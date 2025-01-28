@@ -9,7 +9,7 @@ interface Props {
   institution: string;
 
   /** The date of the education */
-  datePeriod: string;
+  datePeriod: { start: string; end: string };
 
   /** The dissertation topic */
   dissertationTitle: string;
@@ -26,7 +26,9 @@ export function EducationSection({
     <Box>
       <p>{degree}</p>
       <p>{institution}</p>
-      <p>{datePeriod}</p>
+      <p>
+        {datePeriod.start} - {datePeriod.end}
+      </p>
       <p>{dissertationTitle}</p>
     </Box>
   );
