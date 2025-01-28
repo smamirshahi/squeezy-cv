@@ -6,20 +6,16 @@ export function Education(): JSX.Element {
   return (
     <Box>
       <EducationSection
-        title={"PhD, Earth Science"}
-        institution={"MARUM - University of Bremen"}
-        date={"03.2014 - 08.2019"}
-        topic={
-          "Dissertation Topic: Turbulent Suspension of Sediments in Shallow Shelf Seas"
-        }
+        degree="PhD, Earth Science"
+        institution="MARUM - University of Bremen"
+        datePeriod="03.2014 - 08.2019"
+        dissertationTitle="Dissertation Topic: Turbulent Suspension of Sediments in Shallow Shelf Seas"
       />
       <EducationSection
-        title={"M.Sc., Civil and Environmental Engineering"}
-        institution={"Amirkabir University of Technology"}
-        date={"09.2010 - 02.2013"}
-        topic={
-          "Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability"
-        }
+        degree="M.Sc., Civil and Environmental Engineering"
+        institution="Amirkabir University of Technology"
+        datePeriod="09.2010 - 02.2013"
+        dissertationTitle="Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability"
       />
     </Box>
   );

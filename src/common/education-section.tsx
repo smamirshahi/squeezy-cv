@@ -2,24 +2,32 @@ import { Box } from "@mui/material";
 import { JSX } from "react";
 
 interface Props {
-  title: string;
+  /** Degree to earn in this section */
+  degree: string;
+
+  /** The institute that obtain the education */
   institution: string;
-  date: string;
-  topic: string;
+
+  /** The date of the education */
+  datePeriod: string;
+
+  /** The dissertation topic */
+  dissertationTitle: string;
 }
 
+/** Renders a single educational section */
 export function EducationSection({
-  title,
+  degree,
   institution,
-  date,
-  topic,
+  datePeriod,
+  dissertationTitle,
 }: Props): JSX.Element {
   return (
     <Box>
-      <p>{title}</p>
+      <p>{degree}</p>
       <p>{institution}</p>
-      <p>{date}</p>
-      <p>{topic}</p>
+      <p>{datePeriod}</p>
+      <p>{dissertationTitle}</p>
     </Box>
   );
 }
