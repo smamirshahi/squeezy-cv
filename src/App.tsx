@@ -1,10 +1,10 @@
 import "./App.css";
-import { ContactInformation } from "./Sections/contact-information";
-import { Education } from "./Sections/education";
 import { NameJobTitle } from "./Sections/name-job-title";
+import { ContactInformation } from "./Sections/contact-information";
 import { ProfessionalSummary } from "./Sections/professional-summary";
-import { Skills } from "./Sections/skills";
 import { WorkExperience } from "./Sections/work-experience";
+import { Skills } from "./Sections/skills";
+import { Education } from "./Sections/education";
 
 function App() {
   return (
