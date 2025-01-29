@@ -2,27 +2,28 @@ import { Grid2 } from "@mui/material";
 import { JSX } from "react";
 import { SectionTitle } from "../../common/custom-typography";
 import { WorkExperienceSubsection } from "./work-experience-subsection";
-import { GeneralResumeProps } from "../../common/custom-types";
+import { WorkExperiencesProps } from "../../common/custom-types";
 
 interface Props {
   /** data for work experience */
-  workExperience: GeneralResumeProps["workExperience"];
+  workExperiences: WorkExperiencesProps[];
 }
 
 /**
  * Work experience section
  * "Work Experience" | "Employment History" | "Experience"
  */
-export function WorkExperience({ workExperience }: Props): JSX.Element {
+export function WorkExperience({ workExperiences }: Props): JSX.Element {
   return (
-    <Grid2 container direction="column" alignItems="flex-start">
+    <Grid2
+      container
+      direction="column"
+      alignItems="flex-start"
+      sx={{ mb: "20px" }}
+    >
       <SectionTitle text="Work Experience" />
-      {workExperience.map(({ jobTitle, location, datePeriod }) => (
-        <WorkExperienceSubsection
-          title={jobTitle}
-          location={location}
-          datePeriod={datePeriod}
-        />
+      {workExperiences.map((workExperience) => (
+        <WorkExperienceSubsection workExperience={workExperience} />
       ))}
     </Grid2>
   );

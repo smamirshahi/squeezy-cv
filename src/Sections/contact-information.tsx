@@ -6,11 +6,11 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid2 } from "@mui/material";
 import { IconWithText } from "../common/icon-with-text";
-import { GeneralResumeProps } from "../common/custom-types";
+import { ContactInformationProps } from "../common/custom-types";
 
 interface Props {
   /** data for contact information */
-  contactInformation: GeneralResumeProps["contactInformation"];
+  contactInformation: ContactInformationProps;
 }
 
 export function ContactInformation({ contactInformation }: Props): JSX.Element {

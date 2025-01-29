@@ -19,7 +19,7 @@ function App() {
       <NameJobTitle nameJobTitle={Application.nameJobTitle} />
       <ContactInformation contactInformation={Application.contactInformation} />
       <ProfessionalSummary summary={Application.professionalSummary} />
-      <WorkExperience workExperience={Application.workExperience} />
+      <WorkExperience workExperiences={Application.workExperiences} />
       <Education education={Application.education} />
       <Skills />
     </Grid2>

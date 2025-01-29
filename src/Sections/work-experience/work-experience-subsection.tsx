@@ -1,31 +1,27 @@
 import { List, ListItem } from "@mui/material";
 import { JSX } from "react";
 import { NormalText, SubsectionText } from "../../common/custom-typography";
+import { GeneralResumeProps } from "../../common/custom-types";
 
 interface Props {
-  /** The title of the work subsection */
-  title: string;
-
-  /** The location of the work subsection */
-  location: string;
-
-  /** The date of the education */
-  datePeriod: { start: string; end: string };
+  workExperience: GeneralResumeProps["workExperiences"][0];
 }
 
 /** Each subsection of work experience */
 export function WorkExperienceSubsection({
-  title,
-  location,
-  datePeriod,
+  workExperience,
 }: Props): JSX.Element {
   return (
     <>
-      <SubsectionText text={title} isBold />
-      <NormalText text={location} />
-      <NormalText text={`${datePeriod.start} - ${datePeriod.end}`} />
+      <SubsectionText text={workExperience.jobTitle} isBold />
+      <NormalText text={workExperience.location} />
+      <NormalText
+        text={`${workExperience.datePeriod.start} - ${workExperience.datePeriod.end}`}
+      />
       <List sx={{ listStyleType: "disc" }}>
-        <ListItem sx={{ display: "list-item" }}>as</ListItem>
+        {workExperience.bulletPoints?.map((bulletPoint) => (
+          <ListItem sx={{ display: "list-item" }}>{bulletPoint}</ListItem>
+        ))}
       </List>
     </>
   );

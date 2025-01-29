@@ -19,7 +19,7 @@ export const Application: GeneralResumeProps = {
       "I am a software developer with a passion for learning and teaching.",
   },
 
-  workExperience: [
+  workExperiences: [
     {
       jobTitle: "Researcher",
       location: "MARUM-University of Bremen",
