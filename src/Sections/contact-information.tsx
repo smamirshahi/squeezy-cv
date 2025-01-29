@@ -6,11 +6,14 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid2 } from "@mui/material";
 import { IconWithText } from "../common/icon-with-text";
-import { Application } from "../applicant";
+import { GeneralResumeProps } from "../custom-types";
 
-export function ContactInformation(): JSX.Element {
-  const { contactInformation } = Application;
+interface Props {
+  /** data for contact information */
+  contactInformation: GeneralResumeProps["contactInformation"];
+}
 
+export function ContactInformation({ contactInformation }: Props): JSX.Element {
   return (
     <Grid2 container direction="row">
       {contactInformation.email && (
