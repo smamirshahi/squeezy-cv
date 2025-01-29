@@ -16,7 +16,7 @@ interface Props {
 }
 
 /** Renders a single educational section */
-export function EducationSection({
+export function EducationSubsection({
   degree,
   institution,
   datePeriod,

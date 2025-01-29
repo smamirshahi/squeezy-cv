@@ -1,19 +1,11 @@
 import { Grid2, Typography } from "@mui/material";
 import { JSX } from "react";
+import { SectionTitle } from "../common/section-title";
 
 export function ProfessionalSummary(): JSX.Element {
   return (
     <Grid2 container direction="column" alignItems="flex-start">
-      <Typography
-        sx={{
-          fontSize: "12pt",
-          fontFamily: "Calibri, sans-serif",
-          borderBottom: "1px solid black",
-        }}
-        gutterBottom
-      >
-        Professional Summary
-      </Typography>
+      <SectionTitle title="Professional Summary" />
       <Typography
         sx={{ fontSize: "10pt", fontFamily: "Calibri, sans-serif" }}
         gutterBottom
