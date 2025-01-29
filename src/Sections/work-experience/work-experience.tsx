@@ -1,7 +1,7 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
-import { SectionTitle } from "../../common/section-title";
-import { WorkExperienceSubsection } from "./work-subsection";
+import { SectionTitle } from "../../common/custom-typography";
+import { WorkExperienceSubsection } from "./work-experience-subsection";
 
 /**
  * Work experience section
@@ -10,7 +10,7 @@ import { WorkExperienceSubsection } from "./work-subsection";
 export function WorkExperience(): JSX.Element {
   return (
     <Grid2 container direction="column" alignItems="flex-start">
-      <SectionTitle title="Work Experience" />
+      <SectionTitle text="Work Experience" />
       <WorkExperienceSubsection
         title="Researcher"
         location="MARUM-University of Bremen"

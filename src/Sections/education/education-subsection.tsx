@@ -1,5 +1,6 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { JSX } from "react";
+import { NormalText, SubsectionText } from "../../common/custom-typography";
 
 interface Props {
   /** Degree to earn in this section */
@@ -24,38 +25,10 @@ export function EducationSubsection({
 }: Props): JSX.Element {
   return (
     <Box>
-      <Typography
-        sx={{
-          fontSize: "12pt",
-          fontFamily: "Calibri, sans-serif",
-        }}
-      >
-        {degree}
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: "10pt",
-          fontFamily: "Calibri, sans-serif",
-        }}
-      >
-        {institution}
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: "10pt",
-          fontFamily: "Calibri, sans-serif",
-        }}
-      >
-        {datePeriod.start} - {datePeriod.end}
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: "10pt",
-          fontFamily: "Calibri, sans-serif",
-        }}
-      >
-        {dissertationTitle}
-      </Typography>
+      <SubsectionText text={degree} />
+      <NormalText text={institution} />
+      <NormalText text={`${datePeriod.start} - ${datePeriod.end}`} />
+      <NormalText text={dissertationTitle} />
     </Box>
   );
 }
