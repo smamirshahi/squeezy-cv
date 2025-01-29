@@ -7,13 +7,9 @@ export function NameJobTitle(): JSX.Element {
   const { nameJobTitle } = Application;
 
   return (
-    <>
-      <Grid2>
-        <ResumeTitle text={nameJobTitle.name} />
-      </Grid2>
-      <Grid2>
-        <SubsectionText text={nameJobTitle.currentJobTitle} />
-      </Grid2>
-    </>
+    <Grid2 container direction="column" alignItems="flex-start">
+      <ResumeTitle text={nameJobTitle.name} />
+      <SubsectionText text={nameJobTitle.currentJobTitle} />
+    </Grid2>
   );
 }
