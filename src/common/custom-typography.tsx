@@ -1,10 +1,16 @@
 import { Typography } from "@mui/material";
 import { JSX } from "react";
 
+const CustomColor = {
+  darkBlue: "#033a91",
+  black: "#000000",
+};
+
 interface Props {
   /** The text of the subsection */
   text: string;
 
+  /** Whether it is bold or not */
   isBold?: boolean;
 }
 
@@ -15,6 +21,7 @@ export function ResumeTitle({ text, isBold = false }: Props): JSX.Element {
         fontSize: "16pt",
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "normal" : "bold",
+        textTransform: "uppercase",
       }}
       gutterBottom
     >
@@ -30,7 +37,9 @@ export function SectionTitle({ text, isBold = false }: Props): JSX.Element {
         fontSize: "14pt",
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "normal" : "bold",
-        borderBottom: "1px solid black",
+        borderBottom: `2px solid ${CustomColor.darkBlue}`,
+        textTransform: "uppercase",
+        color: CustomColor.darkBlue,
       }}
       gutterBottom
     >

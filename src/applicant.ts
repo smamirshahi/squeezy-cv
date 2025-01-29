@@ -1,4 +1,4 @@
-import { GeneralResumeProps } from "./custom-types";
+import { GeneralResumeProps } from "./common/custom-types";
 
 export const Application: GeneralResumeProps = {
   nameJobTitle: {

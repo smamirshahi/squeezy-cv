@@ -2,7 +2,7 @@ import { Grid2 } from "@mui/material";
 import { JSX } from "react";
 import { SectionTitle } from "../../common/custom-typography";
 import { WorkExperienceSubsection } from "./work-experience-subsection";
-import { GeneralResumeProps } from "../../custom-types";
+import { GeneralResumeProps } from "../../common/custom-types";
 
 interface Props {
   /** data for work experience */

@@ -1,7 +1,7 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
 import { NormalText, SectionTitle } from "../common/custom-typography";
-import { GeneralResumeProps } from "../custom-types";
+import { GeneralResumeProps } from "../common/custom-types";
 
 interface Props {
   /** data for professional summary */
