@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import { JSX } from "react";
 import { SectionTitle } from "../../common/section-title";
 import { WorkExperienceSubsection } from "./work-subsection";
@@ -9,9 +9,13 @@ import { WorkExperienceSubsection } from "./work-subsection";
  */
 export function WorkExperience(): JSX.Element {
   return (
-    <Box>
+    <Grid2 container direction="column" alignItems="flex-start">
       <SectionTitle title="Work Experience" />
-      <WorkExperienceSubsection />
-    </Box>
+      <WorkExperienceSubsection
+        title="Researcher"
+        location="MARUM-University of Bremen"
+        datePeriod={{ start: "12.2019", end: "Present" }}
+      />
+    </Grid2>
   );
 }

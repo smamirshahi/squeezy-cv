@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { JSX } from "react";
 
 interface Props {
@@ -24,12 +24,38 @@ export function EducationSubsection({
 }: Props): JSX.Element {
   return (
     <Box>
-      <p>{degree}</p>
-      <p>{institution}</p>
-      <p>
+      <Typography
+        sx={{
+          fontSize: "12pt",
+          fontFamily: "Calibri, sans-serif",
+        }}
+      >
+        {degree}
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: "10pt",
+          fontFamily: "Calibri, sans-serif",
+        }}
+      >
+        {institution}
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: "10pt",
+          fontFamily: "Calibri, sans-serif",
+        }}
+      >
         {datePeriod.start} - {datePeriod.end}
-      </p>
-      <p>{dissertationTitle}</p>
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: "10pt",
+          fontFamily: "Calibri, sans-serif",
+        }}
+      >
+        {dissertationTitle}
+      </Typography>
     </Box>
   );
 }
