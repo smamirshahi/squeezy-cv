@@ -17,9 +17,7 @@ function App() {
     >
       <NameJobTitle />
       <ContactInformation />
-      <Grid2>
-        <ProfessionalSummary />
-      </Grid2>
+      <ProfessionalSummary />
       <Grid2>
         <WorkExperience />
       </Grid2>
