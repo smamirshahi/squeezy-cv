@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { JSX } from "react";
 import { NormalText, SubsectionText } from "../../common/custom-typography";
 
@@ -24,11 +23,11 @@ export function EducationSubsection({
   dissertationTitle,
 }: Props): JSX.Element {
   return (
-    <Box>
+    <>
       <SubsectionText text={degree} />
       <NormalText text={institution} />
       <NormalText text={`${datePeriod.start} - ${datePeriod.end}`} />
       <NormalText text={dissertationTitle} />
-    </Box>
+    </>
   );
 }

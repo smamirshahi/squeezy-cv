@@ -1,10 +1,13 @@
+import { Grid2 } from "@mui/material";
 import { EducationSubsection } from "./education-subsection";
 import { JSX } from "react";
+import { SectionTitle } from "../../common/custom-typography";
 
 /** Renders the whole education part */
 export function Education(): JSX.Element {
   return (
-    <>
+    <Grid2 container direction="column" alignItems="flex-start">
+      <SectionTitle text="Education" />
       <EducationSubsection
         degree="PhD, Earth Science"
         institution="MARUM - University of Bremen"
@@ -17,6 +20,6 @@ export function Education(): JSX.Element {
         datePeriod={{ start: "09.2010", end: "02.2013" }}
         dissertationTitle="Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability"
       />
-    </>
+    </Grid2>
   );
 }

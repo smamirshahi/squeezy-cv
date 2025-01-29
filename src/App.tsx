@@ -19,12 +19,10 @@ function App() {
       <ContactInformation />
       <ProfessionalSummary />
       <WorkExperience />
+      <Education />
 
       <Grid2>
         <Skills />
-      </Grid2>
-      <Grid2>
-        <Education />
       </Grid2>
     </Grid2>
   );
