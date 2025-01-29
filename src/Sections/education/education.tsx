@@ -2,24 +2,25 @@ import { Grid2 } from "@mui/material";
 import { EducationSubsection } from "./education-subsection";
 import { JSX } from "react";
 import { SectionTitle } from "../../common/custom-typography";
+import { Application } from "../../applicant";
 
 /** Renders the whole education part */
 export function Education(): JSX.Element {
+  const { education } = Application;
+
   return (
     <Grid2 container direction="column" alignItems="flex-start">
       <SectionTitle text="Education" />
-      <EducationSubsection
-        degree="PhD, Earth Science"
-        institution="MARUM - University of Bremen"
-        datePeriod={{ start: "03.2014", end: "08.2019" }}
-        dissertationTitle="Dissertation Topic: Turbulent Suspension of Sediments in Shallow Shelf Seas"
-      />
-      <EducationSubsection
-        degree="M.Sc., Civil and Environmental Engineering"
-        institution="Amirkabir University of Technology"
-        datePeriod={{ start: "09.2010", end: "02.2013" }}
-        dissertationTitle="Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability"
-      />
+      {education.map(
+        ({ degree, institution, datePeriod, dissertationTitle }) => (
+          <EducationSubsection
+            degree={degree}
+            institution={institution}
+            datePeriod={datePeriod}
+            dissertationTitle={dissertationTitle}
+          />
+        )
+      )}
     </Grid2>
   );
 }

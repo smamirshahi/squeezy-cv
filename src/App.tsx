@@ -20,10 +20,7 @@ function App() {
       <ProfessionalSummary />
       <WorkExperience />
       <Education />
-
-      <Grid2>
-        <Skills />
-      </Grid2>
+      <Skills />
     </Grid2>
   );
 }
