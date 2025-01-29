@@ -11,7 +11,7 @@ export const Application: GeneralResumeProps = {
     phoneNumber: "(+49) 1577 1531 797",
     location: "Koblenz, Germany",
     linkedIn: "https://www.linkedin.com/in/mohammadamirshahi/",
-    gitHub: "https://github.com/smamirshahi",
+    // gitHub: "https://github.com/smamirshahi",
   },
 
   professionalSummary: {

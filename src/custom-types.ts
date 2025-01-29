@@ -15,13 +15,13 @@ export interface GeneralResumeProps {
     phoneNumber: string;
 
     /** The location of the applicant */
-    location: string;
+    location?: string;
 
     /** The LinkedIn profile of the applicant */
-    linkedIn: string;
+    linkedIn?: string;
 
     /** The GitHub profile of the applicant */
-    gitHub: string;
+    gitHub?: string;
   };
 
   professionalSummary: {
