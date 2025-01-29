@@ -5,17 +5,31 @@ import { ProfessionalSummary } from "./Sections/professional-summary";
 import { WorkExperience } from "./Sections/work-experience";
 import { Skills } from "./Sections/skills";
 import { Education } from "./Sections/education";
+import { Grid2 } from "@mui/material";
 
 function App() {
   return (
-    <>
+    <Grid2
+      container
+      direction="column"
+      justifyContent="flex-start"
+      alignItems="flex-start"
+    >
       <NameJobTitle />
       <ContactInformation />
-      <ProfessionalSummary />
-      <WorkExperience />
-      <Skills />
-      <Education />
-    </>
+      <Grid2>
+        <ProfessionalSummary />
+      </Grid2>
+      <Grid2>
+        <WorkExperience />
+      </Grid2>
+      <Grid2>
+        <Skills />
+      </Grid2>
+      <Grid2>
+        <Education />
+      </Grid2>
+    </Grid2>
   );
 }
 
