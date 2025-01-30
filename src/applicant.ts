@@ -11,7 +11,7 @@ export const Application: GeneralResumeProps = {
     phoneNumber: "(+49) 1577 1531 797",
     location: "Koblenz, Germany",
     linkedInId: "mohammadamirshahi/",
-    // gitHubId: "https://github.com/smamirshahi",
+    gitHubId: "smamirshahi",
   },
 
   professionalSummary: {
@@ -21,9 +21,19 @@ export const Application: GeneralResumeProps = {
 
   workExperiences: [
     {
+      jobTitle: "Software Developer",
+      location: "FARO Technologies",
+      datePeriod: { start: "2021-06-01" },
+    },
+    {
+      jobTitle: "Software Developer",
+      location: "HoloBuilder Inc.",
+      datePeriod: { start: "2018-12-01", end: "2021-05-31" },
+    },
+    {
       jobTitle: "Researcher",
       location: "MARUM-University of Bremen",
-      datePeriod: { start: "2022-04-17" },
+      datePeriod: { start: "2014-03-16", end: "2019-08-12" },
     },
   ],
 

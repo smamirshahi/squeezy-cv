@@ -1,4 +1,4 @@
-import { List, ListItem } from "@mui/material";
+import { Grid2, List, ListItem } from "@mui/material";
 import { JSX } from "react";
 import {
   DatePeriodText,
@@ -16,17 +16,24 @@ export function WorkExperienceSubsection({
   workExperience,
 }: Props): JSX.Element {
   return (
-    <>
+    <Grid2
+      container
+      direction="column"
+      alignItems="flex-start"
+      sx={{ mb: "10px" }}
+    >
       <SubsectionText text={workExperience.jobTitle} isBold />
       <NormalText text={workExperience.location} />
       <DatePeriodText datePeriod={workExperience.datePeriod} />
-      <List sx={{ listStyleType: "disc" }}>
-        {workExperience.bulletPoints?.map((bulletPoint, index) => (
-          <ListItem key={index} sx={{ display: "list-item" }}>
-            {bulletPoint}
-          </ListItem>
-        ))}
-      </List>
-    </>
+      {workExperience.bulletPoints && (
+        <List sx={{ listStyleType: "disc" }}>
+          {workExperience.bulletPoints.map((bulletPoint, index) => (
+            <ListItem key={index} sx={{ display: "list-item" }}>
+              {bulletPoint}
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </Grid2>
   );
 }
