@@ -7,22 +7,28 @@ import { Skills } from "./Sections/skills";
 import { Education } from "./Sections/education/education";
 import { Grid2 } from "@mui/material";
 import { Application } from "./applicant";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 function App() {
   return (
-    <Grid2
-      container
-      direction="column"
-      justifyContent="flex-start"
-      alignItems="flex-start"
-    >
-      <NameJobTitle nameJobTitle={Application.nameJobTitle} />
-      <ContactInformation contactInformation={Application.contactInformation} />
-      <ProfessionalSummary summary={Application.professionalSummary} />
-      <WorkExperience workExperiences={Application.workExperiences} />
-      <Education education={Application.education} />
-      <Skills />
-    </Grid2>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Grid2
+        container
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+      >
+        <NameJobTitle nameJobTitle={Application.nameJobTitle} />
+        <ContactInformation
+          contactInformation={Application.contactInformation}
+        />
+        <ProfessionalSummary summary={Application.professionalSummary} />
+        <WorkExperience workExperiences={Application.workExperiences} />
+        <Education educations={Application.education} />
+        <Skills />
+      </Grid2>
+    </LocalizationProvider>
   );
 }
 

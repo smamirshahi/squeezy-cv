@@ -36,7 +36,7 @@ export interface WorkExperiencesProps {
   location: string;
 
   /** The date of the education */
-  datePeriod: { start: string; end: string };
+  datePeriod: { start: string; end?: string };
 
   /** Bullet points for each work experience */
   bulletPoints?: string[];
@@ -50,7 +50,7 @@ export interface EducationProps {
   institution: string;
 
   /** The date of the education */
-  datePeriod: { start: string; end: string };
+  datePeriod: { start: string; end?: string };
 
   /** The title of the dissertation */
   dissertationTitle: string;

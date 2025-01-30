@@ -23,7 +23,7 @@ export const Application: GeneralResumeProps = {
     {
       jobTitle: "Researcher",
       location: "MARUM-University of Bremen",
-      datePeriod: { start: "12.2019", end: "Present" },
+      datePeriod: { start: "2022-04-17" },
     },
   ],
 
@@ -31,14 +31,14 @@ export const Application: GeneralResumeProps = {
     {
       degree: "PhD, Earth Science",
       institution: "MARUM - University of Bremen",
-      datePeriod: { start: "03.2014", end: "08.2019" },
+      datePeriod: { start: "2014-03-16", end: "2019-08-12" },
       dissertationTitle:
         "Dissertation Topic: Turbulent Suspension of Sediments in Shallow Shelf Seas",
     },
     {
       degree: "M.Sc., Civil and Environmental Engineering",
       institution: "Amirkabir University of Technology",
-      datePeriod: { start: "09.2010", end: "02.2013" },
+      datePeriod: { start: "2010-09-01", end: "2013-02-01" },
       dissertationTitle:
         "Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability",
     },

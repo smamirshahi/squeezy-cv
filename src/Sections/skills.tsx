@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import { NormalText, SectionTitle } from "../common/custom-typography";
+import { NormalText, SectionTitle } from "../common/custom-stylings";
 import { Grid2 } from "@mui/material";
 
 export function Skills(): JSX.Element {

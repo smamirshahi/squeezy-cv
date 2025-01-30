@@ -1,6 +1,6 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
-import { SectionTitle } from "../../common/custom-typography";
+import { SectionTitle } from "../../common/custom-stylings";
 import { WorkExperienceSubsection } from "./work-experience-subsection";
 import { WorkExperiencesProps } from "../../common/custom-types";
 

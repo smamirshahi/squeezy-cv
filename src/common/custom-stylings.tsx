@@ -6,6 +6,9 @@ const CustomColor = {
   black: "#000000",
 };
 
+/** The format to be used for date */
+export const DATE_FORMAT = "DD/MM/YYYY";
+
 interface Props {
   /** The text of the subsection */
   text: string;

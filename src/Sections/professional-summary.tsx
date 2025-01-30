@@ -1,6 +1,6 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
-import { NormalText, SectionTitle } from "../common/custom-typography";
+import { NormalText, SectionTitle } from "../common/custom-stylings";
 import { ProfessionalSummaryProps } from "../common/custom-types";
 
 interface Props {

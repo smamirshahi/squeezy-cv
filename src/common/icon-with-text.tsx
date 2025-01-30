@@ -1,6 +1,6 @@
 import { Grid2, SvgIcon } from "@mui/material";
 import { JSX } from "react";
-import { NormalText } from "./custom-typography";
+import { NormalText } from "./custom-stylings";
 
 interface Props {
   /** The icon to be shown */
