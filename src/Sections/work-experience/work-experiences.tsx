@@ -13,7 +13,7 @@ interface Props {
  * Work experience section
  * "Work Experience" | "Employment History" | "Experience"
  */
-export function WorkExperience({ workExperiences }: Props): JSX.Element {
+export function WorkExperiences({ workExperiences }: Props): JSX.Element {
   return (
     <Grid2
       container
@@ -22,8 +22,8 @@ export function WorkExperience({ workExperiences }: Props): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <SectionTitle text="Work Experience" />
-      {workExperiences.map((workExperience) => (
-        <WorkExperienceSubsection workExperience={workExperience} />
+      {workExperiences.map((workExperience, index) => (
+        <WorkExperienceSubsection key={index} workExperience={workExperience} />
       ))}
     </Grid2>
   );

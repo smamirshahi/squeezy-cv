@@ -10,12 +10,12 @@ interface Props {
 }
 
 /** Renders the whole education part */
-export function Education({ educations }: Props): JSX.Element {
+export function Educations({ educations }: Props): JSX.Element {
   return (
     <Grid2 container direction="column" alignItems="flex-start">
       <SectionTitle text="Education" />
-      {educations.map((education) => (
-        <EducationSubsection education={education} />
+      {educations.map((education, index) => (
+        <EducationSubsection key={index} education={education} />
       ))}
     </Grid2>
   );

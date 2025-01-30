@@ -2,9 +2,9 @@ import "./App.css";
 import { NameJobTitle } from "./Sections/name-job-title";
 import { ContactInformation } from "./Sections/contact-information";
 import { ProfessionalSummary } from "./Sections/professional-summary";
-import { WorkExperience } from "./Sections/work-experience/work-experience";
+import { WorkExperiences } from "./Sections/work-experience/work-experiences";
 import { Skills } from "./Sections/skills";
-import { Education } from "./Sections/education/education";
+import { Educations } from "./Sections/education/educations";
 import { Grid2, Paper } from "@mui/material";
 import { Application } from "./applicant";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -36,8 +36,8 @@ function App() {
             contactInformation={Application.contactInformation}
           />
           <ProfessionalSummary summary={Application.professionalSummary} />
-          <WorkExperience workExperiences={Application.workExperiences} />
-          <Education educations={Application.education} />
+          <WorkExperiences workExperiences={Application.workExperiences} />
+          <Educations educations={Application.education} />
           <Skills />
         </Grid2>
       </Paper>
