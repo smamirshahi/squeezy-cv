@@ -28,38 +28,27 @@ export interface ProfessionalSummaryProps {
   summary: string;
 }
 
-export interface WorkExperiencesProps {
-  /** The title of the job subsection */
-  jobTitle: string;
+export interface ExperienceProps {
+  /** The title of the job or the degree of education */
+  title: string;
 
-  /** The location of the work subsection */
-  location: string;
+  /** The institute of the work/education subsection */
+  institute: string;
 
-  /** The date of the education */
+  /** The date of the experience */
   datePeriod: { start: string; end?: string };
 
-  /** Bullet points for each work experience */
+  /** The title of the education dissertation */
+  dissertationTitle?: string;
+
+  /** Bullet points for each experience */
   bulletPoints?: string[];
-}
-
-export interface EducationProps {
-  /** The degree of the applicant */
-  degree: string;
-
-  /** The institution of the applicant */
-  institution: string;
-
-  /** The date of the education */
-  datePeriod: { start: string; end?: string };
-
-  /** The title of the dissertation */
-  dissertationTitle: string;
 }
 
 export interface GeneralResumeProps {
   nameJobTitle: NameJobTitleProps;
   contactInformation: ContactInformationProps;
   professionalSummary: ProfessionalSummaryProps;
-  workExperiences: WorkExperiencesProps[];
-  education: EducationProps[];
+  workExperiences: ExperienceProps[];
+  education: ExperienceProps[];
 }
