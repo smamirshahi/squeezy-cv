@@ -1,11 +1,10 @@
 import { JSX } from "react";
 import {
-  DATE_FORMAT,
+  DatePeriodText,
   NormalText,
   SubsectionText,
 } from "../../common/custom-stylings";
 import { EducationProps } from "../../common/custom-types";
-import dayjs from "dayjs";
 
 interface Props {
   /** data for Education */
@@ -18,13 +17,7 @@ export function EducationSubsection({ education }: Props): JSX.Element {
     <>
       <SubsectionText text={education.degree} />
       <NormalText text={education.institution} />
-      <NormalText
-        text={`${dayjs(education.datePeriod.start).format(DATE_FORMAT)} - ${
-          education.datePeriod.end
-            ? dayjs(education.datePeriod.end).format(DATE_FORMAT)
-            : "Present"
-        }`}
-      />
+      <DatePeriodText datePeriod={education.datePeriod} />
       <NormalText text={education.dissertationTitle} />
     </>
   );

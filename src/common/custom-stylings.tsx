@@ -1,5 +1,7 @@
 import { Typography } from "@mui/material";
 import { JSX } from "react";
+import dayjs from "dayjs";
+import { WorkExperiencesProps } from "./custom-types";
 
 const CustomColor = {
   darkBlue: "#033a91",
@@ -76,5 +78,19 @@ export function NormalText({ text, isBold = false }: Props): JSX.Element {
     >
       {text}
     </Typography>
+  );
+}
+
+interface DatePeriodProps {
+  datePeriod: WorkExperiencesProps["datePeriod"];
+}
+
+export function DatePeriodText({ datePeriod }: DatePeriodProps): JSX.Element {
+  return (
+    <NormalText
+      text={`${dayjs(datePeriod.start).format(DATE_FORMAT)} - ${
+        datePeriod.end ? dayjs(datePeriod.end).format(DATE_FORMAT) : "Present"
+      }`}
+    />
   );
 }
