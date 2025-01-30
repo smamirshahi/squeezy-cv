@@ -65,3 +65,19 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    font-size: 12pt;
+    font-family: Arial, sans-serif;
+  }
+
+  .MuiPaper-root {
+    box-shadow: none !important;
+  }
+}
