@@ -10,8 +10,8 @@ export const Application: GeneralResumeProps = {
     email: "smamirshahi@gmail.com",
     phoneNumber: "(+49) 1577 1531 797",
     location: "Koblenz, Germany",
-    linkedIn: "https://www.linkedin.com/in/mohammadamirshahi/",
-    // gitHub: "https://github.com/smamirshahi",
+    linkedInId: "mohammadamirshahi/",
+    // gitHubId: "https://github.com/smamirshahi",
   },
 
   professionalSummary: {

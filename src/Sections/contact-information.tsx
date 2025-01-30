@@ -34,11 +34,17 @@ export function ContactInformation({ contactInformation }: Props): JSX.Element {
           text={contactInformation.location}
         />
       )}
-      {contactInformation.linkedIn && (
-        <IconWithText icon={LinkedInIcon} text={contactInformation.linkedIn} />
+      {contactInformation.linkedInId && (
+        <IconWithText
+          icon={LinkedInIcon}
+          text={`https://www.linkedin.com/in/${contactInformation.linkedInId}`}
+        />
       )}
-      {contactInformation.gitHub && (
-        <IconWithText icon={GitHubIcon} text={contactInformation.gitHub} />
+      {contactInformation.gitHubId && (
+        <IconWithText
+          icon={GitHubIcon}
+          text={`https://github.com/${contactInformation.gitHubId}`}
+        />
       )}
     </Grid2>
   );

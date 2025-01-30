@@ -16,11 +16,11 @@ export interface ContactInformationProps {
   /** The location of the applicant */
   location?: string;
 
-  /** The LinkedIn profile of the applicant */
-  linkedIn?: string;
+  /** The LinkedIn ID of the applicant */
+  linkedInId?: string;
 
-  /** The GitHub profile of the applicant */
-  gitHub?: string;
+  /** The GitHub ID profile of the applicant */
+  gitHubId?: string;
 }
 
 export interface ProfessionalSummaryProps {
