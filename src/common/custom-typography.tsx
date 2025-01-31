@@ -72,6 +72,7 @@ export function BodyText({ text, isBold = false }: TextProps): JSX.Element {
         fontSize: "10pt",
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "bold" : "normal",
+        textAlign: "left",
       }}
     >
       {text}
