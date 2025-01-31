@@ -35,6 +35,9 @@ export interface ExperienceProps {
   /** The institute of the work/education subsection */
   institute: string;
 
+  /** The location of job/education */
+  location: string;
+
   /** The date of the experience */
   datePeriod: { start: string; end?: string };
 

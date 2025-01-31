@@ -27,7 +27,7 @@ export function ResumeTitle({ text, isBold = false }: TextProps): JSX.Element {
       sx={{
         fontSize: "16pt",
         fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "normal" : "bold",
+        fontWeight: isBold ? "bold" : "normal",
         textTransform: "uppercase",
       }}
       gutterBottom
@@ -43,7 +43,7 @@ export function SectionTitle({ text, isBold = false }: TextProps): JSX.Element {
       sx={{
         fontSize: "14pt",
         fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "normal" : "bold",
+        fontWeight: isBold ? "bold" : "normal",
         borderBottom: `2px solid ${CustomColor.darkBlue}`,
         textTransform: "uppercase",
         color: CustomColor.darkBlue,
@@ -64,7 +64,7 @@ export function SubsectionText({
       sx={{
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "normal" : "bold",
+        fontWeight: isBold ? "bold" : "normal",
       }}
     >
       {text}
@@ -78,7 +78,7 @@ export function NormalText({ text, isBold = false }: TextProps): JSX.Element {
       sx={{
         fontSize: "10pt",
         fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "normal" : "bold",
+        fontWeight: isBold ? "bold" : "normal",
       }}
     >
       {text}

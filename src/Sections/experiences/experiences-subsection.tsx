@@ -6,6 +6,8 @@ import {
 } from "../../common/custom-stylings";
 import { Grid2 } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
+import { IconWithText } from "../../common/icon-with-text";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 interface Props {
   /** data for each experience */
@@ -21,11 +23,14 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "10px" }}
     >
-      <SubsectionText text={experience.title} isBold />
+      <SubsectionText text={experience.title} isBold={true} />
       <NormalText text={experience.institute} />
-      <DatePeriodText datePeriod={experience.datePeriod} />
+      <Grid2 container direction="row" alignItems="center">
+        <DatePeriodText datePeriod={experience.datePeriod} />
+        <IconWithText icon={LocationOnIcon} text={experience.location} />
+      </Grid2>
       {experience.dissertationTitle && (
-        <NormalText text={experience.dissertationTitle} />
+        <NormalText text={experience.dissertationTitle} isBold={true} />
       )}
       {/* <List sx={{ listStyleType: "disc" }}>
         {workExperience.bulletPoints.map((bulletPoint, index) => (
