@@ -12,22 +12,28 @@ export function TwoColumnTemplate(): JSX.Element {
   return (
     <Grid2
       container
-      direction="column"
+      direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
     >
       <NameJobTitle nameJobTitle={Application.nameJobTitle} />
-      <ContactInformation contactInformation={Application.contactInformation} />
-      <ProfessionalSummary summary={Application.professionalSummary} />
-      <Experiences
-        sectionTitle="Work Experience"
-        experiences={Application.workExperiences}
-      />
-      <Experiences
-        sectionTitle="Education"
-        experiences={Application.education}
-      />
-      <Skills />
+      <Grid2 size={{ xs: 8 }}>
+        <ProfessionalSummary summary={Application.professionalSummary} />
+        <Experiences
+          sectionTitle="Work Experience"
+          experiences={Application.workExperiences}
+        />
+        <Experiences
+          sectionTitle="Education"
+          experiences={Application.education}
+        />
+      </Grid2>
+      <Grid2 size={{ xs: 4 }}>
+        <ContactInformation
+          contactInformation={Application.contactInformation}
+        />
+        <Skills />
+      </Grid2>
     </Grid2>
   );
 }
