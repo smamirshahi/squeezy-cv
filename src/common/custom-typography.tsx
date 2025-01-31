@@ -1,17 +1,6 @@
 import { Typography } from "@mui/material";
 import { JSX } from "react";
-import dayjs from "dayjs";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { IconWithText } from "./icon-with-text";
-import { ExperienceProps } from "./custom-types";
-
-const CustomColor = {
-  darkBlue: "#033a91",
-  black: "#000000",
-};
-
-/** The format to be used for date */
-export const DATE_FORMAT = "DD/MM/YYYY";
+import { customColors } from "./custom-styles";
 
 interface TextProps {
   /** The text of the subsection */
@@ -21,6 +10,7 @@ interface TextProps {
   isBold?: boolean;
 }
 
+/** The title for the whole resume */
 export function ResumeTitle({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
@@ -37,6 +27,7 @@ export function ResumeTitle({ text, isBold = false }: TextProps): JSX.Element {
   );
 }
 
+/** The Title of a section */
 export function SectionTitle({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
@@ -44,9 +35,9 @@ export function SectionTitle({ text, isBold = false }: TextProps): JSX.Element {
         fontSize: "14pt",
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "bold" : "normal",
-        borderBottom: `2px solid ${CustomColor.darkBlue}`,
+        borderBottom: `2px solid ${customColors.darkBlue}`,
         textTransform: "uppercase",
-        color: CustomColor.darkBlue,
+        color: customColors.darkBlue,
       }}
       gutterBottom
     >
@@ -55,6 +46,7 @@ export function SectionTitle({ text, isBold = false }: TextProps): JSX.Element {
   );
 }
 
+/** The subsection text */
 export function SubsectionText({
   text,
   isBold = false,
@@ -72,7 +64,8 @@ export function SubsectionText({
   );
 }
 
-export function NormalText({ text, isBold = false }: TextProps): JSX.Element {
+/** The text for a normal body text */
+export function BodyText({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -83,20 +76,5 @@ export function NormalText({ text, isBold = false }: TextProps): JSX.Element {
     >
       {text}
     </Typography>
-  );
-}
-
-interface DatePeriodProps {
-  datePeriod: ExperienceProps["datePeriod"];
-}
-
-export function DatePeriodText({ datePeriod }: DatePeriodProps): JSX.Element {
-  return (
-    <IconWithText
-      icon={CalendarMonthIcon}
-      text={`${dayjs(datePeriod.start).format(DATE_FORMAT)} - ${
-        datePeriod.end ? dayjs(datePeriod.end).format(DATE_FORMAT) : "Present"
-      }`}
-    ></IconWithText>
   );
 }

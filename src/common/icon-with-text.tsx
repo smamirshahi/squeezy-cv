@@ -1,6 +1,6 @@
 import { Grid2, SvgIcon } from "@mui/material";
 import { JSX } from "react";
-import { NormalText } from "./custom-stylings";
+import { BodyText } from "./custom-typography";
 
 interface Props {
   /** The icon to be shown */
@@ -20,7 +20,7 @@ export function IconWithText({ icon, text }: Props): JSX.Element {
         viewBox="0 0 24 24"
         fontSize="small"
       />
-      <NormalText text={text} />
+      <BodyText text={text} />
     </Grid2>
   );
 }

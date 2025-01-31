@@ -1,6 +1,6 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
-import { ResumeTitle, SubsectionText } from "../common/custom-stylings";
+import { ResumeTitle, SubsectionText } from "../common/custom-typography";
 import { NameJobTitleProps } from "../common/custom-types";
 
 interface Props {

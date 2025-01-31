@@ -1,6 +1,6 @@
 import { Grid2 } from "@mui/material";
 import { JSX } from "react";
-import { NormalText, SectionTitle } from "../common/custom-stylings";
+import { BodyText, SectionTitle } from "../common/custom-typography";
 import { ProfessionalSummaryProps } from "../common/custom-types";
 
 interface Props {
@@ -17,7 +17,7 @@ export function ProfessionalSummary({ summary }: Props): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <SectionTitle text="Professional Summary" />
-      <NormalText text={summary.summary} />
+      <BodyText text={summary.summary} />
     </Grid2>
   );
 }
