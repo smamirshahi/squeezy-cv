@@ -1,7 +1,9 @@
 import { Typography } from "@mui/material";
 import { JSX } from "react";
 import dayjs from "dayjs";
-import { WorkExperiencesProps } from "./custom-types";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { IconWithText } from "./icon-with-text";
+import { ExperienceProps } from "./custom-types";
 
 const CustomColor = {
   darkBlue: "#033a91",
@@ -11,7 +13,7 @@ const CustomColor = {
 /** The format to be used for date */
 export const DATE_FORMAT = "DD/MM/YYYY";
 
-interface Props {
+interface TextProps {
   /** The text of the subsection */
   text: string;
 
@@ -19,7 +21,7 @@ interface Props {
   isBold?: boolean;
 }
 
-export function ResumeTitle({ text, isBold = false }: Props): JSX.Element {
+export function ResumeTitle({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -35,7 +37,7 @@ export function ResumeTitle({ text, isBold = false }: Props): JSX.Element {
   );
 }
 
-export function SectionTitle({ text, isBold = false }: Props): JSX.Element {
+export function SectionTitle({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -53,7 +55,10 @@ export function SectionTitle({ text, isBold = false }: Props): JSX.Element {
   );
 }
 
-export function SubsectionText({ text, isBold = false }: Props): JSX.Element {
+export function SubsectionText({
+  text,
+  isBold = false,
+}: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -67,7 +72,7 @@ export function SubsectionText({ text, isBold = false }: Props): JSX.Element {
   );
 }
 
-export function NormalText({ text, isBold = false }: Props): JSX.Element {
+export function NormalText({ text, isBold = false }: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -82,15 +87,16 @@ export function NormalText({ text, isBold = false }: Props): JSX.Element {
 }
 
 interface DatePeriodProps {
-  datePeriod: WorkExperiencesProps["datePeriod"];
+  datePeriod: ExperienceProps["datePeriod"];
 }
 
 export function DatePeriodText({ datePeriod }: DatePeriodProps): JSX.Element {
   return (
-    <NormalText
+    <IconWithText
+      icon={CalendarMonthIcon}
       text={`${dayjs(datePeriod.start).format(DATE_FORMAT)} - ${
         datePeriod.end ? dayjs(datePeriod.end).format(DATE_FORMAT) : "Present"
       }`}
-    />
+    ></IconWithText>
   );
 }
