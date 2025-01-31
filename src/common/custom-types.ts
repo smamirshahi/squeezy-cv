@@ -55,3 +55,6 @@ export interface ResumeProps {
   workExperiences: ExperienceProps[];
   education: ExperienceProps[];
 }
+
+/** Templates for Resume */
+export type ResumeTemplates = "one-column" | "two-column" | "three-column";

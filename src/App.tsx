@@ -1,17 +1,30 @@
 import "./App.css";
-import { NameJobTitle } from "./Sections/name-job-title";
-import { ContactInformation } from "./Sections/contact-information";
-import { ProfessionalSummary } from "./Sections/professional-summary";
-import { Skills } from "./Sections/skills";
-import { Grid2, Paper } from "@mui/material";
-import { Application } from "./applicant";
+import { Paper } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { Experiences } from "./Sections/experiences/experiences";
+import { OneColumnTemplate } from "./templates/one-column-template";
+import { useMemo, useState } from "react";
+import { ResumeTemplates } from "./common/custom-types";
+import { TemplateButton } from "./components/template-button";
+import { TwoColumnTemplate } from "./templates/two-column-template";
 
-function App() {
+export function App() {
+  const [template, setTemplate] = useState<ResumeTemplates>("one-column");
+
+  const Template = useMemo(() => {
+    switch (template) {
+      case "one-column":
+        return <OneColumnTemplate />;
+      case "two-column":
+        return <TwoColumnTemplate />;
+      default:
+        throw new Error("Invalid template");
+    }
+  }, [template]);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <TemplateButton setTemplate={setTemplate} />
       <Paper
         elevation={3}
         sx={{
@@ -24,30 +37,8 @@ function App() {
           fontFamily: "Calibri, sans-serif",
         }}
       >
-        <Grid2
-          container
-          direction="column"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          <NameJobTitle nameJobTitle={Application.nameJobTitle} />
-          <ContactInformation
-            contactInformation={Application.contactInformation}
-          />
-          <ProfessionalSummary summary={Application.professionalSummary} />
-          <Experiences
-            sectionTitle="Work Experience"
-            experiences={Application.workExperiences}
-          />
-          <Experiences
-            sectionTitle="Education"
-            experiences={Application.education}
-          />
-          <Skills />
-        </Grid2>
+        {Template}
       </Paper>
     </LocalizationProvider>
   );
 }
-
-export default App;
