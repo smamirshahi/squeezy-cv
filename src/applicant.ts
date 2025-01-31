@@ -1,6 +1,6 @@
 import { ResumeProps } from "./common/custom-types";
 
-export const Application: ResumeProps = {
+export const Applicant: ResumeProps = {
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",
     currentJobTitle: "Software Developer",
@@ -16,7 +16,7 @@ export const Application: ResumeProps = {
 
   professionalSummary: {
     summary:
-      "I am a software developer with a passion for learning and teaching.",
+      "I am a software developer with a passion for learning and teaching.I am a software developer with a passion for learning and teaching.I am a software developer with a passion for learning and teaching.",
   },
 
   workExperiences: [
