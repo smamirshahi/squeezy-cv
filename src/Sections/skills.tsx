@@ -2,6 +2,7 @@ import { JSX } from "react";
 import { BodyText, SectionTitle } from "../common/custom-typography";
 import { Grid2 } from "@mui/material";
 
+/** Skills section (Areas of Expertise) */
 export function Skills(): JSX.Element {
   return (
     <Grid2 container direction="column" alignItems="flex-start">

@@ -13,6 +13,7 @@ interface Props {
   contactInformation: ContactInformationProps;
 }
 
+/** Contact Information (details) */
 export function ContactInformation({ contactInformation }: Props): JSX.Element {
   return (
     <Grid2 container direction="row" sx={{ mb: "20px" }}>
