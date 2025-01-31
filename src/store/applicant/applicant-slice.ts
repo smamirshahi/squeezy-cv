@@ -1,15 +1,16 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { ResumeProps } from "../../common/custom-types";
+import { Applicant } from "../../applicant";
 
 /**
  * State of the current Applicant
  */
 export type ApplicantState = {
-  applicant: ResumeProps | null;
+  applicant: ResumeProps;
 };
 
 export const initialState: ApplicantState = {
-  applicant: null,
+  applicant: Applicant,
 };
 
 /** Slice to access state of applicant */

@@ -1,28 +1,20 @@
 import { Button, ButtonGroup } from "@mui/material";
-import { JSX, useEffect } from "react";
+import { JSX } from "react";
 import { setTemplate } from "../store/ui/ui-slice";
 import { useDispatch } from "react-redux";
-import { setApplicant } from "../store/applicant/applicant-slice";
-import { Applicant } from "../applicant";
+import { ResumeTemplates } from "../common/custom-types";
 
 export function TemplateButton(): JSX.Element {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(setApplicant(Applicant));
-  }, [dispatch]);
+  function onClick(template: ResumeTemplates) {
+    dispatch(setTemplate(template));
+  }
 
   return (
     <ButtonGroup variant="contained" aria-label="Basic button group">
-      <Button onClick={() => dispatch(setTemplate("one-column"))}>
-        One Column
-      </Button>
-      <Button onClick={() => dispatch(setTemplate("two-column"))}>
-        Two Column
-      </Button>
-      <Button onClick={() => dispatch(setTemplate("three-column"))}>
-        Three Column
-      </Button>
+      <Button onClick={() => onClick("one-column")}>One Column</Button>
+      <Button onClick={() => onClick("two-column")}>Two Column</Button>
     </ButtonGroup>
   );
 }
