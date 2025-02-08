@@ -38,13 +38,21 @@ export function ContactInformation({ contactInformation }: Props): JSX.Element {
       {contactInformation.linkedInId && (
         <IconWithText
           icon={LinkedInIcon}
-          text={`https://www.linkedin.com/in/${contactInformation.linkedInId}`}
+          text={
+            contactInformation.shouldShowCompleteLink
+              ? `https://www.linkedin.com/in/${contactInformation.linkedInId}`
+              : contactInformation.linkedInId
+          }
         />
       )}
       {contactInformation.gitHubId && (
         <IconWithText
           icon={GitHubIcon}
-          text={`https://github.com/${contactInformation.gitHubId}`}
+          text={
+            contactInformation.shouldShowCompleteLink
+              ? `https://github.com/${contactInformation.gitHubId}`
+              : contactInformation.gitHubId
+          }
         />
       )}
     </Grid2>

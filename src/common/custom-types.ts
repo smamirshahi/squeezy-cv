@@ -16,6 +16,9 @@ export interface ContactInformationProps {
   /** The location of the applicant */
   location?: string;
 
+  /** Whether to show the complete link for the social media or not */
+  shouldShowCompleteLink: boolean;
+
   /** The LinkedIn ID of the applicant */
   linkedInId?: string;
 
