@@ -1,20 +1,18 @@
 import "./App.css";
 import { Paper } from "@mui/material";
 import { TemplateButton } from "./components/template-button";
-import { useAppSelector } from "./store/store-helper";
-import { templateSelector } from "./store/ui/ui-slice";
 import { TemplateSelection } from "./templates/template-selection";
-import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
+import { templateSelector } from "./store/ui/ui-slice";
+import { useAppSelector } from "./store/store-helper";
 
 export function App() {
   const template = useAppSelector(templateSelector);
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
 
   return (
     <>
-      <button onClick={() => reactToPrintFn()}>Print</button>
+      <TemplateButton printReference={contentRef} />
 
       <Paper
         ref={contentRef}
@@ -29,11 +27,7 @@ export function App() {
           fontFamily: "Calibri, sans-serif",
         }}
       >
-        {template === null ? (
-          <TemplateButton />
-        ) : (
-          <TemplateSelection template={template} />
-        )}
+        {template !== null && <TemplateSelection template={template} />}
       </Paper>
     </>
   );
