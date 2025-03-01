@@ -51,7 +51,7 @@ export interface ExperienceProps {
   bulletPoints?: string[];
 }
 
-export interface ResumeProps {
+export interface ResumeSectionProps {
   nameJobTitle: NameJobTitleProps;
   contactInformation: ContactInformationProps;
   professionalSummary: ProfessionalSummaryProps;

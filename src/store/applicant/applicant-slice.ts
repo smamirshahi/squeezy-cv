@@ -1,12 +1,12 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { ResumeProps } from "../../common/custom-types";
+import { ResumeSectionProps } from "../../common/custom-types";
 import { Applicant } from "../../applicant";
 
 /**
  * State of the current Applicant
  */
 export type ApplicantState = {
-  applicant: ResumeProps;
+  applicant: ResumeSectionProps;
 };
 
 export const initialState: ApplicantState = {
@@ -18,7 +18,7 @@ const applicantSlice = createSlice({
   name: "applicant",
   initialState,
   reducers: {
-    setApplicant(state, action: PayloadAction<ResumeProps>) {
+    setApplicant(state, action: PayloadAction<ResumeSectionProps>) {
       state.applicant = action.payload;
     },
     resetApplicantState: () => initialState,

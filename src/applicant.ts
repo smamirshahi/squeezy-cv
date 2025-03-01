@@ -1,6 +1,6 @@
-import { ResumeProps } from "./common/custom-types";
+import { ResumeSectionProps } from "./common/custom-types";
 
-export const Applicant: ResumeProps = {
+export const Applicant: ResumeSectionProps = {
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",
     currentJobTitle: "Software Developer",
