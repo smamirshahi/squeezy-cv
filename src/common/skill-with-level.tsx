@@ -11,7 +11,7 @@ interface Props {
   /** The percentage of the skill */
   percentage: number;
 
-  /** How to show the skill */
+  /** How to show the skill level */
   type: "linear" | "star";
 }
 
