@@ -1,4 +1,3 @@
-import { JSX } from "react";
 import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid2 } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";

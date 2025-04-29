@@ -1,5 +1,4 @@
 import { Grid2 } from "@mui/material";
-import { JSX } from "react";
 import { BodyText, SectionTitle } from "../common/custom-typography";
 import { ProfessionalSummaryProps } from "../common/custom-types";
 

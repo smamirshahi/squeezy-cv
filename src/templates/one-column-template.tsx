@@ -4,7 +4,6 @@ import { Experiences } from "../Sections/experiences/experiences";
 import { NameJobTitle } from "../Sections/name-job-title";
 import { ProfessionalSummary } from "../Sections/professional-summary";
 import { Skills } from "../Sections/skills";
-import { JSX } from "react";
 import { useAppSelector } from "../store/store-helper";
 import { applicantSelector } from "../store/applicant/applicant-slice";
 

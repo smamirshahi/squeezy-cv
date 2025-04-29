@@ -4,7 +4,6 @@ import { Experiences } from "../Sections/experiences/experiences";
 import { NameJobTitle } from "../Sections/name-job-title";
 import { ProfessionalSummary } from "../Sections/professional-summary";
 import { Skills } from "../Sections/skills";
-import { JSX } from "react";
 import { useSelector } from "react-redux";
 import { applicantSelector } from "../store/applicant/applicant-slice";
 

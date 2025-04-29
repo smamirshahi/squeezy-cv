@@ -1,5 +1,4 @@
 import { Button, ButtonGroup } from "@mui/material";
-import { JSX } from "react";
 import { setTemplate } from "../store/ui/ui-slice";
 import { useDispatch } from "react-redux";
 import { ResumeTemplates } from "../common/custom-types";

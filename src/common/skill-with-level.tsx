@@ -1,4 +1,4 @@
-import { JSX, useMemo } from "react";
+import { useMemo } from "react";
 import { BodyText } from "./custom-typography";
 import { Grid2, LinearProgress, SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";

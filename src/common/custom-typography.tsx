@@ -1,5 +1,4 @@
 import { Typography } from "@mui/material";
-import { JSX } from "react";
 import { customColors } from "./custom-styles";
 
 interface TextProps {

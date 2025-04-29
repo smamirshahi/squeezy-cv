@@ -1,4 +1,4 @@
-import { JSX, useMemo } from "react";
+import {  useMemo } from "react";
 import { ResumeTemplates } from "../common/custom-types";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";

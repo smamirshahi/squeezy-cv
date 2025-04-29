@@ -1,4 +1,3 @@
-import { JSX } from "react";
 import dayjs from "dayjs";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { IconWithText } from "./icon-with-text";

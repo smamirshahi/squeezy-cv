@@ -1,5 +1,4 @@
 import { Grid2, SvgIcon } from "@mui/material";
-import { JSX } from "react";
 import { BodyText } from "./custom-typography";
 
 interface Props {

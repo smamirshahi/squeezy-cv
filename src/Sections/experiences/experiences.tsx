@@ -1,5 +1,4 @@
 import { Grid2 } from "@mui/material";
-import { JSX } from "react";
 import { SectionTitle } from "../../common/custom-typography";
 import { ExperienceProps } from "../../common/custom-types";
 import { ExperiencesSubsection } from "./experiences-subsection";
