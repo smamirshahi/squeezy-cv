@@ -1,5 +1,5 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
-import { Grid2 } from "@mui/material";
+import { Grid2, List, ListItem } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
 import { IconWithText } from "../../common/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -28,13 +28,14 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       {experience.dissertationTitle && (
         <BodyText text={experience.dissertationTitle} isBold={true} />
       )}
-      {/* <List sx={{ listStyleType: "disc" }}>
-        {workExperience.bulletPoints.map((bulletPoint, index) => (
+      {experience.bulletPoints && 
+      <List dense sx={{ listStyleType: "disc" }}>
+        {experience.bulletPoints.map((bulletPoint, index) => (
           <ListItem key={index} sx={{ display: "list-item" }}>
             {bulletPoint}
           </ListItem>
         ))}
-      </List> */}
+      </List>}
     </Grid2>
   );
 }

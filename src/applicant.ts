@@ -26,18 +26,30 @@ export const Applicant: ResumeSectionProps = {
       institute: "FARO Technologies",
       location: "Remote",
       datePeriod: { start: "2021-06-01" },
+      bulletPoints: [
+        "Worked as a front-end software developer on a new Dashboard",
+        "Worked with Stellar team"
+      ]
     },
     {
       title: "Software Developer",
       institute: "HoloBuilder Inc.",
       location: "Aachen, Germany",
       datePeriod: { start: "2018-12-01", end: "2021-05-31" },
+      bulletPoints: [
+        "Worked as a front-end software developer on a web-editor and Dashboard",
+        "Got experience working with React, Backbone and a bit of Vue"
+      ]
     },
     {
       title: "Researcher",
       institute: "MARUM-University of Bremen",
       location: "Bremen, Germany",
       datePeriod: { start: "2014-03-16", end: "2019-08-12" },
+      bulletPoints: [
+        "Worked on suspended sediment transport and turbulence",
+        "participated in 2 research cruises"
+      ]
     },
   ],
 
