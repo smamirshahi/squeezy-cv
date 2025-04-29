@@ -1,4 +1,4 @@
-import { Grid2, SvgIcon } from "@mui/material";
+import { Grid2, SvgIcon, SxProps } from "@mui/material";
 import { BodyText } from "./custom-typography";
 
 interface Props {
@@ -7,10 +7,12 @@ interface Props {
 
   /** The text to be shown */
   text: string;
+
+  customSx?: SxProps
 }
 
 /** Shows an icon with a text next to it */
-export function IconWithText({ icon, text }: Props): JSX.Element {
+export function IconWithText({ icon, text, customSx }: Props): JSX.Element {
   return (
     <Grid2 sx={{ mr: "20px" }} container direction="row">
       <SvgIcon
@@ -19,7 +21,7 @@ export function IconWithText({ icon, text }: Props): JSX.Element {
         viewBox="0 0 24 24"
         fontSize="small"
       />
-      <BodyText text={text} />
+      <BodyText text={text} customSx={customSx} />
     </Grid2>
   );
 }
