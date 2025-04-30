@@ -3,8 +3,8 @@ import { Grid2 } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
 import { IconWithText } from "../../common/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { DatePeriod } from "../../common/date-period";
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import { DatePeriod } from "../../components/date-period";
+import { BulletPoints } from "../../components/bullet-points";
 
 interface Props {
   /** data for each experience */
@@ -29,10 +29,9 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       {experience.dissertationTitle && (
         <BodyText text={experience.dissertationTitle} isBold={true} />
       )}
-      {experience.bulletPoints && 
-        experience.bulletPoints.map((bulletPoint, index) => (
-          <IconWithText key={index} icon={FiberManualRecordIcon} text={bulletPoint} customIconSx={{color: "red", width:  "10px"}} />
-        ))}
+      {experience.bulletPoints && (
+        <BulletPoints bulletPoints={experience.bulletPoints} />
+      )}
     </Grid2>
   );
 }
