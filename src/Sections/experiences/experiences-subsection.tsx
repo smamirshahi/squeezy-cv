@@ -1,10 +1,9 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid2 } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
-import { IconWithText } from "../../common/icon-with-text";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { DatePeriod } from "../../components/date-period";
 import { BulletPoints } from "../../components/bullet-points";
+import { LocationWithIcon } from "../../components/location-with-icon";
 
 interface Props {
   /** data for each experience */
@@ -24,7 +23,7 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       <BodyText text={experience.institute} />
       <Grid2 container direction="row" alignItems="center">
         <DatePeriod datePeriod={experience.datePeriod} />
-        <IconWithText icon={LocationOnIcon} text={experience.location} />
+        <LocationWithIcon place={experience.location} />
       </Grid2>
       {experience.dissertationTitle && (
         <BodyText text={experience.dissertationTitle} isBold={true} />

@@ -1,11 +1,11 @@
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid2 } from "@mui/material";
 import { IconWithText } from "../common/icon-with-text";
 import { ContactInformationProps } from "../common/custom-types";
+import { LocationWithIcon } from "../components/location-with-icon";
 
 interface Props {
   /** data for contact information */
@@ -29,11 +29,9 @@ export function ContactInformation({ contactInformation }: Props): JSX.Element {
         />
       )}
       {contactInformation.location && (
-        <IconWithText
-          icon={LocationOnIcon}
-          text={contactInformation.location}
-        />
+        <LocationWithIcon place={contactInformation.location} />
       )}
+
       {contactInformation.linkedInId && (
         <IconWithText
           icon={LinkedInIcon}
