@@ -17,7 +17,7 @@ export function DatePeriod({ datePeriod }: DatePeriodProps): JSX.Element {
       text={`${dayjs(datePeriod.start).format(DATE_FORMAT)} - ${
         datePeriod.end ? dayjs(datePeriod.end).format(DATE_FORMAT) : "Present"
       }`}
-      customSx={{color: customColors.gray}}
+      customTextSx={{color: customColors.gray}}
     ></IconWithText>
   );
 }

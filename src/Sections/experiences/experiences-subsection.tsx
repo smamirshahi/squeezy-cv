@@ -1,9 +1,10 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
-import { Grid2, List, ListItem } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
 import { IconWithText } from "../../common/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { DatePeriod } from "../../common/date-period";
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 interface Props {
   /** data for each experience */
@@ -29,13 +30,9 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
         <BodyText text={experience.dissertationTitle} isBold={true} />
       )}
       {experience.bulletPoints && 
-      <List dense sx={{ listStyleType: "disc" }}>
-        {experience.bulletPoints.map((bulletPoint, index) => (
-          <ListItem key={index} sx={{ display: "list-item" }}>
-            {bulletPoint}
-          </ListItem>
+        experience.bulletPoints.map((bulletPoint, index) => (
+          <IconWithText key={index} icon={FiberManualRecordIcon} text={bulletPoint} customIconSx={{color: "red", width:  "10px"}} />
         ))}
-      </List>}
     </Grid2>
   );
 }

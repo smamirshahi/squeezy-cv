@@ -8,11 +8,15 @@ interface Props {
   /** The text to be shown */
   text: string;
 
-  customSx?: SxProps
+  /** Styles for the icon */
+  customIconSx?: SxProps
+
+  /** Styles for the text */
+  customTextSx?: SxProps
 }
 
 /** Shows an icon with a text next to it */
-export function IconWithText({ icon, text, customSx }: Props): JSX.Element {
+export function IconWithText({ icon, text, customIconSx, customTextSx }: Props): JSX.Element {
   return (
     <Grid2 sx={{ mr: "20px" }} container direction="row">
       <SvgIcon
@@ -20,8 +24,9 @@ export function IconWithText({ icon, text, customSx }: Props): JSX.Element {
         component={icon}
         viewBox="0 0 24 24"
         fontSize="small"
+        sx={{...customIconSx}}
       />
-      <BodyText text={text} customSx={customSx} />
+      <BodyText text={text} customSx={customTextSx} />
     </Grid2>
   );
 }
