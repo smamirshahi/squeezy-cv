@@ -1,6 +1,6 @@
 import { SectionTitle, SubsectionText } from "../common/custom-typography";
 import { Box, Grid2 } from "@mui/material";
-import { SkillWithLevel } from "../common/skill-with-level";
+import { SkillWithLevel } from "../components/skill-with-level";
 
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */

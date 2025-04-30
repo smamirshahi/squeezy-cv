@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { BodyText } from "./custom-typography";
+import { BodyText } from "../common/custom-typography";
 import { Grid2, LinearProgress, SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
@@ -15,6 +15,7 @@ interface Props {
   type: "linear" | "star";
 }
 
+/** Shows the skill name with the level */
 export function SkillWithLevel({
   skillName,
   percentage,
