@@ -1,9 +1,9 @@
-import { LinearProgress, SvgIcon } from "@mui/material";
+import { SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
-import { useMemo } from "react";
 import { ApplicationStyle } from "../common/custom-types";
+import { customColors } from "../common/custom-styles";
 
 interface Props {
   /** How to show the skill level */
@@ -13,86 +13,82 @@ interface Props {
   percentage: number;
 }
 
+/** Determine the number of icons to be shown as full, half or empty */
 export function LevelIndicator({
   indicatorType,
   percentage,
 }: Props): JSX.Element {
-  const indicator = useMemo(() => {
-    const fullIcon = Math.floor(percentage / 20);
-    const halfIcon = percentage % 20 >= 10 ? 1 : 0;
+  const numberOfFullIcons = Math.floor(percentage / 20);
+  const numberOfHalfIcon = percentage % 20 >= 10 ? 1 : 0;
+  const numberOfEmptyIcons = 5 - numberOfFullIcons - numberOfHalfIcon;
 
-    switch (indicatorType) {
-      case "linear":
-        return (
-          <LinearProgress
-            variant="determinate"
-            value={percentage}
-            sx={{ width: "200px" }}
+  let fullIconComponent: React.ReactNode;
+  let halfIconComponent: React.ReactNode;
+
+  switch (indicatorType) {
+    case "star":
+      fullIconComponent = <StarIcon />;
+      halfIconComponent = <StarHalfIcon />;
+      break;
+    case "circle":
+      fullIconComponent = <CircleIcon />;
+      halfIconComponent = (
+        <>
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke={"#2196f3"}
+            strokeWidth="1"
+            fill="none"
           />
-        );
-      case "star":
-        return (
-          <>
-            {[...Array(fullIcon)].map((_, index) => (
-              <SvgIcon
-                key={index}
-                component={StarIcon}
-                viewBox="0 0 24 24"
-                fontSize="small"
-                sx={{
-                  color: "#2196f3",
-                }}
-              />
-            ))}
+          <path d="M12 2a10 10 0 0 0 0 20V2z" fill={"#2196f3"} />
+        </>
+      );
+      break;
+  }
 
-            {halfIcon === 1 && (
-              <SvgIcon
-                component={StarHalfIcon}
-                viewBox="0 0 24 24"
-                fontSize="small"
-                sx={{
-                  color: "#2196f3",
-                }}
-              />
-            )}
-          </>
-        );
+  return (
+    <>
+      {[...Array(numberOfFullIcons)].map((_, index) => (
+        <SvgIcon
+          key={index}
+          viewBox="0 0 24 24"
+          fontSize="small"
+          sx={{
+            stroke: customColors.lightBlue,
+            color: customColors.lightBlue,
+          }}
+        >
+          {fullIconComponent}
+        </SvgIcon>
+      ))}
 
-      case "circle":
-        return (
-          <>
-            {[...Array(fullIcon)].map((_, index) => (
-              <SvgIcon
-                key={index}
-                component={CircleIcon}
-                viewBox="0 0 24 24"
-                fontSize="small"
-                sx={{
-                  color: "#2196f3",
-                }}
-              />
-            ))}
-
-            {halfIcon === 1 && (
-              <SvgIcon viewBox="0 0 24 24" fontSize="small">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke={"#2196f3"}
-                  strokeWidth="1"
-                  fill="none"
-                />
-                <path d="M12 2a10 10 0 0 0 0 20V2z" fill={"#2196f3"} />
-              </SvgIcon>
-            )}
-          </>
-        );
-
-      default:
-        return <></>;
-    }
-  }, [percentage, indicatorType]);
-
-  return indicator;
+      {numberOfHalfIcon === 1 && (
+        <SvgIcon
+          viewBox="0 0 24 24"
+          fontSize="small"
+          sx={{
+            stroke: customColors.lightBlue,
+            color: customColors.lightBlue,
+          }}
+        >
+          {halfIconComponent}
+        </SvgIcon>
+      )}
+      {[...Array(numberOfEmptyIcons)].map((_, index) => (
+        <SvgIcon
+          key={index}
+          viewBox="0 0 24 24"
+          fontSize="small"
+          sx={{
+            stroke: customColors.lightBlue,
+            color: "transparent",
+          }}
+        >
+          {fullIconComponent}
+        </SvgIcon>
+      ))}
+    </>
+  );
 }

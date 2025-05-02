@@ -64,7 +64,7 @@ export interface SkillWithLevelProps {
 }
 
 export interface ApplicationStyle {
-  skillIndicatorType: "linear" | "star" | "circle";
+  skillIndicatorType: "star" | "circle";
 }
 
 export interface ResumeSectionProps {
