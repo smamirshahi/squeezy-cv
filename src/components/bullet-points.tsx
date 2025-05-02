@@ -1,3 +1,4 @@
+import { customColors } from "../common/custom-styles";
 import { IconWithText } from "../common/icon-with-text";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
@@ -15,7 +16,8 @@ export function BulletPoints({ bulletPoints }: Props): JSX.Element {
           key={index}
           icon={FiberManualRecordIcon}
           text={bulletPoint}
-          customIconSx={{ color: "red", width: "10px" }}
+          customTextSx={{ color: customColors.gray }}
+          customIconSx={{ color: customColors.gray, width: "10px", mr: "5px" }}
         />
       ))}
     </>
