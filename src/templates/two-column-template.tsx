@@ -36,7 +36,10 @@ export function TwoColumnTemplate(): JSX.Element | null {
       </Grid2>
       <Grid2 size={{ xs: 4 }}>
         <ContactInformation contactInformation={applicant.contactInformation} />
-        <Skills />
+        <Skills
+          skills={applicant.skills}
+          indicatorType={applicant.style.skillIndicatorType}
+        />
       </Grid2>
     </Grid2>
   );

@@ -51,12 +51,30 @@ export interface ExperienceProps {
   bulletPoints?: string[];
 }
 
+export interface SkillWithLevelProps {
+  /** The name of the skill */
+  mainSkillName: string;
+  /** The name of the subSkill */
+  subSkill: {
+    /** The name of the subSkill */
+    name: string;
+    /** The percentage of the subSkill */
+    percentage: number;
+  }[];
+}
+
+export interface ApplicationStyle {
+  skillIndicatorType: "linear" | "star" | "circle";
+}
+
 export interface ResumeSectionProps {
   nameJobTitle: NameJobTitleProps;
   contactInformation: ContactInformationProps;
   professionalSummary: ProfessionalSummaryProps;
   workExperiences: ExperienceProps[];
   education: ExperienceProps[];
+  skills: SkillWithLevelProps[];
+  style: ApplicationStyle;
 }
 
 /** Templates for Resume */

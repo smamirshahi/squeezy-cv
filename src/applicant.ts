@@ -1,6 +1,9 @@
 import { ResumeSectionProps } from "./common/custom-types";
 
 export const Applicant: ResumeSectionProps = {
+  style: {
+    skillIndicatorType: "star",
+  },
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",
     currentJobTitle: "Software Developer",
@@ -28,8 +31,8 @@ export const Applicant: ResumeSectionProps = {
       datePeriod: { start: "2021-06-01" },
       bulletPoints: [
         "Worked as a front-end software developer on a new Dashboard",
-        "Worked with Stellar team"
-      ]
+        "Worked with Stellar team",
+      ],
     },
     {
       title: "Software Developer",
@@ -38,8 +41,8 @@ export const Applicant: ResumeSectionProps = {
       datePeriod: { start: "2018-12-01", end: "2021-05-31" },
       bulletPoints: [
         "Worked as a front-end software developer on a web-editor and Dashboard",
-        "Got experience working with React, Backbone and a bit of Vue"
-      ]
+        "Got experience working with React, Backbone and a bit of Vue",
+      ],
     },
     {
       title: "Researcher",
@@ -48,8 +51,8 @@ export const Applicant: ResumeSectionProps = {
       datePeriod: { start: "2014-03-16", end: "2019-08-12" },
       bulletPoints: [
         "Worked on suspended sediment transport and turbulence",
-        "participated in 2 research cruises"
-      ]
+        "participated in 2 research cruises",
+      ],
     },
   ],
 
@@ -69,6 +72,26 @@ export const Applicant: ResumeSectionProps = {
       datePeriod: { start: "2010-09-01", end: "2013-02-01" },
       dissertationTitle:
         "Dissertation Topic: Experimental Study of Effect of Turbulence Intensity on Riprap Stability",
+    },
+  ],
+
+  skills: [
+    {
+      mainSkillName: "Language",
+      subSkill: [
+        { name: "English", percentage: 90 },
+        { name: "German", percentage: 50 },
+      ],
+    },
+    {
+      mainSkillName: "Technical Skills",
+      subSkill: [
+        { name: "React", percentage: 80 },
+        { name: "Backbone", percentage: 70 },
+        { name: "Vue", percentage: 60 },
+        { name: "Python", percentage: 70 },
+        { name: "C++", percentage: 60 },
+      ],
     },
   ],
 };

@@ -30,7 +30,10 @@ export function OneColumnTemplate(): JSX.Element | null {
         experiences={applicant.workExperiences}
       />
       <Experiences sectionTitle="Education" experiences={applicant.education} />
-      <Skills />
+      <Skills
+        skills={applicant.skills}
+        indicatorType={applicant.style.skillIndicatorType}
+      />
     </Grid2>
   );
 }
