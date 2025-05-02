@@ -78,4 +78,4 @@ export interface ResumeSectionProps {
 }
 
 /** Templates for Resume */
-export type ResumeTemplates = "one-column" | "two-column" | "three-column";
+export type ResumeTemplates = "one-column" | "two-column";

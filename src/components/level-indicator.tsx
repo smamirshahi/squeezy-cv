@@ -3,7 +3,7 @@ import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
 import { useMemo } from "react";
-import { ApplicationStyle } from "../../common/custom-types";
+import { ApplicationStyle } from "../common/custom-types";
 
 interface Props {
   /** How to show the skill level */
@@ -88,6 +88,9 @@ export function LevelIndicator({
             )}
           </>
         );
+
+      default:
+        return <></>;
     }
   }, [percentage, indicatorType]);
 

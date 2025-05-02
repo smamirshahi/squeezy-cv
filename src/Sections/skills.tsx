@@ -6,6 +6,8 @@ import {
 import { Grid2 } from "@mui/material";
 import { ApplicationStyle, SkillWithLevelProps } from "../common/custom-types";
 import { LevelIndicator } from "../components/level-indicator";
+import { templateSelector } from "../store/ui/ui-slice";
+import { useAppSelector } from "../store/store-helper";
 
 interface Props {
   /** The skills the user has */
@@ -18,23 +20,33 @@ interface Props {
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */
 export function Skills({ skills, indicatorType }: Props): JSX.Element {
+  const template = useAppSelector(templateSelector);
   return (
-    <Grid2 container direction="column" alignItems="flex-start">
+    <>
       <SectionTitle text="Skills" />
       {skills.map((skill) => (
-        <Grid2 container direction="row" alignItems="center">
-          <SubsectionText text={skill.mainSkillName} />
-          {skill.subSkill.map((subSkill) => (
-            <>
-              <BodyText text={subSkill.name} />
-              <LevelIndicator
-                indicatorType={indicatorType}
-                percentage={subSkill.percentage}
-              />
-            </>
-          ))}
-        </Grid2>
+        <>
+          <SubsectionText
+            text={skill.mainSkillName}
+            customSx={{ textAlign: "left" }}
+          />
+          <Grid2
+            container
+            direction={template === "one-column" ? "row" : "column"}
+            alignItems="flex-start"
+          >
+            {skill.subSkill.map((subSkill) => (
+              <Grid2 container direction="row" alignItems="center">
+                <BodyText text={subSkill.name} customSx={{ mr: "10px" }} />
+                <LevelIndicator
+                  indicatorType={indicatorType}
+                  percentage={subSkill.percentage}
+                />
+              </Grid2>
+            ))}
+          </Grid2>
+        </>
       ))}
-    </Grid2>
+    </>
   );
 }
