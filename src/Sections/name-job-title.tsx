@@ -1,4 +1,4 @@
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ResumeTitle, SubsectionText } from "../common/custom-typography";
 import { NameJobTitleProps } from "../common/custom-types";
 
@@ -9,7 +9,7 @@ interface Props {
 
 export function NameJobTitle({ nameJobTitle }: Props): JSX.Element {
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       alignItems="flex-start"
@@ -17,6 +17,6 @@ export function NameJobTitle({ nameJobTitle }: Props): JSX.Element {
     >
       <ResumeTitle text={nameJobTitle.name} />
       <SubsectionText text={nameJobTitle.currentJobTitle} />
-    </Grid2>
+    </Grid>
   );
 }

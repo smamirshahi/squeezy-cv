@@ -1,4 +1,4 @@
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ContactInformation } from "../Sections/contact-information";
 import { Experiences } from "../Sections/experiences/experiences";
 import { NameJobTitle } from "../Sections/name-job-title";
@@ -16,14 +16,14 @@ export function TwoColumnTemplate(): JSX.Element | null {
   }
 
   return (
-    <Grid2
+    <Grid
       container
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
     >
       <NameJobTitle nameJobTitle={applicant.nameJobTitle} />
-      <Grid2 size={{ xs: 8 }}>
+      <Grid size={{ xs: 8 }}>
         <ProfessionalSummary summary={applicant.professionalSummary} />
         <Experiences
           sectionTitle="Work Experience"
@@ -33,14 +33,14 @@ export function TwoColumnTemplate(): JSX.Element | null {
           sectionTitle="Education"
           experiences={applicant.education}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 4 }}>
+      </Grid>
+      <Grid size={{ xs: 4 }}>
         <ContactInformation contactInformation={applicant.contactInformation} />
         <Skills
           skills={applicant.skills}
           indicatorType={applicant.style.skillIndicatorType}
         />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 }

@@ -3,7 +3,7 @@ import {
   SectionTitle,
   SubsectionText,
 } from "../common/custom-typography";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ApplicationStyle, SkillWithLevelProps } from "../common/custom-types";
 import { LevelIndicator } from "../components/level-indicator";
 import { templateSelector } from "../store/ui/ui-slice";
@@ -30,21 +30,21 @@ export function Skills({ skills, indicatorType }: Props): JSX.Element {
             text={skill.mainSkillName}
             customSx={{ textAlign: "left" }}
           />
-          <Grid2
+          <Grid
             container
             direction={template === "one-column" ? "row" : "column"}
             alignItems="flex-start"
           >
             {skill.subSkill.map((subSkill) => (
-              <Grid2 container direction="row" alignItems="center">
+              <Grid container direction="row" alignItems="center">
                 <BodyText text={subSkill.name} customSx={{ mr: "10px" }} />
                 <LevelIndicator
                   indicatorType={indicatorType}
                   percentage={subSkill.percentage}
                 />
-              </Grid2>
+              </Grid>
             ))}
-          </Grid2>
+          </Grid>
         </>
       ))}
     </>

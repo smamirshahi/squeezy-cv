@@ -1,4 +1,4 @@
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ContactInformation } from "../Sections/contact-information";
 import { Experiences } from "../Sections/experiences/experiences";
 import { NameJobTitle } from "../Sections/name-job-title";
@@ -16,7 +16,7 @@ export function OneColumnTemplate(): JSX.Element | null {
   }
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       justifyContent="flex-start"
@@ -34,6 +34,6 @@ export function OneColumnTemplate(): JSX.Element | null {
         skills={applicant.skills}
         indicatorType={applicant.style.skillIndicatorType}
       />
-    </Grid2>
+    </Grid>
   );
 }

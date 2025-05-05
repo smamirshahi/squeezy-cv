@@ -1,5 +1,5 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ExperienceProps } from "../../common/custom-types";
 import { DatePeriod } from "../../components/date-period";
 import { BulletPoints } from "../../components/bullet-points";
@@ -13,7 +13,7 @@ interface Props {
 /** Renders a single experience section */
 export function ExperiencesSubsection({ experience }: Props): JSX.Element {
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       alignItems="flex-start"
@@ -21,16 +21,16 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
     >
       <SubsectionText text={experience.title} isBold={true} />
       <BodyText text={experience.institute} />
-      <Grid2 container direction="row" alignItems="center">
+      <Grid container direction="row" alignItems="center">
         <DatePeriod datePeriod={experience.datePeriod} />
         <LocationWithIcon place={experience.location} />
-      </Grid2>
+      </Grid>
       {experience.dissertationTitle && (
         <BodyText text={experience.dissertationTitle} isBold={true} />
       )}
       {experience.bulletPoints && (
         <BulletPoints bulletPoints={experience.bulletPoints} />
       )}
-    </Grid2>
+    </Grid>
   );
 }

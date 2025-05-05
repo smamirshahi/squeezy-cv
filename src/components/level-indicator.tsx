@@ -1,4 +1,4 @@
-import { SvgIcon } from "@mui/material";
+import { Box, SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -49,7 +49,7 @@ export function LevelIndicator({
   }
 
   return (
-    <>
+    <Box component="div">
       {[...Array(numberOfFullIcons)].map((_, index) => (
         <SvgIcon
           key={index}
@@ -89,6 +89,6 @@ export function LevelIndicator({
           {fullIconComponent}
         </SvgIcon>
       ))}
-    </>
+    </Box>
   );
 }

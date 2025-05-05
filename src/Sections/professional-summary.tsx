@@ -1,4 +1,4 @@
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { BodyText, SectionTitle } from "../common/custom-typography";
 import { ProfessionalSummaryProps } from "../common/custom-types";
 
@@ -9,7 +9,7 @@ interface Props {
 
 export function ProfessionalSummary({ summary }: Props): JSX.Element {
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       alignItems="flex-start"
@@ -17,6 +17,6 @@ export function ProfessionalSummary({ summary }: Props): JSX.Element {
     >
       <SectionTitle text="Professional Summary" />
       <BodyText text={summary.summary} />
-    </Grid2>
+    </Grid>
   );
 }
