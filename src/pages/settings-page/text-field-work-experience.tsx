@@ -16,7 +16,7 @@ type WorkExperience = {
   location: string;
   startDate: string;
   endDate: string;
-  description: string;
+  description: string[];
 };
 
 export function ExperienceForm() {
@@ -42,7 +42,7 @@ export function ExperienceForm() {
         location: "",
         startDate: "",
         endDate: "",
-        description: "",
+        description: [""],
       },
     ]);
   };
@@ -57,20 +57,18 @@ export function ExperienceForm() {
 
       {experiences.map((exp) => (
         <Paper key={exp.id} sx={{ padding: 2, position: "relative" }}>
-          <IconButton
-            onClick={() => removeExperience(exp.id)}
-            sx={{ position: "absolute", top: 8, right: 8 }}
-          >
-            <DeleteIcon />
-          </IconButton>
-
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField
-              label="Job Title"
-              value={exp.jobTitle}
-              onChange={handleChange(exp.id, "jobTitle")}
-              fullWidth
-            />
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label="Job Title"
+                value={exp.jobTitle}
+                onChange={handleChange(exp.id, "jobTitle")}
+                fullWidth
+              />
+              <IconButton onClick={() => removeExperience(exp.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
             {/* Company and Location in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
@@ -105,14 +103,80 @@ export function ExperienceForm() {
                 fullWidth
               />
             </Box>
-            <TextField
-              label="Description"
-              value={exp.description}
-              onChange={handleChange(exp.id, "description")}
-              fullWidth
-              multiline
-              minRows={4}
-            />
+            {/* Bullet Points for Description */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+                mb: 2,
+              }}
+            >
+              {exp.description.map((point, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <TextField
+                    label={`Bullet Point ${idx + 1}`}
+                    value={point}
+                    onChange={(e) => {
+                      setExperiences((prev) =>
+                        prev.map((ex) =>
+                          ex.id === exp.id
+                            ? {
+                                ...ex,
+                                description: ex.description.map((desc, i) =>
+                                  i === idx ? e.target.value : desc
+                                ),
+                              }
+                            : ex
+                        )
+                      );
+                    }}
+                    fullWidth
+                  />
+                  <IconButton
+                    onClick={() => {
+                      setExperiences((prev) =>
+                        prev.map((ex) =>
+                          ex.id === exp.id
+                            ? {
+                                ...ex,
+                                description: ex.description.filter(
+                                  (_, i) => i !== idx
+                                ),
+                              }
+                            : ex
+                        )
+                      );
+                    }}
+                    disabled={exp.description.length === 1}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ))}
+              <Box>
+                <IconButton
+                  onClick={() => {
+                    setExperiences((prev) =>
+                      prev.map((ex) =>
+                        ex.id === exp.id
+                          ? { ...ex, description: [...ex.description, ""] }
+                          : ex
+                      )
+                    );
+                  }}
+                >
+                  <span style={{ fontSize: 20 }}>➕</span>
+                </IconButton>
+              </Box>
+            </Box>
           </Box>
         </Paper>
       ))}
