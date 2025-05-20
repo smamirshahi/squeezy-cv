@@ -7,6 +7,9 @@ import { templateSelector } from "./store/ui/ui-slice";
 import { useAppSelector } from "./store/store-helper";
 import Divider from "@mui/material/Divider";
 
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+
 export function App() {
   const template = useAppSelector(templateSelector);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -17,8 +20,8 @@ export function App() {
       <Divider
         sx={{
           position: "absolute",
-          top: "297mm",
-          width: "210mm",
+          top: `${A4_HEIGHT_MM}mm`,
+          width: `${A4_WIDTH_MM}mm`,
           border: "1px solid red",
         }}
       />
@@ -27,8 +30,8 @@ export function App() {
         ref={contentRef}
         elevation={3}
         sx={{
-          width: "210mm",
-          minHeight: "297mm",
+          width: `${A4_WIDTH_MM}mm`,
+          minHeight: `${A4_HEIGHT_MM}mm`,
           padding: "20mm",
           boxSizing: "border-box",
           margin: "auto",
