@@ -3,14 +3,13 @@ import {
   Button,
   IconButton,
   TextField,
-  Typography,
-  Paper,
   AccordionSummary,
   AccordionDetails,
   Accordion,
 } from "@mui/material";
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 
 type WorkExperience = {
   id: number;
@@ -25,17 +24,38 @@ type WorkExperience = {
 export function ExperienceForm() {
   const [experiences, setExperiences] = useState<WorkExperience[]>([]);
 
-  const handleChange =
-    (id: number, key: keyof WorkExperience) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setExperiences((prev) =>
-        prev.map((exp) =>
-          exp.id === id ? { ...exp, [key]: e.target.value } : exp
-        )
-      );
-    };
+  function handleChange<K extends keyof WorkExperience>(
+    id: number,
+    key: K,
+    value: WorkExperience[K]
+  ): void {
+    setExperiences((prev) =>
+      prev.map((experience) =>
+        experience.id === id ? { ...experience, [key]: value } : experience
+      )
+    );
+  }
 
-  const addExperience = () => {
+  function handleDescriptionChange(
+    id: number,
+    index: number,
+    value: string
+  ): void {
+    setExperiences((prev) =>
+      prev.map((experience) =>
+        experience.id === id
+          ? {
+              ...experience,
+              description: experience.description.map((desc, i) =>
+                i === index ? value : desc
+              ),
+            }
+          : experience
+      )
+    );
+  }
+
+  function addExperience(): void {
     setExperiences((prev) => [
       ...prev,
       {
@@ -48,143 +68,141 @@ export function ExperienceForm() {
         description: [""],
       },
     ]);
-  };
+  }
 
-  const removeExperience = (id: number) => {
+  function removeExperience(id: number): void {
     setExperiences((prev) => prev.filter((exp) => exp.id !== id));
-  };
+  }
 
   return (
     <Accordion>
-      <AccordionSummary>Work Experience Accordion</AccordionSummary>
+      <AccordionSummary>Work Experience</AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Typography variant="h6">Work Experience</Typography>
-
           {experiences.map((exp) => (
-            <Paper key={exp.id} sx={{ padding: 2, position: "relative" }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Job Title"
-                    value={exp.jobTitle}
-                    onChange={handleChange(exp.id, "jobTitle")}
-                    fullWidth
-                  />
-                  <IconButton onClick={() => removeExperience(exp.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-                {/* Company and Location in one line */}
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Company"
-                    value={exp.company}
-                    onChange={handleChange(exp.id, "company")}
-                    fullWidth
-                  />
-                  <TextField
-                    label="Location"
-                    value={exp.location}
-                    onChange={handleChange(exp.id, "location")}
-                    fullWidth
-                  />
-                </Box>
-                {/* Start and End Date in one line */}
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Start Date"
-                    type="date"
-                    value={exp.startDate}
-                    onChange={handleChange(exp.id, "startDate")}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-                  <TextField
-                    label="End Date"
-                    type="date"
-                    value={exp.endDate}
-                    onChange={handleChange(exp.id, "endDate")}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-                </Box>
-                {/* Bullet Points for Description */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    mb: 2,
-                  }}
-                >
-                  {exp.description.map((point, idx) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <TextField
-                        label={`Bullet Point ${idx + 1}`}
-                        value={point}
-                        onChange={(e) => {
-                          setExperiences((prev) =>
-                            prev.map((ex) =>
-                              ex.id === exp.id
-                                ? {
-                                    ...ex,
-                                    description: ex.description.map((desc, i) =>
-                                      i === idx ? e.target.value : desc
-                                    ),
-                                  }
-                                : ex
-                            )
-                          );
-                        }}
-                        fullWidth
-                      />
-                      <IconButton
-                        onClick={() => {
-                          setExperiences((prev) =>
-                            prev.map((ex) =>
-                              ex.id === exp.id
-                                ? {
-                                    ...ex,
-                                    description: ex.description.filter(
-                                      (_, i) => i !== idx
-                                    ),
-                                  }
-                                : ex
-                            )
-                          );
-                        }}
-                        disabled={exp.description.length === 1}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  ))}
-                  <Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Job Title"
+                  value={exp.jobTitle}
+                  onChange={(event) =>
+                    handleChange(exp.id, "jobTitle", event.target.value)
+                  }
+                  fullWidth
+                />
+                <IconButton onClick={() => removeExperience(exp.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+              {/* Company and Location in one line */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Company"
+                  value={exp.company}
+                  onChange={(event) =>
+                    handleChange(exp.id, "company", event.target.value)
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label="Location"
+                  value={exp.location}
+                  onChange={(event) =>
+                    handleChange(exp.id, "location", event.target.value)
+                  }
+                  fullWidth
+                />
+              </Box>
+              {/* Start and End Date in one line */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  value={exp.startDate}
+                  onChange={(event) =>
+                    handleChange(exp.id, "startDate", event.target.value)
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="End Date"
+                  type="date"
+                  value={exp.endDate}
+                  onChange={(event) =>
+                    handleChange(exp.id, "endDate", event.target.value)
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Box>
+              {/* Bullet Points for Description */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                  mb: 2,
+                }}
+              >
+                {exp.description.map((point, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <TextField
+                      label={`Bullet Point ${idx + 1}`}
+                      value={point}
+                      onChange={(event) =>
+                        handleDescriptionChange(exp.id, idx, event.target.value)
+                      }
+                      fullWidth
+                    />
                     <IconButton
                       onClick={() => {
                         setExperiences((prev) =>
-                          prev.map((ex) =>
-                            ex.id === exp.id
-                              ? { ...ex, description: [...ex.description, ""] }
-                              : ex
+                          prev.map((experience) =>
+                            experience.id === exp.id
+                              ? {
+                                  ...experience,
+                                  description: experience.description.filter(
+                                    (_, i) => i !== idx
+                                  ),
+                                }
+                              : experience
                           )
                         );
                       }}
+                      disabled={exp.description.length === 1}
                     >
-                      <span style={{ fontSize: 20 }}>➕</span>
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
+                ))}
+                <Box>
+                  <IconButton
+                    onClick={() => {
+                      setExperiences((prev) =>
+                        prev.map((experience) =>
+                          experience.id === exp.id
+                            ? {
+                                ...experience,
+                                description: [...experience.description, ""],
+                              }
+                            : experience
+                        )
+                      );
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
                 </Box>
               </Box>
-            </Paper>
+            </Box>
           ))}
 
           <Button variant="contained" onClick={addExperience}>
