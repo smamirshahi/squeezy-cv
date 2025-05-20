@@ -14,3 +14,6 @@ export const customColors = {
  * MMMM/YYYY: December/2018
  */
 export const DATE_FORMAT = "MMMM YYYY";
+
+export const A4_WIDTH_MM = 210;
+export const A4_HEIGHT_MM = 297;
