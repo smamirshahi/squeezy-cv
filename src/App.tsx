@@ -1,5 +1,5 @@
 import "./App.css";
-import { Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { TemplateButton } from "./components/template-button";
 import { TemplateSelection } from "./templates/template-selection";
 import { useRef } from "react";
@@ -15,16 +15,32 @@ export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <>
-      <TemplateButton printReference={contentRef} />
-      <Divider
+    <Box
+      sx={{
+        width: "500mm",
+        display: "flex",
+        gap: 2,
+        padding: 2,
+        justifyContent: "center",
+        alignItems: "flex-start",
+        overflowX: "auto",
+        backgroundColor: "#f0f0f0",
+      }}
+    >
+      <Paper
+        elevation={3}
         sx={{
-          position: "absolute",
-          top: `${A4_HEIGHT_MM}mm`,
           width: `${A4_WIDTH_MM}mm`,
-          border: "1px solid red",
+          minHeight: `${A4_HEIGHT_MM}mm`,
+          padding: "20mm",
+          boxSizing: "border-box",
+          margin: "auto",
+          fontSize: "12pt",
+          fontFamily: "Calibri, sans-serif",
         }}
-      />
+      >
+        <TemplateButton printReference={contentRef} />
+      </Paper>
 
       <Paper
         ref={contentRef}
@@ -39,8 +55,16 @@ export function App() {
           fontFamily: "Calibri, sans-serif",
         }}
       >
+        <Divider
+          sx={{
+            position: "absolute",
+            top: `${A4_HEIGHT_MM}mm`,
+            width: `${A4_WIDTH_MM}mm`,
+            border: "1px solid red",
+          }}
+        />
         {template !== null && <TemplateSelection template={template} />}
       </Paper>
-    </>
+    </Box>
   );
 }
