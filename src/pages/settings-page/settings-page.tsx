@@ -10,6 +10,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { TextFieldWithIcon } from "./text-field-with-icon";
 import { ExperienceForm } from "./text-field-work-experience";
+import { TextFieldEducation } from "./text-field-education";
 
 interface Props {
   /** The reference to the content */
@@ -94,6 +95,7 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
       />
 
       <ExperienceForm />
+      <TextFieldEducation />
     </Paper>
   );
 }
