@@ -3,16 +3,15 @@ import {
   Button,
   IconButton,
   TextField,
-  Typography,
-  Paper,
   AccordionSummary,
   AccordionDetails,
   Accordion,
 } from "@mui/material";
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-type WorkExperience = {
+type Education = {
   id: number;
   degree: string;
   institute: string;
@@ -23,19 +22,21 @@ type WorkExperience = {
 };
 
 export function TextFieldEducation() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([]);
+  const [experiences, setExperiences] = useState<Education[]>([]);
 
-  const handleChange =
-    (id: number, key: keyof WorkExperience) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setExperiences((prev) =>
-        prev.map((exp) =>
-          exp.id === id ? { ...exp, [key]: e.target.value } : exp
-        )
-      );
-    };
+  function handleChange<K extends keyof Education>(
+    id: number,
+    key: K,
+    value: Education[K]
+  ): void {
+    setExperiences((prev) =>
+      prev.map((experience) =>
+        experience.id === id ? { ...experience, [key]: value } : experience
+      )
+    );
+  }
 
-  const addExperience = () => {
+  function addExperience(): void {
     setExperiences((prev) => [
       ...prev,
       {
@@ -48,70 +49,77 @@ export function TextFieldEducation() {
         dissertationTitle: "",
       },
     ]);
-  };
+  }
 
-  const removeExperience = (id: number) => {
+  function removeExperience(id: number): void {
     setExperiences((prev) => prev.filter((exp) => exp.id !== id));
-  };
+  }
 
   return (
     <Accordion>
-      <AccordionSummary>Education</AccordionSummary>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        Education
+      </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Typography variant="h6">Work Experience</Typography>
-
           {experiences.map((exp) => (
-            <Paper key={exp.id} sx={{ padding: 2, position: "relative" }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Job Title"
-                    value={exp.degree}
-                    onChange={handleChange(exp.id, "degree")}
-                    fullWidth
-                  />
-                  <IconButton onClick={() => removeExperience(exp.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-                {/* Company and Location in one line */}
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Company"
-                    value={exp.institute}
-                    onChange={handleChange(exp.id, "institute")}
-                    fullWidth
-                  />
-                  <TextField
-                    label="Location"
-                    value={exp.location}
-                    onChange={handleChange(exp.id, "location")}
-                    fullWidth
-                  />
-                </Box>
-                {/* Start and End Date in one line */}
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
-                    label="Start Date"
-                    type="date"
-                    value={exp.startDate}
-                    onChange={handleChange(exp.id, "startDate")}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-                  <TextField
-                    label="End Date"
-                    type="date"
-                    value={exp.endDate}
-                    onChange={handleChange(exp.id, "endDate")}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-                </Box>
-                {/* Bullet Points for Description */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Degree"
+                  value={exp.degree}
+                  onChange={(event) =>
+                    handleChange(exp.id, "degree", event.target.value)
+                  }
+                  fullWidth
+                />
+                <IconButton onClick={() => removeExperience(exp.id)}>
+                  <DeleteIcon />
+                </IconButton>
               </Box>
-            </Paper>
+              {/* Company and Location in one line */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Institute"
+                  value={exp.institute}
+                  onChange={(event) =>
+                    handleChange(exp.id, "institute", event.target.value)
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label="Location"
+                  value={exp.location}
+                  onChange={(event) =>
+                    handleChange(exp.id, "location", event.target.value)
+                  }
+                  fullWidth
+                />
+              </Box>
+              {/* Start and End Date in one line */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  value={exp.startDate}
+                  onChange={(event) =>
+                    handleChange(exp.id, "startDate", event.target.value)
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="End Date"
+                  type="date"
+                  value={exp.endDate}
+                  onChange={(event) =>
+                    handleChange(exp.id, "endDate", event.target.value)
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Box>
+            </Box>
           ))}
 
           <Button variant="contained" onClick={addExperience}>

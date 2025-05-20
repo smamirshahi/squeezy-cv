@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 type WorkExperience = {
   id: number;
@@ -76,7 +77,9 @@ export function ExperienceForm() {
 
   return (
     <Accordion>
-      <AccordionSummary>Work Experience</AccordionSummary>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        Work Experience
+      </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {experiences.map((exp) => (
