@@ -12,7 +12,11 @@ export function TemplateButton({ printReference }: Props): JSX.Element {
   const dispatch = useDispatch();
 
   return (
-    <ButtonGroup variant="contained" aria-label="Basic button group">
+    <ButtonGroup
+      variant="contained"
+      aria-label="Basic button group"
+      sx={{ mb: "30px" }}
+    >
       <Button onClick={() => dispatch(setTemplate("one-column"))}>
         One Column
       </Button>

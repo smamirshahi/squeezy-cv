@@ -1,4 +1,4 @@
-import { Paper, TextField } from "@mui/material";
+import { Box, Paper, TextField } from "@mui/material";
 import { TemplateButton } from "../../components/template-button";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
 import { applicantSelector } from "../../store/applicant/applicant-slice";
@@ -9,6 +9,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { TextFieldWithIcon } from "./text-field-with-icon";
+import { ExperienceForm } from "./text-field-work-experience";
 
 interface Props {
   /** The reference to the content */
@@ -31,50 +32,68 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <TemplateButton printReference={contentRef} />
+      <Box display="flex" gap={2} mb={2}>
+        <TextField
+          id="outlined-basic"
+          label="Full Name"
+          variant="outlined"
+          value={applicant.nameJobTitle.name}
+          fullWidth
+        />
+        <TextField
+          id="outlined-basic"
+          label="Job Title"
+          variant="outlined"
+          value={applicant.nameJobTitle.currentJobTitle}
+          fullWidth
+        />
+      </Box>
+
+      <Box display="flex" gap={2} mb={2}>
+        <TextFieldWithIcon
+          icon={<AlternateEmailIcon />}
+          label="Email"
+          value={applicant.contactInformation.email}
+        />
+        <TextFieldWithIcon
+          icon={<SmartphoneIcon />}
+          label="Phone"
+          value={applicant.contactInformation.phoneNumber}
+        />
+        <TextFieldWithIcon
+          icon={<LinkedInIcon />}
+          label="LinkedInId"
+          value={applicant.contactInformation.linkedInId}
+        />
+      </Box>
+      <Box display="flex" gap={2} mb={2}>
+        <TextFieldWithIcon
+          icon={<GitHubIcon />}
+          label="Github"
+          value={applicant.contactInformation.gitHubId}
+        />
+        <TextFieldWithIcon
+          icon={<LocationOnIcon />}
+          label="location"
+          value={applicant.contactInformation.location}
+        />
+      </Box>
+
       <TextField
-        id="outlined-basic"
-        label="Full Name"
-        variant="outlined"
-        value={applicant.nameJobTitle.name}
-      />
-      <TextField
-        id="outlined-basic"
-        label="Job Title"
-        variant="outlined"
-        value={applicant.nameJobTitle.currentJobTitle}
-      />
-      <TextField
-        id="outlined-basic"
         label="Professional Summary"
         variant="outlined"
         multiline
         value={applicant.professionalSummary.summary}
+        fullWidth
+        sx={{
+          mt: "20px",
+          "& .MuiInputBase-input": {
+            resize: "vertical",
+          },
+        }}
       />
-      <TextFieldWithIcon
-        icon={<AlternateEmailIcon />}
-        label="Email"
-        value={applicant.contactInformation.email}
-      />
-      <TextFieldWithIcon
-        icon={<SmartphoneIcon />}
-        label="Phone"
-        value={applicant.contactInformation.phoneNumber}
-      />
-      <TextFieldWithIcon
-        icon={<LinkedInIcon />}
-        label="LinkedInId"
-        value={applicant.contactInformation.linkedInId}
-      />
-      <TextFieldWithIcon
-        icon={<GitHubIcon />}
-        label="Github"
-        value={applicant.contactInformation.gitHubId}
-      />
-      <TextFieldWithIcon
-        icon={<LocationOnIcon />}
-        label="location"
-        value={applicant.contactInformation.location}
-      />
+
+      <ExperienceForm />
     </Paper>
   );
 }
