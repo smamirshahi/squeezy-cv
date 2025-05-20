@@ -26,7 +26,10 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
         <LocationWithIcon place={experience.location} />
       </Grid>
       {experience.dissertationTitle && (
-        <BodyText text={experience.dissertationTitle} isBold={true} />
+        <BodyText
+          text={`Dissertation Title: ${experience.dissertationTitle}`}
+          isBold={true}
+        />
       )}
       {experience.bulletPoints && (
         <BulletPoints bulletPoints={experience.bulletPoints} />
