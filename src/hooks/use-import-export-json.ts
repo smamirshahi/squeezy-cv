@@ -1,33 +1,38 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { CVFile, CVFileSchema } from "../types/json-types";
+import { useAppDispatch, useAppSelector } from "../store/store-helper";
+import { cvDataSelector, setCvData } from "../store/applicant/applicant-slice";
 
 interface ReturnProps {
-  cvData?: CVFile["data"];
   handleExport: () => void;
   handleImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function useImportExportJson(): ReturnProps {
-  const [cvData, setCVData] = useState<CVFile["data"]>();
+  const dispatch = useAppDispatch();
+  const cvData = useAppSelector(cvDataSelector);
 
-  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImport = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const raw = JSON.parse(event.target?.result as string);
-        const parsed = CVFileSchema.check(raw);
-        setCVData(parsed.data);
-        alert("CV imported successfully!");
-      } catch (err) {
-        console.error(err);
-        alert("Invalid file format.");
-      }
-    };
-    reader.readAsText(file);
-  }, []);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const raw = JSON.parse(event.target?.result as string);
+          const parsed = CVFileSchema.check(raw);
+          dispatch(setCvData(parsed.data));
+          alert("CV imported successfully!");
+        } catch (err) {
+          console.error(err);
+          alert("Invalid file format.");
+        }
+      };
+      reader.readAsText(file);
+    },
+    [dispatch]
+  );
 
   const handleExport = useCallback(() => {
     if (!cvData) {
@@ -53,7 +58,6 @@ export function useImportExportJson(): ReturnProps {
   console.log(cvData);
 
   return {
-    cvData,
     handleExport,
     handleImport,
   };

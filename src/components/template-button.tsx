@@ -27,7 +27,7 @@ const VisuallyHiddenInput = styled("input")({
 export function TemplateButton({ printReference }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const dispatch = useDispatch();
-  const { cvData, handleExport, handleImport } = useImportExportJson();
+  const { handleExport, handleImport } = useImportExportJson();
 
   return (
     <ButtonGroup

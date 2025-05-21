@@ -1,4 +1,4 @@
-import { Object, String, Number, Array, Optional, Static } from "runtypes";
+import { Object, String, Number, Array, Static } from "runtypes";
 
 const PersonalInfoSchema = Object({
   name: String,
@@ -7,24 +7,19 @@ const PersonalInfoSchema = Object({
 
 const ContactInfoSchema = Object({
   email: String,
-}).and(
-  Object({
-    phone: Optional(String),
-    location: Optional(String),
-    linkedInId: Optional(String),
-    gitHubId: Optional(String),
-  })
-);
-
-const ProfessionalSummarySchema = Object({
-  summary: String,
+  phone: String,
+  location: String,
+  linkedInId: String,
+  gitHubId: String,
 });
+
+const ProfessionalSummarySchema = String;
 
 const ExperienceSchema = Object({
   jobTitle: String,
   company: String,
-  location: String.optional(),
-  startDate: String, // ISO date
+  location: String,
+  startDate: String,
   endDate: String.optional(),
   bulletPoints: Array(String),
 });
@@ -32,10 +27,10 @@ const ExperienceSchema = Object({
 const EducationSchema = Object({
   degree: String,
   institute: String,
-  location: String.optional(),
+  location: String,
   startDate: String,
   endDate: String.optional(),
-  dissertationTitle: String.optional(),
+  dissertationTitle: String,
 });
 
 const SkillItemSchema = Object({

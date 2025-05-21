@@ -3,14 +3,14 @@ import { ResumeTemplates } from "../types/custom-types";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
 import { useSelector } from "react-redux";
-import { applicantSelector } from "../store/applicant/applicant-slice";
+import { cvDataSelector } from "../store/applicant/applicant-slice";
 
 interface Props {
   template: ResumeTemplates;
 }
 
 export function TemplateSelection({ template }: Props): JSX.Element {
-  const applicant = useSelector(applicantSelector);
+  const applicant = useSelector(cvDataSelector);
 
   const content = useMemo(() => {
     switch (template) {
