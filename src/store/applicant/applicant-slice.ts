@@ -49,6 +49,26 @@ const applicantSlice = createSlice({
     ) {
       state.data.personalInfo[action.payload.field] = action.payload.value;
     },
+
+    updateContactInfo(
+      state,
+      action: PayloadAction<{
+        field: keyof CVFile["data"]["contactInfo"];
+        value: string;
+      }>
+    ) {
+      state.data.contactInfo[action.payload.field] = action.payload.value;
+    },
+
+    updateProfessionalSummary(
+      state,
+      action: PayloadAction<{
+        value: string;
+      }>
+    ) {
+      state.data.professionalSummary = action.payload.value;
+    },
+
     setTemplate(state, action: PayloadAction<CVFile["style"]["template"]>) {
       state.style.template = action.payload;
     },
@@ -63,7 +83,13 @@ const applicantSlice = createSlice({
 
 export const { versionSelector, cvDataSelector, styleSelector } =
   applicantSlice.selectors;
-export const { setCvData, setTemplate, resetApplicantState } =
-  applicantSlice.actions;
+export const {
+  setCvData,
+  setTemplate,
+  updatePersonalInfo,
+  updateContactInfo,
+  updateProfessionalSummary,
+  resetApplicantState,
+} = applicantSlice.actions;
 
 export const applicantReducer = applicantSlice.reducer;

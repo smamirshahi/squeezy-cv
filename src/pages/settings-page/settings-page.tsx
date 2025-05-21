@@ -1,7 +1,12 @@
 import { Box, Paper, TextField } from "@mui/material";
 import { TemplateButton } from "../../components/template-button";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
-import { cvDataSelector } from "../../store/applicant/applicant-slice";
+import {
+  cvDataSelector,
+  updateContactInfo,
+  updatePersonalInfo,
+  updateProfessionalSummary,
+} from "../../store/applicant/applicant-slice";
 import { useSelector } from "react-redux";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
@@ -12,6 +17,7 @@ import { TextFieldWithIcon } from "./text-field-with-icon";
 import { ExperienceForm } from "./text-field-work-experience";
 import { TextFieldEducation } from "./text-field-education";
 import { TextFieldSkills } from "./text-field-skills";
+import { useAppDispatch } from "../../store/store-helper";
 
 interface Props {
   /** The reference to the content */
@@ -21,6 +27,8 @@ interface Props {
 export function SettingsPage({ contentRef }: Props): JSX.Element {
   const { personalInfo, contactInfo, professionalSummary } =
     useSelector(cvDataSelector);
+  const dispatch = useAppDispatch();
+
   return (
     <Paper
       elevation={3}
@@ -41,6 +49,11 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           label="Full Name"
           variant="outlined"
           value={personalInfo.name}
+          onChange={(event) =>
+            dispatch(
+              updatePersonalInfo({ field: "name", value: event.target.value })
+            )
+          }
           fullWidth
         />
         <TextField
@@ -48,6 +61,14 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           label="Job Title"
           variant="outlined"
           value={personalInfo.jobTitle}
+          onChange={(event) =>
+            dispatch(
+              updatePersonalInfo({
+                field: "jobTitle",
+                value: event.target.value,
+              })
+            )
+          }
           fullWidth
         />
       </Box>
@@ -57,16 +78,40 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           icon={<AlternateEmailIcon />}
           label="Email"
           value={contactInfo.email}
+          onChange={(event) =>
+            dispatch(
+              updateContactInfo({
+                field: "email",
+                value: event.target.value,
+              })
+            )
+          }
         />
         <TextFieldWithIcon
           icon={<SmartphoneIcon />}
           label="Phone"
           value={contactInfo.phone}
+          onChange={(event) =>
+            dispatch(
+              updateContactInfo({
+                field: "phone",
+                value: event.target.value,
+              })
+            )
+          }
         />
         <TextFieldWithIcon
           icon={<LinkedInIcon />}
           label="LinkedInId"
           value={contactInfo.linkedInId}
+          onChange={(event) =>
+            dispatch(
+              updateContactInfo({
+                field: "linkedInId",
+                value: event.target.value,
+              })
+            )
+          }
         />
       </Box>
       <Box display="flex" gap={2} mb={2}>
@@ -74,11 +119,27 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           icon={<GitHubIcon />}
           label="Github"
           value={contactInfo.gitHubId}
+          onChange={(event) =>
+            dispatch(
+              updateContactInfo({
+                field: "gitHubId",
+                value: event.target.value,
+              })
+            )
+          }
         />
         <TextFieldWithIcon
           icon={<LocationOnIcon />}
           label="location"
           value={contactInfo.location}
+          onChange={(event) =>
+            dispatch(
+              updateContactInfo({
+                field: "location",
+                value: event.target.value,
+              })
+            )
+          }
         />
       </Box>
 
@@ -94,6 +155,9 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
             resize: "vertical",
           },
         }}
+        onChange={(event) =>
+          dispatch(updateProfessionalSummary({ value: event.target.value }))
+        }
       />
 
       <ExperienceForm />

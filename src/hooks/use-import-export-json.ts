@@ -60,8 +60,6 @@ export function useImportExportJson(): ReturnProps {
     URL.revokeObjectURL(url);
   }, [cvData]);
 
-  console.log(cvData);
-
   return {
     handleExport,
     handleImport,
