@@ -2,7 +2,7 @@ import { Box, SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
-import { ApplicationStyle } from "../common/custom-types";
+import { ApplicationStyle } from "../types/custom-types";
 import { customColors } from "../common/custom-styles";
 
 interface Props {

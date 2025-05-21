@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { ResumeSectionProps } from "../../common/custom-types";
+import { ResumeSectionProps } from "../../types/custom-types";
 import { Applicant } from "../../applicant";
 
 /**

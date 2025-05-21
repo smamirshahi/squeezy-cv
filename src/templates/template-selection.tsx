@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ResumeTemplates } from "../common/custom-types";
+import { ResumeTemplates } from "../types/custom-types";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
 import { useSelector } from "react-redux";

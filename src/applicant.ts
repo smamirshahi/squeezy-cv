@@ -1,4 +1,4 @@
-import { ResumeSectionProps } from "./common/custom-types";
+import { ResumeSectionProps } from "./types/custom-types";
 
 export const Applicant: ResumeSectionProps = {
   style: {

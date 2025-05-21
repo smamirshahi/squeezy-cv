@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { ResumeTemplates } from "../../common/custom-types";
+import { ResumeTemplates } from "../../types/custom-types";
 
 /**
  * State of the current UI

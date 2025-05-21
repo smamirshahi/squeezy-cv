@@ -1,6 +1,6 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid } from "@mui/material";
-import { ExperienceProps } from "../../common/custom-types";
+import { ExperienceProps } from "../../types/custom-types";
 import { DatePeriod } from "../../components/date-period";
 import { BulletPoints } from "../../components/bullet-points";
 import { LocationWithIcon } from "../../components/location-with-icon";
