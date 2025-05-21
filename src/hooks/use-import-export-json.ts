@@ -1,14 +1,33 @@
 import { useCallback, useState } from "react";
-import { CVData, CVFile, CVFileSchema } from "../types/json-types";
+import { CVFile, CVFileSchema } from "../types/json-types";
 
 interface ReturnProps {
-  cvData?: CVData;
+  cvData?: CVFile["data"];
   handleExport: () => void;
   handleImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function useImportExportJson(): ReturnProps {
-  const [cvData, setCVData] = useState<CVData>();
+  const [cvData, setCVData] = useState<CVFile["data"]>();
+
+  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const raw = JSON.parse(event.target?.result as string);
+        const parsed = CVFileSchema.check(raw);
+        setCVData(parsed.data);
+        alert("CV imported successfully!");
+      } catch (err) {
+        console.error(err);
+        alert("Invalid file format.");
+      }
+    };
+    reader.readAsText(file);
+  }, []);
 
   const handleExport = useCallback(() => {
     if (!cvData) {
@@ -30,25 +49,6 @@ export function useImportExportJson(): ReturnProps {
     a.click();
     URL.revokeObjectURL(url);
   }, [cvData]);
-
-  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const raw = JSON.parse(event.target?.result as string);
-        const parsed = CVFileSchema.check(raw); // ✅ Validated!
-        setCVData(parsed.data);
-        alert("CV imported successfully!");
-      } catch (err) {
-        console.error(err);
-        alert("Invalid file format.");
-      }
-    };
-    reader.readAsText(file);
-  }, []);
 
   console.log(cvData);
 

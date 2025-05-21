@@ -63,4 +63,3 @@ export const CVFileSchema = Object({
 });
 
 export type CVFile = Static<typeof CVFileSchema>;
-export type CVData = Static<typeof CVSchema>;
