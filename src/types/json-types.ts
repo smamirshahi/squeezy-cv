@@ -56,8 +56,8 @@ const CVSchema = Object({
   personalInfo: PersonalInfoSchema,
   contactInfo: ContactInfoSchema,
   professionalSummary: ProfessionalSummarySchema,
-  experience: Array(ExperienceSchema),
-  education: Array(EducationSchema),
+  experiences: Array(ExperienceSchema),
+  educations: Array(EducationSchema),
   skills: Array(SkillCategorySchema),
 });
 

@@ -1,6 +1,4 @@
-import { ResumeSectionProps } from "./types/custom-types";
-
-export const Applicant: ResumeSectionProps = {
+export const Applicant = {
   style: {
     skillIndicatorType: "star",
     shouldShowFullContactLinks: false,

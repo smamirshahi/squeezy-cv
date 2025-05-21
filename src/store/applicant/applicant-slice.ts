@@ -25,8 +25,8 @@ export const initialState: ApplicantState = {
       gitHubId: "",
     },
     professionalSummary: "",
-    experience: [],
-    education: [],
+    experiences: [],
+    educations: [],
     skills: [],
   },
   style: {
