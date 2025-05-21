@@ -41,6 +41,9 @@ importers:
       react-to-print:
         specifier: ^3.1.0
         version: 3.1.0(react@19.1.0)
+      zod:
+        specifier: ^3.25.16
+        version: 3.25.16
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -1748,8 +1751,8 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.24.3:
-    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
+  zod@3.25.16:
+    resolution: {integrity: sha512-3lOav31WLa1MstEvkM0QlcsFjKmJ2TI9IFYlIVpLE3upguhaeiRfPOzqqtisS/Hetk4ri2fLLC3OtW15lS5jxQ==}
 
 snapshots:
 
@@ -2112,8 +2115,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.24.3
-      zod-to-json-schema: 3.24.5(zod@3.24.3)
+      zod: 3.25.16
+      zod-to-json-schema: 3.24.5(zod@3.25.16)
     transitivePeerDependencies:
       - supports-color
 
@@ -2713,7 +2716,7 @@ snapshots:
       minimatch: 3.1.2
       natural-compare: 1.4.0
       optionator: 0.9.4
-      zod: 3.24.3
+      zod: 3.25.16
     transitivePeerDependencies:
       - supports-color
 
@@ -3374,8 +3377,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-to-json-schema@3.24.5(zod@3.24.3):
+  zod-to-json-schema@3.24.5(zod@3.25.16):
     dependencies:
-      zod: 3.24.3
+      zod: 3.25.16
 
-  zod@3.24.3: {}
+  zod@3.25.16: {}
