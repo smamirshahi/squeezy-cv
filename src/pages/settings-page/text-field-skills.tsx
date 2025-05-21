@@ -6,20 +6,23 @@ import {
   AccordionSummary,
   AccordionDetails,
   Accordion,
+  Rating,
 } from "@mui/material";
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 
+type SkillItem = {
+  id: number;
+  name: string;
+  rate: number;
+};
+
 type Skill = {
   id: number;
   category: string;
-  items: {
-    id: number;
-    name: string;
-    rate: number;
-  }[];
+  items: SkillItem[];
 };
 
 // type Skill = {
@@ -41,10 +44,11 @@ export function TextFieldSkills() {
     );
   }
 
-  function handleSkillItemChange(
+  function handleSkillItemChange<K extends keyof SkillItem>(
     id: number,
     index: number,
-    value: string
+    key: K,
+    value: SkillItem[K]
   ): void {
     setSkills((prev) =>
       prev.map((skill) =>
@@ -52,7 +56,7 @@ export function TextFieldSkills() {
           ? {
               ...skill,
               items: skill.items.map((item, i) =>
-                i === index ? { ...item, name: value } : item
+                i === index ? { ...item, [key]: value } : item
               ),
             }
           : skill
@@ -125,9 +129,26 @@ export function TextFieldSkills() {
                       label={`Skill Item ${idx + 1}`}
                       value={skillItem.name}
                       onChange={(event) =>
-                        handleSkillItemChange(skill.id, idx, event.target.value)
+                        handleSkillItemChange(
+                          skill.id,
+                          idx,
+                          "name",
+                          event.target.value
+                        )
                       }
                       fullWidth
+                    />
+                    <Rating
+                      value={skillItem.rate}
+                      onChange={(_, newValue) => {
+                        handleSkillItemChange(
+                          skill.id,
+                          idx,
+                          "rate",
+                          newValue ?? 0
+                        );
+                      }}
+                      precision={0.5}
                     />
                     <IconButton
                       onClick={() => {
