@@ -4,14 +4,10 @@ import { CVFile } from "../../types/json-types";
 /**
  * State of the current Applicant
  */
-export type ApplicantState = {
-  data: CVFile["data"];
-  style: CVFile["style"];
-};
+export type ApplicantState = CVFile;
 
-// TODO: Add versioning in slice
-
-export const initialState: ApplicantState = {
+export const initialState: CVFile = {
+  version: "1.0",
   data: {
     personalInfo: {
       name: "",
@@ -51,19 +47,23 @@ const applicantSlice = createSlice({
         value: string;
       }>
     ) {
-      if (state.data) {
-        state.data.personalInfo[action.payload.field] = action.payload.value;
-      }
+      state.data.personalInfo[action.payload.field] = action.payload.value;
+    },
+    setTemplate(state, action: PayloadAction<CVFile["style"]["template"]>) {
+      state.style.template = action.payload;
     },
     resetApplicantState: () => initialState,
   },
   selectors: {
+    versionSelector: (state: ApplicantState) => state.version,
     cvDataSelector: (state: ApplicantState) => state.data,
     styleSelector: (state: ApplicantState) => state.style,
   },
 });
 
-export const { cvDataSelector, styleSelector } = applicantSlice.selectors;
-export const { setCvData, resetApplicantState } = applicantSlice.actions;
+export const { versionSelector, cvDataSelector, styleSelector } =
+  applicantSlice.selectors;
+export const { setCvData, setTemplate, resetApplicantState } =
+  applicantSlice.actions;
 
 export const applicantReducer = applicantSlice.reducer;

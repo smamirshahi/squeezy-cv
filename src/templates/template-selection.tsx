@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import { ResumeTemplates } from "../types/custom-types";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
 import { useSelector } from "react-redux";
 import { cvDataSelector } from "../store/applicant/applicant-slice";
+import { CVFile } from "../types/json-types";
 
 interface Props {
-  template: ResumeTemplates;
+  template: CVFile["style"]["template"];
 }
 
 export function TemplateSelection({ template }: Props): JSX.Element {

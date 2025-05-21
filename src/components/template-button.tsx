@@ -1,5 +1,4 @@
 import { Button, ButtonGroup } from "@mui/material";
-import { setTemplate } from "../store/ui/ui-slice";
 import { useDispatch } from "react-redux";
 import { useReactToPrint } from "react-to-print";
 import { useImportExportJson } from "../hooks/use-import-export-json";
@@ -7,6 +6,7 @@ import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
+import { setTemplate } from "../store/applicant/applicant-slice";
 
 interface Props {
   printReference: React.RefObject<HTMLDivElement | null>;

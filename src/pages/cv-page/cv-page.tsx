@@ -2,7 +2,7 @@ import { Paper } from "@mui/material";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
 import { TemplateSelection } from "../../templates/template-selection";
 import { useAppSelector } from "../../store/store-helper";
-import { templateSelector } from "../../store/ui/ui-slice";
+import { styleSelector } from "../../store/applicant/applicant-slice";
 
 interface Props {
   /** The reference to the content */
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function CVPage({ contentRef }: Props): JSX.Element {
-  const template = useAppSelector(templateSelector);
+  const { template } = useAppSelector(styleSelector);
 
   return (
     <Paper

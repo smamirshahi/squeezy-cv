@@ -5,7 +5,6 @@ import {
 } from "../common/custom-typography";
 import { Grid } from "@mui/material";
 import { LevelIndicator } from "../components/level-indicator";
-import { templateSelector } from "../store/ui/ui-slice";
 import { useAppSelector } from "../store/store-helper";
 import {
   cvDataSelector,
@@ -15,7 +14,7 @@ import {
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */
 export function Skills(): JSX.Element {
-  const template = useAppSelector(templateSelector);
+  const { template } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
   const { ratingIcon } = useAppSelector(styleSelector);
 
