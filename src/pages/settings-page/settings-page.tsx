@@ -11,6 +11,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { TextFieldWithIcon } from "./text-field-with-icon";
 import { ExperienceForm } from "./text-field-work-experience";
 import { TextFieldEducation } from "./text-field-education";
+import { TextFieldSkills } from "./text-field-skills";
 
 interface Props {
   /** The reference to the content */
@@ -96,6 +97,7 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
 
       <ExperienceForm />
       <TextFieldEducation />
+      <TextFieldSkills />
     </Paper>
   );
 }
