@@ -28,7 +28,7 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         minHeight: `${A4_HEIGHT_MM}mm`,
         padding: "20mm",
         boxSizing: "border-box",
-        margin: "auto",
+        mx: "auto",
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
       }}

@@ -21,19 +21,19 @@ export function CVPage({ contentRef }: Props): JSX.Element {
         minHeight: `${A4_HEIGHT_MM}mm`,
         padding: "20mm",
         boxSizing: "border-box",
-        margin: "auto",
+        mx: "auto",
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      <Divider
+      {/* <Divider
         sx={{
           position: "absolute",
           top: `${A4_HEIGHT_MM}mm`,
           width: `${A4_WIDTH_MM}mm`,
           border: "1px solid red",
         }}
-      />
+      /> */}
       {template !== null && <TemplateSelection template={template} />}
     </Paper>
   );
