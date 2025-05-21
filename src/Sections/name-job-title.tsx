@@ -13,7 +13,7 @@ export function NameJobTitle(): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <ResumeTitle text={nameJobTitle.name} />
-      <SubsectionText text={nameJobTitle.currentJobTitle} />
+      <SubsectionText text={nameJobTitle.jobTitle} />
     </Grid>
   );
 }

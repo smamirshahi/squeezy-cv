@@ -19,7 +19,7 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "10px" }}
     >
-      <SubsectionText text={experience.title} isBold={true} />
+      <SubsectionText text={experience.jobTitle} isBold={true} />
       <BodyText text={experience.institute} />
       <Grid container direction="row" alignItems="center">
         <DatePeriod datePeriod={experience.datePeriod} />

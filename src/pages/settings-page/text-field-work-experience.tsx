@@ -19,7 +19,7 @@ type WorkExperience = {
   location: string;
   startDate: string;
   endDate: string;
-  description: string[];
+  bulletPoints: string[];
 };
 
 export function ExperienceForm() {
@@ -37,7 +37,7 @@ export function ExperienceForm() {
     );
   }
 
-  function handleDescriptionChange(
+  function handleBulletPointsChange(
     id: number,
     index: number,
     value: string
@@ -47,7 +47,7 @@ export function ExperienceForm() {
         experience.id === id
           ? {
               ...experience,
-              description: experience.description.map((desc, i) =>
+              bulletPoints: experience.bulletPoints.map((desc, i) =>
                 i === index ? value : desc
               ),
             }
@@ -66,7 +66,7 @@ export function ExperienceForm() {
         location: "",
         startDate: "",
         endDate: "",
-        description: [""],
+        bulletPoints: [""],
       },
     ]);
   }
@@ -139,7 +139,6 @@ export function ExperienceForm() {
                   fullWidth
                 />
               </Box>
-              {/* Bullet Points for Description */}
               <Box
                 sx={{
                   display: "flex",
@@ -148,7 +147,7 @@ export function ExperienceForm() {
                   mb: 2,
                 }}
               >
-                {exp.description.map((point, idx) => (
+                {exp.bulletPoints.map((point, idx) => (
                   <Box
                     key={idx}
                     sx={{
@@ -161,7 +160,11 @@ export function ExperienceForm() {
                       label={`Bullet Point ${idx + 1}`}
                       value={point}
                       onChange={(event) =>
-                        handleDescriptionChange(exp.id, idx, event.target.value)
+                        handleBulletPointsChange(
+                          exp.id,
+                          idx,
+                          event.target.value
+                        )
                       }
                       fullWidth
                     />
@@ -172,7 +175,7 @@ export function ExperienceForm() {
                             experience.id === exp.id
                               ? {
                                   ...experience,
-                                  description: experience.description.filter(
+                                  bulletPoints: experience.bulletPoints.filter(
                                     (_, i) => i !== idx
                                   ),
                                 }
@@ -180,7 +183,7 @@ export function ExperienceForm() {
                           )
                         );
                       }}
-                      disabled={exp.description.length === 1}
+                      disabled={exp.bulletPoints.length === 1}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -194,7 +197,7 @@ export function ExperienceForm() {
                           experience.id === exp.id
                             ? {
                                 ...experience,
-                                description: [...experience.description, ""],
+                                bulletPoints: [...experience.bulletPoints, ""],
                               }
                             : experience
                         )

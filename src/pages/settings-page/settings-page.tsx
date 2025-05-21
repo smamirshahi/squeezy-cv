@@ -46,7 +46,7 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           id="outlined-basic"
           label="Job Title"
           variant="outlined"
-          value={applicant.nameJobTitle.currentJobTitle}
+          value={applicant.nameJobTitle.jobTitle}
           fullWidth
         />
       </Box>

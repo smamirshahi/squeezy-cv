@@ -7,7 +7,7 @@ export const Applicant: ResumeSectionProps = {
   },
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",
-    currentJobTitle: "Software Developer",
+    jobTitle: "Software Developer",
   },
 
   contactInformation: {
@@ -25,7 +25,7 @@ export const Applicant: ResumeSectionProps = {
 
   workExperiences: [
     {
-      title: "Software Developer",
+      jobTitle: "Software Developer",
       institute: "FARO Technologies",
       location: "Remote",
       datePeriod: { start: "2021-06-01" },
@@ -35,7 +35,7 @@ export const Applicant: ResumeSectionProps = {
       ],
     },
     {
-      title: "Junior Software Developer",
+      jobTitle: "Junior Software Developer",
       institute: "HoloBuilder Inc.",
       location: "Aachen, Germany",
       datePeriod: { start: "2018-12-01", end: "2021-05-31" },
@@ -48,7 +48,7 @@ export const Applicant: ResumeSectionProps = {
       ],
     },
     {
-      title: "Researcher",
+      jobTitle: "Researcher",
       institute: "MARUM-University of Bremen",
       location: "Bremen, Germany",
       datePeriod: { start: "2014-03-16", end: "2018.06.30" },
@@ -63,7 +63,7 @@ export const Applicant: ResumeSectionProps = {
 
   education: [
     {
-      title: "PhD, Earth Science",
+      jobTitle: "PhD, Earth Science",
       institute: "University of Bremen",
       location: "Bremen, Germany",
       datePeriod: { start: "2014-03-16", end: "2019-08-12" },
@@ -71,7 +71,7 @@ export const Applicant: ResumeSectionProps = {
         "Turbulent Suspension of Sediments in Shallow Shelf Seas",
     },
     {
-      title: "M.Sc., Civil and Environmental Engineering",
+      jobTitle: "M.Sc., Civil and Environmental Engineering",
       institute: "Amirkabir University of Technology",
       location: "Tehran, Iran",
       datePeriod: { start: "2010-09-22", end: "2013-02-13" },
@@ -79,7 +79,7 @@ export const Applicant: ResumeSectionProps = {
         "Experimental Study of Effect of Turbulence Intensity on Riprap Stability",
     },
     {
-      title: "B.Sc., Civil and Environmental Engineering",
+      jobTitle: "B.Sc., Civil and Environmental Engineering",
       institute: "Amirkabir University of Technology",
       location: "Tehran, Iran",
       datePeriod: { start: "2005-09-23", end: "2010-04-21" },

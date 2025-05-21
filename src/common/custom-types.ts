@@ -3,7 +3,7 @@ export interface PersonalInfoProps {
   name: string;
 
   /** The job title of the applicant */
-  currentJobTitle: string;
+  jobTitle: string;
 }
 
 export interface ContactInfoProps {
@@ -30,7 +30,7 @@ export interface ProfessionalSummaryProps {
 
 export interface ExperienceProps {
   /** The title of the job or the degree of education */
-  title: string;
+  jobTitle: string;
 
   /** The institute of the work/education subsection */
   institute: string;
