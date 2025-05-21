@@ -1,72 +1,73 @@
 import React, { useState } from "react";
-import { z } from "zod";
+import { Object, String, Number, Array, Optional, Static } from "runtypes";
 
-// --- Zod Schema ---
-const PersonalInfoSchema = z.object({
-  name: z.string(),
-  jobTitle: z.string(),
+const PersonalInfoSchema = Object({
+  name: String,
+  jobTitle: String,
 });
 
-const ContactInfoSchema = z.object({
-  email: z.string().email(),
-  phone: z.string().optional(),
-  location: z.string().optional(),
-  linkedInId: z.string().optional(),
-  gitHubId: z.string().optional(),
+const ContactInfoSchema = Object({
+  email: String,
+}).and(
+  Object({
+    phone: Optional(String),
+    location: Optional(String),
+    linkedInId: Optional(String),
+    gitHubId: Optional(String),
+  })
+);
+
+const ProfessionalSummarySchema = Object({
+  summary: String,
 });
 
-const ProfessionalSummarySchema = z.object({
-  summary: z.string(),
+const ExperienceSchema = Object({
+  jobTitle: String,
+  company: String,
+  location: String.optional(),
+  startDate: String, // ISO date
+  endDate: String.optional(),
+  bulletPoints: Array(String),
 });
 
-const ExperienceSchema = z.object({
-  jobTitle: z.string(),
-  company: z.string(),
-  location: z.string().optional(),
-  startDate: z.string(), // ISO date
-  endDate: z.string().optional(),
-  bulletPoints: z.array(z.string()),
+const EducationSchema = Object({
+  degree: String,
+  institute: String,
+  location: String.optional(),
+  startDate: String,
+  endDate: String.optional(),
+  dissertationTitle: String.optional(),
 });
 
-const EducationSchema = z.object({
-  degree: z.string(),
-  institute: z.string(),
-  location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  dissertationTitle: z.string().optional(),
+const SkillItemSchema = Object({
+  name: String,
+  rating: Number.withConstraint((n) => n >= 1 && n <= 10),
 });
 
-const SkillItemSchema = z.object({
-  name: z.string(),
-  rating: z.number().min(1).max(10),
+const SkillCategorySchema = Object({
+  category: String,
+  items: Array(SkillItemSchema),
 });
 
-const SkillCategorySchema = z.object({
-  category: z.string(),
-  items: z.array(SkillItemSchema),
-});
-
-const CVSchema = z.object({
+const CVSchema = Object({
   personalInfo: PersonalInfoSchema,
   contactInfo: ContactInfoSchema,
   professionalSummary: ProfessionalSummarySchema,
-  experience: z.array(ExperienceSchema),
-  education: z.array(EducationSchema),
-  skills: z.array(SkillCategorySchema),
+  experience: Array(ExperienceSchema),
+  education: Array(EducationSchema),
+  skills: Array(SkillCategorySchema),
 });
 
-const CVFileSchema = z.object({
-  version: z.string(),
+const CVFileSchema = Object({
+  version: String,
   data: CVSchema,
 });
 
-// --- Types from Zod ---
-type CVFile = z.infer<typeof CVFileSchema>;
-type CVData = z.infer<typeof CVSchema>;
+type CVFile = Static<typeof CVFileSchema>;
+type CVData = Static<typeof CVSchema>;
 
 // --- React Component ---
-export function CVStorageWithZod(): JSX.Element {
+export function CVStorageWithRunType(): JSX.Element {
   const [cvData, setCVData] = useState<CVData>({
     personalInfo: {
       name: "John Doe",
@@ -139,7 +140,7 @@ export function CVStorageWithZod(): JSX.Element {
     reader.onload = (event) => {
       try {
         const raw = JSON.parse(event.target?.result as string);
-        const parsed = CVFileSchema.parse(raw); // ✅ Validated!
+        const parsed = CVFileSchema.check(raw); // ✅ Validated!
         setCVData(parsed.data);
         alert("CV imported successfully!");
       } catch (err) {
@@ -152,7 +153,7 @@ export function CVStorageWithZod(): JSX.Element {
 
   return (
     <div>
-      <h2>CV Storage with Zod</h2>
+      <h2>CV Storage with Runtype</h2>
       <button onClick={handleExport}>Export CV to JSON</button>
       <input type="file" accept=".json" onChange={handleImport} />
       <pre>{JSON.stringify(cvData, null, 2)}</pre>

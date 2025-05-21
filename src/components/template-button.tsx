@@ -2,7 +2,7 @@ import { Button, ButtonGroup } from "@mui/material";
 import { setTemplate } from "../store/ui/ui-slice";
 import { useDispatch } from "react-redux";
 import { useReactToPrint } from "react-to-print";
-import { CVStorageWithZod } from "../pages/settings-page/json-importer";
+import { CVStorageWithRunType } from "../pages/settings-page/json-importer";
 
 interface Props {
   printReference: React.RefObject<HTMLDivElement | null>;
@@ -27,7 +27,7 @@ export function TemplateButton({ printReference }: Props): JSX.Element {
       <Button onClick={() => onPrintClicked()}>Print</Button>
       {/* <Button onClick={() => onPrintClicked()}>Upload JSON</Button> */}
       {/* <Button onClick={() => onPrintClicked()}>Save JSON</Button> */}
-      <CVStorageWithZod />
+      <CVStorageWithRunType />
       template
     </ButtonGroup>
   );
