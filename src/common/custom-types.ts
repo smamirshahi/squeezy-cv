@@ -1,4 +1,4 @@
-export interface NameJobTitleProps {
+export interface PersonalInfoProps {
   /** The name of the applicant */
   name: string;
 
@@ -6,18 +6,15 @@ export interface NameJobTitleProps {
   currentJobTitle: string;
 }
 
-export interface ContactInformationProps {
+export interface ContactInfoProps {
   /** The email of the applicant */
   email: string;
 
   /** The phone number of the applicant */
-  phoneNumber: string;
+  phoneNumber?: string;
 
   /** The location of the applicant */
   location?: string;
-
-  /** Whether to show the complete link for the social media or not */
-  shouldShowCompleteLink: boolean;
 
   /** The LinkedIn ID of the applicant */
   linkedInId?: string;
@@ -53,23 +50,25 @@ export interface ExperienceProps {
 
 export interface SkillWithLevelProps {
   /** The name of the skill */
-  mainSkillName: string;
+  category: string;
   /** The name of the subSkill */
-  subSkill: {
+  item: {
     /** The name of the subSkill */
     name: string;
     /** The percentage of the subSkill */
-    percentage: number;
+    rate: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
   }[];
 }
 
 export interface ApplicationStyle {
   skillIndicatorType: "star" | "circle";
+  /** Whether to show the complete link for the social media or not */
+  shouldShowCompleteLink?: boolean;
 }
 
 export interface ResumeSectionProps {
-  nameJobTitle: NameJobTitleProps;
-  contactInformation: ContactInformationProps;
+  nameJobTitle: PersonalInfoProps;
+  contactInformation: ContactInfoProps;
   professionalSummary: ProfessionalSummaryProps;
   workExperiences: ExperienceProps[];
   education: ExperienceProps[];

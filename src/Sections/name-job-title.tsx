@@ -1,13 +1,10 @@
 import { Grid } from "@mui/material";
 import { ResumeTitle, SubsectionText } from "../common/custom-typography";
-import { NameJobTitleProps } from "../common/custom-types";
+import { useSelector } from "react-redux";
+import { applicantSelector } from "../store/applicant/applicant-slice";
 
-interface Props {
-  /** Name and job title */
-  nameJobTitle: NameJobTitleProps;
-}
-
-export function NameJobTitle({ nameJobTitle }: Props): JSX.Element {
+export function NameJobTitle(): JSX.Element {
+  const { nameJobTitle } = useSelector(applicantSelector);
   return (
     <Grid
       container

@@ -1,4 +1,4 @@
-import { Divider, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
 import { TemplateSelection } from "../../templates/template-selection";
 import { useAppSelector } from "../../store/store-helper";

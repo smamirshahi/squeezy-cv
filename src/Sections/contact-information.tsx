@@ -4,16 +4,13 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid } from "@mui/material";
 import { IconWithText } from "../common/icon-with-text";
-import { ContactInformationProps } from "../common/custom-types";
 import { LocationWithIcon } from "../components/location-with-icon";
-
-interface Props {
-  /** data for contact information */
-  contactInformation: ContactInformationProps;
-}
+import { useAppSelector } from "../store/store-helper";
+import { applicantSelector } from "../store/applicant/applicant-slice";
 
 /** Contact Information (details) */
-export function ContactInformation({ contactInformation }: Props): JSX.Element {
+export function ContactInformation(): JSX.Element {
+  const { contactInformation, style } = useAppSelector(applicantSelector);
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>
       {contactInformation.email && (
@@ -36,7 +33,7 @@ export function ContactInformation({ contactInformation }: Props): JSX.Element {
         <IconWithText
           icon={LinkedInIcon}
           text={
-            contactInformation.shouldShowCompleteLink
+            style.shouldShowCompleteLink
               ? `https://www.linkedin.com/in/${contactInformation.linkedInId}`
               : contactInformation.linkedInId
           }
@@ -46,7 +43,7 @@ export function ContactInformation({ contactInformation }: Props): JSX.Element {
         <IconWithText
           icon={GitHubIcon}
           text={
-            contactInformation.shouldShowCompleteLink
+            style.shouldShowCompleteLink
               ? `https://github.com/${contactInformation.gitHubId}`
               : contactInformation.gitHubId
           }

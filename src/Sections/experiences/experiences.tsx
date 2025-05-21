@@ -1,18 +1,21 @@
 import { Grid } from "@mui/material";
 import { SectionTitle } from "../../common/custom-typography";
-import { ExperienceProps } from "../../common/custom-types";
 import { ExperiencesSubsection } from "./experiences-subsection";
+import { applicantSelector } from "../../store/applicant/applicant-slice";
+import { useAppSelector } from "../../store/store-helper";
 
 interface Props {
   /** The title of the section */
-  sectionTitle: string;
-
-  /** data for experiences */
-  experiences: ExperienceProps[];
+  sectionTitle: "Education" | "Work Experience";
 }
 
 /** Renders the whole experiences part */
-export function Experiences({ sectionTitle, experiences }: Props): JSX.Element {
+export function Experiences({ sectionTitle }: Props): JSX.Element {
+  const { workExperiences, education } = useAppSelector(applicantSelector);
+
+  const content =
+    sectionTitle === "Work Experience" ? workExperiences : education;
+
   return (
     <Grid
       container
@@ -21,7 +24,7 @@ export function Experiences({ sectionTitle, experiences }: Props): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <SectionTitle text={sectionTitle} />
-      {experiences.map((experience, index) => (
+      {content.map((experience, index) => (
         <ExperiencesSubsection key={index} experience={experience} />
       ))}
     </Grid>

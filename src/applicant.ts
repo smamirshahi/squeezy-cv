@@ -3,6 +3,7 @@ import { ResumeSectionProps } from "./common/custom-types";
 export const Applicant: ResumeSectionProps = {
   style: {
     skillIndicatorType: "star",
+    shouldShowCompleteLink: false,
   },
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",
@@ -13,7 +14,6 @@ export const Applicant: ResumeSectionProps = {
     email: "smamirshahi@gmail.com",
     phoneNumber: "(+49) 1577 1531 797",
     location: "Koblenz, Germany",
-    shouldShowCompleteLink: false,
     linkedInId: "mohammadamirshahi",
     gitHubId: "smamirshahi",
   },
@@ -88,20 +88,20 @@ export const Applicant: ResumeSectionProps = {
 
   skills: [
     {
-      mainSkillName: "Language",
-      subSkill: [
-        { name: "English", percentage: 90 },
-        { name: "German", percentage: 50 },
+      category: "Language",
+      item: [
+        { name: "English", rate: 9 },
+        { name: "German", rate: 5 },
       ],
     },
     {
-      mainSkillName: "Technical Skills",
-      subSkill: [
-        { name: "React", percentage: 80 },
-        { name: "Backbone", percentage: 70 },
-        { name: "Vue", percentage: 60 },
-        { name: "Python", percentage: 75 },
-        { name: "C++", percentage: 65 },
+      category: "Technical Skills",
+      item: [
+        { name: "React", rate: 8 },
+        { name: "Backbone", rate: 7 },
+        { name: "Vue", rate: 6 },
+        { name: "Python", rate: 7 },
+        { name: "C++", rate: 6 },
       ],
     },
   ],
