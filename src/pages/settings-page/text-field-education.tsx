@@ -22,22 +22,22 @@ type Education = {
 };
 
 export function TextFieldEducation() {
-  const [experiences, setExperiences] = useState<Education[]>([]);
+  const [degrees, setDegrees] = useState<Education[]>([]);
 
   function handleChange<K extends keyof Education>(
     id: number,
     key: K,
     value: Education[K]
   ): void {
-    setExperiences((prev) =>
-      prev.map((experience) =>
-        experience.id === id ? { ...experience, [key]: value } : experience
+    setDegrees((prev) =>
+      prev.map((degree) =>
+        degree.id === id ? { ...degree, [key]: value } : degree
       )
     );
   }
 
-  function addExperience(): void {
-    setExperiences((prev) => [
+  function addDegree(): void {
+    setDegrees((prev) => [
       ...prev,
       {
         id: Date.now(),
@@ -51,8 +51,8 @@ export function TextFieldEducation() {
     ]);
   }
 
-  function removeExperience(id: number): void {
-    setExperiences((prev) => prev.filter((exp) => exp.id !== id));
+  function removeDegree(id: number): void {
+    setDegrees((prev) => prev.filter((exp) => exp.id !== id));
   }
 
   return (
@@ -62,7 +62,7 @@ export function TextFieldEducation() {
       </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {experiences.map((exp) => (
+          {degrees.map((exp) => (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
@@ -73,7 +73,7 @@ export function TextFieldEducation() {
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeExperience(exp.id)}>
+                <IconButton onClick={() => removeDegree(exp.id)}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -122,8 +122,8 @@ export function TextFieldEducation() {
             </Box>
           ))}
 
-          <Button variant="contained" onClick={addExperience}>
-            Add Work Experience
+          <Button variant="contained" onClick={addDegree}>
+            Add Education
           </Button>
         </Box>
       </AccordionDetails>
