@@ -1,10 +1,10 @@
 import { Grid } from "@mui/material";
 import { BodyText, SectionTitle } from "../common/custom-typography";
 import { useAppSelector } from "../store/store-helper";
-import { applicantSelector } from "../store/applicant/applicant-slice";
+import { cvDataSelector } from "../store/applicant/applicant-slice";
 
 export function ProfessionalSummary(): JSX.Element {
-  const { professionalSummary } = useAppSelector(applicantSelector);
+  const { professionalSummary } = useAppSelector(cvDataSelector);
   return (
     <Grid
       container
@@ -13,7 +13,7 @@ export function ProfessionalSummary(): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <SectionTitle text="Professional Summary" />
-      <BodyText text={professionalSummary.summary} />
+      <BodyText text={professionalSummary} />
     </Grid>
   );
 }

@@ -1,4 +1,4 @@
-export interface PersonalInfoProps {
+interface PersonalInfoProps {
   /** The name of the applicant */
   name: string;
 
@@ -6,7 +6,7 @@ export interface PersonalInfoProps {
   jobTitle: string;
 }
 
-export interface ContactInfoProps {
+interface ContactInfoProps {
   /** The email of the applicant */
   email: string;
 
@@ -23,7 +23,7 @@ export interface ContactInfoProps {
   gitHubId?: string;
 }
 
-export interface ProfessionalSummaryProps {
+interface ProfessionalSummaryProps {
   /** The professional summary of the applicant */
   summary: string;
 }
@@ -48,7 +48,7 @@ export interface ExperienceProps {
   bulletPoints?: string[];
 }
 
-export interface SkillWithLevelProps {
+interface SkillWithLevelProps {
   /** The name of the skill */
   category: string;
   /** The name of the subSkill */
@@ -63,7 +63,7 @@ export interface SkillWithLevelProps {
 export interface ApplicationStyle {
   skillIndicatorType: "star" | "circle";
   /** Whether to show the complete link for the social media or not */
-  shouldShowCompleteLink?: boolean;
+  shouldShowFullContactLinks?: boolean;
 }
 
 export interface ResumeSectionProps {

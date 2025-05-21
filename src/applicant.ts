@@ -3,7 +3,7 @@ import { ResumeSectionProps } from "./types/custom-types";
 export const Applicant: ResumeSectionProps = {
   style: {
     skillIndicatorType: "star",
-    shouldShowCompleteLink: false,
+    shouldShowFullContactLinks: false,
   },
   nameJobTitle: {
     name: "Dr. Mohammad Amirshahi",

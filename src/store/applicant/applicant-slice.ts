@@ -5,13 +5,14 @@ import { CVFile } from "../../types/json-types";
  * State of the current Applicant
  */
 export type ApplicantState = {
-  cvData: CVFile["data"];
+  data: CVFile["data"];
+  style: CVFile["style"];
 };
 
 // TODO: Add versioning in slice
 
 export const initialState: ApplicantState = {
-  cvData: {
+  data: {
     personalInfo: {
       name: "",
       jobTitle: "",
@@ -24,18 +25,14 @@ export const initialState: ApplicantState = {
       gitHubId: "",
     },
     professionalSummary: "",
-    experience: [
-      {
-        jobTitle: "",
-        company: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        bulletPoints: [],
-      },
-    ],
+    experience: [],
     education: [],
     skills: [],
+  },
+  style: {
+    template: "one-column",
+    shouldShowFullContactLinks: true,
+    ratingIcon: "star",
   },
 };
 
@@ -45,7 +42,7 @@ const applicantSlice = createSlice({
   initialState,
   reducers: {
     setCvData(state, action: PayloadAction<CVFile["data"]>) {
-      state.cvData = action.payload;
+      state.data = action.payload;
     },
     updatePersonalInfo(
       state,
@@ -54,25 +51,19 @@ const applicantSlice = createSlice({
         value: string;
       }>
     ) {
-      if (state.cvData) {
-        state.cvData.personalInfo[action.payload.field] = action.payload.value;
+      if (state.data) {
+        state.data.personalInfo[action.payload.field] = action.payload.value;
       }
     },
     resetApplicantState: () => initialState,
   },
   selectors: {
-    cvDataSelector: (state: ApplicantState) => state.cvData,
-    personalInfoSelector: (state: ApplicantState) => state.cvData?.personalInfo,
-    contactInfoSelector: (state: ApplicantState) => state.cvData?.contactInfo,
-    professionalSummarySelector: (state: ApplicantState) =>
-      state.cvData?.professionalSummary,
-    experienceSelector: (state: ApplicantState) => state.cvData?.experience,
-    educationSelector: (state: ApplicantState) => state.cvData?.education,
-    skillsSelector: (state: ApplicantState) => state.cvData?.skills,
+    cvDataSelector: (state: ApplicantState) => state.data,
+    styleSelector: (state: ApplicantState) => state.style,
   },
 });
 
-export const { cvDataSelector } = applicantSlice.selectors;
+export const { cvDataSelector, styleSelector } = applicantSlice.selectors;
 export const { setCvData, resetApplicantState } = applicantSlice.actions;
 
 export const applicantReducer = applicantSlice.reducer;

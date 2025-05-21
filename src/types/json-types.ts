@@ -1,4 +1,13 @@
-import { Object, String, Number, Array, Static } from "runtypes";
+import {
+  Object,
+  String,
+  Number,
+  Array,
+  Static,
+  Union,
+  Literal,
+  Boolean,
+} from "runtypes";
 
 const PersonalInfoSchema = Object({
   name: String,
@@ -52,9 +61,16 @@ const CVSchema = Object({
   skills: Array(SkillCategorySchema),
 });
 
+const StyleSchema = Object({
+  template: Union(Literal("one-column"), Literal("two-column")),
+  shouldShowFullContactLinks: Boolean,
+  ratingIcon: Union(Literal("star"), Literal("circle")),
+});
+
 export const CVFileSchema = Object({
   version: String,
   data: CVSchema,
+  style: StyleSchema,
 });
 
 export type CVFile = Static<typeof CVFileSchema>;

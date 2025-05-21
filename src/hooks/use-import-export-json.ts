@@ -42,6 +42,11 @@ export function useImportExportJson(): ReturnProps {
     const fileData: CVFile = {
       version: "1.0",
       data: cvData,
+      style: {
+        template: "one-column",
+        shouldShowFullContactLinks: true,
+        ratingIcon: "star",
+      },
     };
     const blob = new Blob([JSON.stringify(fileData, null, 2)], {
       type: "application/json",

@@ -1,7 +1,7 @@
 import { Box, Paper, TextField } from "@mui/material";
 import { TemplateButton } from "../../components/template-button";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
-import { applicantSelector } from "../../store/applicant/applicant-slice";
+import { cvDataSelector } from "../../store/applicant/applicant-slice";
 import { useSelector } from "react-redux";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
@@ -19,7 +19,8 @@ interface Props {
 }
 
 export function SettingsPage({ contentRef }: Props): JSX.Element {
-  const applicant = useSelector(applicantSelector);
+  const { personalInfo, contactInfo, professionalSummary } =
+    useSelector(cvDataSelector);
   return (
     <Paper
       elevation={3}
@@ -39,14 +40,14 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
           id="outlined-basic"
           label="Full Name"
           variant="outlined"
-          value={applicant.nameJobTitle.name}
+          value={personalInfo.name}
           fullWidth
         />
         <TextField
           id="outlined-basic"
           label="Job Title"
           variant="outlined"
-          value={applicant.nameJobTitle.jobTitle}
+          value={personalInfo.jobTitle}
           fullWidth
         />
       </Box>
@@ -55,29 +56,29 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         <TextFieldWithIcon
           icon={<AlternateEmailIcon />}
           label="Email"
-          value={applicant.contactInformation.email}
+          value={contactInfo.email}
         />
         <TextFieldWithIcon
           icon={<SmartphoneIcon />}
           label="Phone"
-          value={applicant.contactInformation.phoneNumber}
+          value={contactInfo.phone}
         />
         <TextFieldWithIcon
           icon={<LinkedInIcon />}
           label="LinkedInId"
-          value={applicant.contactInformation.linkedInId}
+          value={contactInfo.linkedInId}
         />
       </Box>
       <Box display="flex" gap={2} mb={2}>
         <TextFieldWithIcon
           icon={<GitHubIcon />}
           label="Github"
-          value={applicant.contactInformation.gitHubId}
+          value={contactInfo.gitHubId}
         />
         <TextFieldWithIcon
           icon={<LocationOnIcon />}
           label="location"
-          value={applicant.contactInformation.location}
+          value={contactInfo.location}
         />
       </Box>
 
@@ -85,7 +86,7 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         label="Professional Summary"
         variant="outlined"
         multiline
-        value={applicant.professionalSummary.summary}
+        value={professionalSummary}
         fullWidth
         sx={{
           mt: "20px",

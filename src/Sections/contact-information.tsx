@@ -6,46 +6,45 @@ import { Grid } from "@mui/material";
 import { IconWithText } from "../common/icon-with-text";
 import { LocationWithIcon } from "../components/location-with-icon";
 import { useAppSelector } from "../store/store-helper";
-import { applicantSelector } from "../store/applicant/applicant-slice";
+import {
+  cvDataSelector,
+  styleSelector,
+} from "../store/applicant/applicant-slice";
 
 /** Contact Information (details) */
 export function ContactInformation(): JSX.Element {
-  const { contactInformation, style } = useAppSelector(applicantSelector);
+  const { contactInfo } = useAppSelector(cvDataSelector);
+  const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
+
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>
-      {contactInformation.email && (
-        <IconWithText
-          icon={AlternateEmailIcon}
-          text={contactInformation.email}
-        />
+      {contactInfo.email && (
+        <IconWithText icon={AlternateEmailIcon} text={contactInfo.email} />
       )}
-      {contactInformation.phoneNumber && (
-        <IconWithText
-          icon={SmartphoneIcon}
-          text={contactInformation.phoneNumber}
-        />
+      {contactInfo.phone && (
+        <IconWithText icon={SmartphoneIcon} text={contactInfo.phone} />
       )}
-      {contactInformation.location && (
-        <LocationWithIcon place={contactInformation.location} />
+      {contactInfo.location && (
+        <LocationWithIcon place={contactInfo.location} />
       )}
 
-      {contactInformation.linkedInId && (
+      {contactInfo.linkedInId && (
         <IconWithText
           icon={LinkedInIcon}
           text={
-            style.shouldShowCompleteLink
-              ? `https://www.linkedin.com/in/${contactInformation.linkedInId}`
-              : contactInformation.linkedInId
+            shouldShowFullContactLinks
+              ? `https://www.linkedin.com/in/${contactInfo.linkedInId}`
+              : contactInfo.linkedInId
           }
         />
       )}
-      {contactInformation.gitHubId && (
+      {contactInfo.gitHubId && (
         <IconWithText
           icon={GitHubIcon}
           text={
-            style.shouldShowCompleteLink
-              ? `https://github.com/${contactInformation.gitHubId}`
-              : contactInformation.gitHubId
+            shouldShowFullContactLinks
+              ? `https://github.com/${contactInfo.gitHubId}`
+              : contactInfo.gitHubId
           }
         />
       )}

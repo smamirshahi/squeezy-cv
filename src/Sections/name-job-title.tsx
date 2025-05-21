@@ -1,10 +1,10 @@
 import { Grid } from "@mui/material";
 import { ResumeTitle, SubsectionText } from "../common/custom-typography";
 import { useSelector } from "react-redux";
-import { applicantSelector } from "../store/applicant/applicant-slice";
+import { cvDataSelector } from "../store/applicant/applicant-slice";
 
 export function NameJobTitle(): JSX.Element {
-  const { nameJobTitle } = useSelector(applicantSelector);
+  const { personalInfo } = useSelector(cvDataSelector);
   return (
     <Grid
       container
@@ -12,8 +12,8 @@ export function NameJobTitle(): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <ResumeTitle text={nameJobTitle.name} />
-      <SubsectionText text={nameJobTitle.jobTitle} />
+      <ResumeTitle text={personalInfo.name} />
+      <SubsectionText text={personalInfo.jobTitle} />
     </Grid>
   );
 }
