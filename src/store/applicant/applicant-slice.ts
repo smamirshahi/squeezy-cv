@@ -46,21 +46,22 @@ const applicantSlice = createSlice({
     setCvData(state, action: PayloadAction<CVData>) {
       state.data = action.payload;
     },
-    updatePersonalInfo(
-      state,
+
+    updatePersonalInfo<K extends keyof PersonalInfo>(
+      state: ApplicantState,
       action: PayloadAction<{
-        field: keyof PersonalInfo;
-        value: string;
+        field: K;
+        value: PersonalInfo[K];
       }>
     ) {
       state.data.personalInfo[action.payload.field] = action.payload.value;
     },
 
-    updateContactInfo(
-      state,
+    updateContactInfo<K extends keyof ContactInfo>(
+      state: ApplicantState,
       action: PayloadAction<{
-        field: keyof ContactInfo;
-        value: string;
+        field: K;
+        value: ContactInfo[K];
       }>
     ) {
       state.data.contactInfo[action.payload.field] = action.payload.value;
@@ -95,17 +96,15 @@ const applicantSlice = createSlice({
         value: Experience[K];
       }>
     ) => {
-      const experience = findExperience(state, action.payload.id);
-      if (experience) {
-        experience[action.payload.key] = action.payload.value;
+      const exp = findExperience(state, action.payload.id);
+      if (exp) {
+        exp[action.payload.key] = action.payload.value;
       }
     },
 
     addBulletPoint: (state, action: PayloadAction<{ id: string }>) => {
-      const experience = findExperience(state, action.payload.id);
-      if (experience) {
-        experience.bulletPoints.push("");
-      }
+      const exp = findExperience(state, action.payload.id);
+      exp?.bulletPoints.push("");
     },
 
     updateExperienceBulletPoint: (
@@ -116,12 +115,9 @@ const applicantSlice = createSlice({
         value: string;
       }>
     ) => {
-      const experience = findExperience(state, action.payload.id);
-      if (
-        experience &&
-        experience.bulletPoints[action.payload.index] !== undefined
-      ) {
-        experience.bulletPoints[action.payload.index] = action.payload.value;
+      const exp = findExperience(state, action.payload.id);
+      if (exp?.bulletPoints[action.payload.index] !== undefined) {
+        exp.bulletPoints[action.payload.index] = action.payload.value;
       }
     },
 
@@ -129,12 +125,9 @@ const applicantSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; index: number }>
     ) => {
-      const experience = findExperience(state, action.payload.id);
-      if (
-        experience &&
-        experience.bulletPoints[action.payload.index] !== undefined
-      ) {
-        experience.bulletPoints.splice(action.payload.index, 1); // mutates via Immer
+      const exp = findExperience(state, action.payload.id);
+      if (exp?.bulletPoints[action.payload.index] !== undefined) {
+        exp.bulletPoints.splice(action.payload.index, 1); // mutates via Immer
       }
     },
 
