@@ -5,5 +5,5 @@ export function findExperience(
   state: ApplicantState,
   id: string
 ): Experience | undefined {
-  return state.data.experiences.find((exp) => exp.id === id);
+  return state.data.experiences.find((experience) => experience.id === id);
 }

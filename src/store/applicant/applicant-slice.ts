@@ -7,6 +7,7 @@ import {
   PersonalInfo,
   Style,
 } from "../../types/json-types";
+import { findExperience } from "./application-slice-helper";
 
 /** State of the current Applicant */
 export type ApplicantState = CVFile;
@@ -94,19 +95,14 @@ const applicantSlice = createSlice({
         value: Experience[K];
       }>
     ) => {
-      const { id, key, value } = action.payload;
-      const experience = state.data.experiences.find(
-        (experience) => experience.id === id
-      );
+      const experience = findExperience(state, action.payload.id);
       if (experience) {
-        experience[key] = value;
+        experience[action.payload.key] = action.payload.value;
       }
     },
 
     addBulletPoint: (state, action: PayloadAction<{ id: string }>) => {
-      const experience = state.data.experiences.find(
-        (exp) => exp.id === action.payload.id
-      );
+      const experience = findExperience(state, action.payload.id);
       if (experience) {
         experience.bulletPoints.push("");
       }
@@ -120,10 +116,12 @@ const applicantSlice = createSlice({
         value: string;
       }>
     ) => {
-      const { id, index, value } = action.payload;
-      const experience = state.data.experiences.find((exp) => exp.id === id);
-      if (experience && experience.bulletPoints[index] !== undefined) {
-        experience.bulletPoints[index] = value;
+      const experience = findExperience(state, action.payload.id);
+      if (
+        experience &&
+        experience.bulletPoints[action.payload.index] !== undefined
+      ) {
+        experience.bulletPoints[action.payload.index] = action.payload.value;
       }
     },
 
@@ -131,10 +129,12 @@ const applicantSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; index: number }>
     ) => {
-      const { id, index } = action.payload;
-      const experience = state.data.experiences.find((exp) => exp.id === id);
-      if (experience && experience.bulletPoints[index] !== undefined) {
-        experience.bulletPoints.splice(index, 1); // mutates via Immer
+      const experience = findExperience(state, action.payload.id);
+      if (
+        experience &&
+        experience.bulletPoints[action.payload.index] !== undefined
+      ) {
+        experience.bulletPoints.splice(action.payload.index, 1); // mutates via Immer
       }
     },
 
