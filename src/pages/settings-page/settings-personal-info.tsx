@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 export function SettingsPersonalInfo(): JSX.Element {
   const dispatch = useAppDispatch();
   const { personalInfo } = useSelector(cvDataSelector);
+
   return (
     <Box display="flex" gap={2} mb={2}>
       <TextField

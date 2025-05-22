@@ -1,4 +1,4 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import { CVFile } from "../../types/json-types";
 
 /**
@@ -69,9 +69,19 @@ const applicantSlice = createSlice({
       state.data.professionalSummary = action.payload.value;
     },
 
-    updateExperienceField: <
-      K extends keyof CVFile["data"]["experiences"][number]
-    >(
+    addExperience: (state) => {
+      state.data.experiences.push({
+        id: nanoid(),
+        jobTitle: "",
+        company: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        bulletPoints: [],
+      });
+    },
+
+    updateExperience: <K extends keyof CVFile["data"]["experiences"][number]>(
       state: ApplicantState,
       action: PayloadAction<{
         id: string;
@@ -86,6 +96,47 @@ const applicantSlice = createSlice({
       if (experience) {
         experience[key] = value;
       }
+    },
+
+    addBulletPoint: (state, action: PayloadAction<{ id: string }>) => {
+      const experience = state.data.experiences.find(
+        (exp) => exp.id === action.payload.id
+      );
+      if (experience) {
+        experience.bulletPoints.push("");
+      }
+    },
+
+    updateExperienceBulletPoint: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        index: number;
+        value: string;
+      }>
+    ) => {
+      const { id, index, value } = action.payload;
+      const experience = state.data.experiences.find((exp) => exp.id === id);
+      if (experience && experience.bulletPoints[index] !== undefined) {
+        experience.bulletPoints[index] = value;
+      }
+    },
+
+    removeBulletPoint: (
+      state,
+      action: PayloadAction<{ id: string; index: number }>
+    ) => {
+      const { id, index } = action.payload;
+      const experience = state.data.experiences.find((exp) => exp.id === id);
+      if (experience && experience.bulletPoints[index] !== undefined) {
+        experience.bulletPoints.splice(index, 1); // mutates via Immer
+      }
+    },
+
+    removeExperience: (state, action: PayloadAction<string>) => {
+      state.data.experiences = state.data.experiences.filter(
+        (exp) => exp.id !== action.payload
+      );
     },
 
     setTemplate(state, action: PayloadAction<CVFile["style"]["template"]>) {
@@ -108,7 +159,12 @@ export const {
   updatePersonalInfo,
   updateContactInfo,
   updateProfessionalSummary,
-  updateExperienceField,
+  addExperience,
+  updateExperience,
+  addBulletPoint,
+  updateExperienceBulletPoint,
+  removeBulletPoint,
+  removeExperience,
   resetApplicantState,
 } = applicantSlice.actions;
 
