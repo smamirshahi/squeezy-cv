@@ -69,6 +69,25 @@ const applicantSlice = createSlice({
       state.data.professionalSummary = action.payload.value;
     },
 
+    updateExperienceField: <
+      K extends keyof CVFile["data"]["experiences"][number]
+    >(
+      state: ApplicantState,
+      action: PayloadAction<{
+        id: string;
+        key: K;
+        value: CVFile["data"]["experiences"][number][K];
+      }>
+    ) => {
+      const { id, key, value } = action.payload;
+      const experience = state.data.experiences.find(
+        (experience) => experience.id === id
+      );
+      if (experience) {
+        experience[key] = value;
+      }
+    },
+
     setTemplate(state, action: PayloadAction<CVFile["style"]["template"]>) {
       state.style.template = action.payload;
     },
@@ -89,6 +108,7 @@ export const {
   updatePersonalInfo,
   updateContactInfo,
   updateProfessionalSummary,
+  updateExperienceField,
   resetApplicantState,
 } = applicantSlice.actions;
 

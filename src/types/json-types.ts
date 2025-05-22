@@ -38,6 +38,9 @@ const ContactInfoSchema = Object({
 const ProfessionalSummarySchema = String;
 
 const ExperienceSchema = Object({
+  /** Specific ID for the experience */
+  id: String,
+
   /** The title of the job */
   jobTitle: String,
 

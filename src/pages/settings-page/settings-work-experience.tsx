@@ -11,30 +11,32 @@ import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useAppDispatch } from "@src/store/store-helper";
+import { useSelector } from "react-redux";
+import {
+  cvDataSelector,
+  updateExperienceField,
+} from "@src/store/applicant/applicant-slice";
+import { CVFile } from "@src/types/json-types";
 
-type WorkExperience = {
-  id: number;
-  jobTitle: string;
-  company: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  bulletPoints: string[];
-};
+type WorkExperience = CVFile["data"]["experiences"][number];
 
 export function SettingsWorkExperience() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([]);
+  // const [experiences, setExperiences] = useState<WorkExperience[]>([]);
+  const dispatch = useAppDispatch();
+  const { experiences } = useSelector(cvDataSelector);
 
   function handleChange<K extends keyof WorkExperience>(
-    id: number,
+    id: string,
     key: K,
     value: WorkExperience[K]
   ): void {
-    setExperiences((prev) =>
-      prev.map((experience) =>
-        experience.id === id ? { ...experience, [key]: value } : experience
-      )
-    );
+    dispatch(updateExperienceField({ id, key, value }));
+    // setExperiences((prev) =>
+    //   prev.map((experience) =>
+    //     experience.id === id ? { ...experience, [key]: value } : experience
+    //   )
+    // );
   }
 
   function handleBulletPointsChange(
