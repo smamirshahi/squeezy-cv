@@ -10,7 +10,11 @@ import {
   SkillItem,
   Style,
 } from "../../types/json-types";
-import { findEducation, findExperience } from "./application-slice-helper";
+import {
+  findEducation,
+  findExperience,
+  findSkill,
+} from "./application-slice-helper";
 
 /** State of the current Applicant */
 export type ApplicantState = CVFile;
@@ -181,7 +185,7 @@ const applicantSlice = createSlice({
             id: nanoid(),
             name: "",
             // FIXME: Correct the number in here
-            rating: 2,
+            rating: 0,
           },
         ],
       });
@@ -201,9 +205,7 @@ const applicantSlice = createSlice({
         value: SkillCategory[K];
       }>
     ) => {
-      const skill = state.data.skills.find(
-        (skill) => skill.id === action.payload.id
-      );
+      const skill = findSkill(state, action.payload.id);
       if (skill) {
         skill[action.payload.key] = action.payload.value;
       }
@@ -218,17 +220,15 @@ const applicantSlice = createSlice({
         value: SkillItem[K];
       }>
     ) => {
-      const { id, index, key, value } = action.payload;
-      const skill = state.data.skills.find((skill) => skill.id === id);
+      const { index, key, value } = action.payload;
+      const skill = findSkill(state, action.payload.id);
       if (skill && skill.items[index] !== undefined) {
         skill.items[index][key] = value;
       }
     },
 
     addSkillItem: (state, action: PayloadAction<{ skillId: string }>) => {
-      const skill = state.data.skills.find(
-        (skill) => skill.id === action.payload.skillId
-      );
+      const skill = findSkill(state, action.payload.skillId);
       if (skill) {
         skill.items.push({
           id: nanoid(),
@@ -242,10 +242,9 @@ const applicantSlice = createSlice({
       state,
       action: PayloadAction<{ skillId: string; index: number }>
     ) => {
-      const { skillId, index } = action.payload;
-      const skill = state.data.skills.find((skill) => skill.id === skillId);
-      if (skill && skill.items[index] !== undefined) {
-        skill.items.splice(index, 1); // ✅ safe with Immer
+      const skill = findSkill(state, action.payload.skillId);
+      if (skill && skill.items[action.payload.index] !== undefined) {
+        skill.items.splice(action.payload.index, 1); // ✅ safe with Immer
       }
     },
 

@@ -1,4 +1,4 @@
-import { Education, Experience } from "@src/types/json-types";
+import { Education, Experience, SkillCategory } from "@src/types/json-types";
 import { ApplicantState } from "./applicant-slice";
 
 export function findExperience(
@@ -13,4 +13,11 @@ export function findEducation(
   id: string
 ): Education | undefined {
   return state.data.educations.find((edu) => edu.id === id);
+}
+
+export function findSkill(
+  state: ApplicantState,
+  id: string
+): SkillCategory | undefined {
+  return state.data.skills.find((skill) => skill.id === id);
 }
