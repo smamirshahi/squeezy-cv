@@ -3,12 +3,11 @@ import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
 import { customColors } from "../common/custom-styles";
-import { CVFile } from "../types/json-types";
+import { SkillItem } from "../types/json-types";
 
-// TODO: Have more specific types for each schema
 interface Props {
   /** How to show the skill level */
-  indicatorType: CVFile["data"]["skills"][number]["items"][number]["rating"];
+  indicatorType: SkillItem["rating"];
 
   /** The percentage of the skill */
   percentage: number;

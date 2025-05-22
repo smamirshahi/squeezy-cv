@@ -1,12 +1,17 @@
 import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
-import { CVFile } from "../../types/json-types";
+import {
+  ContactInfo,
+  CVData,
+  CVFile,
+  Experience,
+  PersonalInfo,
+  Style,
+} from "../../types/json-types";
 
-/**
- * State of the current Applicant
- */
+/** State of the current Applicant */
 export type ApplicantState = CVFile;
 
-export const initialState: CVFile = {
+export const initialState: ApplicantState = {
   version: "1.0",
   data: {
     personalInfo: {
@@ -37,13 +42,13 @@ const applicantSlice = createSlice({
   name: "applicant",
   initialState,
   reducers: {
-    setCvData(state, action: PayloadAction<CVFile["data"]>) {
+    setCvData(state, action: PayloadAction<CVData>) {
       state.data = action.payload;
     },
     updatePersonalInfo(
       state,
       action: PayloadAction<{
-        field: keyof CVFile["data"]["personalInfo"];
+        field: keyof PersonalInfo;
         value: string;
       }>
     ) {
@@ -53,7 +58,7 @@ const applicantSlice = createSlice({
     updateContactInfo(
       state,
       action: PayloadAction<{
-        field: keyof CVFile["data"]["contactInfo"];
+        field: keyof ContactInfo;
         value: string;
       }>
     ) {
@@ -81,12 +86,12 @@ const applicantSlice = createSlice({
       });
     },
 
-    updateExperience: <K extends keyof CVFile["data"]["experiences"][number]>(
+    updateExperience: <K extends keyof Experience>(
       state: ApplicantState,
       action: PayloadAction<{
         id: string;
         key: K;
-        value: CVFile["data"]["experiences"][number][K];
+        value: Experience[K];
       }>
     ) => {
       const { id, key, value } = action.payload;
@@ -139,7 +144,7 @@ const applicantSlice = createSlice({
       );
     },
 
-    setTemplate(state, action: PayloadAction<CVFile["style"]["template"]>) {
+    setTemplate(state, action: PayloadAction<Style["template"]>) {
       state.style.template = action.payload;
     },
     resetApplicantState: () => initialState,

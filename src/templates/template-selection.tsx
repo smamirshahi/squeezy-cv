@@ -3,10 +3,10 @@ import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
 import { useSelector } from "react-redux";
 import { cvDataSelector } from "../store/applicant/applicant-slice";
-import { CVFile } from "../types/json-types";
+import { Style } from "../types/json-types";
 
 interface Props {
-  template: CVFile["style"]["template"];
+  template: Style["template"];
 }
 
 export function TemplateSelection({ template }: Props): JSX.Element {

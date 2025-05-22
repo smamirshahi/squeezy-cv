@@ -138,4 +138,13 @@ export const CVFileSchema = Object({
   style: StyleSchema,
 });
 
+export type PersonalInfo = Static<typeof PersonalInfoSchema>;
+export type ContactInfo = Static<typeof ContactInfoSchema>;
+export type ProfessionalSummary = Static<typeof ProfessionalSummarySchema>;
+export type Experience = Static<typeof ExperienceSchema>;
+export type Education = Static<typeof EducationSchema>;
+export type SkillCategory = Static<typeof SkillCategorySchema>;
+export type SkillItem = Static<typeof SkillItemSchema>;
+export type Style = Static<typeof StyleSchema>;
+export type CVData = Static<typeof CVSchema>;
 export type CVFile = Static<typeof CVFileSchema>;

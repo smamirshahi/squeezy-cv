@@ -2,11 +2,11 @@ import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid } from "@mui/material";
 import { DatePeriod } from "../../components/date-period";
 import { LocationWithIcon } from "../../components/location-with-icon";
-import { CVFile } from "../../types/json-types";
+import { Education } from "../../types/json-types";
 
 interface Props {
   /** data for each education */
-  education: CVFile["data"]["educations"][number];
+  education: Education;
 }
 
 /** Renders a single education section */
