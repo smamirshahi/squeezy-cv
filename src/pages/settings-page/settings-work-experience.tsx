@@ -23,7 +23,6 @@ import {
 } from "@src/store/applicant/applicant-slice";
 
 export function SettingsWorkExperience() {
-  // const [experiences, setExperiences] = useState<WorkExperience[]>([]);
   const dispatch = useAppDispatch();
   const { experiences } = useSelector(cvDataSelector);
 

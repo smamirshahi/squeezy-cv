@@ -61,6 +61,9 @@ const ExperienceSchema = Object({
 });
 
 const EducationSchema = Object({
+  /** Specific ID for the education */
+  id: String,
+
   /** The degree of education */
   degree: String,
 

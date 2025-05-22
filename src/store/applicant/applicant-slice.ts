@@ -3,11 +3,12 @@ import {
   ContactInfo,
   CVData,
   CVFile,
+  Education,
   Experience,
   PersonalInfo,
   Style,
 } from "../../types/json-types";
-import { findExperience } from "./application-slice-helper";
+import { findEducation, findExperience } from "./application-slice-helper";
 
 /** State of the current Applicant */
 export type ApplicantState = CVFile;
@@ -88,6 +89,12 @@ const applicantSlice = createSlice({
       });
     },
 
+    removeExperience: (state, action: PayloadAction<string>) => {
+      state.data.experiences = state.data.experiences.filter(
+        (exp) => exp.id !== action.payload
+      );
+    },
+
     updateExperience: <K extends keyof Experience>(
       state: ApplicantState,
       action: PayloadAction<{
@@ -131,15 +138,42 @@ const applicantSlice = createSlice({
       }
     },
 
-    removeExperience: (state, action: PayloadAction<string>) => {
-      state.data.experiences = state.data.experiences.filter(
-        (exp) => exp.id !== action.payload
+    addEducation: (state) => {
+      state.data.educations.push({
+        id: nanoid(),
+        degree: "",
+        institute: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        dissertationTitle: "",
+      });
+    },
+
+    removeEducation: (state, action: PayloadAction<string>) => {
+      state.data.educations = state.data.educations.filter(
+        (edu) => edu.id !== action.payload
       );
+    },
+
+    updateEducation: <K extends keyof Education>(
+      state: ApplicantState,
+      action: PayloadAction<{
+        id: string;
+        key: K;
+        value: Education[K];
+      }>
+    ) => {
+      const edu = findEducation(state, action.payload.id);
+      if (edu) {
+        edu[action.payload.key] = action.payload.value;
+      }
     },
 
     setTemplate(state, action: PayloadAction<Style["template"]>) {
       state.style.template = action.payload;
     },
+
     resetApplicantState: () => initialState,
   },
   selectors: {
@@ -158,11 +192,14 @@ export const {
   updateContactInfo,
   updateProfessionalSummary,
   addExperience,
+  removeExperience,
   updateExperience,
   addBulletPoint,
   updateExperienceBulletPoint,
   removeBulletPoint,
-  removeExperience,
+  addEducation,
+  removeEducation,
+  updateEducation,
   resetApplicantState,
 } = applicantSlice.actions;
 

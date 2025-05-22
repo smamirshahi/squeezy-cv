@@ -7,53 +7,20 @@ import {
   AccordionDetails,
   Accordion,
 } from "@mui/material";
-import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-type Education = {
-  id: number;
-  degree: string;
-  institute: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  dissertationTitle: string;
-};
+import { useAppDispatch } from "@src/store/store-helper";
+import { useSelector } from "react-redux";
+import {
+  addEducation,
+  cvDataSelector,
+  removeEducation,
+  updateEducation,
+} from "@src/store/applicant/applicant-slice";
 
 export function SettingsEducation() {
-  const [degrees, setDegrees] = useState<Education[]>([]);
-
-  function handleChange<K extends keyof Education>(
-    id: number,
-    key: K,
-    value: Education[K]
-  ): void {
-    setDegrees((prev) =>
-      prev.map((degree) =>
-        degree.id === id ? { ...degree, [key]: value } : degree
-      )
-    );
-  }
-
-  function addDegree(): void {
-    setDegrees((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        degree: "",
-        institute: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        dissertationTitle: "",
-      },
-    ]);
-  }
-
-  function removeDegree(id: number): void {
-    setDegrees((prev) => prev.filter((exp) => exp.id !== id));
-  }
+  const dispatch = useAppDispatch();
+  const { educations } = useSelector(cvDataSelector);
 
   return (
     <Accordion>
@@ -62,18 +29,24 @@ export function SettingsEducation() {
       </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {degrees.map((exp) => (
+          {educations.map((edu) => (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Degree"
-                  value={exp.degree}
+                  value={edu.degree}
                   onChange={(event) =>
-                    handleChange(exp.id, "degree", event.target.value)
+                    dispatch(
+                      updateEducation({
+                        id: edu.id,
+                        key: "degree",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeDegree(exp.id)}>
+                <IconButton onClick={() => dispatch(removeEducation(edu.id))}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -81,17 +54,29 @@ export function SettingsEducation() {
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Institute"
-                  value={exp.institute}
+                  value={edu.institute}
                   onChange={(event) =>
-                    handleChange(exp.id, "institute", event.target.value)
+                    dispatch(
+                      updateEducation({
+                        id: edu.id,
+                        key: "institute",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
                 <TextField
                   label="Location"
-                  value={exp.location}
+                  value={edu.location}
                   onChange={(event) =>
-                    handleChange(exp.id, "location", event.target.value)
+                    dispatch(
+                      updateEducation({
+                        id: edu.id,
+                        key: "location",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
@@ -101,9 +86,15 @@ export function SettingsEducation() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  value={exp.startDate}
+                  value={edu.startDate}
                   onChange={(event) =>
-                    handleChange(exp.id, "startDate", event.target.value)
+                    dispatch(
+                      updateEducation({
+                        id: edu.id,
+                        key: "startDate",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   InputLabelProps={{ shrink: true }}
                   fullWidth
@@ -111,18 +102,38 @@ export function SettingsEducation() {
                 <TextField
                   label="End Date"
                   type="date"
-                  value={exp.endDate}
+                  value={edu.endDate}
                   onChange={(event) =>
-                    handleChange(exp.id, "endDate", event.target.value)
+                    dispatch(
+                      updateEducation({
+                        id: edu.id,
+                        key: "endDate",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
               </Box>
+              <TextField
+                label="Dissertation Title"
+                value={edu.dissertationTitle}
+                onChange={(event) =>
+                  dispatch(
+                    updateEducation({
+                      id: edu.id,
+                      key: "dissertationTitle",
+                      value: event.target.value,
+                    })
+                  )
+                }
+                fullWidth
+              />
             </Box>
           ))}
 
-          <Button variant="contained" onClick={addDegree}>
+          <Button variant="contained" onClick={() => dispatch(addEducation())}>
             Add Education
           </Button>
         </Box>
