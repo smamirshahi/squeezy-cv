@@ -1,10 +1,10 @@
 import { Grid } from "@mui/material";
 import { ResumeTitle, SubsectionText } from "../common/custom-typography";
-import { useSelector } from "react-redux";
 import { cvDataSelector } from "../store/applicant/applicant-slice";
+import { useAppSelector } from "@src/store/store-helper";
 
 export function NameJobTitle(): JSX.Element {
-  const { personalInfo } = useSelector(cvDataSelector);
+  const { personalInfo } = useAppSelector(cvDataSelector);
   return (
     <Grid
       container

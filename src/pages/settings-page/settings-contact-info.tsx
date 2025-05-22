@@ -5,15 +5,14 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { useSelector } from "react-redux";
 import {
   cvDataSelector,
   updateContactInfo,
 } from "@src/store/applicant/applicant-slice";
-import { useAppDispatch } from "@src/store/store-helper";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
 export function SettingsContactInfo(): JSX.Element {
-  const { contactInfo } = useSelector(cvDataSelector);
+  const { contactInfo } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
 
   return (

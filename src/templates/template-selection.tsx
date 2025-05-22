@@ -1,16 +1,16 @@
 import { useMemo } from "react";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
-import { useSelector } from "react-redux";
 import { cvDataSelector } from "../store/applicant/applicant-slice";
 import { Style } from "../types/json-types";
+import { useAppSelector } from "@src/store/store-helper";
 
 interface Props {
   template: Style["template"];
 }
 
 export function TemplateSelection({ template }: Props): JSX.Element {
-  const applicant = useSelector(cvDataSelector);
+  const applicant = useAppSelector(cvDataSelector);
 
   const content = useMemo(() => {
     switch (template) {

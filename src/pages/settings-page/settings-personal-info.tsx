@@ -3,12 +3,11 @@ import {
   cvDataSelector,
   updatePersonalInfo,
 } from "@src/store/applicant/applicant-slice";
-import { useAppDispatch } from "@src/store/store-helper";
-import { useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
 export function SettingsPersonalInfo(): JSX.Element {
   const dispatch = useAppDispatch();
-  const { personalInfo } = useSelector(cvDataSelector);
+  const { personalInfo } = useAppSelector(cvDataSelector);
 
   return (
     <Box display="flex" gap={2} mb={2}>

@@ -8,82 +8,23 @@ import {
   Accordion,
   Rating,
 } from "@mui/material";
-import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
-
-type SkillItem = {
-  id: number;
-  name: string;
-  rate: number;
-};
-
-type Skill = {
-  id: number;
-  category: string;
-  items: SkillItem[];
-};
-
-// type Skill = {
-//   skill: Skill2[];
-// };
+import {
+  addSkillCategory,
+  addSkillItem,
+  cvDataSelector,
+  removeSkillCategory,
+  removeSkillItem,
+  updateSkillCategory,
+  updateSkillItem,
+} from "@src/store/applicant/applicant-slice";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
 export function SettingsSkills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-
-  function handleChange<K extends keyof Skill>(
-    id: number,
-    key: K,
-    value: Skill[K]
-  ): void {
-    setSkills((prev) =>
-      prev.map((skill) =>
-        skill.id === id ? { ...skill, [key]: value } : skill
-      )
-    );
-  }
-
-  function handleSkillItemChange<K extends keyof SkillItem>(
-    id: number,
-    index: number,
-    key: K,
-    value: SkillItem[K]
-  ): void {
-    setSkills((prev) =>
-      prev.map((skill) =>
-        skill.id === id
-          ? {
-              ...skill,
-              items: skill.items.map((item, i) =>
-                i === index ? { ...item, [key]: value } : item
-              ),
-            }
-          : skill
-      )
-    );
-  }
-
-  function addSkillCategory(): void {
-    setSkills((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        category: "",
-        items: [
-          {
-            id: Date.now() * 2,
-            name: "",
-            rate: 0,
-          },
-        ],
-      },
-    ]);
-  }
-
-  function removeMainSkill(id: number): void {
-    setSkills((prev) => prev.filter((skill) => skill.id !== id));
-  }
+  const dispatch = useAppDispatch();
+  const { skills } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>
@@ -99,11 +40,19 @@ export function SettingsSkills() {
                   label="Skill Category"
                   value={skill.category}
                   onChange={(event) =>
-                    handleChange(skill.id, "category", event.target.value)
+                    dispatch(
+                      updateSkillCategory({
+                        id: skill.id,
+                        key: "category",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeMainSkill(skill.id)}>
+                <IconButton
+                  onClick={() => dispatch(removeSkillCategory(skill.id))}
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -129,40 +78,37 @@ export function SettingsSkills() {
                       label={`Skill Item ${idx + 1}`}
                       value={skillItem.name}
                       onChange={(event) =>
-                        handleSkillItemChange(
-                          skill.id,
-                          idx,
-                          "name",
-                          event.target.value
+                        dispatch(
+                          updateSkillItem({
+                            id: skill.id,
+                            index: idx,
+                            key: "name",
+                            value: event.target.value,
+                          })
                         )
                       }
                       fullWidth
                     />
                     <Rating
-                      value={skillItem.rate}
+                      value={skillItem.rating}
                       onChange={(_, newValue) => {
-                        handleSkillItemChange(
-                          skill.id,
-                          idx,
-                          "rate",
-                          newValue ?? 0
+                        dispatch(
+                          updateSkillItem({
+                            id: skill.id,
+                            index: idx,
+                            key: "rating",
+                            value: newValue ?? 0,
+                          })
                         );
                       }}
                       precision={0.5}
                     />
                     <IconButton
-                      onClick={() => {
-                        setSkills((prev) =>
-                          prev.map((s) =>
-                            s.id === skill.id
-                              ? {
-                                  ...s,
-                                  items: s.items.filter((_, i) => i !== idx),
-                                }
-                              : s
-                          )
-                        );
-                      }}
+                      onClick={() =>
+                        dispatch(
+                          removeSkillItem({ skillId: skill.id, index: idx })
+                        )
+                      }
                       disabled={skill.items.length === 1}
                     >
                       <DeleteIcon fontSize="small" />
@@ -171,21 +117,9 @@ export function SettingsSkills() {
                 ))}
                 <Box>
                   <IconButton
-                    onClick={() => {
-                      setSkills((prev) =>
-                        prev.map((skill) =>
-                          skill.id === skill.id
-                            ? {
-                                ...skill,
-                                items: [
-                                  ...skill.items,
-                                  { id: Date.now(), name: "", rate: 0 },
-                                ],
-                              }
-                            : skill
-                        )
-                      );
-                    }}
+                    onClick={() =>
+                      dispatch(addSkillItem({ skillId: skill.id }))
+                    }
                   >
                     <AddIcon />
                   </IconButton>
@@ -194,7 +128,10 @@ export function SettingsSkills() {
             </Box>
           ))}
 
-          <Button variant="contained" onClick={addSkillCategory}>
+          <Button
+            variant="contained"
+            onClick={() => dispatch(addSkillCategory())}
+          >
             Add New Skill Category
           </Button>
         </Box>

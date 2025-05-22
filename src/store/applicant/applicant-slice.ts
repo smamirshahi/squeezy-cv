@@ -6,6 +6,8 @@ import {
   Education,
   Experience,
   PersonalInfo,
+  SkillCategory,
+  SkillItem,
   Style,
 } from "../../types/json-types";
 import { findEducation, findExperience } from "./application-slice-helper";
@@ -170,6 +172,83 @@ const applicantSlice = createSlice({
       }
     },
 
+    addSkillCategory: (state) => {
+      state.data.skills.push({
+        id: nanoid(),
+        category: "",
+        items: [
+          {
+            id: nanoid(),
+            name: "",
+            // FIXME: Correct the number in here
+            rating: 2,
+          },
+        ],
+      });
+    },
+
+    removeSkillCategory: (state, action: PayloadAction<string>) => {
+      state.data.skills = state.data.skills.filter(
+        (skill) => skill.id !== action.payload
+      );
+    },
+
+    updateSkillCategory: <K extends keyof SkillCategory>(
+      state: ApplicantState,
+      action: PayloadAction<{
+        id: string;
+        key: K;
+        value: SkillCategory[K];
+      }>
+    ) => {
+      const skill = state.data.skills.find(
+        (skill) => skill.id === action.payload.id
+      );
+      if (skill) {
+        skill[action.payload.key] = action.payload.value;
+      }
+    },
+
+    updateSkillItem: <K extends keyof SkillItem>(
+      state: ApplicantState,
+      action: PayloadAction<{
+        id: string;
+        index: number;
+        key: K;
+        value: SkillItem[K];
+      }>
+    ) => {
+      const { id, index, key, value } = action.payload;
+      const skill = state.data.skills.find((skill) => skill.id === id);
+      if (skill && skill.items[index] !== undefined) {
+        skill.items[index][key] = value;
+      }
+    },
+
+    addSkillItem: (state, action: PayloadAction<{ skillId: string }>) => {
+      const skill = state.data.skills.find(
+        (skill) => skill.id === action.payload.skillId
+      );
+      if (skill) {
+        skill.items.push({
+          id: nanoid(),
+          name: "",
+          rating: 0,
+        });
+      }
+    },
+
+    removeSkillItem: (
+      state,
+      action: PayloadAction<{ skillId: string; index: number }>
+    ) => {
+      const { skillId, index } = action.payload;
+      const skill = state.data.skills.find((skill) => skill.id === skillId);
+      if (skill && skill.items[index] !== undefined) {
+        skill.items.splice(index, 1); // ✅ safe with Immer
+      }
+    },
+
     setTemplate(state, action: PayloadAction<Style["template"]>) {
       state.style.template = action.payload;
     },
@@ -200,6 +279,12 @@ export const {
   addEducation,
   removeEducation,
   updateEducation,
+  addSkillCategory,
+  removeSkillCategory,
+  updateSkillCategory,
+  addSkillItem,
+  removeSkillItem,
+  updateSkillItem,
   resetApplicantState,
 } = applicantSlice.actions;
 

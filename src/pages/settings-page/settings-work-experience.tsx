@@ -10,8 +10,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useAppDispatch } from "@src/store/store-helper";
-import { useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import {
   cvDataSelector,
   updateExperienceBulletPoint,
@@ -24,7 +23,7 @@ import {
 
 export function SettingsWorkExperience() {
   const dispatch = useAppDispatch();
-  const { experiences } = useSelector(cvDataSelector);
+  const { experiences } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>

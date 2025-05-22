@@ -84,6 +84,9 @@ const EducationSchema = Object({
 });
 
 const SkillItemSchema = Object({
+  /** The ID of the skill item */
+  id: String,
+
   /** The name of the skill item */
   name: String,
 
@@ -92,6 +95,9 @@ const SkillItemSchema = Object({
 });
 
 const SkillCategorySchema = Object({
+  /** The ID of the skill category */
+  id: String,
+
   /** The name of the skill */
   category: String,
 

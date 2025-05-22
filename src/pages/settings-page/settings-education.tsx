@@ -9,8 +9,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useAppDispatch } from "@src/store/store-helper";
-import { useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import {
   addEducation,
   cvDataSelector,
@@ -20,7 +19,7 @@ import {
 
 export function SettingsEducation() {
   const dispatch = useAppDispatch();
-  const { educations } = useSelector(cvDataSelector);
+  const { educations } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>
