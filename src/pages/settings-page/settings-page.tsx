@@ -14,9 +14,9 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { TextFieldWithIcon } from "./text-field-with-icon";
-import { ExperienceForm } from "./text-field-work-experience";
-import { TextFieldEducation } from "./text-field-education";
-import { TextFieldSkills } from "./text-field-skills";
+import { WorkExperienceForm } from "./work-experience-form";
+import { EducationForm } from "./education-form";
+import { SkillsForm } from "./skills-form";
 import { useAppDispatch } from "../../store/store-helper";
 
 interface Props {
@@ -160,9 +160,9 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         }
       />
 
-      <ExperienceForm />
-      <TextFieldEducation />
-      <TextFieldSkills />
+      <WorkExperienceForm />
+      <EducationForm />
+      <SkillsForm />
     </Paper>
   );
 }

@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
-import { ContactInformation } from "../Sections/contact-information";
-import { Experiences } from "../Sections/experiences/experiences";
-import { NameJobTitle } from "../Sections/name-job-title";
-import { ProfessionalSummary } from "../Sections/professional-summary";
-import { Skills } from "../Sections/skills";
+import { ContactInformation } from "../sections/contact-information";
+import { Experiences } from "../sections/experiences/experiences";
+import { NameJobTitle } from "../sections/name-job-title";
+import { ProfessionalSummary } from "../sections/professional-summary";
+import { Skills } from "../sections/skills";
 
 /** Two column template */
 export function TwoColumnTemplate(): JSX.Element | null {

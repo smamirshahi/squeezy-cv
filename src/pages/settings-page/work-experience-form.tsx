@@ -22,7 +22,7 @@ type WorkExperience = {
   bulletPoints: string[];
 };
 
-export function ExperienceForm() {
+export function WorkExperienceForm() {
   const [experiences, setExperiences] = useState<WorkExperience[]>([]);
 
   function handleChange<K extends keyof WorkExperience>(

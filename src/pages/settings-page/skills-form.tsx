@@ -29,7 +29,7 @@ type Skill = {
 //   skill: Skill2[];
 // };
 
-export function TextFieldSkills() {
+export function SkillsForm() {
   const [skills, setSkills] = useState<Skill[]>([]);
 
   function handleChange<K extends keyof Skill>(
