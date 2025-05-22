@@ -21,7 +21,7 @@ type Education = {
   dissertationTitle: string;
 };
 
-export function EducationForm() {
+export function SettingsEducation() {
   const [degrees, setDegrees] = useState<Education[]>([]);
 
   function handleChange<K extends keyof Education>(

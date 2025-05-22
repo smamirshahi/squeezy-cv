@@ -27,7 +27,7 @@ export function TextFieldWithIcon({
           ),
         },
       }}
-      variant="standard"
+      variant="outlined"
       value={value}
       onChange={onChange}
     />
