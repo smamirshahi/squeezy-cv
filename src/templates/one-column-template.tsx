@@ -1,20 +1,12 @@
 import { Grid } from "@mui/material";
-import { ContactInformation } from "../Sections/contact-information";
-import { Experiences } from "../Sections/experiences/experiences";
-import { NameJobTitle } from "../Sections/name-job-title";
-import { ProfessionalSummary } from "../Sections/professional-summary";
-import { Skills } from "../Sections/skills";
-import { useAppSelector } from "../store/store-helper";
-import { applicantSelector } from "../store/applicant/applicant-slice";
+import { ContactInformation } from "../sections/contact-information";
+import { Experiences } from "../sections/experiences/experiences";
+import { NameJobTitle } from "../sections/name-job-title";
+import { ProfessionalSummary } from "../sections/professional-summary";
+import { Skills } from "../sections/skills";
 
 /** One column template */
 export function OneColumnTemplate(): JSX.Element | null {
-  const applicant = useAppSelector(applicantSelector);
-
-  if (applicant === null) {
-    return null;
-  }
-
   return (
     <Grid
       container
@@ -22,18 +14,12 @@ export function OneColumnTemplate(): JSX.Element | null {
       justifyContent="flex-start"
       alignItems="flex-start"
     >
-      <NameJobTitle nameJobTitle={applicant.nameJobTitle} />
-      <ContactInformation contactInformation={applicant.contactInformation} />
-      <ProfessionalSummary summary={applicant.professionalSummary} />
-      <Experiences
-        sectionTitle="Work Experience"
-        experiences={applicant.workExperiences}
-      />
-      <Experiences sectionTitle="Education" experiences={applicant.education} />
-      <Skills
-        skills={applicant.skills}
-        indicatorType={applicant.style.skillIndicatorType}
-      />
+      <NameJobTitle />
+      <ContactInformation />
+      <ProfessionalSummary />
+      <Experiences sectionTitle="Work Experience" />
+      <Experiences sectionTitle="Education" />
+      <Skills />
     </Grid>
   );
 }

@@ -7,9 +7,16 @@ interface Props {
   value?: string;
 
   label: string;
+
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function TextFieldWithIcon({ icon, value, label }: Props): JSX.Element {
+export function TextFieldWithIcon({
+  icon,
+  value,
+  label,
+  onChange,
+}: Props): JSX.Element {
   return (
     <TextField
       label={label}
@@ -20,8 +27,9 @@ export function TextFieldWithIcon({ icon, value, label }: Props): JSX.Element {
           ),
         },
       }}
-      variant="standard"
+      variant="outlined"
       value={value}
+      onChange={onChange}
     />
   );
 }

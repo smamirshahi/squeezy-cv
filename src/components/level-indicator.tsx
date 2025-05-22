@@ -2,12 +2,12 @@ import { Box, SvgIcon } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
-import { ApplicationStyle } from "../common/custom-types";
 import { customColors } from "../common/custom-styles";
+import { SkillItem } from "../types/json-types";
 
 interface Props {
   /** How to show the skill level */
-  indicatorType: ApplicationStyle["skillIndicatorType"];
+  indicatorType: SkillItem["rating"];
 
   /** The percentage of the skill */
   percentage: number;

@@ -7,73 +7,23 @@ import {
   AccordionDetails,
   Accordion,
 } from "@mui/material";
-import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import {
+  cvDataSelector,
+  updateExperienceBulletPoint,
+  updateExperience,
+  removeExperience,
+  addExperience,
+  addBulletPoint,
+  removeBulletPoint,
+} from "@src/store/applicant/applicant-slice";
 
-type WorkExperience = {
-  id: number;
-  jobTitle: string;
-  company: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  description: string[];
-};
-
-export function ExperienceForm() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([]);
-
-  function handleChange<K extends keyof WorkExperience>(
-    id: number,
-    key: K,
-    value: WorkExperience[K]
-  ): void {
-    setExperiences((prev) =>
-      prev.map((experience) =>
-        experience.id === id ? { ...experience, [key]: value } : experience
-      )
-    );
-  }
-
-  function handleDescriptionChange(
-    id: number,
-    index: number,
-    value: string
-  ): void {
-    setExperiences((prev) =>
-      prev.map((experience) =>
-        experience.id === id
-          ? {
-              ...experience,
-              description: experience.description.map((desc, i) =>
-                i === index ? value : desc
-              ),
-            }
-          : experience
-      )
-    );
-  }
-
-  function addExperience(): void {
-    setExperiences((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        jobTitle: "",
-        company: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        description: [""],
-      },
-    ]);
-  }
-
-  function removeExperience(id: number): void {
-    setExperiences((prev) => prev.filter((exp) => exp.id !== id));
-  }
+export function SettingsWorkExperience() {
+  const dispatch = useAppDispatch();
+  const { experiences } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>
@@ -89,11 +39,17 @@ export function ExperienceForm() {
                   label="Job Title"
                   value={exp.jobTitle}
                   onChange={(event) =>
-                    handleChange(exp.id, "jobTitle", event.target.value)
+                    dispatch(
+                      updateExperience({
+                        id: exp.id,
+                        key: "jobTitle",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeExperience(exp.id)}>
+                <IconButton onClick={() => dispatch(removeExperience(exp.id))}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -103,7 +59,13 @@ export function ExperienceForm() {
                   label="Company"
                   value={exp.company}
                   onChange={(event) =>
-                    handleChange(exp.id, "company", event.target.value)
+                    dispatch(
+                      updateExperience({
+                        id: exp.id,
+                        key: "company",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
@@ -111,7 +73,13 @@ export function ExperienceForm() {
                   label="Location"
                   value={exp.location}
                   onChange={(event) =>
-                    handleChange(exp.id, "location", event.target.value)
+                    dispatch(
+                      updateExperience({
+                        id: exp.id,
+                        key: "location",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   fullWidth
                 />
@@ -123,7 +91,13 @@ export function ExperienceForm() {
                   type="date"
                   value={exp.startDate}
                   onChange={(event) =>
-                    handleChange(exp.id, "startDate", event.target.value)
+                    dispatch(
+                      updateExperience({
+                        id: exp.id,
+                        key: "startDate",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   InputLabelProps={{ shrink: true }}
                   fullWidth
@@ -133,13 +107,18 @@ export function ExperienceForm() {
                   type="date"
                   value={exp.endDate}
                   onChange={(event) =>
-                    handleChange(exp.id, "endDate", event.target.value)
+                    dispatch(
+                      updateExperience({
+                        id: exp.id,
+                        key: "endDate",
+                        value: event.target.value,
+                      })
+                    )
                   }
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
               </Box>
-              {/* Bullet Points for Description */}
               <Box
                 sx={{
                   display: "flex",
@@ -148,9 +127,9 @@ export function ExperienceForm() {
                   mb: 2,
                 }}
               >
-                {exp.description.map((point, idx) => (
+                {exp.bulletPoints.map((point, index) => (
                   <Box
-                    key={idx}
+                    key={index}
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -158,29 +137,24 @@ export function ExperienceForm() {
                     }}
                   >
                     <TextField
-                      label={`Bullet Point ${idx + 1}`}
+                      label={`Bullet Point ${index + 1}`}
                       value={point}
                       onChange={(event) =>
-                        handleDescriptionChange(exp.id, idx, event.target.value)
+                        dispatch(
+                          updateExperienceBulletPoint({
+                            id: exp.id,
+                            index,
+                            value: event.target.value,
+                          })
+                        )
                       }
                       fullWidth
                     />
                     <IconButton
                       onClick={() => {
-                        setExperiences((prev) =>
-                          prev.map((experience) =>
-                            experience.id === exp.id
-                              ? {
-                                  ...experience,
-                                  description: experience.description.filter(
-                                    (_, i) => i !== idx
-                                  ),
-                                }
-                              : experience
-                          )
-                        );
+                        dispatch(removeBulletPoint({ id: exp.id, index }));
                       }}
-                      disabled={exp.description.length === 1}
+                      disabled={exp.bulletPoints.length === 1}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -189,16 +163,7 @@ export function ExperienceForm() {
                 <Box>
                   <IconButton
                     onClick={() => {
-                      setExperiences((prev) =>
-                        prev.map((experience) =>
-                          experience.id === exp.id
-                            ? {
-                                ...experience,
-                                description: [...experience.description, ""],
-                              }
-                            : experience
-                        )
-                      );
+                      dispatch(addBulletPoint({ id: exp.id }));
                     }}
                   >
                     <AddIcon />
@@ -208,7 +173,7 @@ export function ExperienceForm() {
             </Box>
           ))}
 
-          <Button variant="contained" onClick={addExperience}>
+          <Button variant="contained" onClick={() => dispatch(addExperience())}>
             Add Work Experience
           </Button>
         </Box>

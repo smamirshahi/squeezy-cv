@@ -1,17 +1,17 @@
 import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid } from "@mui/material";
-import { ExperienceProps } from "../../common/custom-types";
 import { DatePeriod } from "../../components/date-period";
 import { BulletPoints } from "../../components/bullet-points";
 import { LocationWithIcon } from "../../components/location-with-icon";
+import { Experience } from "../../types/json-types";
 
 interface Props {
   /** data for each experience */
-  experience: ExperienceProps;
+  experience: Experience;
 }
 
 /** Renders a single experience section */
-export function ExperiencesSubsection({ experience }: Props): JSX.Element {
+export function ExperienceSubsection({ experience }: Props): JSX.Element {
   return (
     <Grid
       container
@@ -19,18 +19,14 @@ export function ExperiencesSubsection({ experience }: Props): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "10px" }}
     >
-      <SubsectionText text={experience.title} isBold={true} />
-      <BodyText text={experience.institute} />
+      <SubsectionText text={experience.jobTitle} isBold={true} />
+      <BodyText text={experience.company} />
       <Grid container direction="row" alignItems="center">
-        <DatePeriod datePeriod={experience.datePeriod} />
+        <DatePeriod
+          datePeriod={{ start: experience.startDate, end: experience.endDate }}
+        />
         <LocationWithIcon place={experience.location} />
       </Grid>
-      {experience.dissertationTitle && (
-        <BodyText
-          text={`Dissertation Title: ${experience.dissertationTitle}`}
-          isBold={true}
-        />
-      )}
       {experience.bulletPoints && (
         <BulletPoints bulletPoints={experience.bulletPoints} />
       )}

@@ -1,13 +1,10 @@
 import { Grid } from "@mui/material";
 import { BodyText, SectionTitle } from "../common/custom-typography";
-import { ProfessionalSummaryProps } from "../common/custom-types";
+import { useAppSelector } from "../store/store-helper";
+import { cvDataSelector } from "../store/applicant/applicant-slice";
 
-interface Props {
-  /** data for professional summary */
-  summary: ProfessionalSummaryProps;
-}
-
-export function ProfessionalSummary({ summary }: Props): JSX.Element {
+export function ProfessionalSummary(): JSX.Element {
+  const { professionalSummary } = useAppSelector(cvDataSelector);
   return (
     <Grid
       container
@@ -16,7 +13,7 @@ export function ProfessionalSummary({ summary }: Props): JSX.Element {
       sx={{ mb: "20px" }}
     >
       <SectionTitle text="Professional Summary" />
-      <BodyText text={summary.summary} />
+      <BodyText text={professionalSummary} />
     </Grid>
   );
 }

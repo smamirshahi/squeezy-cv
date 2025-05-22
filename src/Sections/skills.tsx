@@ -4,30 +4,27 @@ import {
   SubsectionText,
 } from "../common/custom-typography";
 import { Grid } from "@mui/material";
-import { ApplicationStyle, SkillWithLevelProps } from "../common/custom-types";
 import { LevelIndicator } from "../components/level-indicator";
-import { templateSelector } from "../store/ui/ui-slice";
 import { useAppSelector } from "../store/store-helper";
-
-interface Props {
-  /** The skills the user has */
-  skills: SkillWithLevelProps[];
-
-  /** How to show the skill level */
-  indicatorType: ApplicationStyle["skillIndicatorType"];
-}
+import {
+  cvDataSelector,
+  styleSelector,
+} from "../store/applicant/applicant-slice";
 
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */
-export function Skills({ skills, indicatorType }: Props): JSX.Element {
-  const template = useAppSelector(templateSelector);
+export function Skills(): JSX.Element {
+  const { template } = useAppSelector(styleSelector);
+  const { skills } = useAppSelector(cvDataSelector);
+  const { ratingIcon } = useAppSelector(styleSelector);
+
   return (
     <>
       <SectionTitle text="Skills" />
       {skills.map((skill) => (
         <>
           <SubsectionText
-            text={skill.mainSkillName}
+            text={skill.category}
             customSx={{ textAlign: "left" }}
           />
           <Grid
@@ -35,12 +32,12 @@ export function Skills({ skills, indicatorType }: Props): JSX.Element {
             direction={template === "one-column" ? "row" : "column"}
             alignItems="flex-start"
           >
-            {skill.subSkill.map((subSkill) => (
+            {skill.items.map((item) => (
               <Grid container direction="row" alignItems="center">
-                <BodyText text={subSkill.name} customSx={{ mr: "10px" }} />
+                <BodyText text={item.name} customSx={{ mr: "10px" }} />
                 <LevelIndicator
-                  indicatorType={indicatorType}
-                  percentage={subSkill.percentage}
+                  indicatorType={ratingIcon}
+                  percentage={item.rating}
                 />
               </Grid>
             ))}

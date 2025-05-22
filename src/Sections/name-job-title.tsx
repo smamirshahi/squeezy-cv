@@ -1,13 +1,10 @@
 import { Grid } from "@mui/material";
 import { ResumeTitle, SubsectionText } from "../common/custom-typography";
-import { NameJobTitleProps } from "../common/custom-types";
+import { cvDataSelector } from "../store/applicant/applicant-slice";
+import { useAppSelector } from "@src/store/store-helper";
 
-interface Props {
-  /** Name and job title */
-  nameJobTitle: NameJobTitleProps;
-}
-
-export function NameJobTitle({ nameJobTitle }: Props): JSX.Element {
+export function NameJobTitle(): JSX.Element {
+  const { personalInfo } = useAppSelector(cvDataSelector);
   return (
     <Grid
       container
@@ -15,8 +12,8 @@ export function NameJobTitle({ nameJobTitle }: Props): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <ResumeTitle text={nameJobTitle.name} />
-      <SubsectionText text={nameJobTitle.currentJobTitle} />
+      <ResumeTitle text={personalInfo.name} />
+      <SubsectionText text={personalInfo.jobTitle} />
     </Grid>
   );
 }
