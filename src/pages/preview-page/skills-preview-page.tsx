@@ -3,8 +3,7 @@ import {
   SectionTitle,
   SubsectionText,
 } from "@src/components/custom-typography";
-import { Grid } from "@mui/material";
-import { LevelIndicator } from "../../components/level-indicator";
+import { Grid, Rating } from "@mui/material";
 import { useAppSelector } from "../../store/store-helper";
 import {
   cvDataSelector,
@@ -16,7 +15,6 @@ import {
 export function SkillsPreviewPage(): JSX.Element {
   const { template } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
-  const { ratingIcon } = useAppSelector(styleSelector);
 
   return (
     <>
@@ -35,10 +33,7 @@ export function SkillsPreviewPage(): JSX.Element {
             {skill.items.map((item) => (
               <Grid container direction="row" alignItems="center">
                 <BodyText text={item.name} customSx={{ mr: "10px" }} />
-                <LevelIndicator
-                  indicatorType={ratingIcon}
-                  percentage={item.rating}
-                />
+                <Rating value={item.rating} precision={0.5} />
               </Grid>
             ))}
           </Grid>
