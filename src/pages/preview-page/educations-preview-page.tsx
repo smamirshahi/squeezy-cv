@@ -6,8 +6,9 @@ import {
 } from "@src/components/custom-typography";
 import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 import { useAppSelector } from "../../store/store-helper";
-import { LocationWithIcon } from "../../components/location-with-icon";
 import { DatePeriod } from "@src/components/date-period";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { IconWithText } from "@src/components/icon-with-text";
 
 /** Renders the whole education part in preview page */
 export function EducationsPreviewPage(): JSX.Element {
@@ -39,7 +40,7 @@ export function EducationsPreviewPage(): JSX.Element {
                 end: education.endDate,
               }}
             />
-            <LocationWithIcon place={education.location} />
+            <IconWithText icon={LocationOnIcon} text={education.location} />
           </Grid>
           {education.dissertationTitle && (
             <BodyText

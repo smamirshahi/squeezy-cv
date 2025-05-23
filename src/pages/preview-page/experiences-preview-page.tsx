@@ -7,8 +7,10 @@ import {
 import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 import { useAppSelector } from "../../store/store-helper";
 import { DatePeriod } from "@src/components/date-period";
-import { BulletPoints } from "@src/components/bullet-points";
-import { LocationWithIcon } from "../../components/location-with-icon";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { IconWithText } from "@src/components/icon-with-text";
+import { customColors } from "@src/common/custom-styles";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element {
@@ -40,10 +42,25 @@ export function ExperiencesPreviewPage(): JSX.Element {
                 end: experience.endDate,
               }}
             />
-            <LocationWithIcon place={experience.location} />
+            <IconWithText icon={LocationOnIcon} text={experience.location} />
           </Grid>
           {experience.bulletPoints && (
-            <BulletPoints bulletPoints={experience.bulletPoints} />
+            // <BulletPoints bulletPoints={experience.bulletPoints} />
+            <>
+              {experience.bulletPoints.map((bulletPoint, index) => (
+                <IconWithText
+                  key={index}
+                  icon={FiberManualRecordIcon}
+                  text={bulletPoint}
+                  customTextSx={{ color: customColors.gray }}
+                  customIconSx={{
+                    color: customColors.gray,
+                    width: "10px",
+                    mr: "5px",
+                  }}
+                />
+              ))}
+            </>
           )}
         </Grid>
       ))}

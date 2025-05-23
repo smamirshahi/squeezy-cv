@@ -6,7 +6,7 @@ interface Props {
   icon: React.ElementType;
 
   /** The text to be shown */
-  text: string;
+  text?: string;
 
   /** Styles for the icon */
   customIconSx?: SxProps;
@@ -22,6 +22,10 @@ export function IconWithText({
   customIconSx,
   customTextSx,
 }: Props): JSX.Element {
+  if (!text) {
+    return <></>;
+  }
+
   return (
     <Grid container sx={{ mr: "20px" }} direction="row">
       <SvgIcon
