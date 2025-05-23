@@ -4,7 +4,7 @@ import {
   SectionTitle,
   SubsectionText,
 } from "../../common/custom-typography";
-import { cvDataSelector } from "../../store/applicant/applicant-slice";
+import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 import { useAppSelector } from "../../store/store-helper";
 import { LocationWithIcon } from "../../components/location-with-icon";
 import { DatePeriod } from "@src/components/date-period";

@@ -9,7 +9,7 @@ import { useAppSelector } from "../../store/store-helper";
 import {
   cvDataSelector,
   styleSelector,
-} from "../../store/applicant/applicant-slice";
+} from "../../store/cv-data/cv-data-slice";
 
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */

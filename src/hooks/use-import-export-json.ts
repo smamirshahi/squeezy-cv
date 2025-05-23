@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { CVFile, CVFileSchema } from "../custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "../store/store-helper";
-import { cvDataSelector, setCvData } from "../store/applicant/applicant-slice";
+import { cvDataSelector, setCvData } from "../store/cv-data/cv-data-slice";
 
 interface ReturnProps {
   handleExport: () => void;

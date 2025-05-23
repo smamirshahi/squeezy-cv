@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
-import { setTemplate } from "../store/applicant/applicant-slice";
+import { setTemplate } from "../store/cv-data/cv-data-slice";
 
 interface Props {
   printReference: React.RefObject<HTMLDivElement | null>;

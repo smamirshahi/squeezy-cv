@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { applicantReducer } from "./applicant/applicant-slice";
+import { cvDataReducer } from "./cv-data/cv-data-slice";
 
 export const rootReducer = {
-  applicant: applicantReducer,
+  cvData: cvDataReducer,
 };
 
 export const store = configureStore({

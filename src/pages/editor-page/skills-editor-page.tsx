@@ -19,7 +19,7 @@ import {
   removeSkillItem,
   updateSkillCategory,
   updateSkillItem,
-} from "@src/store/applicant/applicant-slice";
+} from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
 export function SkillsEditorPage() {

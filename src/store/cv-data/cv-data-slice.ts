@@ -14,12 +14,12 @@ import {
   findEducation,
   findExperience,
   findSkill,
-} from "./application-slice-helper";
+} from "./cv-data-slice-helper";
 
-/** State of the current Applicant */
-export type ApplicantState = CVFile;
+/** State of the current CV */
+export type cvDataState = CVFile;
 
-export const initialState: ApplicantState = {
+export const initialState: cvDataState = {
   version: "1.0",
   data: {
     personalInfo: {
@@ -45,9 +45,9 @@ export const initialState: ApplicantState = {
   },
 };
 
-/** Slice to access state of applicant */
-const applicantSlice = createSlice({
-  name: "applicant",
+/** Slice to access state of cv data */
+const cvDataSlice = createSlice({
+  name: "cvData",
   initialState,
   reducers: {
     setCvData(state, action: PayloadAction<CVData>) {
@@ -55,7 +55,7 @@ const applicantSlice = createSlice({
     },
 
     updatePersonalInfo<K extends keyof PersonalInfo>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         field: K;
         value: PersonalInfo[K];
@@ -65,7 +65,7 @@ const applicantSlice = createSlice({
     },
 
     updateContactInfo<K extends keyof ContactInfo>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         field: K;
         value: ContactInfo[K];
@@ -102,7 +102,7 @@ const applicantSlice = createSlice({
     },
 
     updateExperience: <K extends keyof Experience>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -163,7 +163,7 @@ const applicantSlice = createSlice({
     },
 
     updateEducation: <K extends keyof Education>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -198,7 +198,7 @@ const applicantSlice = createSlice({
     },
 
     updateSkillCategory: <K extends keyof SkillCategory>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -212,7 +212,7 @@ const applicantSlice = createSlice({
     },
 
     updateSkillItem: <K extends keyof SkillItem>(
-      state: ApplicantState,
+      state: cvDataState,
       action: PayloadAction<{
         id: string;
         index: number;
@@ -252,17 +252,17 @@ const applicantSlice = createSlice({
       state.style.template = action.payload;
     },
 
-    resetApplicantState: () => initialState,
+    resetCvDataState: () => initialState,
   },
   selectors: {
-    versionSelector: (state: ApplicantState) => state.version,
-    cvDataSelector: (state: ApplicantState) => state.data,
-    styleSelector: (state: ApplicantState) => state.style,
+    versionSelector: (state: cvDataState) => state.version,
+    cvDataSelector: (state: cvDataState) => state.data,
+    styleSelector: (state: cvDataState) => state.style,
   },
 });
 
 export const { versionSelector, cvDataSelector, styleSelector } =
-  applicantSlice.selectors;
+  cvDataSlice.selectors;
 export const {
   setCvData,
   setTemplate,
@@ -284,7 +284,7 @@ export const {
   addSkillItem,
   removeSkillItem,
   updateSkillItem,
-  resetApplicantState,
-} = applicantSlice.actions;
+  resetCvDataState,
+} = cvDataSlice.actions;
 
-export const applicantReducer = applicantSlice.reducer;
+export const cvDataReducer = cvDataSlice.reducer;
