@@ -6,12 +6,12 @@ import {
   updateProfessionalSummary,
 } from "../../store/applicant/applicant-slice";
 import { useSelector } from "react-redux";
-import { SettingsWorkExperience } from "../settings-page/settings-work-experience";
-import { SettingsEducation } from "../settings-page/settings-education";
-import { SettingsSkills } from "../settings-page/settings-skills";
+import { SettingsPageExperience } from "../settings-page/settings-page-experience";
+import { SettingsPageEducation } from "../settings-page/settings-page-education";
+import { SettingsPageSkills } from "../settings-page/settings-page-skills";
 import { useAppDispatch } from "../../store/store-helper";
-import { SettingsPersonalInfo } from "../settings-page/settings-personal-info";
-import { SettingsContactInfo } from "../settings-page/settings-contact-info";
+import { SettingsPagePersonalInfo } from "../settings-page/settings-page-personal-info";
+import { SettingsPageContactInfo } from "../settings-page/settings-page-contact-info";
 
 interface Props {
   /** The reference to the content */
@@ -36,8 +36,8 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <TemplateButton printReference={contentRef} />
-      <SettingsPersonalInfo />
-      <SettingsContactInfo />
+      <SettingsPagePersonalInfo />
+      <SettingsPageContactInfo />
 
       <TextField
         label="Professional Summary"
@@ -56,9 +56,9 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         }
       />
 
-      <SettingsWorkExperience />
-      <SettingsEducation />
-      <SettingsSkills />
+      <SettingsPageExperience />
+      <SettingsPageEducation />
+      <SettingsPageSkills />
     </Paper>
   );
 }

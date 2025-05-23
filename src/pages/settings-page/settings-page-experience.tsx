@@ -21,7 +21,7 @@ import {
   removeBulletPoint,
 } from "@src/store/applicant/applicant-slice";
 
-export function SettingsWorkExperience() {
+export function SettingsPageExperience() {
   const dispatch = useAppDispatch();
   const { experiences } = useAppSelector(cvDataSelector);
 

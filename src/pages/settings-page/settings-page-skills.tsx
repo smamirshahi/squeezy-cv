@@ -22,7 +22,7 @@ import {
 } from "@src/store/applicant/applicant-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
-export function SettingsSkills() {
+export function SettingsPageSkills() {
   const dispatch = useAppDispatch();
   const { skills } = useAppSelector(cvDataSelector);
 
