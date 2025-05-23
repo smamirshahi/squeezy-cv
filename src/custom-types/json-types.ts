@@ -1,7 +1,6 @@
 import {
   Object,
   String,
-  Number,
   Array,
   Static,
   Union,
@@ -90,8 +89,20 @@ const SkillItemSchema = Object({
   /** The name of the skill item */
   name: String,
 
-  /** The number of the skill item from 1 (no skill) to 10 (excellent) */
-  rating: Number.withConstraint((n) => n >= 1 && n <= 10),
+  /** The number of the skill item from 0 (no skill) to 10 (excellent) */
+  rating: Union(
+    Literal(0),
+    Literal(0.5),
+    Literal(1.0),
+    Literal(1.5),
+    Literal(2.0),
+    Literal(2.5),
+    Literal(3.0),
+    Literal(3.5),
+    Literal(4.0),
+    Literal(4.5),
+    Literal(5.0)
+  ),
 });
 
 const SkillCategorySchema = Object({

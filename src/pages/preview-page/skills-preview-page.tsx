@@ -10,7 +10,6 @@ import {
   styleSelector,
 } from "../../store/cv-data/cv-data-slice";
 
-// FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage(): JSX.Element {
   const { template } = useAppSelector(styleSelector);

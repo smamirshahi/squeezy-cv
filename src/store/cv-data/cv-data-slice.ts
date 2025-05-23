@@ -184,7 +184,6 @@ const cvDataSlice = createSlice({
           {
             id: nanoid(),
             name: "",
-            // FIXME: Correct the number in here
             rating: 0,
           },
         ],
