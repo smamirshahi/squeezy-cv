@@ -11,7 +11,7 @@ import {
 } from "@src/store/applicant/applicant-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
-export function SettingsPageContactInfo(): JSX.Element {
+export function ContactInfoEditorPage(): JSX.Element {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
 

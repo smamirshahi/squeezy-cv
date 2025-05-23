@@ -5,7 +5,7 @@ import {
 } from "@src/store/applicant/applicant-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
-export function SettingsPagePersonalInfo(): JSX.Element {
+export function PersonalInfoEditorPage(): JSX.Element {
   const dispatch = useAppDispatch();
   const { personalInfo } = useAppSelector(cvDataSelector);
 

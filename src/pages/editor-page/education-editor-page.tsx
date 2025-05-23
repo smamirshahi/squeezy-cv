@@ -17,7 +17,7 @@ import {
   updateEducation,
 } from "@src/store/applicant/applicant-slice";
 
-export function SettingsPageEducation() {
+export function EducationEditorPage() {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
 

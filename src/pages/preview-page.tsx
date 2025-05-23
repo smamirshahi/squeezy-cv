@@ -1,15 +1,15 @@
 import { Paper } from "@mui/material";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
-import { TemplateSelection } from "../../templates/template-selection";
-import { useAppSelector } from "../../store/store-helper";
-import { styleSelector } from "../../store/applicant/applicant-slice";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../common/custom-styles";
+import { TemplateSelection } from "../templates/template-selection";
+import { useAppSelector } from "../store/store-helper";
+import { styleSelector } from "../store/applicant/applicant-slice";
 
 interface Props {
   /** The reference to the content */
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function CVPage({ contentRef }: Props): JSX.Element {
+export function PreviewPage({ contentRef }: Props): JSX.Element {
   const { template } = useAppSelector(styleSelector);
 
   return (

@@ -1,24 +1,24 @@
 import { Paper, TextField } from "@mui/material";
-import { TemplateButton } from "../../components/template-button";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../../common/custom-styles";
+import { TemplateButton } from "../components/template-button";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../common/custom-styles";
 import {
   cvDataSelector,
   updateProfessionalSummary,
-} from "../../store/applicant/applicant-slice";
+} from "../store/applicant/applicant-slice";
 import { useSelector } from "react-redux";
-import { SettingsPageExperience } from "../settings-page/settings-page-experience";
-import { SettingsPageEducation } from "../settings-page/settings-page-education";
-import { SettingsPageSkills } from "../settings-page/settings-page-skills";
-import { useAppDispatch } from "../../store/store-helper";
-import { SettingsPagePersonalInfo } from "../settings-page/settings-page-personal-info";
-import { SettingsPageContactInfo } from "../settings-page/settings-page-contact-info";
+import { ExperienceEditorPage } from "./editor-page/experience-editor-page";
+import { EducationEditorPage } from "./editor-page/education-editor-page";
+import { SkillsEditorPage } from "./editor-page/skills-editor-page";
+import { useAppDispatch } from "../store/store-helper";
+import { PersonalInfoEditorPage } from "./editor-page/personal-info-editor-page";
+import { ContactInfoEditorPage } from "./editor-page/contact-info-editor-page";
 
 interface Props {
   /** The reference to the content */
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function SettingsPage({ contentRef }: Props): JSX.Element {
+export function EditorPage({ contentRef }: Props): JSX.Element {
   const { professionalSummary } = useSelector(cvDataSelector);
   const dispatch = useAppDispatch();
 
@@ -36,8 +36,8 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <TemplateButton printReference={contentRef} />
-      <SettingsPagePersonalInfo />
-      <SettingsPageContactInfo />
+      <PersonalInfoEditorPage />
+      <ContactInfoEditorPage />
 
       <TextField
         label="Professional Summary"
@@ -56,9 +56,9 @@ export function SettingsPage({ contentRef }: Props): JSX.Element {
         }
       />
 
-      <SettingsPageExperience />
-      <SettingsPageEducation />
-      <SettingsPageSkills />
+      <ExperienceEditorPage />
+      <EducationEditorPage />
+      <SkillsEditorPage />
     </Paper>
   );
 }

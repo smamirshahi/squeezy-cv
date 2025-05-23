@@ -1,8 +1,8 @@
 import "./App.css";
 import { Box } from "@mui/material";
 import { useRef } from "react";
-import { SettingsPage } from "./pages/cv-page/settings-page";
-import { CVPage } from "./pages/cv-page/cv-page";
+import { EditorPage } from "./pages/editor-page";
+import { PreviewPage } from "./pages/preview-page";
 
 export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -20,8 +20,8 @@ export function App() {
         backgroundColor: "#f0f0f0",
       }}
     >
-      <SettingsPage contentRef={contentRef} />
-      <CVPage contentRef={contentRef} />
+      <EditorPage contentRef={contentRef} />
+      <PreviewPage contentRef={contentRef} />
     </Box>
   );
 }
