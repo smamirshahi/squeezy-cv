@@ -3,7 +3,7 @@ import { Grid } from "@mui/material";
 import { DatePeriod } from "../../components/date-period";
 import { BulletPoints } from "../../components/bullet-points";
 import { LocationWithIcon } from "../../components/location-with-icon";
-import { Experience } from "../../types/json-types";
+import { Experience } from "../../custom-types/json-types";
 
 interface Props {
   /** data for each experience */

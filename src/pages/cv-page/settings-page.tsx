@@ -6,12 +6,12 @@ import {
   updateProfessionalSummary,
 } from "../../store/applicant/applicant-slice";
 import { useSelector } from "react-redux";
-import { SettingsWorkExperience } from "./settings-work-experience";
-import { SettingsEducation } from "./settings-education";
-import { SettingsSkills } from "./settings-skills";
+import { SettingsWorkExperience } from "../settings-page/settings-work-experience";
+import { SettingsEducation } from "../settings-page/settings-education";
+import { SettingsSkills } from "../settings-page/settings-skills";
 import { useAppDispatch } from "../../store/store-helper";
-import { SettingsPersonalInfo } from "./settings-personal-info";
-import { SettingsContactInfo } from "./settings-contact-info";
+import { SettingsPersonalInfo } from "../settings-page/settings-personal-info";
+import { SettingsContactInfo } from "../settings-page/settings-contact-info";
 
 interface Props {
   /** The reference to the content */

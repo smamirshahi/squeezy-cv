@@ -80,7 +80,7 @@ const EducationSchema = Object({
   endDate: String.optional(),
 
   /** The title of the education dissertation */
-  dissertationTitle: String,
+  dissertationTitle: String.optional(),
 });
 
 const SkillItemSchema = Object({

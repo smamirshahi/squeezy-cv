@@ -2,7 +2,7 @@ import { BodyText, SubsectionText } from "../../common/custom-typography";
 import { Grid } from "@mui/material";
 import { DatePeriod } from "../../components/date-period";
 import { LocationWithIcon } from "../../components/location-with-icon";
-import { Education } from "../../types/json-types";
+import { Education } from "../../custom-types/json-types";
 
 interface Props {
   /** data for each education */

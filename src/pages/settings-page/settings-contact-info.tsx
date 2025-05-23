@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { TextFieldWithIcon } from "./text-field-with-icon";
+import { TextFieldWithIcon } from "../../components/text-field-with-icon";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";

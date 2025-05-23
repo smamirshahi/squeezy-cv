@@ -3,7 +3,7 @@ import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import CircleIcon from "@mui/icons-material/Circle";
 import { customColors } from "../common/custom-styles";
-import { SkillItem } from "../types/json-types";
+import { SkillItem } from "../custom-types/json-types";
 
 interface Props {
   /** How to show the skill level */

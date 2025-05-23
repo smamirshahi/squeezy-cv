@@ -1,4 +1,8 @@
-import { Education, Experience, SkillCategory } from "@src/types/json-types";
+import {
+  Education,
+  Experience,
+  SkillCategory,
+} from "@src/custom-types/json-types";
 import { ApplicantState } from "./applicant-slice";
 
 export function findExperience(

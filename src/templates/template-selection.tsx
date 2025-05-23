@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { OneColumnTemplate } from "./one-column-template";
 import { TwoColumnTemplate } from "./two-column-template";
 import { cvDataSelector } from "../store/applicant/applicant-slice";
-import { Style } from "../types/json-types";
+import { Style } from "../custom-types/json-types";
 import { useAppSelector } from "@src/store/store-helper";
 
 interface Props {

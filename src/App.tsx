@@ -1,7 +1,7 @@
 import "./App.css";
 import { Box } from "@mui/material";
 import { useRef } from "react";
-import { SettingsPage } from "./pages/settings-page/settings-page";
+import { SettingsPage } from "./pages/cv-page/settings-page";
 import { CVPage } from "./pages/cv-page/cv-page";
 
 export function App() {
