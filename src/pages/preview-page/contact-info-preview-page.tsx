@@ -3,7 +3,7 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid } from "@mui/material";
-import { IconWithText } from "../../common/icon-with-text";
+import { IconWithText } from "../../components/icon-with-text";
 import { LocationWithIcon } from "../../components/location-with-icon";
 import { useAppSelector } from "../../store/store-helper";
 import {

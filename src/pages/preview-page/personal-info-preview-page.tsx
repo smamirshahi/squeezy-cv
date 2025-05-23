@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ResumeTitle, SubsectionText } from "../../common/custom-typography";
+import { ResumeTitle, SubsectionText } from "@src/components/custom-typography";
 import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 import { useAppSelector } from "@src/store/store-helper";
 

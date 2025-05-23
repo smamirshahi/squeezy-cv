@@ -2,7 +2,7 @@ import {
   BodyText,
   SectionTitle,
   SubsectionText,
-} from "../../common/custom-typography";
+} from "@src/components/custom-typography";
 import { Grid } from "@mui/material";
 import { LevelIndicator } from "../../components/level-indicator";
 import { useAppSelector } from "../../store/store-helper";

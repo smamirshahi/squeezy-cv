@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { BodyText, SectionTitle } from "../../common/custom-typography";
+import { BodyText, SectionTitle } from "@src/components/custom-typography";
 import { useAppSelector } from "../../store/store-helper";
 import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 

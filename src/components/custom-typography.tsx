@@ -1,5 +1,5 @@
 import { SxProps, Typography } from "@mui/material";
-import { customColors } from "./custom-styles";
+import { customColors } from "@src/common/custom-styles";
 
 interface TextProps {
   /** The text of the subsection */
@@ -8,11 +8,15 @@ interface TextProps {
   /** Whether it is bold or not */
   isBold?: boolean;
 
-  customSx?: SxProps
+  customSx?: SxProps;
 }
 
 /** The title for the whole resume */
-export function ResumeTitle({ text, isBold = false, customSx }: TextProps): JSX.Element {
+export function ResumeTitle({
+  text,
+  isBold = false,
+  customSx,
+}: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -20,7 +24,7 @@ export function ResumeTitle({ text, isBold = false, customSx }: TextProps): JSX.
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "bold" : "normal",
         textTransform: "uppercase",
-        ...customSx
+        ...customSx,
       }}
       gutterBottom
     >
@@ -30,7 +34,11 @@ export function ResumeTitle({ text, isBold = false, customSx }: TextProps): JSX.
 }
 
 /** The Title of a section */
-export function SectionTitle({ text, isBold = false, customSx }: TextProps): JSX.Element {
+export function SectionTitle({
+  text,
+  isBold = false,
+  customSx,
+}: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -40,7 +48,7 @@ export function SectionTitle({ text, isBold = false, customSx }: TextProps): JSX
         borderBottom: `2px solid ${customColors.darkBlue}`,
         textTransform: "uppercase",
         color: customColors.darkBlue,
-        ...customSx
+        ...customSx,
       }}
       gutterBottom
     >
@@ -53,7 +61,7 @@ export function SectionTitle({ text, isBold = false, customSx }: TextProps): JSX
 export function SubsectionText({
   text,
   isBold = false,
-  customSx
+  customSx,
 }: TextProps): JSX.Element {
   return (
     <Typography
@@ -61,7 +69,7 @@ export function SubsectionText({
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "bold" : "normal",
-        ...customSx
+        ...customSx,
       }}
     >
       {text}
@@ -70,7 +78,11 @@ export function SubsectionText({
 }
 
 /** The text for a normal body text */
-export function BodyText({ text, isBold = false, customSx }: TextProps): JSX.Element {
+export function BodyText({
+  text,
+  isBold = false,
+  customSx,
+}: TextProps): JSX.Element {
   return (
     <Typography
       sx={{
@@ -78,7 +90,7 @@ export function BodyText({ text, isBold = false, customSx }: TextProps): JSX.Ele
         fontFamily: "Calibri, sans-serif",
         fontWeight: isBold ? "bold" : "normal",
         textAlign: "left",
-        ...customSx
+        ...customSx,
       }}
     >
       {text}

@@ -1,5 +1,5 @@
 import { customColors } from "../common/custom-styles";
-import { IconWithText } from "../common/icon-with-text";
+import { IconWithText } from "./icon-with-text";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
 interface Props {

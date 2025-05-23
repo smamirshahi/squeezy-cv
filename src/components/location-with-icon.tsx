@@ -1,4 +1,4 @@
-import { IconWithText } from "../common/icon-with-text";
+import { IconWithText } from "./icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 interface Props {
