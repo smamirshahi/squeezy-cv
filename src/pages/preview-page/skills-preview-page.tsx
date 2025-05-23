@@ -2,18 +2,18 @@ import {
   BodyText,
   SectionTitle,
   SubsectionText,
-} from "../common/custom-typography";
+} from "../../common/custom-typography";
 import { Grid } from "@mui/material";
-import { LevelIndicator } from "../components/level-indicator";
-import { useAppSelector } from "../store/store-helper";
+import { LevelIndicator } from "../../components/level-indicator";
+import { useAppSelector } from "../../store/store-helper";
 import {
   cvDataSelector,
   styleSelector,
-} from "../store/applicant/applicant-slice";
+} from "../../store/applicant/applicant-slice";
 
 // FIXME: This needs to be completed
 /** Skills section (Areas of Expertise) */
-export function Skills(): JSX.Element {
+export function SkillsPreviewPage(): JSX.Element {
   const { template } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
   const { ratingIcon } = useAppSelector(styleSelector);

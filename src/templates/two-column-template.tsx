@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
-import { ContactInformation } from "../sections/contact-information";
-import { Experiences } from "../sections/experiences/experiences";
-import { NameJobTitle } from "../sections/name-job-title";
-import { ProfessionalSummary } from "../sections/professional-summary";
-import { Skills } from "../sections/skills";
+import { ContactInfoPreviewPage } from "../pages/preview-page/contact-info-preview-page";
+import { ExperiencesPreviewPage } from "../pages/preview-page/experiences-preview-page";
+import { PersonalInfoPreviewPage } from "../pages/preview-page/personal-info-preview-page";
+import { SummaryPreviewPage } from "../pages/preview-page/summary-preview-page";
+import { SkillsPreviewPage } from "../pages/preview-page/skills-preview-page";
 
 /** Two column template */
 export function TwoColumnTemplate(): JSX.Element | null {
@@ -14,15 +14,15 @@ export function TwoColumnTemplate(): JSX.Element | null {
       justifyContent="flex-start"
       alignItems="flex-start"
     >
-      <NameJobTitle />
+      <PersonalInfoPreviewPage />
       <Grid size={{ xs: 8 }}>
-        <ProfessionalSummary />
-        <Experiences sectionTitle="Work Experience" />
-        <Experiences sectionTitle="Education" />
+        <SummaryPreviewPage />
+        <ExperiencesPreviewPage />
+        <ExperiencesPreviewPage />
       </Grid>
       <Grid size={{ xs: 4 }}>
-        <ContactInformation />
-        <Skills />
+        <ContactInfoPreviewPage />
+        <SkillsPreviewPage />
       </Grid>
     </Grid>
   );

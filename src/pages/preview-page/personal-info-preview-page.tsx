@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
-import { ResumeTitle, SubsectionText } from "../common/custom-typography";
-import { cvDataSelector } from "../store/applicant/applicant-slice";
+import { ResumeTitle, SubsectionText } from "../../common/custom-typography";
+import { cvDataSelector } from "../../store/applicant/applicant-slice";
 import { useAppSelector } from "@src/store/store-helper";
 
-export function NameJobTitle(): JSX.Element {
+export function PersonalInfoPreviewPage(): JSX.Element {
   const { personalInfo } = useAppSelector(cvDataSelector);
   return (
     <Grid

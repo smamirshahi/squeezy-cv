@@ -3,16 +3,16 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid } from "@mui/material";
-import { IconWithText } from "../common/icon-with-text";
-import { LocationWithIcon } from "../components/location-with-icon";
-import { useAppSelector } from "../store/store-helper";
+import { IconWithText } from "../../common/icon-with-text";
+import { LocationWithIcon } from "../../components/location-with-icon";
+import { useAppSelector } from "../../store/store-helper";
 import {
   cvDataSelector,
   styleSelector,
-} from "../store/applicant/applicant-slice";
+} from "../../store/applicant/applicant-slice";
 
 /** Contact Information (details) */
-export function ContactInformation(): JSX.Element {
+export function ContactInfoPreviewPage(): JSX.Element {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
