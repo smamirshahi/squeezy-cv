@@ -1,6 +1,6 @@
 import { Paper } from "@mui/material";
 import { TemplateButton } from "../components/template-button";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../common/custom-styles";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../custom-types/custom-styles";
 import { ExperienceEditorPage } from "./editor-page/experience-editor-page";
 import { EducationEditorPage } from "./editor-page/education-editor-page";
 import { SkillsEditorPage } from "./editor-page/skills-editor-page";

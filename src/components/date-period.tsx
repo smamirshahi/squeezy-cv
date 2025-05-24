@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { IconWithText } from "./icon-with-text";
-import { customColors, DATE_FORMAT } from "../common/custom-styles";
+import { customColors, DATE_FORMAT } from "../custom-types/custom-styles";
 
 interface DatePeriodProps {
   /** Date period with start and end */
