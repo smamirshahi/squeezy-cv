@@ -8,11 +8,12 @@ interface TextProps {
   /** Whether it is bold or not */
   isBold?: boolean;
 
+  /** Custom styles for the text */
   customSx?: SxProps;
 }
 
-/** The title for the whole resume */
-export function ResumeTitle({
+/** The title for the whole CV */
+export function CvTitle({
   text,
   isBold = false,
   customSx,

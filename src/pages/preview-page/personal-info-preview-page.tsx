@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ResumeTitle, SubsectionText } from "@src/components/cv-typography";
+import { CvTitle, SubsectionText } from "@src/components/cv-typography";
 import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
 import { useAppSelector } from "@src/store/store-helper";
 
@@ -12,7 +12,7 @@ export function PersonalInfoPreviewPage(): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <ResumeTitle text={personalInfo.name} />
+      <CvTitle text={personalInfo.name} />
       <SubsectionText text={personalInfo.jobTitle} />
     </Grid>
   );

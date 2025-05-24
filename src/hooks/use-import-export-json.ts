@@ -4,10 +4,20 @@ import { useAppDispatch, useAppSelector } from "../store/store-helper";
 import { cvDataSelector, setCvData } from "../store/cv-data/cv-data-slice";
 
 interface ReturnProps {
+  /**
+   * Handles the export of CV data to a JSON file.
+   * It creates a Blob from the CV data and triggers a download.
+   */
   handleExport: () => void;
+
+  /**
+   * Handles the import of CV data from a JSON file.
+   * It reads the file, parses it, and updates the CV data in the store.
+   */
   handleImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+/** Custom hook to handle importing and exporting CV data in JSON format */
 export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
   const cvData = useAppSelector(cvDataSelector);
