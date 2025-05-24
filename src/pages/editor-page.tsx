@@ -11,15 +11,13 @@ import { useImportExportJson } from "@src/hooks/use-import-export-json";
 import DownloadIcon from "@mui/icons-material/Download";
 import {
   ContactInfo,
-  Education,
-  Experience,
   PersonalInfo,
   ProfessionalSummary,
-  SkillCategory,
 } from "@src/custom-types/json-types";
 import { useState } from "react";
-import { cvDataSelector } from "@src/store/cv-data/cv-data-slice";
-import { useAppSelector } from "@src/store/store-helper";
+import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
 
 interface Props {
   /** The reference to the content */
@@ -27,22 +25,32 @@ interface Props {
 }
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const { handleExport } = useImportExportJson();
   const cvData = useAppSelector(cvDataSelector);
+  const { handleExport } = useImportExportJson();
+  const dispatch = useAppDispatch();
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(
     cvData.personalInfo
   );
+
   const [contactInfo, setContactInfo] = useState<ContactInfo>(
     cvData.contactInfo
   );
   const [summary, setSummary] = useState<ProfessionalSummary>(
     cvData.professionalSummary
   );
-  const [experiences, setExperiences] = useState<Experience[]>(
-    cvData.experiences
-  );
-  const [educations, setEducations] = useState<Education[]>(cvData.educations);
-  const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
+  const { experiences, educations, skills } = useEditorPageUpdate();
+
+  function updateCvData() {
+    const newCvData = {
+      personalInfo,
+      contactInfo,
+      professionalSummary: summary,
+      experiences,
+      educations,
+      skills,
+    };
+    dispatch(setCvData(newCvData));
+  }
 
   return (
     <Paper
@@ -67,15 +75,9 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         setContactInfo={setContactInfo}
       />
       <SummaryEditorPage summary={summary} setSummary={setSummary} />
-      <ExperienceEditorPage
-        experiences={experiences}
-        setExperiences={setExperiences}
-      />
-      <EducationEditorPage
-        educations={educations}
-        setEducations={setEducations}
-      />
-      <SkillsEditorPage skills={skills} setSkills={setSkills} />
+      <ExperienceEditorPage />
+      <EducationEditorPage />
+      <SkillsEditorPage />
       <Grid
         container
         direction="row"
@@ -83,7 +85,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         sx={{ mt: "20px" }}
         gap={2}
       >
-        <Button variant="contained" onClick={() => console.log("hello")}>
+        <Button variant="contained" onClick={updateCvData}>
           Apply
         </Button>
         <Button
