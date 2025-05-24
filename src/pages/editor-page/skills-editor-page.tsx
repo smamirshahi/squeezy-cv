@@ -21,6 +21,7 @@ import {
   updateSkillItem,
 } from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { isRatingAcceptable } from "@src/custom-types/type-guards";
 
 export function SkillsEditorPage() {
   const dispatch = useAppDispatch();
@@ -92,14 +93,16 @@ export function SkillsEditorPage() {
                     <Rating
                       value={skillItem.rating}
                       onChange={(_, newValue) => {
-                        dispatch(
-                          updateSkillItem({
-                            id: skill.id,
-                            index: idx,
-                            key: "rating",
-                            value: newValue ?? 0,
-                          })
-                        );
+                        if (isRatingAcceptable(newValue)) {
+                          dispatch(
+                            updateSkillItem({
+                              id: skill.id,
+                              index: idx,
+                              key: "rating",
+                              value: newValue ?? 0,
+                            })
+                          );
+                        }
                       }}
                       precision={0.5}
                     />
