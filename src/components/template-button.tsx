@@ -4,7 +4,6 @@ import { useReactToPrint } from "react-to-print";
 import { useImportExportJson } from "../hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
-import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import { setTemplate } from "../store/cv-data/cv-data-slice";
 
@@ -32,7 +31,7 @@ const VisuallyHiddenInput = styled("input")({
 export function TemplateButton({ printReference }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const dispatch = useDispatch();
-  const { handleExport, handleImport } = useImportExportJson();
+  const { handleImport } = useImportExportJson();
 
   return (
     <ButtonGroup
@@ -48,9 +47,6 @@ export function TemplateButton({ printReference }: Props): JSX.Element {
       </Button>
       <Button onClick={() => onPrintClicked()} startIcon={<PrintIcon />}>
         Print
-      </Button>
-      <Button onClick={handleExport} startIcon={<DownloadIcon />}>
-        Export
       </Button>
       {/* <pre>{JSON.stringify(cvData, null, 2)}</pre> */}
       <Button
