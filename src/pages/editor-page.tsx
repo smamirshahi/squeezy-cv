@@ -9,6 +9,8 @@ import { ContactInfoEditorPage } from "./editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "./editor-page/summary-editor-page";
 import { useImportExportJson } from "@src/hooks/use-import-export-json";
 import DownloadIcon from "@mui/icons-material/Download";
+import { PersonalInfo } from "@src/custom-types/json-types";
+import { useState } from "react";
 
 interface Props {
   /** The reference to the content */
@@ -17,6 +19,10 @@ interface Props {
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const { handleExport } = useImportExportJson();
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    name: "",
+    jobTitle: "",
+  });
 
   return (
     <Paper
@@ -32,7 +38,10 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <TemplateButton printReference={contentRef} />
-      <PersonalInfoEditorPage />
+      <PersonalInfoEditorPage
+        personalInfo={personalInfo}
+        setPersonalInfo={setPersonalInfo}
+      />
       <ContactInfoEditorPage />
       <SummaryEditorPage />
       <ExperienceEditorPage />

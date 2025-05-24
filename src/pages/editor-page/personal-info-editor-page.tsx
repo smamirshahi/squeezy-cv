@@ -1,14 +1,16 @@
 import { Box, TextField } from "@mui/material";
-import {
-  cvDataSelector,
-  updatePersonalInfo,
-} from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { PersonalInfo } from "@src/custom-types/json-types";
+import { SetStateFunction } from "@src/store/store-helper";
 
-export function PersonalInfoEditorPage(): JSX.Element {
-  const dispatch = useAppDispatch();
-  const { personalInfo } = useAppSelector(cvDataSelector);
+interface Props {
+  personalInfo: PersonalInfo;
+  setPersonalInfo: SetStateFunction<PersonalInfo>;
+}
 
+export function PersonalInfoEditorPage({
+  personalInfo,
+  setPersonalInfo,
+}: Props): JSX.Element {
   return (
     <Box display="flex" gap={2} mb={2}>
       <TextField
@@ -17,9 +19,7 @@ export function PersonalInfoEditorPage(): JSX.Element {
         variant="outlined"
         value={personalInfo.name}
         onChange={(event) =>
-          dispatch(
-            updatePersonalInfo({ field: "name", value: event.target.value })
-          )
+          setPersonalInfo((prev) => ({ ...prev, name: event.target.value }))
         }
         fullWidth
       />
@@ -29,12 +29,7 @@ export function PersonalInfoEditorPage(): JSX.Element {
         variant="outlined"
         value={personalInfo.jobTitle}
         onChange={(event) =>
-          dispatch(
-            updatePersonalInfo({
-              field: "jobTitle",
-              value: event.target.value,
-            })
-          )
+          setPersonalInfo((prev) => ({ ...prev, jobTitle: event.target.value }))
         }
         fullWidth
       />
