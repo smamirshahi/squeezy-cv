@@ -3,30 +3,24 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid } from "@mui/material";
-import { IconWithText } from "../common/icon-with-text";
-import { LocationWithIcon } from "../components/location-with-icon";
-import { useAppSelector } from "../store/store-helper";
+import { IconWithText } from "../../components/icon-with-text";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useAppSelector } from "../../store/store-helper";
 import {
   cvDataSelector,
   styleSelector,
-} from "../store/applicant/applicant-slice";
+} from "../../store/cv-data/cv-data-slice";
 
 /** Contact Information (details) */
-export function ContactInformation(): JSX.Element {
+export function ContactInfoPreviewPage(): JSX.Element {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>
-      {contactInfo.email && (
-        <IconWithText icon={AlternateEmailIcon} text={contactInfo.email} />
-      )}
-      {contactInfo.phone && (
-        <IconWithText icon={SmartphoneIcon} text={contactInfo.phone} />
-      )}
-      {contactInfo.location && (
-        <LocationWithIcon place={contactInfo.location} />
-      )}
+      <IconWithText icon={AlternateEmailIcon} text={contactInfo.email} />
+      <IconWithText icon={SmartphoneIcon} text={contactInfo.phone} />
+      <IconWithText icon={LocationOnIcon} text={contactInfo.location} />
 
       {contactInfo.linkedInId && (
         <IconWithText

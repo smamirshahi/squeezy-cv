@@ -6,9 +6,13 @@ import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
-import { setTemplate } from "../store/applicant/applicant-slice";
+import { setTemplate } from "../store/cv-data/cv-data-slice";
 
 interface Props {
+  /**
+   * Reference to the div that contains the content to be printed.
+   * This is used by react-to-print to know what to print.
+   */
   printReference: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -24,6 +28,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
+/** A button group that allows the user to change the template, print, export, and import the CV data */
 export function TemplateButton({ printReference }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const dispatch = useDispatch();

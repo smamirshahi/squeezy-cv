@@ -1,12 +1,12 @@
 import { Grid, SvgIcon, SxProps } from "@mui/material";
-import { BodyText } from "./custom-typography";
+import { BodyText } from "./cv-typography";
 
 interface Props {
   /** The icon to be shown */
   icon: React.ElementType;
 
   /** The text to be shown */
-  text: string;
+  text?: string;
 
   /** Styles for the icon */
   customIconSx?: SxProps;
@@ -22,6 +22,10 @@ export function IconWithText({
   customIconSx,
   customTextSx,
 }: Props): JSX.Element {
+  if (!text) {
+    return <></>;
+  }
+
   return (
     <Grid container sx={{ mr: "20px" }} direction="row">
       <SvgIcon

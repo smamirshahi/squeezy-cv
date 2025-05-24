@@ -15,9 +15,9 @@ import {
   cvDataSelector,
   removeEducation,
   updateEducation,
-} from "@src/store/applicant/applicant-slice";
+} from "@src/store/cv-data/cv-data-slice";
 
-export function SettingsEducation() {
+export function EducationEditorPage() {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
 

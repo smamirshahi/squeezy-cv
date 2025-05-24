@@ -19,9 +19,9 @@ import {
   addExperience,
   addBulletPoint,
   removeBulletPoint,
-} from "@src/store/applicant/applicant-slice";
+} from "@src/store/cv-data/cv-data-slice";
 
-export function SettingsWorkExperience() {
+export function ExperienceEditorPage() {
   const dispatch = useAppDispatch();
   const { experiences } = useAppSelector(cvDataSelector);
 

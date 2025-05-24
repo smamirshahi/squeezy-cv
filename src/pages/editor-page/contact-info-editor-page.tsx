@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { TextFieldWithIcon } from "./text-field-with-icon";
+import { TextFieldWithIcon } from "../../components/text-field-with-icon";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -8,10 +8,10 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
   cvDataSelector,
   updateContactInfo,
-} from "@src/store/applicant/applicant-slice";
+} from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 
-export function SettingsContactInfo(): JSX.Element {
+export function ContactInfoEditorPage(): JSX.Element {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
 
