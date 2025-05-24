@@ -3,7 +3,10 @@ import { PersonalInfo } from "@src/custom-types/json-types";
 import { SetStateFunction } from "@src/store/store-helper";
 
 interface Props {
+  /** The personal information to edit */
   personalInfo: PersonalInfo;
+
+  /** Setter for the personal information to edit */
   setPersonalInfo: SetStateFunction<PersonalInfo>;
 }
 

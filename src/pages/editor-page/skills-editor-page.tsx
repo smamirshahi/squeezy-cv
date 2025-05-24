@@ -14,18 +14,25 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   addSkillCategory,
   addSkillItem,
-  cvDataSelector,
   removeSkillCategory,
   removeSkillItem,
   updateSkillCategory,
   updateSkillItem,
 } from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { SetStateFunction, useAppDispatch } from "@src/store/store-helper";
 import { isRatingAcceptable } from "@src/custom-types/type-guards";
+import { SkillCategory } from "@src/custom-types/json-types";
 
-export function SkillsEditorPage() {
+interface Props {
+  /** The skills to edit */
+  skills: SkillCategory[];
+
+  /** Setter for the skills to edit */
+  setSkills: SetStateFunction<SkillCategory[]>;
+}
+
+export function SkillsEditorPage({ skills, setSkills }: Props) {
   const dispatch = useAppDispatch();
-  const { skills } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>

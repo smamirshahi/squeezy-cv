@@ -9,17 +9,24 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { SetStateFunction, useAppDispatch } from "@src/store/store-helper";
 import {
   addEducation,
-  cvDataSelector,
   removeEducation,
   updateEducation,
 } from "@src/store/cv-data/cv-data-slice";
+import { Education } from "@src/custom-types/json-types";
 
-export function EducationEditorPage() {
+interface Props {
+  /** The educations to edit */
+  educations: Education[];
+
+  /** Setter for the educations to edit */
+  setEducations: SetStateFunction<Education[]>;
+}
+
+export function EducationEditorPage({ educations, setEducations }: Props) {
   const dispatch = useAppDispatch();
-  const { educations } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>

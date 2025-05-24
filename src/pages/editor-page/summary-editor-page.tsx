@@ -1,20 +1,25 @@
 import { TextField } from "@mui/material";
-import {
-  cvDataSelector,
-  updateProfessionalSummary,
-} from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { ProfessionalSummary } from "@src/custom-types/json-types";
+import { SetStateFunction } from "@src/store/store-helper";
 
-export function SummaryEditorPage(): JSX.Element | null {
-  const dispatch = useAppDispatch();
-  const { professionalSummary } = useAppSelector(cvDataSelector);
+interface Props {
+  /** The professional summary to edit */
+  summary: ProfessionalSummary;
 
+  /** Setter for the professional summary to edit */
+  setSummary: SetStateFunction<ProfessionalSummary>;
+}
+
+export function SummaryEditorPage({
+  summary,
+  setSummary,
+}: Props): JSX.Element | null {
   return (
     <TextField
       label="Professional Summary"
       variant="outlined"
       multiline
-      value={professionalSummary}
+      value={summary}
       fullWidth
       sx={{
         mt: "20px",
@@ -22,9 +27,7 @@ export function SummaryEditorPage(): JSX.Element | null {
           resize: "vertical",
         },
       }}
-      onChange={(event) =>
-        dispatch(updateProfessionalSummary({ value: event.target.value }))
-      }
+      onChange={(event) => setSummary(event.target.value)}
     />
   );
 }

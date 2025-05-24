@@ -10,9 +10,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { SetStateFunction, useAppDispatch } from "@src/store/store-helper";
 import {
-  cvDataSelector,
   updateExperienceBulletPoint,
   updateExperience,
   removeExperience,
@@ -20,10 +19,18 @@ import {
   addBulletPoint,
   removeBulletPoint,
 } from "@src/store/cv-data/cv-data-slice";
+import { Experience } from "@src/custom-types/json-types";
 
-export function ExperienceEditorPage() {
+interface Props {
+  /** The experiences to edit */
+  experiences: Experience[];
+
+  /** Setter for the experiences to edit */
+  setExperiences: SetStateFunction<Experience[]>;
+}
+
+export function ExperienceEditorPage({ experiences, setExperiences }: Props) {
   const dispatch = useAppDispatch();
-  const { experiences } = useAppSelector(cvDataSelector);
 
   return (
     <Accordion>

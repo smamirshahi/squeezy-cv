@@ -9,8 +9,17 @@ import { ContactInfoEditorPage } from "./editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "./editor-page/summary-editor-page";
 import { useImportExportJson } from "@src/hooks/use-import-export-json";
 import DownloadIcon from "@mui/icons-material/Download";
-import { PersonalInfo } from "@src/custom-types/json-types";
+import {
+  ContactInfo,
+  Education,
+  Experience,
+  PersonalInfo,
+  ProfessionalSummary,
+  SkillCategory,
+} from "@src/custom-types/json-types";
 import { useState } from "react";
+import { cvDataSelector } from "@src/store/cv-data/cv-data-slice";
+import { useAppSelector } from "@src/store/store-helper";
 
 interface Props {
   /** The reference to the content */
@@ -19,10 +28,21 @@ interface Props {
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const { handleExport } = useImportExportJson();
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    name: "",
-    jobTitle: "",
-  });
+  const cvData = useAppSelector(cvDataSelector);
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(
+    cvData.personalInfo
+  );
+  const [contactInfo, setContactInfo] = useState<ContactInfo>(
+    cvData.contactInfo
+  );
+  const [summary, setSummary] = useState<ProfessionalSummary>(
+    cvData.professionalSummary
+  );
+  const [experiences, setExperiences] = useState<Experience[]>(
+    cvData.experiences
+  );
+  const [educations, setEducations] = useState<Education[]>(cvData.educations);
+  const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
 
   return (
     <Paper
@@ -42,11 +62,20 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         personalInfo={personalInfo}
         setPersonalInfo={setPersonalInfo}
       />
-      <ContactInfoEditorPage />
-      <SummaryEditorPage />
-      <ExperienceEditorPage />
-      <EducationEditorPage />
-      <SkillsEditorPage />
+      <ContactInfoEditorPage
+        contactInfo={contactInfo}
+        setContactInfo={setContactInfo}
+      />
+      <SummaryEditorPage summary={summary} setSummary={setSummary} />
+      <ExperienceEditorPage
+        experiences={experiences}
+        setExperiences={setExperiences}
+      />
+      <EducationEditorPage
+        educations={educations}
+        setEducations={setEducations}
+      />
+      <SkillsEditorPage skills={skills} setSkills={setSkills} />
       <Grid
         container
         direction="row"
