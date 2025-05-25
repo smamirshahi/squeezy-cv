@@ -191,6 +191,7 @@ export function useEditorPageUpdate() {
 
   return {
     experiences,
+    setExperiences,
     addExperience,
     removeExperience,
     updateExperience,
@@ -198,10 +199,12 @@ export function useEditorPageUpdate() {
     updateExperienceBulletPoint,
     removeBulletPoint,
     educations,
+    setEducations,
     addEducation,
     removeEducation,
     updateEducation,
     skills,
+    setSkills,
     addSkillCategory,
     removeSkillCategory,
     updateSkillCategory,

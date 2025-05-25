@@ -14,7 +14,7 @@ import {
   PersonalInfo,
   ProfessionalSummary,
 } from "@src/custom-types/json-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
@@ -38,7 +38,24 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [summary, setSummary] = useState<ProfessionalSummary>(
     cvData.professionalSummary
   );
-  const { experiences, educations, skills } = useEditorPageUpdate();
+  const {
+    experiences,
+    setExperiences,
+    educations,
+    setEducations,
+    skills,
+    setSkills,
+  } = useEditorPageUpdate();
+
+  // Add the initial values to the state variables
+  useEffect(() => {
+    setPersonalInfo(cvData.personalInfo);
+    setContactInfo(cvData.contactInfo);
+    setSummary(cvData.professionalSummary);
+    setExperiences(cvData.experiences);
+    setEducations(cvData.educations);
+    setSkills(cvData.skills);
+  }, [cvData]);
 
   function updateCvData() {
     const newCvData = {
