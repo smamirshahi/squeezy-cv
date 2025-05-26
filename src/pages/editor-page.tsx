@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
+import { StylesEditorPage } from "@pages/editor-page/styles-editor-page";
 
 interface Props {
   /** The reference to the content */
@@ -102,6 +103,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
       }}
     >
+      <StylesEditorPage />
       <TemplateButton printReference={contentRef} setFileName={setFileName} />
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
