@@ -1,4 +1,11 @@
-import { Button, Grid, Paper } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Grid,
+  Paper,
+} from "@mui/material";
 import { TemplateButton } from "../components/template-button";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../custom-types/custom-styles";
 import { ExperienceEditorPage } from "./editor-page/experience-editor-page";
@@ -9,6 +16,7 @@ import { ContactInfoEditorPage } from "./editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "./editor-page/summary-editor-page";
 import { useImportExportJson } from "@src/hooks/use-import-export-json";
 import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   ContactInfo,
   PersonalInfo,
@@ -83,14 +91,21 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <TemplateButton printReference={contentRef} />
-      <PersonalInfoEditorPage
-        personalInfo={personalInfo}
-        setPersonalInfo={setPersonalInfo}
-      />
-      <ContactInfoEditorPage
-        contactInfo={contactInfo}
-        setContactInfo={setContactInfo}
-      />
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          Profile
+        </AccordionSummary>
+        <AccordionDetails>
+          <PersonalInfoEditorPage
+            personalInfo={personalInfo}
+            setPersonalInfo={setPersonalInfo}
+          />
+          <ContactInfoEditorPage
+            contactInfo={contactInfo}
+            setContactInfo={setContactInfo}
+          />
+        </AccordionDetails>
+      </Accordion>
       <SummaryEditorPage summary={summary} setSummary={setSummary} />
       <ExperienceEditorPage />
       <EducationEditorPage />
