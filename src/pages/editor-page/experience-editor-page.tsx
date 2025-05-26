@@ -12,7 +12,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
 
-export function ExperienceEditorPage() {
+export function ExperienceEditorPage(): JSX.Element {
   const {
     experiences,
     addExperience,
@@ -30,18 +30,25 @@ export function ExperienceEditorPage() {
       </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {experiences.map((exp) => (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {experiences.map((experience) => (
+            <Box
+              key={experience.id}
+              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            >
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Job Title"
-                  value={exp.jobTitle}
+                  value={experience.jobTitle}
                   onChange={(event) =>
-                    updateExperience(exp.id, "jobTitle", event.target.value)
+                    updateExperience(
+                      experience.id,
+                      "jobTitle",
+                      event.target.value
+                    )
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeExperience(exp.id)}>
+                <IconButton onClick={() => removeExperience(experience.id)}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -49,17 +56,25 @@ export function ExperienceEditorPage() {
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Company"
-                  value={exp.company}
+                  value={experience.company}
                   onChange={(event) =>
-                    updateExperience(exp.id, "company", event.target.value)
+                    updateExperience(
+                      experience.id,
+                      "company",
+                      event.target.value
+                    )
                   }
                   fullWidth
                 />
                 <TextField
                   label="Location"
-                  value={exp.location}
+                  value={experience.location}
                   onChange={(event) =>
-                    updateExperience(exp.id, "location", event.target.value)
+                    updateExperience(
+                      experience.id,
+                      "location",
+                      event.target.value
+                    )
                   }
                   fullWidth
                 />
@@ -69,20 +84,30 @@ export function ExperienceEditorPage() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  value={exp.startDate}
+                  value={experience.startDate}
                   onChange={(event) =>
-                    updateExperience(exp.id, "startDate", event.target.value)
+                    updateExperience(
+                      experience.id,
+                      "startDate",
+                      event.target.value
+                    )
                   }
+                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
                 <TextField
                   label="End Date"
                   type="date"
-                  value={exp.endDate}
+                  value={experience.endDate}
                   onChange={(event) =>
-                    updateExperience(exp.id, "endDate", event.target.value)
+                    updateExperience(
+                      experience.id,
+                      "endDate",
+                      event.target.value
+                    )
                   }
+                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
@@ -95,7 +120,7 @@ export function ExperienceEditorPage() {
                   mb: 2,
                 }}
               >
-                {exp.bulletPoints.map((point, index) => (
+                {experience.bulletPoints.map((point, index) => (
                   <Box
                     key={index}
                     sx={{
@@ -109,7 +134,7 @@ export function ExperienceEditorPage() {
                       value={point}
                       onChange={(event) =>
                         updateExperienceBulletPoint(
-                          exp.id,
+                          experience.id,
                           index,
                           event.target.value
                         )
@@ -117,15 +142,15 @@ export function ExperienceEditorPage() {
                       fullWidth
                     />
                     <IconButton
-                      onClick={() => removeBulletPoint(exp.id, index)}
-                      disabled={exp.bulletPoints.length === 1}
+                      onClick={() => removeBulletPoint(experience.id, index)}
+                      disabled={experience.bulletPoints.length === 1}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
                 ))}
                 <Box>
-                  <IconButton onClick={() => addBulletPoint(exp.id)}>
+                  <IconButton onClick={() => addBulletPoint(experience.id)}>
                     <AddIcon />
                   </IconButton>
                 </Box>

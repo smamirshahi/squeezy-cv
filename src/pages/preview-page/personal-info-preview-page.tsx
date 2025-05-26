@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { CvTitle, SubsectionText } from "@src/components/cv-typography";
-import { cvDataSelector } from "../../store/cv-data/cv-data-slice";
+import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@src/store/store-helper";
 
 export function PersonalInfoPreviewPage(): JSX.Element {

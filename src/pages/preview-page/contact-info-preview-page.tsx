@@ -3,13 +3,10 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Grid } from "@mui/material";
-import { IconWithText } from "../../components/icon-with-text";
+import { IconWithText } from "@components/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { useAppSelector } from "../../store/store-helper";
-import {
-  cvDataSelector,
-  styleSelector,
-} from "../../store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
+import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
 
 /** Contact Information (details) */
 export function ContactInfoPreviewPage(): JSX.Element {

@@ -31,7 +31,8 @@
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
     "react-to-print": "^3.1.0",
-    "runtypes": "^7.0.4"
+    "runtypes": "^7.0.4",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",

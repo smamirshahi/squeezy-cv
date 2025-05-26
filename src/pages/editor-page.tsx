@@ -7,14 +7,14 @@ import {
   Paper,
   TextField,
 } from "@mui/material";
-import { TemplateButton } from "../components/template-button";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../custom-types/custom-styles";
-import { ExperienceEditorPage } from "./editor-page/experience-editor-page";
-import { EducationEditorPage } from "./editor-page/education-editor-page";
-import { SkillsEditorPage } from "./editor-page/skills-editor-page";
-import { PersonalInfoEditorPage } from "./editor-page/personal-info-editor-page";
-import { ContactInfoEditorPage } from "./editor-page/contact-info-editor-page";
-import { SummaryEditorPage } from "./editor-page/summary-editor-page";
+import { TemplateButton } from "@components/template-button";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@customTypes/custom-styles";
+import { ExperienceEditorPage } from "@pages/editor-page/experience-editor-page";
+import { EducationEditorPage } from "@pages/editor-page/education-editor-page";
+import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
+import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-page";
+import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-page";
+import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { useImportExportJson } from "@src/hooks/use-import-export-json";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -65,9 +65,19 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setExperiences(cvData.experiences);
     setEducations(cvData.educations);
     setSkills(cvData.skills);
-  }, [cvData]);
+  }, [
+    cvData.contactInfo,
+    cvData.educations,
+    cvData.experiences,
+    cvData.personalInfo,
+    cvData.professionalSummary,
+    cvData.skills,
+    setEducations,
+    setExperiences,
+    setSkills,
+  ]);
 
-  function updateCvData() {
+  function updateCvData(): void {
     const newCvData = {
       personalInfo,
       contactInfo,

@@ -11,7 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
 
-export function EducationEditorPage() {
+export function EducationEditorPage(): JSX.Element {
   const { educations, addEducation, removeEducation, updateEducation } =
     useEditorPageUpdate();
 
@@ -22,18 +22,21 @@ export function EducationEditorPage() {
       </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {educations.map((edu) => (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {educations.map((education) => (
+            <Box
+              key={education.id}
+              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            >
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Degree"
-                  value={edu.degree}
+                  value={education.degree}
                   onChange={(event) =>
-                    updateEducation(edu.id, "degree", event.target.value)
+                    updateEducation(education.id, "degree", event.target.value)
                   }
                   fullWidth
                 />
-                <IconButton onClick={() => removeEducation(edu.id)}>
+                <IconButton onClick={() => removeEducation(education.id)}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -41,17 +44,25 @@ export function EducationEditorPage() {
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Institute"
-                  value={edu.institute}
+                  value={education.institute}
                   onChange={(event) =>
-                    updateEducation(edu.id, "institute", event.target.value)
+                    updateEducation(
+                      education.id,
+                      "institute",
+                      event.target.value
+                    )
                   }
                   fullWidth
                 />
                 <TextField
                   label="Location"
-                  value={edu.location}
+                  value={education.location}
                   onChange={(event) =>
-                    updateEducation(edu.id, "location", event.target.value)
+                    updateEducation(
+                      education.id,
+                      "location",
+                      event.target.value
+                    )
                   }
                   fullWidth
                 />
@@ -61,30 +72,36 @@ export function EducationEditorPage() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  value={edu.startDate}
+                  value={education.startDate}
                   onChange={(event) =>
-                    updateEducation(edu.id, "startDate", event.target.value)
+                    updateEducation(
+                      education.id,
+                      "startDate",
+                      event.target.value
+                    )
                   }
+                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
                 <TextField
                   label="End Date"
                   type="date"
-                  value={edu.endDate}
+                  value={education.endDate}
                   onChange={(event) =>
-                    updateEducation(edu.id, "endDate", event.target.value)
+                    updateEducation(education.id, "endDate", event.target.value)
                   }
+                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
               </Box>
               <TextField
                 label="Dissertation Title"
-                value={edu.dissertationTitle}
+                value={education.dissertationTitle}
                 onChange={(event) =>
                   updateEducation(
-                    edu.id,
+                    education.id,
                     "dissertationTitle",
                     event.target.value
                   )

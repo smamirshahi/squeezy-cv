@@ -7,9 +7,50 @@ import {
   SkillItem,
 } from "@src/custom-types/json-types";
 import { cvDataSelector } from "@src/store/cv-data/cv-data-slice";
-import { useAppSelector } from "@src/store/store-helper";
+import { SetStateFunction, useAppSelector } from "@src/store/store-helper";
 
-export function useEditorPageUpdate() {
+interface ReturnProps {
+  experiences: Experience[];
+  setExperiences: SetStateFunction<Experience[]>;
+  addExperience(): void;
+  removeExperience(id: string): void;
+  updateExperience<K extends keyof Experience>(
+    id: string,
+    key: K,
+    value: Experience[K]
+  ): void;
+  addBulletPoint(id: string): void;
+  updateExperienceBulletPoint(id: string, index: number, value: string): void;
+  removeBulletPoint(id: string, index: number): void;
+  educations: Education[];
+  setEducations: SetStateFunction<Education[]>;
+  addEducation(): void;
+  removeEducation(id: string): void;
+  updateEducation<K extends keyof Education>(
+    id: string,
+    key: K,
+    value: Education[K]
+  ): void;
+  skills: SkillCategory[];
+  setSkills: SetStateFunction<SkillCategory[]>;
+  addSkillCategory(): void;
+  removeSkillCategory(id: string): void;
+  updateSkillCategory<K extends keyof SkillCategory>(
+    id: string,
+    key: K,
+    value: SkillCategory[K]
+  ): void;
+  updateSkillItem<K extends keyof SkillItem>(
+    skillId: string,
+    index: number,
+    key: K,
+    value: SkillItem[K]
+  ): void;
+  addSkillItem(skillId: string): void;
+  removeSkillItem(skillId: string, index: number): void;
+}
+
+export function useEditorPageUpdate(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
   const [experiences, setExperiences] = useState<Experience[]>(
     cvData.experiences
@@ -17,8 +58,7 @@ export function useEditorPageUpdate() {
   const [educations, setEducations] = useState<Education[]>(cvData.educations);
   const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
 
-  // Experience
-  const addExperience = () => {
+  function addExperience(): void {
     setExperiences((prev) => [
       ...prev,
       {
@@ -31,7 +71,7 @@ export function useEditorPageUpdate() {
         bulletPoints: [],
       },
     ]);
-  };
+  }
 
   function removeById<T extends { id: string }>(
     setFn: React.Dispatch<React.SetStateAction<T[]>>,
@@ -40,7 +80,9 @@ export function useEditorPageUpdate() {
     setFn((prev) => prev.filter((item) => item.id !== id));
   }
 
-  const removeExperience = (id: string) => removeById(setExperiences, id);
+  function removeExperience(id: string): void {
+    removeById(setExperiences, id);
+  }
 
   function updateExperience<K extends keyof Experience>(
     id: string,
@@ -110,7 +152,9 @@ export function useEditorPageUpdate() {
     ]);
   }
 
-  const removeEducation = (id: string) => removeById(setEducations, id);
+  function removeEducation(id: string): void {
+    removeById(setEducations, id);
+  }
 
   function updateEducation<K extends keyof Education>(
     id: string,
@@ -134,7 +178,9 @@ export function useEditorPageUpdate() {
     ]);
   }
 
-  const removeSkillCategory = (id: string) => removeById(setSkills, id);
+  function removeSkillCategory(id: string): void {
+    removeById(setSkills, id);
+  }
 
   function updateSkillCategory<K extends keyof SkillCategory>(
     id: string,
@@ -154,7 +200,9 @@ export function useEditorPageUpdate() {
   ): void {
     setSkills((prev) =>
       prev.map((s) => {
-        if (s.id !== skillId) return s;
+        if (s.id !== skillId) {
+          return s;
+        }
         const updatedItems = s.items.map((item, i) =>
           i === index ? { ...item, [key]: value } : item
         );

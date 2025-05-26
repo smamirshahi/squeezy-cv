@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { CVFile, CVFileSchema } from "../custom-types/json-types";
-import { useAppDispatch, useAppSelector } from "../store/store-helper";
-import { cvDataSelector, setCvData } from "../store/cv-data/cv-data-slice";
+import { CVFile, CVFileSchema } from "@customTypes/json-types";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
 
 interface ReturnProps {
   /**
@@ -25,7 +25,9 @@ export function useImportExportJson(): ReturnProps {
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) return "";
+      if (!file) {
+        return "";
+      }
 
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -33,9 +35,10 @@ export function useImportExportJson(): ReturnProps {
           const raw = JSON.parse(event.target?.result as string);
           const parsed = CVFileSchema.check(raw);
           dispatch(setCvData(parsed.data));
+          // eslint-disable-next-line no-alert
           alert("CV imported successfully!");
-        } catch (err) {
-          console.error(err);
+        } catch (_error: unknown) {
+          // eslint-disable-next-line no-alert
           alert("Invalid file format.");
         }
       };
@@ -48,6 +51,7 @@ export function useImportExportJson(): ReturnProps {
   const handleExport = useCallback(
     (fileName: string) => {
       if (!cvData) {
+        // eslint-disable-next-line no-alert
         alert("No CV data to export.");
         return;
       }

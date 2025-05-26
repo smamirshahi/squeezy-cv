@@ -1,4 +1,4 @@
-import { SkillItem } from "./json-types";
+import { SkillItem } from "@customTypes/json-types";
 
 /** Check if the rating is accepted */
 export function isRatingAcceptable(
@@ -7,6 +7,7 @@ export function isRatingAcceptable(
   return (
     rating !== null &&
     rating >= 0 &&
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     rating <= 5 &&
     Number.isInteger(rating * 2)
   );
