@@ -5,6 +5,7 @@ import {
   Button,
   Grid,
   Paper,
+  TextField,
 } from "@mui/material";
 import { TemplateButton } from "../components/template-button";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "../custom-types/custom-styles";
@@ -39,6 +40,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(
     cvData.personalInfo
   );
+  const [fileName, setFileName] = useState<string>("");
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>(
     cvData.contactInfo
@@ -90,7 +92,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      <TemplateButton printReference={contentRef} />
+      <TemplateButton printReference={contentRef} setFileName={setFileName} />
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           Profile
@@ -120,9 +122,13 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         <Button variant="contained" onClick={updateCvData}>
           Apply
         </Button>
+        <TextField
+          value={fileName}
+          onChange={(event) => setFileName(event.target.value)}
+        />
         <Button
           variant="contained"
-          onClick={handleExport}
+          onClick={() => handleExport(fileName)}
           startIcon={<DownloadIcon />}
         >
           Save
