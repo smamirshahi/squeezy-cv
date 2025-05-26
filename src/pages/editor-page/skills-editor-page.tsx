@@ -14,7 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@src/custom-types/type-guards";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
 
-export function SkillsEditorPage() {
+export function SkillsEditorPage(): JSX.Element {
   const {
     skills,
     addSkillCategory,
@@ -33,7 +33,10 @@ export function SkillsEditorPage() {
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {skills.map((skill) => (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box
+              key={skill.id}
+              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            >
               <Box sx={{ display: "flex", gap: 2 }}>
                 <TextField
                   label="Skill Category"

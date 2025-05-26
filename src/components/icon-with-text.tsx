@@ -1,5 +1,5 @@
 import { Grid, SvgIcon, SxProps } from "@mui/material";
-import { BodyText } from "./cv-typography";
+import { BodyText } from "@components/cv-typography";
 
 interface Props {
   /** The icon to be shown */
@@ -21,9 +21,9 @@ export function IconWithText({
   text,
   customIconSx,
   customTextSx,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   if (!text) {
-    return <></>;
+    return null;
   }
 
   return (

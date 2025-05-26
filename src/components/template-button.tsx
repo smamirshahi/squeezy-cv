@@ -1,12 +1,11 @@
 import { Button, ButtonGroup } from "@mui/material";
-import { useDispatch } from "react-redux";
 import { useReactToPrint } from "react-to-print";
-import { useImportExportJson } from "../hooks/use-import-export-json";
+import { useImportExportJson } from "@hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import PrintIcon from "@mui/icons-material/Print";
-import { setTemplate } from "../store/cv-data/cv-data-slice";
-import { SetStateFunction } from "@src/store/store-helper";
+import { setTemplate } from "@src/store/cv-data/cv-data-slice";
+import { SetStateFunction, useAppDispatch } from "@src/store/store-helper";
 
 interface Props {
   /**
@@ -36,7 +35,7 @@ export function TemplateButton({
   setFileName,
 }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { handleImport } = useImportExportJson();
 
   return (

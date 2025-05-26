@@ -89,6 +89,7 @@ const SkillItemSchema = Object({
   /** The name of the skill item */
   name: String,
 
+  /* eslint-disable @typescript-eslint/no-magic-numbers */
   /** The number of the skill item from 0 (no skill) to 10 (excellent) */
   rating: Union(
     Literal(0),
@@ -104,6 +105,7 @@ const SkillItemSchema = Object({
     Literal(5.0)
   ),
 });
+/* eslint-enable @typescript-eslint/no-magic-numbers */
 
 const SkillCategorySchema = Object({
   /** The ID of the skill category */

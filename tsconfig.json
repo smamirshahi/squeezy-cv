@@ -25,12 +25,11 @@
 
     "paths": {
       "@src/*": ["src/*"],
-      "@common/*": ["src/common/*"],
       "@components/*": ["src/components/*"],
+      "@customTypes/*": ["src/custom-types/*"],
       "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
-      "@sections/*": ["src/sections/*"],
-      "@store/*": ["src/sections/*"],
+      "@store/*": ["src/store/*"],
     }
   },
   "include": ["src", "vite.config.ts"]

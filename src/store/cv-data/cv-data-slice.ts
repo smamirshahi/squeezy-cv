@@ -9,17 +9,17 @@ import {
   SkillCategory,
   SkillItem,
   Style,
-} from "../../custom-types/json-types";
+} from "@customTypes/json-types";
 import {
   findEducation,
   findExperience,
   findSkill,
-} from "./cv-data-slice-helper";
+} from "@store/cv-data/cv-data-slice-helper";
 
 /** State of the current CV */
-export type cvDataState = CVFile;
+export type CvDataState = CVFile;
 
-export const initialState: cvDataState = {
+export const initialState: CvDataState = {
   version: "1.0",
   data: {
     personalInfo: {
@@ -55,7 +55,7 @@ const cvDataSlice = createSlice({
     },
 
     updatePersonalInfo<K extends keyof PersonalInfo>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         field: K;
         value: PersonalInfo[K];
@@ -65,7 +65,7 @@ const cvDataSlice = createSlice({
     },
 
     updateContactInfo<K extends keyof ContactInfo>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         field: K;
         value: ContactInfo[K];
@@ -102,7 +102,7 @@ const cvDataSlice = createSlice({
     },
 
     updateExperience: <K extends keyof Experience>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -140,7 +140,7 @@ const cvDataSlice = createSlice({
     ) => {
       const exp = findExperience(state, action.payload.id);
       if (exp?.bulletPoints[action.payload.index] !== undefined) {
-        exp.bulletPoints.splice(action.payload.index, 1); // mutates via Immer
+        exp.bulletPoints.splice(action.payload.index, 1);
       }
     },
 
@@ -163,7 +163,7 @@ const cvDataSlice = createSlice({
     },
 
     updateEducation: <K extends keyof Education>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -197,7 +197,7 @@ const cvDataSlice = createSlice({
     },
 
     updateSkillCategory: <K extends keyof SkillCategory>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         id: string;
         key: K;
@@ -211,7 +211,7 @@ const cvDataSlice = createSlice({
     },
 
     updateSkillItem: <K extends keyof SkillItem>(
-      state: cvDataState,
+      state: CvDataState,
       action: PayloadAction<{
         id: string;
         index: number;
@@ -243,7 +243,7 @@ const cvDataSlice = createSlice({
     ) => {
       const skill = findSkill(state, action.payload.skillId);
       if (skill && skill.items[action.payload.index] !== undefined) {
-        skill.items.splice(action.payload.index, 1); // ✅ safe with Immer
+        skill.items.splice(action.payload.index, 1);
       }
     },
 
@@ -254,9 +254,9 @@ const cvDataSlice = createSlice({
     resetCvDataState: () => initialState,
   },
   selectors: {
-    versionSelector: (state: cvDataState) => state.version,
-    cvDataSelector: (state: cvDataState) => state.data,
-    styleSelector: (state: cvDataState) => state.style,
+    versionSelector: (state: CvDataState) => state.version,
+    cvDataSelector: (state: CvDataState) => state.data,
+    styleSelector: (state: CvDataState) => state.style,
   },
 });
 

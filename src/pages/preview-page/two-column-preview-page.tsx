@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
-import { ContactInfoPreviewPage } from "./contact-info-preview-page";
-import { ExperiencesPreviewPage } from "./experiences-preview-page";
-import { PersonalInfoPreviewPage } from "./personal-info-preview-page";
-import { SummaryPreviewPage } from "./summary-preview-page";
-import { SkillsPreviewPage } from "./skills-preview-page";
+import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
+import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
+import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
+import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
+import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 
 /** Two column template */
 export function TwoColumnPreviewPage(): JSX.Element | null {

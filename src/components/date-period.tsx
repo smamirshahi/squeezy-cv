@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { IconWithText } from "./icon-with-text";
-import { customColors, DATE_FORMAT } from "../custom-types/custom-styles";
+import { IconWithText } from "@components/icon-with-text";
+import { customColors, DATE_FORMAT } from "@customTypes/custom-styles";
 
 interface DatePeriodProps {
   /** Date period with start and end */
@@ -17,6 +17,6 @@ export function DatePeriod({ datePeriod }: DatePeriodProps): JSX.Element {
         datePeriod.end ? dayjs(datePeriod.end).format(DATE_FORMAT) : "Present"
       }`}
       customTextSx={{ color: customColors.gray }}
-    ></IconWithText>
+    />
   );
 }

@@ -1,10 +1,9 @@
-import "./App.css";
 import { Box } from "@mui/material";
 import { useRef } from "react";
-import { EditorPage } from "./pages/editor-page";
-import { PreviewPage } from "./pages/preview-page";
+import { EditorPage } from "@pages/editor-page";
+import { PreviewPage } from "@pages/preview-page";
 
-export function App() {
+export function App(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
