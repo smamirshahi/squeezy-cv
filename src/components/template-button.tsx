@@ -4,9 +4,9 @@ import { useReactToPrint } from "react-to-print";
 import { useImportExportJson } from "../hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
-import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import { setTemplate } from "../store/cv-data/cv-data-slice";
+import { SetStateFunction } from "@src/store/store-helper";
 
 interface Props {
   /**
@@ -14,6 +14,8 @@ interface Props {
    * This is used by react-to-print to know what to print.
    */
   printReference: React.RefObject<HTMLDivElement | null>;
+
+  setFileName: SetStateFunction<string>;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -29,10 +31,13 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 /** A button group that allows the user to change the template, print, export, and import the CV data */
-export function TemplateButton({ printReference }: Props): JSX.Element {
+export function TemplateButton({
+  printReference,
+  setFileName,
+}: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const dispatch = useDispatch();
-  const { handleExport, handleImport } = useImportExportJson();
+  const { handleImport } = useImportExportJson();
 
   return (
     <ButtonGroup
@@ -49,9 +54,6 @@ export function TemplateButton({ printReference }: Props): JSX.Element {
       <Button onClick={() => onPrintClicked()} startIcon={<PrintIcon />}>
         Print
       </Button>
-      <Button onClick={handleExport} startIcon={<DownloadIcon />}>
-        Export
-      </Button>
       {/* <pre>{JSON.stringify(cvData, null, 2)}</pre> */}
       <Button
         component="label"
@@ -62,7 +64,10 @@ export function TemplateButton({ printReference }: Props): JSX.Element {
         Import
         <VisuallyHiddenInput
           type="file"
-          onChange={handleImport}
+          onChange={(event) => {
+            const fileName = handleImport(event);
+            setFileName(fileName);
+          }}
           accept=".json"
         />
       </Button>

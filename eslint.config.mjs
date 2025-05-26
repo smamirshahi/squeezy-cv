@@ -170,10 +170,6 @@ export default tseslint.config(
        * ECMAScript 6
        * These rules relate to ES6, also known as ES2015
        */
-      // Import Sorting
-      // TODO: Find config which plays well with import organizing feature of IDEs
-      // "import/order": ["warn", { alphabetize: { order: "asc" } }],
-
       // Require template literals instead of string concatenation
       "prefer-template": "warn",
 
@@ -182,20 +178,6 @@ export default tseslint.config(
         "warn",
         {
           paths: [
-            // Do not allow any usage of underscore, as we prefer lodash
-            "underscore",
-            "underscore/*",
-
-            // Only allow import of top-level lodash package
-            // Unused parts will be removed by webpack
-            // More information: https://lodash.com/per-method-packages
-            "lodash/*",
-
-            // Do not allow usage of moment, as it is not actively developed anymore
-            // More information: https://momentjs.com/docs/#/-project-status/
-            // Usage of moment should be limited to packages encapsulating the usage, making removing moment easier
-            "moment",
-
             // Do not allow to use the non-typed originals of useDispatch & useSelector
             {
               name: "react-redux",
@@ -216,15 +198,6 @@ export default tseslint.config(
               message:
                 "Please use 'PreservingNavigate' or 'PreservingNavLink' component instead.",
             },
-            {
-              name: "@api/core-api-token-manager",
-              importNames: ["CoreApiTokenManager"],
-              message:
-                "Please use 'getCachedTokenProvider', 'useCachedTokenProvider', " +
-                "'getCachedCompanyTokenProvider' or 'useCachedCompanyTokenProvider' from the app itself " +
-                "to ensure that we request a single token per project as long as it's valid.",
-            },
-            
           ],
           patterns: [
             {
@@ -232,27 +205,7 @@ export default tseslint.config(
               message:
                 'Relative imports with any number of "../" or "./" are not allowed. Use path mapping instead',
             },
-            // Importing the wrong config can lead to nasty "works in dev" bugs. Better whitelist all places with eslint-disable.
-            {
-              group: [
-                "@src/runtime-config-*",
-                "!@src/runtime-config-base",
-                "!@src/runtime-config-types",
-              ],
-              message:
-                "You probably wanted to import '@src/runtime-config' instead.",
-            },
           ],
-        },
-      ],
-
-      "no-restricted-syntax": [
-        "warn",
-        {
-          selector: "MemberExpression > Identifier[name='getUserProjectToken']",
-          message:
-            "Please use 'getCachedTokenProvider' or 'useCachedTokenProvider' from the app itself " +
-            "to ensure that we request a single token per project as long as it's valid.",
         },
       ],
 
@@ -350,32 +303,9 @@ export default tseslint.config(
       // Allow explicit type declarations for variables or parameters initialized to a number, string, or boolean
       "@typescript-eslint/no-inferrable-types": "off",
 
-      // End import from eslint-config-base
-
-      // Import from eslint-config-react
-
       /**
        * plugin:react/recommended:
        */
-      // react/display-name
-      // react/jsx-no-comment-textnodes
-      // react/jsx-no-duplicate-props
-      // react/jsx-no-target-blank
-      // react/jsx-no-undef
-      // react/jsx-uses-react
-      // react/jsx-uses-vars
-      // react/no-children-prop
-      // react/no-danger-with-children
-      // react/no-deprecated
-      // react/no-direct-mutation-state
-      // react/no-find-dom-node
-      // react/no-is-mounted
-      // react/no-render-return-value
-      // react/no-string-refs
-      // react/no-unknown-property
-      // react/prop-types
-      // react/react-in-jsx-scope
-      // react/require-render-return
 
       // warn when key prop is missing in arrays
       "react/jsx-key": "warn",
@@ -441,13 +371,6 @@ export default tseslint.config(
       // Checks effect dependencies
       "react-hooks/exhaustive-deps": "warn",
 
-      // TODO: Consider the following:
-      // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/forbid-component-props.md
-      // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/forbid-dom-props.md
-      // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-target-blank.md
-
-      // End import from eslint-config-react
-
       // suppress errors for missing 'import React' in files
       "react/react-in-jsx-scope": "off",
 
@@ -466,6 +389,7 @@ export default tseslint.config(
       // "npm run lint-ci" includes "--max-warnings 0", so a warning is enough.
       "no-console": ["warn"],
       "no-debugger": ["warn"],
+
       // Prevent us from having focused tests.
       "no-only-tests/no-only-tests": "warn",
 
@@ -510,19 +434,6 @@ export default tseslint.config(
       "@typescript-eslint/await-thenable": "off",
       // Some types in the monorepo are "empty", meaning they do not add anything to the parent type
       "@typescript-eslint/no-empty-object-type": "off",
-    },
-  },
-  {
-    // Override for code that should avoid the window object, to make the code usable from SharedWorker:
-    // API calls, SharedWorker, Config
-    files: [
-      "src/runtime-config*.ts",
-      "src/context-providers/**/*.ts",
-      "src/api/**/*.ts",
-    ],
-    rules: {
-      // Use `globalThis` instead of `window` where possible
-      "unicorn/prefer-global-this": "warn",
     },
   },
   {

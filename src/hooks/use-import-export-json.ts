@@ -8,13 +8,13 @@ interface ReturnProps {
    * Handles the export of CV data to a JSON file.
    * It creates a Blob from the CV data and triggers a download.
    */
-  handleExport: () => void;
+  handleExport: (fileName: string) => void;
 
   /**
    * Handles the import of CV data from a JSON file.
    * It reads the file, parses it, and updates the CV data in the store.
    */
-  handleImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImport: (e: React.ChangeEvent<HTMLInputElement>) => string;
 }
 
 /** Custom hook to handle importing and exporting CV data in JSON format */
@@ -25,7 +25,7 @@ export function useImportExportJson(): ReturnProps {
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) return;
+      if (!file) return "";
 
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -40,38 +40,42 @@ export function useImportExportJson(): ReturnProps {
         }
       };
       reader.readAsText(file);
+      return file.name.replace(/\.[^/.]+$/, "");
     },
     [dispatch]
   );
 
-  const handleExport = useCallback(() => {
-    if (!cvData) {
-      alert("No CV data to export.");
-      return;
-    }
-    const fileData: CVFile = {
-      version: "1.0",
-      data: cvData,
-      style: {
-        template: "one-column",
-        shouldShowFullContactLinks: true,
-        ratingIcon: "star",
-      },
-    };
-    const blob = new Blob([JSON.stringify(fileData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
+  const handleExport = useCallback(
+    (fileName: string) => {
+      if (!cvData) {
+        alert("No CV data to export.");
+        return;
+      }
+      const fileData: CVFile = {
+        version: "1.0",
+        data: cvData,
+        style: {
+          template: "one-column",
+          shouldShowFullContactLinks: true,
+          ratingIcon: "star",
+        },
+      };
+      const blob = new Blob([JSON.stringify(fileData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "cv-export.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [cvData]);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName ? `${fileName}.json` : "cv-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    [cvData]
+  );
 
   return {
-    handleExport,
     handleImport,
+    handleExport,
   };
 }

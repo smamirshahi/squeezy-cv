@@ -11,21 +11,19 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  addSkillCategory,
-  addSkillItem,
-  cvDataSelector,
-  removeSkillCategory,
-  removeSkillItem,
-  updateSkillCategory,
-  updateSkillItem,
-} from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import { isRatingAcceptable } from "@src/custom-types/type-guards";
+import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
 
 export function SkillsEditorPage() {
-  const dispatch = useAppDispatch();
-  const { skills } = useAppSelector(cvDataSelector);
+  const {
+    skills,
+    addSkillCategory,
+    removeSkillCategory,
+    updateSkillCategory,
+    addSkillItem,
+    updateSkillItem,
+    removeSkillItem,
+  } = useEditorPageUpdate();
 
   return (
     <Accordion>
@@ -41,19 +39,15 @@ export function SkillsEditorPage() {
                   label="Skill Category"
                   value={skill.category}
                   onChange={(event) =>
-                    dispatch(
-                      updateSkillCategory({
-                        id: skill.id,
-                        key: "category",
-                        value: event.target.value,
-                      })
+                    updateSkillCategory(
+                      skill.id,
+                      "category",
+                      event.target.value
                     )
                   }
                   fullWidth
                 />
-                <IconButton
-                  onClick={() => dispatch(removeSkillCategory(skill.id))}
-                >
+                <IconButton onClick={() => removeSkillCategory(skill.id)}>
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -79,13 +73,11 @@ export function SkillsEditorPage() {
                       label={`Skill Item ${idx + 1}`}
                       value={skillItem.name}
                       onChange={(event) =>
-                        dispatch(
-                          updateSkillItem({
-                            id: skill.id,
-                            index: idx,
-                            key: "name",
-                            value: event.target.value,
-                          })
+                        updateSkillItem(
+                          skill.id,
+                          idx,
+                          "name",
+                          event.target.value
                         )
                       }
                       fullWidth
@@ -94,24 +86,18 @@ export function SkillsEditorPage() {
                       value={skillItem.rating}
                       onChange={(_, newValue) => {
                         if (isRatingAcceptable(newValue)) {
-                          dispatch(
-                            updateSkillItem({
-                              id: skill.id,
-                              index: idx,
-                              key: "rating",
-                              value: newValue ?? 0,
-                            })
+                          updateSkillItem(
+                            skill.id,
+                            idx,
+                            "rating",
+                            newValue ?? 0
                           );
                         }
                       }}
                       precision={0.5}
                     />
                     <IconButton
-                      onClick={() =>
-                        dispatch(
-                          removeSkillItem({ skillId: skill.id, index: idx })
-                        )
-                      }
+                      onClick={() => removeSkillItem(skill.id, idx)}
                       disabled={skill.items.length === 1}
                     >
                       <DeleteIcon fontSize="small" />
@@ -119,11 +105,7 @@ export function SkillsEditorPage() {
                   </Box>
                 ))}
                 <Box>
-                  <IconButton
-                    onClick={() =>
-                      dispatch(addSkillItem({ skillId: skill.id }))
-                    }
-                  >
+                  <IconButton onClick={() => addSkillItem(skill.id)}>
                     <AddIcon />
                   </IconButton>
                 </Box>
@@ -131,10 +113,7 @@ export function SkillsEditorPage() {
             </Box>
           ))}
 
-          <Button
-            variant="contained"
-            onClick={() => dispatch(addSkillCategory())}
-          >
+          <Button variant="contained" onClick={() => addSkillCategory()}>
             Add New Skill Category
           </Button>
         </Box>
