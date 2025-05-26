@@ -4,8 +4,7 @@ import { useImportExportJson } from "@hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import PrintIcon from "@mui/icons-material/Print";
-import { setTemplate } from "@src/store/cv-data/cv-data-slice";
-import { SetStateFunction, useAppDispatch } from "@src/store/store-helper";
+import { SetStateFunction } from "@src/store/store-helper";
 
 interface Props {
   /**
@@ -14,6 +13,7 @@ interface Props {
    */
   printReference: React.RefObject<HTMLDivElement | null>;
 
+  /** Setter for the filename */
   setFileName: SetStateFunction<string>;
 }
 
@@ -35,7 +35,6 @@ export function TemplateButton({
   setFileName,
 }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
-  const dispatch = useAppDispatch();
   const { handleImport } = useImportExportJson();
 
   return (
@@ -44,12 +43,6 @@ export function TemplateButton({
       aria-label="Basic button group"
       sx={{ mb: "30px" }}
     >
-      <Button onClick={() => dispatch(setTemplate("one-column"))}>
-        One Column
-      </Button>
-      <Button onClick={() => dispatch(setTemplate("two-column"))}>
-        Two Column
-      </Button>
       <Button onClick={() => onPrintClicked()} startIcon={<PrintIcon />}>
         Print
       </Button>

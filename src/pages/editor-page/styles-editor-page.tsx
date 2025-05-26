@@ -14,10 +14,14 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { Style } from "@src/custom-types/json-types";
+import { setTemplate, styleSelector } from "@src/store/cv-data/cv-data-slice";
 
 export function StylesEditorPage(): JSX.Element {
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
-  const [selectedTemplate, setSelectedTemplate] = useState("simple");
+  const { template } = useAppSelector(styleSelector);
+  const dispatch = useAppDispatch();
 
   return (
     <Accordion>
@@ -46,16 +50,18 @@ export function StylesEditorPage(): JSX.Element {
             <RadioGroup
               row
               name="template"
-              value={selectedTemplate}
-              onChange={(event) => setSelectedTemplate(event.target.value)}
+              value={template}
+              onChange={(event) =>
+                dispatch(setTemplate(event.target.value as Style["template"]))
+              }
             >
               <FormControlLabel
-                value="oneColumn"
+                value="one-column"
                 control={<Radio />}
                 label="One-Column"
               />
               <FormControlLabel
-                value="twoColumn"
+                value="two-column"
                 control={<Radio />}
                 label="Two-Column"
               />

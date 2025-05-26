@@ -103,8 +103,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      <StylesEditorPage />
       <TemplateButton printReference={contentRef} setFileName={setFileName} />
+      <StylesEditorPage />
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           Profile
