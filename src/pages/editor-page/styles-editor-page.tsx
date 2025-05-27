@@ -20,6 +20,7 @@ import {
   setTemplate,
   styleSelector,
 } from "@src/store/cv-data/cv-data-slice";
+import { CvColorPicker } from "@components/cv-color-picker";
 
 export function StylesEditorPage(): JSX.Element {
   const { template, dateFormat } = useAppSelector(styleSelector);
@@ -47,6 +48,8 @@ export function StylesEditorPage(): JSX.Element {
             <MenuItem value="YYYY-MM-DD">MMMM/YYYY (December 2018)</MenuItem>
           </Select>
         </FormControl>
+
+        <CvColorPicker />
 
         <FormControl component="fieldset">
           <Stack direction="row" alignItems="center" spacing={2}>
