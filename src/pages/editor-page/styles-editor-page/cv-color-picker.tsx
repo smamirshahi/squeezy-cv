@@ -1,19 +1,22 @@
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { useState } from "react";
 import {
+  Box,
   Button,
   FormControl,
   InputLabel,
   MenuItem,
   Popover,
   Select,
+  Stack,
+  Typography,
   useTheme,
 } from "@mui/material";
 
 export function CvColorPicker(): JSX.Element {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [fontsize, setFontsize] = useState("1");
+  const [fontsize, setFontsize] = useState<number>(10);
 
   const isOpen = Boolean(anchorEl);
   const id = isOpen ? "simple-popover" : undefined;
@@ -21,16 +24,16 @@ export function CvColorPicker(): JSX.Element {
   const textColor = theme.palette.getContrastText(color);
 
   return (
-    <div>
-      <p>Title</p>
-      <FormControl fullWidth>
-        <InputLabel id="number-label">font size</InputLabel>
+    <Stack direction="row" alignItems="center" spacing={2}>
+      <Typography>Subtitle</Typography>
+      <FormControl size="small" sx={{ minWidth: 100 }}>
+        <InputLabel id="number-label">Font Size</InputLabel>
         <Select
           labelId="number-label"
           id="number-select"
           value={fontsize}
-          label="Number"
-          onChange={(event) => setFontsize(event.target.value)}
+          label="Font Size"
+          onChange={(event) => setFontsize(event.target.value as number)}
         >
           {[...Array(7)].map((_, i) => {
             const num = 11 + i;
@@ -54,6 +57,7 @@ export function CvColorPicker(): JSX.Element {
       >
         {color}
       </Button>
+
       <Popover
         id={id}
         open={isOpen}
@@ -68,9 +72,11 @@ export function CvColorPicker(): JSX.Element {
           horizontal: "center",
         }}
       >
-        <HexColorPicker color={color} onChange={setColor} />
-        <HexColorInput color={color} onChange={setColor} />
+        <Box sx={{ p: 2 }}>
+          <HexColorPicker color={color} onChange={setColor} />
+          <HexColorInput color={color} onChange={setColor} />
+        </Box>
       </Popover>
-    </div>
+    </Stack>
   );
 }

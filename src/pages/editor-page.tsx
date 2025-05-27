@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
-import { StylesEditorPage } from "@pages/editor-page/styles-editor-page";
+import { StylesEditorPage } from "@src/pages/editor-page/styles-editor-page/styles-editor-page";
 
 interface Props {
   /** The reference to the content */
