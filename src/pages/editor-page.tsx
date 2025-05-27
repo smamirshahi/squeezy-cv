@@ -49,6 +49,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [summary, setSummary] = useState<ProfessionalSummary>(
     cvData.professionalSummary
   );
+
   const {
     experiences,
     setExperiences,

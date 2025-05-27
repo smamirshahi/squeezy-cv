@@ -13,14 +13,16 @@ import {
   Stack,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
 import { Style } from "@src/custom-types/json-types";
-import { setTemplate, styleSelector } from "@src/store/cv-data/cv-data-slice";
+import {
+  setDateFormat,
+  setTemplate,
+  styleSelector,
+} from "@src/store/cv-data/cv-data-slice";
 
 export function StylesEditorPage(): JSX.Element {
-  const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
-  const { template } = useAppSelector(styleSelector);
+  const { template, dateFormat } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
   return (
@@ -36,7 +38,9 @@ export function StylesEditorPage(): JSX.Element {
             id="date-format"
             value={dateFormat}
             label="Date Format"
-            onChange={(event) => setDateFormat(event.target.value)}
+            onChange={(event) =>
+              dispatch(setDateFormat(event.target.value as Style["dateFormat"]))
+            }
           >
             <MenuItem value="DD/MM/YYYY">DD/MM/YYYY (01/12/2018)</MenuItem>
             <MenuItem value="MM/DD/YYYY">MMM/YYYY (Dec/2018)</MenuItem>

@@ -147,6 +147,13 @@ const StyleSchema = Object({
 
   /** The rating icon */
   ratingIcon: Union(Literal("star"), Literal("circle")),
+
+  /** The date format */
+  dateFormat: Union(
+    Literal("DD/MM/YYYY"),
+    Literal("MMM/YYYY"),
+    Literal("MMMM/YYYY")
+  ),
 });
 
 export const CVFileSchema = Object({
