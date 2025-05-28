@@ -1,11 +1,4 @@
-import {
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-} from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@src/custom-types/json-types";
 import { setTemplate, styleSelector } from "@src/store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
@@ -15,29 +8,20 @@ export function TemplateEditorPage(): JSX.Element {
   const { template } = useAppSelector(styleSelector);
 
   return (
-    <FormControl component="fieldset">
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <FormLabel component="legend">Template</FormLabel>
-        <RadioGroup
-          row
-          name="template"
-          value={template}
-          onChange={(event) =>
-            dispatch(setTemplate(event.target.value as Style["template"]))
-          }
-        >
-          <FormControlLabel
-            value="one-column"
-            control={<Radio />}
-            label="One-Column"
-          />
-          <FormControlLabel
-            value="two-column"
-            control={<Radio />}
-            label="Two-Column"
-          />
-        </RadioGroup>
-      </Stack>
+    <FormControl fullWidth>
+      <InputLabel id="template-label">Template Selection</InputLabel>
+      <Select
+        labelId="template-label"
+        id="template-format"
+        value={template}
+        label="Template"
+        onChange={(event) =>
+          dispatch(setTemplate(event.target.value as Style["template"]))
+        }
+      >
+        <MenuItem value="one-column">One-Column</MenuItem>
+        <MenuItem value="two-column">Two-Column</MenuItem>
+      </Select>
     </FormControl>
   );
 }

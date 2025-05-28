@@ -11,9 +11,9 @@ export function StylesEditorPage(): JSX.Element {
         Styles
       </AccordionSummary>
       <AccordionDetails>
+        <TemplateEditorPage />
         <DateFormatSelection />
         <CvColorPicker />
-        <TemplateEditorPage />
       </AccordionDetails>
     </Accordion>
   );
