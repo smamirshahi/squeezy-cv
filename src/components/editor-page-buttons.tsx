@@ -47,6 +47,7 @@ export function EditorPageButtons({
       gap={1}
     >
       <Button
+        component="label"
         variant="contained"
         role={undefined}
         tabIndex={-1}
