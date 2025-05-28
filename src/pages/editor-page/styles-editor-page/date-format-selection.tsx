@@ -19,8 +19,8 @@ export function DateFormatSelection(): JSX.Element {
         }
       >
         <MenuItem value="DD/MM/YYYY">DD/MM/YYYY (01/12/2018)</MenuItem>
-        <MenuItem value="MM/DD/YYYY">MMM/YYYY (Dec/2018)</MenuItem>
-        <MenuItem value="YYYY-MM-DD">MMMM/YYYY (December 2018)</MenuItem>
+        <MenuItem value="MMM/YYYY">MMM/YYYY (Dec/2018)</MenuItem>
+        <MenuItem value="MMMM/YYYY">MMMM/YYYY (December 2018)</MenuItem>
       </Select>
     </FormControl>
   );

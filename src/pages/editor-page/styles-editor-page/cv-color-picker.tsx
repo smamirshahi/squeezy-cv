@@ -20,7 +20,7 @@ interface Props {
 export function CvColorPicker({ fontTitle }: Props): JSX.Element {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [fontsize, setFontsize] = useState<number>(10);
+  const [fontsize, setFontsize] = useState<number>(12);
 
   const isOpen = Boolean(anchorEl);
   const id = isOpen ? "simple-popover" : undefined;
