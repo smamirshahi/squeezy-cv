@@ -43,7 +43,7 @@ export function EditorPageButtons({
       container
       direction="row"
       justifyContent="center"
-      sx={{ mt: "20px" }}
+      sx={{ mb: "20px" }}
       gap={1}
     >
       <Button
@@ -52,6 +52,7 @@ export function EditorPageButtons({
         role={undefined}
         tabIndex={-1}
         startIcon={<UploadIcon />}
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
       >
         Import
         <VisuallyHiddenInput
@@ -64,14 +65,24 @@ export function EditorPageButtons({
         />
       </Button>
 
-      <Button variant="contained" onClick={onApplyClicked}>
+      <Button
+        variant="contained"
+        onClick={onApplyClicked}
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
+      >
         Apply
       </Button>
       <TextField
         value={fileName}
         onChange={(event) => setFileName(event.target.value)}
+        sx={{
+          height: "40px",
+          "& .MuiInputBase-root": { height: "40px", fontSize: "0.7rem" },
+        }}
+        inputProps={{ style: { height: "40px", padding: 0 } }}
       />
       <Button
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
         variant="contained"
         onClick={() => handleExport(fileName)}
         startIcon={<DownloadIcon />}
@@ -79,13 +90,13 @@ export function EditorPageButtons({
         Save
       </Button>
       <Button
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
         variant="contained"
         onClick={() => onPrintClicked()}
         startIcon={<PrintIcon />}
       >
         Print
       </Button>
-      {/* <pre>{JSON.stringify(cvData, null, 2)}</pre> */}
     </Grid>
   );
 }
