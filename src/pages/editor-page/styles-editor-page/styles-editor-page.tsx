@@ -1,4 +1,9 @@
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Stack,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { CvColorPicker } from "@src/pages/editor-page/styles-editor-page/cv-color-picker";
 import { TemplateEditorPage } from "@pages/editor-page/styles-editor-page/template-editor-page";
@@ -11,8 +16,10 @@ export function StylesEditorPage(): JSX.Element {
         Styles
       </AccordionSummary>
       <AccordionDetails>
-        <TemplateEditorPage />
-        <DateFormatSelection />
+        <Stack direction="row" spacing={2}>
+          <TemplateEditorPage />
+          <DateFormatSelection />
+        </Stack>
         <CvColorPicker />
       </AccordionDetails>
     </Accordion>
