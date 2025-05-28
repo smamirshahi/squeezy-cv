@@ -20,7 +20,7 @@ export function StylesEditorPage(): JSX.Element {
           <TemplateEditorPage />
           <DateFormatSelection />
         </Stack>
-        <CvColorPicker />
+        <CvColorPicker fontTitle="subtitle" />
       </AccordionDetails>
     </Accordion>
   );

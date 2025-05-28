@@ -13,7 +13,11 @@ import {
   useTheme,
 } from "@mui/material";
 
-export function CvColorPicker(): JSX.Element {
+interface Props {
+  fontTitle: string;
+}
+
+export function CvColorPicker({ fontTitle }: Props): JSX.Element {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [fontsize, setFontsize] = useState<number>(10);
@@ -24,8 +28,14 @@ export function CvColorPicker(): JSX.Element {
   const textColor = theme.palette.getContrastText(color);
 
   return (
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <Typography>Subtitle</Typography>
+    <Stack
+      direction="row"
+      alignItems="center"
+      justifyContent="space-between"
+      spacing={2}
+      sx={{ mt: "10px" }}
+    >
+      <Typography>{fontTitle}</Typography>
       <FormControl size="small" sx={{ minWidth: 100 }}>
         <InputLabel id="number-label">Font Size</InputLabel>
         <Select
