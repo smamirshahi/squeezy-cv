@@ -1,10 +1,11 @@
-import { Button, ButtonGroup } from "@mui/material";
+import { Button, Grid, TextField } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import UploadIcon from "@mui/icons-material/Upload";
 import PrintIcon from "@mui/icons-material/Print";
-import { SetStateFunction } from "@src/store/store-helper";
+import { useState } from "react";
+import DownloadIcon from "@mui/icons-material/Download";
 
 interface Props {
   /**
@@ -13,8 +14,7 @@ interface Props {
    */
   printReference: React.RefObject<HTMLDivElement | null>;
 
-  /** Setter for the filename */
-  setFileName: SetStateFunction<string>;
+  onApplyClicked?: () => void;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -30,25 +30,24 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 /** A button group that allows the user to change the template, print, export, and import the CV data */
-export function TemplateButton({
+export function EditorPageButtons({
   printReference,
-  setFileName,
+  onApplyClicked,
 }: Props): JSX.Element {
+  const [fileName, setFileName] = useState<string>("");
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
-  const { handleImport } = useImportExportJson();
+  const { handleImport, handleExport } = useImportExportJson();
 
   return (
-    <ButtonGroup
-      variant="outlined"
-      aria-label="Basic button group"
-      sx={{ mb: "30px" }}
+    <Grid
+      container
+      direction="row"
+      justifyContent="center"
+      sx={{ mt: "20px" }}
+      gap={1}
     >
-      <Button onClick={() => onPrintClicked()} startIcon={<PrintIcon />}>
-        Print
-      </Button>
-      {/* <pre>{JSON.stringify(cvData, null, 2)}</pre> */}
       <Button
-        component="label"
+        variant="contained"
         role={undefined}
         tabIndex={-1}
         startIcon={<UploadIcon />}
@@ -63,6 +62,29 @@ export function TemplateButton({
           accept=".json"
         />
       </Button>
-    </ButtonGroup>
+
+      <Button variant="contained" onClick={onApplyClicked}>
+        Apply
+      </Button>
+      <TextField
+        value={fileName}
+        onChange={(event) => setFileName(event.target.value)}
+      />
+      <Button
+        variant="contained"
+        onClick={() => handleExport(fileName)}
+        startIcon={<DownloadIcon />}
+      >
+        Save
+      </Button>
+      <Button
+        variant="contained"
+        onClick={() => onPrintClicked()}
+        startIcon={<PrintIcon />}
+      >
+        Print
+      </Button>
+      {/* <pre>{JSON.stringify(cvData, null, 2)}</pre> */}
+    </Grid>
   );
 }

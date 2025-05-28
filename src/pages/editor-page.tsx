@@ -2,12 +2,9 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Button,
-  Grid,
   Paper,
-  TextField,
 } from "@mui/material";
-import { TemplateButton } from "@components/template-button";
+import { EditorPageButtons } from "@src/components/editor-page-buttons";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@customTypes/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor-page";
 import { EducationEditorPage } from "@pages/editor-page/education-editor-page";
@@ -15,8 +12,6 @@ import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
 import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-page";
 import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
-import { useImportExportJson } from "@src/hooks/use-import-export-json";
-import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   ContactInfo,
@@ -36,12 +31,11 @@ interface Props {
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const cvData = useAppSelector(cvDataSelector);
-  const { handleExport } = useImportExportJson();
+
   const dispatch = useAppDispatch();
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(
     cvData.personalInfo
   );
-  const [fileName, setFileName] = useState<string>("");
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>(
     cvData.contactInfo
@@ -104,7 +98,10 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      <TemplateButton printReference={contentRef} setFileName={setFileName} />
+      <EditorPageButtons
+        printReference={contentRef}
+        onApplyClicked={updateCvData}
+      />
       <StylesEditorPage />
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -125,28 +122,6 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <ExperienceEditorPage />
       <EducationEditorPage />
       <SkillsEditorPage />
-      <Grid
-        container
-        direction="row"
-        justifyContent="flex-end"
-        sx={{ mt: "20px" }}
-        gap={2}
-      >
-        <Button variant="contained" onClick={updateCvData}>
-          Apply
-        </Button>
-        <TextField
-          value={fileName}
-          onChange={(event) => setFileName(event.target.value)}
-        />
-        <Button
-          variant="contained"
-          onClick={() => handleExport(fileName)}
-          startIcon={<DownloadIcon />}
-        >
-          Save
-        </Button>
-      </Grid>
     </Paper>
   );
 }
