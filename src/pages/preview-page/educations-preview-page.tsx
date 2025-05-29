@@ -3,7 +3,7 @@ import {
   BodyText,
   SectionTitle,
   SubsectionText,
-} from "@components/cv-typography";
+} from "@components/cv-typography-old";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";

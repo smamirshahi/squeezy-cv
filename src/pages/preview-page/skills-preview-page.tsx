@@ -2,7 +2,7 @@ import {
   BodyText,
   SectionTitle,
   SubsectionText,
-} from "@components/cv-typography";
+} from "@components/cv-typography-old";
 import { Grid, Rating } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";

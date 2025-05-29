@@ -1,5 +1,5 @@
 import { Grid, SvgIcon, SxProps } from "@mui/material";
-import { BodyText } from "@components/cv-typography";
+import { BodyText } from "@components/cv-typography-old";
 
 interface Props {
   /** The icon to be shown */
