@@ -5,9 +5,9 @@ import {
   Experience,
   SkillCategory,
   SkillItem,
-} from "@src/custom-types/json-types";
-import { cvDataSelector } from "@src/store/cv-data/cv-data-slice";
-import { SetStateFunction, useAppSelector } from "@src/store/store-helper";
+} from "@custom-types/json-types";
+import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { SetStateFunction, useAppSelector } from "@store/store-helper";
 
 interface ReturnProps {
   experiences: Experience[];

@@ -9,7 +9,7 @@ import {
   SkillCategory,
   SkillItem,
   Style,
-} from "@customTypes/json-types";
+} from "@custom-types/json-types";
 import {
   findEducation,
   findExperience,

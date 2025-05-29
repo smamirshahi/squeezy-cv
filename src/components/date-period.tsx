@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { IconWithText } from "@components/icon-with-text";
-import { customColors } from "@customTypes/custom-styles";
-import { useAppSelector } from "@src/store/store-helper";
-import { styleSelector } from "@src/store/cv-data/cv-data-slice";
+import { customColors } from "@custom-types/custom-styles";
+import { useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 
 interface DatePeriodProps {
   /** Date period with start and end */

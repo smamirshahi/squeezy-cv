@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { CVFile, CVFileSchema } from "@customTypes/json-types";
+import { CVFile, CVFileSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
 
@@ -62,6 +62,7 @@ export function useImportExportJson(): ReturnProps {
           template: "one-column",
           shouldShowFullContactLinks: true,
           ratingIcon: "star",
+          dateFormat: "MMMM/YYYY",
         },
       };
       const blob = new Blob([JSON.stringify(fileData, null, 2)], {

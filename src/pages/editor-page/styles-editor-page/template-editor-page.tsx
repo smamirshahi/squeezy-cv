@@ -1,7 +1,7 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { Style } from "@src/custom-types/json-types";
-import { setTemplate, styleSelector } from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
+import { Style } from "@custom-types/json-types";
+import { setTemplate, styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 export function TemplateEditorPage(): JSX.Element {
   const dispatch = useAppDispatch();

@@ -24,9 +24,9 @@
     "noUncheckedSideEffectImports": true,
 
     "paths": {
-      "@src/*": ["src/*"],
       "@components/*": ["src/components/*"],
-      "@customTypes/*": ["src/custom-types/*"],
+      "@custom-types/*": ["src/custom-types/*"],
+      "@custom-styles/*": ["src/custom-styles/*"],
       "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
       "@store/*": ["src/store/*"],

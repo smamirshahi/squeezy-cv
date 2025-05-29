@@ -3,14 +3,14 @@ import {
   BodyText,
   SectionTitle,
   SubsectionText,
-} from "@src/components/cv-typography";
+} from "@components/cv-typography";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import { DatePeriod } from "@src/components/date-period";
+import { DatePeriod } from "@components/date-period";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { IconWithText } from "@src/components/icon-with-text";
-import { customColors } from "@src/custom-types/custom-styles";
+import { IconWithText } from "@components/icon-with-text";
+import { customColors } from "@custom-types/custom-styles";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element {

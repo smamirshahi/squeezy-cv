@@ -1,8 +1,4 @@
-import {
-  Education,
-  Experience,
-  SkillCategory,
-} from "@src/custom-types/json-types";
+import { Education, Experience, SkillCategory } from "@custom-types/json-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(

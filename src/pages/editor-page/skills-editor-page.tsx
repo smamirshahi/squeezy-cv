@@ -1,9 +1,9 @@
 import { Box, Button, IconButton, TextField, Rating } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { isRatingAcceptable } from "@src/custom-types/type-guards";
-import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
-import { CVAccordion } from "@src/components/cv-accordion";
+import { isRatingAcceptable } from "@custom-types/type-guards";
+import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { CVAccordion } from "@components/cv-accordion";
 
 export function SkillsEditorPage(): JSX.Element {
   const {

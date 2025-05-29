@@ -1,6 +1,6 @@
 import { AccordionDetails, Paper } from "@mui/material";
-import { EditorPageButtons } from "@src/components/editor-page-buttons";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@customTypes/custom-styles";
+import { EditorPageButtons } from "@components/editor-page-buttons";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-types/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor-page";
 import { EducationEditorPage } from "@pages/editor-page/education-editor-page";
 import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
@@ -11,13 +11,13 @@ import {
   ContactInfo,
   PersonalInfo,
   ProfessionalSummary,
-} from "@src/custom-types/json-types";
+} from "@custom-types/json-types";
 import { useEffect, useState } from "react";
-import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
-import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
-import { StylesEditorPage } from "@src/pages/editor-page/styles-editor-page/styles-editor-page";
-import { CVAccordion } from "@src/components/cv-accordion";
+import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
+import { CVAccordion } from "@components/cv-accordion";
 
 interface Props {
   /** The reference to the content */

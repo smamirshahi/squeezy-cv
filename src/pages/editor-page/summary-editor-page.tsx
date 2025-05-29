@@ -1,7 +1,7 @@
 import { TextField } from "@mui/material";
-import { ProfessionalSummary } from "@src/custom-types/json-types";
-import { SetStateFunction } from "@src/store/store-helper";
-import { CVAccordion } from "@src/components/cv-accordion";
+import { ProfessionalSummary } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
+import { CVAccordion } from "@components/cv-accordion";
 
 interface Props {
   /** The professional summary to edit */

@@ -1,8 +1,8 @@
 import { Stack } from "@mui/material";
-import { CvColorPicker } from "@src/pages/editor-page/styles-editor-page/cv-color-picker";
+import { CvColorPicker } from "@pages/editor-page/styles-editor-page/cv-color-picker";
 import { TemplateEditorPage } from "@pages/editor-page/styles-editor-page/template-editor-page";
 import { DateFormatSelection } from "@pages/editor-page/styles-editor-page/date-format-selection";
-import { CVAccordion } from "@src/components/cv-accordion";
+import { CVAccordion } from "@components/cv-accordion";
 
 export function StylesEditorPage(): JSX.Element {
   return (

@@ -1,4 +1,4 @@
-import { SkillItem } from "@customTypes/json-types";
+import { SkillItem } from "@custom-types/json-types";
 
 /** Check if the rating is accepted */
 export function isRatingAcceptable(

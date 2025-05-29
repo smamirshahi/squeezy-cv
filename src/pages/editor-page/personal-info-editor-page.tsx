@@ -1,6 +1,6 @@
 import { Box, TextField } from "@mui/material";
-import { PersonalInfo } from "@src/custom-types/json-types";
-import { SetStateFunction } from "@src/store/store-helper";
+import { PersonalInfo } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
 
 interface Props {
   /** The personal information to edit */

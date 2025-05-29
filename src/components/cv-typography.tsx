@@ -1,5 +1,5 @@
 import { SxProps, Typography } from "@mui/material";
-import { customColors } from "@src/custom-types/custom-styles";
+import { customColors } from "@custom-types/custom-styles";
 
 interface TextProps {
   /** The text of the subsection */

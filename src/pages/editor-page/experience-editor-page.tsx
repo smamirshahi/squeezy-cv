@@ -1,8 +1,8 @@
 import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
-import { CVAccordion } from "@src/components/cv-accordion";
+import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { CVAccordion } from "@components/cv-accordion";
 
 export function ExperienceEditorPage(): JSX.Element {
   const {
