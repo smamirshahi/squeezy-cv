@@ -1,121 +1,96 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  TextField,
-  AccordionSummary,
-  AccordionDetails,
-  Accordion,
-} from "@mui/material";
+import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
+import { CVAccordion } from "@src/components/cv-accordion";
 
 export function EducationEditorPage(): JSX.Element {
   const { educations, addEducation, removeEducation, updateEducation } =
     useEditorPageUpdate();
 
   return (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        Education
-      </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {educations.map((education) => (
-            <Box
-              key={education.id}
-              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-            >
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <TextField
-                  label="Degree"
-                  value={education.degree}
-                  onChange={(event) =>
-                    updateEducation(education.id, "degree", event.target.value)
-                  }
-                  fullWidth
-                />
-                <IconButton onClick={() => removeEducation(education.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-              {/* Company and Location in one line */}
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <TextField
-                  label="Institute"
-                  value={education.institute}
-                  onChange={(event) =>
-                    updateEducation(
-                      education.id,
-                      "institute",
-                      event.target.value
-                    )
-                  }
-                  fullWidth
-                />
-                <TextField
-                  label="Location"
-                  value={education.location}
-                  onChange={(event) =>
-                    updateEducation(
-                      education.id,
-                      "location",
-                      event.target.value
-                    )
-                  }
-                  fullWidth
-                />
-              </Box>
-              {/* Start and End Date in one line */}
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <TextField
-                  label="Start Date"
-                  type="date"
-                  value={education.startDate}
-                  onChange={(event) =>
-                    updateEducation(
-                      education.id,
-                      "startDate",
-                      event.target.value
-                    )
-                  }
-                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
-                <TextField
-                  label="End Date"
-                  type="date"
-                  value={education.endDate}
-                  onChange={(event) =>
-                    updateEducation(education.id, "endDate", event.target.value)
-                  }
-                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
-              </Box>
+    <CVAccordion title="Education">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {educations.map((education) => (
+          <Box
+            key={education.id}
+            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          >
+            <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Dissertation Title"
-                value={education.dissertationTitle}
+                label="Degree"
+                value={education.degree}
                 onChange={(event) =>
-                  updateEducation(
-                    education.id,
-                    "dissertationTitle",
-                    event.target.value
-                  )
+                  updateEducation(education.id, "degree", event.target.value)
+                }
+                fullWidth
+              />
+              <IconButton onClick={() => removeEducation(education.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+            {/* Company and Location in one line */}
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label="Institute"
+                value={education.institute}
+                onChange={(event) =>
+                  updateEducation(education.id, "institute", event.target.value)
+                }
+                fullWidth
+              />
+              <TextField
+                label="Location"
+                value={education.location}
+                onChange={(event) =>
+                  updateEducation(education.id, "location", event.target.value)
                 }
                 fullWidth
               />
             </Box>
-          ))}
+            {/* Start and End Date in one line */}
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label="Start Date"
+                type="date"
+                value={education.startDate}
+                onChange={(event) =>
+                  updateEducation(education.id, "startDate", event.target.value)
+                }
+                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+              <TextField
+                label="End Date"
+                type="date"
+                value={education.endDate}
+                onChange={(event) =>
+                  updateEducation(education.id, "endDate", event.target.value)
+                }
+                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+            </Box>
+            <TextField
+              label="Dissertation Title"
+              value={education.dissertationTitle}
+              onChange={(event) =>
+                updateEducation(
+                  education.id,
+                  "dissertationTitle",
+                  event.target.value
+                )
+              }
+              fullWidth
+            />
+          </Box>
+        ))}
 
-          <Button variant="contained" onClick={() => addEducation()}>
-            Add Education
-          </Button>
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+        <Button variant="contained" onClick={() => addEducation()}>
+          Add Education
+        </Button>
+      </Box>
+    </CVAccordion>
   );
 }
