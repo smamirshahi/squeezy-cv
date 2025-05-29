@@ -1,5 +1,5 @@
 import { Paper } from "@mui/material";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-types/custom-styles";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useMemo } from "react";

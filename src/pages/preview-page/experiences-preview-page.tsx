@@ -10,7 +10,7 @@ import { DatePeriod } from "@components/date-period";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
-import { customColors } from "@custom-types/custom-styles";
+import { customColors } from "@custom-styles/custom-styles";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element {

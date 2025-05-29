@@ -11,13 +11,18 @@ import {
   Style,
 } from "@custom-types/json-types";
 import {
+  AvailableFonts,
   findEducation,
   findExperience,
   findSkill,
+  FontStyle,
+  TypographyVariant,
 } from "@store/cv-data/cv-data-slice-helper";
 
 /** State of the current CV */
-export type CvDataState = CVFile;
+export type CvDataState = CVFile & {
+  typographyVariant: Record<AvailableFonts, FontStyle>;
+};
 
 export const initialState: CvDataState = {
   version: "1.0",
@@ -44,6 +49,7 @@ export const initialState: CvDataState = {
     ratingIcon: "star",
     dateFormat: "MMMM/YYYY",
   },
+  typographyVariant: TypographyVariant,
 };
 
 /** Slice to access state of cv data */
@@ -262,11 +268,16 @@ const cvDataSlice = createSlice({
     versionSelector: (state: CvDataState) => state.version,
     cvDataSelector: (state: CvDataState) => state.data,
     styleSelector: (state: CvDataState) => state.style,
+    typographyVariantSelector: (state: CvDataState) => state.typographyVariant,
   },
 });
 
-export const { versionSelector, cvDataSelector, styleSelector } =
-  cvDataSlice.selectors;
+export const {
+  versionSelector,
+  cvDataSelector,
+  styleSelector,
+  typographyVariantSelector,
+} = cvDataSlice.selectors;
 export const {
   setCvData,
   setTemplate,
