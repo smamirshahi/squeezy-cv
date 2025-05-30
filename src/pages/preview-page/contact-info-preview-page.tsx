@@ -9,9 +9,13 @@ import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
 
 /** Contact Information (details) */
-export function ContactInfoPreviewPage(): JSX.Element {
+export function ContactInfoPreviewPage(): JSX.Element | null {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
+
+  if (!contactInfo.email) {
+    return null;
+  }
 
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>

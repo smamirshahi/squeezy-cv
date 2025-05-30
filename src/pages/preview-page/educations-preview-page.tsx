@@ -7,8 +7,12 @@ import { IconWithText } from "@components/icon-with-text";
 import { CvTypographyNew } from "@components/cv-typography";
 
 /** Renders the whole education part in preview page */
-export function EducationsPreviewPage(): JSX.Element {
+export function EducationsPreviewPage(): JSX.Element | null {
   const { educations } = useAppSelector(cvDataSelector);
+
+  if (educations.length === 0) {
+    return null;
+  }
 
   return (
     <Grid

@@ -5,9 +5,13 @@ import React from "react";
 import { CvTypographyNew } from "@components/cv-typography";
 
 /** Skills section (Areas of Expertise) */
-export function SkillsPreviewPage(): JSX.Element {
+export function SkillsPreviewPage(): JSX.Element | null {
   const { template } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
+
+  if (skills.length === 0) {
+    return null;
+  }
 
   return (
     <>

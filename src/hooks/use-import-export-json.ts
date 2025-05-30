@@ -35,8 +35,7 @@ export function useImportExportJson(): ReturnProps {
           const raw = JSON.parse(event.target?.result as string);
           const parsed = CVFileSchema.check(raw);
           dispatch(setCvData(parsed.data));
-          // eslint-disable-next-line no-alert
-          alert("CV imported successfully!");
+          // alert("CV imported successfully!");
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert
           alert("Invalid file format.");

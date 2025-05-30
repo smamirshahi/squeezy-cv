@@ -3,8 +3,13 @@ import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { CvTypographyNew } from "@components/cv-typography";
 
-export function PersonalInfoPreviewPage(): JSX.Element {
+export function PersonalInfoPreviewPage(): JSX.Element | null {
   const { personalInfo } = useAppSelector(cvDataSelector);
+
+  if (!personalInfo.name) {
+    return null;
+  }
+
   return (
     <Grid
       container

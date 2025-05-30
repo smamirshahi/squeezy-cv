@@ -8,8 +8,12 @@ import { IconWithText } from "@components/icon-with-text";
 import { CvTypographyNew } from "@components/cv-typography";
 
 /** Renders the whole experiences part */
-export function ExperiencesPreviewPage(): JSX.Element {
+export function ExperiencesPreviewPage(): JSX.Element | null {
   const { experiences } = useAppSelector(cvDataSelector);
+
+  if (experiences.length === 0) {
+    return null;
+  }
 
   return (
     <Grid
