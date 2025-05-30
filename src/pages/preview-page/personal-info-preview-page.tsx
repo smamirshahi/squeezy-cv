@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
-import { CvTitle, SubsectionText } from "@components/cv-typography-old";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
+import { CvTypographyNew } from "@components/cv-typography";
 
 export function PersonalInfoPreviewPage(): JSX.Element {
   const { personalInfo } = useAppSelector(cvDataSelector);
@@ -12,8 +12,8 @@ export function PersonalInfoPreviewPage(): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTitle text={personalInfo.name} />
-      <SubsectionText text={personalInfo.jobTitle} />
+      <CvTypographyNew variant="headingLg" text={personalInfo.name} />
+      <CvTypographyNew variant="headingMd" text={personalInfo.jobTitle} />
     </Grid>
   );
 }

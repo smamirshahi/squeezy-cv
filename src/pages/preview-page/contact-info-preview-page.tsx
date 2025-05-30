@@ -15,12 +15,25 @@ export function ContactInfoPreviewPage(): JSX.Element {
 
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>
-      <IconWithText icon={AlternateEmailIcon} text={contactInfo.email} />
-      <IconWithText icon={SmartphoneIcon} text={contactInfo.phone} />
-      <IconWithText icon={LocationOnIcon} text={contactInfo.location} />
+      <IconWithText
+        variant="captionText"
+        icon={AlternateEmailIcon}
+        text={contactInfo.email}
+      />
+      <IconWithText
+        variant="captionText"
+        icon={SmartphoneIcon}
+        text={contactInfo.phone}
+      />
+      <IconWithText
+        variant="captionText"
+        icon={LocationOnIcon}
+        text={contactInfo.location}
+      />
 
       {contactInfo.linkedInId && (
         <IconWithText
+          variant="captionText"
           icon={LinkedInIcon}
           text={
             shouldShowFullContactLinks
@@ -31,6 +44,7 @@ export function ContactInfoPreviewPage(): JSX.Element {
       )}
       {contactInfo.gitHubId && (
         <IconWithText
+          variant="captionText"
           icon={GitHubIcon}
           text={
             shouldShowFullContactLinks

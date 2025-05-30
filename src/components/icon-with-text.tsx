@@ -1,26 +1,23 @@
-import { Grid, SvgIcon, SxProps } from "@mui/material";
-import { BodyText } from "@components/cv-typography-old";
+import { Grid, SvgIcon } from "@mui/material";
+import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
+import { CvTypographyNew } from "@components/cv-typography";
 
 interface Props {
   /** The icon to be shown */
   icon: React.ElementType;
 
+  /** The variant of the typography */
+  variant?: AvailableFonts;
+
   /** The text to be shown */
   text?: string;
-
-  /** Styles for the icon */
-  customIconSx?: SxProps;
-
-  /** Styles for the text */
-  customTextSx?: SxProps;
 }
 
 /** Shows an icon with a text next to it */
 export function IconWithText({
+  variant = "captionText",
   icon,
   text,
-  customIconSx,
-  customTextSx,
 }: Props): JSX.Element | null {
   if (!text) {
     return null;
@@ -33,9 +30,8 @@ export function IconWithText({
         component={icon}
         viewBox="0 0 24 24"
         fontSize="small"
-        sx={{ ...customIconSx }}
       />
-      <BodyText text={text} customSx={customTextSx} />
+      <CvTypographyNew variant={variant} text={text} />
     </Grid>
   );
 }

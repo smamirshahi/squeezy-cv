@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
-import { BodyText, SectionTitle } from "@components/cv-typography-old";
 import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { CvTypographyNew } from "@components/cv-typography";
 
 export function SummaryPreviewPage(): JSX.Element {
   const { professionalSummary } = useAppSelector(cvDataSelector);
@@ -12,8 +12,8 @@ export function SummaryPreviewPage(): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <SectionTitle text="Professional Summary" />
-      <BodyText text={professionalSummary} />
+      <CvTypographyNew variant="headingLg" text="Professional Summary" />
+      <CvTypographyNew variant="bodyLg" text={professionalSummary} />
     </Grid>
   );
 }

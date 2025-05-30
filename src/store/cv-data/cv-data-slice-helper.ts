@@ -23,7 +23,7 @@ export function findSkill(
 }
 
 export type FontStyle = {
-  fontSize: number;
+  fontSize: string;
   fontWeight: number;
   color: string;
 };
@@ -38,32 +38,32 @@ export type AvailableFonts =
 
 export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   headingLg: {
-    fontSize: 2,
+    fontSize: "16pt",
     fontWeight: 700,
     color: "#000000",
   },
   headingMd: {
-    fontSize: 1.5,
+    fontSize: "14pt",
     fontWeight: 600,
     color: "#000000",
   },
   headingSm: {
-    fontSize: 1.25,
+    fontSize: "12pt",
     fontWeight: 500,
     color: "#000000",
   },
   bodyLg: {
-    fontSize: 1,
+    fontSize: "10pt",
     fontWeight: 400,
     color: "#000000",
   },
   bulletText: {
-    fontSize: 0.9,
+    fontSize: "9pt",
     fontWeight: 400,
     color: "#000000",
   },
   captionText: {
-    fontSize: 0.75,
+    fontSize: "8pt",
     fontWeight: 400,
     color: "#777",
   },

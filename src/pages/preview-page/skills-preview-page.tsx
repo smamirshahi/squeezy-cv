@@ -1,12 +1,8 @@
-import {
-  BodyText,
-  SectionTitle,
-  SubsectionText,
-} from "@components/cv-typography-old";
 import { Grid, Rating } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
 import React from "react";
+import { CvTypographyNew } from "@components/cv-typography";
 
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage(): JSX.Element {
@@ -15,13 +11,10 @@ export function SkillsPreviewPage(): JSX.Element {
 
   return (
     <>
-      <SectionTitle text="Skills" />
+      <CvTypographyNew variant="headingLg" text="Skills" />
       {skills.map((skill) => (
         <React.Fragment key={skill.id}>
-          <SubsectionText
-            text={skill.category}
-            customSx={{ textAlign: "left" }}
-          />
+          <CvTypographyNew variant="headingSm" text={skill.category} />
           <Grid
             container
             direction={template === "one-column" ? "row" : "column"}
@@ -29,7 +22,7 @@ export function SkillsPreviewPage(): JSX.Element {
           >
             {skill.items.map((item) => (
               <Grid key={item.id} container direction="row" alignItems="center">
-                <BodyText text={item.name} customSx={{ mr: "10px" }} />
+                <CvTypographyNew variant="bodyLg" text={item.name} />
                 <Rating value={item.rating} precision={0.5} />
               </Grid>
             ))}

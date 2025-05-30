@@ -1,16 +1,11 @@
 import { Grid } from "@mui/material";
-import {
-  BodyText,
-  SectionTitle,
-  SubsectionText,
-} from "@components/cv-typography-old";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
-import { customColors } from "@custom-styles/custom-styles";
+import { CvTypographyNew } from "@components/cv-typography";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element {
@@ -23,8 +18,7 @@ export function ExperiencesPreviewPage(): JSX.Element {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <SectionTitle text="Work Experience" />
-
+      <CvTypographyNew variant="headingLg" text="Work Experience" />
       {experiences.map((experience, index) => (
         <Grid
           container
@@ -33,8 +27,8 @@ export function ExperiencesPreviewPage(): JSX.Element {
           alignItems="flex-start"
           sx={{ mb: "10px" }}
         >
-          <SubsectionText text={experience.jobTitle} isBold={true} />
-          <BodyText text={experience.company} />
+          <CvTypographyNew variant="headingMd" text={experience.jobTitle} />
+          <CvTypographyNew variant="headingSm" text={experience.company} />
           <Grid container direction="row" alignItems="center">
             <DatePeriod
               datePeriod={{
@@ -52,12 +46,12 @@ export function ExperiencesPreviewPage(): JSX.Element {
                   key={index}
                   icon={FiberManualRecordIcon}
                   text={bulletPoint}
-                  customTextSx={{ color: customColors.gray }}
-                  customIconSx={{
-                    color: customColors.gray,
-                    width: "10px",
-                    mr: "5px",
-                  }}
+                  // customTextSx={{ color: customColors.gray }}
+                  // customIconSx={{
+                  //   color: customColors.gray,
+                  //   width: "10px",
+                  //   mr: "5px",
+                  // }}
                 />
               ))}
             </>

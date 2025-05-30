@@ -11,11 +11,15 @@ interface TypographyVariantProps {
   text: string;
 }
 
-export function HeadingMdTypography({
+export function CvTypographyNew({
   variant,
   text,
 }: TypographyVariantProps): JSX.Element {
   const typographyVariant = useAppSelector(typographyVariantSelector);
 
-  return <Typography sx={typographyVariant[variant]}>{text}</Typography>;
+  return (
+    <Typography sx={typographyVariant[variant]} gutterBottom>
+      {text}
+    </Typography>
+  );
 }
