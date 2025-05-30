@@ -68,3 +68,20 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
     color: "#777",
   },
 };
+
+type FontWeightString = "normal" | "medium" | "semi-bold" | "bold";
+
+export function convertFontWeightToNumber(
+  fontWeightString: FontWeightString
+): number {
+  switch (fontWeightString) {
+    case "normal":
+      return 400;
+    case "medium":
+      return 500;
+    case "semi-bold":
+      return 600;
+    case "bold":
+      return 700;
+  }
+}

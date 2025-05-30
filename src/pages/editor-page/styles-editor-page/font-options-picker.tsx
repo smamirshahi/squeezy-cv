@@ -12,19 +12,23 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { AvailableFonts, FontStyle } from "@store/cv-data/cv-data-slice-helper";
 
 interface Props {
-  fontTitle: string;
+  fontTitle: AvailableFonts;
+
+  style: FontStyle;
 }
 
-export function CvColorPicker({ fontTitle }: Props): JSX.Element {
+export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [fontsize, setFontsize] = useState<number>(12);
+  const [fontsize, setFontsize] = useState<string>(style.fontSize);
+  const [color, setColor] = useState<string>(style.color);
+  const [fontWeight, setFontWeight] = useState<number>(style.fontWeight);
 
   const isOpen = Boolean(anchorEl);
   const id = isOpen ? "simple-popover" : undefined;
-  const [color, setColor] = useState<string>("#aabbcc");
   const textColor = theme.palette.getContrastText(color);
 
   return (
@@ -37,16 +41,36 @@ export function CvColorPicker({ fontTitle }: Props): JSX.Element {
     >
       <Typography>{fontTitle}</Typography>
       <FormControl size="small" sx={{ minWidth: 100 }}>
-        <InputLabel id="number-label">Font Size</InputLabel>
+        <InputLabel id="fontSize-label">Font Size</InputLabel>
         <Select
-          labelId="number-label"
-          id="number-select"
+          labelId="fontSize-label"
+          id="fontSize-select"
           value={fontsize}
           label="Font Size"
-          onChange={(event) => setFontsize(event.target.value as number)}
+          onChange={(event) => setFontsize(event.target.value)}
         >
-          {[...Array(7)].map((_, i) => {
-            const num = 11 + i;
+          {[...Array(16)].map((_, i) => {
+            const num = 10 + i;
+            return (
+              <MenuItem key={num} value={num}>
+                {num}
+              </MenuItem>
+            );
+          })}
+        </Select>
+      </FormControl>
+
+      <FormControl size="small" sx={{ minWidth: 100 }}>
+        <InputLabel id="fontWeight-label">Font Weight</InputLabel>
+        <Select
+          labelId="fontWeight-label"
+          id="fontWeight-select"
+          value={fontWeight}
+          label="Font Weight"
+          onChange={(event) => setFontWeight(event.target.value as number)}
+        >
+          {[...Array(16)].map((_, i) => {
+            const num = 10 + i;
             return (
               <MenuItem key={num} value={num}>
                 {num}
