@@ -1,5 +1,5 @@
 import { HexColorPicker, HexColorInput } from "react-colorful";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -13,23 +13,30 @@ import {
   useTheme,
 } from "@mui/material";
 import { AvailableFonts, FontStyle } from "@store/cv-data/cv-data-slice-helper";
+import { useAppDispatch } from "@store/store-helper";
+import { setTypography } from "@store/cv-data/cv-data-slice";
 
 interface Props {
-  fontTitle: AvailableFonts;
+  /** The variant of the font */
+  variant: AvailableFonts;
 
+  /** The style of the font */
   style: FontStyle;
 }
 
-export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
+export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [fontsize, setFontsize] = useState<string>(style.fontSize);
-  const [color, setColor] = useState<string>(style.color);
-  const [fontWeight, setFontWeight] = useState<number>(style.fontWeight);
+  const [fontStyle, setFontStyle] = useState<FontStyle>(style);
 
   const isOpen = Boolean(anchorEl);
   const id = isOpen ? "simple-popover" : undefined;
-  const textColor = theme.palette.getContrastText(color);
+  const textColor = theme.palette.getContrastText(fontStyle.color);
+
+  useEffect(() => {
+    dispatch(setTypography({ variant, fontStyle }));
+  }, [dispatch, fontStyle, variant]);
 
   return (
     <Stack
@@ -39,15 +46,20 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
       spacing={2}
       sx={{ mt: "10px" }}
     >
-      <Typography>{fontTitle}</Typography>
+      <Typography>{variant}</Typography>
       <FormControl size="small" sx={{ minWidth: 100 }}>
         <InputLabel id="fontSize-label">Font Size</InputLabel>
         <Select
           labelId="fontSize-label"
           id="fontSize-select"
-          value={fontsize}
+          value={fontStyle.fontSize}
           label="Font Size"
-          onChange={(event) => setFontsize(event.target.value)}
+          onChange={(event) =>
+            setFontStyle((prev) => ({
+              ...prev,
+              fontSize: event.target.value,
+            }))
+          }
         >
           {Array.from({ length: 15 }, (_, i) => i + 8).map((pt) => (
             <MenuItem key={pt} value={`${pt}pt`}>
@@ -62,9 +74,14 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
         <Select
           labelId="fontWeight-label"
           id="fontWeight-select"
-          value={fontWeight}
+          value={fontStyle.fontWeight}
           label="Font Weight"
-          onChange={(event) => setFontWeight(event.target.value as number)}
+          onChange={(event) =>
+            setFontStyle((prev) => ({
+              ...prev,
+              fontWeight: event.target.value as number,
+            }))
+          }
         >
           {[400, 500, 600, 700].map((weight) => (
             <MenuItem key={weight} value={weight}>
@@ -79,11 +96,11 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
         variant="contained"
         onClick={(event) => setAnchorEl(event.currentTarget)}
         sx={{
-          backgroundColor: color,
+          backgroundColor: fontStyle.color,
           color: textColor,
         }}
       >
-        {color}
+        {fontStyle.color}
       </Button>
 
       <Popover
@@ -101,8 +118,24 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
         }}
       >
         <Box sx={{ p: 2 }}>
-          <HexColorPicker color={color} onChange={setColor} />
-          <HexColorInput color={color} onChange={setColor} />
+          <HexColorPicker
+            color={fontStyle.color}
+            onChange={(color) =>
+              setFontStyle((prev) => ({
+                ...prev,
+                color,
+              }))
+            }
+          />
+          <HexColorInput
+            color={fontStyle.color}
+            onChange={(color) =>
+              setFontStyle((prev) => ({
+                ...prev,
+                color,
+              }))
+            }
+          />
         </Box>
       </Popover>
     </Stack>

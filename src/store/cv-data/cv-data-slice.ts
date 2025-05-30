@@ -262,6 +262,14 @@ const cvDataSlice = createSlice({
       state.style.dateFormat = action.payload;
     },
 
+    setTypography(
+      state,
+      action: PayloadAction<{ variant: AvailableFonts; fontStyle: FontStyle }>
+    ) {
+      state.typographyVariant[action.payload.variant] =
+        action.payload.fontStyle;
+    },
+
     resetCvDataState: () => initialState,
   },
   selectors: {
@@ -300,6 +308,7 @@ export const {
   addSkillItem,
   removeSkillItem,
   updateSkillItem,
+  setTypography,
   resetCvDataState,
 } = cvDataSlice.actions;
 

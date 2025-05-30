@@ -19,11 +19,7 @@ export function StylesEditorPage(): JSX.Element {
       {Object.entries(typographyVariant).map(([variant, style]) => {
         if (isAvailableFont(variant)) {
           return (
-            <FontOptionsPicker
-              key={variant}
-              fontTitle={variant}
-              style={style}
-            />
+            <FontOptionsPicker key={variant} variant={variant} style={style} />
           );
         }
       })}
