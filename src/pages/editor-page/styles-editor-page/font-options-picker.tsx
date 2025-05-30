@@ -49,14 +49,11 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
           label="Font Size"
           onChange={(event) => setFontsize(event.target.value)}
         >
-          {[...Array(16)].map((_, i) => {
-            const num = 10 + i;
-            return (
-              <MenuItem key={num} value={num}>
-                {num}
-              </MenuItem>
-            );
-          })}
+          {Array.from({ length: 15 }, (_, i) => i + 8).map((pt) => (
+            <MenuItem key={pt} value={`${pt}pt`}>
+              {pt} pt
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -69,14 +66,11 @@ export function FontOptionsPicker({ fontTitle, style }: Props): JSX.Element {
           label="Font Weight"
           onChange={(event) => setFontWeight(event.target.value as number)}
         >
-          {[...Array(16)].map((_, i) => {
-            const num = 10 + i;
-            return (
-              <MenuItem key={num} value={num}>
-                {num}
-              </MenuItem>
-            );
-          })}
+          {[400, 500, 600, 700].map((weight) => (
+            <MenuItem key={weight} value={weight}>
+              {weight}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
