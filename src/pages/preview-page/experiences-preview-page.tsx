@@ -47,6 +47,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
             <>
               {experience.bulletPoints.map((bulletPoint, index) => (
                 <IconWithText
+                  variant="bulletText"
                   key={index}
                   icon={FiberManualRecordIcon}
                   text={bulletPoint}
