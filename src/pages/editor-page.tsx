@@ -1,32 +1,23 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
-  Grid,
-  Paper,
-  TextField,
-} from "@mui/material";
-import { TemplateButton } from "@components/template-button";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@customTypes/custom-styles";
+import { AccordionDetails, Paper } from "@mui/material";
+import { EditorPageButtons } from "@components/editor-page-buttons";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor-page";
 import { EducationEditorPage } from "@pages/editor-page/education-editor-page";
 import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
 import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-page";
 import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
-import { useImportExportJson } from "@src/hooks/use-import-export-json";
-import DownloadIcon from "@mui/icons-material/Download";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   ContactInfo,
   PersonalInfo,
   ProfessionalSummary,
-} from "@src/custom-types/json-types";
+} from "@custom-types/json-types";
 import { useEffect, useState } from "react";
-import { cvDataSelector, setCvData } from "@src/store/cv-data/cv-data-slice";
-import { useAppDispatch, useAppSelector } from "@src/store/store-helper";
-import { useEditorPageUpdate } from "@src/hooks/use-editor-page-update";
+import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
+import { CVAccordion } from "@components/cv-accordion";
 
 interface Props {
   /** The reference to the content */
@@ -35,12 +26,11 @@ interface Props {
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const cvData = useAppSelector(cvDataSelector);
-  const { handleExport } = useImportExportJson();
+
   const dispatch = useAppDispatch();
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(
     cvData.personalInfo
   );
-  const [fileName, setFileName] = useState<string>("");
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>(
     cvData.contactInfo
@@ -48,6 +38,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [summary, setSummary] = useState<ProfessionalSummary>(
     cvData.professionalSummary
   );
+
   const {
     experiences,
     setExperiences,
@@ -102,11 +93,12 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      <TemplateButton printReference={contentRef} setFileName={setFileName} />
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          Profile
-        </AccordionSummary>
+      <EditorPageButtons
+        printReference={contentRef}
+        onApplyClicked={updateCvData}
+      />
+      <StylesEditorPage />
+      <CVAccordion title="Profile">
         <AccordionDetails>
           <PersonalInfoEditorPage
             personalInfo={personalInfo}
@@ -117,33 +109,11 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
             setContactInfo={setContactInfo}
           />
         </AccordionDetails>
-      </Accordion>
+      </CVAccordion>
       <SummaryEditorPage summary={summary} setSummary={setSummary} />
       <ExperienceEditorPage />
       <EducationEditorPage />
       <SkillsEditorPage />
-      <Grid
-        container
-        direction="row"
-        justifyContent="flex-end"
-        sx={{ mt: "20px" }}
-        gap={2}
-      >
-        <Button variant="contained" onClick={updateCvData}>
-          Apply
-        </Button>
-        <TextField
-          value={fileName}
-          onChange={(event) => setFileName(event.target.value)}
-        />
-        <Button
-          variant="contained"
-          onClick={() => handleExport(fileName)}
-          startIcon={<DownloadIcon />}
-        >
-          Save
-        </Button>
-      </Grid>
     </Paper>
   );
 }

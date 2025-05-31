@@ -5,8 +5,8 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { SetStateFunction } from "@src/store/store-helper";
-import { ContactInfo } from "@src/custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
+import { ContactInfo } from "@custom-types/json-types";
 
 interface Props {
   /** The contact information to edit */

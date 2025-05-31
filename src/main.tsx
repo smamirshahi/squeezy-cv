@@ -1,7 +1,9 @@
+// eslint-disable-next-line no-restricted-imports
+import "./index.css";
+// eslint-disable-next-line no-restricted-imports
+import { App } from "./App";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@src/index.css";
-import { App } from "@src/App";
 import { Provider } from "react-redux";
 import { store } from "@store/store";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";

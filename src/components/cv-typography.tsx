@@ -1,99 +1,24 @@
-import { SxProps, Typography } from "@mui/material";
-import { customColors } from "@src/custom-types/custom-styles";
+import { Typography } from "@mui/material";
+import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
+import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
+import { useAppSelector } from "@store/store-helper";
 
-interface TextProps {
-  /** The text of the subsection */
+interface TypographyVariantProps {
+  /** The variant of the typography */
+  variant: AvailableFonts;
+
+  /** The text to display */
   text: string;
-
-  /** Whether it is bold or not */
-  isBold?: boolean;
-
-  /** Custom styles for the text */
-  customSx?: SxProps;
 }
 
-/** The title for the whole CV */
-export function CvTitle({
+export function CvTypographyNew({
+  variant,
   text,
-  isBold = false,
-  customSx,
-}: TextProps): JSX.Element {
-  return (
-    <Typography
-      sx={{
-        fontSize: "16pt",
-        fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "bold" : "normal",
-        textTransform: "uppercase",
-        ...customSx,
-      }}
-      gutterBottom
-    >
-      {text}
-    </Typography>
-  );
-}
+}: TypographyVariantProps): JSX.Element {
+  const typographyVariant = useAppSelector(typographyVariantSelector);
 
-/** The Title of a section */
-export function SectionTitle({
-  text,
-  isBold = false,
-  customSx,
-}: TextProps): JSX.Element {
   return (
-    <Typography
-      sx={{
-        fontSize: "14pt",
-        fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "bold" : "normal",
-        borderBottom: `2px solid ${customColors.darkBlue}`,
-        textTransform: "uppercase",
-        color: customColors.darkBlue,
-        ...customSx,
-      }}
-      gutterBottom
-    >
-      {text}
-    </Typography>
-  );
-}
-
-/** The subsection text */
-export function SubsectionText({
-  text,
-  isBold = false,
-  customSx,
-}: TextProps): JSX.Element {
-  return (
-    <Typography
-      sx={{
-        fontSize: "12pt",
-        fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "bold" : "normal",
-        ...customSx,
-      }}
-    >
-      {text}
-    </Typography>
-  );
-}
-
-/** The text for a normal body text */
-export function BodyText({
-  text,
-  isBold = false,
-  customSx,
-}: TextProps): JSX.Element {
-  return (
-    <Typography
-      sx={{
-        fontSize: "10pt",
-        fontFamily: "Calibri, sans-serif",
-        fontWeight: isBold ? "bold" : "normal",
-        textAlign: "left",
-        ...customSx,
-      }}
-    >
+    <Typography sx={typographyVariant[variant]} gutterBottom>
       {text}
     </Typography>
   );

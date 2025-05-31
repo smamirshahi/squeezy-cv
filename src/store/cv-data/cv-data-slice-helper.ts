@@ -1,8 +1,4 @@
-import {
-  Education,
-  Experience,
-  SkillCategory,
-} from "@src/custom-types/json-types";
+import { Education, Experience, SkillCategory } from "@custom-types/json-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(
@@ -24,4 +20,68 @@ export function findSkill(
   id: string
 ): SkillCategory | undefined {
   return state.data.skills.find((skill) => skill.id === id);
+}
+
+export type FontStyle = {
+  fontSize: string;
+  fontWeight: number;
+  color: string;
+};
+
+export type AvailableFonts =
+  | "headingLg"
+  | "headingMd"
+  | "headingSm"
+  | "bodyLg"
+  | "bulletText"
+  | "captionText";
+
+export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
+  headingLg: {
+    fontSize: "16pt",
+    fontWeight: 700,
+    color: "#000000",
+  },
+  headingMd: {
+    fontSize: "14pt",
+    fontWeight: 600,
+    color: "#000000",
+  },
+  headingSm: {
+    fontSize: "12pt",
+    fontWeight: 500,
+    color: "#000000",
+  },
+  bodyLg: {
+    fontSize: "10pt",
+    fontWeight: 400,
+    color: "#000000",
+  },
+  bulletText: {
+    fontSize: "9pt",
+    fontWeight: 400,
+    color: "#000000",
+  },
+  captionText: {
+    fontSize: "8pt",
+    fontWeight: 400,
+    color: "#777",
+  },
+};
+
+type FontWeightString = "normal" | "medium" | "semi-bold" | "bold";
+
+export function convertFontWeightToNumber(
+  fontWeightString: FontWeightString
+): number {
+  switch (fontWeightString) {
+    case "normal":
+      return 400;
+    case "medium":
+      return 500;
+    case "semi-bold":
+      return 600;
+    case "bold":
+      return 700;
+  }
 }

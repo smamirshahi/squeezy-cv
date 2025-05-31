@@ -1,10 +1,10 @@
 import { Paper } from "@mui/material";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@customTypes/custom-styles";
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useMemo } from "react";
-import { OneColumnPreviewPage } from "@src/pages/preview-page/one-column-preview-page";
-import { TwoColumnPreviewPage } from "@src/pages/preview-page/two-column-preview-page";
+import { OneColumnPreviewPage } from "@pages/preview-page/one-column-preview-page";
+import { TwoColumnPreviewPage } from "@pages/preview-page/two-column-preview-page";
 
 interface Props {
   /** The reference to the content */

@@ -1,12 +1,7 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  TextField,
-} from "@mui/material";
-import { ProfessionalSummary } from "@src/custom-types/json-types";
-import { SetStateFunction } from "@src/store/store-helper";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { TextField } from "@mui/material";
+import { ProfessionalSummary } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
+import { CVAccordion } from "@components/cv-accordion";
 
 interface Props {
   /** The professional summary to edit */
@@ -21,26 +16,21 @@ export function SummaryEditorPage({
   setSummary,
 }: Props): JSX.Element | null {
   return (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        Professional Summary
-      </AccordionSummary>
-      <AccordionDetails>
-        <TextField
-          label="Professional Summary"
-          variant="outlined"
-          multiline
-          value={summary}
-          fullWidth
-          sx={{
-            mt: "20px",
-            "& .MuiInputBase-input": {
-              resize: "vertical",
-            },
-          }}
-          onChange={(event) => setSummary(event.target.value)}
-        />
-      </AccordionDetails>
-    </Accordion>
+    <CVAccordion title="Professional Summary">
+      <TextField
+        label="Professional Summary"
+        variant="outlined"
+        multiline
+        value={summary}
+        fullWidth
+        sx={{
+          mt: "20px",
+          "& .MuiInputBase-input": {
+            resize: "vertical",
+          },
+        }}
+        onChange={(event) => setSummary(event.target.value)}
+      />
+    </CVAccordion>
   );
 }

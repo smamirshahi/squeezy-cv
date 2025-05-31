@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { CVFile, CVFileSchema } from "@customTypes/json-types";
+import { CVFile, CVFileSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
 
@@ -35,8 +35,7 @@ export function useImportExportJson(): ReturnProps {
           const raw = JSON.parse(event.target?.result as string);
           const parsed = CVFileSchema.check(raw);
           dispatch(setCvData(parsed.data));
-          // eslint-disable-next-line no-alert
-          alert("CV imported successfully!");
+          // alert("CV imported successfully!");
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert
           alert("Invalid file format.");
@@ -62,6 +61,7 @@ export function useImportExportJson(): ReturnProps {
           template: "one-column",
           shouldShowFullContactLinks: true,
           ratingIcon: "star",
+          dateFormat: "MMMM/YYYY",
         },
       };
       const blob = new Blob([JSON.stringify(fileData, null, 2)], {

@@ -4,6 +4,7 @@ import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
+import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
 
 /** Two column template */
 export function TwoColumnPreviewPage(): JSX.Element | null {
@@ -18,7 +19,7 @@ export function TwoColumnPreviewPage(): JSX.Element | null {
       <Grid size={{ xs: 8 }}>
         <SummaryPreviewPage />
         <ExperiencesPreviewPage />
-        <ExperiencesPreviewPage />
+        <EducationsPreviewPage />
       </Grid>
       <Grid size={{ xs: 4 }}>
         <ContactInfoPreviewPage />

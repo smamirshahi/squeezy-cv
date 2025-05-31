@@ -9,15 +9,20 @@ import {
   SkillCategory,
   SkillItem,
   Style,
-} from "@customTypes/json-types";
+} from "@custom-types/json-types";
 import {
+  AvailableFonts,
   findEducation,
   findExperience,
   findSkill,
+  FontStyle,
+  TypographyVariant,
 } from "@store/cv-data/cv-data-slice-helper";
 
 /** State of the current CV */
-export type CvDataState = CVFile;
+export type CvDataState = CVFile & {
+  typographyVariant: Record<AvailableFonts, FontStyle>;
+};
 
 export const initialState: CvDataState = {
   version: "1.0",
@@ -42,7 +47,9 @@ export const initialState: CvDataState = {
     template: "one-column",
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
+    dateFormat: "MMMM/YYYY",
   },
+  typographyVariant: TypographyVariant,
 };
 
 /** Slice to access state of cv data */
@@ -251,20 +258,38 @@ const cvDataSlice = createSlice({
       state.style.template = action.payload;
     },
 
+    setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
+      state.style.dateFormat = action.payload;
+    },
+
+    setTypography(
+      state,
+      action: PayloadAction<{ variant: AvailableFonts; fontStyle: FontStyle }>
+    ) {
+      state.typographyVariant[action.payload.variant] =
+        action.payload.fontStyle;
+    },
+
     resetCvDataState: () => initialState,
   },
   selectors: {
     versionSelector: (state: CvDataState) => state.version,
     cvDataSelector: (state: CvDataState) => state.data,
     styleSelector: (state: CvDataState) => state.style,
+    typographyVariantSelector: (state: CvDataState) => state.typographyVariant,
   },
 });
 
-export const { versionSelector, cvDataSelector, styleSelector } =
-  cvDataSlice.selectors;
+export const {
+  versionSelector,
+  cvDataSelector,
+  styleSelector,
+  typographyVariantSelector,
+} = cvDataSlice.selectors;
 export const {
   setCvData,
   setTemplate,
+  setDateFormat,
   updatePersonalInfo,
   updateContactInfo,
   updateProfessionalSummary,
@@ -283,6 +308,7 @@ export const {
   addSkillItem,
   removeSkillItem,
   updateSkillItem,
+  setTypography,
   resetCvDataState,
 } = cvDataSlice.actions;
 
