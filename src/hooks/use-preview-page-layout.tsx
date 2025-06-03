@@ -8,7 +8,16 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
 import { SetStateFunction } from "@store/store-helper";
 
+type Components =
+  | "personalInfo"
+  | "contactInfo"
+  | "SummaryPage"
+  | "experiences"
+  | "educations"
+  | "skills";
+
 interface CustomLayout extends Layout {
+  i: Components;
   component: React.ReactNode;
 }
 

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import GridLayout, { Layout } from "react-grid-layout";
-import { TextField, Box, Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
@@ -69,14 +69,11 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
           <Box
             key={item.i}
             sx={{
-              border: "1px solid #ddd",
-              background: "#fafafa",
-              borderRadius: 4,
               boxSizing: "border-box",
               overflow: "hidden",
             }}
           >
-            <>{item.component}</>
+            {item.component}
           </Box>
         ))}
       </GridLayout>
