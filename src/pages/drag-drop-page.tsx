@@ -5,6 +5,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
 import { usePreviewPageDimension } from "@hooks/use-preview-page-dimension";
+import { usePreviewPageLayout } from "@hooks/use-preview-page-layout";
 
 interface Props {
   /** The reference to the content */
@@ -21,11 +22,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
   const { pageDimensions, maxRows } = usePreviewPageDimension({ contentRef });
 
   // 3) Initial layout (in grid units). You can add/remove or re‐order these items as needed.
-  const [layout, setLayout] = useState<Layout[]>([
-    { i: "a", x: 0, y: 0, w: 4, h: 4 },
-    { i: "b", x: 4, y: 0, w: 4, h: 4 },
-    { i: "c", x: 8, y: 0, w: 4, h: 4 },
-  ]);
+  const { layout, setLayout } = usePreviewPageLayout();
 
   // If you want to add/remove items dynamically, you could manage a separate array of IDs.
   // For simplicity, we just use three items ("a","b","c").
@@ -64,12 +61,14 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         preventCollision={true}
         margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
         containerPadding={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
-        onLayoutChange={(newLayout: Layout[]) => setLayout(newLayout)}
+        onLayoutChange={(newLayout: Layout[]) =>
+          console.log("Layout changed:", newLayout)
+        }
       >
         {layout.map((item) => (
-          <div
+          <Box
             key={item.i}
-            style={{
+            sx={{
               border: "1px solid #ddd",
               background: "#fafafa",
               borderRadius: 4,
@@ -77,24 +76,8 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
               overflow: "hidden",
             }}
           >
-            <Box sx={{ p: 1, height: "100%", boxSizing: "border-box" }}>
-              <TextField
-                fullWidth
-                multiline
-                // Let the text area grow in height along with the grid row count.
-                minRows={Math.max(1, item.h)}
-                variant="outlined"
-                placeholder={`Text Field ${item.i.toUpperCase()}`}
-                sx={{
-                  height: "100%",
-                  "& .MuiInputBase-root": {
-                    height: "100%",
-                    alignItems: "flex-start",
-                  },
-                }}
-              />
-            </Box>
-          </div>
+            <>{item.component}</>
+          </Box>
         ))}
       </GridLayout>
     </Paper>
