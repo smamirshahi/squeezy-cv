@@ -15,11 +15,17 @@ interface Props {
 /** Convert mm → px, knowing px/mm from pageDimensions */
 
 export function DragDropPage({ contentRef }: Props): JSX.Element {
-  const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
-    usePreviewPageDimension({
-      contentRef,
-      marginType: "narrow",
-    });
+  const {
+    innerWidthPx,
+    maxRows,
+    marginsInMM,
+    defaultMargin,
+    gridUnitPx,
+    computedCols,
+  } = usePreviewPageDimension({
+    contentRef,
+    marginType: "narrow",
+  });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook
   const { layout, onLayoutChange } = usePreviewPageLayout();
@@ -45,10 +51,9 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <GridLayout
-        className="layout"
         layout={Object.values(layout)}
-        cols={12}
-        rowHeight={rowHeight}
+        cols={computedCols}
+        rowHeight={gridUnitPx}
         // inner width in px (after subtracting the margin from left and right)
         width={innerWidthPx}
         // enforces bottom edge
@@ -61,9 +66,11 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         containerPadding={[defaultMargin, defaultMargin]}
         onLayoutChange={onLayoutChange}
         style={{
-          backgroundSize: `calc(100%/12) ${rowHeight}px`,
-          backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 
-            linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`,
+          backgroundSize: `${gridUnitPx}px ${gridUnitPx}px`,
+          backgroundImage:
+            // vertical lines: 1px solid, then (GRID_UNIT_PX−1) transparent
+            `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),             
+            linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)`,
         }}
       >
         {Object.values(layout).map((item) => (
