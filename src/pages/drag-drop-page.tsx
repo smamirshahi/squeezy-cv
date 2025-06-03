@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import GridLayout, { Layout } from "react-grid-layout";
 import { TextField, Box, Paper } from "@mui/material";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
+import { usePreviewPageDimension } from "@hooks/use-preview-page-dimension";
 
 interface Props {
   /** The reference to the content */
@@ -17,29 +18,7 @@ const DEFAULT_MARGIN = 10;
 const ROW_HEIGHT = 30;
 
 export function DragDropPage({ contentRef }: Props): JSX.Element {
-  // 1) Keep track of the measured pixel width/height of the A4 paper.
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    function updateDimensions(): void {
-      if (contentRef.current) {
-        setDimensions({
-          width: contentRef.current.clientWidth,
-          height: contentRef.current.clientHeight,
-        });
-      }
-    }
-
-    // Measure once on mount:
-    updateDimensions();
-    // Re‐measure on window resize (in case mm→px changes):
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, [contentRef]);
-
-  // 2) Compute maximum number of rows so items cannot exceed the bottom.
-  //    If the container height is, e.g., 1122px, and rowHeight = 30, then maxRows = 37.
-  const maxRows = Math.floor(dimensions.height / ROW_HEIGHT);
+  const { pageDimensions, maxRows } = usePreviewPageDimension({ contentRef });
 
   // 3) Initial layout (in grid units). You can add/remove or re‐order these items as needed.
   const [layout, setLayout] = useState<Layout[]>([
@@ -57,15 +36,16 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
       elevation={3}
       sx={{
         // Force the container to be exactly A4: 210mm × 297mm.
-        width: `${A4_WIDTH_MM}mm`, // typically "210mm"
-        height: `${A4_HEIGHT_MM}mm`, // typically "297mm"
-        overflow: "hidden", // clip anything outside the A4 bounds
+        width: `${A4_WIDTH_MM}mm`,
+        height: `${A4_HEIGHT_MM}mm`,
+        overflow: "hidden",
         padding: "20mm",
         boxSizing: "border-box",
         mx: "auto",
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
-        position: "relative", // ensures GridLayout's absolute items are clipped
+        // ensures GridLayout's absolute items are clipped
+        position: "relative",
       }}
     >
       <GridLayout
@@ -73,12 +53,15 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         layout={layout}
         cols={12}
         rowHeight={ROW_HEIGHT}
-        width={dimensions.width} // use the measured pixel‐width of 210mm
-        maxRows={maxRows} // prevent any item from going below the bottom edge
+        width={pageDimensions.width}
+        // prevent any item from going below the bottom edge
+        maxRows={maxRows}
         isDraggable={true}
         isResizable={true}
-        verticalCompact={false} // no auto‐compacting/collapsing upward
-        preventCollision={true} // keep cells from overlapping
+        // no auto‐compacting/collapsing upward
+        verticalCompact={false}
+        // keep cells from overlapping
+        preventCollision={true}
         margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
         containerPadding={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
         onLayoutChange={(newLayout: Layout[]) => setLayout(newLayout)}
