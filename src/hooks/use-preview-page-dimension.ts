@@ -56,8 +56,8 @@ export function usePreviewPageDimension({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  // const marginsInMM = marginType === "normal" ? 25.4 : 12.7;
-  const marginsInMM = 0;
+  const marginsInMM = marginType === "normal" ? 25.4 : 12.7;
+  // const marginsInMM = 0;
 
   // This is necessary because the A4 paper size is defined in mm, but we need pixel values for the grid layout.
   useEffect(() => {
