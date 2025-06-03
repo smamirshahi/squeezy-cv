@@ -9,11 +9,11 @@ interface Props {
   marginType: "narrow" | "normal";
 }
 
-/** distance between grid lines, in pixels */
-const gridUnitPx = 20;
+/** each grid‐row is 30px tall */
+const ROW_HEIGHT = 30;
 
 /** gap between cells, in px */
-const defaultMargin = 10;
+const DEFAULT_MARGIN = 10;
 
 /** The measured pixel width/height of the A4 paper */
 interface PageDimensionProps {
@@ -32,11 +32,9 @@ interface ReturnProps {
 
   marginsInMM: number;
 
+  rowHeight: number;
+
   defaultMargin: number;
-
-  gridUnitPx: number;
-
-  computedCols: number;
 }
 
 function mmToPx(mm: number, pxPerMm: number): number {
@@ -58,7 +56,8 @@ export function usePreviewPageDimension({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  const marginsInMM = marginType === "normal" ? 25.4 : 12.7;
+  // const marginsInMM = marginType === "normal" ? 25.4 : 12.7;
+  const marginsInMM = 0;
 
   // This is necessary because the A4 paper size is defined in mm, but we need pixel values for the grid layout.
   useEffect(() => {
@@ -70,6 +69,7 @@ export function usePreviewPageDimension({
         });
       }
     }
+
     // Measure once on mount:
     updateDimensions();
 
@@ -86,24 +86,39 @@ export function usePreviewPageDimension({
   const innerWidthPx = Math.max(0, pageDimensions.width - 2 * paperPaddingPx);
   const innerHeightPx = Math.max(0, pageDimensions.height - 2 * paperPaddingPx);
 
-  // 3) Compute cols by dividing innerWidth by GRID_UNIT_PX:
-  const computedCols = Math.max(1, Math.floor(innerWidthPx / gridUnitPx));
-
-  // 4) Compute maxRows similarly (using ROW_HEIGHT = GRID_UNIT_PX):
+  // 4) Now compute maxRows so that:
+  //      innerHeightPx ≥ 2*containerPaddingPx + (maxRows*ROW_HEIGHT) + ((maxRows−1)*marginPx)
+  //    Rearranged:
+  //      maxRows ≤ floor((innerHeightPx − 2*containerPaddingPx + marginPx) / (ROW_HEIGHT + marginPx))
+  //
+  //    Since:
+  //      containerPaddingPx = DEFAULT_MARGIN (10px on top AND 10px on bottom),
+  //      marginPx         = DEFAULT_MARGIN (10px between rows),
+  //
+  //    we get:
   const maxRows = Math.max(
     0,
-    Math.floor(
-      (innerHeightPx - 2 * defaultMargin + defaultMargin) /
-        (gridUnitPx + defaultMargin)
-    )
+    Math.floor((innerHeightPx - DEFAULT_MARGIN) / (ROW_HEIGHT + DEFAULT_MARGIN))
+  );
+
+  console.log(
+    "innerWidthPx",
+    innerWidthPx,
+    "maxRows",
+    maxRows,
+    "marginsInMM",
+    marginsInMM,
+    "ROW_HEIGHT",
+    ROW_HEIGHT,
+    "DEFAULT_MARGIN",
+    DEFAULT_MARGIN
   );
 
   return {
     innerWidthPx,
     maxRows,
     marginsInMM,
-    defaultMargin,
-    gridUnitPx,
-    computedCols,
+    rowHeight: ROW_HEIGHT,
+    defaultMargin: DEFAULT_MARGIN,
   };
 }
