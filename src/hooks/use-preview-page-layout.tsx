@@ -11,27 +11,34 @@ import { SetStateFunction } from "@store/store-helper";
 type Components =
   | "personalInfo"
   | "contactInfo"
-  | "SummaryPage"
+  | "summaryPage"
   | "experiences"
   | "educations"
   | "skills";
 
-interface CustomLayout extends Layout {
-  i: Components;
-  component: React.ReactNode;
-}
+type CustomLayout = Record<
+  Components,
+  Layout & {
+    i: Components;
+    component: React.ReactNode;
+  }
+>;
 
 interface ReturnProps {
   /** The layout of the preview page */
-  layout: CustomLayout[];
+  layout: CustomLayout;
 
   /** Function to set the layout */
-  setLayout: SetStateFunction<CustomLayout[]>;
+  onLayoutChange: (newLayout: Layout[]) => void;
 }
 
 export function usePreviewPageLayout(): ReturnProps {
-  const [layout, setLayout] = useState<CustomLayout[]>([
-    {
+  function onLayoutChange(newLayout: Layout[]): void {
+    console.log("Layout changed:", newLayout);
+  }
+
+  const [layout, setLayout] = useState<CustomLayout>({
+    personalInfo: {
       i: "personalInfo",
       x: 0,
       y: 0,
@@ -39,7 +46,7 @@ export function usePreviewPageLayout(): ReturnProps {
       h: 2,
       component: <PersonalInfoPreviewPage />,
     },
-    {
+    contactInfo: {
       i: "contactInfo",
       x: 0,
       y: 2,
@@ -47,15 +54,15 @@ export function usePreviewPageLayout(): ReturnProps {
       h: 2,
       component: <ContactInfoPreviewPage />,
     },
-    {
-      i: "SummaryPage",
+    summaryPage: {
+      i: "summaryPage",
       x: 0,
       y: 4,
       w: 10,
       h: 5,
       component: <SummaryPreviewPage />,
     },
-    {
+    experiences: {
       i: "experiences",
       x: 0,
       y: 9,
@@ -63,7 +70,7 @@ export function usePreviewPageLayout(): ReturnProps {
       h: 17,
       component: <ExperiencesPreviewPage />,
     },
-    {
+    educations: {
       i: "educations",
       x: 7,
       y: 9,
@@ -71,11 +78,18 @@ export function usePreviewPageLayout(): ReturnProps {
       h: 13,
       component: <EducationsPreviewPage />,
     },
-    { i: "skills", x: 7, y: 22, w: 4, h: 4, component: <SkillsPreviewPage /> },
-  ]);
+    skills: {
+      i: "skills",
+      x: 7,
+      y: 22,
+      w: 4,
+      h: 4,
+      component: <SkillsPreviewPage />,
+    },
+  });
 
   return {
     layout,
-    setLayout,
+    onLayoutChange,
   };
 }

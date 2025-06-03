@@ -22,7 +22,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
   const { pageDimensions, maxRows } = usePreviewPageDimension({ contentRef });
 
   // 3) Initial layout (in grid units). You can add/remove or re‐order these items as needed.
-  const { layout, setLayout } = usePreviewPageLayout();
+  const { layout, onLayoutChange } = usePreviewPageLayout();
 
   // If you want to add/remove items dynamically, you could manage a separate array of IDs.
   // For simplicity, we just use three items ("a","b","c").
@@ -47,7 +47,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
     >
       <GridLayout
         className="layout"
-        layout={layout}
+        layout={Object.values(layout)}
         cols={12}
         rowHeight={ROW_HEIGHT}
         width={pageDimensions.width}
@@ -61,11 +61,9 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         preventCollision={true}
         margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
         containerPadding={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
-        onLayoutChange={(newLayout: Layout[]) =>
-          console.log("Layout changed:", newLayout)
-        }
+        onLayoutChange={onLayoutChange}
       >
-        {layout.map((item) => (
+        {Object.values(layout).map((item) => (
           <Box
             key={item.i}
             sx={{
