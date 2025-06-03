@@ -6,7 +6,6 @@ import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
-import { SetStateFunction } from "@store/store-helper";
 
 type Components =
   | "personalInfo"
@@ -34,7 +33,7 @@ interface ReturnProps {
 
 export function usePreviewPageLayout(): ReturnProps {
   function onLayoutChange(newLayout: Layout[]): void {
-    console.log("Layout changed:", newLayout);
+    // console.log("Layout changed:", newLayout);
   }
 
   const [layout, setLayout] = useState<CustomLayout>({
