@@ -101,19 +101,6 @@ export function usePreviewPageDimension({
     Math.floor((innerHeightPx - DEFAULT_MARGIN) / (ROW_HEIGHT + DEFAULT_MARGIN))
   );
 
-  console.log(
-    "innerWidthPx",
-    innerWidthPx,
-    "maxRows",
-    maxRows,
-    "marginsInMM",
-    marginsInMM,
-    "ROW_HEIGHT",
-    ROW_HEIGHT,
-    "DEFAULT_MARGIN",
-    DEFAULT_MARGIN
-  );
-
   return {
     innerWidthPx,
     maxRows,

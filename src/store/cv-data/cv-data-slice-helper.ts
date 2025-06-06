@@ -44,12 +44,12 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   },
   headingMd: {
     fontSize: "14pt",
-    fontWeight: 600,
+    fontWeight: 700,
     color: "#000000",
   },
   headingSm: {
     fontSize: "12pt",
-    fontWeight: 500,
+    fontWeight: 400,
     color: "#000000",
   },
   bodyLg: {
@@ -65,11 +65,11 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   captionText: {
     fontSize: "8pt",
     fontWeight: 400,
-    color: "#777",
+    color: "#000000",
   },
 };
 
-type FontWeightString = "normal" | "medium" | "semi-bold" | "bold";
+type FontWeightString = "normal" | "bold";
 
 export function convertFontWeightToNumber(
   fontWeightString: FontWeightString
@@ -77,10 +77,6 @@ export function convertFontWeightToNumber(
   switch (fontWeightString) {
     case "normal":
       return 400;
-    case "medium":
-      return 500;
-    case "semi-bold":
-      return 600;
     case "bold":
       return 700;
   }

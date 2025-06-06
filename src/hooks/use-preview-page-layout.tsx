@@ -33,7 +33,7 @@ interface ReturnProps {
 
 export function usePreviewPageLayout(): ReturnProps {
   function onLayoutChange(newLayout: Layout[]): void {
-    // console.log("Layout changed:", newLayout);
+    console.log("Layout changed:", newLayout);
   }
 
   const [layout, setLayout] = useState<CustomLayout>({
