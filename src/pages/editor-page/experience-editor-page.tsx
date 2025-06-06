@@ -1,31 +1,21 @@
 import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEditorPageExperiences } from "@hooks/use-editor-page-experiences";
 import { CVAccordion } from "@components/cv-accordion";
-import { Experience } from "@custom-types/json-types";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  addBulletPoint,
+  addExperience,
+  cvDataSelector,
+  removeBulletPoint,
+  removeExperience,
+  updateExperience,
+  updateExperienceBulletPoint,
+} from "@store/cv-data/cv-data-slice";
 
-interface Props {
-  /** The experiences to edit */
-  experiences: Experience[];
-
-  /** Setter for the experiences to edit */
-  setExperiences: SetStateFunction<Experience[]>;
-}
-
-export function ExperienceEditorPage({
-  experiences,
-  setExperiences,
-}: Props): JSX.Element {
-  const {
-    addExperience,
-    removeExperience,
-    updateExperience,
-    addBulletPoint,
-    updateExperienceBulletPoint,
-    removeBulletPoint,
-  } = useEditorPageExperiences({ experiences, setExperiences });
+export function ExperienceEditorPage(): JSX.Element {
+  const { experiences } = useAppSelector(cvDataSelector);
+  const dispatch = useAppDispatch();
 
   return (
     <CVAccordion title="Work Experience">
@@ -40,15 +30,19 @@ export function ExperienceEditorPage({
                 label="Job Title"
                 value={experience.jobTitle}
                 onChange={(event) =>
-                  updateExperience(
-                    experience.id,
-                    "jobTitle",
-                    event.target.value
+                  dispatch(
+                    updateExperience({
+                      id: experience.id,
+                      key: "jobTitle",
+                      value: event.target.value,
+                    })
                   )
                 }
                 fullWidth
               />
-              <IconButton onClick={() => removeExperience(experience.id)}>
+              <IconButton
+                onClick={() => dispatch(removeExperience(experience.id))}
+              >
                 <DeleteIcon />
               </IconButton>
             </Box>
@@ -58,7 +52,13 @@ export function ExperienceEditorPage({
                 label="Company"
                 value={experience.company}
                 onChange={(event) =>
-                  updateExperience(experience.id, "company", event.target.value)
+                  dispatch(
+                    updateExperience({
+                      id: experience.id,
+                      key: "company",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
@@ -66,10 +66,12 @@ export function ExperienceEditorPage({
                 label="Location"
                 value={experience.location}
                 onChange={(event) =>
-                  updateExperience(
-                    experience.id,
-                    "location",
-                    event.target.value
+                  dispatch(
+                    updateExperience({
+                      id: experience.id,
+                      key: "location",
+                      value: event.target.value,
+                    })
                   )
                 }
                 fullWidth
@@ -82,10 +84,12 @@ export function ExperienceEditorPage({
                 type="date"
                 value={experience.startDate}
                 onChange={(event) =>
-                  updateExperience(
-                    experience.id,
-                    "startDate",
-                    event.target.value
+                  dispatch(
+                    updateExperience({
+                      id: experience.id,
+                      key: "startDate",
+                      value: event.target.value,
+                    })
                   )
                 }
                 // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
@@ -97,7 +101,13 @@ export function ExperienceEditorPage({
                 type="date"
                 value={experience.endDate}
                 onChange={(event) =>
-                  updateExperience(experience.id, "endDate", event.target.value)
+                  dispatch(
+                    updateExperience({
+                      id: experience.id,
+                      key: "endDate",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                 InputLabelProps={{ shrink: true }}
@@ -125,16 +135,20 @@ export function ExperienceEditorPage({
                     label={`Bullet Point ${index + 1}`}
                     value={point}
                     onChange={(event) =>
-                      updateExperienceBulletPoint(
-                        experience.id,
-                        index,
-                        event.target.value
+                      dispatch(
+                        updateExperienceBulletPoint({
+                          id: experience.id,
+                          index,
+                          value: event.target.value,
+                        })
                       )
                     }
                     fullWidth
                   />
                   <IconButton
-                    onClick={() => removeBulletPoint(experience.id, index)}
+                    onClick={() =>
+                      dispatch(removeBulletPoint({ id: experience.id, index }))
+                    }
                     disabled={experience.bulletPoints.length === 1}
                   >
                     <DeleteIcon fontSize="small" />
@@ -142,7 +156,11 @@ export function ExperienceEditorPage({
                 </Box>
               ))}
               <Box>
-                <IconButton onClick={() => addBulletPoint(experience.id)}>
+                <IconButton
+                  onClick={() =>
+                    dispatch(addBulletPoint({ id: experience.id }))
+                  }
+                >
                   <AddIcon />
                 </IconButton>
               </Box>
@@ -150,7 +168,7 @@ export function ExperienceEditorPage({
           </Box>
         ))}
 
-        <Button variant="contained" onClick={() => addExperience()}>
+        <Button variant="contained" onClick={() => dispatch(addExperience())}>
           Add Work Experience
         </Button>
       </Box>

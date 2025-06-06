@@ -2,28 +2,21 @@ import { Box, Button, IconButton, TextField, Rating } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import { useEditorPageSkills } from "@hooks/use-editor-page-skills";
 import { CVAccordion } from "@components/cv-accordion";
-import { SkillCategory } from "@custom-types/json-types";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  addSkillCategory,
+  addSkillItem,
+  cvDataSelector,
+  removeSkillCategory,
+  removeSkillItem,
+  updateSkillCategory,
+  updateSkillItem,
+} from "@store/cv-data/cv-data-slice";
 
-interface Props {
-  /** The educations to edit */
-  skills: SkillCategory[];
-
-  /** Setter for the educations to edit */
-  setSkills: SetStateFunction<SkillCategory[]>;
-}
-
-export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
-  const {
-    addSkillCategory,
-    removeSkillCategory,
-    updateSkillCategory,
-    addSkillItem,
-    updateSkillItem,
-    removeSkillItem,
-  } = useEditorPageSkills({ skills, setSkills });
+export function SkillsEditorPage(): JSX.Element {
+  const { skills } = useAppSelector(cvDataSelector);
+  const dispatch = useAppDispatch();
 
   return (
     <CVAccordion title="Skills">
@@ -38,11 +31,19 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
                 label="Skill Category"
                 value={skill.category}
                 onChange={(event) =>
-                  updateSkillCategory(skill.id, "category", event.target.value)
+                  dispatch(
+                    updateSkillCategory({
+                      id: skill.id,
+                      key: "category",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
-              <IconButton onClick={() => removeSkillCategory(skill.id)}>
+              <IconButton
+                onClick={() => dispatch(removeSkillCategory(skill.id))}
+              >
                 <DeleteIcon />
               </IconButton>
             </Box>
@@ -55,9 +56,9 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
                 mb: 2,
               }}
             >
-              {skill.items.map((skillItem, idx) => (
+              {skill.items.map((skillItem, index) => (
                 <Box
-                  key={idx}
+                  key={index}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -65,10 +66,17 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
                   }}
                 >
                   <TextField
-                    label={`Skill Item ${idx + 1}`}
+                    label={`Skill Item ${index + 1}`}
                     value={skillItem.name}
                     onChange={(event) =>
-                      updateSkillItem(skill.id, idx, "name", event.target.value)
+                      dispatch(
+                        updateSkillItem({
+                          id: skill.id,
+                          index,
+                          key: "name",
+                          value: event.target.value,
+                        })
+                      )
                     }
                     fullWidth
                   />
@@ -76,13 +84,22 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
                     value={skillItem.rating}
                     onChange={(_, newValue) => {
                       if (isRatingAcceptable(newValue)) {
-                        updateSkillItem(skill.id, idx, "rating", newValue ?? 0);
+                        dispatch(
+                          updateSkillItem({
+                            id: skill.id,
+                            index,
+                            key: "rating",
+                            value: newValue ?? 0,
+                          })
+                        );
                       }
                     }}
                     precision={0.5}
                   />
                   <IconButton
-                    onClick={() => removeSkillItem(skill.id, idx)}
+                    onClick={() =>
+                      dispatch(removeSkillItem({ skillId: skill.id, index }))
+                    }
                     disabled={skill.items.length === 1}
                   >
                     <DeleteIcon fontSize="small" />
@@ -90,7 +107,9 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
                 </Box>
               ))}
               <Box>
-                <IconButton onClick={() => addSkillItem(skill.id)}>
+                <IconButton
+                  onClick={() => dispatch(addSkillItem({ skillId: skill.id }))}
+                >
                   <AddIcon />
                 </IconButton>
               </Box>
@@ -98,7 +117,10 @@ export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
           </Box>
         ))}
 
-        <Button variant="contained" onClick={() => addSkillCategory()}>
+        <Button
+          variant="contained"
+          onClick={() => dispatch(addSkillCategory())}
+        >
           Add New Skill Category
         </Button>
       </Box>

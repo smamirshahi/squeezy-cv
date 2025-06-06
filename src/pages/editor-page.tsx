@@ -109,15 +109,9 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         </AccordionDetails>
       </CVAccordion>
       <SummaryEditorPage summary={summary} setSummary={setSummary} />
-      <ExperienceEditorPage
-        experiences={experiences}
-        setExperiences={setExperiences}
-      />
-      <EducationEditorPage
-        educations={educations}
-        setEducations={setEducations}
-      />
-      <SkillsEditorPage skills={skills} setSkills={setSkills} />
+      <ExperienceEditorPage />
+      <EducationEditorPage />
+      <SkillsEditorPage />
     </Paper>
   );
 }

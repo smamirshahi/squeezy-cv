@@ -1,24 +1,17 @@
 import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useEditorPageEducations } from "@hooks/use-editor-page-educations";
 import { CVAccordion } from "@components/cv-accordion";
-import { Education } from "@custom-types/json-types";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  addEducation,
+  cvDataSelector,
+  removeEducation,
+  updateEducation,
+} from "@store/cv-data/cv-data-slice";
 
-interface Props {
-  /** The educations to edit */
-  educations: Education[];
-
-  /** Setter for the educations to edit */
-  setEducations: SetStateFunction<Education[]>;
-}
-
-export function EducationEditorPage({
-  educations,
-  setEducations,
-}: Props): JSX.Element {
-  const { addEducation, removeEducation, updateEducation } =
-    useEditorPageEducations({ educations, setEducations });
+export function EducationEditorPage(): JSX.Element {
+  const { educations } = useAppSelector(cvDataSelector);
+  const dispatch = useAppDispatch();
 
   return (
     <CVAccordion title="Education">
@@ -33,11 +26,19 @@ export function EducationEditorPage({
                 label="Degree"
                 value={education.degree}
                 onChange={(event) =>
-                  updateEducation(education.id, "degree", event.target.value)
+                  dispatch(
+                    updateEducation({
+                      id: education.id,
+                      key: "degree",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
-              <IconButton onClick={() => removeEducation(education.id)}>
+              <IconButton
+                onClick={() => dispatch(removeEducation(education.id))}
+              >
                 <DeleteIcon />
               </IconButton>
             </Box>
@@ -47,7 +48,13 @@ export function EducationEditorPage({
                 label="Institute"
                 value={education.institute}
                 onChange={(event) =>
-                  updateEducation(education.id, "institute", event.target.value)
+                  dispatch(
+                    updateEducation({
+                      id: education.id,
+                      key: "institute",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
@@ -55,7 +62,13 @@ export function EducationEditorPage({
                 label="Location"
                 value={education.location}
                 onChange={(event) =>
-                  updateEducation(education.id, "location", event.target.value)
+                  dispatch(
+                    updateEducation({
+                      id: education.id,
+                      key: "location",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
@@ -67,7 +80,13 @@ export function EducationEditorPage({
                 type="date"
                 value={education.startDate}
                 onChange={(event) =>
-                  updateEducation(education.id, "startDate", event.target.value)
+                  dispatch(
+                    updateEducation({
+                      id: education.id,
+                      key: "startDate",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                 InputLabelProps={{ shrink: true }}
@@ -78,7 +97,13 @@ export function EducationEditorPage({
                 type="date"
                 value={education.endDate}
                 onChange={(event) =>
-                  updateEducation(education.id, "endDate", event.target.value)
+                  dispatch(
+                    updateEducation({
+                      id: education.id,
+                      key: "endDate",
+                      value: event.target.value,
+                    })
+                  )
                 }
                 // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
                 InputLabelProps={{ shrink: true }}
@@ -89,10 +114,12 @@ export function EducationEditorPage({
               label="Dissertation Title"
               value={education.dissertationTitle}
               onChange={(event) =>
-                updateEducation(
-                  education.id,
-                  "dissertationTitle",
-                  event.target.value
+                dispatch(
+                  updateEducation({
+                    id: education.id,
+                    key: "dissertationTitle",
+                    value: event.target.value,
+                  })
                 )
               }
               fullWidth
@@ -100,7 +127,7 @@ export function EducationEditorPage({
           </Box>
         ))}
 
-        <Button variant="contained" onClick={() => addEducation()}>
+        <Button variant="contained" onClick={() => dispatch(addEducation())}>
           Add Education
         </Button>
       </Box>
