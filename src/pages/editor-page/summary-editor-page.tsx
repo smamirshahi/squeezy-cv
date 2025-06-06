@@ -7,14 +7,16 @@ import {
   updateProfessionalSummary,
 } from "@store/cv-data/cv-data-slice";
 
+const DEBOUNCE_IN_MM = 500;
+
 export function SummaryEditorPage(): JSX.Element | null {
   const { professionalSummary } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
-  const [localSummary, setLocalSummary] = useState(professionalSummary);
+  const [localState, setLocalState] = useState(professionalSummary);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setLocalSummary(professionalSummary);
+    setLocalState(professionalSummary);
   }, [professionalSummary]);
 
   useEffect(() => {
@@ -22,18 +24,17 @@ export function SummaryEditorPage(): JSX.Element | null {
       clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      if (localSummary !== professionalSummary) {
-        dispatch(updateProfessionalSummary(localSummary));
+      if (localState !== professionalSummary) {
+        dispatch(updateProfessionalSummary(localState));
       }
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    }, 500);
+    }, DEBOUNCE_IN_MM);
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localSummary]);
+  }, [localState]);
 
   return (
     <CVAccordion title="Professional Summary">
@@ -41,7 +42,7 @@ export function SummaryEditorPage(): JSX.Element | null {
         label="Professional Summary"
         variant="outlined"
         multiline
-        value={localSummary}
+        value={localState}
         fullWidth
         sx={{
           mt: "20px",
@@ -49,7 +50,7 @@ export function SummaryEditorPage(): JSX.Element | null {
             resize: "vertical",
           },
         }}
-        onChange={(event) => setLocalSummary(event.target.value)}
+        onChange={(event) => setLocalState(event.target.value)}
       />
     </CVAccordion>
   );
