@@ -51,12 +51,6 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
                   key={index}
                   icon={FiberManualRecordIcon}
                   text={bulletPoint}
-                  // customTextSx={{ color: customColors.gray }}
-                  // customIconSx={{
-                  //   color: customColors.gray,
-                  //   width: "10px",
-                  //   mr: "5px",
-                  // }}
                 />
               ))}
             </>
