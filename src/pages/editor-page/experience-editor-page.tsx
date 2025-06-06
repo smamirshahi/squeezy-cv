@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { useEditorPageExperiences } from "@hooks/use-editor-page-experiences";
 import { CVAccordion } from "@components/cv-accordion";
 
 export function ExperienceEditorPage(): JSX.Element {
@@ -13,7 +13,7 @@ export function ExperienceEditorPage(): JSX.Element {
     addBulletPoint,
     updateExperienceBulletPoint,
     removeBulletPoint,
-  } = useEditorPageUpdate();
+  } = useEditorPageExperiences();
 
   return (
     <CVAccordion title="Work Experience">

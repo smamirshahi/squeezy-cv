@@ -15,7 +15,9 @@ import {
 import { useEffect, useState } from "react";
 import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { useEditorPageUpdate } from "@hooks/use-editor-page-update";
+import { useEditorPageExperiences } from "@hooks/use-editor-page-experiences";
+import { useEditorPageEducations } from "@hooks/use-editor-page-educations";
+import { useEditorPageSkills } from "@hooks/use-editor-page-skills";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
 
@@ -39,14 +41,9 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     cvData.professionalSummary
   );
 
-  const {
-    experiences,
-    setExperiences,
-    educations,
-    setEducations,
-    skills,
-    setSkills,
-  } = useEditorPageUpdate();
+  const { experiences, setExperiences } = useEditorPageExperiences();
+  const { educations, setEducations } = useEditorPageEducations();
+  const { skills, setSkills } = useEditorPageSkills();
 
   // Add the initial values to the state variables
   useEffect(() => {
