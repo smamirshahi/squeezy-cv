@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import {
   Education,
@@ -52,9 +52,7 @@ interface ReturnProps {
 
 export function useEditorPageUpdate(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
-  const [experiences, setExperiences] = useState<Experience[]>(
-    cvData.experiences
-  );
+  const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>(cvData.educations);
   const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
 
@@ -72,6 +70,18 @@ export function useEditorPageUpdate(): ReturnProps {
       },
     ]);
   }
+
+  useEffect(() => {
+    setExperiences(cvData.experiences);
+  }, [cvData.experiences]);
+
+  useEffect(() => {
+    setEducations(cvData.educations);
+  }, [cvData.educations]);
+
+  useEffect(() => {
+    setSkills(cvData.skills);
+  }, [cvData.skills]);
 
   function removeById<T extends { id: string }>(
     setFn: React.Dispatch<React.SetStateAction<T[]>>,
