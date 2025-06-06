@@ -77,13 +77,8 @@ const cvDataSlice = createSlice({
       state.data.contactInfo[action.payload.field] = action.payload.value;
     },
 
-    updateProfessionalSummary(
-      state,
-      action: PayloadAction<{
-        value: string;
-      }>
-    ) {
-      state.data.professionalSummary = action.payload.value;
+    updateProfessionalSummary(state, action: PayloadAction<string>) {
+      state.data.professionalSummary = action.payload;
     },
     ...experiencesReducers,
     ...educationsReducers,

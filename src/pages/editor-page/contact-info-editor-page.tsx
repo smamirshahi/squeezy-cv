@@ -5,21 +5,16 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { SetStateFunction } from "@store/store-helper";
-import { ContactInfo } from "@custom-types/json-types";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  cvDataSelector,
+  updateContactInfo,
+} from "@store/cv-data/cv-data-slice";
 
-interface Props {
-  /** The contact information to edit */
-  contactInfo: ContactInfo;
+export function ContactInfoEditorPage(): JSX.Element {
+  const { contactInfo } = useAppSelector(cvDataSelector);
+  const dispatch = useAppDispatch();
 
-  /** Setter for the contact information to edit */
-  setContactInfo: SetStateFunction<ContactInfo>;
-}
-
-export function ContactInfoEditorPage({
-  contactInfo,
-  setContactInfo,
-}: Props): JSX.Element {
   return (
     <>
       <Box display="flex" gap={2} mb={2}>
@@ -28,7 +23,9 @@ export function ContactInfoEditorPage({
           label="Email"
           value={contactInfo.email}
           onChange={(event) =>
-            setContactInfo((prev) => ({ ...prev, email: event.target.value }))
+            dispatch(
+              updateContactInfo({ field: "email", value: event.target.value })
+            )
           }
         />
         <TextFieldWithIcon
@@ -36,7 +33,9 @@ export function ContactInfoEditorPage({
           label="Phone"
           value={contactInfo.phone}
           onChange={(event) =>
-            setContactInfo((prev) => ({ ...prev, phone: event.target.value }))
+            dispatch(
+              updateContactInfo({ field: "phone", value: event.target.value })
+            )
           }
         />
         <TextFieldWithIcon
@@ -44,10 +43,12 @@ export function ContactInfoEditorPage({
           label="LinkedInId"
           value={contactInfo.linkedInId}
           onChange={(event) =>
-            setContactInfo((prev) => ({
-              ...prev,
-              linkedId: event.target.value,
-            }))
+            dispatch(
+              updateContactInfo({
+                field: "linkedInId",
+                value: event.target.value,
+              })
+            )
           }
         />
       </Box>
@@ -57,10 +58,12 @@ export function ContactInfoEditorPage({
           label="Github"
           value={contactInfo.gitHubId}
           onChange={(event) =>
-            setContactInfo((prev) => ({
-              ...prev,
-              gitHubId: event.target.value,
-            }))
+            dispatch(
+              updateContactInfo({
+                field: "gitHubId",
+                value: event.target.value,
+              })
+            )
           }
         />
         <TextFieldWithIcon
@@ -68,10 +71,12 @@ export function ContactInfoEditorPage({
           label="location"
           value={contactInfo.location}
           onChange={(event) =>
-            setContactInfo((prev) => ({
-              ...prev,
-              location: event.target.value,
-            }))
+            dispatch(
+              updateContactInfo({
+                field: "location",
+                value: event.target.value,
+              })
+            )
           }
         />
       </Box>
