@@ -7,8 +7,6 @@ import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
 import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-page";
 import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
-import { cvDataSelector } from "@store/cv-data/cv-data-slice";
-import { useAppSelector } from "@store/store-helper";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
 
@@ -18,8 +16,6 @@ interface Props {
 }
 
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const cvData = useAppSelector(cvDataSelector);
-
   return (
     <Paper
       elevation={3}
