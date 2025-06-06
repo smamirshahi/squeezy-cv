@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { nanoid } from "nanoid";
 import { Education } from "@custom-types/json-types";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
@@ -16,13 +16,23 @@ interface ReturnProps {
   ): void;
 }
 
-export function useEditorPageEducations(): ReturnProps {
+interface Props {
+  /** The educations to edit */
+  educations: Education[];
+
+  /** Setter for the educations to edit */
+  setEducations: SetStateFunction<Education[]>;
+}
+
+export function useEditorPageEducations({
+  educations,
+  setEducations,
+}: Props): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
-  const [educations, setEducations] = useState<Education[]>(cvData.educations);
 
   useEffect(() => {
     setEducations(cvData.educations);
-  }, [cvData.educations]);
+  }, [cvData.educations, setEducations]);
 
   function addEducation(): void {
     setEducations((prev) => [

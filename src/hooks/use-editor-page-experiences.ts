@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { nanoid } from "nanoid";
 import { Experience } from "@custom-types/json-types";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
@@ -19,13 +19,23 @@ interface ReturnProps {
   removeBulletPoint(id: string, index: number): void;
 }
 
-export function useEditorPageExperiences(): ReturnProps {
+interface Props {
+  /** The experiences to edit */
+  experiences: Experience[];
+
+  /** Setter for the experiences to edit */
+  setExperiences: SetStateFunction<Experience[]>;
+}
+
+export function useEditorPageExperiences({
+  experiences,
+  setExperiences,
+}: Props): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
 
   useEffect(() => {
     setExperiences(cvData.experiences);
-  }, [cvData.experiences]);
+  }, [cvData.experiences, setExperiences]);
 
   function addExperience(): void {
     setExperiences((prev) => [

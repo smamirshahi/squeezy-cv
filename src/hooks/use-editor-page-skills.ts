@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { nanoid } from "nanoid";
 import { SkillCategory, SkillItem } from "@custom-types/json-types";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
@@ -24,13 +24,20 @@ interface ReturnProps {
   removeSkillItem(skillId: string, index: number): void;
 }
 
-export function useEditorPageSkills(): ReturnProps {
+interface Props {
+  /** The educations to edit */
+  skills: SkillCategory[];
+
+  /** Setter for the educations to edit */
+  setSkills: SetStateFunction<SkillCategory[]>;
+}
+
+export function useEditorPageSkills({ skills, setSkills }: Props): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
-  const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
 
   useEffect(() => {
     setSkills(cvData.skills);
-  }, [cvData.skills]);
+  }, [cvData.skills, setSkills]);
 
   function addSkillCategory(): void {
     setSkills((prev) => [

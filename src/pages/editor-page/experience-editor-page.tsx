@@ -3,17 +3,29 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useEditorPageExperiences } from "@hooks/use-editor-page-experiences";
 import { CVAccordion } from "@components/cv-accordion";
+import { Experience } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
 
-export function ExperienceEditorPage(): JSX.Element {
+interface Props {
+  /** The experiences to edit */
+  experiences: Experience[];
+
+  /** Setter for the experiences to edit */
+  setExperiences: SetStateFunction<Experience[]>;
+}
+
+export function ExperienceEditorPage({
+  experiences,
+  setExperiences,
+}: Props): JSX.Element {
   const {
-    experiences,
     addExperience,
     removeExperience,
     updateExperience,
     addBulletPoint,
     updateExperienceBulletPoint,
     removeBulletPoint,
-  } = useEditorPageExperiences();
+  } = useEditorPageExperiences({ experiences, setExperiences });
 
   return (
     <CVAccordion title="Work Experience">

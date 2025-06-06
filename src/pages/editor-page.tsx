@@ -9,15 +9,15 @@ import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-pa
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import {
   ContactInfo,
+  Education,
+  Experience,
   PersonalInfo,
   ProfessionalSummary,
+  SkillCategory,
 } from "@custom-types/json-types";
 import { useEffect, useState } from "react";
 import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { useEditorPageExperiences } from "@hooks/use-editor-page-experiences";
-import { useEditorPageEducations } from "@hooks/use-editor-page-educations";
-import { useEditorPageSkills } from "@hooks/use-editor-page-skills";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
 
@@ -40,10 +40,11 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [summary, setSummary] = useState<ProfessionalSummary>(
     cvData.professionalSummary
   );
-
-  const { experiences, setExperiences } = useEditorPageExperiences();
-  const { educations, setEducations } = useEditorPageEducations();
-  const { skills, setSkills } = useEditorPageSkills();
+  const [experiences, setExperiences] = useState<Experience[]>(
+    cvData.experiences
+  );
+  const [educations, setEducations] = useState<Education[]>(cvData.educations);
+  const [skills, setSkills] = useState<SkillCategory[]>(cvData.skills);
 
   // Add the initial values to the state variables
   useEffect(() => {
@@ -108,9 +109,15 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         </AccordionDetails>
       </CVAccordion>
       <SummaryEditorPage summary={summary} setSummary={setSummary} />
-      <ExperienceEditorPage />
-      <EducationEditorPage />
-      <SkillsEditorPage />
+      <ExperienceEditorPage
+        experiences={experiences}
+        setExperiences={setExperiences}
+      />
+      <EducationEditorPage
+        educations={educations}
+        setEducations={setEducations}
+      />
+      <SkillsEditorPage skills={skills} setSkills={setSkills} />
     </Paper>
   );
 }

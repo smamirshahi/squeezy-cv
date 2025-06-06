@@ -4,17 +4,26 @@ import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { useEditorPageSkills } from "@hooks/use-editor-page-skills";
 import { CVAccordion } from "@components/cv-accordion";
+import { SkillCategory } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
 
-export function SkillsEditorPage(): JSX.Element {
+interface Props {
+  /** The educations to edit */
+  skills: SkillCategory[];
+
+  /** Setter for the educations to edit */
+  setSkills: SetStateFunction<SkillCategory[]>;
+}
+
+export function SkillsEditorPage({ skills, setSkills }: Props): JSX.Element {
   const {
-    skills,
     addSkillCategory,
     removeSkillCategory,
     updateSkillCategory,
     addSkillItem,
     updateSkillItem,
     removeSkillItem,
-  } = useEditorPageSkills();
+  } = useEditorPageSkills({ skills, setSkills });
 
   return (
     <CVAccordion title="Skills">

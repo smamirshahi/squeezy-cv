@@ -2,10 +2,23 @@ import { Box, Button, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEditorPageEducations } from "@hooks/use-editor-page-educations";
 import { CVAccordion } from "@components/cv-accordion";
+import { Education } from "@custom-types/json-types";
+import { SetStateFunction } from "@store/store-helper";
 
-export function EducationEditorPage(): JSX.Element {
-  const { educations, addEducation, removeEducation, updateEducation } =
-    useEditorPageEducations();
+interface Props {
+  /** The educations to edit */
+  educations: Education[];
+
+  /** Setter for the educations to edit */
+  setEducations: SetStateFunction<Education[]>;
+}
+
+export function EducationEditorPage({
+  educations,
+  setEducations,
+}: Props): JSX.Element {
+  const { addEducation, removeEducation, updateEducation } =
+    useEditorPageEducations({ educations, setEducations });
 
   return (
     <CVAccordion title="Education">
