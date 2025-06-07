@@ -1,40 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { TextField } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useAppSelector } from "@store/store-helper";
 import { CVAccordion } from "@components/cv-accordion";
 import {
   cvDataSelector,
   updateProfessionalSummary,
 } from "@store/cv-data/cv-data-slice";
-
-const DEBOUNCE_IN_MM = 500;
+import { useDebounceCallback } from "@hooks/use-debounce-callback";
 
 export function SummaryEditorPage(): JSX.Element | null {
   const { professionalSummary } = useAppSelector(cvDataSelector);
-  const dispatch = useAppDispatch();
   const [localState, setLocalState] = useState(professionalSummary);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  useDebounceCallback({
+    localState,
+    reduxState: professionalSummary,
+    action: updateProfessionalSummary,
+  });
 
   useEffect(() => {
     setLocalState(professionalSummary);
   }, [professionalSummary]);
-
-  useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      if (localState !== professionalSummary) {
-        dispatch(updateProfessionalSummary(localState));
-      }
-    }, DEBOUNCE_IN_MM);
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localState]);
 
   return (
     <CVAccordion title="Professional Summary">
