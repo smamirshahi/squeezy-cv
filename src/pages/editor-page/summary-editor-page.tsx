@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { TextField } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
 import { CVAccordion } from "@components/cv-accordion";
@@ -10,16 +9,11 @@ import { useDebounceCallback } from "@hooks/use-debounce-callback";
 
 export function SummaryEditorPage(): JSX.Element | null {
   const { professionalSummary } = useAppSelector(cvDataSelector);
-  const [localState, setLocalState] = useState(professionalSummary);
-  useDebounceCallback({
-    localState,
+
+  const { localState, setLocalState } = useDebounceCallback({
     reduxState: professionalSummary,
     action: updateProfessionalSummary,
   });
-
-  useEffect(() => {
-    setLocalState(professionalSummary);
-  }, [professionalSummary]);
 
   return (
     <CVAccordion title="Professional Summary">
