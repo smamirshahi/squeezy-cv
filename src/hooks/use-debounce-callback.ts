@@ -40,8 +40,7 @@ export function useDebounceCallback<T>({
         clearTimeout(debounceRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localState]);
+  }, [createAction, dispatch, localState, reduxState]);
 
   return {
     localState,
