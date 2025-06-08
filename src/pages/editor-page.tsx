@@ -5,7 +5,7 @@ import { ExperienceEditorPage } from "@pages/editor-page/experience-editor-page"
 import { EducationEditorPage } from "@pages/editor-page/education-editor-page";
 import { SkillsEditorPage } from "@pages/editor-page/skills-editor-page";
 import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-page";
-import { ContactInfoEditorPage } from "@pages/editor-page/contact-info-editor-page";
+import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
