@@ -12,7 +12,7 @@ export function SummaryEditorPage(): JSX.Element | null {
 
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: professionalSummary,
-    action: updateProfessionalSummary,
+    createAction: updateProfessionalSummary,
   });
 
   return (

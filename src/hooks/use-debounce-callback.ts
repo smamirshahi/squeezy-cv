@@ -4,7 +4,7 @@ import { UnknownAction } from "@reduxjs/toolkit";
 
 interface Props<T> {
   reduxState: T;
-  action: (payload: T) => UnknownAction;
+  createAction: (value: T) => UnknownAction;
 }
 
 interface ReturnProps<T> {
@@ -16,7 +16,7 @@ const DEBOUNCE_IN_MM = 500;
 
 export function useDebounceCallback<T>({
   reduxState,
-  action,
+  createAction,
 }: Props<T>): ReturnProps<T> {
   const [localState, setLocalState] = useState(reduxState);
   const dispatch = useAppDispatch();
@@ -32,7 +32,7 @@ export function useDebounceCallback<T>({
     }
     debounceRef.current = setTimeout(() => {
       if (localState !== reduxState) {
-        dispatch(action(localState));
+        dispatch(createAction(localState));
       }
     }, DEBOUNCE_IN_MM);
     return () => {
