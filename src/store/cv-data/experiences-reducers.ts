@@ -25,12 +25,12 @@ export const experiencesReducers = {
   updateExperience: <K extends keyof Experience>(
     state: CvDataState,
     action: PayloadAction<{
-      id: string;
+      experienceId: string;
       key: K;
       value: Experience[K];
     }>
   ) => {
-    const exp = findExperience(state, action.payload.id);
+    const exp = findExperience(state, action.payload.experienceId);
     if (exp) {
       exp[action.payload.key] = action.payload.value;
     }
@@ -38,33 +38,33 @@ export const experiencesReducers = {
 
   addBulletPoint: (
     state: CvDataState,
-    action: PayloadAction<{ id: string }>
+    action: PayloadAction<{ experienceId: string }>
   ) => {
-    const exp = findExperience(state, action.payload.id);
+    const exp = findExperience(state, action.payload.experienceId);
     exp?.bulletPoints.push("");
   },
 
   updateExperienceBulletPoint: (
     state: CvDataState,
     action: PayloadAction<{
-      id: string;
-      index: number;
+      experienceId: string;
+      bulletPointId: number;
       value: string;
     }>
   ) => {
-    const exp = findExperience(state, action.payload.id);
-    if (exp?.bulletPoints[action.payload.index] !== undefined) {
-      exp.bulletPoints[action.payload.index] = action.payload.value;
+    const exp = findExperience(state, action.payload.experienceId);
+    if (exp?.bulletPoints[action.payload.bulletPointId] !== undefined) {
+      exp.bulletPoints[action.payload.bulletPointId] = action.payload.value;
     }
   },
 
   removeBulletPoint: (
     state: CvDataState,
-    action: PayloadAction<{ id: string; index: number }>
+    action: PayloadAction<{ experienceId: string; bulletPointId: number }>
   ) => {
-    const exp = findExperience(state, action.payload.id);
-    if (exp?.bulletPoints[action.payload.index] !== undefined) {
-      exp.bulletPoints.splice(action.payload.index, 1);
+    const exp = findExperience(state, action.payload.experienceId);
+    if (exp?.bulletPoints[action.payload.bulletPointId] !== undefined) {
+      exp.bulletPoints.splice(action.payload.bulletPointId, 1);
     }
   },
 };

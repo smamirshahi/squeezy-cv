@@ -32,7 +32,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateExperience({
-                      id: experience.id,
+                      experienceId: experience.id,
                       key: "jobTitle",
                       value: event.target.value,
                     })
@@ -54,7 +54,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateExperience({
-                      id: experience.id,
+                      experienceId: experience.id,
                       key: "company",
                       value: event.target.value,
                     })
@@ -68,7 +68,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateExperience({
-                      id: experience.id,
+                      experienceId: experience.id,
                       key: "location",
                       value: event.target.value,
                     })
@@ -86,7 +86,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateExperience({
-                      id: experience.id,
+                      experienceId: experience.id,
                       key: "startDate",
                       value: event.target.value,
                     })
@@ -103,7 +103,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateExperience({
-                      id: experience.id,
+                      experienceId: experience.id,
                       key: "endDate",
                       value: event.target.value,
                     })
@@ -137,8 +137,8 @@ export function ExperienceEditorPage(): JSX.Element {
                     onChange={(event) =>
                       dispatch(
                         updateExperienceBulletPoint({
-                          id: experience.id,
-                          index,
+                          experienceId: experience.id,
+                          bulletPointId: index,
                           value: event.target.value,
                         })
                       )
@@ -147,7 +147,12 @@ export function ExperienceEditorPage(): JSX.Element {
                   />
                   <IconButton
                     onClick={() =>
-                      dispatch(removeBulletPoint({ id: experience.id, index }))
+                      dispatch(
+                        removeBulletPoint({
+                          experienceId: experience.id,
+                          bulletPointId: index,
+                        })
+                      )
                     }
                     disabled={experience.bulletPoints.length === 1}
                   >
@@ -158,7 +163,7 @@ export function ExperienceEditorPage(): JSX.Element {
               <Box>
                 <IconButton
                   onClick={() =>
-                    dispatch(addBulletPoint({ id: experience.id }))
+                    dispatch(addBulletPoint({ experienceId: experience.id }))
                   }
                 >
                   <AddIcon />

@@ -3,23 +3,23 @@ import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(
   state: CvDataState,
-  id: string
+  experienceId: string
 ): Experience | undefined {
-  return state.data.experiences.find((exp) => exp.id === id);
+  return state.data.experiences.find((exp) => exp.id === experienceId);
 }
 
 export function findEducation(
   state: CvDataState,
-  id: string
+  educationId: string
 ): Education | undefined {
-  return state.data.educations.find((edu) => edu.id === id);
+  return state.data.educations.find((edu) => edu.id === educationId);
 }
 
 export function findSkill(
   state: CvDataState,
-  id: string
+  skillId: string
 ): SkillCategory | undefined {
-  return state.data.skills.find((skill) => skill.id === id);
+  return state.data.skills.find((skill) => skill.id === skillId);
 }
 
 export type FontStyle = {
@@ -68,16 +68,3 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
     color: "#000000",
   },
 };
-
-type FontWeightString = "normal" | "bold";
-
-export function convertFontWeightToNumber(
-  fontWeightString: FontWeightString
-): number {
-  switch (fontWeightString) {
-    case "normal":
-      return 400;
-    case "bold":
-      return 700;
-  }
-}
