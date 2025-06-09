@@ -1,83 +1,41 @@
 import { Box } from "@mui/material";
-import { TextFieldWithIcon } from "@components/text-field-with-icon";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import {
-  cvDataSelector,
-  updateContactInfo,
-} from "@store/cv-data/cv-data-slice";
+import { ContactInfoSection } from "@pages/editor-page/contact-info/contact-info-section";
 
 export function ContactInfoEditorPage(): JSX.Element {
-  const { contactInfo } = useAppSelector(cvDataSelector);
-  const dispatch = useAppDispatch();
-
   return (
     <>
       <Box display="flex" gap={2} mb={2}>
-        <TextFieldWithIcon
+        <ContactInfoSection
           icon={<AlternateEmailIcon />}
           label="Email"
-          value={contactInfo.email}
-          onChange={(event) =>
-            dispatch(
-              updateContactInfo({ field: "email", value: event.target.value })
-            )
-          }
+          field="email"
         />
-        <TextFieldWithIcon
+        <ContactInfoSection
           icon={<SmartphoneIcon />}
           label="Phone"
-          value={contactInfo.phone}
-          onChange={(event) =>
-            dispatch(
-              updateContactInfo({ field: "phone", value: event.target.value })
-            )
-          }
+          field="phone"
         />
-        <TextFieldWithIcon
+        <ContactInfoSection
           icon={<LinkedInIcon />}
           label="LinkedInId"
-          value={contactInfo.linkedInId}
-          onChange={(event) =>
-            dispatch(
-              updateContactInfo({
-                field: "linkedInId",
-                value: event.target.value,
-              })
-            )
-          }
+          field="linkedInId"
         />
       </Box>
       <Box display="flex" gap={2} mb={2}>
-        <TextFieldWithIcon
+        <ContactInfoSection
           icon={<GitHubIcon />}
           label="Github"
-          value={contactInfo.gitHubId}
-          onChange={(event) =>
-            dispatch(
-              updateContactInfo({
-                field: "gitHubId",
-                value: event.target.value,
-              })
-            )
-          }
+          field="gitHubId"
         />
-        <TextFieldWithIcon
+        <ContactInfoSection
           icon={<LocationOnIcon />}
-          label="location"
-          value={contactInfo.location}
-          onChange={(event) =>
-            dispatch(
-              updateContactInfo({
-                field: "location",
-                value: event.target.value,
-              })
-            )
-          }
+          label="Location"
+          field="location"
         />
       </Box>
     </>
