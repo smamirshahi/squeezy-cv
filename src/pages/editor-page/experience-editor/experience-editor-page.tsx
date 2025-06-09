@@ -124,7 +124,7 @@ export function ExperienceEditorPage(): JSX.Element {
             >
               {experience.bulletPoints.map((point, index) => (
                 <Box
-                  key={index}
+                  key={point.id}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -133,12 +133,12 @@ export function ExperienceEditorPage(): JSX.Element {
                 >
                   <TextField
                     label={`Bullet Point ${index + 1}`}
-                    value={point}
+                    value={point.text}
                     onChange={(event) =>
                       dispatch(
                         updateExperienceBulletPoint({
                           experienceId: experience.id,
-                          bulletPointId: index,
+                          bulletPointId: point.id,
                           value: event.target.value,
                         })
                       )
@@ -150,7 +150,7 @@ export function ExperienceEditorPage(): JSX.Element {
                       dispatch(
                         removeBulletPoint({
                           experienceId: experience.id,
-                          bulletPointId: index,
+                          bulletPointId: point.id,
                         })
                       )
                     }

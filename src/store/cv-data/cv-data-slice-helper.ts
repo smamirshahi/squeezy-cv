@@ -1,4 +1,9 @@
-import { Education, Experience, SkillCategory } from "@custom-types/json-types";
+import {
+  BulletPoint,
+  Education,
+  Experience,
+  SkillCategory,
+} from "@custom-types/json-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(
@@ -6,6 +11,16 @@ export function findExperience(
   experienceId: string
 ): Experience | undefined {
   return state.data.experiences.find((exp) => exp.id === experienceId);
+}
+
+export function findBulletPoint(
+  state: CvDataState,
+  experienceId: string,
+  bulletPointId: string
+): BulletPoint | undefined {
+  return state.data.experiences
+    .find((exp) => exp.id === experienceId)
+    ?.bulletPoints.find((bp) => bp.id === bulletPointId);
 }
 
 export function findEducation(

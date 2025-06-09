@@ -1,7 +1,10 @@
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 import { Experience } from "@custom-types/json-types";
-import { findExperience } from "@store/cv-data/cv-data-slice-helper";
+import {
+  findBulletPoint,
+  findExperience,
+} from "@store/cv-data/cv-data-slice-helper";
 
 export const experiencesReducers = {
   addExperience: (state: CvDataState) => {
@@ -41,30 +44,34 @@ export const experiencesReducers = {
     action: PayloadAction<{ experienceId: string }>
   ) => {
     const exp = findExperience(state, action.payload.experienceId);
-    exp?.bulletPoints.push("");
+    exp?.bulletPoints.push({ id: nanoid(), text: "" });
   },
 
   updateExperienceBulletPoint: (
     state: CvDataState,
     action: PayloadAction<{
       experienceId: string;
-      bulletPointId: number;
+      bulletPointId: string;
       value: string;
     }>
   ) => {
-    const exp = findExperience(state, action.payload.experienceId);
-    if (exp?.bulletPoints[action.payload.bulletPointId] !== undefined) {
-      exp.bulletPoints[action.payload.bulletPointId] = action.payload.value;
+    const { experienceId, bulletPointId, value } = action.payload;
+    const bulletPoint = findBulletPoint(state, experienceId, bulletPointId);
+    if (bulletPoint) {
+      bulletPoint.text = value;
     }
   },
 
   removeBulletPoint: (
     state: CvDataState,
-    action: PayloadAction<{ experienceId: string; bulletPointId: number }>
+    action: PayloadAction<{ experienceId: string; bulletPointId: string }>
   ) => {
-    const exp = findExperience(state, action.payload.experienceId);
-    if (exp?.bulletPoints[action.payload.bulletPointId] !== undefined) {
-      exp.bulletPoints.splice(action.payload.bulletPointId, 1);
+    const { experienceId, bulletPointId } = action.payload;
+    const exp = findExperience(state, experienceId);
+    if (exp) {
+      exp.bulletPoints = exp.bulletPoints.filter(
+        (bp) => bp.id !== bulletPointId
+      );
     }
   },
 };
