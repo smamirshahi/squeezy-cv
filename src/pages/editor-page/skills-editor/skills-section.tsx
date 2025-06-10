@@ -1,20 +1,16 @@
-import {
-  BulletPoint,
-  Experience,
-  SkillCategory,
-} from "@custom-types/json-types";
+import { SkillCategory, SkillItem } from "@custom-types/json-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import { TextField } from "@mui/material";
 import {
-  updateExperienceBulletPoint,
   updateSkillCategory,
+  updateSkillItem,
 } from "@store/cv-data/cv-data-slice";
 
 interface UpdateSkillSectionProps {
   skill: SkillCategory;
 }
 
-export function UpdateSkillSection({
+export function UpdateSkillCategorySection({
   skill,
 }: UpdateSkillSectionProps): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
@@ -38,34 +34,33 @@ export function UpdateSkillSection({
 }
 
 interface UpdateSkillItemSectionProps {
-  experience: Experience;
-  bulletPoint: BulletPoint;
-  bulletPointIndex: number;
+  skill: SkillCategory;
+  skillItem: SkillItem;
+  skillItemIndex: number;
 }
 
-export function UpdateSkillItemSection({
-  experience,
-  bulletPoint,
-  bulletPointIndex,
+export function UpdateSkillItemNameSection({
+  skill,
+  skillItem,
+  skillItemIndex,
 }: UpdateSkillItemSectionProps): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
-    reduxState: bulletPoint.text,
+    reduxState: skillItem.name,
     createAction: (localState) =>
-      updateExperienceBulletPoint({
-        experienceId: experience.id,
-        bulletPointId: bulletPoint.id,
+      updateSkillItem({
+        skillId: skill.id,
+        skillItemId: skillItem.id,
+        key: "name",
         value: localState,
       }),
   });
 
   return (
     <TextField
-      label={`Bullet Point ${bulletPointIndex + 1}`}
+      label={`Skill Item ${skillItemIndex + 1}`}
       value={localState}
       onChange={(event) => setLocalState(event.target.value)}
       fullWidth
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-      InputLabelProps={{ shrink: true }}
     />
   );
 }
