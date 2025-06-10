@@ -24,6 +24,12 @@ interface Props {
   style: FontStyle;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const WORD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20];
+
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const WORD_FONT_WEIGHT = [400, 700];
+
 export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
   const theme = useTheme();
   const dispatch = useAppDispatch();
@@ -61,7 +67,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
             }))
           }
         >
-          {Array.from({ length: 15 }, (_, i) => i + 8).map((pt) => (
+          {WORD_FONT_SIZES.map((pt) => (
             <MenuItem key={pt} value={`${pt}pt`}>
               {pt} pt
             </MenuItem>
@@ -83,7 +89,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
             }))
           }
         >
-          {[400, 500, 600, 700].map((weight) => (
+          {WORD_FONT_WEIGHT.map((weight) => (
             <MenuItem key={weight} value={weight}>
               {weight}
             </MenuItem>

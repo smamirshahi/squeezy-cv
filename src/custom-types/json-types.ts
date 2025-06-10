@@ -36,6 +36,14 @@ const ContactInfoSchema = Object({
 /** The professional summary of the applicant */
 const ProfessionalSummarySchema = String;
 
+const BulletPointSchema = Object({
+  /** Specific ID for the bullet point */
+  id: String,
+
+  /** The text of the bullet point */
+  text: String,
+});
+
 const ExperienceSchema = Object({
   /** Specific ID for the experience */
   id: String,
@@ -56,7 +64,7 @@ const ExperienceSchema = Object({
   endDate: String.optional(),
 
   /** Bullet points for each experience */
-  bulletPoints: Array(String),
+  bulletPoints: Array(BulletPointSchema),
 });
 
 const EducationSchema = Object({
@@ -171,6 +179,7 @@ export type PersonalInfo = Static<typeof PersonalInfoSchema>;
 export type ContactInfo = Static<typeof ContactInfoSchema>;
 export type ProfessionalSummary = Static<typeof ProfessionalSummarySchema>;
 export type Experience = Static<typeof ExperienceSchema>;
+export type BulletPoint = Static<typeof BulletPointSchema>;
 export type Education = Static<typeof EducationSchema>;
 export type SkillCategory = Static<typeof SkillCategorySchema>;
 export type SkillItem = Static<typeof SkillItemSchema>;

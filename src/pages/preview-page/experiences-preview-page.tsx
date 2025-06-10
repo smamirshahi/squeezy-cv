@@ -45,18 +45,12 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
           {experience.bulletPoints && (
             // <BulletPoints bulletPoints={experience.bulletPoints} />
             <>
-              {experience.bulletPoints.map((bulletPoint, index) => (
+              {experience.bulletPoints.map((bulletPoint) => (
                 <IconWithText
                   variant="bulletText"
-                  key={index}
+                  key={bulletPoint.id}
                   icon={FiberManualRecordIcon}
-                  text={bulletPoint}
-                  // customTextSx={{ color: customColors.gray }}
-                  // customIconSx={{
-                  //   color: customColors.gray,
-                  //   width: "10px",
-                  //   mr: "5px",
-                  // }}
+                  text={bulletPoint.text}
                 />
               ))}
             </>

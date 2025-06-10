@@ -1,0 +1,49 @@
+import { useEffect, useRef, useState } from "react";
+import { SetStateFunction, useAppDispatch } from "@store/store-helper";
+import { UnknownAction } from "@reduxjs/toolkit";
+
+interface Props<T> {
+  reduxState: T;
+  createAction: (value: T) => UnknownAction;
+}
+
+interface ReturnProps<T> {
+  localState: T;
+  setLocalState: SetStateFunction<T>;
+}
+
+const DEBOUNCE_IN_MM = 500;
+
+export function useDebounceCallback<T>({
+  reduxState,
+  createAction,
+}: Props<T>): ReturnProps<T> {
+  const [localState, setLocalState] = useState(reduxState);
+  const dispatch = useAppDispatch();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setLocalState(reduxState);
+  }, [reduxState, setLocalState]);
+
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      if (localState !== reduxState) {
+        dispatch(createAction(localState));
+      }
+    }, DEBOUNCE_IN_MM);
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [createAction, dispatch, localState, reduxState]);
+
+  return {
+    localState,
+    setLocalState,
+  };
+}

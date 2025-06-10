@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { useRef } from "react";
 import { EditorPage } from "@pages/editor-page";
 import { PreviewPage } from "@pages/preview-page";
+import { DragDropPage } from "@pages/drag-drop-page";
 
 export function App(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -20,7 +21,8 @@ export function App(): JSX.Element {
       }}
     >
       <EditorPage contentRef={contentRef} />
-      <PreviewPage contentRef={contentRef} />
+      {/* <PreviewPage contentRef={contentRef} /> */}
+      <DragDropPage contentRef={contentRef} />
     </Box>
   );
 }

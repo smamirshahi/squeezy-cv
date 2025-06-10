@@ -1,27 +1,27 @@
 import { TextField } from "@mui/material";
-import { ProfessionalSummary } from "@custom-types/json-types";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppSelector } from "@store/store-helper";
 import { CVAccordion } from "@components/cv-accordion";
+import {
+  cvDataSelector,
+  updateProfessionalSummary,
+} from "@store/cv-data/cv-data-slice";
+import { useDebounceCallback } from "@hooks/use-debounce-callback";
 
-interface Props {
-  /** The professional summary to edit */
-  summary: ProfessionalSummary;
+export function SummaryEditorPage(): JSX.Element | null {
+  const { professionalSummary } = useAppSelector(cvDataSelector);
 
-  /** Setter for the professional summary to edit */
-  setSummary: SetStateFunction<ProfessionalSummary>;
-}
+  const { localState, setLocalState } = useDebounceCallback({
+    reduxState: professionalSummary,
+    createAction: updateProfessionalSummary,
+  });
 
-export function SummaryEditorPage({
-  summary,
-  setSummary,
-}: Props): JSX.Element | null {
   return (
     <CVAccordion title="Professional Summary">
       <TextField
         label="Professional Summary"
         variant="outlined"
         multiline
-        value={summary}
+        value={localState}
         fullWidth
         sx={{
           mt: "20px",
@@ -29,7 +29,7 @@ export function SummaryEditorPage({
             resize: "vertical",
           },
         }}
-        onChange={(event) => setSummary(event.target.value)}
+        onChange={(event) => setLocalState(event.target.value)}
       />
     </CVAccordion>
   );

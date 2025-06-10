@@ -1,25 +1,51 @@
-import { Education, Experience, SkillCategory } from "@custom-types/json-types";
+import {
+  BulletPoint,
+  Education,
+  Experience,
+  SkillCategory,
+  SkillItem,
+} from "@custom-types/json-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(
   state: CvDataState,
-  id: string
+  experienceId: string
 ): Experience | undefined {
-  return state.data.experiences.find((exp) => exp.id === id);
+  return state.data.experiences.find((exp) => exp.id === experienceId);
+}
+
+export function findBulletPoint(
+  state: CvDataState,
+  experienceId: string,
+  bulletPointId: string
+): BulletPoint | undefined {
+  return state.data.experiences
+    .find((exp) => exp.id === experienceId)
+    ?.bulletPoints.find((bp) => bp.id === bulletPointId);
 }
 
 export function findEducation(
   state: CvDataState,
-  id: string
+  educationId: string
 ): Education | undefined {
-  return state.data.educations.find((edu) => edu.id === id);
+  return state.data.educations.find((edu) => edu.id === educationId);
 }
 
 export function findSkill(
   state: CvDataState,
-  id: string
+  skillId: string
 ): SkillCategory | undefined {
-  return state.data.skills.find((skill) => skill.id === id);
+  return state.data.skills.find((skill) => skill.id === skillId);
+}
+
+export function findSkillItem(
+  state: CvDataState,
+  skillId: string,
+  skillItemId: string
+): SkillItem | undefined {
+  return state.data.skills
+    .find((skill) => skill.id === skillId)
+    ?.items.find((item) => item.id === skillItemId);
 }
 
 export type FontStyle = {
@@ -44,12 +70,12 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   },
   headingMd: {
     fontSize: "14pt",
-    fontWeight: 600,
+    fontWeight: 700,
     color: "#000000",
   },
   headingSm: {
     fontSize: "12pt",
-    fontWeight: 500,
+    fontWeight: 400,
     color: "#000000",
   },
   bodyLg: {
@@ -65,23 +91,6 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   captionText: {
     fontSize: "8pt",
     fontWeight: 400,
-    color: "#777",
+    color: "#000000",
   },
 };
-
-type FontWeightString = "normal" | "medium" | "semi-bold" | "bold";
-
-export function convertFontWeightToNumber(
-  fontWeightString: FontWeightString
-): number {
-  switch (fontWeightString) {
-    case "normal":
-      return 400;
-    case "medium":
-      return 500;
-    case "semi-bold":
-      return 600;
-    case "bold":
-      return 700;
-  }
-}
