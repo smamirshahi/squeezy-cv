@@ -1,7 +1,7 @@
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 import { SkillCategory, SkillItem } from "@custom-types/json-types";
-import { findSkill } from "@store/cv-data/cv-data-slice-helper";
+import { findSkill, findSkillItem } from "@store/cv-data/cv-data-slice-helper";
 
 export const skillsReducers = {
   addSkillCategory: (state: CvDataState) => {
@@ -27,12 +27,12 @@ export const skillsReducers = {
   updateSkillCategory: <K extends keyof SkillCategory>(
     state: CvDataState,
     action: PayloadAction<{
-      id: string;
+      skillId: string;
       key: K;
       value: SkillCategory[K];
     }>
   ) => {
-    const skill = findSkill(state, action.payload.id);
+    const skill = findSkill(state, action.payload.skillId);
     if (skill) {
       skill[action.payload.key] = action.payload.value;
     }
@@ -43,38 +43,37 @@ export const skillsReducers = {
     action: PayloadAction<{ skillId: string }>
   ) => {
     const skill = findSkill(state, action.payload.skillId);
-    if (skill) {
-      skill.items.push({
-        id: nanoid(),
-        name: "",
-        rating: 0,
-      });
-    }
-  },
-
-  removeSkillItem: (
-    state: CvDataState,
-    action: PayloadAction<{ skillId: string; index: number }>
-  ) => {
-    const skill = findSkill(state, action.payload.skillId);
-    if (skill && skill.items[action.payload.index] !== undefined) {
-      skill.items.splice(action.payload.index, 1);
-    }
+    skill?.items.push({
+      id: nanoid(),
+      name: "",
+      rating: 0,
+    });
   },
 
   updateSkillItem: <K extends keyof SkillItem>(
     state: CvDataState,
     action: PayloadAction<{
-      id: string;
-      index: number;
+      skillId: string;
+      skillItemId: string;
       key: K;
       value: SkillItem[K];
     }>
   ) => {
-    const { index, key, value } = action.payload;
-    const skill = findSkill(state, action.payload.id);
-    if (skill && skill.items[index] !== undefined) {
-      skill.items[index][key] = value;
+    const { skillId, skillItemId, key, value } = action.payload;
+    const skillItem = findSkillItem(state, skillId, skillItemId);
+    if (skillItem) {
+      skillItem[key] = value;
+    }
+  },
+
+  removeSkillItem: (
+    state: CvDataState,
+    action: PayloadAction<{ skillId: string; skillItemId: string }>
+  ) => {
+    const { skillId, skillItemId } = action.payload;
+    const skill = findSkill(state, skillId);
+    if (skill) {
+      skill.items = skill.items.filter((item) => item.id !== skillItemId);
     }
   },
 };

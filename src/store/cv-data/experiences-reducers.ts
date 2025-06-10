@@ -15,7 +15,7 @@ export const experiencesReducers = {
       location: "",
       startDate: "",
       endDate: "",
-      bulletPoints: [],
+      bulletPoints: [{ id: nanoid(), text: "" }],
     });
   },
 

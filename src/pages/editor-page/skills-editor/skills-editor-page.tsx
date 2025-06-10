@@ -10,9 +10,9 @@ import {
   cvDataSelector,
   removeSkillCategory,
   removeSkillItem,
-  updateSkillCategory,
   updateSkillItem,
 } from "@store/cv-data/cv-data-slice";
+import { UpdateSkillSection } from "@pages/editor-page/skills-editor/skills-section";
 
 export function SkillsEditorPage(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
@@ -27,20 +27,8 @@ export function SkillsEditorPage(): JSX.Element {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                label="Skill Category"
-                value={skill.category}
-                onChange={(event) =>
-                  dispatch(
-                    updateSkillCategory({
-                      id: skill.id,
-                      key: "category",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
-              />
+              <UpdateSkillSection skill={skill} />
+
               <IconButton
                 onClick={() => dispatch(removeSkillCategory(skill.id))}
               >
@@ -71,8 +59,8 @@ export function SkillsEditorPage(): JSX.Element {
                     onChange={(event) =>
                       dispatch(
                         updateSkillItem({
-                          id: skill.id,
-                          index,
+                          skillId: skill.id,
+                          skillItemId: skillItem.id,
                           key: "name",
                           value: event.target.value,
                         })
@@ -86,8 +74,8 @@ export function SkillsEditorPage(): JSX.Element {
                       if (isRatingAcceptable(newValue)) {
                         dispatch(
                           updateSkillItem({
-                            id: skill.id,
-                            index,
+                            skillId: skill.id,
+                            skillItemId: skillItem.id,
                             key: "rating",
                             value: newValue ?? 0,
                           })
@@ -98,7 +86,12 @@ export function SkillsEditorPage(): JSX.Element {
                   />
                   <IconButton
                     onClick={() =>
-                      dispatch(removeSkillItem({ skillId: skill.id, index }))
+                      dispatch(
+                        removeSkillItem({
+                          skillId: skill.id,
+                          skillItemId: skillItem.id,
+                        })
+                      )
                     }
                     disabled={skill.items.length === 1}
                   >
