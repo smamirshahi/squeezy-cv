@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, TextField } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { CVAccordion } from "@components/cv-accordion";
@@ -9,9 +9,11 @@ import {
   cvDataSelector,
   removeBulletPoint,
   removeExperience,
-  updateExperience,
-  updateExperienceBulletPoint,
 } from "@store/cv-data/cv-data-slice";
+import {
+  UpdateBulletPointSection,
+  UpdateExperienceSection,
+} from "@pages/editor-page/experience-editor/experience-section";
 
 export function ExperienceEditorPage(): JSX.Element {
   const { experiences } = useAppSelector(cvDataSelector);
@@ -26,19 +28,10 @@ export function ExperienceEditorPage(): JSX.Element {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateExperienceSection
                 label="Job Title"
-                value={experience.jobTitle}
-                onChange={(event) =>
-                  dispatch(
-                    updateExperience({
-                      experienceId: experience.id,
-                      key: "jobTitle",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="jobTitle"
+                experience={experience}
               />
               <IconButton
                 onClick={() => dispatch(removeExperience(experience.id))}
@@ -48,70 +41,30 @@ export function ExperienceEditorPage(): JSX.Element {
             </Box>
             {/* Company and Location in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateExperienceSection
                 label="Company"
-                value={experience.company}
-                onChange={(event) =>
-                  dispatch(
-                    updateExperience({
-                      experienceId: experience.id,
-                      key: "company",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="company"
+                experience={experience}
               />
-              <TextField
+              <UpdateExperienceSection
                 label="Location"
-                value={experience.location}
-                onChange={(event) =>
-                  dispatch(
-                    updateExperience({
-                      experienceId: experience.id,
-                      key: "location",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="location"
+                experience={experience}
               />
             </Box>
             {/* Start and End Date in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateExperienceSection
                 label="Start Date"
-                type="date"
-                value={experience.startDate}
-                onChange={(event) =>
-                  dispatch(
-                    updateExperience({
-                      experienceId: experience.id,
-                      key: "startDate",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                InputLabelProps={{ shrink: true }}
-                fullWidth
+                field="startDate"
+                experience={experience}
+                textFieldType="date"
               />
-              <TextField
+              <UpdateExperienceSection
                 label="End Date"
-                type="date"
-                value={experience.endDate}
-                onChange={(event) =>
-                  dispatch(
-                    updateExperience({
-                      experienceId: experience.id,
-                      key: "endDate",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                InputLabelProps={{ shrink: true }}
-                fullWidth
+                field="endDate"
+                experience={experience}
+                textFieldType="date"
               />
             </Box>
             <Box
@@ -122,35 +75,26 @@ export function ExperienceEditorPage(): JSX.Element {
                 mb: 2,
               }}
             >
-              {experience.bulletPoints.map((point, index) => (
+              {experience.bulletPoints.map((bulletPoint, index) => (
                 <Box
-                  key={point.id}
+                  key={bulletPoint.id}
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
                   }}
                 >
-                  <TextField
-                    label={`Bullet Point ${index + 1}`}
-                    value={point.text}
-                    onChange={(event) =>
-                      dispatch(
-                        updateExperienceBulletPoint({
-                          experienceId: experience.id,
-                          bulletPointId: point.id,
-                          value: event.target.value,
-                        })
-                      )
-                    }
-                    fullWidth
+                  <UpdateBulletPointSection
+                    experience={experience}
+                    bulletPoint={bulletPoint}
+                    bulletPointIndex={index}
                   />
                   <IconButton
                     onClick={() =>
                       dispatch(
                         removeBulletPoint({
                           experienceId: experience.id,
-                          bulletPointId: point.id,
+                          bulletPointId: bulletPoint.id,
                         })
                       )
                     }
