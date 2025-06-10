@@ -2,7 +2,6 @@ import { Grid } from "@mui/material";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvTypographyNew } from "@components/cv-typography";
@@ -44,16 +43,16 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
           </Grid>
           {experience.bulletPoints && (
             // <BulletPoints bulletPoints={experience.bulletPoints} />
-            <>
+            <ul>
               {experience.bulletPoints.map((bulletPoint) => (
-                <IconWithText
-                  variant="bulletText"
-                  key={bulletPoint.id}
-                  icon={FiberManualRecordIcon}
-                  text={bulletPoint.text}
-                />
+                <li key={bulletPoint.id}>
+                  <CvTypographyNew
+                    variant="bulletText"
+                    text={bulletPoint.text}
+                  />
+                </li>
               ))}
-            </>
+            </ul>
           )}
         </Grid>
       ))}
