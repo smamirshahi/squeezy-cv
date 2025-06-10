@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, TextField } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CVAccordion } from "@components/cv-accordion";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -6,8 +6,8 @@ import {
   addEducation,
   cvDataSelector,
   removeEducation,
-  updateEducation,
 } from "@store/cv-data/cv-data-slice";
+import { UpdateEducationSection } from "@pages/editor-page/education-editor/education-section";
 
 export function EducationEditorPage(): JSX.Element {
   const { educations } = useAppSelector(cvDataSelector);
@@ -22,19 +22,10 @@ export function EducationEditorPage(): JSX.Element {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateEducationSection
                 label="Degree"
-                value={education.degree}
-                onChange={(event) =>
-                  dispatch(
-                    updateEducation({
-                      educationId: education.id,
-                      key: "degree",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="degree"
+                education={education}
               />
               <IconButton
                 onClick={() => dispatch(removeEducation(education.id))}
@@ -44,85 +35,36 @@ export function EducationEditorPage(): JSX.Element {
             </Box>
             {/* Company and Location in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateEducationSection
                 label="Institute"
-                value={education.institute}
-                onChange={(event) =>
-                  dispatch(
-                    updateEducation({
-                      educationId: education.id,
-                      key: "institute",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="institute"
+                education={education}
               />
-              <TextField
+              <UpdateEducationSection
                 label="Location"
-                value={education.location}
-                onChange={(event) =>
-                  dispatch(
-                    updateEducation({
-                      educationId: education.id,
-                      key: "location",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                fullWidth
+                field="location"
+                education={education}
               />
             </Box>
             {/* Start and End Date in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <UpdateEducationSection
                 label="Start Date"
-                type="date"
-                value={education.startDate}
-                onChange={(event) =>
-                  dispatch(
-                    updateEducation({
-                      educationId: education.id,
-                      key: "startDate",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                InputLabelProps={{ shrink: true }}
-                fullWidth
+                field="startDate"
+                education={education}
+                textFieldType="date"
               />
-              <TextField
+              <UpdateEducationSection
                 label="End Date"
-                type="date"
-                value={education.endDate}
-                onChange={(event) =>
-                  dispatch(
-                    updateEducation({
-                      educationId: education.id,
-                      key: "endDate",
-                      value: event.target.value,
-                    })
-                  )
-                }
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
-                InputLabelProps={{ shrink: true }}
-                fullWidth
+                field="endDate"
+                education={education}
+                textFieldType="date"
               />
             </Box>
-            <TextField
+            <UpdateEducationSection
               label="Dissertation Title"
-              value={education.dissertationTitle}
-              onChange={(event) =>
-                dispatch(
-                  updateEducation({
-                    educationId: education.id,
-                    key: "dissertationTitle",
-                    value: event.target.value,
-                  })
-                )
-              }
-              fullWidth
+              field="dissertationTitle"
+              education={education}
             />
           </Box>
         ))}
