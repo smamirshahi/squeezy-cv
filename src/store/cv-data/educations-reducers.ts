@@ -25,12 +25,12 @@ export const educationsReducers = {
   updateEducation: <K extends keyof Education>(
     state: CvDataState,
     action: PayloadAction<{
-      id: string;
+      educationId: string;
       key: K;
       value: Education[K];
     }>
   ) => {
-    const edu = findEducation(state, action.payload.id);
+    const edu = findEducation(state, action.payload.educationId);
     if (edu) {
       edu[action.payload.key] = action.payload.value;
     }

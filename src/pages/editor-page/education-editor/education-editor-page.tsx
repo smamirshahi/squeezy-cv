@@ -28,7 +28,7 @@ export function EducationEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateEducation({
-                      id: education.id,
+                      educationId: education.id,
                       key: "degree",
                       value: event.target.value,
                     })
@@ -50,7 +50,7 @@ export function EducationEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateEducation({
-                      id: education.id,
+                      educationId: education.id,
                       key: "institute",
                       value: event.target.value,
                     })
@@ -64,7 +64,7 @@ export function EducationEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateEducation({
-                      id: education.id,
+                      educationId: education.id,
                       key: "location",
                       value: event.target.value,
                     })
@@ -82,7 +82,7 @@ export function EducationEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateEducation({
-                      id: education.id,
+                      educationId: education.id,
                       key: "startDate",
                       value: event.target.value,
                     })
@@ -99,7 +99,7 @@ export function EducationEditorPage(): JSX.Element {
                 onChange={(event) =>
                   dispatch(
                     updateEducation({
-                      id: education.id,
+                      educationId: education.id,
                       key: "endDate",
                       value: event.target.value,
                     })
@@ -116,7 +116,7 @@ export function EducationEditorPage(): JSX.Element {
               onChange={(event) =>
                 dispatch(
                   updateEducation({
-                    id: education.id,
+                    educationId: education.id,
                     key: "dissertationTitle",
                     value: event.target.value,
                   })
