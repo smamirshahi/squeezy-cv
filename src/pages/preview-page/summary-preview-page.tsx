@@ -3,6 +3,7 @@ import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { CvTypography } from "@components/cv-typography";
 
+/** Shows the professional summary page in preview mode */
 export function SummaryPreviewPage(): JSX.Element | null {
   const { professionalSummary } = useAppSelector(cvDataSelector);
 

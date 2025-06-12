@@ -6,6 +6,7 @@ import {
   updateExperienceBulletPoint,
 } from "@store/cv-data/cv-data-slice";
 
+/** All the keys of experience that can be updated */
 type EditableExperienceField = Pick<
   Experience,
   "jobTitle" | "company" | "location" | "startDate" | "endDate"
@@ -14,15 +15,20 @@ type EditableExperienceField = Pick<
 interface UpdateExperienceSectionProps<
   K extends keyof EditableExperienceField,
 > {
+  /** The label to show next to it */
   label: string;
 
+  /** The field to be updated */
   field: K;
 
+  /** Experience that is going to be updated */
   experience: Experience;
 
+  /** Type of text field */
   textFieldType?: "date" | "text";
 }
 
+/** Update experience section with debouncing */
 export function UpdateExperienceSection<
   K extends keyof EditableExperienceField,
 >({
@@ -55,10 +61,14 @@ export function UpdateExperienceSection<
 }
 
 interface UpdateBulletPointSectionProps {
+  /** Bullet point */
   bulletPoint: BulletPoint;
+
+  /** Index of bullet point */
   bulletPointIndex: number;
 }
 
+/** Update bullet point section with debouncing */
 export function UpdateBulletPointSection({
   bulletPoint,
   bulletPointIndex,

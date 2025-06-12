@@ -12,7 +12,6 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-
 import {
   WORD_FONT_SIZE_OPTIONS,
   WORD_FONT_WEIGHT_OPTIONS,
@@ -30,6 +29,7 @@ interface Props {
   style: FontStyle;
 }
 
+/** Shows dropdown to select the font size, font weight and color */
 export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
   const theme = useTheme();
   const dispatch = useAppDispatch();
@@ -53,6 +53,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
       sx={{ mt: "10px" }}
     >
       <Typography>{variant}</Typography>
+
       <FormControl size="small" sx={{ minWidth: 100 }}>
         <InputLabel id="fontSize-label">Font Size</InputLabel>
         <Select

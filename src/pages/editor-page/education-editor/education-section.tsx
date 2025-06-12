@@ -4,15 +4,20 @@ import { TextField } from "@mui/material";
 import { updateEducation } from "@store/cv-data/cv-data-slice";
 
 interface UpdateEducationSectionProps<K extends keyof Education> {
+  /** The label to show next to it */
   label: string;
 
+  /** The field to be updated */
   field: K;
 
+  /** Education that is going to be updated */
   education: Education;
 
+  /** Type of text field */
   textFieldType?: "date" | "text";
 }
 
+/** Update education section with debouncing */
 export function UpdateEducationSection<K extends keyof Education>({
   label,
   field,

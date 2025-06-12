@@ -6,6 +6,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { ContactInfoSection } from "@pages/editor-page/contact-info/contact-info-section";
 
+/** Shows the contact info in editor page */
 export function ContactInfoEditorPage(): JSX.Element {
   return (
     <>
@@ -15,23 +16,27 @@ export function ContactInfoEditorPage(): JSX.Element {
           label="Email"
           field="email"
         />
+
         <ContactInfoSection
           icon={<SmartphoneIcon />}
           label="Phone"
           field="phone"
         />
+
         <ContactInfoSection
           icon={<LinkedInIcon />}
           label="LinkedInId"
           field="linkedInId"
         />
       </Box>
+
       <Box display="flex" gap={2} mb={2}>
         <ContactInfoSection
           icon={<GitHubIcon />}
           label="Github"
           field="gitHubId"
         />
+
         <ContactInfoSection
           icon={<LocationOnIcon />}
           label="Location"

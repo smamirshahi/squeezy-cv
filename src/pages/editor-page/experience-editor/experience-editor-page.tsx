@@ -22,6 +22,7 @@ import {
   UpdateExperienceSection,
 } from "@pages/editor-page/experience-editor/experience-section";
 
+/** Shows the experience in editor page */
 export function ExperienceEditorPage(): JSX.Element {
   const { experiences } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
@@ -40,6 +41,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 field="jobTitle"
                 experience={experience}
               />
+
               <FormControlLabel
                 control={
                   <Switch
@@ -58,6 +60,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 }
                 label="Show this experience"
               />
+
               <IconButton
                 onClick={() => dispatch(removeExperience(experience.id))}
               >
@@ -77,6 +80,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 experience={experience}
               />
             </Box>
+
             {/* Start and End Date in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <UpdateExperienceSection
@@ -92,6 +96,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 textFieldType="date"
               />
             </Box>
+
             <Box
               sx={{
                 display: "flex",
@@ -128,6 +133,7 @@ export function ExperienceEditorPage(): JSX.Element {
                   </IconButton>
                 </Box>
               ))}
+
               <Box>
                 <IconButton
                   onClick={() =>

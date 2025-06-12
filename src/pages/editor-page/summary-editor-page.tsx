@@ -7,6 +7,7 @@ import {
 } from "@store/cv-data/cv-data-slice";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 
+/** Shows the professional summary section in editor page */
 export function SummaryEditorPage(): JSX.Element | null {
   const { professionalSummary } = useAppSelector(cvDataSelector);
 
