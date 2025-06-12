@@ -6,6 +6,8 @@ import "react-resizable/css/styles.css";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { usePreviewPageDimension } from "@hooks/use-preview-page-dimension";
 import { usePreviewPageLayout } from "@hooks/use-preview-page-layout";
+import { useAppSelector } from "@store/store-helper";
+import { appSelector } from "@store/app/app-slice";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -14,6 +16,8 @@ interface Props {
 
 /** Have a preview page with drag and drop functionality */
 export function DragDropPreviewPage({ contentRef }: Props): JSX.Element {
+  const shouldShowGrids = useAppSelector(appSelector);
+
   const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
     usePreviewPageDimension({
       contentRef,
@@ -60,8 +64,10 @@ export function DragDropPreviewPage({ contentRef }: Props): JSX.Element {
         // onLayoutChange={onLayoutChange}
         style={{
           backgroundSize: `calc(100%/12) ${rowHeight}px`,
-          backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 
-            linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`,
+          backgroundImage: shouldShowGrids
+            ? `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 
+            linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`
+            : "none",
         }}
       >
         {layout.map((item) => (
