@@ -3,17 +3,25 @@ import { SetStateFunction, useAppDispatch } from "@store/store-helper";
 import { UnknownAction } from "@reduxjs/toolkit";
 
 interface Props<T> {
+  /** The value in the redux store */
   reduxState: T;
+
+  /** The reducer action to update the redux state */
   createAction: (value: T) => UnknownAction;
 }
 
 interface ReturnProps<T> {
+  /** The local state */
   localState: T;
+
+  /** Setter for localState */
   setLocalState: SetStateFunction<T>;
 }
 
+/** Debouncing in MM */
 const DEBOUNCE_IN_MM = 500;
 
+/** A function that adds debouncing to reducer action  */
 export function useDebounceCallback<T>({
   reduxState,
   createAction,

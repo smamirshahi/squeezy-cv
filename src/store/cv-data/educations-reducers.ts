@@ -1,7 +1,7 @@
 import { Education } from "@custom-types/education-types";
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
-import { findEducation } from "@store/cv-data/cv-data-slice-helper";
+import { findEducationById } from "@store/cv-data/cv-data-slice-helper";
 
 export const educationsReducers = {
   addEducation: (state: CvDataState) => {
@@ -30,7 +30,7 @@ export const educationsReducers = {
       value: Education[K];
     }>
   ) => {
-    const edu = findEducation(state, action.payload.educationId);
+    const edu = findEducationById(state, action.payload.educationId);
     if (edu) {
       edu[action.payload.key] = action.payload.value;
     }

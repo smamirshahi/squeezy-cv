@@ -1,7 +1,10 @@
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 import { SkillCategory, SkillItem } from "@custom-types/skill-types";
-import { findSkill, findSkillItem } from "@store/cv-data/cv-data-slice-helper";
+import {
+  findSkillById,
+  findSkillItemById,
+} from "@store/cv-data/cv-data-slice-helper";
 
 export const skillsReducers = {
   addSkillCategory: (state: CvDataState) => {
@@ -32,7 +35,7 @@ export const skillsReducers = {
       value: SkillCategory[K];
     }>
   ) => {
-    const skill = findSkill(state, action.payload.skillId);
+    const skill = findSkillById(state, action.payload.skillId);
     if (skill) {
       skill[action.payload.key] = action.payload.value;
     }
@@ -42,7 +45,7 @@ export const skillsReducers = {
     state: CvDataState,
     action: PayloadAction<{ skillId: string }>
   ) => {
-    const skill = findSkill(state, action.payload.skillId);
+    const skill = findSkillById(state, action.payload.skillId);
     skill?.items.push({
       id: nanoid(),
       name: "",
@@ -60,7 +63,7 @@ export const skillsReducers = {
     }>
   ) => {
     const { skillId, skillItemId, key, value } = action.payload;
-    const skillItem = findSkillItem(state, skillId, skillItemId);
+    const skillItem = findSkillItemById(state, skillId, skillItemId);
     if (skillItem) {
       skillItem[key] = value;
     }
@@ -71,7 +74,7 @@ export const skillsReducers = {
     action: PayloadAction<{ skillId: string; skillItemId: string }>
   ) => {
     const { skillId, skillItemId } = action.payload;
-    const skill = findSkill(state, skillId);
+    const skill = findSkillById(state, skillId);
     if (skill) {
       skill.items = skill.items.filter((item) => item.id !== skillItemId);
     }

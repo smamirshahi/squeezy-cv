@@ -3,14 +3,15 @@ import { BulletPoint, Experience } from "@custom-types/experience-types";
 import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
-export function findExperience(
+/** Find experience based on ID */
+export function findExperienceById(
   state: CvDataState,
   experienceId: string
 ): Experience | undefined {
   return state.data.experiences.find((exp) => exp.id === experienceId);
 }
 
-export function findBulletPoint(
+export function findBulletPointById(
   state: CvDataState,
   experienceId: string,
   bulletPointId: string
@@ -20,21 +21,21 @@ export function findBulletPoint(
     ?.bulletPoints.find((bp) => bp.id === bulletPointId);
 }
 
-export function findEducation(
+export function findEducationById(
   state: CvDataState,
   educationId: string
 ): Education | undefined {
   return state.data.educations.find((edu) => edu.id === educationId);
 }
 
-export function findSkill(
+export function findSkillById(
   state: CvDataState,
   skillId: string
 ): SkillCategory | undefined {
   return state.data.skills.find((skill) => skill.id === skillId);
 }
 
-export function findSkillItem(
+export function findSkillItemById(
   state: CvDataState,
   skillId: string,
   skillItemId: string

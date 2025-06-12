@@ -21,7 +21,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
     });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook
-  const { layout } = usePreviewPageLayout();
+  const layout = usePreviewPageLayout();
 
   return (
     <Paper
@@ -45,7 +45,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
     >
       <GridLayout
         className="layout"
-        layout={Object.values(layout)}
+        layout={layout}
         cols={12}
         rowHeight={rowHeight}
         // inner width in px (after subtracting the margin from left and right)
@@ -65,7 +65,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
             linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`,
         }}
       >
-        {Object.values(layout).map((item) => (
+        {layout.map((item) => (
           <Box
             key={item.i}
             sx={{
