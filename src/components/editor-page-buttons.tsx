@@ -13,8 +13,6 @@ interface Props {
    * This is used by react-to-print to know what to print.
    */
   printReference: React.RefObject<HTMLDivElement | null>;
-
-  onApplyClicked?: () => void;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -29,11 +27,8 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-/** A button group that allows the user to change the template, print, export, and import the CV data */
-export function EditorPageButtons({
-  printReference,
-  onApplyClicked,
-}: Props): JSX.Element {
+/** A button group that allows the user print, export, and import the CV data */
+export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const [fileName, setFileName] = useState<string>("");
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const { handleImport, handleExport } = useImportExportJson();
@@ -64,22 +59,15 @@ export function EditorPageButtons({
           accept=".json"
         />
       </Button>
-
-      <Button
-        variant="contained"
-        onClick={onApplyClicked}
-        sx={{ height: "40px", minWidth: "auto", px: 1 }}
-      >
-        Apply
-      </Button>
       <TextField
         value={fileName}
         onChange={(event) => setFileName(event.target.value)}
         sx={{
           height: "40px",
-          "& .MuiInputBase-root": { height: "40px", fontSize: "0.7rem" },
+          width: "180px",
+          "& .MuiInputBase-root": { height: "40px", fontSize: "1rem" },
         }}
-        inputProps={{ style: { height: "40px", padding: 0 } }}
+        inputProps={{ style: { height: "40px" } }}
       />
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}

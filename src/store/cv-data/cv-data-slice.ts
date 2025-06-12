@@ -1,24 +1,15 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import {
-  ContactInfo,
-  CVData,
-  CVFile,
-  PersonalInfo,
-  Style,
-} from "@custom-types/json-types";
-import {
-  AvailableFonts,
-  FontStyle,
-  TypographyVariant,
-} from "@store/cv-data/cv-data-slice-helper";
+import { TypographyVariant } from "@custom-styles/custom-styles";
 import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { educationsReducers } from "@store/cv-data/educations-reducers";
 import { skillsReducers } from "@store/cv-data/skills-reducers";
+import { CVData, CVJson } from "@custom-types/json-types";
+import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
+import { PersonalInfo } from "@custom-types/personal-info-types";
+import { ContactInfo } from "@custom-types/contact-info-types";
 
 /** State of the current CV */
-export type CvDataState = CVFile & {
-  typographyVariant: Record<AvailableFonts, FontStyle>;
-};
+export type CvDataState = CVJson;
 
 export const initialState: CvDataState = {
   version: "1.0",
@@ -40,12 +31,12 @@ export const initialState: CvDataState = {
     skills: [],
   },
   style: {
-    template: "one-column",
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
     dateFormat: "MMMM/YYYY",
+    typography: TypographyVariant,
+    paperMargin: "narrow",
   },
-  typographyVariant: TypographyVariant,
 };
 
 /** Slice to access state of cv data */
@@ -55,6 +46,10 @@ const cvDataSlice = createSlice({
   reducers: {
     setCvData(state, action: PayloadAction<CVData>) {
       state.data = action.payload;
+    },
+
+    setStyle(state, action: PayloadAction<Style>) {
+      state.style = action.payload;
     },
 
     updatePersonalInfo<K extends keyof PersonalInfo>(
@@ -84,20 +79,18 @@ const cvDataSlice = createSlice({
     ...educationsReducers,
     ...skillsReducers,
 
-    setTemplate(state, action: PayloadAction<Style["template"]>) {
-      state.style.template = action.payload;
-    },
-
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
     },
 
     setTypography(
       state,
-      action: PayloadAction<{ variant: AvailableFonts; fontStyle: FontStyle }>
+      action: PayloadAction<{
+        variant: AvailableFonts;
+        fontStyle: FontStyle;
+      }>
     ) {
-      state.typographyVariant[action.payload.variant] =
-        action.payload.fontStyle;
+      state.style.typography[action.payload.variant] = action.payload.fontStyle;
     },
 
     resetCvDataState: () => initialState,
@@ -106,19 +99,15 @@ const cvDataSlice = createSlice({
     versionSelector: (state: CvDataState) => state.version,
     cvDataSelector: (state: CvDataState) => state.data,
     styleSelector: (state: CvDataState) => state.style,
-    typographyVariantSelector: (state: CvDataState) => state.typographyVariant,
   },
 });
 
-export const {
-  versionSelector,
-  cvDataSelector,
-  styleSelector,
-  typographyVariantSelector,
-} = cvDataSlice.selectors;
+export const { versionSelector, cvDataSelector, styleSelector } =
+  cvDataSlice.selectors;
+
 export const {
   setCvData,
-  setTemplate,
+  setStyle,
   setDateFormat,
   updatePersonalInfo,
   updateContactInfo,

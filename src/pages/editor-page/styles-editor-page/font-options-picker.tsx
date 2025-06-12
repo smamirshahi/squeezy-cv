@@ -12,9 +12,15 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { AvailableFonts, FontStyle } from "@store/cv-data/cv-data-slice-helper";
+
+import {
+  WORD_FONT_SIZE_OPTIONS,
+  WORD_FONT_WEIGHT_OPTIONS,
+} from "@custom-styles/custom-styles";
 import { useAppDispatch } from "@store/store-helper";
 import { setTypography } from "@store/cv-data/cv-data-slice";
+import { isWordFontSize, isWordFontWeight } from "@custom-types/type-guards";
+import { AvailableFonts, FontStyle } from "@custom-types/styles-types";
 
 interface Props {
   /** The variant of the font */
@@ -23,12 +29,6 @@ interface Props {
   /** The style of the font */
   style: FontStyle;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-magic-numbers
-const WORD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20];
-
-// eslint-disable-next-line @typescript-eslint/no-magic-numbers
-const WORD_FONT_WEIGHT = [400, 700];
 
 export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
   const theme = useTheme();
@@ -60,16 +60,19 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
           id="fontSize-select"
           value={fontStyle.fontSize}
           label="Font Size"
-          onChange={(event) =>
-            setFontStyle((prev) => ({
-              ...prev,
-              fontSize: event.target.value,
-            }))
-          }
+          onChange={(event) => {
+            const newFontSize = event.target.value;
+            if (isWordFontSize(newFontSize)) {
+              setFontStyle((prev) => ({
+                ...prev,
+                fontSize: newFontSize,
+              }));
+            }
+          }}
         >
-          {WORD_FONT_SIZES.map((pt) => (
-            <MenuItem key={pt} value={`${pt}pt`}>
-              {pt} pt
+          {WORD_FONT_SIZE_OPTIONS.map((pt) => (
+            <MenuItem key={pt} value={pt}>
+              {pt}
             </MenuItem>
           ))}
         </Select>
@@ -82,14 +85,17 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
           id="fontWeight-select"
           value={fontStyle.fontWeight}
           label="Font Weight"
-          onChange={(event) =>
-            setFontStyle((prev) => ({
-              ...prev,
-              fontWeight: event.target.value as number,
-            }))
-          }
+          onChange={(event) => {
+            const newFontWeight = event.target.value;
+            if (isWordFontWeight(newFontWeight)) {
+              setFontStyle((prev) => ({
+                ...prev,
+                fontWeight: newFontWeight,
+              }));
+            }
+          }}
         >
-          {WORD_FONT_WEIGHT.map((weight) => (
+          {WORD_FONT_WEIGHT_OPTIONS.map((weight) => (
             <MenuItem key={weight} value={weight}>
               {weight}
             </MenuItem>

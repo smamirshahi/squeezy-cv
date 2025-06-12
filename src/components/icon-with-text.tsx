@@ -1,6 +1,7 @@
-import { Grid, SvgIcon } from "@mui/material";
-import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
-import { CvTypographyNew } from "@components/cv-typography";
+import { Grid } from "@mui/material";
+import { CvTypography } from "@components/cv-typography";
+import { CvIcon } from "@components/cv-icon";
+import { AvailableFonts } from "@custom-types/styles-types";
 
 interface Props {
   /** The icon to be shown */
@@ -15,7 +16,7 @@ interface Props {
 
 /** Shows an icon with a text next to it */
 export function IconWithText({
-  variant = "captionText",
+  variant = "bulletText",
   icon,
   text,
 }: Props): JSX.Element | null {
@@ -25,13 +26,8 @@ export function IconWithText({
 
   return (
     <Grid container sx={{ mr: "20px" }} direction="row">
-      <SvgIcon
-        color="primary"
-        component={icon}
-        viewBox="0 0 24 24"
-        fontSize="small"
-      />
-      <CvTypographyNew variant={variant} text={text} />
+      <CvIcon icon={icon} />
+      <CvTypography variant={variant} text={text} />
     </Grid>
   );
 }

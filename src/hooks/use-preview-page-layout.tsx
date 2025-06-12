@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Layout } from "react-grid-layout";
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
@@ -26,22 +25,15 @@ type CustomLayout = Record<
 interface ReturnProps {
   /** The layout of the preview page */
   layout: CustomLayout;
-
-  /** Function to set the layout */
-  onLayoutChange: (newLayout: Layout[]) => void;
 }
 
 export function usePreviewPageLayout(): ReturnProps {
-  function onLayoutChange(newLayout: Layout[]): void {
-    console.log("Layout changed:", newLayout);
-  }
-
-  const [layout, setLayout] = useState<CustomLayout>({
+  const layout: CustomLayout = {
     personalInfo: {
       i: "personalInfo",
       x: 0,
       y: 0,
-      w: 10,
+      w: 12,
       h: 2,
       component: <PersonalInfoPreviewPage />,
     },
@@ -49,7 +41,7 @@ export function usePreviewPageLayout(): ReturnProps {
       i: "contactInfo",
       x: 0,
       y: 2,
-      w: 10,
+      w: 12,
       h: 2,
       component: <ContactInfoPreviewPage />,
     },
@@ -57,14 +49,14 @@ export function usePreviewPageLayout(): ReturnProps {
       i: "summaryPage",
       x: 0,
       y: 4,
-      w: 10,
-      h: 5,
+      w: 12,
+      h: 4,
       component: <SummaryPreviewPage />,
     },
     experiences: {
       i: "experiences",
       x: 0,
-      y: 9,
+      y: 8,
       w: 7,
       h: 17,
       component: <ExperiencesPreviewPage />,
@@ -72,23 +64,22 @@ export function usePreviewPageLayout(): ReturnProps {
     educations: {
       i: "educations",
       x: 7,
-      y: 9,
-      w: 4,
-      h: 13,
+      y: 8,
+      w: 5,
+      h: 8,
       component: <EducationsPreviewPage />,
     },
     skills: {
       i: "skills",
       x: 7,
-      y: 22,
-      w: 4,
-      h: 4,
+      y: 19,
+      w: 5,
+      h: 6,
       component: <SkillsPreviewPage />,
     },
-  });
+  };
 
   return {
     layout,
-    onLayoutChange,
   };
 }

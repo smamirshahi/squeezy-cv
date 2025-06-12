@@ -1,5 +1,14 @@
-import { SkillItem } from "@custom-types/json-types";
-import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
+import {
+  AVAILABLE_FONT_OPTIONS,
+  WORD_FONT_SIZE_OPTIONS,
+  WORD_FONT_WEIGHT_OPTIONS,
+} from "@custom-styles/custom-styles";
+import { SkillItem } from "@custom-types/skill-types";
+import {
+  FontSize,
+  FontWeight,
+  AvailableFonts,
+} from "@custom-types/styles-types";
 
 /** Check if the rating is accepted */
 export function isRatingAcceptable(
@@ -14,16 +23,14 @@ export function isRatingAcceptable(
   );
 }
 
-export function isAvailableFont(value: unknown): value is AvailableFonts {
-  return (
-    typeof value === "string" &&
-    [
-      "headingLg",
-      "headingMd",
-      "headingSm",
-      "bodyLg",
-      "bulletText",
-      "captionText",
-    ].includes(value)
-  );
+export function isValidFont(value: string): value is AvailableFonts {
+  return AVAILABLE_FONT_OPTIONS.includes(value as AvailableFonts);
+}
+
+export function isWordFontSize(value: string): value is FontSize {
+  return WORD_FONT_SIZE_OPTIONS.includes(value as FontSize);
+}
+
+export function isWordFontWeight(value: string): value is FontWeight {
+  return WORD_FONT_WEIGHT_OPTIONS.includes(value as FontWeight);
 }

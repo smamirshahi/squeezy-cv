@@ -1,4 +1,4 @@
-import { BulletPoint, Experience } from "@custom-types/json-types";
+import { BulletPoint, Experience } from "@custom-types/experience-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import { TextField } from "@mui/material";
 import {

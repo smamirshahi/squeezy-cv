@@ -3,7 +3,7 @@ import GridLayout from "react-grid-layout";
 import { Box, Paper } from "@mui/material";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
+import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { usePreviewPageDimension } from "@hooks/use-preview-page-dimension";
 import { usePreviewPageLayout } from "@hooks/use-preview-page-layout";
 
@@ -18,11 +18,10 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
   const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
     usePreviewPageDimension({
       contentRef,
-      marginType: "narrow",
     });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook
-  const { layout, onLayoutChange } = usePreviewPageLayout();
+  const { layout } = usePreviewPageLayout();
 
   return (
     <Paper
@@ -31,8 +30,8 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
       sx={{
         // Force the container to be exactly A4 (210 mm × 297 mm),
         // with “narrow” 12.7 mm padding on all sides.
-        width: `${A4_WIDTH_MM}mm`,
-        height: `${A4_HEIGHT_MM}mm`,
+        width: `${A4_DIMENSION_MM.width}mm`,
+        height: `${A4_DIMENSION_MM.height}mm`,
         // Hide anything outside
         overflow: "hidden",
         padding: `${marginsInMM}mm`,
@@ -59,7 +58,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         preventCollision={true}
         margin={[defaultMargin, defaultMargin]}
         containerPadding={[defaultMargin, defaultMargin]}
-        onLayoutChange={onLayoutChange}
+        // onLayoutChange={onLayoutChange}
         style={{
           backgroundSize: `calc(100%/12) ${rowHeight}px`,
           backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 

@@ -1,4 +1,4 @@
-import { SkillCategory, SkillItem } from "@custom-types/json-types";
+import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import { TextField } from "@mui/material";
 import {

@@ -2,10 +2,9 @@ import { Grid } from "@mui/material";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
-import { CvTypographyNew } from "@components/cv-typography";
+import { CvTypography } from "@components/cv-typography";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element | null {
@@ -22,41 +21,49 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTypographyNew variant="headingLg" text="Work Experience" />
-      {experiences.map((experience, index) => (
-        <Grid
-          container
-          key={index}
-          direction="column"
-          alignItems="flex-start"
-          sx={{ mb: "10px" }}
-        >
-          <CvTypographyNew variant="headingMd" text={experience.jobTitle} />
-          <CvTypographyNew variant="headingSm" text={experience.company} />
-          <Grid container direction="row" alignItems="center">
-            <DatePeriod
-              datePeriod={{
-                start: experience.startDate,
-                end: experience.endDate,
-              }}
-            />
-            <IconWithText icon={LocationOnIcon} text={experience.location} />
-          </Grid>
-          {experience.bulletPoints && (
-            // <BulletPoints bulletPoints={experience.bulletPoints} />
-            <>
-              {experience.bulletPoints.map((bulletPoint) => (
+      <CvTypography variant="headingMd" text="Work Experience" />
+      {experiences.map(
+        (experience, index) =>
+          !experience.shouldHide && (
+            <Grid
+              container
+              key={index}
+              direction="column"
+              alignItems="flex-start"
+              sx={{ mb: "10px" }}
+            >
+              <CvTypography variant="headingSm" text={experience.jobTitle} />
+              <Grid container direction="row" alignItems="center">
+                <CvTypography variant="bodyMd" text={experience.company} />
                 <IconWithText
-                  variant="bulletText"
-                  key={bulletPoint.id}
-                  icon={FiberManualRecordIcon}
-                  text={bulletPoint.text}
+                  icon={LocationOnIcon}
+                  text={experience.location}
+                  variant="bodyMd"
                 />
-              ))}
-            </>
-          )}
-        </Grid>
-      ))}
+              </Grid>
+              <DatePeriod
+                datePeriod={{
+                  start: experience.startDate,
+                  end: experience.endDate,
+                }}
+              />
+
+              {experience.bulletPoints && (
+                // <BulletPoints bulletPoints={experience.bulletPoints} />
+                <ul>
+                  {experience.bulletPoints.map((bulletPoint) => (
+                    <li key={bulletPoint.id}>
+                      <CvTypography
+                        variant="bulletText"
+                        text={bulletPoint.text}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Grid>
+          )
+      )}
     </Grid>
   );
 }

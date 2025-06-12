@@ -1,7 +1,12 @@
 import { useCallback } from "react";
-import { CVFile, CVFileSchema } from "@custom-types/json-types";
+import { CVJson, CVJsonSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
+import {
+  cvDataSelector,
+  setCvData,
+  setStyle,
+  styleSelector,
+} from "@store/cv-data/cv-data-slice";
 
 interface ReturnProps {
   /**
@@ -21,6 +26,7 @@ interface ReturnProps {
 export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
   const cvData = useAppSelector(cvDataSelector);
+  const style = useAppSelector(styleSelector);
 
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,8 +39,9 @@ export function useImportExportJson(): ReturnProps {
       reader.onload = (event) => {
         try {
           const raw = JSON.parse(event.target?.result as string);
-          const parsed = CVFileSchema.check(raw);
+          const parsed = CVJsonSchema.check(raw);
           dispatch(setCvData(parsed.data));
+          dispatch(setStyle(parsed.style));
           // alert("CV imported successfully!");
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert
@@ -54,15 +61,10 @@ export function useImportExportJson(): ReturnProps {
         alert("No CV data to export.");
         return;
       }
-      const fileData: CVFile = {
+      const fileData: CVJson = {
         version: "1.0",
         data: cvData,
-        style: {
-          template: "one-column",
-          shouldShowFullContactLinks: true,
-          ratingIcon: "star",
-          dateFormat: "MMMM/YYYY",
-        },
+        style,
       };
       const blob = new Blob([JSON.stringify(fileData, null, 2)], {
         type: "application/json",
@@ -75,7 +77,7 @@ export function useImportExportJson(): ReturnProps {
       a.click();
       URL.revokeObjectURL(url);
     },
-    [cvData]
+    [cvData, style]
   );
 
   return {

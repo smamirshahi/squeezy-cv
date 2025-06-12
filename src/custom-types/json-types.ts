@@ -1,132 +1,13 @@
-import {
-  Object,
-  String,
-  Array,
-  Static,
-  Union,
-  Literal,
-  Boolean,
-} from "runtypes";
+import { Object, String, Array, Static } from "runtypes";
+import { PersonalInfoSchema } from "@custom-types/personal-info-types";
+import { ContactInfoSchema } from "@custom-types/contact-info-types";
+import { ProfessionalSummarySchema } from "@custom-types/summary-types";
+import { ExperienceSchema } from "@custom-types/experience-types";
+import { EducationSchema } from "@custom-types/education-types";
+import { SkillCategorySchema } from "@custom-types/skill-types";
+import { StyleSchema } from "@custom-types/styles-types";
 
-const PersonalInfoSchema = Object({
-  /** The name of the applicant */
-  name: String,
-
-  /** The job title of the applicant */
-  jobTitle: String,
-});
-
-const ContactInfoSchema = Object({
-  /** The email of the applicant */
-  email: String,
-
-  /** The phone number of the applicant */
-  phone: String,
-
-  /** The location of the applicant */
-  location: String,
-
-  /** The LinkedIn ID of the applicant */
-  linkedInId: String,
-
-  /** The GitHub ID profile of the applicant */
-  gitHubId: String,
-});
-
-/** The professional summary of the applicant */
-const ProfessionalSummarySchema = String;
-
-const BulletPointSchema = Object({
-  /** Specific ID for the bullet point */
-  id: String,
-
-  /** The text of the bullet point */
-  text: String,
-});
-
-const ExperienceSchema = Object({
-  /** Specific ID for the experience */
-  id: String,
-
-  /** The title of the job */
-  jobTitle: String,
-
-  /** The company of the work */
-  company: String,
-
-  /** The location of job */
-  location: String,
-
-  /** The start date of the experience */
-  startDate: String,
-
-  /** The end date of the experience. If not available, it means until now */
-  endDate: String.optional(),
-
-  /** Bullet points for each experience */
-  bulletPoints: Array(BulletPointSchema),
-});
-
-const EducationSchema = Object({
-  /** Specific ID for the education */
-  id: String,
-
-  /** The degree of education */
-  degree: String,
-
-  /** The institute of the education */
-  institute: String,
-
-  /** The location of education */
-  location: String,
-
-  /** The start date of the education */
-  startDate: String,
-
-  /** The end date of the education. If not available, it means until now */
-  endDate: String.optional(),
-
-  /** The title of the education dissertation */
-  dissertationTitle: String.optional(),
-});
-
-const SkillItemSchema = Object({
-  /** The ID of the skill item */
-  id: String,
-
-  /** The name of the skill item */
-  name: String,
-
-  /* eslint-disable @typescript-eslint/no-magic-numbers */
-  /** The number of the skill item from 0 (no skill) to 10 (excellent) */
-  rating: Union(
-    Literal(0),
-    Literal(0.5),
-    Literal(1.0),
-    Literal(1.5),
-    Literal(2.0),
-    Literal(2.5),
-    Literal(3.0),
-    Literal(3.5),
-    Literal(4.0),
-    Literal(4.5),
-    Literal(5.0)
-  ),
-});
-/* eslint-enable @typescript-eslint/no-magic-numbers */
-
-const SkillCategorySchema = Object({
-  /** The ID of the skill category */
-  id: String,
-
-  /** The name of the skill */
-  category: String,
-
-  /** The name of the skill item */
-  items: Array(SkillItemSchema),
-});
-
-const CVSchema = Object({
+const DataSchema = Object({
   /** Personal information section */
   personalInfo: PersonalInfoSchema,
 
@@ -146,43 +27,16 @@ const CVSchema = Object({
   skills: Array(SkillCategorySchema),
 });
 
-const StyleSchema = Object({
-  /** The template for the CV */
-  template: Union(Literal("one-column"), Literal("two-column")),
-
-  /** Whether to show full URL for contact or just the ID */
-  shouldShowFullContactLinks: Boolean,
-
-  /** The rating icon */
-  ratingIcon: Union(Literal("star"), Literal("circle")),
-
-  /** The date format */
-  dateFormat: Union(
-    Literal("DD/MM/YYYY"),
-    Literal("MMM/YYYY"),
-    Literal("MMMM/YYYY")
-  ),
-});
-
-export const CVFileSchema = Object({
+export const CVJsonSchema = Object({
   /** The version of the CV file. It is used to later track the changes in JSON file and read based upon version */
   version: String,
 
   /** The date of the CV file */
-  data: CVSchema,
+  data: DataSchema,
 
   /** The style of the CV file */
   style: StyleSchema,
 });
 
-export type PersonalInfo = Static<typeof PersonalInfoSchema>;
-export type ContactInfo = Static<typeof ContactInfoSchema>;
-export type ProfessionalSummary = Static<typeof ProfessionalSummarySchema>;
-export type Experience = Static<typeof ExperienceSchema>;
-export type BulletPoint = Static<typeof BulletPointSchema>;
-export type Education = Static<typeof EducationSchema>;
-export type SkillCategory = Static<typeof SkillCategorySchema>;
-export type SkillItem = Static<typeof SkillItemSchema>;
-export type Style = Static<typeof StyleSchema>;
-export type CVData = Static<typeof CVSchema>;
-export type CVFile = Static<typeof CVFileSchema>;
+export type CVData = Static<typeof DataSchema>;
+export type CVJson = Static<typeof CVJsonSchema>;

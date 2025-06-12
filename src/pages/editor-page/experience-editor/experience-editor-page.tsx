@@ -1,4 +1,10 @@
-import { Box, Button, IconButton } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  IconButton,
+  Switch,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { CVAccordion } from "@components/cv-accordion";
@@ -9,6 +15,7 @@ import {
   cvDataSelector,
   removeBulletPoint,
   removeExperience,
+  updateExperience,
 } from "@store/cv-data/cv-data-slice";
 import {
   UpdateBulletPointSection,
@@ -32,6 +39,24 @@ export function ExperienceEditorPage(): JSX.Element {
                 label="Job Title"
                 field="jobTitle"
                 experience={experience}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={experience.shouldHide}
+                    onChange={(event) =>
+                      dispatch(
+                        updateExperience({
+                          experienceId: experience.id,
+                          key: "shouldHide",
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          value: event.target.checked,
+                        })
+                      )
+                    }
+                  />
+                }
+                label="Hide this experience"
               />
               <IconButton
                 onClick={() => dispatch(removeExperience(experience.id))}

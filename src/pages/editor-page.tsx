@@ -1,6 +1,6 @@
 import { AccordionDetails, Paper } from "@mui/material";
 import { EditorPageButtons } from "@components/editor-page-buttons";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
+import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
 import { EducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page";
 import { SkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page";
@@ -20,8 +20,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     <Paper
       elevation={3}
       sx={{
-        width: `${A4_WIDTH_MM}mm`,
-        minHeight: `${A4_HEIGHT_MM}mm`,
+        width: `${A4_DIMENSION_MM.width}mm`,
+        minHeight: `${A4_DIMENSION_MM.height}mm`,
         padding: "20mm",
         boxSizing: "border-box",
         mx: "auto",

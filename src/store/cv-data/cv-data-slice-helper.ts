@@ -1,10 +1,6 @@
-import {
-  BulletPoint,
-  Education,
-  Experience,
-  SkillCategory,
-  SkillItem,
-} from "@custom-types/json-types";
+import { Education } from "@custom-types/education-types";
+import { BulletPoint, Experience } from "@custom-types/experience-types";
+import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(
@@ -47,50 +43,3 @@ export function findSkillItem(
     .find((skill) => skill.id === skillId)
     ?.items.find((item) => item.id === skillItemId);
 }
-
-export type FontStyle = {
-  fontSize: string;
-  fontWeight: number;
-  color: string;
-};
-
-export type AvailableFonts =
-  | "headingLg"
-  | "headingMd"
-  | "headingSm"
-  | "bodyLg"
-  | "bulletText"
-  | "captionText";
-
-export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
-  headingLg: {
-    fontSize: "16pt",
-    fontWeight: 700,
-    color: "#000000",
-  },
-  headingMd: {
-    fontSize: "14pt",
-    fontWeight: 700,
-    color: "#000000",
-  },
-  headingSm: {
-    fontSize: "12pt",
-    fontWeight: 400,
-    color: "#000000",
-  },
-  bodyLg: {
-    fontSize: "10pt",
-    fontWeight: 400,
-    color: "#000000",
-  },
-  bulletText: {
-    fontSize: "9pt",
-    fontWeight: 400,
-    color: "#000000",
-  },
-  captionText: {
-    fontSize: "8pt",
-    fontWeight: 400,
-    color: "#000000",
-  },
-};
