@@ -1,6 +1,6 @@
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
-import { Experience } from "@custom-types/json-types";
+import { Experience } from "@custom-types/experience-types";
 import {
   findBulletPoint,
   findExperience,

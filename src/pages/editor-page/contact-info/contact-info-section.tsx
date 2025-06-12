@@ -1,5 +1,5 @@
 import { TextFieldWithIcon } from "@components/text-field-with-icon";
-import { ContactInfo } from "@custom-types/json-types";
+import { ContactInfo } from "@custom-types/contact-info-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import {
   cvDataSelector,

@@ -6,7 +6,7 @@ import {
   WordFontSize,
   WordFontWeight,
 } from "@custom-styles/custom-styles";
-import { SkillItem } from "@custom-types/json-types";
+import { SkillItem } from "@custom-types/skill-types";
 
 /** Check if the rating is accepted */
 export function isRatingAcceptable(

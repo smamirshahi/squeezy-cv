@@ -1,12 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
-  ContactInfo,
-  CVData,
-  CVFile,
-  PersonalInfo,
-  Style,
-} from "@custom-types/json-types";
-import {
   AvailableFonts,
   TypographyVariant,
   FontStyle,
@@ -14,9 +7,13 @@ import {
 import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { educationsReducers } from "@store/cv-data/educations-reducers";
 import { skillsReducers } from "@store/cv-data/skills-reducers";
+import { CVData, CVJson } from "@custom-types/json-types";
+import { Style } from "@custom-types/styles-types";
+import { PersonalInfo } from "@custom-types/personal-info-types";
+import { ContactInfo } from "@custom-types/contact-info-types";
 
 /** State of the current CV */
-export type CvDataState = CVFile;
+export type CvDataState = CVJson;
 
 export const initialState: CvDataState = {
   version: "1.0",

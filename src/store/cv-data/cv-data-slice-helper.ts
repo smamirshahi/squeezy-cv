@@ -1,10 +1,6 @@
-import {
-  BulletPoint,
-  Education,
-  Experience,
-  SkillCategory,
-  SkillItem,
-} from "@custom-types/json-types";
+import { Education } from "@custom-types/education-types";
+import { BulletPoint, Experience } from "@custom-types/experience-types";
+import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
 export function findExperience(

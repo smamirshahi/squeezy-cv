@@ -1,4 +1,4 @@
-import { Education } from "@custom-types/json-types";
+import { Education } from "@custom-types/education-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import { TextField } from "@mui/material";
 import { updateEducation } from "@store/cv-data/cv-data-slice";

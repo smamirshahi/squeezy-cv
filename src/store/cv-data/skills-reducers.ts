@@ -1,6 +1,6 @@
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
-import { SkillCategory, SkillItem } from "@custom-types/json-types";
+import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { findSkill, findSkillItem } from "@store/cv-data/cv-data-slice-helper";
 
 export const skillsReducers = {

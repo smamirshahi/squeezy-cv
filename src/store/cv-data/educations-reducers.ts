@@ -1,6 +1,6 @@
+import { Education } from "@custom-types/education-types";
 import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
-import { Education } from "@custom-types/json-types";
 import { findEducation } from "@store/cv-data/cv-data-slice-helper";
 
 export const educationsReducers = {

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { CVFile, CVFileSchema } from "@custom-types/json-types";
+import { CVJson, CVJsonSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   cvDataSelector,
@@ -39,7 +39,7 @@ export function useImportExportJson(): ReturnProps {
       reader.onload = (event) => {
         try {
           const raw = JSON.parse(event.target?.result as string);
-          const parsed = CVFileSchema.check(raw);
+          const parsed = CVJsonSchema.check(raw);
           dispatch(setCvData(parsed.data));
           dispatch(setStyle(parsed.style));
           // alert("CV imported successfully!");
@@ -61,7 +61,7 @@ export function useImportExportJson(): ReturnProps {
         alert("No CV data to export.");
         return;
       }
-      const fileData: CVFile = {
+      const fileData: CVJson = {
         version: "1.0",
         data: cvData,
         style,
