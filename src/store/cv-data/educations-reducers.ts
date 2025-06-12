@@ -13,7 +13,7 @@ export const educationsReducers = {
       startDate: "",
       endDate: "",
       dissertationTitle: "",
-      shouldHide: false,
+      shouldShow: true,
     });
   },
 

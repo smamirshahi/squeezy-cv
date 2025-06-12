@@ -24,7 +24,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       <CvTypography variant="headingMd" text="Work Experience" />
       {experiences.map(
         (experience, index) =>
-          !experience.shouldHide && (
+          experience.shouldShow && (
             <Grid
               container
               key={index}

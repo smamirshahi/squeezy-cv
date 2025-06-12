@@ -24,7 +24,7 @@ export function EducationsPreviewPage(): JSX.Element | null {
       <CvTypography variant="headingMd" text="Education" />
       {educations.map(
         (education, index) =>
-          !education.shouldHide && (
+          education.shouldShow && (
             <Grid
               key={index}
               container

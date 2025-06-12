@@ -3,7 +3,6 @@ import { BulletPoint, Experience } from "@custom-types/experience-types";
 import { SkillCategory, SkillItem } from "@custom-types/skill-types";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 
-/** Find experience based on ID */
 export function findExperienceById(
   state: CvDataState,
   experienceId: string

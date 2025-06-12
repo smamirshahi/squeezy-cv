@@ -23,7 +23,7 @@ export const EducationSchema = Object({
   dissertationTitle: String.optional(),
 
   /** Whether to hide this specific row or now */
-  shouldHide: Boolean,
+  shouldShow: Boolean,
 });
 
 export type Education = Static<typeof EducationSchema>;

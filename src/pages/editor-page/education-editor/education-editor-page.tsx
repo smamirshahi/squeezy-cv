@@ -37,12 +37,12 @@ export function EducationEditorPage(): JSX.Element {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={education.shouldHide}
+                    checked={education.shouldShow}
                     onChange={(event) =>
                       dispatch(
                         updateEducation({
                           educationId: education.id,
-                          key: "shouldHide",
+                          key: "shouldShow",
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           value: event.target.checked,
                         })
@@ -50,7 +50,7 @@ export function EducationEditorPage(): JSX.Element {
                     }
                   />
                 }
-                label="Hide this education"
+                label="Show this education"
               />
 
               <IconButton

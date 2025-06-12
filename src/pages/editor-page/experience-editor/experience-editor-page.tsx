@@ -43,12 +43,12 @@ export function ExperienceEditorPage(): JSX.Element {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={experience.shouldHide}
+                    checked={experience.shouldShow}
                     onChange={(event) =>
                       dispatch(
                         updateExperience({
                           experienceId: experience.id,
-                          key: "shouldHide",
+                          key: "shouldShow",
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           value: event.target.checked,
                         })
@@ -56,7 +56,7 @@ export function ExperienceEditorPage(): JSX.Element {
                     }
                   />
                 }
-                label="Hide this experience"
+                label="Show this experience"
               />
               <IconButton
                 onClick={() => dispatch(removeExperience(experience.id))}
