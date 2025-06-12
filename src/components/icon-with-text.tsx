@@ -1,6 +1,7 @@
-import { Grid, SvgIcon } from "@mui/material";
+import { Grid } from "@mui/material";
 import { AvailableFonts } from "@custom-styles/custom-styles";
 import { CvTypography } from "@components/cv-typography";
+import { CvIcon } from "@components/cv-icon";
 
 interface Props {
   /** The icon to be shown */
@@ -25,12 +26,7 @@ export function IconWithText({
 
   return (
     <Grid container sx={{ mr: "20px" }} direction="row">
-      <SvgIcon
-        color="primary"
-        component={icon}
-        viewBox="0 0 24 24"
-        fontSize="small"
-      />
+      <CvIcon icon={icon} />
       <CvTypography variant={variant} text={text} />
     </Grid>
   );

@@ -47,7 +47,8 @@ export type AvailableFonts =
   | "bodyLg"
   | "bodyMd"
   | "bodySm"
-  | "bulletText";
+  | "bulletText"
+  | "icon";
 
 export const AVAILABLE_FONT_OPTIONS: AvailableFonts[] = [
   "headingLg",
@@ -57,6 +58,7 @@ export const AVAILABLE_FONT_OPTIONS: AvailableFonts[] = [
   "bodyMd",
   "bodySm",
   "bulletText",
+  "icon",
 ];
 
 export type FontStyle = {
@@ -100,5 +102,10 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
     fontSize: "9pt",
     fontWeight: "400",
     color: "#333333",
+  },
+  icon: {
+    fontSize: "20pt",
+    fontWeight: "400",
+    color: "#1976d2",
   },
 };
