@@ -113,7 +113,37 @@ const SkillItemSchema = Object({
     Literal(5.0)
   ),
 });
+
 /* eslint-enable @typescript-eslint/no-magic-numbers */
+export const FontStyleSchema = Object({
+  fontSize: Union(
+    Literal("8pt"),
+    Literal("9pt"),
+    Literal("10pt"),
+    Literal("11pt"),
+    Literal("12pt"),
+    Literal("13pt"),
+    Literal("14pt"),
+    Literal("16pt"),
+    Literal("18pt"),
+    Literal("20pt")
+  ),
+
+  fontWeight: Union(Literal("400"), Literal("700")),
+
+  color: String,
+});
+
+export const TypographyVariantSchema = Object({
+  headingLg: FontStyleSchema,
+  headingMd: FontStyleSchema,
+  headingSm: FontStyleSchema,
+  bodyLg: FontStyleSchema,
+  bodyMd: FontStyleSchema,
+  bodySm: FontStyleSchema,
+  bulletText: FontStyleSchema,
+  icon: FontStyleSchema,
+});
 
 const SkillCategorySchema = Object({
   /** The ID of the skill category */
@@ -159,6 +189,8 @@ const StyleSchema = Object({
     Literal("MMM/YYYY"),
     Literal("MMMM/YYYY")
   ),
+
+  typography: TypographyVariantSchema,
 });
 
 export const CVFileSchema = Object({
