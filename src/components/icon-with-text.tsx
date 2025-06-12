@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
-import { AvailableFonts } from "@custom-styles/custom-styles";
 import { CvTypography } from "@components/cv-typography";
 import { CvIcon } from "@components/cv-icon";
+import { AvailableFonts } from "@custom-types/styles-types";
 
 interface Props {
   /** The icon to be shown */

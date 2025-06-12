@@ -14,14 +14,13 @@ import {
 } from "@mui/material";
 
 import {
-  AvailableFonts,
-  FontStyle,
   WORD_FONT_SIZE_OPTIONS,
   WORD_FONT_WEIGHT_OPTIONS,
 } from "@custom-styles/custom-styles";
 import { useAppDispatch } from "@store/store-helper";
 import { setTypography } from "@store/cv-data/cv-data-slice";
 import { isWordFontSize, isWordFontWeight } from "@custom-types/type-guards";
+import { AvailableFonts, FontStyle } from "@custom-types/styles-types";
 
 interface Props {
   /** The variant of the font */
