@@ -1,4 +1,4 @@
-import { Object, String, Array, Static } from "runtypes";
+import { Object, String, Array, Static, Boolean } from "runtypes";
 
 export const BulletPointSchema = Object({
   /** Specific ID for the bullet point */
@@ -29,6 +29,9 @@ export const ExperienceSchema = Object({
 
   /** Bullet points for each experience */
   bulletPoints: Array(BulletPointSchema),
+
+  /** Whether to hide this specific row or now */
+  shouldHide: Boolean,
 });
 
 export type Experience = Static<typeof ExperienceSchema>;

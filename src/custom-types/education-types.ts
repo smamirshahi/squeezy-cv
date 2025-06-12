@@ -1,4 +1,4 @@
-import { Object, String, Static } from "runtypes";
+import { Object, String, Static, Boolean } from "runtypes";
 
 export const EducationSchema = Object({
   /** Specific ID for the education */
@@ -21,6 +21,9 @@ export const EducationSchema = Object({
 
   /** The title of the education dissertation */
   dissertationTitle: String.optional(),
+
+  /** Whether to hide this specific row or now */
+  shouldHide: Boolean,
 });
 
 export type Education = Static<typeof EducationSchema>;

@@ -22,38 +22,41 @@ export function EducationsPreviewPage(): JSX.Element | null {
       sx={{ mb: "20px" }}
     >
       <CvTypography variant="headingMd" text="Education" />
-      {educations.map((education, index) => (
-        <Grid
-          key={index}
-          container
-          direction="column"
-          alignItems="flex-start"
-          sx={{ mb: "10px" }}
-        >
-          <CvTypography variant="headingSm" text={education.degree} />
-          <Grid container direction="row" alignItems="center">
-            <CvTypography variant="bodyMd" text={education.institute} />
-            <IconWithText
-              icon={LocationOnIcon}
-              text={education.location}
-              variant="bodyMd"
-            />
-          </Grid>
-          <DatePeriod
-            datePeriod={{
-              start: education.startDate,
-              end: education.endDate,
-            }}
-          />
+      {educations.map(
+        (education, index) =>
+          !education.shouldHide && (
+            <Grid
+              key={index}
+              container
+              direction="column"
+              alignItems="flex-start"
+              sx={{ mb: "10px" }}
+            >
+              <CvTypography variant="headingSm" text={education.degree} />
+              <Grid container direction="row" alignItems="center">
+                <CvTypography variant="bodyMd" text={education.institute} />
+                <IconWithText
+                  icon={LocationOnIcon}
+                  text={education.location}
+                  variant="bodyMd"
+                />
+              </Grid>
+              <DatePeriod
+                datePeriod={{
+                  start: education.startDate,
+                  end: education.endDate,
+                }}
+              />
 
-          {education.dissertationTitle && (
-            <CvTypography
-              variant="bulletText"
-              text={`Dissertation Title: ${education.dissertationTitle}`}
-            />
-          )}
-        </Grid>
-      ))}
+              {education.dissertationTitle && (
+                <CvTypography
+                  variant="bulletText"
+                  text={`Dissertation Title: ${education.dissertationTitle}`}
+                />
+              )}
+            </Grid>
+          )
+      )}
     </Grid>
   );
 }

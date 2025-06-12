@@ -22,42 +22,48 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       sx={{ mb: "20px" }}
     >
       <CvTypography variant="headingMd" text="Work Experience" />
-      {experiences.map((experience, index) => (
-        <Grid
-          container
-          key={index}
-          direction="column"
-          alignItems="flex-start"
-          sx={{ mb: "10px" }}
-        >
-          <CvTypography variant="headingSm" text={experience.jobTitle} />
-          <Grid container direction="row" alignItems="center">
-            <CvTypography variant="bodyMd" text={experience.company} />
-            <IconWithText
-              icon={LocationOnIcon}
-              text={experience.location}
-              variant="bodyMd"
-            />
-          </Grid>
-          <DatePeriod
-            datePeriod={{
-              start: experience.startDate,
-              end: experience.endDate,
-            }}
-          />
+      {experiences.map(
+        (experience, index) =>
+          !experience.shouldHide && (
+            <Grid
+              container
+              key={index}
+              direction="column"
+              alignItems="flex-start"
+              sx={{ mb: "10px" }}
+            >
+              <CvTypography variant="headingSm" text={experience.jobTitle} />
+              <Grid container direction="row" alignItems="center">
+                <CvTypography variant="bodyMd" text={experience.company} />
+                <IconWithText
+                  icon={LocationOnIcon}
+                  text={experience.location}
+                  variant="bodyMd"
+                />
+              </Grid>
+              <DatePeriod
+                datePeriod={{
+                  start: experience.startDate,
+                  end: experience.endDate,
+                }}
+              />
 
-          {experience.bulletPoints && (
-            // <BulletPoints bulletPoints={experience.bulletPoints} />
-            <ul>
-              {experience.bulletPoints.map((bulletPoint) => (
-                <li key={bulletPoint.id}>
-                  <CvTypography variant="bulletText" text={bulletPoint.text} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </Grid>
-      ))}
+              {experience.bulletPoints && (
+                // <BulletPoints bulletPoints={experience.bulletPoints} />
+                <ul>
+                  {experience.bulletPoints.map((bulletPoint) => (
+                    <li key={bulletPoint.id}>
+                      <CvTypography
+                        variant="bulletText"
+                        text={bulletPoint.text}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Grid>
+          )
+      )}
     </Grid>
   );
 }

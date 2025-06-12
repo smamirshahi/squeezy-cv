@@ -1,4 +1,10 @@
-import { Box, Button, IconButton } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  IconButton,
+  Switch,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CVAccordion } from "@components/cv-accordion";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -6,6 +12,7 @@ import {
   addEducation,
   cvDataSelector,
   removeEducation,
+  updateEducation,
 } from "@store/cv-data/cv-data-slice";
 import { UpdateEducationSection } from "@pages/editor-page/education-editor/education-section";
 
@@ -27,6 +34,25 @@ export function EducationEditorPage(): JSX.Element {
                 field="degree"
                 education={education}
               />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={education.shouldHide}
+                    onChange={(event) =>
+                      dispatch(
+                        updateEducation({
+                          educationId: education.id,
+                          key: "shouldHide",
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          value: event.target.checked,
+                        })
+                      )
+                    }
+                  />
+                }
+                label="Hide this education"
+              />
+
               <IconButton
                 onClick={() => dispatch(removeEducation(education.id))}
               >
