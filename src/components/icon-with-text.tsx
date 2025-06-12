@@ -1,5 +1,5 @@
 import { Grid, SvgIcon } from "@mui/material";
-import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
+import { AvailableFonts } from "@custom-styles/custom-styles";
 import { CvTypographyNew } from "@components/cv-typography";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 
 /** Shows an icon with a text next to it */
 export function IconWithText({
-  variant = "captionText",
+  variant = "bulletText",
   icon,
   text,
 }: Props): JSX.Element | null {

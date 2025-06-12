@@ -8,9 +8,9 @@ import {
 } from "@custom-types/json-types";
 import {
   AvailableFonts,
-  FontStyle,
   TypographyVariant,
-} from "@store/cv-data/cv-data-slice-helper";
+  FontStyle,
+} from "@custom-styles/custom-styles";
 import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { educationsReducers } from "@store/cv-data/educations-reducers";
 import { skillsReducers } from "@store/cv-data/skills-reducers";
@@ -94,7 +94,10 @@ const cvDataSlice = createSlice({
 
     setTypography(
       state,
-      action: PayloadAction<{ variant: AvailableFonts; fontStyle: FontStyle }>
+      action: PayloadAction<{
+        variant: AvailableFonts;
+        fontStyle: FontStyle;
+      }>
     ) {
       state.typographyVariant[action.payload.variant] =
         action.payload.fontStyle;

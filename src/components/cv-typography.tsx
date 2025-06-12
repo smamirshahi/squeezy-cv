@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
-import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
+import { AvailableFonts } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 
 interface TypographyVariantProps {

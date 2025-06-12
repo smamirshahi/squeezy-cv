@@ -5,7 +5,7 @@ import { DateFormatSelection } from "@pages/editor-page/styles-editor-page/date-
 import { CVAccordion } from "@components/cv-accordion";
 import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import { isAvailableFont } from "@custom-types/type-guards";
+import { isValidFont } from "@custom-types/type-guards";
 
 export function StylesEditorPage(): JSX.Element {
   const typographyVariant = useAppSelector(typographyVariantSelector);
@@ -17,7 +17,7 @@ export function StylesEditorPage(): JSX.Element {
         <DateFormatSelection />
       </Stack>
       {Object.entries(typographyVariant).map(([variant, style]) => {
-        if (isAvailableFont(variant)) {
+        if (isValidFont(variant)) {
           return (
             <FontOptionsPicker key={variant} variant={variant} style={style} />
           );

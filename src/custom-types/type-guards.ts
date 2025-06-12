@@ -1,5 +1,12 @@
+import {
+  AVAILABLE_FONT_OPTIONS,
+  AvailableFonts,
+  WORD_FONT_SIZE_OPTIONS,
+  WORD_FONT_WEIGHT_OPTIONS,
+  WordFontSize,
+  WordFontWeight,
+} from "@custom-styles/custom-styles";
 import { SkillItem } from "@custom-types/json-types";
-import { AvailableFonts } from "@store/cv-data/cv-data-slice-helper";
 
 /** Check if the rating is accepted */
 export function isRatingAcceptable(
@@ -14,17 +21,14 @@ export function isRatingAcceptable(
   );
 }
 
-export function isAvailableFont(value: unknown): value is AvailableFonts {
-  return (
-    typeof value === "string" &&
-    [
-      "headingLg",
-      "headingMd",
-      "headingSm",
-      "bodyLg",
-      "bodyMd",
-      "bodySm",
-      "bulletText",
-    ].includes(value)
-  );
+export function isValidFont(value: string): value is AvailableFonts {
+  return AVAILABLE_FONT_OPTIONS.includes(value as AvailableFonts);
+}
+
+export function isWordFontSize(value: string): value is WordFontSize {
+  return WORD_FONT_SIZE_OPTIONS.includes(value as WordFontSize);
+}
+
+export function isWordFontWeight(value: string): value is WordFontWeight {
+  return WORD_FONT_WEIGHT_OPTIONS.includes(value as WordFontWeight);
 }
