@@ -11,7 +11,7 @@ interface TypographyVariantProps {
   text: string;
 }
 
-export function CvTypographyNew({
+export function CvTypography({
   variant,
   text,
 }: TypographyVariantProps): JSX.Element {

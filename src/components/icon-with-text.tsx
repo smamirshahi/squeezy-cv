@@ -1,6 +1,6 @@
 import { Grid, SvgIcon } from "@mui/material";
 import { AvailableFonts } from "@custom-styles/custom-styles";
-import { CvTypographyNew } from "@components/cv-typography";
+import { CvTypography } from "@components/cv-typography";
 
 interface Props {
   /** The icon to be shown */
@@ -31,7 +31,7 @@ export function IconWithText({
         viewBox="0 0 24 24"
         fontSize="small"
       />
-      <CvTypographyNew variant={variant} text={text} />
+      <CvTypography variant={variant} text={text} />
     </Grid>
   );
 }

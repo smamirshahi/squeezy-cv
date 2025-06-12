@@ -4,7 +4,7 @@ import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
-import { CvTypographyNew } from "@components/cv-typography";
+import { CvTypography } from "@components/cv-typography";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element | null {
@@ -21,7 +21,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTypographyNew variant="headingLg" text="Work Experience" />
+      <CvTypography variant="headingLg" text="Work Experience" />
       {experiences.map((experience, index) => (
         <Grid
           container
@@ -30,8 +30,8 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
           alignItems="flex-start"
           sx={{ mb: "10px" }}
         >
-          <CvTypographyNew variant="headingMd" text={experience.jobTitle} />
-          <CvTypographyNew variant="headingSm" text={experience.company} />
+          <CvTypography variant="headingMd" text={experience.jobTitle} />
+          <CvTypography variant="headingSm" text={experience.company} />
           <Grid container direction="row" alignItems="center">
             <DatePeriod
               datePeriod={{
@@ -46,10 +46,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
             <ul>
               {experience.bulletPoints.map((bulletPoint) => (
                 <li key={bulletPoint.id}>
-                  <CvTypographyNew
-                    variant="bulletText"
-                    text={bulletPoint.text}
-                  />
+                  <CvTypography variant="bulletText" text={bulletPoint.text} />
                 </li>
               ))}
             </ul>
