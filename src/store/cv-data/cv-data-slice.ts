@@ -40,7 +40,6 @@ export const initialState: CvDataState = {
     skills: [],
   },
   style: {
-    template: "one-column",
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
     dateFormat: "MMMM/YYYY",
@@ -84,10 +83,6 @@ const cvDataSlice = createSlice({
     ...educationsReducers,
     ...skillsReducers,
 
-    setTemplate(state, action: PayloadAction<Style["template"]>) {
-      state.style.template = action.payload;
-    },
-
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
     },
@@ -119,9 +114,9 @@ export const {
   styleSelector,
   typographyVariantSelector,
 } = cvDataSlice.selectors;
+
 export const {
   setCvData,
-  setTemplate,
   setDateFormat,
   updatePersonalInfo,
   updateContactInfo,

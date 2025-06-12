@@ -1,6 +1,4 @@
-import { Stack } from "@mui/material";
 import { FontOptionsPicker } from "@pages/editor-page/styles-editor-page/font-options-picker";
-import { TemplateEditorPage } from "@pages/editor-page/styles-editor-page/template-editor-page";
 import { DateFormatSelection } from "@pages/editor-page/styles-editor-page/date-format-selection";
 import { CVAccordion } from "@components/cv-accordion";
 import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
@@ -12,10 +10,7 @@ export function StylesEditorPage(): JSX.Element {
 
   return (
     <CVAccordion title="Styles">
-      <Stack direction="row" spacing={2}>
-        <TemplateEditorPage />
-        <DateFormatSelection />
-      </Stack>
+      <DateFormatSelection />
       {Object.entries(typographyVariant).map(([variant, style]) => {
         if (isValidFont(variant)) {
           return (

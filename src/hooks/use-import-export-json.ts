@@ -58,7 +58,6 @@ export function useImportExportJson(): ReturnProps {
         version: "1.0",
         data: cvData,
         style: {
-          template: "one-column",
           shouldShowFullContactLinks: true,
           ratingIcon: "star",
           dateFormat: "MMMM/YYYY",

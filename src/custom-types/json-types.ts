@@ -147,9 +147,6 @@ const CVSchema = Object({
 });
 
 const StyleSchema = Object({
-  /** The template for the CV */
-  template: Union(Literal("one-column"), Literal("two-column")),
-
   /** Whether to show full URL for contact or just the ID */
   shouldShowFullContactLinks: Boolean,
 

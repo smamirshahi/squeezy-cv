@@ -1,10 +1,6 @@
 import { Paper } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
-import { useAppSelector } from "@store/store-helper";
-import { styleSelector } from "@store/cv-data/cv-data-slice";
-import { useMemo } from "react";
 import { OneColumnPreviewPage } from "@pages/preview-page/one-column-preview-page";
-import { TwoColumnPreviewPage } from "@pages/preview-page/two-column-preview-page";
 
 interface Props {
   /** The reference to the content */
@@ -12,21 +8,6 @@ interface Props {
 }
 
 export function PreviewPage({ contentRef }: Props): JSX.Element | null {
-  const { template } = useAppSelector(styleSelector);
-
-  const content = useMemo(() => {
-    switch (template) {
-      case "one-column":
-        return <OneColumnPreviewPage />;
-
-      case "two-column":
-        return <TwoColumnPreviewPage />;
-
-      default:
-        return null;
-    }
-  }, [template]);
-
   return (
     <Paper
       ref={contentRef}
@@ -41,7 +22,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element | null {
         fontFamily: "Calibri, sans-serif",
       }}
     >
-      {content}
+      <OneColumnPreviewPage />
     </Paper>
   );
 }

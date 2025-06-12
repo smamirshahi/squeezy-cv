@@ -27,7 +27,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-/** A button group that allows the user to change the template, print, export, and import the CV data */
+/** A button group that allows the user print, export, and import the CV data */
 export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const [fileName, setFileName] = useState<string>("");
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
