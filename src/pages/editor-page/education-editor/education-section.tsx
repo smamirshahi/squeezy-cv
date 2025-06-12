@@ -34,7 +34,7 @@ export function UpdateEducationSection<K extends keyof Education>({
       type={textFieldType}
       label={label}
       value={localState}
-      onChange={(event) => setLocalState(event.target.value)}
+      onChange={(event) => setLocalState(event.target.value as Education[K])}
       fullWidth
       // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
       InputLabelProps={{ shrink: true }}

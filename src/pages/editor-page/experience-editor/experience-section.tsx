@@ -55,13 +55,11 @@ export function UpdateExperienceSection<
 }
 
 interface UpdateBulletPointSectionProps {
-  experience: Experience;
   bulletPoint: BulletPoint;
   bulletPointIndex: number;
 }
 
 export function UpdateBulletPointSection({
-  experience,
   bulletPoint,
   bulletPointIndex,
 }: UpdateBulletPointSectionProps): JSX.Element {
@@ -69,7 +67,6 @@ export function UpdateBulletPointSection({
     reduxState: bulletPoint.text,
     createAction: (localState) =>
       updateExperienceBulletPoint({
-        experienceId: experience.id,
         bulletPointId: bulletPoint.id,
         value: localState,
       }),

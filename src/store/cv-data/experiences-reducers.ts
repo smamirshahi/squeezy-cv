@@ -16,6 +16,7 @@ export const experiencesReducers = {
       startDate: "",
       endDate: "",
       bulletPoints: [{ id: nanoid(), text: "" }],
+      shouldHide: false,
     });
   },
 
@@ -50,13 +51,12 @@ export const experiencesReducers = {
   updateExperienceBulletPoint: (
     state: CvDataState,
     action: PayloadAction<{
-      experienceId: string;
       bulletPointId: string;
       value: string;
     }>
   ) => {
-    const { experienceId, bulletPointId, value } = action.payload;
-    const bulletPoint = findBulletPointById(state, experienceId, bulletPointId);
+    const { bulletPointId, value } = action.payload;
+    const bulletPoint = findBulletPointById(state, bulletPointId);
     if (bulletPoint) {
       bulletPoint.text = value;
     }

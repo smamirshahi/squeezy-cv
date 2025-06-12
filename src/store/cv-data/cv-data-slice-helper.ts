@@ -13,12 +13,11 @@ export function findExperienceById(
 
 export function findBulletPointById(
   state: CvDataState,
-  experienceId: string,
   bulletPointId: string
 ): BulletPoint | undefined {
   return state.data.experiences
-    .find((exp) => exp.id === experienceId)
-    ?.bulletPoints.find((bp) => bp.id === bulletPointId);
+    .flatMap((experience) => experience.bulletPoints)
+    .find((bulletPoint) => bulletPoint.id === bulletPointId);
 }
 
 export function findEducationById(
@@ -37,10 +36,9 @@ export function findSkillById(
 
 export function findSkillItemById(
   state: CvDataState,
-  skillId: string,
   skillItemId: string
 ): SkillItem | undefined {
   return state.data.skills
-    .find((skill) => skill.id === skillId)
-    ?.items.find((item) => item.id === skillItemId);
+    .flatMap((skill) => skill.items)
+    .find((item) => item.id === skillItemId);
 }

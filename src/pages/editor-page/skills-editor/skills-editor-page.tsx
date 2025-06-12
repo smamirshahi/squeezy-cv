@@ -57,7 +57,6 @@ export function SkillsEditorPage(): JSX.Element {
                   }}
                 >
                   <UpdateSkillItemNameSection
-                    skill={skill}
                     skillItem={skillItem}
                     skillItemIndex={index}
                   />
@@ -67,7 +66,6 @@ export function SkillsEditorPage(): JSX.Element {
                       if (isRatingAcceptable(newValue)) {
                         dispatch(
                           updateSkillItem({
-                            skillId: skill.id,
                             skillItemId: skillItem.id,
                             key: "rating",
                             value: newValue ?? 0,

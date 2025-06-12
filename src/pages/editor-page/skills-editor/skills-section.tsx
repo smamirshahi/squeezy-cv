@@ -34,13 +34,11 @@ export function UpdateSkillCategorySection({
 }
 
 interface UpdateSkillItemSectionProps {
-  skill: SkillCategory;
   skillItem: SkillItem;
   skillItemIndex: number;
 }
 
 export function UpdateSkillItemNameSection({
-  skill,
   skillItem,
   skillItemIndex,
 }: UpdateSkillItemSectionProps): JSX.Element {
@@ -48,7 +46,6 @@ export function UpdateSkillItemNameSection({
     reduxState: skillItem.name,
     createAction: (localState) =>
       updateSkillItem({
-        skillId: skill.id,
         skillItemId: skillItem.id,
         key: "name",
         value: localState,

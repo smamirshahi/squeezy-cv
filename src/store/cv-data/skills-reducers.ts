@@ -56,14 +56,13 @@ export const skillsReducers = {
   updateSkillItem: <K extends keyof SkillItem>(
     state: CvDataState,
     action: PayloadAction<{
-      skillId: string;
       skillItemId: string;
       key: K;
       value: SkillItem[K];
     }>
   ) => {
-    const { skillId, skillItemId, key, value } = action.payload;
-    const skillItem = findSkillItemById(state, skillId, skillItemId);
+    const { skillItemId, key, value } = action.payload;
+    const skillItem = findSkillItemById(state, skillItemId);
     if (skillItem) {
       skillItem[key] = value;
     }

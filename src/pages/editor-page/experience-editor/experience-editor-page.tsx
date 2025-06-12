@@ -110,7 +110,6 @@ export function ExperienceEditorPage(): JSX.Element {
                   }}
                 >
                   <UpdateBulletPointSection
-                    experience={experience}
                     bulletPoint={bulletPoint}
                     bulletPointIndex={index}
                   />
