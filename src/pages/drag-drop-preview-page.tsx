@@ -12,9 +12,8 @@ interface Props {
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
-/** Convert mm → px, knowing px/mm from pageDimensions */
-
-export function DragDropPage({ contentRef }: Props): JSX.Element {
+/** Have a preview page with drag and drop functionality */
+export function DragDropPreviewPage({ contentRef }: Props): JSX.Element {
   const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
     usePreviewPageDimension({
       contentRef,

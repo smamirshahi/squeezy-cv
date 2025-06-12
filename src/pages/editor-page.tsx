@@ -15,6 +15,7 @@ interface Props {
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
+/** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
   return (
     <Paper
