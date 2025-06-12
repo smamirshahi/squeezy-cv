@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   cvDataSelector,
   setCvData,
+  setStyle,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 
@@ -40,6 +41,7 @@ export function useImportExportJson(): ReturnProps {
           const raw = JSON.parse(event.target?.result as string);
           const parsed = CVFileSchema.check(raw);
           dispatch(setCvData(parsed.data));
+          dispatch(setStyle(parsed.style));
           // alert("CV imported successfully!");
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert

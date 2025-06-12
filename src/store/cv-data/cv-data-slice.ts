@@ -54,6 +54,10 @@ const cvDataSlice = createSlice({
       state.data = action.payload;
     },
 
+    setStyle(state, action: PayloadAction<Style>) {
+      state.style = action.payload;
+    },
+
     updatePersonalInfo<K extends keyof PersonalInfo>(
       state: CvDataState,
       action: PayloadAction<{
@@ -109,6 +113,7 @@ export const { versionSelector, cvDataSelector, styleSelector } =
 
 export const {
   setCvData,
+  setStyle,
   setDateFormat,
   updatePersonalInfo,
   updateContactInfo,
