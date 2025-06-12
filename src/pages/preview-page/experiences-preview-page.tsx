@@ -21,7 +21,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTypography variant="headingLg" text="Work Experience" />
+      <CvTypography variant="headingMd" text="Work Experience" />
       {experiences.map((experience, index) => (
         <Grid
           container
@@ -30,17 +30,22 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
           alignItems="flex-start"
           sx={{ mb: "10px" }}
         >
-          <CvTypography variant="headingMd" text={experience.jobTitle} />
-          <CvTypography variant="headingSm" text={experience.company} />
+          <CvTypography variant="headingSm" text={experience.jobTitle} />
           <Grid container direction="row" alignItems="center">
-            <DatePeriod
-              datePeriod={{
-                start: experience.startDate,
-                end: experience.endDate,
-              }}
+            <CvTypography variant="bodyMd" text={experience.company} />
+            <IconWithText
+              icon={LocationOnIcon}
+              text={experience.location}
+              variant="bodyMd"
             />
-            <IconWithText icon={LocationOnIcon} text={experience.location} />
           </Grid>
+          <DatePeriod
+            datePeriod={{
+              start: experience.startDate,
+              end: experience.endDate,
+            }}
+          />
+
           {experience.bulletPoints && (
             // <BulletPoints bulletPoints={experience.bulletPoints} />
             <ul>

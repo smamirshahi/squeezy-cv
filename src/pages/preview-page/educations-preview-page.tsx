@@ -21,8 +21,7 @@ export function EducationsPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTypography variant="headingLg" text="Education" />
-
+      <CvTypography variant="headingMd" text="Education" />
       {educations.map((education, index) => (
         <Grid
           key={index}
@@ -31,20 +30,25 @@ export function EducationsPreviewPage(): JSX.Element | null {
           alignItems="flex-start"
           sx={{ mb: "10px" }}
         >
-          <CvTypography variant="headingMd" text={education.degree} />
-          <CvTypography variant="headingSm" text={education.institute} />
+          <CvTypography variant="headingSm" text={education.degree} />
           <Grid container direction="row" alignItems="center">
-            <DatePeriod
-              datePeriod={{
-                start: education.startDate,
-                end: education.endDate,
-              }}
+            <CvTypography variant="bodyMd" text={education.institute} />
+            <IconWithText
+              icon={LocationOnIcon}
+              text={education.location}
+              variant="bodyMd"
             />
-            <IconWithText icon={LocationOnIcon} text={education.location} />
           </Grid>
+          <DatePeriod
+            datePeriod={{
+              start: education.startDate,
+              end: education.endDate,
+            }}
+          />
+
           {education.dissertationTitle && (
             <CvTypography
-              variant="bodyLg"
+              variant="bulletText"
               text={`Dissertation Title: ${education.dissertationTitle}`}
             />
           )}

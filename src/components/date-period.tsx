@@ -15,6 +15,7 @@ export function DatePeriod({ datePeriod }: DatePeriodProps): JSX.Element {
 
   return (
     <IconWithText
+      variant="bodySm"
       icon={CalendarMonthIcon}
       text={`${dayjs(datePeriod.start).format(dateFormat)} - ${
         datePeriod.end ? dayjs(datePeriod.end).format(dateFormat) : "Present"

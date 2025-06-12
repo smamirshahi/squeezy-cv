@@ -15,7 +15,7 @@ export function SkillsPreviewPage(): JSX.Element | null {
 
   return (
     <>
-      <CvTypography variant="headingLg" text="Skills" />
+      <CvTypography variant="headingMd" text="Skills" />
       {skills.map((skill) => (
         <React.Fragment key={skill.id}>
           <CvTypography variant="headingSm" text={skill.category} />
@@ -26,7 +26,7 @@ export function SkillsPreviewPage(): JSX.Element | null {
           >
             {skill.items.map((item) => (
               <Grid key={item.id} container direction="row" alignItems="center">
-                <CvTypography variant="bodyLg" text={item.name} />
+                <CvTypography variant="bulletText" text={item.name} />
                 <Rating value={item.rating} precision={0.5} />
               </Grid>
             ))}

@@ -18,7 +18,7 @@ export function PersonalInfoPreviewPage(): JSX.Element | null {
       sx={{ mb: "20px" }}
     >
       <CvTypography variant="headingLg" text={personalInfo.name} />
-      <CvTypography variant="headingMd" text={personalInfo.jobTitle} />
+      <CvTypography variant="bodyLg" text={personalInfo.jobTitle} />
     </Grid>
   );
 }

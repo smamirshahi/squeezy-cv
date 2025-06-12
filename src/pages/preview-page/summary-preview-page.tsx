@@ -16,8 +16,8 @@ export function SummaryPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ mb: "20px" }}
     >
-      <CvTypography variant="headingLg" text="Professional Summary" />
-      <CvTypography variant="bodyLg" text={professionalSummary} />
+      <CvTypography variant="headingMd" text="Professional Summary" />
+      <CvTypography variant="bulletText" text={professionalSummary} />
     </Grid>
   );
 }

@@ -67,7 +67,7 @@ export type FontStyle = {
 
 export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   headingLg: {
-    fontSize: "8pt",
+    fontSize: "18pt",
     fontWeight: "700",
     color: "#222222",
   },
