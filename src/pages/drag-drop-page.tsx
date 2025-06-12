@@ -22,7 +22,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
     });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook
-  const { layout, onLayoutChange } = usePreviewPageLayout();
+  const { layout } = usePreviewPageLayout();
 
   return (
     <Paper
@@ -59,7 +59,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         preventCollision={true}
         margin={[defaultMargin, defaultMargin]}
         containerPadding={[defaultMargin, defaultMargin]}
-        onLayoutChange={onLayoutChange}
+        // onLayoutChange={onLayoutChange}
         style={{
           backgroundSize: `calc(100%/12) ${rowHeight}px`,
           backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 

@@ -1,7 +1,11 @@
 import { useCallback } from "react";
 import { CVFile, CVFileSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { cvDataSelector, setCvData } from "@store/cv-data/cv-data-slice";
+import {
+  cvDataSelector,
+  setCvData,
+  styleSelector,
+} from "@store/cv-data/cv-data-slice";
 
 interface ReturnProps {
   /**
@@ -21,6 +25,7 @@ interface ReturnProps {
 export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
   const cvData = useAppSelector(cvDataSelector);
+  const style = useAppSelector(styleSelector);
 
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,11 +62,7 @@ export function useImportExportJson(): ReturnProps {
       const fileData: CVFile = {
         version: "1.0",
         data: cvData,
-        style: {
-          shouldShowFullContactLinks: true,
-          ratingIcon: "star",
-          dateFormat: "MMMM/YYYY",
-        },
+        style,
       };
       const blob = new Blob([JSON.stringify(fileData, null, 2)], {
         type: "application/json",
@@ -74,7 +75,7 @@ export function useImportExportJson(): ReturnProps {
       a.click();
       URL.revokeObjectURL(url);
     },
-    [cvData]
+    [cvData, style]
   );
 
   return {

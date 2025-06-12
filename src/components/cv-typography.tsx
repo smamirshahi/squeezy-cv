@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { AvailableFonts } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 
@@ -15,10 +15,10 @@ export function CvTypography({
   variant,
   text,
 }: TypographyVariantProps): JSX.Element {
-  const typographyVariant = useAppSelector(typographyVariantSelector);
+  const { typography } = useAppSelector(styleSelector);
 
   return (
-    <Typography sx={typographyVariant[variant]} gutterBottom>
+    <Typography sx={typography[variant]} gutterBottom>
       {text}
     </Typography>
   );

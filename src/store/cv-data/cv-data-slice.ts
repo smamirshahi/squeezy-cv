@@ -16,9 +16,7 @@ import { educationsReducers } from "@store/cv-data/educations-reducers";
 import { skillsReducers } from "@store/cv-data/skills-reducers";
 
 /** State of the current CV */
-export type CvDataState = CVFile & {
-  typographyVariant: Record<AvailableFonts, FontStyle>;
-};
+export type CvDataState = CVFile;
 
 export const initialState: CvDataState = {
   version: "1.0",
@@ -43,8 +41,8 @@ export const initialState: CvDataState = {
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
     dateFormat: "MMMM/YYYY",
+    typography: TypographyVariant,
   },
-  typographyVariant: TypographyVariant,
 };
 
 /** Slice to access state of cv data */
@@ -94,8 +92,7 @@ const cvDataSlice = createSlice({
         fontStyle: FontStyle;
       }>
     ) {
-      state.typographyVariant[action.payload.variant] =
-        action.payload.fontStyle;
+      state.style.typography[action.payload.variant] = action.payload.fontStyle;
     },
 
     resetCvDataState: () => initialState,
@@ -104,16 +101,11 @@ const cvDataSlice = createSlice({
     versionSelector: (state: CvDataState) => state.version,
     cvDataSelector: (state: CvDataState) => state.data,
     styleSelector: (state: CvDataState) => state.style,
-    typographyVariantSelector: (state: CvDataState) => state.typographyVariant,
   },
 });
 
-export const {
-  versionSelector,
-  cvDataSelector,
-  styleSelector,
-  typographyVariantSelector,
-} = cvDataSlice.selectors;
+export const { versionSelector, cvDataSelector, styleSelector } =
+  cvDataSlice.selectors;
 
 export const {
   setCvData,

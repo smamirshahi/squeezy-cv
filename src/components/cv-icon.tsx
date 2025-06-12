@@ -1,5 +1,5 @@
 import { SvgIcon } from "@mui/material";
-import { typographyVariantSelector } from "@store/cv-data/cv-data-slice";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 /** Wraps an svg icon and make the color */
 export function CvIcon({ icon }: Props): JSX.Element {
-  const typographyVariant = useAppSelector(typographyVariantSelector);
+  const { typography } = useAppSelector(styleSelector);
 
   return (
     <SvgIcon
@@ -17,7 +17,7 @@ export function CvIcon({ icon }: Props): JSX.Element {
       viewBox="0 0 24 24"
       fontSize="small"
       sx={{
-        color: typographyVariant.icon.color,
+        color: typography.icon.color,
       }}
     />
   );
