@@ -13,10 +13,6 @@ export function ContactInfoPreviewPage(): JSX.Element | null {
   const { contactInfo } = useAppSelector(cvDataSelector);
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
-  if (!contactInfo.email) {
-    return null;
-  }
-
   return (
     <Grid container direction="row" sx={{ mb: "20px" }}>
       <IconWithText

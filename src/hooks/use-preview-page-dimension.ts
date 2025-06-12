@@ -27,17 +27,17 @@ interface ReturnProps {
   /** Maximum number of rows that can fit in the A4 paper height */
   maxRows: number;
 
+  /** The inner paper width in px */
   innerWidthPx: number;
 
+  /** The margins in mm */
   marginsInMM: number;
 
+  /** The height of each row */
   rowHeight: number;
 
+  /** The default margin */
   defaultMargin: number;
-}
-
-function mmToPx(mm: number, pxPerMm: number): number {
-  return mm * pxPerMm;
 }
 
 /**
@@ -78,7 +78,7 @@ export function usePreviewPageDimension({ contentRef }: Props): ReturnProps {
 
   // 2) Figure out px/mm so we can subtract exactly 12.7 mm top/bottom
   const pxPerMm = pageDimensions.width / A4_DIMENSION_MM.width;
-  const paperPaddingPx = mmToPx(marginsInMM, pxPerMm);
+  const paperPaddingPx = marginsInMM * pxPerMm;
 
   // 3) Compute the inner area (inside the 12.7 mm padding) in px:
   const innerWidthPx = Math.max(0, pageDimensions.width - 2 * paperPaddingPx);

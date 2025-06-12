@@ -12,14 +12,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-
 import {
   WORD_FONT_SIZE_OPTIONS,
   WORD_FONT_WEIGHT_OPTIONS,
 } from "@custom-styles/custom-styles";
 import { useAppDispatch } from "@store/store-helper";
 import { setTypography } from "@store/cv-data/cv-data-slice";
-import { isWordFontSize, isWordFontWeight } from "@custom-types/type-guards";
+import { isValidFontSize, isValidFontWeight } from "@custom-types/type-guards";
 import { AvailableFonts, FontStyle } from "@custom-types/styles-types";
 
 interface Props {
@@ -30,6 +29,7 @@ interface Props {
   style: FontStyle;
 }
 
+/** Shows dropdown to select the font size, font weight and color */
 export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
   const theme = useTheme();
   const dispatch = useAppDispatch();
@@ -53,6 +53,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
       sx={{ mt: "10px" }}
     >
       <Typography>{variant}</Typography>
+
       <FormControl size="small" sx={{ minWidth: 100 }}>
         <InputLabel id="fontSize-label">Font Size</InputLabel>
         <Select
@@ -62,7 +63,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
           label="Font Size"
           onChange={(event) => {
             const newFontSize = event.target.value;
-            if (isWordFontSize(newFontSize)) {
+            if (isValidFontSize(newFontSize)) {
               setFontStyle((prev) => ({
                 ...prev,
                 fontSize: newFontSize,
@@ -87,7 +88,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
           label="Font Weight"
           onChange={(event) => {
             const newFontWeight = event.target.value;
-            if (isWordFontWeight(newFontWeight)) {
+            if (isValidFontWeight(newFontWeight)) {
               setFontStyle((prev) => ({
                 ...prev,
                 fontWeight: newFontWeight,

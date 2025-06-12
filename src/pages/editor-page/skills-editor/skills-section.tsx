@@ -7,9 +7,11 @@ import {
 } from "@store/cv-data/cv-data-slice";
 
 interface UpdateSkillSectionProps {
+  /** The skill category */
   skill: SkillCategory;
 }
 
+/** Update skill category section with debouncing */
 export function UpdateSkillCategorySection({
   skill,
 }: UpdateSkillSectionProps): JSX.Element {
@@ -34,13 +36,15 @@ export function UpdateSkillCategorySection({
 }
 
 interface UpdateSkillItemSectionProps {
-  skill: SkillCategory;
+  /** Skill item */
   skillItem: SkillItem;
+
+  /** Index of skill item */
   skillItemIndex: number;
 }
 
-export function UpdateSkillItemNameSection({
-  skill,
+/** Update skill item section with debouncing */
+export function UpdateSkillItemSection({
   skillItem,
   skillItemIndex,
 }: UpdateSkillItemSectionProps): JSX.Element {
@@ -48,7 +52,6 @@ export function UpdateSkillItemNameSection({
     reduxState: skillItem.name,
     createAction: (localState) =>
       updateSkillItem({
-        skillId: skill.id,
         skillItemId: skillItem.id,
         key: "name",
         value: localState,

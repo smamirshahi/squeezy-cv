@@ -6,6 +6,8 @@ import UploadIcon from "@mui/icons-material/Upload";
 import PrintIcon from "@mui/icons-material/Print";
 import { useState } from "react";
 import DownloadIcon from "@mui/icons-material/Download";
+import { useAppDispatch } from "@store/store-helper";
+import { setShouldShowGrids } from "@store/app/app-slice";
 
 interface Props {
   /**
@@ -30,8 +32,18 @@ const VisuallyHiddenInput = styled("input")({
 /** A button group that allows the user print, export, and import the CV data */
 export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const [fileName, setFileName] = useState<string>("");
-  const onPrintClicked = useReactToPrint({ contentRef: printReference });
   const { handleImport, handleExport } = useImportExportJson();
+  const dispatch = useAppDispatch();
+
+  const onPrintClicked = useReactToPrint({
+    contentRef: printReference,
+    onBeforePrint: async () => {
+      await dispatch(setShouldShowGrids(false));
+    },
+    onAfterPrint: async () => {
+      await dispatch(setShouldShowGrids(true));
+    },
+  });
 
   return (
     <Grid

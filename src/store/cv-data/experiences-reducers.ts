@@ -2,8 +2,8 @@ import { PayloadAction, nanoid } from "@reduxjs/toolkit";
 import { CvDataState } from "@store/cv-data/cv-data-slice";
 import { Experience } from "@custom-types/experience-types";
 import {
-  findBulletPoint,
-  findExperience,
+  findBulletPointById,
+  findExperienceById,
 } from "@store/cv-data/cv-data-slice-helper";
 
 export const experiencesReducers = {
@@ -16,6 +16,7 @@ export const experiencesReducers = {
       startDate: "",
       endDate: "",
       bulletPoints: [{ id: nanoid(), text: "" }],
+      shouldShow: true,
     });
   },
 
@@ -33,7 +34,7 @@ export const experiencesReducers = {
       value: Experience[K];
     }>
   ) => {
-    const exp = findExperience(state, action.payload.experienceId);
+    const exp = findExperienceById(state, action.payload.experienceId);
     if (exp) {
       exp[action.payload.key] = action.payload.value;
     }
@@ -43,20 +44,19 @@ export const experiencesReducers = {
     state: CvDataState,
     action: PayloadAction<{ experienceId: string }>
   ) => {
-    const exp = findExperience(state, action.payload.experienceId);
+    const exp = findExperienceById(state, action.payload.experienceId);
     exp?.bulletPoints.push({ id: nanoid(), text: "" });
   },
 
   updateExperienceBulletPoint: (
     state: CvDataState,
     action: PayloadAction<{
-      experienceId: string;
       bulletPointId: string;
       value: string;
     }>
   ) => {
-    const { experienceId, bulletPointId, value } = action.payload;
-    const bulletPoint = findBulletPoint(state, experienceId, bulletPointId);
+    const { bulletPointId, value } = action.payload;
+    const bulletPoint = findBulletPointById(state, bulletPointId);
     if (bulletPoint) {
       bulletPoint.text = value;
     }
@@ -67,7 +67,7 @@ export const experiencesReducers = {
     action: PayloadAction<{ experienceId: string; bulletPointId: string }>
   ) => {
     const { experienceId, bulletPointId } = action.payload;
-    const exp = findExperience(state, experienceId);
+    const exp = findExperienceById(state, experienceId);
     if (exp) {
       exp.bulletPoints = exp.bulletPoints.filter(
         (bp) => bp.id !== bulletPointId

@@ -16,6 +16,7 @@ import {
 } from "@store/cv-data/cv-data-slice";
 import { UpdateEducationSection } from "@pages/editor-page/education-editor/education-section";
 
+/** Shows the education in editor page */
 export function EducationEditorPage(): JSX.Element {
   const { educations } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
@@ -34,15 +35,16 @@ export function EducationEditorPage(): JSX.Element {
                 field="degree"
                 education={education}
               />
+
               <FormControlLabel
                 control={
                   <Switch
-                    checked={education.shouldHide}
+                    checked={education.shouldShow}
                     onChange={(event) =>
                       dispatch(
                         updateEducation({
                           educationId: education.id,
-                          key: "shouldHide",
+                          key: "shouldShow",
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           value: event.target.checked,
                         })
@@ -50,7 +52,7 @@ export function EducationEditorPage(): JSX.Element {
                     }
                   />
                 }
-                label="Hide this education"
+                label="Show this education"
               />
 
               <IconButton
@@ -59,6 +61,7 @@ export function EducationEditorPage(): JSX.Element {
                 <DeleteIcon />
               </IconButton>
             </Box>
+
             {/* Company and Location in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <UpdateEducationSection
@@ -72,6 +75,7 @@ export function EducationEditorPage(): JSX.Element {
                 education={education}
               />
             </Box>
+
             {/* Start and End Date in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <UpdateEducationSection

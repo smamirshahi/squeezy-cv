@@ -31,7 +31,7 @@ export const ExperienceSchema = Object({
   bulletPoints: Array(BulletPointSchema),
 
   /** Whether to hide this specific row or now */
-  shouldHide: Boolean,
+  shouldShow: Boolean,
 });
 
 export type Experience = Static<typeof ExperienceSchema>;

@@ -6,8 +6,10 @@ import {
 } from "@store/cv-data/cv-data-slice";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
 
+/** Shows the personal information section in editor page */
 export function PersonalInfoEditorPage(): JSX.Element {
   const { personalInfo } = useAppSelector(cvDataSelector);
+
   const { localState: localName, setLocalState: setLocalName } =
     useDebounceCallback({
       reduxState: personalInfo.name,

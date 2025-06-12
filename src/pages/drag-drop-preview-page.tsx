@@ -6,22 +6,25 @@ import "react-resizable/css/styles.css";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { usePreviewPageDimension } from "@hooks/use-preview-page-dimension";
 import { usePreviewPageLayout } from "@hooks/use-preview-page-layout";
+import { useAppSelector } from "@store/store-helper";
+import { appSelector } from "@store/app/app-slice";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
-/** Convert mm → px, knowing px/mm from pageDimensions */
+/** Have a preview page with drag and drop functionality */
+export function DragDropPreviewPage({ contentRef }: Props): JSX.Element {
+  const shouldShowGrids = useAppSelector(appSelector);
 
-export function DragDropPage({ contentRef }: Props): JSX.Element {
   const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
     usePreviewPageDimension({
       contentRef,
     });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook
-  const { layout } = usePreviewPageLayout();
+  const layout = usePreviewPageLayout();
 
   return (
     <Paper
@@ -45,7 +48,7 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
     >
       <GridLayout
         className="layout"
-        layout={Object.values(layout)}
+        layout={layout}
         cols={12}
         rowHeight={rowHeight}
         // inner width in px (after subtracting the margin from left and right)
@@ -61,11 +64,13 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
         // onLayoutChange={onLayoutChange}
         style={{
           backgroundSize: `calc(100%/12) ${rowHeight}px`,
-          backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 
-            linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`,
+          backgroundImage: shouldShowGrids
+            ? `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px), 
+            linear-gradient(to bottom, transparent ${rowHeight - 1}px, rgba(0,0,0,0.1) 1px)`
+            : "none",
         }}
       >
-        {Object.values(layout).map((item) => (
+        {layout.map((item) => (
           <Box
             key={item.i}
             sx={{

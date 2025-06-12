@@ -6,80 +6,60 @@ import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
 
-type Components =
-  | "personalInfo"
-  | "contactInfo"
-  | "summaryPage"
-  | "experiences"
-  | "educations"
-  | "skills";
-
-type CustomLayout = Record<
-  Components,
+/** Returns the layout of the preview page */
+export function usePreviewPageLayout(): Array<
   Layout & {
-    i: Components;
     component: React.ReactNode;
   }
->;
-
-interface ReturnProps {
-  /** The layout of the preview page */
-  layout: CustomLayout;
-}
-
-export function usePreviewPageLayout(): ReturnProps {
-  const layout: CustomLayout = {
-    personalInfo: {
+> {
+  return [
+    {
       i: "personalInfo",
+      w: 12,
+      h: 2,
       x: 0,
       y: 0,
-      w: 12,
-      h: 2,
       component: <PersonalInfoPreviewPage />,
     },
-    contactInfo: {
+    {
       i: "contactInfo",
-      x: 0,
-      y: 2,
       w: 12,
       h: 2,
+      x: 0,
+      y: 2,
       component: <ContactInfoPreviewPage />,
     },
-    summaryPage: {
+    {
       i: "summaryPage",
-      x: 0,
-      y: 4,
       w: 12,
       h: 4,
+      x: 0,
+      y: 4,
       component: <SummaryPreviewPage />,
     },
-    experiences: {
+    {
       i: "experiences",
-      x: 0,
-      y: 8,
       w: 7,
       h: 17,
+      x: 0,
+      y: 8,
       component: <ExperiencesPreviewPage />,
     },
-    educations: {
+    {
       i: "educations",
-      x: 7,
-      y: 8,
       w: 5,
       h: 8,
+      x: 7,
+      y: 8,
       component: <EducationsPreviewPage />,
     },
-    skills: {
+    {
       i: "skills",
-      x: 7,
-      y: 19,
       w: 5,
       h: 6,
+      x: 7,
+      y: 19,
       component: <SkillsPreviewPage />,
     },
-  };
-
-  return {
-    layout,
-  };
+  ];
 }

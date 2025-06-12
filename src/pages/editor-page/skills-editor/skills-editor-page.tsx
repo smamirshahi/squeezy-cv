@@ -14,9 +14,10 @@ import {
 } from "@store/cv-data/cv-data-slice";
 import {
   UpdateSkillCategorySection,
-  UpdateSkillItemNameSection,
+  UpdateSkillItemSection,
 } from "@pages/editor-page/skills-editor/skills-section";
 
+/** Shows the skill section in editor page */
 export function SkillsEditorPage(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
@@ -56,8 +57,7 @@ export function SkillsEditorPage(): JSX.Element {
                     gap: 1,
                   }}
                 >
-                  <UpdateSkillItemNameSection
-                    skill={skill}
+                  <UpdateSkillItemSection
                     skillItem={skillItem}
                     skillItemIndex={index}
                   />
@@ -67,7 +67,6 @@ export function SkillsEditorPage(): JSX.Element {
                       if (isRatingAcceptable(newValue)) {
                         dispatch(
                           updateSkillItem({
-                            skillId: skill.id,
                             skillItemId: skillItem.id,
                             key: "rating",
                             value: newValue ?? 0,

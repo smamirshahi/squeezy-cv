@@ -22,7 +22,7 @@ export function SkillsPreviewPage(): JSX.Element | null {
             {skill.items.map((item) => (
               <Grid key={item.id} container direction="row" alignItems="center">
                 <CvTypography variant="bulletText" text={item.name} />
-                <Rating value={item.rating} precision={0.5} />
+                <Rating value={item.rating} precision={0.5} readOnly />
               </Grid>
             ))}
           </Grid>

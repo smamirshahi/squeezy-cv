@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
@@ -24,7 +24,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
       <CvTypography variant="headingMd" text="Work Experience" />
       {experiences.map(
         (experience, index) =>
-          !experience.shouldHide && (
+          experience.shouldShow && (
             <Grid
               container
               key={index}
@@ -50,7 +50,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
 
               {experience.bulletPoints && (
                 // <BulletPoints bulletPoints={experience.bulletPoints} />
-                <ul>
+                <Box component="ul" sx={{ my: "0px", pl: "20px" }}>
                   {experience.bulletPoints.map((bulletPoint) => (
                     <li key={bulletPoint.id}>
                       <CvTypography
@@ -59,7 +59,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
                       />
                     </li>
                   ))}
-                </ul>
+                </Box>
               )}
             </Grid>
           )

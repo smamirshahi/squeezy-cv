@@ -8,15 +8,15 @@ interface Props {
   icon: React.ElementType;
 
   /** The variant of the typography */
-  variant?: AvailableFonts;
+  variant: AvailableFonts;
 
   /** The text to be shown */
-  text?: string;
+  text: string;
 }
 
 /** Shows an icon with a text next to it */
 export function IconWithText({
-  variant = "bulletText",
+  variant,
   icon,
   text,
 }: Props): JSX.Element | null {

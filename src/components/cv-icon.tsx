@@ -7,7 +7,7 @@ interface Props {
   icon: React.ElementType;
 }
 
-/** Wraps an svg icon and make the color */
+/** Wraps an svg icon and make the color based on the user selection */
 export function CvIcon({ icon }: Props): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
 

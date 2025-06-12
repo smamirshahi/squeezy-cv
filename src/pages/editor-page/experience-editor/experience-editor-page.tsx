@@ -22,6 +22,7 @@ import {
   UpdateExperienceSection,
 } from "@pages/editor-page/experience-editor/experience-section";
 
+/** Shows the experience in editor page */
 export function ExperienceEditorPage(): JSX.Element {
   const { experiences } = useAppSelector(cvDataSelector);
   const dispatch = useAppDispatch();
@@ -40,15 +41,16 @@ export function ExperienceEditorPage(): JSX.Element {
                 field="jobTitle"
                 experience={experience}
               />
+
               <FormControlLabel
                 control={
                   <Switch
-                    checked={experience.shouldHide}
+                    checked={experience.shouldShow}
                     onChange={(event) =>
                       dispatch(
                         updateExperience({
                           experienceId: experience.id,
-                          key: "shouldHide",
+                          key: "shouldShow",
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           value: event.target.checked,
                         })
@@ -56,8 +58,9 @@ export function ExperienceEditorPage(): JSX.Element {
                     }
                   />
                 }
-                label="Hide this experience"
+                label="Show this experience"
               />
+
               <IconButton
                 onClick={() => dispatch(removeExperience(experience.id))}
               >
@@ -77,6 +80,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 experience={experience}
               />
             </Box>
+
             {/* Start and End Date in one line */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <UpdateExperienceSection
@@ -92,6 +96,7 @@ export function ExperienceEditorPage(): JSX.Element {
                 textFieldType="date"
               />
             </Box>
+
             <Box
               sx={{
                 display: "flex",
@@ -110,7 +115,6 @@ export function ExperienceEditorPage(): JSX.Element {
                   }}
                 >
                   <UpdateBulletPointSection
-                    experience={experience}
                     bulletPoint={bulletPoint}
                     bulletPointIndex={index}
                   />
@@ -129,6 +133,7 @@ export function ExperienceEditorPage(): JSX.Element {
                   </IconButton>
                 </Box>
               ))}
+
               <Box>
                 <IconButton
                   onClick={() =>

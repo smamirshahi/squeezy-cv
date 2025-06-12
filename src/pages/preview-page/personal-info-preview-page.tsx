@@ -3,6 +3,7 @@ import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { CvTypography } from "@components/cv-typography";
 
+/** Shows the personal info in preview page */
 export function PersonalInfoPreviewPage(): JSX.Element | null {
   const { personalInfo } = useAppSelector(cvDataSelector);
 
