@@ -18,7 +18,6 @@ export function DragDropPage({ contentRef }: Props): JSX.Element {
   const { maxRows, innerWidthPx, marginsInMM, rowHeight, defaultMargin } =
     usePreviewPageDimension({
       contentRef,
-      marginType: "narrow",
     });
 
   // 5) Pull in the layout / onLayoutChange from your custom hook

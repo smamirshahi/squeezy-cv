@@ -35,6 +35,7 @@ export const initialState: CvDataState = {
     ratingIcon: "star",
     dateFormat: "MMMM/YYYY",
     typography: TypographyVariant,
+    paperMargin: "narrow",
   },
 };
 

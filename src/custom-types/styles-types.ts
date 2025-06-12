@@ -15,6 +15,8 @@ export const FontSizeSchema = Union(
 
 export const FontWeightSchema = Union(Literal("400"), Literal("700"));
 
+export const PaperMarginSchema = Union(Literal("normal"), Literal("narrow"));
+
 export const FontStyleSchema = Object({
   fontSize: FontSizeSchema,
 
@@ -61,10 +63,13 @@ export const StyleSchema = Object({
   ),
 
   typography: TypographyVariantSchema,
+
+  paperMargin: PaperMarginSchema,
 });
 
 export type FontSize = Static<typeof FontSizeSchema>;
 export type FontWeight = Static<typeof FontWeightSchema>;
 export type AvailableFonts = Static<typeof AvailableFontsSchema>;
 export type FontStyle = Static<typeof FontStyleSchema>;
+export type PaperMargin = Static<typeof PaperMarginSchema>;
 export type Style = Static<typeof StyleSchema>;

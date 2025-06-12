@@ -1,12 +1,11 @@
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 
 interface Props {
   /** The reference to the content */
   contentRef: React.RefObject<HTMLDivElement | null>;
-
-  /** The type of margin around the page */
-  marginType: "narrow" | "normal";
 }
 
 /** each grid‐row is 30px tall */
@@ -45,10 +44,9 @@ function mmToPx(mm: number, pxPerMm: number): number {
  * Get the Paper’s pixel‐dimensions (including its padding).
  *  e.g. { width: ~794, height: ~1123 } if 210×297 mm → ~794×1123 px at 96dpi.
  */
-export function usePreviewPageDimension({
-  contentRef,
-  marginType,
-}: Props): ReturnProps {
+export function usePreviewPageDimension({ contentRef }: Props): ReturnProps {
+  const { paperMargin } = useAppSelector(styleSelector);
+
   // 1) Keep track of the measured pixel width/height of the A4 paper.
   const [pageDimensions, setPageDimensions] = useState<PageDimensionProps>({
     width: 0,
@@ -56,7 +54,7 @@ export function usePreviewPageDimension({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  const marginsInMM = marginType === "normal" ? 25.4 : 12.7;
+  const marginsInMM = paperMargin === "normal" ? 25.4 : 12.7;
   // const marginsInMM = 0;
 
   // This is necessary because the A4 paper size is defined in mm, but we need pixel values for the grid layout.
