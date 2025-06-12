@@ -1,10 +1,5 @@
-/** Custom colors used inside the repo */
-export const customColors = {
-  lightBlue: "#2196f3",
-  darkBlue: "#033a91",
-  black: "#000000",
-  gray: "#666666",
+/** The dimension of A4 paper in mm */
+export const A4_DIMENSION_MM = {
+  width: 210,
+  height: 297,
 };
-
-export const A4_WIDTH_MM = 210;
-export const A4_HEIGHT_MM = 297;

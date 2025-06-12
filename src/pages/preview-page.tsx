@@ -1,5 +1,5 @@
 import { Paper } from "@mui/material";
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from "@custom-styles/custom-styles";
+import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useMemo } from "react";
@@ -32,8 +32,8 @@ export function PreviewPage({ contentRef }: Props): JSX.Element | null {
       ref={contentRef}
       elevation={3}
       sx={{
-        width: `${A4_WIDTH_MM}mm`,
-        minHeight: `${A4_HEIGHT_MM}mm`,
+        width: `${A4_DIMENSION_MM.width}mm`,
+        minHeight: `${A4_DIMENSION_MM.height}mm`,
         padding: "20mm",
         boxSizing: "border-box",
         mx: "auto",

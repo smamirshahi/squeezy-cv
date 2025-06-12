@@ -25,7 +25,7 @@ interface Props {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-const WORD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20];
+const WORD_FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20];
 
 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
 const WORD_FONT_WEIGHT = [400, 700];

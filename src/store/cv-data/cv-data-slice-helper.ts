@@ -59,38 +59,44 @@ export type AvailableFonts =
   | "headingMd"
   | "headingSm"
   | "bodyLg"
-  | "bulletText"
-  | "captionText";
+  | "bodyMd"
+  | "bodySm"
+  | "bulletText";
 
 export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   headingLg: {
-    fontSize: "16pt",
+    fontSize: "18pt",
     fontWeight: 700,
-    color: "#000000",
+    color: "#222222",
   },
   headingMd: {
-    fontSize: "14pt",
+    fontSize: "13pt",
     fontWeight: 700,
-    color: "#000000",
+    color: "#333333",
   },
   headingSm: {
-    fontSize: "12pt",
-    fontWeight: 400,
-    color: "#000000",
+    fontSize: "11pt",
+    fontWeight: 700,
+    color: "#222222",
   },
   bodyLg: {
+    fontSize: "13pt",
+    fontWeight: 400,
+    color: "#444444",
+  },
+  bodyMd: {
     fontSize: "10pt",
     fontWeight: 400,
-    color: "#000000",
+    color: "#555555",
+  },
+  bodySm: {
+    fontSize: "9pt",
+    fontWeight: 400,
+    color: "#777777",
   },
   bulletText: {
     fontSize: "9pt",
     fontWeight: 400,
-    color: "#000000",
-  },
-  captionText: {
-    fontSize: "8pt",
-    fontWeight: 400,
-    color: "#000000",
+    color: "#333333",
   },
 };

@@ -1,4 +1,4 @@
-import { A4_WIDTH_MM } from "@custom-styles/custom-styles";
+import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -79,7 +79,7 @@ export function usePreviewPageDimension({
   }, [contentRef]);
 
   // 2) Figure out px/mm so we can subtract exactly 12.7 mm top/bottom
-  const pxPerMm = pageDimensions.width / A4_WIDTH_MM;
+  const pxPerMm = pageDimensions.width / A4_DIMENSION_MM.width;
   const paperPaddingPx = mmToPx(marginsInMM, pxPerMm);
 
   // 3) Compute the inner area (inside the 12.7 mm padding) in px:

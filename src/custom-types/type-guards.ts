@@ -22,8 +22,9 @@ export function isAvailableFont(value: unknown): value is AvailableFonts {
       "headingMd",
       "headingSm",
       "bodyLg",
+      "bodyMd",
+      "bodySm",
       "bulletText",
-      "captionText",
     ].includes(value)
   );
 }
