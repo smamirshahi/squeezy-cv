@@ -62,8 +62,10 @@ export const StyleSchema = Object({
     Literal("MMMM/YYYY")
   ),
 
+  /** Displays different font names and sizes */
   typography: TypographyVariantSchema,
 
+  /** The margin inside the paper. It related to narrow and normal margin of Microsoft words */
   paperMargin: PaperMarginSchema,
 });
 

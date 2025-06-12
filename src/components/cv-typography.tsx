@@ -11,6 +11,7 @@ interface TypographyVariantProps {
   text: string;
 }
 
+/** Creates a new typography which is connected to store */
 export function CvTypography({
   variant,
   text,

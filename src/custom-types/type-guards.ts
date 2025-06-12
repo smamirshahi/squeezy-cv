@@ -23,14 +23,17 @@ export function isRatingAcceptable(
   );
 }
 
+/** Whether the font is a valid one */
 export function isValidFont(value: string): value is AvailableFonts {
   return AVAILABLE_FONT_OPTIONS.includes(value as AvailableFonts);
 }
 
-export function isWordFontSize(value: string): value is FontSize {
+/** Whether the font size is a valid one */
+export function isValidFontSize(value: string): value is FontSize {
   return WORD_FONT_SIZE_OPTIONS.includes(value as FontSize);
 }
 
-export function isWordFontWeight(value: string): value is FontWeight {
+/** Whether the font weight is a valid one */
+export function isValidFontWeight(value: string): value is FontWeight {
   return WORD_FONT_WEIGHT_OPTIONS.includes(value as FontWeight);
 }

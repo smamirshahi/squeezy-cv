@@ -1,6 +1,6 @@
-import { TextFieldWithIcon } from "@components/text-field-with-icon";
 import { ContactInfo } from "@custom-types/contact-info-types";
 import { useDebounceCallback } from "@hooks/use-debounce-callback";
+import { InputAdornment, TextField } from "@mui/material";
 import {
   cvDataSelector,
   updateContactInfo,
@@ -11,11 +11,14 @@ interface Props<K extends keyof ContactInfo> {
   /** The icon to be shown */
   icon: React.ReactNode;
 
+  /** The contact label */
   label: string;
 
+  /** The filed of contact that is going to be updated */
   field: K;
 }
 
+/** A section that shows a contact info and update it with debouncing */
 export function ContactInfoSection<K extends keyof ContactInfo>({
   icon,
   label,
@@ -29,9 +32,16 @@ export function ContactInfoSection<K extends keyof ContactInfo>({
   });
 
   return (
-    <TextFieldWithIcon
-      icon={icon}
+    <TextField
       label={label}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">{icon}</InputAdornment>
+          ),
+        },
+      }}
+      variant="outlined"
       value={localState}
       onChange={(event) => setLocalState(event.target.value)}
     />
