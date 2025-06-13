@@ -33,7 +33,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
               sx={{ mb: "10px" }}
             >
               <CvTypography variant="headingSm" text={experience.jobTitle} />
-              <Grid container direction="row" alignItems="center">
+              <Grid container direction="row" alignItems="center" gap={3}>
                 <CvTypography variant="bodyMd" text={experience.company} />
                 <IconWithText
                   icon={LocationOnIcon}

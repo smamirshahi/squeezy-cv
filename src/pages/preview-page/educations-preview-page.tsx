@@ -33,7 +33,7 @@ export function EducationsPreviewPage(): JSX.Element | null {
               sx={{ mb: "10px" }}
             >
               <CvTypography variant="headingSm" text={education.degree} />
-              <Grid container direction="row" alignItems="center">
+              <Grid container direction="row" alignItems="center" gap={3}>
                 <CvTypography variant="bodyMd" text={education.institute} />
                 <IconWithText
                   icon={LocationOnIcon}

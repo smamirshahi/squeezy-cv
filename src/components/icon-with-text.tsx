@@ -25,7 +25,13 @@ export function IconWithText({
   }
 
   return (
-    <Grid container sx={{ mr: "20px" }} direction="row">
+    <Grid
+      container
+      sx={{ mr: "20px" }}
+      direction="row"
+      alignItems="center"
+      gap={0.5}
+    >
       <CvIcon icon={icon} />
       <CvTypography variant={variant} text={text} />
     </Grid>
