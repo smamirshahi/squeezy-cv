@@ -54,8 +54,8 @@ export function SortableItem({
   }, [isOver, handlePointerMove]);
 
   const indicatorStyle: React.CSSProperties = useMemo(() => {
-    let borderTop = "2px dashed black";
-    let borderBottom = "2px dashed black";
+    let borderTop = "2px double #6bda9a";
+    let borderBottom = "2px double #6bda9a";
     if (isOver) {
       if (linePosition === "top") {
         borderTop = "2px solid blue";
@@ -83,8 +83,8 @@ export function SortableItem({
         px: "5px",
         marginBottom: "10px",
         width: "95%",
-        borderRight: "2px dashed black",
-        borderLeft: "2px dashed black",
+        borderRight: "2px double #6bda9a",
+        borderLeft: "2px double #6bda9a",
         ...indicatorStyle,
         border: shouldShowBorders ? {} : "2px dashed transparent",
       }}
