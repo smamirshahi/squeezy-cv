@@ -21,7 +21,7 @@ const appSlice = createSlice({
     resetAppState: () => initialState,
   },
   selectors: {
-    appSelector: (state: AppState) => state.shouldShowGrids,
+    appSelector: (state: AppState) => state,
   },
 });
 

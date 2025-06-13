@@ -8,6 +8,8 @@ import {
   GRID_SIZE,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { SortableItem } from "@components/drag-and-drop/sortable-item";
+import { useAppSelector } from "@store/store-helper";
+import { appSelector } from "@store/app/app-slice";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
+  const { shouldShowGrids } = useAppSelector(appSelector);
   const [order, setOrder] = useState(items.map((item) => item.id));
 
   function arrayMove<T>(array: readonly T[], from: number, to: number): T[] {
@@ -54,9 +57,10 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
         // ensures children are clipped
         position: "relative",
-        backgroundImage:
-          "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
-          "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)",
+        backgroundImage: shouldShowGrids
+          ? "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
+            "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)"
+          : "none",
         backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
         display: "flex",
         flexDirection: "column",
