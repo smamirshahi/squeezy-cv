@@ -13,15 +13,13 @@ export function PersonalInfoEditorPage(): JSX.Element {
   const { localState: localName, setLocalState: setLocalName } =
     useDebounceCallback({
       reduxState: personalInfo.name,
-      createAction: (localName) =>
-        updatePersonalInfo({ field: "name", value: localName }),
+      createAction: (value) => updatePersonalInfo({ field: "name", value }),
     });
 
   const { localState: localJobTitle, setLocalState: setLocalJobTitle } =
     useDebounceCallback({
       reduxState: personalInfo.jobTitle,
-      createAction: (localJobTitle) =>
-        updatePersonalInfo({ field: "jobTitle", value: localJobTitle }),
+      createAction: (value) => updatePersonalInfo({ field: "jobTitle", value }),
     });
 
   return (

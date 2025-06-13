@@ -27,8 +27,7 @@ export function ContactInfoSection<K extends keyof ContactInfo>({
   const { contactInfo } = useAppSelector(cvDataSelector);
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: contactInfo[field],
-    createAction: (localState) =>
-      updateContactInfo({ field, value: localState }),
+    createAction: (value) => updateContactInfo({ field, value }),
   });
 
   return (

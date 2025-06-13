@@ -17,11 +17,11 @@ export function UpdateSkillCategorySection({
 }: UpdateSkillSectionProps): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: skill.category,
-    createAction: (localState) =>
+    createAction: (value) =>
       updateSkillCategory({
         skillId: skill.id,
         key: "category",
-        value: localState,
+        value,
       }),
   });
 
@@ -50,11 +50,11 @@ export function UpdateSkillItemSection({
 }: UpdateSkillItemSectionProps): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: skillItem.name,
-    createAction: (localState) =>
+    createAction: (value) =>
       updateSkillItem({
         skillItemId: skillItem.id,
         key: "name",
-        value: localState,
+        value,
       }),
   });
 

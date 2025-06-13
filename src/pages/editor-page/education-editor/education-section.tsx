@@ -26,11 +26,11 @@ export function UpdateEducationSection<K extends keyof Education>({
 }: UpdateEducationSectionProps<K>): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: education[field],
-    createAction: (localState) =>
+    createAction: (value) =>
       updateEducation({
         educationId: education.id,
         key: field,
-        value: localState,
+        value,
       }),
   });
 

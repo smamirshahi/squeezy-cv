@@ -9,7 +9,9 @@ import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-i
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
-import { useState } from "react";
+import { useDebounceCallback } from "@hooks/use-debounce-callback";
+import { useAppSelector } from "@store/store-helper";
+import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
 
 interface Props {
   /** The reference to the content */
@@ -18,8 +20,19 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const [title, setTitle] = useState<string>("");
-  const [jobUrl, setJobUrl] = useState<string>("");
+  const metaData = useAppSelector(metaDataSelector);
+
+  const { localState: localJobTitle, setLocalState: setLocalJobTitle } =
+    useDebounceCallback({
+      reduxState: metaData.title,
+      createAction: (value) => setMetaData({ field: "title", value }),
+    });
+
+  const { localState: localJobUrl, setLocalState: setLocalJobUrl } =
+    useDebounceCallback({
+      reduxState: metaData.jobUrl,
+      createAction: (value) => setMetaData({ field: "jobUrl", value }),
+    });
 
   return (
     <Paper
@@ -37,8 +50,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageButtons printReference={contentRef} />
       <TextField
         fullWidth
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
+        value={localJobTitle}
+        onChange={(event) => setLocalJobTitle(event.target.value)}
         sx={{
           mb: "10px",
         }}
@@ -46,8 +59,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       />
       <TextField
         fullWidth
-        value={jobUrl}
-        onChange={(event) => setJobUrl(event.target.value)}
+        value={localJobUrl}
+        onChange={(event) => setLocalJobUrl(event.target.value)}
         sx={{
           mb: "10px",
         }}

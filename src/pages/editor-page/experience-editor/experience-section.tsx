@@ -39,11 +39,11 @@ export function UpdateExperienceSection<
 }: UpdateExperienceSectionProps<K>): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: experience[field],
-    createAction: (localState) =>
+    createAction: (value) =>
       updateExperience({
         experienceId: experience.id,
         key: field,
-        value: localState,
+        value,
       }),
   });
 
@@ -75,10 +75,10 @@ export function UpdateBulletPointSection({
 }: UpdateBulletPointSectionProps): JSX.Element {
   const { localState, setLocalState } = useDebounceCallback({
     reduxState: bulletPoint.text,
-    createAction: (localState) =>
+    createAction: (value) =>
       updateExperienceBulletPoint({
         bulletPointId: bulletPoint.id,
-        value: localState,
+        value,
       }),
   });
 
