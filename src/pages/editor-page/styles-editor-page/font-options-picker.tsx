@@ -52,7 +52,7 @@ export function FontOptionsPicker({ variant, style }: Props): JSX.Element {
       spacing={2}
       sx={{ mt: "10px" }}
     >
-      <Typography>{variant}</Typography>
+      <Typography sx={{ width: "100px" }}>{variant}</Typography>
 
       <FormControl size="small" sx={{ minWidth: 100 }}>
         <InputLabel id="fontSize-label">Font Size</InputLabel>

@@ -83,6 +83,10 @@ const cvDataSlice = createSlice({
       state.style.dateFormat = action.payload;
     },
 
+    setPaperMargin(state, action: PayloadAction<Style["paperMargin"]>) {
+      state.style.paperMargin = action.payload;
+    },
+
     setTypography(
       state,
       action: PayloadAction<{
@@ -127,6 +131,7 @@ export const {
   addSkillItem,
   removeSkillItem,
   updateSkillItem,
+  setPaperMargin,
   setTypography,
   resetCvDataState,
 } = cvDataSlice.actions;

@@ -15,7 +15,7 @@ export function SummaryPreviewPage(): JSX.Element | null {
       container
       direction="column"
       alignItems="flex-start"
-      sx={{ mb: "20px" }}
+      sx={{ m: "0px", p: "0px" }}
     >
       <CvTypography variant="headingMd" text="Professional Summary" />
       <CvTypography variant="bulletText" text={professionalSummary} />

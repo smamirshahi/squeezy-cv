@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { useRef } from "react";
 import { EditorPage } from "@pages/editor-page";
-import { DragDropPreviewPage } from "@pages/drag-drop-preview-page";
+import { DnDKitWrapper } from "@components/drag-and-drop/dnd-kit-wrapper";
 
 export function App(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -20,7 +20,8 @@ export function App(): JSX.Element {
       }}
     >
       <EditorPage contentRef={contentRef} />
-      <DragDropPreviewPage contentRef={contentRef} />
+      {/* <DragDropPreviewPage contentRef={contentRef} /> */}
+      <DnDKitWrapper contentRef={contentRef} />
     </Box>
   );
 }
