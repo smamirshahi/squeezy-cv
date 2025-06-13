@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
-  const { isPrinting } = useAppSelector(appSelector);
+  const { shouldShowGrids } = useAppSelector(appSelector);
   const items = useItems();
   const [order, setOrder] = useState(items.map((item) => item.id));
 
@@ -58,10 +58,10 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
         fontFamily: "Calibri, sans-serif",
         // ensures children are clipped
         position: "relative",
-        backgroundImage: isPrinting
-          ? "none"
-          : "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
-            "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)",
+        backgroundImage: shouldShowGrids
+          ? "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
+            "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)"
+          : "none",
         backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
         display: "flex",
         flexDirection: "column",
@@ -78,7 +78,7 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
             return;
           }
           return (
-            <SortableItem key={id} id={id} isPrinting={isPrinting}>
+            <SortableItem key={id} id={id}>
               {item.element}
             </SortableItem>
           );

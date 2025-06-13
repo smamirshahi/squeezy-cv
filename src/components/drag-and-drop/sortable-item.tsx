@@ -1,6 +1,8 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Box } from "@mui/material";
+import { appSelector } from "@store/app/app-slice";
+import { useAppSelector } from "@store/store-helper";
 import {
   PropsWithChildren,
   useCallback,
@@ -13,17 +15,14 @@ import {
 interface Props {
   /** Unique identifier */
   id: string;
-
-  /** Whether it is printing or not */
-  isPrinting: boolean;
 }
 
 /** Wraps children with draggable and droppable behavior so that items can be reordered within a list. */
 export function SortableItem({
   id,
-  isPrinting,
   children,
 }: PropsWithChildren<Props>): JSX.Element {
+  const { shouldShowBorders } = useAppSelector(appSelector);
   const {
     setNodeRef: setDraggableRef,
     listeners,
@@ -87,7 +86,7 @@ export function SortableItem({
         borderRight: "2px dashed black",
         borderLeft: "2px dashed black",
         ...indicatorStyle,
-        border: isPrinting ? "none" : {},
+        border: shouldShowBorders ? {} : "2px dashed transparent",
       }}
       {...listeners}
       {...attributes}

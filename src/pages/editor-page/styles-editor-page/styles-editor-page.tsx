@@ -3,16 +3,56 @@ import { CVAccordion } from "@components/cv-accordion";
 import { setDateFormat, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { isValidFont } from "@custom-types/type-guards";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+} from "@mui/material";
 import { Style } from "@custom-types/styles-types";
+import {
+  appSelector,
+  setShouldShowBorders,
+  setShouldShowGrids,
+} from "@store/app/app-slice";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
   const { typography, dateFormat } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
+  const app = useAppSelector(appSelector);
 
   return (
     <CVAccordion title="Styles">
+      <FormControl component="fieldset" variant="standard">
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={app.shouldShowGrids}
+                onChange={(event) =>
+                  dispatch(setShouldShowGrids(event.target.checked))
+                }
+              />
+            }
+            label="Should show Grids"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={app.shouldShowBorders}
+                onChange={(event) =>
+                  dispatch(setShouldShowBorders(event.target.checked))
+                }
+              />
+            }
+            label="Should show borders"
+          />
+        </FormGroup>
+      </FormControl>
       <FormControl fullWidth>
         <InputLabel id="date-format-label">Date Format</InputLabel>
         <Select

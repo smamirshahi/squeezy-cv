@@ -2,15 +2,16 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
 interface AppState {
+  /** Whether to show grids on preview page */
   shouldShowGrids: boolean;
 
-  isPrinting: boolean;
+  /** Whether to show borders around components in preview page */
+  shouldShowBorders: boolean;
 }
 
 export const initialState: AppState = {
   shouldShowGrids: true,
-
-  isPrinting: false,
+  shouldShowBorders: true,
 };
 
 /** Slice to access state of app */
@@ -19,7 +20,12 @@ const appSlice = createSlice({
   initialState,
   reducers: {
     setIsPrinting(state, action: PayloadAction<boolean>) {
-      state.isPrinting = action.payload;
+      state.shouldShowGrids = !action.payload;
+      state.shouldShowBorders = !action.payload;
+    },
+
+    setShouldShowBorders(state, action: PayloadAction<boolean>) {
+      state.shouldShowBorders = action.payload;
     },
 
     setShouldShowGrids(state, action: PayloadAction<boolean>) {
@@ -35,7 +41,11 @@ const appSlice = createSlice({
 
 export const { appSelector } = appSlice.selectors;
 
-export const { setIsPrinting, setShouldShowGrids, resetAppState } =
-  appSlice.actions;
+export const {
+  setIsPrinting,
+  setShouldShowGrids,
+  setShouldShowBorders,
+  resetAppState,
+} = appSlice.actions;
 
 export const appReducer = appSlice.reducer;
