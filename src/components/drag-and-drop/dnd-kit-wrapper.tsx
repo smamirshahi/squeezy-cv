@@ -58,6 +58,9 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
           "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
           "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)",
         backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
       <DndContext

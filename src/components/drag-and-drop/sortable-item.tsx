@@ -1,5 +1,6 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { Box } from "@mui/material";
 import {
   PropsWithChildren,
   useCallback,
@@ -65,27 +66,28 @@ export function SortableItem({
     };
   }, [isOver, linePosition]);
 
-  const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
-    backgroundColor: "transparent",
-    padding: "5px",
-    marginBottom: "20px",
-    width: "100%",
-    ...indicatorStyle,
-  };
-
   return (
-    <div
-      ref={(node) => {
+    <Box
+      component="div"
+      ref={(node: HTMLDivElement | null) => {
         setDraggableRef(node);
         setDroppableRef(node);
         localRef.current = node;
       }}
-      style={style}
+      sx={{
+        transform: CSS.Translate.toString(transform),
+        backgroundColor: "transparent",
+        px: "5px",
+        marginBottom: "10px",
+        width: "95%",
+        borderRight: "2px dashed black",
+        borderLeft: "2px dashed black",
+        ...indicatorStyle,
+      }}
       {...listeners}
       {...attributes}
     >
       {children}
-    </div>
+    </Box>
   );
 }
