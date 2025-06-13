@@ -27,6 +27,20 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
   );
   const [positions, setPositions] = useState(initialPositions);
 
+  function handleDragEnd(event: DragEndEvent): void {
+    const { active, delta } = event;
+
+    setPositions((prev) => {
+      const newX = prev[active.id].x + delta.x;
+      const newY = prev[active.id].y + delta.y;
+
+      return {
+        ...prev,
+        [active.id]: { x: snapToGrid(newX), y: snapToGrid(newY) },
+      };
+    });
+  }
+
   return (
     <Paper
       ref={contentRef}
@@ -75,18 +89,4 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
       </DndContext>
     </Paper>
   );
-
-  function handleDragEnd(event: DragEndEvent): void {
-    const { active, delta } = event;
-
-    setPositions((prev) => {
-      const newX = prev[active.id].x + delta.x;
-      const newY = prev[active.id].y + delta.y;
-
-      return {
-        ...prev,
-        [active.id]: { x: snapToGrid(newX), y: snapToGrid(newY) },
-      };
-    });
-  }
 }
