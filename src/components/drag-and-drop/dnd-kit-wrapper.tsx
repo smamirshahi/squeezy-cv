@@ -4,8 +4,8 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Paper } from "@mui/material";
 import {
-  items,
   GRID_SIZE,
+  useItems,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { SortableItem } from "@components/drag-and-drop/sortable-item";
 import { useAppSelector } from "@store/store-helper";
@@ -18,6 +18,7 @@ interface Props {
 
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
+  const items = useItems();
   const [order, setOrder] = useState(items.map((item) => item.id));
 
   function arrayMove<T>(array: readonly T[], from: number, to: number): T[] {
