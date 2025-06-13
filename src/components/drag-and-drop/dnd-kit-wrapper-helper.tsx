@@ -14,42 +14,49 @@ interface PreviewDnDComponents {
   id: string;
   element: React.ReactElement | null;
   position: { x: number; y: number };
+  column: "left" | "right";
 }
 
 export function useItems(): PreviewDnDComponents[] {
   const cvData = useAppSelector(cvDataSelector);
 
-  const items = useMemo(() => {
+  const items: PreviewDnDComponents[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
         element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
+        column: "left",
       },
       {
         id: "contactInfo",
         element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
+        column: "right",
       },
       {
         id: "summary",
         element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
+        column: "left",
       },
       {
         id: "experiences",
         element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
+        column: "left",
       },
       {
         id: "educations",
         element: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
+        column: "left",
       },
       {
         id: "skills",
         element: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
+        column: "right",
       },
     ];
   }, [cvData]);
