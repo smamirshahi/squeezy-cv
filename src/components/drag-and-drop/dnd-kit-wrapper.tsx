@@ -69,8 +69,10 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
           <Draggable
             key={item.id}
             id={item.id}
-            style={{
+            userStyle={{
               position: "absolute",
+              backgroundColor: "transparent",
+              border: "2px dashed black",
               left: positions[item.id].x,
               top: positions[item.id].y,
             }}

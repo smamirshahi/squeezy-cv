@@ -5,14 +5,14 @@ interface Props {
   /** Unique ID */
   id: string;
   /** Optional style to apply to the draggable element */
-  style?: React.CSSProperties;
+  userStyle?: React.CSSProperties;
 }
 
 /** Adds the draggable functionality */
 export function Draggable({
   id,
   children,
-  style: userStyle,
+  userStyle,
 }: PropsWithChildren<Props>): JSX.Element {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
