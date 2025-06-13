@@ -13,11 +13,15 @@ import {
 interface Props {
   /** Unique identifier */
   id: string;
+
+  /** Whether it is printing or not */
+  isPrinting: boolean;
 }
 
 /** Wraps children with draggable and droppable behavior so that items can be reordered within a list. */
 export function SortableItem({
   id,
+  isPrinting,
   children,
 }: PropsWithChildren<Props>): JSX.Element {
   const {
@@ -83,6 +87,7 @@ export function SortableItem({
         borderRight: "2px dashed black",
         borderLeft: "2px dashed black",
         ...indicatorStyle,
+        border: isPrinting ? "none" : {},
       }}
       {...listeners}
       {...attributes}

@@ -7,7 +7,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import { useState } from "react";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useAppDispatch } from "@store/store-helper";
-import { setShouldShowGrids } from "@store/app/app-slice";
+import { setIsPrinting } from "@store/app/app-slice";
 
 interface Props {
   /**
@@ -38,10 +38,10 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const onPrintClicked = useReactToPrint({
     contentRef: printReference,
     onBeforePrint: async () => {
-      await dispatch(setShouldShowGrids(false));
+      await dispatch(setIsPrinting(true));
     },
     onAfterPrint: async () => {
-      await dispatch(setShouldShowGrids(true));
+      await dispatch(setIsPrinting(false));
     },
   });
 
