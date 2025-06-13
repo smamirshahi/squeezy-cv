@@ -50,7 +50,7 @@ export function useItems(): PreviewDnDComponents[] {
         id: "educations",
         element: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        column: "left",
+        column: "right",
       },
       {
         id: "skills",
