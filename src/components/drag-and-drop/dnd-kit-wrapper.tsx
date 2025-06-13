@@ -74,6 +74,9 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
       >
         {order.map((id) => {
           const item = items.find((i) => i.id === id)!;
+          if (item.element === null) {
+            return;
+          }
           return (
             <SortableItem key={id} id={id}>
               {item.element}

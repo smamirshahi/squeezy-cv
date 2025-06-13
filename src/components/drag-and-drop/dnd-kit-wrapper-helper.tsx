@@ -4,51 +4,55 @@ import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
+import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
 import React, { useMemo } from "react";
 
 export const GRID_SIZE = 20;
 
 interface PreviewDnDComponents {
   id: string;
-  element: React.ReactElement;
+  element: React.ReactElement | null;
   position: { x: number; y: number };
 }
 
 export function useItems(): PreviewDnDComponents[] {
+  const cvData = useAppSelector(cvDataSelector);
+
   const items = useMemo(() => {
     return [
       {
         id: "personalInfo",
-        element: <PersonalInfoPreviewPage />,
+        element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
       },
       {
         id: "contactInfo",
-        element: <ContactInfoPreviewPage />,
+        element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
       },
       {
         id: "summary",
-        element: <SummaryPreviewPage />,
+        element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
       },
       {
         id: "experiences",
-        element: <ExperiencesPreviewPage />,
+        element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
       },
       {
         id: "educations",
-        element: <EducationsPreviewPage />,
+        element: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
       },
       {
         id: "skills",
-        element: <SkillsPreviewPage />,
+        element: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
       },
     ];
-  }, []);
+  }, [cvData]);
 
   return items;
 }
