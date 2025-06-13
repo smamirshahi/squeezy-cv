@@ -20,7 +20,6 @@ export function App(): JSX.Element {
       }}
     >
       <EditorPage contentRef={contentRef} />
-      {/* <DragDropPreviewPage contentRef={contentRef} /> */}
       <DnDKitWrapper contentRef={contentRef} />
     </Box>
   );
