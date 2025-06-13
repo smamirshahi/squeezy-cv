@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
-import { Draggable } from "@components/drag-and-drop/draggable";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Paper } from "@mui/material";
 import {
   items,
   GRID_SIZE,
-  snapToGrid,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
+import { SortableItem } from "@components/drag-and-drop/sortable-item";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -16,29 +15,26 @@ interface Props {
 }
 
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
-  const initialPositions = items.reduce<
-    Record<string, { x: number; y: number }>
-  >(
-    (acc, item) => ({
-      ...acc,
-      [item.id]: item.position,
-    }),
-    {}
-  );
-  const [positions, setPositions] = useState(initialPositions);
+  const [order, setOrder] = useState(items.map((item) => item.id));
+
+  function arrayMove<T>(array: readonly T[], from: number, to: number): T[] {
+    const newArray = array.slice();
+    const [moved] = newArray.splice(from, 1);
+    newArray.splice(to, 0, moved);
+    return newArray;
+  }
 
   function handleDragEnd(event: DragEndEvent): void {
-    const { active, delta } = event;
+    const { active, over } = event;
 
-    setPositions((prev) => {
-      const newX = prev[active.id].x + delta.x;
-      const newY = prev[active.id].y + delta.y;
+    if (over && active.id !== over.id) {
+      setOrder((prev) => {
+        const oldIndex = prev.indexOf(active.id as string);
+        const newIndex = prev.indexOf(over.id as string);
 
-      return {
-        ...prev,
-        [active.id]: { x: snapToGrid(newX), y: snapToGrid(newY) },
-      };
-    });
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    }
   }
 
   return (
@@ -68,24 +64,14 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
         modifiers={[restrictToParentElement]}
         onDragEnd={handleDragEnd}
       >
-        {items.map((item) => (
-          <Draggable
-            key={item.id}
-            id={item.id}
-            userStyle={{
-              position: "absolute",
-              backgroundColor: "transparent",
-              border: "2px dashed black",
-              left: positions[item.id].x,
-              top: positions[item.id].y,
-              padding: "5px",
-              margin: "0px",
-              width: "100%",
-            }}
-          >
-            {item.element}
-          </Draggable>
-        ))}
+        {order.map((id) => {
+          const item = items.find((i) => i.id === id)!;
+          return (
+            <SortableItem key={id} id={id}>
+              {item.element}
+            </SortableItem>
+          );
+        })}
       </DndContext>
     </Paper>
   );
