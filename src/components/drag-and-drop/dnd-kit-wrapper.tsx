@@ -2,16 +2,13 @@ import { useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { Draggable } from "@components/drag-and-drop/draggable";
-import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
-import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Paper } from "@mui/material";
-import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
-import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
-import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
-import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
-
-const GRID_SIZE = 20;
+import {
+  items,
+  GRID_SIZE,
+  snapToGrid,
+} from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -19,20 +16,12 @@ interface Props {
 }
 
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
-  const items = [
-    { id: "personalInfo", element: <PersonalInfoPreviewPage /> },
-    { id: "contactInfo", element: <ContactInfoPreviewPage /> },
-    { id: "summary", element: <SummaryPreviewPage /> },
-    { id: "experiences", element: <ExperiencesPreviewPage /> },
-    { id: "educations", element: <EducationsPreviewPage /> },
-    { id: "skills", element: <SkillsPreviewPage /> },
-  ] as const;
   const initialPositions = items.reduce<
     Record<string, { x: number; y: number }>
   >(
-    (acc, item, index) => ({
+    (acc, item) => ({
       ...acc,
-      [item.id]: { x: index * GRID_SIZE, y: 0 },
+      [item.id]: item.position,
     }),
     {}
   );
@@ -75,6 +64,9 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
               border: "2px dashed black",
               left: positions[item.id].x,
               top: positions[item.id].y,
+              padding: "5px",
+              margin: "0px",
+              width: "100%",
             }}
           >
             {item.element}
@@ -90,10 +82,10 @@ export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
     setPositions((prev) => {
       const newX = prev[active.id].x + delta.x;
       const newY = prev[active.id].y + delta.y;
-      const snap = (n: number) => Math.round(n / GRID_SIZE) * GRID_SIZE;
+
       return {
         ...prev,
-        [active.id]: { x: snap(newX), y: snap(newY) },
+        [active.id]: { x: snapToGrid(newX), y: snapToGrid(newY) },
       };
     });
   }

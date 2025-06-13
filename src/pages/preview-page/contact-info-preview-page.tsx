@@ -14,7 +14,7 @@ export function ContactInfoPreviewPage(): JSX.Element | null {
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
-    <Grid container direction="row" sx={{ mb: "20px" }}>
+    <Grid container direction="row">
       <IconWithText
         variant="bulletText"
         icon={AlternateEmailIcon}

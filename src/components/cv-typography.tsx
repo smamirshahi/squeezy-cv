@@ -19,7 +19,10 @@ export function CvTypography({
   const { typography } = useAppSelector(styleSelector);
 
   return (
-    <Typography sx={typography[variant]} gutterBottom>
+    <Typography
+      sx={{ ...typography[variant], p: "0px", m: "0px" }}
+      gutterBottom
+    >
       {text}
     </Typography>
   );
