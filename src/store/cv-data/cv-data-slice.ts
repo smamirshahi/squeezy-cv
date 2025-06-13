@@ -3,7 +3,7 @@ import { TypographyVariant } from "@custom-styles/custom-styles";
 import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { educationsReducers } from "@store/cv-data/educations-reducers";
 import { skillsReducers } from "@store/cv-data/skills-reducers";
-import { CVData, CVJson } from "@custom-types/json-types";
+import { CVData, CVJson, MetaData } from "@custom-types/json-types";
 import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
 import { PersonalInfo } from "@custom-types/personal-info-types";
 import { ContactInfo } from "@custom-types/contact-info-types";
@@ -12,7 +12,11 @@ import { ContactInfo } from "@custom-types/contact-info-types";
 export type CvDataState = CVJson;
 
 export const initialState: CvDataState = {
-  version: "1.0",
+  metaData: {
+    version: "1.0",
+    title: "",
+    jobUrl: "",
+  },
   data: {
     personalInfo: {
       name: "",
@@ -46,6 +50,16 @@ const cvDataSlice = createSlice({
   reducers: {
     setCvData(state, action: PayloadAction<CVData>) {
       state.data = action.payload;
+    },
+
+    setMetaData<K extends keyof MetaData>(
+      state: CvDataState,
+      action: PayloadAction<{
+        field: K;
+        value: MetaData[K];
+      }>
+    ) {
+      state.metaData[action.payload.field] = action.payload.value;
     },
 
     setStyle(state, action: PayloadAction<Style>) {
@@ -100,16 +114,17 @@ const cvDataSlice = createSlice({
     resetCvDataState: () => initialState,
   },
   selectors: {
-    versionSelector: (state: CvDataState) => state.version,
+    metaDataSelector: (state: CvDataState) => state.metaData,
     cvDataSelector: (state: CvDataState) => state.data,
     styleSelector: (state: CvDataState) => state.style,
   },
 });
 
-export const { versionSelector, cvDataSelector, styleSelector } =
+export const { metaDataSelector, cvDataSelector, styleSelector } =
   cvDataSlice.selectors;
 
 export const {
+  setMetaData,
   setCvData,
   setStyle,
   setDateFormat,

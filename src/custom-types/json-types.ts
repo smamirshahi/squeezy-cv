@@ -27,9 +27,20 @@ const DataSchema = Object({
   skills: Array(SkillCategorySchema),
 });
 
-export const CVJsonSchema = Object({
+const MetaDataSchema = Object({
+  /** This title serves as a placeholder to describe for what purpose the CV is being written */
+  title: String,
+
+  /** A URL for the job where it is posted */
+  jobUrl: String,
+
   /** The version of the CV file. It is used to later track the changes in JSON file and read based upon version */
   version: String,
+});
+
+export const CVJsonSchema = Object({
+  /** All the meta data */
+  metaData: MetaDataSchema,
 
   /** The date of the CV file */
   data: DataSchema,
@@ -38,5 +49,6 @@ export const CVJsonSchema = Object({
   style: StyleSchema,
 });
 
+export type MetaData = Static<typeof MetaDataSchema>;
 export type CVData = Static<typeof DataSchema>;
 export type CVJson = Static<typeof CVJsonSchema>;

@@ -1,4 +1,4 @@
-import { AccordionDetails, Paper } from "@mui/material";
+import { AccordionDetails, Paper, TextField } from "@mui/material";
 import { EditorPageButtons } from "@components/editor-page-buttons";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
@@ -9,6 +9,7 @@ import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-i
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { CVAccordion } from "@components/cv-accordion";
+import { useState } from "react";
 
 interface Props {
   /** The reference to the content */
@@ -17,6 +18,9 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
+  const [title, setTitle] = useState<string>("");
+  const [jobUrl, setJobUrl] = useState<string>("");
+
   return (
     <Paper
       elevation={3}
@@ -31,6 +35,25 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <EditorPageButtons printReference={contentRef} />
+      <TextField
+        fullWidth
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        sx={{
+          mb: "10px",
+        }}
+        label="job title"
+      />
+      <TextField
+        fullWidth
+        value={jobUrl}
+        onChange={(event) => setJobUrl(event.target.value)}
+        sx={{
+          mb: "10px",
+        }}
+        label="job url"
+        inputProps={{ style: { height: "40px" } }}
+      />
       <StylesEditorPage />
       <CVAccordion title="Profile">
         <AccordionDetails>
