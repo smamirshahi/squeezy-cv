@@ -166,7 +166,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
             display="flex"
             flexDirection="column"
             alignItems="center"
-            sx={{ width: "100%" }}
+            sx={{ width: "100%", paddingBottom: `${GRID_SIZE}px` }}
           >
             {columns.fullWidth.map((id) => {
               const el = itemsMap[id];
@@ -183,7 +183,12 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         </Droppable>
         <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
           <Droppable id="left" userStyle={{ flex: 1 }}>
-            <Box display="flex" flexDirection="column" alignItems="center">
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              sx={{ paddingBottom: `${GRID_SIZE}px` }}
+            >
               {columns.left.map((id) => {
                 const el = itemsMap[id];
                 if (!el) {
@@ -198,7 +203,12 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
             </Box>
           </Droppable>
           <Droppable id="right" userStyle={{ flex: 1 }}>
-            <Box display="flex" flexDirection="column" alignItems="center">
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              sx={{ paddingBottom: `${GRID_SIZE}px` }}
+            >
               {columns.right.map((id) => {
                 const el = itemsMap[id];
                 if (!el) {

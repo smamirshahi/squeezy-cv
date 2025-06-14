@@ -38,19 +38,19 @@ export function useItems(): PreviewDnDComponents[] {
         id: "summary",
         element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        column: "right",
+        column: "left",
       },
       {
         id: "experiences",
         element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        column: "left",
+        column: "right",
       },
       {
         id: "educations",
         element: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        column: "right",
+        column: "left",
       },
       {
         id: "skills",
