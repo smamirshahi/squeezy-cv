@@ -29,6 +29,9 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     [validItems]
   );
   const [columns, setColumns] = useState(() => ({
+    fullWidth: validItems
+      .filter((i) => i.column === "fullWidth")
+      .map((i) => i.id),
     left: validItems.filter((i) => i.column === "left").map((i) => i.id),
     right: validItems.filter((i) => i.column === "right").map((i) => i.id),
   }));
@@ -38,22 +41,34 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   // arrangements persist across re-renders.
   useEffect(() => {
     const validIds = validItems.map((i) => i.id);
-    const columnIds = [...columns.left, ...columns.right];
+    const columnIds = [...columns.fullWidth, ...columns.left, ...columns.right];
     const hasDifference =
       validIds.length !== columnIds.length ||
       !validIds.every((id) => columnIds.includes(id));
     if (hasDifference) {
       setColumns({
+        fullWidth: validItems
+          .filter((i) => i.column === "fullWidth")
+          .map((i) => i.id),
         left: validItems.filter((i) => i.column === "left").map((i) => i.id),
         right: validItems.filter((i) => i.column === "right").map((i) => i.id),
       });
     }
-  }, [validItems, columns.left, columns.right]);
+  }, [validItems, columns.fullWidth, columns.left, columns.right]);
 
-  function findContainer(id: string): "left" | "right" | null {
-    if (id === "left" || id === "right") return id;
-    if (columns.left.includes(id)) return "left";
-    if (columns.right.includes(id)) return "right";
+  function findContainer(id: string): "fullWidth" | "left" | "right" | null {
+    if (id === "fullWidth" || id === "left" || id === "right") {
+      return id;
+    }
+    if (columns.left.includes(id)) {
+      return "left";
+    }
+    if (columns.right.includes(id)) {
+      return "right";
+    }
+    if (columns.fullWidth.includes(id)) {
+      return "fullWidth";
+    }
     return null;
   }
 
@@ -95,7 +110,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       const targetItems = [...prev[overContainer]];
       sourceItems.splice(sourceItems.indexOf(active.id as string), 1);
       const insertIndex =
-        over.id === "left" || over.id === "right"
+        over.id === "left" || over.id === "right" || over.id === "fullWidth"
           ? targetItems.length
           : targetItems.indexOf(over.id as string);
       targetItems.splice(insertIndex, 0, active.id as string);
@@ -136,8 +151,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
           : "none",
         backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
         display: "flex",
-        flexDirection: "row",
-        alignItems: "flex-start",
+        flexDirection: "column",
+        alignItems: "stretch",
         padding: paperMarginForPrinting,
         gap: 2,
       }}
@@ -146,11 +161,18 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         modifiers={[restrictToParentElement]}
         onDragEnd={handleDragEnd}
       >
-        <Droppable id="left" userStyle={{ flex: 1 }}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            {columns.left.map((id) => {
+        <Droppable id="fullWidth" userStyle={{ width: "100%" }}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            sx={{ width: "100%" }}
+          >
+            {columns.fullWidth.map((id) => {
               const el = itemsMap[id];
-              if (!el) return null;
+              if (!el) {
+                return null;
+              }
               return (
                 <SortableItem key={id} id={id}>
                   {el}
@@ -159,19 +181,38 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
             })}
           </Box>
         </Droppable>
-        <Droppable id="right" userStyle={{ flex: 1 }}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            {columns.right.map((id) => {
-              const el = itemsMap[id];
-              if (!el) return null;
-              return (
-                <SortableItem key={id} id={id}>
-                  {el}
-                </SortableItem>
-              );
-            })}
-          </Box>
-        </Droppable>
+        <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
+          <Droppable id="left" userStyle={{ flex: 1 }}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              {columns.left.map((id) => {
+                const el = itemsMap[id];
+                if (!el) {
+                  return null;
+                }
+                return (
+                  <SortableItem key={id} id={id}>
+                    {el}
+                  </SortableItem>
+                );
+              })}
+            </Box>
+          </Droppable>
+          <Droppable id="right" userStyle={{ flex: 1 }}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              {columns.right.map((id) => {
+                const el = itemsMap[id];
+                if (!el) {
+                  return null;
+                }
+                return (
+                  <SortableItem key={id} id={id}>
+                    {el}
+                  </SortableItem>
+                );
+              })}
+            </Box>
+          </Droppable>
+        </Box>
       </DndContext>
     </Paper>
   );

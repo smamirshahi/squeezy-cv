@@ -14,7 +14,7 @@ interface PreviewDnDComponents {
   id: string;
   element: React.ReactElement | null;
   position: { x: number; y: number };
-  column: "left" | "right";
+  column: "left" | "right" | "fullWidth";
 }
 
 export function useItems(): PreviewDnDComponents[] {
@@ -26,19 +26,19 @@ export function useItems(): PreviewDnDComponents[] {
         id: "personalInfo",
         element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        column: "left",
+        column: "fullWidth",
       },
       {
         id: "contactInfo",
         element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        column: "right",
+        column: "fullWidth",
       },
       {
         id: "summary",
         element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        column: "left",
+        column: "right",
       },
       {
         id: "experiences",
