@@ -10,51 +10,81 @@ import React, { useMemo } from "react";
 
 export const GRID_SIZE = 20;
 
-interface PreviewDnDComponents {
-  id: string;
+interface ItemProps {
+  id: Container;
   element: React.ReactElement | null;
   position: { x: number; y: number };
+  column: "left" | "right" | "fullWidth";
 }
 
-export function useItems(): PreviewDnDComponents[] {
+export type Container =
+  | "personalInfo"
+  | "contactInfo"
+  | "summary"
+  | "experiences"
+  | "educations"
+  | "skills";
+
+export type Column = "fullWidth" | "left" | "right";
+
+interface ReturnProps {
+  allItems: ItemProps[];
+  existedItems: ItemProps[];
+  itemsMap: Record<string, React.ReactElement | null>;
+}
+
+export function useItems(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
-  const items = useMemo(() => {
+  const allItems: ItemProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
         element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
+        column: "fullWidth",
       },
       {
         id: "contactInfo",
         element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
+        column: "fullWidth",
       },
       {
         id: "summary",
         element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
+        column: "left",
       },
       {
         id: "experiences",
         element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
+        column: "right",
       },
       {
         id: "educations",
         element: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
+        column: "left",
       },
       {
         id: "skills",
         element: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
+        column: "right",
       },
     ];
   }, [cvData]);
 
-  return items;
+  const existedItems = allItems.filter((item) => item.element !== null);
+
+  const itemsMap = useMemo(
+    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
+    [existedItems]
+  );
+
+  return { allItems, existedItems, itemsMap };
 }
 
 /** Function to snap the moving component to grid */
