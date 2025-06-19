@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Box, Paper } from "@mui/material";
 import {
+  Column,
+  Container,
   GRID_SIZE,
   useItems,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
@@ -11,7 +13,7 @@ import { SortableItem } from "@components/drag-and-drop/sortable-item";
 import { Droppable } from "@components/drag-and-drop/droppable";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
-import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useStyleHelper } from "@hooks/use-style-helper";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -21,13 +23,9 @@ interface Props {
 /** A simple two column DnD layout */
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
-  const { paperMargin } = useAppSelector(styleSelector);
-  const { existedItems } = useItems();
+  const { paperMarginForPrinting } = useStyleHelper();
 
-  const itemsMap = useMemo(
-    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
-    [existedItems]
-  );
+  const { existedItems, itemsMap } = useItems();
 
   const [columns, setColumns] = useState(() => ({
     fullWidth: existedItems
@@ -36,9 +34,6 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     left: existedItems.filter((i) => i.column === "left").map((i) => i.id),
     right: existedItems.filter((i) => i.column === "right").map((i) => i.id),
   }));
-
-  console.log("itemsMap", itemsMap);
-  console.log("columns", columns);
 
   // When validItems change (e.g. after importing data), ensure columns include
   // all valid IDs. Only reset when new or removed items are detected so manual
@@ -62,7 +57,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
   }, [existedItems, columns.fullWidth, columns.left, columns.right]);
 
-  function findContainer(id: string): "fullWidth" | "left" | "right" | null {
+  function findContainer(id: Column): "fullWidth" | "left" | "right" | null {
     if (id === "fullWidth" || id === "left" || id === "right") {
       return id;
     }
@@ -91,8 +86,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
-    const activeContainer = findContainer(active.id as string);
-    const overContainer = findContainer(over.id as string);
+    const activeContainer = findContainer(active.id as Column);
+    const overContainer = findContainer(over.id as Column);
     if (!activeContainer || !overContainer) {
       return;
     }
@@ -103,8 +98,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
           ...prev,
           [activeContainer]: arrayMove(
             prev[activeContainer],
-            prev[activeContainer].indexOf(active.id as string),
-            prev[activeContainer].indexOf(over.id as string)
+            prev[activeContainer].indexOf(active.id as Container),
+            prev[activeContainer].indexOf(over.id as Container)
           ),
         }));
       }
@@ -114,12 +109,12 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     setColumns((prev) => {
       const sourceItems = [...prev[activeContainer]];
       const targetItems = [...prev[overContainer]];
-      sourceItems.splice(sourceItems.indexOf(active.id as string), 1);
+      sourceItems.splice(sourceItems.indexOf(active.id as Container), 1);
       const insertIndex =
         over.id === "left" || over.id === "right" || over.id === "fullWidth"
           ? targetItems.length
-          : targetItems.indexOf(over.id as string);
-      targetItems.splice(insertIndex, 0, active.id as string);
+          : targetItems.indexOf(over.id as Container);
+      targetItems.splice(insertIndex, 0, active.id as Container);
 
       return {
         ...prev,
@@ -128,15 +123,6 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       };
     });
   }
-
-  const paperMarginForPrinting: string = useMemo(() => {
-    switch (paperMargin) {
-      case "narrow":
-        return "48px";
-      case "normal":
-        return "96px";
-    }
-  }, [paperMargin]);
 
   return (
     <Paper

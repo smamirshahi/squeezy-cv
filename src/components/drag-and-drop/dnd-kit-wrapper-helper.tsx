@@ -11,21 +11,32 @@ import React, { useMemo } from "react";
 export const GRID_SIZE = 20;
 
 interface ItemProps {
-  id: string;
+  id: Container;
   element: React.ReactElement | null;
   position: { x: number; y: number };
   column: "left" | "right" | "fullWidth";
 }
 
+export type Container =
+  | "personalInfo"
+  | "contactInfo"
+  | "summary"
+  | "experiences"
+  | "educations"
+  | "skills";
+
+export type Column = "fullWidth" | "left" | "right";
+
 interface ReturnProps {
-  items: ItemProps[];
+  allItems: ItemProps[];
   existedItems: ItemProps[];
+  itemsMap: Record<string, React.ReactElement | null>;
 }
 
 export function useItems(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
-  const items: ItemProps[] = useMemo(() => {
+  const allItems: ItemProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
@@ -66,9 +77,14 @@ export function useItems(): ReturnProps {
     ];
   }, [cvData]);
 
-  const existedItems = items.filter((item) => item.element !== null);
+  const existedItems = allItems.filter((item) => item.element !== null);
 
-  return { items, existedItems };
+  const itemsMap = useMemo(
+    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
+    [existedItems]
+  );
+
+  return { allItems, existedItems, itemsMap };
 }
 
 /** Function to snap the moving component to grid */
