@@ -9,11 +9,11 @@ import {
   GRID_SIZE,
   useItems,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
-import { SortableItem } from "@components/drag-and-drop/sortable-item";
-import { Droppable } from "@components/drag-and-drop/droppable";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 import { useStyleHelper } from "@hooks/use-style-helper";
+import { SideDroppableArea } from "@components/drag-and-drop/side-droppable";
+import { FullWidthDroppable } from "@components/drag-and-drop/full-width-droppable";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -24,40 +24,33 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-
-  const { existedItems, itemsMap } = useItems();
+  const { existedItems, itemsMap, containerBasedOnSide } = useItems();
 
   const [columns, setColumns] = useState(() => ({
-    fullWidth: existedItems
-      .filter((i) => i.column === "fullWidth")
-      .map((i) => i.id),
-    left: existedItems.filter((i) => i.column === "left").map((i) => i.id),
-    right: existedItems.filter((i) => i.column === "right").map((i) => i.id),
+    fullWidth: containerBasedOnSide("fullWidth"),
+    left: containerBasedOnSide("left"),
+    right: containerBasedOnSide("right"),
   }));
 
   // When validItems change (e.g. after importing data), ensure columns include
   // all valid IDs. Only reset when new or removed items are detected so manual
   // arrangements persist across re-renders.
   useEffect(() => {
-    const validIds = existedItems.map((i) => i.id);
+    const validIds = existedItems.map(({ id }) => id);
     const columnIds = [...columns.fullWidth, ...columns.left, ...columns.right];
     const hasDifference =
       validIds.length !== columnIds.length ||
       !validIds.every((id) => columnIds.includes(id));
     if (hasDifference) {
       setColumns({
-        fullWidth: existedItems
-          .filter((i) => i.column === "fullWidth")
-          .map((i) => i.id),
-        left: existedItems.filter((i) => i.column === "left").map((i) => i.id),
-        right: existedItems
-          .filter((i) => i.column === "right")
-          .map((i) => i.id),
+        fullWidth: containerBasedOnSide("fullWidth"),
+        left: containerBasedOnSide("left"),
+        right: containerBasedOnSide("right"),
       });
     }
-  }, [existedItems, columns.fullWidth, columns.left, columns.right]);
+  }, [columns, containerBasedOnSide, existedItems]);
 
-  function findContainer(id: Column): "fullWidth" | "left" | "right" | null {
+  function findContainer(id: Column): Column | null {
     if (id === "fullWidth" || id === "left" || id === "right") {
       return id;
     }
@@ -153,67 +146,18 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         modifiers={[restrictToParentElement]}
         onDragEnd={handleDragEnd}
       >
-        <Droppable id="fullWidth" userStyle={{ width: "100%" }}>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            sx={{ width: "100%", paddingBottom: `${GRID_SIZE}px` }}
-          >
-            {columns.fullWidth.map((id) => {
-              const el = itemsMap[id];
-              if (!el) {
-                return null;
-              }
-              return (
-                <SortableItem key={id} id={id}>
-                  {el}
-                </SortableItem>
-              );
-            })}
-          </Box>
-        </Droppable>
+        <FullWidthDroppable columns={columns.fullWidth} itemsMap={itemsMap} />
         <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
-          <Droppable id="left" userStyle={{ flex: 1 }}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{ paddingBottom: `${GRID_SIZE}px` }}
-            >
-              {columns.left.map((id) => {
-                const el = itemsMap[id];
-                if (!el) {
-                  return null;
-                }
-                return (
-                  <SortableItem key={id} id={id}>
-                    {el}
-                  </SortableItem>
-                );
-              })}
-            </Box>
-          </Droppable>
-          <Droppable id="right" userStyle={{ flex: 1 }}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{ paddingBottom: `${GRID_SIZE}px` }}
-            >
-              {columns.right.map((id) => {
-                const el = itemsMap[id];
-                if (!el) {
-                  return null;
-                }
-                return (
-                  <SortableItem key={id} id={id}>
-                    {el}
-                  </SortableItem>
-                );
-              })}
-            </Box>
-          </Droppable>
+          <SideDroppableArea
+            side="left"
+            columns={columns.left}
+            itemsMap={itemsMap}
+          />
+          <SideDroppableArea
+            side="right"
+            columns={columns.right}
+            itemsMap={itemsMap}
+          />
         </Box>
       </DndContext>
     </Paper>

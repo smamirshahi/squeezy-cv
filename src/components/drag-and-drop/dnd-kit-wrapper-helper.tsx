@@ -6,7 +6,7 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 export const GRID_SIZE = 20;
 
@@ -27,10 +27,13 @@ export type Container =
 
 export type Column = "fullWidth" | "left" | "right";
 
+export type ItemsMap = Record<string, React.ReactElement | null>;
+
 interface ReturnProps {
   allItems: ItemProps[];
   existedItems: ItemProps[];
-  itemsMap: Record<string, React.ReactElement | null>;
+  itemsMap: ItemsMap;
+  containerBasedOnSide: (side: Column) => Container[];
 }
 
 export function useItems(): ReturnProps {
@@ -84,7 +87,16 @@ export function useItems(): ReturnProps {
     [existedItems]
   );
 
-  return { allItems, existedItems, itemsMap };
+  const containerBasedOnSide = useCallback(
+    (side: Column) => {
+      return existedItems
+        .filter(({ column }) => column === side)
+        .map(({ id }) => id);
+    },
+    [existedItems]
+  );
+
+  return { allItems, existedItems, itemsMap, containerBasedOnSide };
 }
 
 /** Function to snap the moving component to grid */
