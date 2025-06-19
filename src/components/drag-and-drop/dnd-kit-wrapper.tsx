@@ -17,6 +17,7 @@ interface Props {
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
+// FIXME: This should be removed
 export function DnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMargin } = useAppSelector(styleSelector);

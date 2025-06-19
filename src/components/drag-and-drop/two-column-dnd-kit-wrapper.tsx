@@ -22,39 +22,45 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMargin } = useAppSelector(styleSelector);
-  const items = useItems();
-  const validItems = items.filter((i) => i.element !== null);
+  const { existedItems } = useItems();
+
   const itemsMap = useMemo(
-    () => Object.fromEntries(validItems.map((i) => [i.id, i.element])),
-    [validItems]
+    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
+    [existedItems]
   );
+
   const [columns, setColumns] = useState(() => ({
-    fullWidth: validItems
+    fullWidth: existedItems
       .filter((i) => i.column === "fullWidth")
       .map((i) => i.id),
-    left: validItems.filter((i) => i.column === "left").map((i) => i.id),
-    right: validItems.filter((i) => i.column === "right").map((i) => i.id),
+    left: existedItems.filter((i) => i.column === "left").map((i) => i.id),
+    right: existedItems.filter((i) => i.column === "right").map((i) => i.id),
   }));
+
+  console.log("itemsMap", itemsMap);
+  console.log("columns", columns);
 
   // When validItems change (e.g. after importing data), ensure columns include
   // all valid IDs. Only reset when new or removed items are detected so manual
   // arrangements persist across re-renders.
   useEffect(() => {
-    const validIds = validItems.map((i) => i.id);
+    const validIds = existedItems.map((i) => i.id);
     const columnIds = [...columns.fullWidth, ...columns.left, ...columns.right];
     const hasDifference =
       validIds.length !== columnIds.length ||
       !validIds.every((id) => columnIds.includes(id));
     if (hasDifference) {
       setColumns({
-        fullWidth: validItems
+        fullWidth: existedItems
           .filter((i) => i.column === "fullWidth")
           .map((i) => i.id),
-        left: validItems.filter((i) => i.column === "left").map((i) => i.id),
-        right: validItems.filter((i) => i.column === "right").map((i) => i.id),
+        left: existedItems.filter((i) => i.column === "left").map((i) => i.id),
+        right: existedItems
+          .filter((i) => i.column === "right")
+          .map((i) => i.id),
       });
     }
-  }, [validItems, columns.fullWidth, columns.left, columns.right]);
+  }, [existedItems, columns.fullWidth, columns.left, columns.right]);
 
   function findContainer(id: string): "fullWidth" | "left" | "right" | null {
     if (id === "fullWidth" || id === "left" || id === "right") {

@@ -10,17 +10,22 @@ import React, { useMemo } from "react";
 
 export const GRID_SIZE = 20;
 
-interface PreviewDnDComponents {
+interface ItemProps {
   id: string;
   element: React.ReactElement | null;
   position: { x: number; y: number };
   column: "left" | "right" | "fullWidth";
 }
 
-export function useItems(): PreviewDnDComponents[] {
+interface ReturnProps {
+  items: ItemProps[];
+  existedItems: ItemProps[];
+}
+
+export function useItems(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
-  const items: PreviewDnDComponents[] = useMemo(() => {
+  const items: ItemProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
@@ -61,7 +66,9 @@ export function useItems(): PreviewDnDComponents[] {
     ];
   }, [cvData]);
 
-  return items;
+  const existedItems = items.filter((item) => item.element !== null);
+
+  return { items, existedItems };
 }
 
 /** Function to snap the moving component to grid */
