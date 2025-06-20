@@ -6,6 +6,7 @@ import { Box, Paper } from "@mui/material";
 import {
   findContentSideById,
   GRID_SIZE,
+  reorderSections,
   useDndKitWrapper,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { useAppSelector } from "@store/store-helper";
@@ -51,39 +52,29 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
   }, [sectionIdsBySide, availableSections, updatePaperContent]);
 
-  function arrayMove<T>(array: readonly T[], from: number, to: number): T[] {
-    const newArray = array.slice();
-    const [moved] = newArray.splice(from, 1);
-    newArray.splice(to, 0, moved);
-    return newArray;
-  }
-
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
     if (!over) {
       return;
     }
 
-    const activeContainer = findContentSideById(
+    const activeContent = findContentSideById(
       sectionIdsBySide,
       active.id as Side
     );
-    const overContainer = findContentSideById(
-      sectionIdsBySide,
-      over.id as Side
-    );
-    if (!activeContainer || !overContainer) {
+    const overContent = findContentSideById(sectionIdsBySide, over.id as Side);
+    if (!activeContent || !overContent) {
       return;
     }
 
-    if (activeContainer === overContainer) {
+    if (activeContent === overContent) {
       if (active.id !== over.id) {
         setSectionIdsBySide((prev) => ({
           ...prev,
-          [activeContainer]: arrayMove(
-            prev[activeContainer],
-            prev[activeContainer].indexOf(active.id as SectionId),
-            prev[activeContainer].indexOf(over.id as SectionId)
+          [activeContent]: reorderSections(
+            prev[activeContent],
+            prev[activeContent].indexOf(active.id as SectionId),
+            prev[activeContent].indexOf(over.id as SectionId)
           ),
         }));
       }
@@ -91,8 +82,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
 
     setSectionIdsBySide((prev) => {
-      const sourceItems = [...prev[activeContainer]];
-      const targetItems = [...prev[overContainer]];
+      const sourceItems = [...prev[activeContent]];
+      const targetItems = [...prev[overContent]];
       sourceItems.splice(sourceItems.indexOf(active.id as SectionId), 1);
       const insertIndex =
         over.id === "left" || over.id === "right" || over.id === "fullWidth"
@@ -102,8 +93,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
 
       return {
         ...prev,
-        [activeContainer]: sourceItems,
-        [overContainer]: targetItems,
+        [activeContent]: sourceItems,
+        [overContent]: targetItems,
       };
     });
   }

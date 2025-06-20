@@ -130,3 +130,19 @@ export function findContentSideById(
   }
   return null;
 }
+
+/**
+ * Reorder the sections by moving a section ID at "from" and insert it at "to"
+ *
+ * @param sectionIds - The array of section IDs that is moved and need to be reordered
+ */
+export function reorderSections<T>(
+  sectionIds: readonly T[],
+  from: number,
+  to: number
+): T[] {
+  const newArray = sectionIds.slice();
+  const [moved] = newArray.splice(from, 1);
+  newArray.splice(to, 0, moved);
+  return newArray;
+}
