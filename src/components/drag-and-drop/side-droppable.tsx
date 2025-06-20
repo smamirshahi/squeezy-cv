@@ -1,22 +1,28 @@
 import { Box } from "@mui/material";
 import { Droppable } from "@components/drag-and-drop/droppable";
-import {
-  Container,
-  GRID_SIZE,
-  ItemsMap,
-} from "@components/drag-and-drop/dnd-kit-wrapper-helper";
+import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { SortableItem } from "@components/drag-and-drop/sortable-item";
+import {
+  SectionId,
+  SectionIdToContentMap,
+} from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
+  /** The side in which the content is placed */
   side: "right" | "left";
-  columns: Container[];
-  itemsMap: ItemsMap;
+
+  /** The IDs of the sections */
+  sectionIds: SectionId[];
+
+  /** The map of section IDs to their content */
+  sectionsMap: SectionIdToContentMap;
 }
 
+/** A droppable component showing in one side */
 export function SideDroppableArea({
   side,
-  columns,
-  itemsMap,
+  sectionIds,
+  sectionsMap,
 }: Props): JSX.Element {
   return (
     <Droppable id={side} userStyle={{ flex: 1 }}>
@@ -26,14 +32,14 @@ export function SideDroppableArea({
         alignItems="center"
         sx={{ paddingBottom: `${GRID_SIZE}px` }}
       >
-        {columns.map((id) => {
-          const el = itemsMap[id];
-          if (!el) {
+        {sectionIds.map((id) => {
+          const content = sectionsMap[id];
+          if (!content) {
             return null;
           }
           return (
             <SortableItem key={id} id={id}>
-              {el}
+              {content}
             </SortableItem>
           );
         })}

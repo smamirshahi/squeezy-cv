@@ -1,18 +1,25 @@
 import { Box } from "@mui/material";
 import { Droppable } from "@components/drag-and-drop/droppable";
-import {
-  Container,
-  GRID_SIZE,
-  ItemsMap,
-} from "@components/drag-and-drop/dnd-kit-wrapper-helper";
+import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { SortableItem } from "@components/drag-and-drop/sortable-item";
+import {
+  SectionId,
+  SectionIdToContentMap,
+} from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
-  columns: Container[];
-  itemsMap: ItemsMap;
+  /** The IDs of the sections */
+  sectionIds: SectionId[];
+
+  /** The map of section IDs to their content */
+  sectionsMap: SectionIdToContentMap;
 }
 
-export function FullWidthDroppable({ columns, itemsMap }: Props): JSX.Element {
+/** A droppable component in fullWidth */
+export function FullWidthDroppable({
+  sectionIds,
+  sectionsMap,
+}: Props): JSX.Element {
   return (
     <Droppable id="fullWidth" userStyle={{ width: "100%" }}>
       <Box
@@ -21,14 +28,14 @@ export function FullWidthDroppable({ columns, itemsMap }: Props): JSX.Element {
         alignItems="center"
         sx={{ width: "100%", paddingBottom: `${GRID_SIZE}px` }}
       >
-        {columns.map((id) => {
-          const el = itemsMap[id];
-          if (!el) {
+        {sectionIds.map((id) => {
+          const content = sectionsMap[id];
+          if (!content) {
             return null;
           }
           return (
             <SortableItem key={id} id={id}>
-              {el}
+              {content}
             </SortableItem>
           );
         })}

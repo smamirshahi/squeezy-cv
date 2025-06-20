@@ -6,97 +6,102 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import {
+  SectionIdToContentMap,
+  SectionId,
+  SectionProps,
+  Side,
+} from "@components/drag-and-drop/dnd-kit-types";
 
 export const GRID_SIZE = 20;
 
-interface ItemProps {
-  id: Container;
-  element: React.ReactElement | null;
-  position: { x: number; y: number };
-  column: "left" | "right" | "fullWidth";
-}
-
-export type Container =
-  | "personalInfo"
-  | "contactInfo"
-  | "summary"
-  | "experiences"
-  | "educations"
-  | "skills";
-
-export type Column = "fullWidth" | "left" | "right";
-
-export type ItemsMap = Record<string, React.ReactElement | null>;
-
 interface ReturnProps {
-  allItems: ItemProps[];
-  existedItems: ItemProps[];
-  itemsMap: ItemsMap;
-  containerBasedOnSide: (side: Column) => Container[];
+  sections: SectionProps[];
+  availableSections: SectionProps[];
+  idToSectionMap: SectionIdToContentMap;
+  updateContainer: () => {
+    fullWidth: SectionId[];
+    left: SectionId[];
+    right: SectionId[];
+  };
 }
 
 export function useItems(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
-  const allItems: ItemProps[] = useMemo(() => {
+  const sections: SectionProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
-        element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
+        content: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        column: "fullWidth",
+        layout: "fullWidth",
       },
       {
         id: "contactInfo",
-        element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
+        content: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        column: "fullWidth",
+        layout: "fullWidth",
       },
       {
         id: "summary",
-        element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
+        content: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        column: "left",
+        layout: "left",
       },
       {
         id: "experiences",
-        element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
+        content: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        column: "right",
+        layout: "right",
       },
       {
         id: "educations",
-        element: cvData.educations.length ? <EducationsPreviewPage /> : null,
+        content: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        column: "left",
+        layout: "left",
       },
       {
         id: "skills",
-        element: cvData.skills.length ? <SkillsPreviewPage /> : null,
+        content: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
-        column: "right",
+        layout: "right",
       },
     ];
   }, [cvData]);
 
-  const existedItems = allItems.filter((item) => item.element !== null);
-
-  const itemsMap = useMemo(
-    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
-    [existedItems]
+  const availableSections = sections.filter(
+    ({ content: element }) => element !== null
   );
 
-  const containerBasedOnSide = useCallback(
-    (side: Column) => {
-      return existedItems
-        .filter(({ column }) => column === side)
+  const idToSectionMap = useMemo(
+    () =>
+      Object.fromEntries(
+        availableSections.map(({ id, content: element }) => [id, element])
+      ) as Record<SectionId, React.ReactElement | null>,
+    [availableSections]
+  );
+
+  const updateContainer = useCallback(() => {
+    function containerBasedOnSide(side: Side): SectionId[] {
+      return availableSections
+        .filter(({ layout }) => layout === side)
         .map(({ id }) => id);
-    },
-    [existedItems]
-  );
+    }
+    return {
+      fullWidth: containerBasedOnSide("fullWidth"),
+      left: containerBasedOnSide("left"),
+      right: containerBasedOnSide("right"),
+    };
+  }, [availableSections]);
 
-  return { allItems, existedItems, itemsMap, containerBasedOnSide };
+  return {
+    sections,
+    availableSections,
+    idToSectionMap,
+    updateContainer,
+  };
 }
 
 /** Function to snap the moving component to grid */

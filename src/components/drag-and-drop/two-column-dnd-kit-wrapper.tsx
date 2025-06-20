@@ -4,8 +4,6 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Box, Paper } from "@mui/material";
 import {
-  Column,
-  Container,
   GRID_SIZE,
   useItems,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
@@ -14,6 +12,7 @@ import { appSelector } from "@store/app/app-slice";
 import { useStyleHelper } from "@hooks/use-style-helper";
 import { SideDroppableArea } from "@components/drag-and-drop/side-droppable";
 import { FullWidthDroppable } from "@components/drag-and-drop/full-width-droppable";
+import { SectionId, Side } from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -24,43 +23,39 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { existedItems, itemsMap, containerBasedOnSide } = useItems();
+  const { availableSections, idToSectionMap, updateContainer } = useItems();
 
-  const [columns, setColumns] = useState(() => ({
-    fullWidth: containerBasedOnSide("fullWidth"),
-    left: containerBasedOnSide("left"),
-    right: containerBasedOnSide("right"),
-  }));
+  const [itemsIdBySide, setItemsIdBySide] = useState(() => updateContainer());
 
   // When validItems change (e.g. after importing data), ensure columns include
   // all valid IDs. Only reset when new or removed items are detected so manual
   // arrangements persist across re-renders.
   useEffect(() => {
-    const validIds = existedItems.map(({ id }) => id);
-    const columnIds = [...columns.fullWidth, ...columns.left, ...columns.right];
+    const validIds = availableSections.map(({ id }) => id);
+    const columnIds = [
+      ...itemsIdBySide.fullWidth,
+      ...itemsIdBySide.left,
+      ...itemsIdBySide.right,
+    ];
     const hasDifference =
       validIds.length !== columnIds.length ||
       !validIds.every((id) => columnIds.includes(id));
     if (hasDifference) {
-      setColumns({
-        fullWidth: containerBasedOnSide("fullWidth"),
-        left: containerBasedOnSide("left"),
-        right: containerBasedOnSide("right"),
-      });
+      setItemsIdBySide(updateContainer());
     }
-  }, [columns, containerBasedOnSide, existedItems]);
+  }, [itemsIdBySide, availableSections, updateContainer]);
 
-  function findContainer(id: Column): Column | null {
+  function findContainer(id: Side): Side | null {
     if (id === "fullWidth" || id === "left" || id === "right") {
       return id;
     }
-    if (columns.left.includes(id)) {
+    if (itemsIdBySide.left.includes(id)) {
       return "left";
     }
-    if (columns.right.includes(id)) {
+    if (itemsIdBySide.right.includes(id)) {
       return "right";
     }
-    if (columns.fullWidth.includes(id)) {
+    if (itemsIdBySide.fullWidth.includes(id)) {
       return "fullWidth";
     }
     return null;
@@ -79,35 +74,35 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
-    const activeContainer = findContainer(active.id as Column);
-    const overContainer = findContainer(over.id as Column);
+    const activeContainer = findContainer(active.id as Side);
+    const overContainer = findContainer(over.id as Side);
     if (!activeContainer || !overContainer) {
       return;
     }
 
     if (activeContainer === overContainer) {
       if (active.id !== over.id) {
-        setColumns((prev) => ({
+        setItemsIdBySide((prev) => ({
           ...prev,
           [activeContainer]: arrayMove(
             prev[activeContainer],
-            prev[activeContainer].indexOf(active.id as Container),
-            prev[activeContainer].indexOf(over.id as Container)
+            prev[activeContainer].indexOf(active.id as SectionId),
+            prev[activeContainer].indexOf(over.id as SectionId)
           ),
         }));
       }
       return;
     }
 
-    setColumns((prev) => {
+    setItemsIdBySide((prev) => {
       const sourceItems = [...prev[activeContainer]];
       const targetItems = [...prev[overContainer]];
-      sourceItems.splice(sourceItems.indexOf(active.id as Container), 1);
+      sourceItems.splice(sourceItems.indexOf(active.id as SectionId), 1);
       const insertIndex =
         over.id === "left" || over.id === "right" || over.id === "fullWidth"
           ? targetItems.length
-          : targetItems.indexOf(over.id as Container);
-      targetItems.splice(insertIndex, 0, active.id as Container);
+          : targetItems.indexOf(over.id as SectionId);
+      targetItems.splice(insertIndex, 0, active.id as SectionId);
 
       return {
         ...prev,
@@ -146,17 +141,20 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         modifiers={[restrictToParentElement]}
         onDragEnd={handleDragEnd}
       >
-        <FullWidthDroppable columns={columns.fullWidth} itemsMap={itemsMap} />
+        <FullWidthDroppable
+          sectionIds={itemsIdBySide.fullWidth}
+          sectionsMap={idToSectionMap}
+        />
         <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
           <SideDroppableArea
             side="left"
-            columns={columns.left}
-            itemsMap={itemsMap}
+            sectionIds={itemsIdBySide.left}
+            sectionsMap={idToSectionMap}
           />
           <SideDroppableArea
             side="right"
-            columns={columns.right}
-            itemsMap={itemsMap}
+            sectionIds={itemsIdBySide.right}
+            sectionsMap={idToSectionMap}
           />
         </Box>
       </DndContext>
