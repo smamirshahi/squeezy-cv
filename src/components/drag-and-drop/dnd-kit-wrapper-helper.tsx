@@ -19,7 +19,7 @@ export const GRID_SIZE = 20;
 
 interface ReturnProps {
   sections: SectionProps[];
-  availableSections: SectionProps[];
+  sectionsWithContent: SectionProps[];
   idToSectionMap: SectionIdToContentMap;
   updatePaperContent: () => {
     fullWidth: SectionId[];
@@ -72,22 +72,22 @@ export function useDndKitWrapper(): ReturnProps {
     ];
   }, [cvData]);
 
-  const availableSections = sections.filter(
+  const sectionsWithContent = sections.filter(
     ({ content: element }) => element !== null
   );
 
   const idToSectionMap = useMemo(
     () =>
       Object.fromEntries(
-        availableSections.map(({ id, content: element }) => [id, element])
+        sectionsWithContent.map(({ id, content: element }) => [id, element])
       ) as Record<SectionId, React.ReactElement | null>,
-    [availableSections]
+    [sectionsWithContent]
   );
 
   const updatePaperContent: () => Record<Side, SectionId[]> =
     useCallback(() => {
       function getSectionIdsBySide(side: Side): SectionId[] {
-        return availableSections
+        return sectionsWithContent
           .filter(({ layout }) => layout === side)
           .map(({ id }) => id);
       }
@@ -96,11 +96,11 @@ export function useDndKitWrapper(): ReturnProps {
         left: getSectionIdsBySide("left"),
         right: getSectionIdsBySide("right"),
       };
-    }, [availableSections]);
+    }, [sectionsWithContent]);
 
   return {
     sections,
-    availableSections,
+    sectionsWithContent,
     idToSectionMap,
     updatePaperContent,
   };
@@ -109,6 +109,14 @@ export function useDndKitWrapper(): ReturnProps {
 /** Function to snap the moving component to grid */
 export function snapToGrid(n: number): number {
   return Math.round(n / GRID_SIZE) * GRID_SIZE;
+}
+
+// FIXME: This is equivalent to `sectionsWithContent`. One of them should be removed
+/** Returns all the sections that have content (it is not null) */
+export function getSectionsWithContent(
+  sections: SectionProps[]
+): SectionProps[] {
+  return sections.filter(({ content }) => content !== null);
 }
 
 /** Returns the side of section by ID */

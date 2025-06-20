@@ -29,7 +29,7 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { availableSections, idToSectionMap, updatePaperContent } =
+  const { sectionsWithContent, idToSectionMap, updatePaperContent } =
     useDndKitWrapper();
   const [sectionIdsBySide, setSectionIdsBySide] = useState<SideToSectionIdMap>(
     () => updatePaperContent()
@@ -38,7 +38,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   // When availableSections change (e.g. after importing data), ensure sectionIdsBySide include all valid section IDs.
   // Only reset when new or removed sections are detected so manual arrangements persist across re-renders.
   useEffect(() => {
-    const newAvailableIds = availableSections.map(({ id }) => id);
+    const newAvailableIds = sectionsWithContent.map(({ id }) => id);
     const oldAvailableIds = [
       ...sectionIdsBySide.fullWidth,
       ...sectionIdsBySide.left,
@@ -50,7 +50,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     if (hasDifference) {
       setSectionIdsBySide(updatePaperContent());
     }
-  }, [sectionIdsBySide, availableSections, updatePaperContent]);
+  }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
 
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
