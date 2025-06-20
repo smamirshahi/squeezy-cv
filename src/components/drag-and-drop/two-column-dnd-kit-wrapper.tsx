@@ -23,9 +23,11 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { availableSections, idToSectionMap, updateContainer } = useItems();
+  const { availableSections, idToSectionMap, updatePaperContent } = useItems();
 
-  const [itemsIdBySide, setItemsIdBySide] = useState(() => updateContainer());
+  const [sectionIdsBySide, setSectionIdsBySide] = useState(() =>
+    updatePaperContent()
+  );
 
   // When validItems change (e.g. after importing data), ensure columns include
   // all valid IDs. Only reset when new or removed items are detected so manual
@@ -33,29 +35,29 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   useEffect(() => {
     const validIds = availableSections.map(({ id }) => id);
     const columnIds = [
-      ...itemsIdBySide.fullWidth,
-      ...itemsIdBySide.left,
-      ...itemsIdBySide.right,
+      ...sectionIdsBySide.fullWidth,
+      ...sectionIdsBySide.left,
+      ...sectionIdsBySide.right,
     ];
     const hasDifference =
       validIds.length !== columnIds.length ||
       !validIds.every((id) => columnIds.includes(id));
     if (hasDifference) {
-      setItemsIdBySide(updateContainer());
+      setSectionIdsBySide(updatePaperContent());
     }
-  }, [itemsIdBySide, availableSections, updateContainer]);
+  }, [sectionIdsBySide, availableSections, updatePaperContent]);
 
   function findContainer(id: Side): Side | null {
     if (id === "fullWidth" || id === "left" || id === "right") {
       return id;
     }
-    if (itemsIdBySide.left.includes(id)) {
+    if (sectionIdsBySide.left.includes(id)) {
       return "left";
     }
-    if (itemsIdBySide.right.includes(id)) {
+    if (sectionIdsBySide.right.includes(id)) {
       return "right";
     }
-    if (itemsIdBySide.fullWidth.includes(id)) {
+    if (sectionIdsBySide.fullWidth.includes(id)) {
       return "fullWidth";
     }
     return null;
@@ -82,7 +84,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
 
     if (activeContainer === overContainer) {
       if (active.id !== over.id) {
-        setItemsIdBySide((prev) => ({
+        setSectionIdsBySide((prev) => ({
           ...prev,
           [activeContainer]: arrayMove(
             prev[activeContainer],
@@ -94,7 +96,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
-    setItemsIdBySide((prev) => {
+    setSectionIdsBySide((prev) => {
       const sourceItems = [...prev[activeContainer]];
       const targetItems = [...prev[overContainer]];
       sourceItems.splice(sourceItems.indexOf(active.id as SectionId), 1);
@@ -142,16 +144,16 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         onDragEnd={handleDragEnd}
       >
         <FullWidthDroppable
-          sectionIds={itemsIdBySide.fullWidth}
+          sectionIds={sectionIdsBySide.fullWidth}
           sectionsMap={idToSectionMap}
         />
         <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
           <SideDroppableArea
-            sectionIds={itemsIdBySide.left}
+            sectionIds={sectionIdsBySide.left}
             sectionsMap={idToSectionMap}
           />
           <SideDroppableArea
-            sectionIds={itemsIdBySide.right}
+            sectionIds={sectionIdsBySide.right}
             sectionsMap={idToSectionMap}
           />
         </Box>

@@ -20,7 +20,7 @@ interface ReturnProps {
   sections: SectionProps[];
   availableSections: SectionProps[];
   idToSectionMap: SectionIdToContentMap;
-  updateContainer: () => {
+  updatePaperContent: () => {
     fullWidth: SectionId[];
     left: SectionId[];
     right: SectionId[];
@@ -83,24 +83,25 @@ export function useItems(): ReturnProps {
     [availableSections]
   );
 
-  const updateContainer = useCallback(() => {
-    function containerBasedOnSide(side: Side): SectionId[] {
-      return availableSections
-        .filter(({ layout }) => layout === side)
-        .map(({ id }) => id);
-    }
-    return {
-      fullWidth: containerBasedOnSide("fullWidth"),
-      left: containerBasedOnSide("left"),
-      right: containerBasedOnSide("right"),
-    };
-  }, [availableSections]);
+  const updatePaperContent: () => Record<Side, SectionId[]> =
+    useCallback(() => {
+      function getSectionIdsBySide(side: Side): SectionId[] {
+        return availableSections
+          .filter(({ layout }) => layout === side)
+          .map(({ id }) => id);
+      }
+      return {
+        fullWidth: getSectionIdsBySide("fullWidth"),
+        left: getSectionIdsBySide("left"),
+        right: getSectionIdsBySide("right"),
+      };
+    }, [availableSections]);
 
   return {
     sections,
     availableSections,
     idToSectionMap,
-    updateContainer,
+    updatePaperContent,
   };
 }
 
