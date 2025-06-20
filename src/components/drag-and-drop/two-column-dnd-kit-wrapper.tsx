@@ -4,15 +4,20 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { Box, Paper } from "@mui/material";
 import {
+  findContentSideById,
   GRID_SIZE,
-  useItems,
+  useDndKitWrapper,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 import { useStyleHelper } from "@hooks/use-style-helper";
 import { SideDroppableArea } from "@components/drag-and-drop/side-droppable";
 import { FullWidthDroppable } from "@components/drag-and-drop/full-width-droppable";
-import { SectionId, Side } from "@components/drag-and-drop/dnd-kit-types";
+import {
+  SectionId,
+  Side,
+  SideToSectionIdMap,
+} from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -23,45 +28,28 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { availableSections, idToSectionMap, updatePaperContent } = useItems();
-
-  const [sectionIdsBySide, setSectionIdsBySide] = useState(() =>
-    updatePaperContent()
+  const { availableSections, idToSectionMap, updatePaperContent } =
+    useDndKitWrapper();
+  const [sectionIdsBySide, setSectionIdsBySide] = useState<SideToSectionIdMap>(
+    () => updatePaperContent()
   );
 
-  // When validItems change (e.g. after importing data), ensure columns include
-  // all valid IDs. Only reset when new or removed items are detected so manual
-  // arrangements persist across re-renders.
+  // When availableSections change (e.g. after importing data), ensure sectionIdsBySide include all valid section IDs.
+  // Only reset when new or removed sections are detected so manual arrangements persist across re-renders.
   useEffect(() => {
-    const validIds = availableSections.map(({ id }) => id);
-    const columnIds = [
+    const newAvailableIds = availableSections.map(({ id }) => id);
+    const oldAvailableIds = [
       ...sectionIdsBySide.fullWidth,
       ...sectionIdsBySide.left,
       ...sectionIdsBySide.right,
     ];
     const hasDifference =
-      validIds.length !== columnIds.length ||
-      !validIds.every((id) => columnIds.includes(id));
+      newAvailableIds.length !== oldAvailableIds.length ||
+      !newAvailableIds.every((id) => oldAvailableIds.includes(id));
     if (hasDifference) {
       setSectionIdsBySide(updatePaperContent());
     }
   }, [sectionIdsBySide, availableSections, updatePaperContent]);
-
-  function findContainer(id: Side): Side | null {
-    if (id === "fullWidth" || id === "left" || id === "right") {
-      return id;
-    }
-    if (sectionIdsBySide.left.includes(id)) {
-      return "left";
-    }
-    if (sectionIdsBySide.right.includes(id)) {
-      return "right";
-    }
-    if (sectionIdsBySide.fullWidth.includes(id)) {
-      return "fullWidth";
-    }
-    return null;
-  }
 
   function arrayMove<T>(array: readonly T[], from: number, to: number): T[] {
     const newArray = array.slice();
@@ -76,8 +64,14 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
-    const activeContainer = findContainer(active.id as Side);
-    const overContainer = findContainer(over.id as Side);
+    const activeContainer = findContentSideById(
+      sectionIdsBySide,
+      active.id as Side
+    );
+    const overContainer = findContentSideById(
+      sectionIdsBySide,
+      over.id as Side
+    );
     if (!activeContainer || !overContainer) {
       return;
     }

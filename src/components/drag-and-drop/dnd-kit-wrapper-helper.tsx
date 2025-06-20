@@ -12,6 +12,7 @@ import {
   SectionId,
   SectionProps,
   Side,
+  SideToSectionIdMap,
 } from "@components/drag-and-drop/dnd-kit-types";
 
 export const GRID_SIZE = 20;
@@ -27,7 +28,7 @@ interface ReturnProps {
   };
 }
 
-export function useItems(): ReturnProps {
+export function useDndKitWrapper(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
   const sections: SectionProps[] = useMemo(() => {
@@ -108,4 +109,24 @@ export function useItems(): ReturnProps {
 /** Function to snap the moving component to grid */
 export function snapToGrid(n: number): number {
   return Math.round(n / GRID_SIZE) * GRID_SIZE;
+}
+
+/** Returns the side of section by ID */
+export function findContentSideById(
+  sectionIdsBySide: SideToSectionIdMap,
+  id: Side
+): Side | null {
+  if (id === "fullWidth" || id === "left" || id === "right") {
+    return id;
+  }
+  if (sectionIdsBySide.left.includes(id)) {
+    return "left";
+  }
+  if (sectionIdsBySide.right.includes(id)) {
+    return "right";
+  }
+  if (sectionIdsBySide.fullWidth.includes(id)) {
+    return "fullWidth";
+  }
+  return null;
 }
