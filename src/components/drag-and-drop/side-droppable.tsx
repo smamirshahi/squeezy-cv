@@ -1,16 +1,13 @@
 import { Box } from "@mui/material";
 import { Droppable } from "@components/drag-and-drop/droppable";
 import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
-import { SortableItem } from "@components/drag-and-drop/sortable-item";
+import { SortableSection } from "@components/drag-and-drop/sortable-section";
 import {
   SectionId,
   SectionIdToContentMap,
 } from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
-  /** The side in which the content is placed */
-  side: "right" | "left";
-
   /** The IDs of the sections */
   sectionIds: SectionId[];
 
@@ -20,12 +17,11 @@ interface Props {
 
 /** A droppable component showing in one side */
 export function SideDroppableArea({
-  side,
   sectionIds,
   sectionsMap,
 }: Props): JSX.Element {
   return (
-    <Droppable id={side} userStyle={{ flex: 1 }}>
+    <Droppable id="side" userStyle={{ flex: 1 }}>
       <Box
         display="flex"
         flexDirection="column"
@@ -38,9 +34,9 @@ export function SideDroppableArea({
             return null;
           }
           return (
-            <SortableItem key={id} id={id}>
+            <SortableSection key={id} id={id}>
               {content}
-            </SortableItem>
+            </SortableSection>
           );
         })}
       </Box>

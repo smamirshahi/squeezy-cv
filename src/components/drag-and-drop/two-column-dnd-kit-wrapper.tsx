@@ -147,12 +147,10 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
         />
         <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
           <SideDroppableArea
-            side="left"
             sectionIds={itemsIdBySide.left}
             sectionsMap={idToSectionMap}
           />
           <SideDroppableArea
-            side="right"
             sectionIds={itemsIdBySide.right}
             sectionsMap={idToSectionMap}
           />

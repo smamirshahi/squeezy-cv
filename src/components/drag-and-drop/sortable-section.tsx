@@ -17,8 +17,8 @@ interface Props {
   id: string;
 }
 
-/** Wraps children with draggable and droppable behavior so that items can be reordered within a list. */
-export function SortableItem({
+/** Wraps children with draggable and droppable behavior so that sections can be reordered within a list. */
+export function SortableSection({
   id,
   children,
 }: PropsWithChildren<Props>): JSX.Element {

@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { Droppable } from "@components/drag-and-drop/droppable";
 import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
-import { SortableItem } from "@components/drag-and-drop/sortable-item";
+import { SortableSection } from "@components/drag-and-drop/sortable-section";
 import {
   SectionId,
   SectionIdToContentMap,
@@ -34,9 +34,9 @@ export function FullWidthDroppable({
             return null;
           }
           return (
-            <SortableItem key={id} id={id}>
+            <SortableSection key={id} id={id}>
               {content}
-            </SortableItem>
+            </SortableSection>
           );
         })}
       </Box>
