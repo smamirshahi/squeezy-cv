@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
-import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
+import { A4_DIMENSION_MM, GRID_SIZE_PX } from "@custom-styles/custom-styles";
 import { Box, Paper } from "@mui/material";
 import {
   findContentSideById,
-  GRID_SIZE,
   reorderSections,
   useDndKitWrapper,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
@@ -123,7 +122,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
           ? "linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px)," +
             "linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)"
           : "none",
-        backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
+        backgroundSize: `${GRID_SIZE_PX}px ${GRID_SIZE_PX}px`,
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",

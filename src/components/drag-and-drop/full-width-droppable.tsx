@@ -1,11 +1,11 @@
 import { Box } from "@mui/material";
 import { Droppable } from "@components/drag-and-drop/droppable";
-import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { SortableSection } from "@components/drag-and-drop/sortable-section";
 import {
   SectionId,
   SectionIdToContentMap,
 } from "@components/drag-and-drop/dnd-kit-types";
+import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
 
 interface Props {
   /** The IDs of the sections */
@@ -28,16 +28,16 @@ export function FullWidthDroppable({
         alignItems="center"
         sx={{
           width: "100%",
-          paddingBottom: `${GRID_SIZE}px`,
+          paddingBottom: `${GRID_SIZE_PX}px`,
         }}
       >
-        {sectionIds.map((id) => {
-          const content = sectionsMap[id];
+        {sectionIds.map((sectionId) => {
+          const content = sectionsMap[sectionId];
           if (!content) {
             return null;
           }
           return (
-            <SortableSection key={id} id={id}>
+            <SortableSection key={sectionId} sectionId={sectionId}>
               {content}
             </SortableSection>
           );

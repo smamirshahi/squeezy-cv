@@ -14,8 +14,7 @@ import {
   Side,
   SideToSectionIdMap,
 } from "@components/drag-and-drop/dnd-kit-types";
-
-export const GRID_SIZE = 20;
+import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
 
 interface ReturnProps {
   sections: SectionProps[];
@@ -108,7 +107,7 @@ export function useDndKitWrapper(): ReturnProps {
 
 /** Function to snap the moving component to grid */
 export function snapToGrid(n: number): number {
-  return Math.round(n / GRID_SIZE) * GRID_SIZE;
+  return Math.round(n / GRID_SIZE_PX) * GRID_SIZE_PX;
 }
 
 // FIXME: This is equivalent to `sectionsWithContent`. One of them should be removed
