@@ -16,7 +16,7 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
   }
 
   return (
-    <PreviewSection initialSide="left">
+    <PreviewSection sectionId="experiences">
       <Grid
         container
         direction="column"

@@ -13,7 +13,7 @@ export function PersonalInfoPreviewPage(): JSX.Element | null {
   }
 
   return (
-    <PreviewSection initialSide="fullWidth">
+    <PreviewSection sectionId="personalInfo">
       <Grid
         container
         direction="column"

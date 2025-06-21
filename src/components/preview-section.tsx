@@ -1,27 +1,31 @@
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren } from "react";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import AlignHorizontalRightIcon from "@mui/icons-material/AlignHorizontalRight";
 import ExpandIcon from "@mui/icons-material/Expand";
 import { Side } from "@custom-types/styles-types";
+import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
+import { appSelector, setSideForSectionById } from "@store/app/app-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 interface Props {
-  /** The initial side of a section */
-  initialSide: Side;
+  /** The ID of the section */
+  sectionId: SectionId;
 }
 
 export function PreviewSection({
-  initialSide,
+  sectionId,
   children,
 }: PropsWithChildren<Props>): JSX.Element {
-  const [side, setSide] = useState<Side>(initialSide);
+  const { sides } = useAppSelector(appSelector);
+  const dispatch = useAppDispatch();
 
   function onButtonClick(
     _event: React.MouseEvent<HTMLElement>,
     newSide: Side | null
   ): void {
     if (newSide !== null) {
-      setSide(newSide);
+      dispatch(setSideForSectionById({ sectionId, side: newSide }));
     }
   }
 
@@ -53,7 +57,7 @@ export function PreviewSection({
         }}
       >
         <ToggleButtonGroup
-          value={side}
+          value={sides[sectionId]}
           exclusive
           onChange={onButtonClick}
           // sx={{ height: "10px" }}
@@ -62,7 +66,7 @@ export function PreviewSection({
           <ToggleButton value="left" sx={{ p: "2px" }}>
             <AlignHorizontalLeftIcon />
           </ToggleButton>
-          <ToggleButton value="center" sx={{ p: "2px" }}>
+          <ToggleButton value="fullWidth" sx={{ p: "2px" }}>
             <ExpandIcon sx={{ transform: "rotate(90deg)" }} />
           </ToggleButton>
           <ToggleButton value="right" sx={{ p: "2px" }}>

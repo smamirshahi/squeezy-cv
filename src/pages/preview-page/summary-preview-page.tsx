@@ -12,7 +12,7 @@ export function SummaryPreviewPage(): JSX.Element | null {
     return null;
   }
   return (
-    <PreviewSection initialSide="fullWidth">
+    <PreviewSection sectionId="summary">
       <Grid
         container
         direction="column"

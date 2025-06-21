@@ -66,6 +66,7 @@ export const {
   setIsPrinting,
   setShouldShowGrids,
   setShouldShowBorders,
+  setSideForSectionById,
   resetAppState,
 } = appSlice.actions;
 

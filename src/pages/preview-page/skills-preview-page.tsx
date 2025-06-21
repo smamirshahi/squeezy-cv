@@ -14,7 +14,7 @@ export function SkillsPreviewPage(): JSX.Element | null {
   }
 
   return (
-    <PreviewSection initialSide="right">
+    <PreviewSection sectionId="skills">
       <CvTypography variant="headingMd" text="Skills" />
       {skills.map((skill) => (
         <React.Fragment key={skill.id}>

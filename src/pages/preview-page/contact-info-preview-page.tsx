@@ -15,7 +15,7 @@ export function ContactInfoPreviewPage(): JSX.Element | null {
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
-    <PreviewSection initialSide="fullWidth">
+    <PreviewSection sectionId="contactInfo">
       <Grid container direction="row">
         <IconWithText
           variant="bulletText"
