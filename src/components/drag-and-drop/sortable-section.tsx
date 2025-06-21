@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
+import { DISTANCE_BETWEEN_SECTIONS_PX } from "@custom-styles/custom-styles";
 
 interface Props {
   /** Unique identifier for the section used by dnd-kit */
@@ -100,7 +100,7 @@ export function SortableSection({
         transform: CSS.Translate.toString(transform),
         backgroundColor: "transparent",
         px: "5px",
-        marginBottom: `${GRID_SIZE_PX}px`,
+        marginBottom: `${DISTANCE_BETWEEN_SECTIONS_PX}px`,
         width: "95%",
         borderRight: "2px double #6bda9a",
         borderLeft: "2px double #6bda9a",
