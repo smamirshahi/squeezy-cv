@@ -12,10 +12,12 @@ import {
   useState,
 } from "react";
 import { DISTANCE_BETWEEN_SECTIONS_PX } from "@custom-styles/custom-styles";
+import { PreviewSection } from "@components/preview-section";
+import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
 
 interface Props {
   /** Unique identifier for the section used by dnd-kit */
-  sectionId: string;
+  sectionId: SectionId;
 }
 
 /**
@@ -87,30 +89,32 @@ export function SortableSection({
   }, [isOver, linePosition]);
 
   return (
-    <Box
-      component="div"
-      // Attach refs so this element participates in drag and drop
-      ref={(node: HTMLDivElement | null) => {
-        setDraggableRef(node);
-        setDroppableRef(node);
-        localRef.current = node;
-      }}
-      sx={{
-        // Visual appearance and positioning while dragging
-        transform: CSS.Translate.toString(transform),
-        backgroundColor: "transparent",
-        px: "5px",
-        marginBottom: `${DISTANCE_BETWEEN_SECTIONS_PX}px`,
-        width: "95%",
-        borderRight: "2px double #6bda9a",
-        borderLeft: "2px double #6bda9a",
-        ...indicatorStyle,
-        border: shouldShowBorders ? {} : "2px dashed transparent",
-      }}
-      {...listeners}
-      {...attributes}
-    >
-      {children}
-    </Box>
+    <PreviewSection sectionId={sectionId}>
+      <Box
+        component="div"
+        // Attach refs so this element participates in drag and drop
+        ref={(node: HTMLDivElement | null) => {
+          setDraggableRef(node);
+          setDroppableRef(node);
+          localRef.current = node;
+        }}
+        sx={{
+          // Visual appearance and positioning while dragging
+          transform: CSS.Translate.toString(transform),
+          backgroundColor: "transparent",
+          px: "5px",
+          marginBottom: `${DISTANCE_BETWEEN_SECTIONS_PX}px`,
+          width: "95%",
+          borderRight: "2px double #6bda9a",
+          borderLeft: "2px double #6bda9a",
+          ...indicatorStyle,
+          border: shouldShowBorders ? {} : "2px dashed transparent",
+        }}
+        {...listeners}
+        {...attributes}
+      >
+        {children}
+      </Box>
+    </PreviewSection>
   );
 }
