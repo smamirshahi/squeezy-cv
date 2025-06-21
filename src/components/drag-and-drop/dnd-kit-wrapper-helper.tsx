@@ -122,11 +122,8 @@ export function getSectionsWithContent(
 /** Returns the side of section by ID */
 export function findContentSideById(
   sectionIdsBySide: SideToSectionIdMap,
-  id: Side
+  id: SectionId
 ): Side | null {
-  if (id === "fullWidth" || id === "left" || id === "right") {
-    return id;
-  }
   if (sectionIdsBySide.left.includes(id)) {
     return "left";
   }

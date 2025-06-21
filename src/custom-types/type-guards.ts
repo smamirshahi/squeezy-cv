@@ -1,3 +1,4 @@
+import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
 import {
   AVAILABLE_FONT_OPTIONS,
   WORD_FONT_SIZE_OPTIONS,
@@ -36,4 +37,19 @@ export function isValidFontSize(value: string): value is FontSize {
 /** Whether the font weight is a valid one */
 export function isValidFontWeight(value: string): value is FontWeight {
   return WORD_FONT_WEIGHT_OPTIONS.includes(value as FontWeight);
+}
+
+/** Check if the value is a valid SectionId */
+export function isIdSectionId(value: unknown): value is SectionId {
+  return (
+    typeof value === "string" &&
+    [
+      "personalInfo",
+      "contactInfo",
+      "summary",
+      "experiences",
+      "educations",
+      "skills",
+    ].includes(value)
+  );
 }

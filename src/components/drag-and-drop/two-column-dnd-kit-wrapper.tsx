@@ -16,9 +16,9 @@ import { SideDroppableArea } from "@components/drag-and-drop/side-droppable";
 import { FullWidthDroppable } from "@components/drag-and-drop/full-width-droppable";
 import {
   SectionId,
-  Side,
   SideToSectionIdMap,
 } from "@components/drag-and-drop/dnd-kit-types";
+import { isIdSectionId } from "@custom-types/type-guards";
 
 interface Props {
   /** The reference to the content (the A4 paper container) */
@@ -53,28 +53,33 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
 
   function handleDragEnd(event: DragEndEvent): void {
+    // active is the item being dragged, over is the item being hovered over
     const { active, over } = event;
+
     if (!over) {
       return;
     }
 
-    const activeContent = findContentSideById(
-      sectionIdsBySide,
-      active.id as Side
-    );
-    const overContent = findContentSideById(sectionIdsBySide, over.id as Side);
-    if (!activeContent || !overContent) {
+    if (!isIdSectionId(active.id) || !isIdSectionId(over.id)) {
+      // If either active or over is a SectionId, it means the drag is not valid
+      // because we cannot drop a section on another section.
       return;
     }
 
-    if (activeContent === overContent) {
+    const activeContentSide = findContentSideById(sectionIdsBySide, active.id);
+    const overContentSide = findContentSideById(sectionIdsBySide, over.id);
+    if (!activeContentSide || !overContentSide) {
+      return;
+    }
+
+    if (activeContentSide === overContentSide) {
       if (active.id !== over.id) {
         setSectionIdsBySide((prev) => ({
           ...prev,
-          [activeContent]: reorderSections(
-            prev[activeContent],
-            prev[activeContent].indexOf(active.id as SectionId),
-            prev[activeContent].indexOf(over.id as SectionId)
+          [activeContentSide]: reorderSections(
+            prev[activeContentSide],
+            prev[activeContentSide].indexOf(active.id as SectionId),
+            prev[activeContentSide].indexOf(over.id as SectionId)
           ),
         }));
       }
@@ -82,8 +87,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
 
     setSectionIdsBySide((prev) => {
-      const sourceItems = [...prev[activeContent]];
-      const targetItems = [...prev[overContent]];
+      const sourceItems = [...prev[activeContentSide]];
+      const targetItems = [...prev[overContentSide]];
       sourceItems.splice(sourceItems.indexOf(active.id as SectionId), 1);
       const insertIndex =
         over.id === "left" || over.id === "right" || over.id === "fullWidth"
@@ -93,8 +98,8 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
 
       return {
         ...prev,
-        [activeContent]: sourceItems,
-        [overContent]: targetItems,
+        [activeContentSide]: sourceItems,
+        [overContentSide]: targetItems,
       };
     });
   }
