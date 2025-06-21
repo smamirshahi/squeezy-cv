@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { GRID_SIZE } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 
 interface Props {
   /** Unique identifier */
@@ -81,7 +82,7 @@ export function SortableSection({
         transform: CSS.Translate.toString(transform),
         backgroundColor: "transparent",
         px: "5px",
-        marginBottom: "10px",
+        marginBottom: `${GRID_SIZE}px`,
         width: "95%",
         borderRight: "2px double #6bda9a",
         borderLeft: "2px double #6bda9a",
