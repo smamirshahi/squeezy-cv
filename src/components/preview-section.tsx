@@ -28,12 +28,8 @@ export function PreviewSection({
     <Box
       sx={{
         position: "relative",
-        width: 400,
-        height: 200,
-        border: "1px solid grey",
-        borderRadius: 2,
         overflow: "hidden",
-        "&:hover .toggle-group": {
+        "&:hover .alignment-buttons": {
           opacity: 1,
           visibility: "visible",
         },
@@ -41,7 +37,7 @@ export function PreviewSection({
     >
       {/* Hidden Toggle Button Group on Top Right */}
       <Box
-        className="toggle-group"
+        className="alignment-buttons"
         sx={{
           position: "absolute",
           top: 8,
