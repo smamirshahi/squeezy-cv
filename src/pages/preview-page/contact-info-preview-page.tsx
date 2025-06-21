@@ -7,6 +7,7 @@ import { IconWithText } from "@components/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
+import { PreviewSection } from "@components/preview-section";
 
 /** Contact Information (details) */
 export function ContactInfoPreviewPage(): JSX.Element | null {
@@ -14,45 +15,47 @@ export function ContactInfoPreviewPage(): JSX.Element | null {
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
-    <Grid container direction="row">
-      <IconWithText
-        variant="bulletText"
-        icon={AlternateEmailIcon}
-        text={contactInfo.email}
-      />
-      <IconWithText
-        variant="bulletText"
-        icon={SmartphoneIcon}
-        text={contactInfo.phone}
-      />
-      <IconWithText
-        variant="bulletText"
-        icon={LocationOnIcon}
-        text={contactInfo.location}
-      />
+    <PreviewSection initialSide="fullWidth">
+      <Grid container direction="row">
+        <IconWithText
+          variant="bulletText"
+          icon={AlternateEmailIcon}
+          text={contactInfo.email}
+        />
+        <IconWithText
+          variant="bulletText"
+          icon={SmartphoneIcon}
+          text={contactInfo.phone}
+        />
+        <IconWithText
+          variant="bulletText"
+          icon={LocationOnIcon}
+          text={contactInfo.location}
+        />
 
-      {contactInfo.linkedInId && (
-        <IconWithText
-          variant="bulletText"
-          icon={LinkedInIcon}
-          text={
-            shouldShowFullContactLinks
-              ? `https://www.linkedin.com/in/${contactInfo.linkedInId}`
-              : contactInfo.linkedInId
-          }
-        />
-      )}
-      {contactInfo.gitHubId && (
-        <IconWithText
-          variant="bulletText"
-          icon={GitHubIcon}
-          text={
-            shouldShowFullContactLinks
-              ? `https://github.com/${contactInfo.gitHubId}`
-              : contactInfo.gitHubId
-          }
-        />
-      )}
-    </Grid>
+        {contactInfo.linkedInId && (
+          <IconWithText
+            variant="bulletText"
+            icon={LinkedInIcon}
+            text={
+              shouldShowFullContactLinks
+                ? `https://www.linkedin.com/in/${contactInfo.linkedInId}`
+                : contactInfo.linkedInId
+            }
+          />
+        )}
+        {contactInfo.gitHubId && (
+          <IconWithText
+            variant="bulletText"
+            icon={GitHubIcon}
+            text={
+              shouldShowFullContactLinks
+                ? `https://github.com/${contactInfo.gitHubId}`
+                : contactInfo.gitHubId
+            }
+          />
+        )}
+      </Grid>
+    </PreviewSection>
   );
 }

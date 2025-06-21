@@ -3,6 +3,7 @@ import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import React from "react";
 import { CvTypography } from "@components/cv-typography";
+import { PreviewSection } from "@components/preview-section";
 
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage(): JSX.Element | null {
@@ -13,7 +14,7 @@ export function SkillsPreviewPage(): JSX.Element | null {
   }
 
   return (
-    <>
+    <PreviewSection initialSide="right">
       <CvTypography variant="headingMd" text="Skills" />
       {skills.map((skill) => (
         <React.Fragment key={skill.id}>
@@ -28,6 +29,6 @@ export function SkillsPreviewPage(): JSX.Element | null {
           </Grid>
         </React.Fragment>
       ))}
-    </>
+    </PreviewSection>
   );
 }
