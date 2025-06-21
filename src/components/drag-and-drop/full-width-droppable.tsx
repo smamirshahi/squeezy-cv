@@ -26,7 +26,10 @@ export function FullWidthDroppable({
         display="flex"
         flexDirection="column"
         alignItems="center"
-        sx={{ width: "100%", paddingBottom: `${GRID_SIZE}px` }}
+        sx={{
+          width: "100%",
+          paddingBottom: `${GRID_SIZE}px`,
+        }}
       >
         {sectionIds.map((id) => {
           const content = sectionsMap[id];

@@ -52,17 +52,17 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
   }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
 
+  /**
+   * Handle the drag
+   * It checks if the dragged section has changed side and update sectionsIdsBySide accordingly.
+   */
   function handleDragEnd(event: DragEndEvent): void {
     // active is the item being dragged, over is the item being hovered over
     const { active, over } = event;
 
-    if (!over) {
-      return;
-    }
-
-    if (!isIdSectionId(active.id) || !isIdSectionId(over.id)) {
-      // If either active or over is a SectionId, it means the drag is not valid
-      // because we cannot drop a section on another section.
+    // If over is null or either active or over is a SectionId, it means the drag is not valid
+    // because we cannot drop a section on another section.
+    if (!over || !isIdSectionId(active.id) || !isIdSectionId(over.id)) {
       return;
     }
 
@@ -72,6 +72,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
+    // If the active and over sections are on the same side, reorder them
     if (activeContentSide === overContentSide) {
       if (active.id !== over.id) {
         setSectionIdsBySide((prev) => ({
@@ -86,6 +87,7 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       return;
     }
 
+    // If the active and over sections are on different sides, move the active section to the over side
     setSectionIdsBySide((prev) => {
       const sourceItems = [...prev[activeContentSide]];
       const targetItems = [...prev[overContentSide]];
