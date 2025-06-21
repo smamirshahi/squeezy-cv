@@ -26,50 +26,55 @@ export function PreviewSection({
 
   return (
     <Box
+      className="test-preview-section"
       sx={{
         position: "relative",
-        overflow: "hidden",
+        // allow showing the buttons outside
+        overflow: "visible",
         "&:hover .alignment-buttons": {
           opacity: 1,
           visibility: "visible",
         },
       }}
     >
-      {/* Hidden Toggle Button Group on Top Right */}
+      {/* Toggle Buttons Outside Top-Right */}
       <Box
         className="alignment-buttons"
         sx={{
           position: "absolute",
-          top: 8,
-          right: 8,
+          // move above the container
+          top: -32,
+          right: -8,
           opacity: 0,
           visibility: "hidden",
           transition: "opacity 0.3s ease, visibility 0.3s ease",
+          zIndex: 1,
         }}
       >
         <ToggleButtonGroup
           value={side}
           exclusive
           onChange={onButtonClick}
-          aria-label="text alignment"
+          // sx={{ height: "10px" }}
+          sx={{ backgroundColor: "white" }}
         >
-          <ToggleButton value="left" aria-label="left aligned">
+          <ToggleButton value="left" sx={{ p: "2px" }}>
             <AlignHorizontalLeftIcon />
           </ToggleButton>
-          <ToggleButton value="center" aria-label="centered">
-            <ExpandIcon />
+          <ToggleButton value="center" sx={{ p: "2px" }}>
+            <ExpandIcon sx={{ transform: "rotate(90deg)" }} />
           </ToggleButton>
-          <ToggleButton value="right" aria-label="right aligned">
+          <ToggleButton value="right" sx={{ p: "2px" }}>
             <AlignHorizontalRightIcon />
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
       {/* Content Area */}
       <Box
         sx={{
           width: "100%",
           height: "100%",
-          p: 2,
         }}
       >
         {children}
