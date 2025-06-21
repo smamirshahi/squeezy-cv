@@ -2,10 +2,10 @@ import { Button, Grid, TextField } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
-import UploadIcon from "@mui/icons-material/Upload";
+import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import { useState } from "react";
-import DownloadIcon from "@mui/icons-material/Download";
+import SaveIcon from "@mui/icons-material/Save";
 import { useAppDispatch } from "@store/store-helper";
 import { setIsPrinting } from "@store/app/app-slice";
 
@@ -58,7 +58,7 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
         variant="contained"
         role={undefined}
         tabIndex={-1}
-        startIcon={<UploadIcon />}
+        startIcon={<DownloadIcon />}
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
       >
         Import
@@ -85,7 +85,7 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
         variant="contained"
         onClick={() => handleExport(fileName)}
-        startIcon={<DownloadIcon />}
+        startIcon={<SaveIcon />}
       >
         Save
       </Button>

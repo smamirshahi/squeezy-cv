@@ -6,88 +6,147 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import React, { useMemo } from "react";
-
-export const GRID_SIZE = 20;
-
-interface ItemProps {
-  id: Container;
-  element: React.ReactElement | null;
-  position: { x: number; y: number };
-  column: "left" | "right" | "fullWidth";
-}
-
-export type Container =
-  | "personalInfo"
-  | "contactInfo"
-  | "summary"
-  | "experiences"
-  | "educations"
-  | "skills";
-
-export type Column = "fullWidth" | "left" | "right";
+import { useCallback, useMemo } from "react";
+import {
+  SectionIdToContentMap,
+  SectionId,
+  SectionProps,
+  Side,
+  SideToSectionIdMap,
+} from "@components/drag-and-drop/dnd-kit-types";
+import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
 
 interface ReturnProps {
-  allItems: ItemProps[];
-  existedItems: ItemProps[];
-  itemsMap: Record<string, React.ReactElement | null>;
+  sections: SectionProps[];
+  sectionsWithContent: SectionProps[];
+  idToSectionMap: SectionIdToContentMap;
+  updatePaperContent: () => {
+    fullWidth: SectionId[];
+    left: SectionId[];
+    right: SectionId[];
+  };
 }
 
-export function useItems(): ReturnProps {
+export function useDndKitWrapper(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
 
-  const allItems: ItemProps[] = useMemo(() => {
+  const sections: SectionProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
-        element: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
+        content: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        column: "fullWidth",
+        layout: "fullWidth",
       },
       {
         id: "contactInfo",
-        element: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
+        content: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        column: "fullWidth",
+        layout: "fullWidth",
       },
       {
         id: "summary",
-        element: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
+        content: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        column: "left",
+        layout: "left",
       },
       {
         id: "experiences",
-        element: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
+        content: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        column: "right",
+        layout: "right",
       },
       {
         id: "educations",
-        element: cvData.educations.length ? <EducationsPreviewPage /> : null,
+        content: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        column: "left",
+        layout: "left",
       },
       {
         id: "skills",
-        element: cvData.skills.length ? <SkillsPreviewPage /> : null,
+        content: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
-        column: "right",
+        layout: "right",
       },
     ];
   }, [cvData]);
 
-  const existedItems = allItems.filter((item) => item.element !== null);
-
-  const itemsMap = useMemo(
-    () => Object.fromEntries(existedItems.map((i) => [i.id, i.element])),
-    [existedItems]
+  const sectionsWithContent = sections.filter(
+    ({ content: element }) => element !== null
   );
 
-  return { allItems, existedItems, itemsMap };
+  const idToSectionMap = useMemo(
+    () =>
+      Object.fromEntries(
+        sectionsWithContent.map(({ id, content: element }) => [id, element])
+      ) as Record<SectionId, React.ReactElement | null>,
+    [sectionsWithContent]
+  );
+
+  const updatePaperContent: () => Record<Side, SectionId[]> =
+    useCallback(() => {
+      function getSectionIdsBySide(side: Side): SectionId[] {
+        return sectionsWithContent
+          .filter(({ layout }) => layout === side)
+          .map(({ id }) => id);
+      }
+      return {
+        fullWidth: getSectionIdsBySide("fullWidth"),
+        left: getSectionIdsBySide("left"),
+        right: getSectionIdsBySide("right"),
+      };
+    }, [sectionsWithContent]);
+
+  return {
+    sections,
+    sectionsWithContent,
+    idToSectionMap,
+    updatePaperContent,
+  };
 }
 
 /** Function to snap the moving component to grid */
 export function snapToGrid(n: number): number {
-  return Math.round(n / GRID_SIZE) * GRID_SIZE;
+  return Math.round(n / GRID_SIZE_PX) * GRID_SIZE_PX;
+}
+
+// FIXME: This is equivalent to `sectionsWithContent`. One of them should be removed
+/** Returns all the sections that have content (it is not null) */
+export function getSectionsWithContent(
+  sections: SectionProps[]
+): SectionProps[] {
+  return sections.filter(({ content }) => content !== null);
+}
+
+/** Returns the side of section by ID */
+export function findContentSideById(
+  sectionIdsBySide: SideToSectionIdMap,
+  id: SectionId
+): Side | null {
+  if (sectionIdsBySide.left.includes(id)) {
+    return "left";
+  }
+  if (sectionIdsBySide.right.includes(id)) {
+    return "right";
+  }
+  if (sectionIdsBySide.fullWidth.includes(id)) {
+    return "fullWidth";
+  }
+  return null;
+}
+
+/**
+ * Reorder the sections by moving a section ID at "from" and insert it at "to"
+ *
+ * @param sectionIds - The array of section IDs that is moved and need to be reordered
+ */
+export function reorderSections<T>(
+  sectionIds: readonly T[],
+  from: number,
+  to: number
+): T[] {
+  const newArray = sectionIds.slice();
+  const [moved] = newArray.splice(from, 1);
+  newArray.splice(to, 0, moved);
+  return newArray;
 }
