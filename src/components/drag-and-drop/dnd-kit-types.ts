@@ -1,4 +1,4 @@
-export type Side = "fullWidth" | "left" | "right";
+import { Side } from "@custom-types/styles-types";
 
 export type SectionId =
   | "personalInfo"
@@ -19,7 +19,7 @@ export interface SectionProps {
   position: { x: number; y: number };
 
   /** The side where the section is displayed */
-  layout: Side;
+  side: Side;
 }
 
 /** Maps Side to sectionId */

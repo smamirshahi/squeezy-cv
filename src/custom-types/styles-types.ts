@@ -1,5 +1,11 @@
 import { Object, String, Static, Union, Literal, Boolean } from "runtypes";
 
+export const SideSchema = Union(
+  Literal("fullWidth"),
+  Literal("left"),
+  Literal("right")
+);
+
 export const FontSizeSchema = Union(
   Literal("8pt"),
   Literal("9pt"),
@@ -75,3 +81,4 @@ export type AvailableFonts = Static<typeof AvailableFontsSchema>;
 export type FontStyle = Static<typeof FontStyleSchema>;
 export type PaperMargin = Static<typeof PaperMarginSchema>;
 export type Style = Static<typeof StyleSchema>;
+export type Side = Static<typeof SideSchema>;

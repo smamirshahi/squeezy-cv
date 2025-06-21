@@ -11,10 +11,10 @@ import {
   SectionIdToContentMap,
   SectionId,
   SectionProps,
-  Side,
   SideToSectionIdMap,
 } from "@components/drag-and-drop/dnd-kit-types";
 import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
+import { Side } from "@custom-types/styles-types";
 
 interface ReturnProps {
   sections: SectionProps[];
@@ -36,37 +36,37 @@ export function useDndKitWrapper(): ReturnProps {
         id: "personalInfo",
         content: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        layout: "fullWidth",
+        side: "fullWidth",
       },
       {
         id: "contactInfo",
         content: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        layout: "fullWidth",
+        side: "fullWidth",
       },
       {
         id: "summary",
         content: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        layout: "left",
+        side: "left",
       },
       {
         id: "experiences",
         content: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        layout: "right",
+        side: "right",
       },
       {
         id: "educations",
         content: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        layout: "left",
+        side: "left",
       },
       {
         id: "skills",
         content: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
-        layout: "right",
+        side: "right",
       },
     ];
   }, [cvData]);
@@ -87,7 +87,7 @@ export function useDndKitWrapper(): ReturnProps {
     useCallback(() => {
       function getSectionIdsBySide(side: Side): SectionId[] {
         return sectionsWithContent
-          .filter(({ layout }) => layout === side)
+          .filter(({ side: layout }) => layout === side)
           .map(({ id }) => id);
       }
       return {

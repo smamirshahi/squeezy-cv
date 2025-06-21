@@ -1,11 +1,12 @@
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { PropsWithChildren, useState } from "react";
-import { Side } from "@components/drag-and-drop/dnd-kit-types";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import AlignHorizontalRightIcon from "@mui/icons-material/AlignHorizontalRight";
 import ExpandIcon from "@mui/icons-material/Expand";
+import { Side } from "@custom-types/styles-types";
 
 interface Props {
+  /** The initial side of a section */
   initialSide: Side;
 }
 
