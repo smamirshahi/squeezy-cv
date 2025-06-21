@@ -15,6 +15,7 @@ import {
 } from "@components/drag-and-drop/dnd-kit-types";
 import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
 import { Side } from "@custom-types/styles-types";
+import { appSelector } from "@store/app/app-slice";
 
 interface ReturnProps {
   sections: SectionProps[];
@@ -29,6 +30,7 @@ interface ReturnProps {
 
 export function useDndKitWrapper(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
+  const { sides } = useAppSelector(appSelector);
 
   const sections: SectionProps[] = useMemo(() => {
     return [
@@ -36,40 +38,40 @@ export function useDndKitWrapper(): ReturnProps {
         id: "personalInfo",
         content: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        side: "fullWidth",
+        side: sides.personalInfo,
       },
       {
         id: "contactInfo",
         content: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        side: "fullWidth",
+        side: sides.contactInfo,
       },
       {
         id: "summary",
         content: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        side: "left",
+        side: sides.summary,
       },
       {
         id: "experiences",
         content: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        side: "right",
+        side: sides.experiences,
       },
       {
         id: "educations",
         content: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        side: "left",
+        side: sides.educations,
       },
       {
         id: "skills",
         content: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
-        side: "right",
+        side: sides.skills,
       },
     ];
-  }, [cvData]);
+  }, [cvData, sides]);
 
   const sectionsWithContent = sections.filter(
     ({ content: element }) => element !== null
