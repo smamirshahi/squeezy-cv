@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { useRef } from "react";
-import { EditorPage } from "@pages/editor-page";
+import { EditorPage } from "@pages/editor-page/editor-page";
 import { TwoColumnDnDKitWrapper } from "@components/drag-and-drop/two-column-dnd-kit-wrapper";
 
 export function App(): JSX.Element {
