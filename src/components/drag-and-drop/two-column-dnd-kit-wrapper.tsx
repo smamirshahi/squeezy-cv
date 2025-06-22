@@ -6,7 +6,6 @@ import { Box, Paper } from "@mui/material";
 import {
   findContentSideById,
   reorderSections,
-  updatePaperContent,
   useDndKitWrapper,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { useAppSelector } from "@store/store-helper";
@@ -29,13 +28,11 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { sectionsWithContent, idToSectionMap } = useDndKitWrapper();
+  const { sectionsWithContent, idToSectionMap, updatePaperContent } =
+    useDndKitWrapper();
   const [sectionIdsBySide, setSectionIdsBySide] = useState<SideToSectionIdMap>(
-    () => updatePaperContent(sectionsWithContent)
+    () => updatePaperContent()
   );
-
-  // FIXME: This doesn't change
-  // console.log(sectionsWithContent);
 
   // When availableSections change (e.g. after importing data), ensure sectionIdsBySide include all valid section IDs.
   // Only reset when new or removed sections are detected so manual arrangements persist across re-renders.
@@ -50,9 +47,15 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       newAvailableIds.length !== oldAvailableIds.length ||
       !newAvailableIds.every((id) => oldAvailableIds.includes(id));
     if (hasDifference) {
-      setSectionIdsBySide(updatePaperContent(sectionsWithContent));
+      setSectionIdsBySide(updatePaperContent());
     }
-  }, [sectionIdsBySide, sectionsWithContent]);
+  }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
+
+  // FIXME: The problem is that sectionIdsBySide doesn't change based on the changes with alignment
+  /** Update content if a section has changed side */
+  // useEffect(() => {
+  //   setSectionIdsBySide(updatePaperContent());
+  // }, [sectionIdsBySide, updatePaperContent]);
 
   /**
    * Handle the drag

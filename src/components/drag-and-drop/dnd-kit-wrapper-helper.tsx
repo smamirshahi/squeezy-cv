@@ -6,7 +6,7 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   SectionIdToContentMap,
   SectionId,
@@ -23,6 +23,9 @@ interface ReturnProps {
 
   /** Map section ID to section */
   idToSectionMap: SectionIdToContentMap;
+
+  /** A callback to that receives the sectionsWithContent and return a map between Side and SectionId */
+  updatePaperContent: () => SideToSectionIdMap;
 }
 
 export function useDndKitWrapper(): ReturnProps {
@@ -83,9 +86,23 @@ export function useDndKitWrapper(): ReturnProps {
     [sectionsWithContent]
   );
 
+  const updatePaperContent: () => SideToSectionIdMap = useCallback(() => {
+    function getSectionIdsBySide(side: Side): SectionId[] {
+      return sectionsWithContent
+        .filter(({ side: layout }) => layout === side)
+        .map(({ id }) => id);
+    }
+    return {
+      fullWidth: getSectionIdsBySide("fullWidth"),
+      left: getSectionIdsBySide("left"),
+      right: getSectionIdsBySide("right"),
+    };
+  }, [sectionsWithContent]);
+
   return {
     sectionsWithContent,
     idToSectionMap,
+    updatePaperContent,
   };
 }
 
@@ -133,24 +150,4 @@ export function reorderSections<T>(
   const [moved] = newArray.splice(from, 1);
   newArray.splice(to, 0, moved);
   return newArray;
-}
-
-function getSectionIdsBySide(
-  sectionsWithContent: SectionProps[],
-  side: Side
-): SectionId[] {
-  return sectionsWithContent
-    .filter(({ side: layout }) => layout === side)
-    .map(({ id }) => id);
-}
-
-/** A callback to that receives the sectionsWithContent and return a map between Side and SectionId */
-export function updatePaperContent(
-  sectionsWithContent: SectionProps[]
-): SideToSectionIdMap {
-  return {
-    fullWidth: getSectionIdsBySide(sectionsWithContent, "fullWidth"),
-    left: getSectionIdsBySide(sectionsWithContent, "left"),
-    right: getSectionIdsBySide(sectionsWithContent, "right"),
-  };
 }
