@@ -51,11 +51,14 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
     }
   }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
 
-  // FIXME: The problem is that sectionIdsBySide doesn't change based on the changes with alignment
-  /** Update content if a section has changed side */
-  // useEffect(() => {
-  //   setSectionIdsBySide(updatePaperContent());
-  // }, [sectionIdsBySide, updatePaperContent]);
+  /**
+   * Update layout when a section is realigned using the alignment buttons.
+   * This effect listens to the `sides` value from the store and recomputes
+   * sectionIdsBySide whenever it changes.
+   */
+  useEffect(() => {
+    setSectionIdsBySide(updatePaperContent());
+  }, [updatePaperContent]);
 
   /**
    * Handle the drag

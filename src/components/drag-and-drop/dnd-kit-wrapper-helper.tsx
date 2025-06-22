@@ -74,8 +74,9 @@ export function useDndKitWrapper(): ReturnProps {
     ];
   }, [cvData, sides]);
 
-  const sectionsWithContent = sections.filter(
-    ({ content: element }) => element !== null
+  const sectionsWithContent = useMemo(
+    () => sections.filter(({ content }) => content !== null),
+    [sections]
   );
 
   const idToSectionMap = useMemo(
