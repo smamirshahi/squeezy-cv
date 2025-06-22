@@ -89,7 +89,21 @@ export function SortableSection({
   }, [isOver, linePosition]);
 
   return (
-    <PreviewSection sectionId={sectionId}>
+    <PreviewSection
+      sectionId={sectionId}
+      customSx={{
+        // Visual appearance and positioning while dragging
+        transform: CSS.Translate.toString(transform),
+        backgroundColor: "transparent",
+        px: "5px",
+        marginBottom: `${DISTANCE_BETWEEN_SECTIONS_PX}px`,
+        width: "95%",
+        borderRight: "2px double #6bda9a",
+        borderLeft: "2px double #6bda9a",
+        ...indicatorStyle,
+        border: shouldShowBorders ? {} : "2px dashed transparent",
+      }}
+    >
       <Box
         component="div"
         // Attach refs so this element participates in drag and drop
@@ -97,18 +111,6 @@ export function SortableSection({
           setDraggableRef(node);
           setDroppableRef(node);
           localRef.current = node;
-        }}
-        sx={{
-          // Visual appearance and positioning while dragging
-          transform: CSS.Translate.toString(transform),
-          backgroundColor: "transparent",
-          px: "5px",
-          marginBottom: `${DISTANCE_BETWEEN_SECTIONS_PX}px`,
-          width: "95%",
-          borderRight: "2px double #6bda9a",
-          borderLeft: "2px double #6bda9a",
-          ...indicatorStyle,
-          border: shouldShowBorders ? {} : "2px dashed transparent",
         }}
         {...listeners}
         {...attributes}

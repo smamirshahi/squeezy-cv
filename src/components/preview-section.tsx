@@ -1,4 +1,4 @@
-import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, SxProps, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { PropsWithChildren } from "react";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import AlignHorizontalRightIcon from "@mui/icons-material/AlignHorizontalRight";
@@ -11,11 +11,15 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 interface Props {
   /** The ID of the section */
   sectionId: SectionId;
+
+  /** Allow PreviewSection to have custom sx */
+  customSx?: SxProps;
 }
 
 export function PreviewSection({
   sectionId,
   children,
+  customSx = {},
 }: PropsWithChildren<Props>): JSX.Element {
   const { sides } = useAppSelector(appSelector);
   const dispatch = useAppDispatch();
@@ -40,6 +44,7 @@ export function PreviewSection({
           opacity: 1,
           visibility: "visible",
         },
+        ...customSx,
       }}
     >
       {/* Toggle Buttons Outside Top-Right */}

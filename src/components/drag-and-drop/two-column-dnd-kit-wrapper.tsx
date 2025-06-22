@@ -6,6 +6,7 @@ import { Box, Paper } from "@mui/material";
 import {
   findContentSideById,
   reorderSections,
+  updatePaperContent,
   useDndKitWrapper,
 } from "@components/drag-and-drop/dnd-kit-wrapper-helper";
 import { useAppSelector } from "@store/store-helper";
@@ -28,11 +29,13 @@ interface Props {
 export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
   const { shouldShowGrids } = useAppSelector(appSelector);
   const { paperMarginForPrinting } = useStyleHelper();
-  const { sectionsWithContent, idToSectionMap, updatePaperContent } =
-    useDndKitWrapper();
+  const { sectionsWithContent, idToSectionMap } = useDndKitWrapper();
   const [sectionIdsBySide, setSectionIdsBySide] = useState<SideToSectionIdMap>(
-    () => updatePaperContent()
+    () => updatePaperContent(sectionsWithContent)
   );
+
+  // FIXME: This doesn't change
+  // console.log(sectionsWithContent);
 
   // When availableSections change (e.g. after importing data), ensure sectionIdsBySide include all valid section IDs.
   // Only reset when new or removed sections are detected so manual arrangements persist across re-renders.
@@ -47,9 +50,9 @@ export function TwoColumnDnDKitWrapper({ contentRef }: Props): JSX.Element {
       newAvailableIds.length !== oldAvailableIds.length ||
       !newAvailableIds.every((id) => oldAvailableIds.includes(id));
     if (hasDifference) {
-      setSectionIdsBySide(updatePaperContent());
+      setSectionIdsBySide(updatePaperContent(sectionsWithContent));
     }
-  }, [sectionIdsBySide, sectionsWithContent, updatePaperContent]);
+  }, [sectionIdsBySide, sectionsWithContent]);
 
   /**
    * Handle the drag
