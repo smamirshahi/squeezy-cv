@@ -1,6 +1,5 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Box } from "@mui/material";
 import { appSelector } from "@store/app/app-slice";
 import { useAppSelector } from "@store/store-helper";
 import {
@@ -90,6 +89,11 @@ export function SortableSection({
 
   return (
     <PreviewSection
+      ref={(node: HTMLDivElement | null) => {
+        setDraggableRef(node);
+        setDroppableRef(node);
+        localRef.current = node;
+      }}
       sectionId={sectionId}
       customSx={{
         // Visual appearance and positioning while dragging
@@ -103,20 +107,10 @@ export function SortableSection({
         ...indicatorStyle,
         border: shouldShowBorders ? {} : "2px dashed transparent",
       }}
+      {...listeners}
+      {...attributes}
     >
-      <Box
-        component="div"
-        // Attach refs so this element participates in drag and drop
-        ref={(node: HTMLDivElement | null) => {
-          setDraggableRef(node);
-          setDroppableRef(node);
-          localRef.current = node;
-        }}
-        {...listeners}
-        {...attributes}
-      >
-        {children}
-      </Box>
+      {children}
     </PreviewSection>
   );
 }

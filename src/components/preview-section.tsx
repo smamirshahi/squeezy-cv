@@ -1,5 +1,5 @@
 import { Box, SxProps, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, forwardRef } from "react";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import AlignHorizontalRightIcon from "@mui/icons-material/AlignHorizontalRight";
 import ExpandIcon from "@mui/icons-material/Expand";
@@ -8,7 +8,7 @@ import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
 import { appSelector, setSideForSectionById } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
   /** The ID of the section */
   sectionId: SectionId;
 
@@ -16,11 +16,14 @@ interface Props {
   customSx?: SxProps;
 }
 
-export function PreviewSection({
-  sectionId,
-  children,
-  customSx = {},
-}: PropsWithChildren<Props>): JSX.Element {
+/** A wrapper for each section in preview mode. Adds some toggle button to align items on top of each section */
+export const PreviewSection = forwardRef<
+  HTMLDivElement,
+  PropsWithChildren<Props>
+>(function PreviewSection(
+  { sectionId, children, customSx = {}, ...rest },
+  ref
+): JSX.Element {
   const { sides } = useAppSelector(appSelector);
   const dispatch = useAppDispatch();
 
@@ -35,6 +38,7 @@ export function PreviewSection({
 
   return (
     <Box
+      ref={ref}
       className="test-preview-section"
       sx={{
         position: "relative",
@@ -46,10 +50,14 @@ export function PreviewSection({
         },
         ...customSx,
       }}
+      {...rest}
     >
       {/* Toggle Buttons Outside Top-Right */}
       <Box
         className="alignment-buttons"
+        // Stopped starting drag events when clicking the alignment buttons
+        // by preventing pointer event propagation inside the button box
+        onPointerDown={(e) => e.stopPropagation()}
         sx={{
           position: "absolute",
           // move above the container
@@ -91,4 +99,4 @@ export function PreviewSection({
       </Box>
     </Box>
   );
-}
+});
