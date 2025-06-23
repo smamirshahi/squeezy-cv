@@ -11,68 +11,72 @@ import {
   SectionIdToContentMap,
   SectionId,
   SectionProps,
-  Side,
   SideToSectionIdMap,
 } from "@components/drag-and-drop/dnd-kit-types";
 import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
+import { Side } from "@custom-types/styles-types";
+import { appSelector } from "@store/app/app-slice";
 
 interface ReturnProps {
-  sections: SectionProps[];
+  /** All the sections that actually have a content and content is not null */
   sectionsWithContent: SectionProps[];
+
+  /** Map section ID to section */
   idToSectionMap: SectionIdToContentMap;
-  updatePaperContent: () => {
-    fullWidth: SectionId[];
-    left: SectionId[];
-    right: SectionId[];
-  };
+
+  /** A callback to that receives the sectionsWithContent and return a map between Side and SectionId */
+  updatePaperContent: () => SideToSectionIdMap;
 }
 
 export function useDndKitWrapper(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
+  const { sides } = useAppSelector(appSelector);
 
+  /** All the sections available right now */
   const sections: SectionProps[] = useMemo(() => {
     return [
       {
         id: "personalInfo",
         content: cvData.personalInfo.name ? <PersonalInfoPreviewPage /> : null,
         position: { x: 0, y: 0 },
-        layout: "fullWidth",
+        side: sides.personalInfo,
       },
       {
         id: "contactInfo",
         content: cvData.contactInfo.email ? <ContactInfoPreviewPage /> : null,
         position: { x: 0, y: 80 },
-        layout: "fullWidth",
+        side: sides.contactInfo,
       },
       {
         id: "summary",
         content: cvData.professionalSummary ? <SummaryPreviewPage /> : null,
         position: { x: 0, y: 140 },
-        layout: "left",
+        side: sides.summary,
       },
       {
         id: "experiences",
         content: cvData.experiences.length ? <ExperiencesPreviewPage /> : null,
         position: { x: 0, y: 280 },
-        layout: "right",
+        side: sides.experiences,
       },
       {
         id: "educations",
         content: cvData.educations.length ? <EducationsPreviewPage /> : null,
         position: { x: 0, y: 760 },
-        layout: "left",
+        side: sides.educations,
       },
       {
         id: "skills",
         content: cvData.skills.length ? <SkillsPreviewPage /> : null,
         position: { x: 0, y: 1000 },
-        layout: "right",
+        side: sides.skills,
       },
     ];
-  }, [cvData]);
+  }, [cvData, sides]);
 
-  const sectionsWithContent = sections.filter(
-    ({ content: element }) => element !== null
+  const sectionsWithContent = useMemo(
+    () => sections.filter(({ content }) => content !== null),
+    [sections]
   );
 
   const idToSectionMap = useMemo(
@@ -83,22 +87,20 @@ export function useDndKitWrapper(): ReturnProps {
     [sectionsWithContent]
   );
 
-  const updatePaperContent: () => Record<Side, SectionId[]> =
-    useCallback(() => {
-      function getSectionIdsBySide(side: Side): SectionId[] {
-        return sectionsWithContent
-          .filter(({ layout }) => layout === side)
-          .map(({ id }) => id);
-      }
-      return {
-        fullWidth: getSectionIdsBySide("fullWidth"),
-        left: getSectionIdsBySide("left"),
-        right: getSectionIdsBySide("right"),
-      };
-    }, [sectionsWithContent]);
+  const updatePaperContent: () => SideToSectionIdMap = useCallback(() => {
+    function getSectionIdsBySide(side: Side): SectionId[] {
+      return sectionsWithContent
+        .filter(({ side: layout }) => layout === side)
+        .map(({ id }) => id);
+    }
+    return {
+      fullWidth: getSectionIdsBySide("fullWidth"),
+      left: getSectionIdsBySide("left"),
+      right: getSectionIdsBySide("right"),
+    };
+  }, [sectionsWithContent]);
 
   return {
-    sections,
     sectionsWithContent,
     idToSectionMap,
     updatePaperContent,
