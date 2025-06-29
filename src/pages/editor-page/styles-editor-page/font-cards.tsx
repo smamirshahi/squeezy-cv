@@ -16,13 +16,6 @@ import { FontColorSelector } from "@pages/editor-page/font-editor/font-color-sel
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { isValidFont } from "@custom-types/type-guards";
 
-function selectedCardStyle(isSelected: boolean): React.CSSProperties {
-  return {
-    boxShadow: isSelected ? "0 8px 20px rgba(0,0,0,0.2)" : undefined,
-    transform: isSelected ? "translateY(-4px) scale(1.02)" : undefined,
-  };
-}
-
 export function FontCards(): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
   const { selectedTypography } = useAppSelector(appSelector);
@@ -49,10 +42,14 @@ export function FontCards(): JSX.Element {
                 width: "280px",
                 m: "10px",
                 border: "1px solid black",
-                ...selectedCardStyle(selectedTypography === variant),
+                backgroundColor:
+                  selectedTypography === variant ? "#e7e7e7" : undefined,
               }}
             >
-              <CardActionArea onClick={() => onCardSelected(variant)}>
+              <CardActionArea
+                onClick={() => onCardSelected(variant)}
+                disableRipple
+              >
                 <CardContent
                   sx={{
                     textAlign: "center",
