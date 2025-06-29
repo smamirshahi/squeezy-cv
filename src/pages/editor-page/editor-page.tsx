@@ -40,7 +40,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       sx={{
         width: `${A4_DIMENSION_MM.width}mm`,
         minHeight: `${A4_DIMENSION_MM.height}mm`,
-        padding: "20mm",
+        padding: "10mm",
         boxSizing: "border-box",
         mx: "auto",
         fontSize: "12pt",

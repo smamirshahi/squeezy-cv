@@ -31,7 +31,7 @@ export function FontCards(): JSX.Element {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                width: "280px",
+                width: "200px",
                 m: "10px",
                 border: "1px solid black",
                 backgroundColor:
@@ -66,8 +66,6 @@ export function FontCards(): JSX.Element {
                 </CardContent>
               </CardActionArea>
               <CardActions>
-                {/* <FontSizeDropdown variant={variant} fontStyle={style} />
-                <FontWeightDropdown variant={variant} fontStyle={style} /> */}
                 <TypographyDropdown variant={variant} fontStyle={style} />
                 <FontColorSelector variant={variant} fontStyle={style} />
               </CardActions>
