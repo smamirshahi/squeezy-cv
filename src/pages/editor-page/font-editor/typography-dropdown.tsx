@@ -12,7 +12,10 @@ import { FontWeightRadioButton } from "@pages/editor-page/font-editor/font-weigh
 import { FontSizeRadioButton } from "@pages/editor-page/font-editor/font-size-radio-button";
 
 interface Props {
+  /** The variant of the font */
   variant: AvailableFonts;
+
+  /** The style of the font */
   fontStyle: FontStyle;
 }
 
@@ -26,8 +29,6 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
   const [selectedWeight, setSelectedWeight] = useState<FontWeight>(
     fontStyle.fontWeight
   );
-
-  const isOpen = Boolean(anchorEl);
 
   function handleApply(): void {
     dispatch(
@@ -46,14 +47,14 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
   return (
     <>
       <Button
-        variant="outlined"
+        variant="contained"
         size="small"
         onClick={(e) => setAnchorEl(e.currentTarget)}
       >
         Typography
       </Button>
       <Popover
-        open={isOpen}
+        open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{
