@@ -1,7 +1,6 @@
 import { CVAccordion } from "@components/cv-accordion";
 import { setPaperMargin, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { isValidFont } from "@custom-types/type-guards";
 import {
   Box,
   FormControl,
@@ -17,12 +16,12 @@ import {
   setShouldShowBorders,
   setShouldShowGrids,
 } from "@store/app/app-slice";
-import { FontCard } from "@pages/editor-page/styles-editor-page/font-card";
+import { FontCards } from "@pages/editor-page/styles-editor-page/font-cards";
 import { DateTypeDropdown } from "@pages/editor-page/styles-editor-page/date-type-dropdown";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
-  const { typography, paperMargin } = useAppSelector(styleSelector);
+  const { paperMargin } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
   const app = useAppSelector(appSelector);
 
@@ -70,11 +69,7 @@ export function StylesEditorPage(): JSX.Element {
         </Box>
       </FormControl>
       <DateTypeDropdown />
-      {Object.entries(typography).map(([variant, style]) => {
-        if (isValidFont(variant)) {
-          return <FontCard key={variant} variant={variant} fontStyle={style} />;
-        }
-      })}
+      <FontCards />
     </CVAccordion>
   );
 }
