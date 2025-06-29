@@ -1,9 +1,5 @@
 import { CVAccordion } from "@components/cv-accordion";
-import {
-  setDateFormat,
-  setPaperMargin,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
+import { setPaperMargin, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { isValidFont } from "@custom-types/type-guards";
 import {
@@ -22,10 +18,11 @@ import {
   setShouldShowGrids,
 } from "@store/app/app-slice";
 import { FontCard } from "@pages/editor-page/styles-editor-page/font-card";
+import { DateTypeDropdown } from "@pages/editor-page/styles-editor-page/date-type-dropdown";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
-  const { typography, dateFormat, paperMargin } = useAppSelector(styleSelector);
+  const { typography, paperMargin } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
   const app = useAppSelector(appSelector);
 
@@ -72,23 +69,7 @@ export function StylesEditorPage(): JSX.Element {
           </FormControl>
         </Box>
       </FormControl>
-      <FormControl fullWidth sx={{ my: "20px" }}>
-        <InputLabel id="date-format-label">Date Format</InputLabel>
-        <Select
-          labelId="date-format-label"
-          id="date-format"
-          value={dateFormat}
-          label="Date Format"
-          onChange={(event) =>
-            dispatch(setDateFormat(event.target.value as Style["dateFormat"]))
-          }
-        >
-          <MenuItem value="DD/MM/YYYY">DD/MM/YYYY (01/12/2018)</MenuItem>
-          <MenuItem value="MMM/YYYY">MMM/YYYY (Dec/2018)</MenuItem>
-          <MenuItem value="MMMM/YYYY">MMMM/YYYY (December 2018)</MenuItem>
-          <MenuItem value="YYYY.MM.DD">YYYY.MM.DD (2018.06.30)</MenuItem>
-        </Select>
-      </FormControl>
+      <DateTypeDropdown />
       {Object.entries(typography).map(([variant, style]) => {
         if (isValidFont(variant)) {
           return <FontCard key={variant} variant={variant} fontStyle={style} />;

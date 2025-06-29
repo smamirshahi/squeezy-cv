@@ -18,12 +18,12 @@ export function FontSizeDropdown({ variant, fontStyle }: Props): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
-    <FormControl size="small" sx={{ minWidth: 100 }}>
-      <InputLabel id="fontSize-label">Font Size</InputLabel>
+    <FormControl size="small">
+      <InputLabel id="fontSize-label">Size</InputLabel>
       <Select
         id="fontSize-select"
         value={fontStyle.fontSize}
-        label="Font Size"
+        label="Size"
         onChange={(event) => {
           const newFontSize = event.target.value;
           if (isValidFontSize(newFontSize)) {

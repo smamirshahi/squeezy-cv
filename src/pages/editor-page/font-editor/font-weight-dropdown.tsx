@@ -18,12 +18,12 @@ export function FontWeightDropdown({ variant, fontStyle }: Props): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
-    <FormControl size="small" sx={{ minWidth: 100 }}>
-      <InputLabel id="fontWeight-label">Font Weight</InputLabel>
+    <FormControl size="small">
+      <InputLabel id="fontWeight-label">Weight</InputLabel>
       <Select
         id="fontWeight-select"
         value={fontStyle.fontWeight}
-        label="Font Weight"
+        label="Weight"
         onChange={(event) => {
           const newFontWeight = event.target.value;
           if (isValidFontWeight(newFontWeight)) {

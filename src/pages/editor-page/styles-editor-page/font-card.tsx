@@ -33,7 +33,7 @@ export function FontCard({ variant, fontStyle }: Props): JSX.Element {
   }
 
   return (
-    <Card>
+    <Card sx={{ width: "280px", m: "10px", border: "1px solid black" }}>
       <CardActionArea onClick={onCardSelected}>
         <CardContent
           sx={{
