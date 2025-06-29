@@ -1,5 +1,5 @@
 import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
-import { Side } from "@custom-types/styles-types";
+import { AvailableFonts, Side } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
@@ -12,11 +12,14 @@ interface AppState {
 
   /** Temporarily solution */
   sides: Record<SectionId, Side>;
+
+  selectedTypography: AvailableFonts | null;
 }
 
 export const initialState: AppState = {
   shouldShowGrids: true,
   shouldShowBorders: true,
+  selectedTypography: null,
   sides: {
     personalInfo: "fullWidth",
     contactInfo: "fullWidth",
@@ -53,6 +56,10 @@ const appSlice = createSlice({
       state.sides[sectionId] = side;
     },
 
+    setSelectedTypography(state, action: PayloadAction<AvailableFonts | null>) {
+      state.selectedTypography = action.payload;
+    },
+
     resetAppState: () => initialState,
   },
   selectors: {
@@ -67,6 +74,7 @@ export const {
   setShouldShowGrids,
   setShouldShowBorders,
   setSideForSectionById,
+  setSelectedTypography,
   resetAppState,
 } = appSlice.actions;
 

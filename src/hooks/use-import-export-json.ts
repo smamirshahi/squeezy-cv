@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { CVJson, CVJsonSchema } from "@custom-types/json-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -27,6 +27,26 @@ export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
   const cvData = useAppSelector(cvDataSelector);
   const style = useAppSelector(styleSelector);
+
+  // Automatic import on mount
+  useEffect(() => {
+    fetch("../../cv-export.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("File not found");
+        }
+        return response.json();
+      })
+      .then((raw) => {
+        const parsed = CVJsonSchema.check(raw);
+        dispatch(setCvData(parsed.data));
+        dispatch(setStyle(parsed.style));
+      })
+      .catch((_error) => {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load default CV file.");
+      });
+  }, [dispatch]);
 
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +82,11 @@ export function useImportExportJson(): ReturnProps {
         return;
       }
       const fileData: CVJson = {
-        version: "1.0",
+        metaData: {
+          version: "1.0",
+          title: "",
+          jobUrl: "",
+        },
         data: cvData,
         style,
       };
