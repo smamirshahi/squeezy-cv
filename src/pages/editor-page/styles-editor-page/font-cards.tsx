@@ -22,12 +22,6 @@ export function FontCards(): JSX.Element {
   const dispatch = useAppDispatch();
   const theme = useTheme();
 
-  function onCardSelected(variant: AvailableFonts): void {
-    selectedTypography === variant
-      ? dispatch(setSelectedTypography(null))
-      : dispatch(setSelectedTypography(variant));
-  }
-
   return (
     <Box component="div" sx={{ display: "flex", flexWrap: "wrap" }}>
       {Object.entries(typography).map(([variant, style]) => {
@@ -47,7 +41,11 @@ export function FontCards(): JSX.Element {
               }}
             >
               <CardActionArea
-                onClick={() => onCardSelected(variant)}
+                onClick={() => {
+                  selectedTypography === variant
+                    ? dispatch(setSelectedTypography(null))
+                    : dispatch(setSelectedTypography(variant));
+                }}
                 disableRipple
               >
                 <CardContent
