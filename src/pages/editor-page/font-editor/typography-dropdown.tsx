@@ -10,6 +10,7 @@ import {
 } from "@custom-types/styles-types";
 import { FontWeightRadioButton } from "@pages/editor-page/font-editor/font-weight-radio-button";
 import { FontSizeRadioButton } from "@pages/editor-page/font-editor/font-size-radio-button";
+import { FontColorSelector } from "@pages/editor-page/font-editor/font-color-selector";
 
 interface Props {
   /** The variant of the font */
@@ -29,6 +30,7 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
   const [selectedWeight, setSelectedWeight] = useState<FontWeight>(
     fontStyle.fontWeight
   );
+  const [selectedColor, setSelectedColor] = useState<string>(fontStyle.color);
 
   function handleApply(): void {
     dispatch(
@@ -37,7 +39,7 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
         fontStyle: {
           fontSize: selectedSize,
           fontWeight: selectedWeight,
-          color: fontStyle.color,
+          color: selectedColor,
         },
       })
     );
@@ -50,6 +52,7 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
         variant="contained"
         size="small"
         onClick={(e) => setAnchorEl(e.currentTarget)}
+        fullWidth
       >
         Typography
       </Button>
@@ -70,6 +73,10 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
           <FontWeightRadioButton
             selectedWeight={selectedWeight}
             setSelectedWeight={setSelectedWeight}
+          />
+          <FontColorSelector
+            selectedColor={selectedColor}
+            setSelectedColor={setSelectedColor}
           />
         </Box>
         <Box display="flex" justifyContent="flex-end" p={1}>

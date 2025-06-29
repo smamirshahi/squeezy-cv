@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { appSelector, setSelectedTypography } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { FontColorSelector } from "@pages/editor-page/font-editor/font-color-selector";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { isValidFont } from "@custom-types/type-guards";
 import { TypographyDropdown } from "@pages/editor-page/font-editor/typography-dropdown";
@@ -67,7 +66,6 @@ export function FontCards(): JSX.Element {
               </CardActionArea>
               <CardActions>
                 <TypographyDropdown variant={variant} fontStyle={style} />
-                <FontColorSelector variant={variant} fontStyle={style} />
               </CardActions>
             </Card>
           );
