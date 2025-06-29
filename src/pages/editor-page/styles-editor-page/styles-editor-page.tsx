@@ -1,4 +1,3 @@
-import { FontOptionsPicker } from "@pages/editor-page/styles-editor-page/font-options-picker";
 import { CVAccordion } from "@components/cv-accordion";
 import {
   setDateFormat,
@@ -22,6 +21,7 @@ import {
   setShouldShowBorders,
   setShouldShowGrids,
 } from "@store/app/app-slice";
+import { FontCard } from "@pages/editor-page/styles-editor-page/font-card";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
@@ -91,9 +91,7 @@ export function StylesEditorPage(): JSX.Element {
       </FormControl>
       {Object.entries(typography).map(([variant, style]) => {
         if (isValidFont(variant)) {
-          return (
-            <FontOptionsPicker key={variant} variant={variant} style={style} />
-          );
+          return <FontCard key={variant} variant={variant} fontStyle={style} />;
         }
       })}
     </CVAccordion>
