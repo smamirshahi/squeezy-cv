@@ -18,8 +18,22 @@ export function FontColorSelector({ variant, fontStyle }: Props): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
   const id = isOpen ? "simple-popover" : undefined;
-
+  const [newColor, setNewColor] = useState<string>(fontStyle.color);
   const dispatch = useAppDispatch();
+
+  function onPopoverClose(): void {
+    setAnchorEl(null);
+    dispatch(
+      setTypography({
+        variant,
+        fontStyle: {
+          fontSize: fontStyle.fontSize,
+          fontWeight: fontStyle.fontWeight,
+          color: newColor,
+        },
+      })
+    );
+  }
 
   return (
     <>
@@ -28,17 +42,17 @@ export function FontColorSelector({ variant, fontStyle }: Props): JSX.Element {
         variant="contained"
         onClick={(event) => setAnchorEl(event.currentTarget)}
         sx={{
-          backgroundColor: fontStyle.color,
+          backgroundColor: newColor,
         }}
       >
-        {fontStyle.color}
+        {newColor}
       </Button>
 
       <Popover
         id={id}
         open={isOpen}
         anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
+        onClose={onPopoverClose}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
@@ -50,34 +64,12 @@ export function FontColorSelector({ variant, fontStyle }: Props): JSX.Element {
       >
         <Box component="div" sx={{ p: 2 }}>
           <HexColorPicker
-            color={fontStyle.color}
-            onChange={(newColor) =>
-              dispatch(
-                setTypography({
-                  variant,
-                  fontStyle: {
-                    fontSize: fontStyle.fontSize,
-                    fontWeight: fontStyle.fontWeight,
-                    color: newColor,
-                  },
-                })
-              )
-            }
+            color={newColor}
+            onChange={(newColor) => setNewColor(newColor)}
           />
           <HexColorInput
-            color={fontStyle.color}
-            onChange={(newColor) =>
-              dispatch(
-                setTypography({
-                  variant,
-                  fontStyle: {
-                    fontSize: fontStyle.fontSize,
-                    fontWeight: fontStyle.fontWeight,
-                    color: newColor,
-                  },
-                })
-              )
-            }
+            color={newColor}
+            onChange={(newColor) => setNewColor(newColor)}
           />
         </Box>
       </Popover>
