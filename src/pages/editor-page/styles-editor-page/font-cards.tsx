@@ -1,4 +1,3 @@
-import { AvailableFonts } from "@custom-types/styles-types";
 import {
   Box,
   Card,
