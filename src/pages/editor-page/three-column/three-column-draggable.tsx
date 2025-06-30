@@ -19,14 +19,16 @@ import { Side } from "@custom-types/styles-types";
 export function ThreeColumnDraggable(): JSX.Element {
   // State for each container
   const [fullWidthItems, setFullWidthItems] = useState<Item[]>([
-    { id: "item-1", label: "Item 1" },
+    { id: "personalInfo", label: "Personal Info" },
+    { id: "contactInfo", label: "Contact Info" },
+    { id: "summary", label: "Personal Summary" },
   ]);
   const [leftItems, setLeftItems] = useState<Item[]>([
-    { id: "item-2", label: "Item 2" },
-    { id: "item-3", label: "Item 3" },
+    { id: "experiences", label: "Experiences" },
   ]);
   const [rightItems, setRightItems] = useState<Item[]>([
-    { id: "item-4", label: "Item 4" },
+    { id: "educations", label: "Educations" },
+    { id: "skills", label: "Skills" },
   ]);
 
   const sensors = useSensors(
