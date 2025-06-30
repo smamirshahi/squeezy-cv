@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { useRef } from "react";
 import { EditorPage } from "@pages/editor-page/editor-page";
-import { TwoColumnDnDKitWrapper } from "@components/drag-and-drop/two-column-dnd-kit-wrapper";
+import { PreviewPage } from "@pages/preview-page/preview-page";
 
 export function App(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -20,7 +20,7 @@ export function App(): JSX.Element {
       }}
     >
       <EditorPage contentRef={contentRef} />
-      <TwoColumnDnDKitWrapper contentRef={contentRef} />
+      <PreviewPage contentRef={contentRef} />
     </Box>
   );
 }

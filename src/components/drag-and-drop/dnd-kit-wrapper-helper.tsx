@@ -17,6 +17,7 @@ import { GRID_SIZE_PX } from "@custom-styles/custom-styles";
 import { Side } from "@custom-types/styles-types";
 import { appSelector } from "@store/app/app-slice";
 
+// TODO: Remove this component
 interface ReturnProps {
   /** All the sections that actually have a content and content is not null */
   sectionsWithContent: SectionProps[];

@@ -19,6 +19,8 @@ import {
 } from "@components/drag-and-drop/dnd-kit-types";
 import { isIdSectionId } from "@custom-types/type-guards";
 
+// TODO: Remove this component
+
 interface Props {
   /** The reference to the content (the A4 paper container) */
   contentRef: React.RefObject<HTMLDivElement | null>;
