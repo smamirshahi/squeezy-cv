@@ -5,6 +5,7 @@ import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@custom-types/styles-types";
 import { FontCards } from "@pages/editor-page/styles-editor-page/font-cards";
 import { DateTypeDropdown } from "@pages/editor-page/styles-editor-page/date-type-dropdown";
+import { ThreeColumnDraggable } from "@pages/editor-page/three-column/three-column-draggable";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
@@ -34,6 +35,7 @@ export function StylesEditorPage(): JSX.Element {
       </FormControl>
       <DateTypeDropdown />
       <FontCards />
+      <ThreeColumnDraggable />
     </CVAccordion>
   );
 }
