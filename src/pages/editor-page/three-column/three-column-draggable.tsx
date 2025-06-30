@@ -10,19 +10,15 @@ import {
 import {
   SortableContext,
   arrayMove,
-  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
-interface Item {
-  id: string;
-  label: string;
-}
+import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
+import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
+import { Side } from "@custom-types/styles-types";
 
 export function ThreeColumnDraggable(): JSX.Element {
   // State for each container
-  const [topItems, setTopItems] = useState<Item[]>([
+  const [fullWidthItems, setFullWidthItems] = useState<Item[]>([
     { id: "item-1", label: "Item 1" },
   ]);
   const [leftItems, setLeftItems] = useState<Item[]>([
@@ -39,9 +35,9 @@ export function ThreeColumnDraggable(): JSX.Element {
     })
   );
 
-  function findContainer(itemId: string): "top" | "left" | "right" | null {
-    if (topItems.find((i) => i.id === itemId)) {
-      return "top";
+  function findContainer(itemId: string): Side | null {
+    if (fullWidthItems.find((i) => i.id === itemId)) {
+      return "fullWidth";
     }
     if (leftItems.find((i) => i.id === itemId)) {
       return "left";
@@ -67,19 +63,19 @@ export function ThreeColumnDraggable(): JSX.Element {
 
     if (fromContainer === toContainer) {
       // Reorder within the same container
-      const items =
-        fromContainer === "top"
-          ? [...topItems]
-          : fromContainer === "left"
-            ? [...leftItems]
-            : [...rightItems];
+      let items = [...fullWidthItems];
+      if (fromContainer === "left") {
+        items = [...leftItems];
+      } else if (fromContainer === "right") {
+        items = [...rightItems];
+      }
 
       const oldIndex = items.findIndex((i) => i.id === active.id);
       const newIndex = items.findIndex((i) => i.id === over.id);
       const newItems = arrayMove(items, oldIndex, newIndex);
 
-      if (fromContainer === "top") {
-        setTopItems(newItems);
+      if (fromContainer === "fullWidth") {
+        setFullWidthItems(newItems);
       } else if (fromContainer === "left") {
         setLeftItems(newItems);
       } else {
@@ -87,19 +83,19 @@ export function ThreeColumnDraggable(): JSX.Element {
       }
     } else {
       // Move between containers
-      const fromItems =
-        fromContainer === "top"
-          ? [...topItems]
-          : fromContainer === "left"
-            ? [...leftItems]
-            : [...rightItems];
+      let fromItems = [...fullWidthItems];
+      if (fromContainer === "left") {
+        fromItems = [...fullWidthItems];
+      } else if (fromContainer === "right") {
+        fromItems = [...rightItems];
+      }
 
-      const toItems =
-        toContainer === "top"
-          ? [...topItems]
-          : toContainer === "left"
-            ? [...leftItems]
-            : [...rightItems];
+      let toItems = [...fullWidthItems];
+      if (toContainer === "left") {
+        toItems = [...leftItems];
+      } else if (toContainer === "right") {
+        toItems = [...rightItems];
+      }
 
       const movingItem = fromItems.find((i) => i.id === active.id);
       if (!movingItem) {
@@ -109,16 +105,16 @@ export function ThreeColumnDraggable(): JSX.Element {
       const newFromItems = fromItems.filter((i) => i.id !== active.id);
       const newToItems = [movingItem, ...toItems];
 
-      if (fromContainer === "top") {
-        setTopItems(newFromItems);
+      if (fromContainer === "fullWidth") {
+        setFullWidthItems(newFromItems);
       } else if (fromContainer === "left") {
         setLeftItems(newFromItems);
       } else {
         setRightItems(newFromItems);
       }
 
-      if (toContainer === "top") {
-        setTopItems(newToItems);
+      if (toContainer === "fullWidth") {
+        setFullWidthItems(newToItems);
       } else if (toContainer === "left") {
         setLeftItems(newToItems);
       } else {
@@ -141,12 +137,16 @@ export function ThreeColumnDraggable(): JSX.Element {
           gap: "16px",
         }}
       >
-        {/* Full-width Top Sortable */}
+        {/* Full-width Sortable */}
         <SortableContext
-          items={topItems}
+          items={fullWidthItems}
           strategy={verticalListSortingStrategy}
         >
-          <Column title="" items={topItems} gridColumn="1 / span 2" />
+          <SortableColumn
+            title=""
+            items={fullWidthItems}
+            gridColumn="1 / span 2"
+          />
         </SortableContext>
 
         {/* Left Column */}
@@ -154,7 +154,7 @@ export function ThreeColumnDraggable(): JSX.Element {
           items={leftItems}
           strategy={verticalListSortingStrategy}
         >
-          <Column title="" items={leftItems} />
+          <SortableColumn title="" items={leftItems} />
         </SortableContext>
 
         {/* Right Column */}
@@ -162,70 +162,9 @@ export function ThreeColumnDraggable(): JSX.Element {
           items={rightItems}
           strategy={verticalListSortingStrategy}
         >
-          <Column title="" items={rightItems} />
+          <SortableColumn title="" items={rightItems} />
         </SortableContext>
       </div>
     </DndContext>
-  );
-}
-
-function Column({
-  title,
-  items,
-  gridColumn,
-}: {
-  title: string;
-  items: Item[];
-  gridColumn?: string;
-}): JSX.Element {
-  return (
-    <div
-      style={{
-        gridColumn,
-        background: "#f9f9f9",
-        padding: "8px",
-        border: "1px solid #ddd",
-        minHeight: "120px",
-      }}
-    >
-      <h4>{title}</h4>
-      {items.map((item) => (
-        <SortableItem key={item.id} id={item.id} label={item.label} />
-      ))}
-    </div>
-  );
-}
-
-function SortableItem({
-  id,
-  label,
-}: {
-  id: string;
-  label: string;
-}): JSX.Element {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    padding: "8px",
-    margin: "4px 0",
-    background: isDragging ? "#cce5ff" : "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "grab",
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {label}
-    </div>
   );
 }
