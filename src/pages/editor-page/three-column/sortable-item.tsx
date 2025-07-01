@@ -1,6 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
+import {
+  Item,
+  getItemStyle,
+} from "@pages/editor-page/three-column/three-column-draggable-utils";
 
 interface Props {
   /** The items to display in the sortable column */
@@ -17,16 +19,7 @@ export function SortableItem({ item }: Props): JSX.Element {
     isDragging,
   } = useSortable({ id: item.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    padding: "8px",
-    margin: "4px 0",
-    background: isDragging ? "#cce5ff" : "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "grab",
-  };
+  const style = getItemStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
