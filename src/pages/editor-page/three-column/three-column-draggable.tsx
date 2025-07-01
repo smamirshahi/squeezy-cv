@@ -10,10 +10,10 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
 import {
+  findItemSideById,
   initialStructure,
   PageStructure,
 } from "@pages/editor-page/three-column/three-column-draggable-utils";
-import { Side } from "@custom-types/styles-types";
 import { Grid } from "@mui/material";
 
 export function ThreeColumnDraggable(): JSX.Element {
@@ -26,46 +26,32 @@ export function ThreeColumnDraggable(): JSX.Element {
     })
   );
 
-  function findContainerSide(itemId: string): Side | null {
-    if (pageStructure.fullWidth.find(({ id }) => id === itemId)) {
-      return "fullWidth";
-    }
-    if (pageStructure.left.find(({ id }) => id === itemId)) {
-      return "left";
-    }
-    if (pageStructure.right.find(({ id }) => id === itemId)) {
-      return "right";
-    }
-    return null;
-  }
-
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
     if (!over) {
       return;
     }
 
-    const fromContainer = findContainerSide(active.id as string);
-    const toContainer = findContainerSide(over.id as string);
+    const fromContainer = findItemSideById(pageStructure, active.id);
+    const toContainer = findItemSideById(pageStructure, over.id);
 
     if (!fromContainer || !toContainer) {
       return;
     }
 
+    const fromItems = [...pageStructure[fromContainer]];
+    const toItems = [...pageStructure[toContainer]];
+
+    const oldIndex = fromItems.findIndex(({ id }) => id === active.id);
+    const newIndex = fromItems.findIndex(({ id }) => id === over.id);
+
     if (fromContainer === toContainer) {
       // Reorder within the same container
-      const items = [...pageStructure[fromContainer]];
-
-      const oldIndex = items.findIndex((i) => i.id === active.id);
-      const newIndex = items.findIndex((i) => i.id === over.id);
-      const newItems = arrayMove(items, oldIndex, newIndex);
+      const newItems = arrayMove(fromItems, oldIndex, newIndex);
       setPageStructure((prev) => ({ ...prev, [fromContainer]: newItems }));
     } else {
       // Move between containers
-      const fromItems = [...pageStructure[fromContainer]];
-      const toItems = [...pageStructure[toContainer]];
-
-      const movingItem = fromItems.find(({ id }) => id === active.id);
+      const movingItem = oldIndex !== -1 ? fromItems[oldIndex] : undefined;
       if (!movingItem) {
         return;
       }
