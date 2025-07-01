@@ -1,13 +1,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
 
-export function SortableItem({
-  id,
-  label,
-}: {
-  id: string;
-  label: string;
-}): JSX.Element {
+interface Props {
+  /** The items to display in the sortable column */
+  item: Item;
+}
+
+export function SortableItem({ item }: Props): JSX.Element {
   const {
     attributes,
     listeners,
@@ -15,7 +15,7 @@ export function SortableItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id: item.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -30,7 +30,7 @@ export function SortableItem({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {label}
+      {item.label}
     </div>
   );
 }
