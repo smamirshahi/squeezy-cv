@@ -7,15 +7,11 @@ import {
   useSensors,
   DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
 import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
 import { Side } from "@custom-types/styles-types";
-import { Box } from "@mui/material";
+import { Grid } from "@mui/material";
 
 export function ThreeColumnDraggable(): JSX.Element {
   // State for each container
@@ -132,39 +128,21 @@ export function ThreeColumnDraggable(): JSX.Element {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <Box
-        component="div"
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "auto 1fr",
-          gap: "16px",
-        }}
-      >
+      <Grid container spacing={2}>
         {/* Full-width Sortable */}
-        <SortableContext
-          items={fullWidthItems}
-          strategy={verticalListSortingStrategy}
-        >
-          <SortableColumn items={fullWidthItems} gridColumn="1 / span 2" />
-        </SortableContext>
+        <Grid size={12}>
+          <SortableColumn items={fullWidthItems} />
+        </Grid>
 
         {/* Left Column */}
-        <SortableContext
-          items={leftItems}
-          strategy={verticalListSortingStrategy}
-        >
+        <Grid size={6}>
           <SortableColumn items={leftItems} />
-        </SortableContext>
-
+        </Grid>
         {/* Right Column */}
-        <SortableContext
-          items={rightItems}
-          strategy={verticalListSortingStrategy}
-        >
+        <Grid size={6}>
           <SortableColumn items={rightItems} />
-        </SortableContext>
-      </Box>
+        </Grid>
+      </Grid>
     </DndContext>
   );
 }
