@@ -126,15 +126,15 @@ export function ThreeColumnDraggable(): JSX.Element {
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Full-width Sortable */}
 
-        <SortableColumn items={pageStructure.fullWidth} />
+        <SortableColumn side="fullWidth" items={pageStructure.fullWidth} />
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Left Column */}
-        <SortableColumn items={pageStructure.left} />
+        <SortableColumn side="left" items={pageStructure.left} />
 
         {/* Right Column */}
-        <SortableColumn items={pageStructure.right} />
+        <SortableColumn side="right" items={pageStructure.right} />
       </Box>
     </DndContext>
   );

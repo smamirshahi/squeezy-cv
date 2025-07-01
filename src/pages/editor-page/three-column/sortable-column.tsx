@@ -1,3 +1,5 @@
+import { Side } from "@custom-types/styles-types";
+import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -10,14 +12,29 @@ import {
 } from "@pages/editor-page/three-column/three-column-draggable-utils";
 
 interface Props {
+  /** Identifier for the column */
+  side: Side;
+
   /** The items to display in the sortable column */
   items: Item[];
 }
 
-export function SortableColumn({ items }: Props): JSX.Element {
+export function SortableColumn({ side, items }: Props): JSX.Element {
+  const { setNodeRef, isOver } = useDroppable({ id: side });
+
   return (
-    <SortableContext items={items} strategy={verticalListSortingStrategy}>
-      <Box sx={columnStyle}>
+    <SortableContext
+      id={side}
+      items={items}
+      strategy={verticalListSortingStrategy}
+    >
+      <Box
+        ref={setNodeRef}
+        sx={{
+          ...columnStyle,
+          background: isOver ? "#e3f2fd" : columnStyle.background,
+        }}
+      >
         {items.map((item) => (
           <SortableItem key={item.id} item={item} />
         ))}
