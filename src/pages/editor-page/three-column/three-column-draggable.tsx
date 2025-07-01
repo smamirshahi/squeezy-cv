@@ -9,24 +9,19 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
-import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
+import {
+  initialStructure,
+  Item,
+} from "@pages/editor-page/three-column/three-column-draggable-utils";
 import { Side } from "@custom-types/styles-types";
 import { Grid } from "@mui/material";
 
 export function ThreeColumnDraggable(): JSX.Element {
-  // State for each container
-  const [fullWidthItems, setFullWidthItems] = useState<Item[]>([
-    { id: "personalInfo", label: "Personal Info" },
-    { id: "contactInfo", label: "Contact Info" },
-    { id: "summary", label: "Personal Summary" },
-  ]);
-  const [leftItems, setLeftItems] = useState<Item[]>([
-    { id: "experiences", label: "Experiences" },
-  ]);
-  const [rightItems, setRightItems] = useState<Item[]>([
-    { id: "educations", label: "Educations" },
-    { id: "skills", label: "Skills" },
-  ]);
+  const [fullWidthItems, setFullWidthItems] = useState<Item[]>(
+    initialStructure.fullWidth
+  );
+  const [leftItems, setLeftItems] = useState<Item[]>(initialStructure.left);
+  const [rightItems, setRightItems] = useState<Item[]>(initialStructure.right);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -35,13 +30,13 @@ export function ThreeColumnDraggable(): JSX.Element {
   );
 
   function findContainer(itemId: string): Side | null {
-    if (fullWidthItems.find((i) => i.id === itemId)) {
+    if (fullWidthItems.find(({ id }) => id === itemId)) {
       return "fullWidth";
     }
-    if (leftItems.find((i) => i.id === itemId)) {
+    if (leftItems.find(({ id }) => id === itemId)) {
       return "left";
     }
-    if (rightItems.find((i) => i.id === itemId)) {
+    if (rightItems.find(({ id }) => id === itemId)) {
       return "right";
     }
     return null;
@@ -96,12 +91,12 @@ export function ThreeColumnDraggable(): JSX.Element {
         toItems = [...rightItems];
       }
 
-      const movingItem = fromItems.find((i) => i.id === active.id);
+      const movingItem = fromItems.find(({ id }) => id === active.id);
       if (!movingItem) {
         return;
       }
 
-      const newFromItems = fromItems.filter((i) => i.id !== active.id);
+      const newFromItems = fromItems.filter(({ id }) => id !== active.id);
       const newToItems = [movingItem, ...toItems];
 
       if (fromContainer === "fullWidth") {
