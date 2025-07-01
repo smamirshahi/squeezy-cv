@@ -6,7 +6,7 @@ import { Style } from "@custom-types/styles-types";
 import { FontCards } from "@pages/editor-page/styles-editor-page/font-cards";
 import { DateTypeDropdown } from "@pages/editor-page/styles-editor-page/date-type-dropdown";
 import { ThreeColumnDraggable } from "@pages/editor-page/three-column/three-column-draggable";
-import { CvSlider } from "@pages/editor-page/styles-editor-page/cv-slider";
+import { PageStructureSlider } from "@pages/editor-page/styles-editor-page/page-structure-slider";
 
 /** Shows the styles section in editor page */
 export function StylesEditorPage(): JSX.Element {
@@ -37,7 +37,7 @@ export function StylesEditorPage(): JSX.Element {
       <DateTypeDropdown />
       <FontCards />
       <ThreeColumnDraggable />
-      <CvSlider />
+      <PageStructureSlider />
     </CVAccordion>
   );
 }
