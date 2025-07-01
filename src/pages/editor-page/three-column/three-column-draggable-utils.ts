@@ -45,6 +45,7 @@ export const columnStyle: React.CSSProperties = {
   border: "2px dashed #ccc",
   borderRadius: "4px",
   minHeight: "120px",
+  width: "300px",
 };
 
 /**

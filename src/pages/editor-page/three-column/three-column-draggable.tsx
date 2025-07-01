@@ -14,7 +14,7 @@ import {
   initialStructure,
   PageStructure,
 } from "@pages/editor-page/three-column/three-column-draggable-utils";
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 
 export function ThreeColumnDraggable(): JSX.Element {
   const [pageStructure, setPageStructure] =
@@ -70,21 +70,19 @@ export function ThreeColumnDraggable(): JSX.Element {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <Grid container spacing={2}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Full-width Sortable */}
-        <Grid size={12}>
-          <SortableColumn items={pageStructure.fullWidth} />
-        </Grid>
 
+        <SortableColumn items={pageStructure.fullWidth} />
+      </Box>
+
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Left Column */}
-        <Grid size={6}>
-          <SortableColumn items={pageStructure.left} />
-        </Grid>
+        <SortableColumn items={pageStructure.left} />
+
         {/* Right Column */}
-        <Grid size={6}>
-          <SortableColumn items={pageStructure.right} />
-        </Grid>
-      </Grid>
+        <SortableColumn items={pageStructure.right} />
+      </Box>
     </DndContext>
   );
 }
