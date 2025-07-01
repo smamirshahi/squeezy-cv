@@ -15,6 +15,7 @@ import {
 import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
 import { Item } from "@pages/editor-page/three-column/three-column-draggable-utils";
 import { Side } from "@custom-types/styles-types";
+import { Box } from "@mui/material";
 
 export function ThreeColumnDraggable(): JSX.Element {
   // State for each container
@@ -131,8 +132,9 @@ export function ThreeColumnDraggable(): JSX.Element {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div
-        style={{
+      <Box
+        component="div"
+        sx={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gridTemplateRows: "auto 1fr",
@@ -144,11 +146,7 @@ export function ThreeColumnDraggable(): JSX.Element {
           items={fullWidthItems}
           strategy={verticalListSortingStrategy}
         >
-          <SortableColumn
-            title=""
-            items={fullWidthItems}
-            gridColumn="1 / span 2"
-          />
+          <SortableColumn items={fullWidthItems} gridColumn="1 / span 2" />
         </SortableContext>
 
         {/* Left Column */}
@@ -156,7 +154,7 @@ export function ThreeColumnDraggable(): JSX.Element {
           items={leftItems}
           strategy={verticalListSortingStrategy}
         >
-          <SortableColumn title="" items={leftItems} />
+          <SortableColumn items={leftItems} />
         </SortableContext>
 
         {/* Right Column */}
@@ -164,9 +162,9 @@ export function ThreeColumnDraggable(): JSX.Element {
           items={rightItems}
           strategy={verticalListSortingStrategy}
         >
-          <SortableColumn title="" items={rightItems} />
+          <SortableColumn items={rightItems} />
         </SortableContext>
-      </div>
+      </Box>
     </DndContext>
   );
 }
