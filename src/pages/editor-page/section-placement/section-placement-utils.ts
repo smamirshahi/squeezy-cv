@@ -3,35 +3,37 @@ import { Side } from "@custom-types/styles-types";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { CSS, Transform } from "@dnd-kit/utilities";
 
-export interface Item {
-  /** The ID of the item */
-  id: PreviewSectionId;
-
-  /** The label to show for each item */
-  label: string;
-}
-
-export type PageStructure = Record<Side, Item[]>;
+export type PageStructure = Record<Side, PreviewSectionId[]>;
 
 export const initialPlacement: PageStructure = {
-  fullWidth: [
-    { id: "personalInfo", label: "Personal Info" },
-    { id: "contactInfo", label: "Contact Info" },
-    { id: "summary", label: "Personal Summary" },
-  ],
-  left: [{ id: "experiences", label: "Experiences" }],
-  right: [
-    { id: "educations", label: "Educations" },
-    { id: "skills", label: "Skills" },
-  ],
+  fullWidth: ["personalInfo", "contactInfo", "summary"],
+  left: ["experiences"],
+  right: ["educations", "skills"],
 };
+
+export function getLabelById(id: PreviewSectionId): string {
+  switch (id) {
+    case "personalInfo":
+      return "Personal Info";
+    case "contactInfo":
+      return "Contact Info";
+    case "summary":
+      return "Personal Summary";
+    case "experiences":
+      return "Experiences";
+    case "educations":
+      return "Educations";
+    case "skills":
+      return "Skills";
+  }
+}
 
 export function findItemSideById(
   structure: PageStructure,
   id: UniqueIdentifier
 ): Side | null {
   for (const key of Object.keys(structure) as Side[]) {
-    if (structure[key].some((item) => item.id === id)) {
+    if (structure[key].some((itemId) => itemId === id)) {
       return key;
     }
   }

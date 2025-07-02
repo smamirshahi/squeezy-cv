@@ -6,27 +6,25 @@ import {
 } from "@dnd-kit/sortable";
 import { Box } from "@mui/material";
 import { SortableItem } from "@pages/editor-page/section-placement/sortable-item";
-import {
-  Item,
-  columnStyle,
-} from "@pages/editor-page/section-placement/section-placement-utils";
+import { columnStyle } from "@pages/editor-page/section-placement/section-placement-utils";
+import { PreviewSectionId } from "@store/app/app-slice-types";
 
 interface Props {
   /** Identifier for the column */
   side: Side;
 
   /** The items to display in the sortable column */
-  items: Item[];
+  itemIds: PreviewSectionId[];
 }
 
 /** A column representing sortable items */
-export function SortableColumn({ side, items }: Props): JSX.Element {
+export function SortableColumn({ side, itemIds }: Props): JSX.Element {
   const { setNodeRef, isOver } = useDroppable({ id: side });
 
   return (
     <SortableContext
       id={side}
-      items={items}
+      items={itemIds}
       strategy={verticalListSortingStrategy}
     >
       <Box
@@ -36,8 +34,8 @@ export function SortableColumn({ side, items }: Props): JSX.Element {
           background: isOver ? "#e3f2fd" : columnStyle.background,
         }}
       >
-        {items.map((item) => (
-          <SortableItem key={item.id} item={item} />
+        {itemIds.map((id) => (
+          <SortableItem key={id} itemId={id} />
         ))}
       </Box>
     </SortableContext>

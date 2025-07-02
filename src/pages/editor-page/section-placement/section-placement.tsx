@@ -44,8 +44,8 @@ export function SectionPlacement(): JSX.Element {
     const fromItems = [...pageStructure[fromContainer]];
     const toItems = [...pageStructure[toContainer]];
 
-    const oldIndex = fromItems.findIndex(({ id }) => id === active.id);
-    const newIndex = fromItems.findIndex(({ id }) => id === over.id);
+    const oldIndex = fromItems.findIndex((id) => id === active.id);
+    const newIndex = fromItems.findIndex((id) => id === over.id);
 
     if (fromContainer === toContainer) {
       // Reorder within the same container
@@ -58,7 +58,7 @@ export function SectionPlacement(): JSX.Element {
         return;
       }
 
-      const newFromItems = fromItems.filter(({ id }) => id !== active.id);
+      const newFromItems = fromItems.filter((id) => id !== active.id);
       const newToItems = [movingItem, ...toItems];
 
       setPageStructure((prev) => ({ ...prev, [fromContainer]: newFromItems }));
@@ -85,8 +85,8 @@ export function SectionPlacement(): JSX.Element {
 
     if (fromContainer === toContainer) {
       const items = pageStructure[fromContainer];
-      const oldIndex = items.findIndex(({ id }) => id === active.id);
-      const newIndex = items.findIndex(({ id }) => id === over.id);
+      const oldIndex = items.findIndex((id) => id === active.id);
+      const newIndex = items.findIndex((id) => id === over.id);
       if (oldIndex !== newIndex && newIndex !== -1) {
         setPageStructure((prev) => ({
           ...prev,
@@ -99,12 +99,12 @@ export function SectionPlacement(): JSX.Element {
     setPageStructure((prev) => {
       const fromItems = [...prev[fromContainer]];
       const toItems = [...prev[toContainer]];
-      const activeIndex = fromItems.findIndex(({ id }) => id === active.id);
+      const activeIndex = fromItems.findIndex((id) => id === active.id);
       if (activeIndex === -1) {
         return prev;
       }
       const [movingItem] = fromItems.splice(activeIndex, 1);
-      const overIndex = toItems.findIndex(({ id }) => id === over.id);
+      const overIndex = toItems.findIndex((id) => id === over.id);
       const insertIndex = overIndex === -1 ? toItems.length : overIndex;
       toItems.splice(insertIndex, 0, movingItem);
 
@@ -126,15 +126,15 @@ export function SectionPlacement(): JSX.Element {
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Full-width Sortable */}
 
-        <SortableColumn side="fullWidth" items={pageStructure.fullWidth} />
+        <SortableColumn side="fullWidth" itemIds={pageStructure.fullWidth} />
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         {/* Left Column */}
-        <SortableColumn side="left" items={pageStructure.left} />
+        <SortableColumn side="left" itemIds={pageStructure.left} />
 
         {/* Right Column */}
-        <SortableColumn side="right" items={pageStructure.right} />
+        <SortableColumn side="right" itemIds={pageStructure.right} />
       </Box>
     </DndContext>
   );
