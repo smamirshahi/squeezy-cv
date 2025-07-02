@@ -1,4 +1,4 @@
-import { PreviewSectionId } from "@store/app/app-slice-types";
+import { EditorSectionId, PreviewSectionId } from "@store/app/app-slice-types";
 import { AvailableFonts, Side } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
@@ -11,6 +11,8 @@ interface AppState {
   sides: Record<PreviewSectionId, Side>;
 
   selectedTypography: AvailableFonts | null;
+
+  selectedSectionInEditorPage: EditorSectionId | null;
 }
 
 export const initialState: AppState = {
@@ -24,6 +26,7 @@ export const initialState: AppState = {
     educations: "right",
     skills: "right",
   },
+  selectedSectionInEditorPage: null,
 };
 
 /** Slice to access state of app */
@@ -51,6 +54,13 @@ const appSlice = createSlice({
       state.selectedTypography = action.payload;
     },
 
+    setSelectedSectionInEditorPage(
+      state,
+      action: PayloadAction<EditorSectionId | null>
+    ) {
+      state.selectedSectionInEditorPage = action.payload;
+    },
+
     resetAppState: () => initialState,
   },
   selectors: {
@@ -65,6 +75,7 @@ export const {
   setShouldShowBorders,
   setSideForSectionById,
   setSelectedTypography,
+  setSelectedSectionInEditorPage,
   resetAppState,
 } = appSlice.actions;
 

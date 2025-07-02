@@ -9,8 +9,6 @@ import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-i
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { EditorPageSection } from "@pages/editor-page/editor-page-section";
-import { useState } from "react";
-import { EditorSectionId } from "@store/app/app-slice-types";
 import { MetaDataSection } from "@pages/editor-page/meta-data-section";
 import { PageStructureEditorPage } from "@pages/editor-page/page-structure-editor-page";
 
@@ -21,9 +19,6 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const [expandedSection, setExpandedSection] =
-    useState<EditorSectionId | null>(null);
-
   return (
     <Paper
       elevation={3}
@@ -38,82 +33,39 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <EditorPageButtons printReference={contentRef} />
-      <EditorPageSection
-        title="Metadata"
-        sectionId="metadata"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Metadata" sectionId="metadata">
         <MetaDataSection />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Typography"
-        sectionId="typography"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Typography" sectionId="typography">
         <StylesEditorPage />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Page Structure"
-        sectionId="template"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Page Structure" sectionId="template">
         <PageStructureEditorPage />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Personal Info"
-        sectionId="personalInfo"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Personal Info" sectionId="personalInfo">
         <PersonalInfoEditorPage />
       </EditorPageSection>
-      <EditorPageSection
-        title="Contact Info"
-        sectionId="contactInfo"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+
+      <EditorPageSection title="Contact Info" sectionId="contactInfo">
         <ContactInfoEditorPage />
       </EditorPageSection>
-      <EditorPageSection
-        title="Professional Summary"
-        sectionId="summary"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+
+      <EditorPageSection title="Professional Summary" sectionId="summary">
         <SummaryEditorPage />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Work Experience"
-        sectionId="experiences"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Work Experience" sectionId="experiences">
         <ExperienceEditorPage />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Educations"
-        sectionId="educations"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Educations" sectionId="educations">
         <EducationEditorPage />
       </EditorPageSection>
 
-      <EditorPageSection
-        title="Skills"
-        sectionId="skills"
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-      >
+      <EditorPageSection title="Skills" sectionId="skills">
         <SkillsEditorPage />
       </EditorPageSection>
     </Paper>
