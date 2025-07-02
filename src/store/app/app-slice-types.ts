@@ -10,7 +10,7 @@ export type PreviewSectionId =
 /** Sections in editor page */
 export type EditorSectionId =
   | "metadata"
-  | "styles"
+  | "typography"
   | "template"
   | "personalInfo"
   | "contactInfo"

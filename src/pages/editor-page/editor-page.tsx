@@ -12,6 +12,7 @@ import { EditorPageSection } from "@pages/editor-page/editor-page-section";
 import { useState } from "react";
 import { EditorSectionId } from "@store/app/app-slice-types";
 import { MetaDataSection } from "@pages/editor-page/meta-data-section";
+import { PageStructureEditorPage } from "@pages/editor-page/page-structure-editor-page";
 
 interface Props {
   /** The reference to the content */
@@ -47,12 +48,21 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       </EditorPageSection>
 
       <EditorPageSection
-        title="Styles"
-        sectionId="styles"
+        title="Typography"
+        sectionId="typography"
         expandedSection={expandedSection}
         setExpandedSection={setExpandedSection}
       >
         <StylesEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection
+        title="Page Structure"
+        sectionId="template"
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
+      >
+        <PageStructureEditorPage />
       </EditorPageSection>
 
       <EditorPageSection
