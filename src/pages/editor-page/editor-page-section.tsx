@@ -2,27 +2,37 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { PropsWithChildren } from "react";
 import { EditorSectionId } from "@store/app/app-slice-types";
+import { SetStateFunction } from "@store/store-helper";
 
 interface Props {
   /** The title to show in accordion */
   title: string;
 
+  /** The ID of the section representing editor page */
   sectionId: EditorSectionId;
 
-  isExpanded: boolean;
+  /** The section that is expanded */
+  expandedSection: EditorSectionId | null;
 
-  handleChange: (sectionId: EditorSectionId) => void;
+  /** Setter for changing section that is expanded */
+  setExpandedSection: SetStateFunction<EditorSectionId | null>;
 }
 
+/** Shows a section with expansion in editor page */
 export function EditorPageSection({
   title,
   sectionId,
-  isExpanded,
-  handleChange,
+  expandedSection,
+  setExpandedSection,
   children,
 }: PropsWithChildren<Props>): JSX.Element {
   return (
-    <Accordion expanded={isExpanded} onChange={() => handleChange(sectionId)}>
+    <Accordion
+      expanded={expandedSection === sectionId}
+      onChange={() =>
+        setExpandedSection(expandedSection === sectionId ? null : sectionId)
+      }
+    >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         {title}
       </AccordionSummary>

@@ -23,12 +23,6 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const [expandedSection, setExpandedSection] =
     useState<EditorSectionId | null>(null);
 
-  function onExpandedSectionClicked(sectionId: EditorSectionId): void {
-    expandedSection === sectionId
-      ? setExpandedSection(null)
-      : setExpandedSection(sectionId);
-  }
-
   return (
     <Paper
       elevation={3}
@@ -46,8 +40,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Metadata"
         sectionId="metadata"
-        isExpanded={expandedSection === "metadata"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <MetaDataSection />
       </EditorPageSection>
@@ -55,8 +49,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Styles"
         sectionId="styles"
-        isExpanded={expandedSection === "styles"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <StylesEditorPage />
       </EditorPageSection>
@@ -64,24 +58,24 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Personal Info"
         sectionId="personalInfo"
-        isExpanded={expandedSection === "personalInfo"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <PersonalInfoEditorPage />
       </EditorPageSection>
       <EditorPageSection
         title="Contact Info"
         sectionId="contactInfo"
-        isExpanded={expandedSection === "contactInfo"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <ContactInfoEditorPage />
       </EditorPageSection>
       <EditorPageSection
         title="Professional Summary"
         sectionId="summary"
-        isExpanded={expandedSection === "summary"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <SummaryEditorPage />
       </EditorPageSection>
@@ -89,8 +83,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Work Experience"
         sectionId="experiences"
-        isExpanded={expandedSection === "experiences"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <ExperienceEditorPage />
       </EditorPageSection>
@@ -98,8 +92,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Educations"
         sectionId="educations"
-        isExpanded={expandedSection === "educations"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <EducationEditorPage />
       </EditorPageSection>
@@ -107,8 +101,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <EditorPageSection
         title="Skills"
         sectionId="skills"
-        isExpanded={expandedSection === "skills"}
-        handleChange={onExpandedSectionClicked}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
       >
         <SkillsEditorPage />
       </EditorPageSection>
