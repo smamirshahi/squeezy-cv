@@ -1,4 +1,4 @@
-import { SectionId } from "./app-slice-types";
+import { PreviewSectionId } from "./app-slice-types";
 import { AvailableFonts, Side } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
@@ -11,7 +11,7 @@ interface AppState {
   shouldShowBorders: boolean;
 
   /** Temporarily solution */
-  sides: Record<SectionId, Side>;
+  sides: Record<PreviewSectionId, Side>;
 
   selectedTypography: AvailableFonts | null;
 }
@@ -50,7 +50,7 @@ const appSlice = createSlice({
 
     setSideForSectionById(
       state,
-      action: PayloadAction<{ sectionId: SectionId; side: Side }>
+      action: PayloadAction<{ sectionId: PreviewSectionId; side: Side }>
     ) {
       const { sectionId, side } = action.payload;
       state.sides[sectionId] = side;

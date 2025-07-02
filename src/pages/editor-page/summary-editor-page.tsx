@@ -1,6 +1,5 @@
 import { TextField } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
-import { CVAccordion } from "@components/cv-accordion";
 import {
   cvDataSelector,
   updateProfessionalSummary,
@@ -17,21 +16,19 @@ export function SummaryEditorPage(): JSX.Element | null {
   });
 
   return (
-    <CVAccordion title="Professional Summary">
-      <TextField
-        label="Professional Summary"
-        variant="outlined"
-        multiline
-        value={localState}
-        fullWidth
-        sx={{
-          mt: "20px",
-          "& .MuiInputBase-input": {
-            resize: "vertical",
-          },
-        }}
-        onChange={(event) => setLocalState(event.target.value)}
-      />
-    </CVAccordion>
+    <TextField
+      label="Professional Summary"
+      variant="outlined"
+      multiline
+      value={localState}
+      fullWidth
+      sx={{
+        mt: "20px",
+        "& .MuiInputBase-input": {
+          resize: "vertical",
+        },
+      }}
+      onChange={(event) => setLocalState(event.target.value)}
+    />
   );
 }

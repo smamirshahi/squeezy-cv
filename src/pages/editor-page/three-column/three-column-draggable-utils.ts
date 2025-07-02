@@ -1,11 +1,11 @@
-import { SectionId } from "@store/app/app-slice-types";
+import { PreviewSectionId } from "@store/app/app-slice-types";
 import { Side } from "@custom-types/styles-types";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { CSS, Transform } from "@dnd-kit/utilities";
 
 export interface Item {
   /** The ID of the item */
-  id: SectionId;
+  id: PreviewSectionId;
 
   /** The label to show for each item */
   label: string;

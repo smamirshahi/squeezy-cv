@@ -1,4 +1,3 @@
-import { CVAccordion } from "@components/cv-accordion";
 import { setPaperMargin, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
@@ -14,7 +13,7 @@ export function StylesEditorPage(): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
-    <CVAccordion title="Styles">
+    <>
       <FormControl component="fieldset" variant="standard">
         <Box component="div" display="flex" flexDirection="row">
           <FormControl>
@@ -38,6 +37,6 @@ export function StylesEditorPage(): JSX.Element {
       <FontCards />
       <ThreeColumnDraggable />
       <PageStructureSlider />
-    </CVAccordion>
+    </>
   );
 }
