@@ -7,10 +7,16 @@ interface AppState {
   /** Whether to show borders around components in preview page */
   shouldShowBorders: boolean;
 
-  /** Temporarily solution */
+  selectedTypography: AvailableFonts | null;
+
   structure: PageStructure;
 
-  selectedTypography: AvailableFonts | null;
+  columnWidth: {
+    /** Width of the left column in preview page in percentage */
+    left: number;
+    /** Width of the right column in preview page in percentage */
+    right: number;
+  };
 
   selectedSectionInEditorPage: EditorSectionId | null;
 }
@@ -22,6 +28,10 @@ export const initialState: AppState = {
     fullWidth: ["personalInfo", "contactInfo", "summary"],
     left: ["experiences"],
     right: ["educations", "skills"],
+  },
+  columnWidth: {
+    left: 50,
+    right: 50,
   },
   selectedSectionInEditorPage: null,
 };
@@ -54,6 +64,10 @@ const appSlice = createSlice({
       state.selectedSectionInEditorPage = action.payload;
     },
 
+    setColumnWidth(state, action: PayloadAction<AppState["columnWidth"]>) {
+      state.columnWidth = action.payload;
+    },
+
     resetAppState: () => initialState,
   },
   selectors: {
@@ -69,6 +83,7 @@ export const {
   updatePageStructure,
   setSelectedTypography,
   setSelectedSectionInEditorPage,
+  setColumnWidth,
   resetAppState,
 } = appSlice.actions;
 

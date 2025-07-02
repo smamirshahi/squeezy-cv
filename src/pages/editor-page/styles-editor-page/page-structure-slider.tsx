@@ -1,5 +1,6 @@
 import { Slider, Stack } from "@mui/material";
-import { useState } from "react";
+import { appSelector, setColumnWidth } from "@store/app/app-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 const selectablePercents = [
   {
@@ -20,9 +21,8 @@ const selectablePercents = [
 ];
 
 export function PageStructureSlider(): JSX.Element {
-  const [leftColumnSize, setLeftColumnSize] = useState<number>(
-    selectablePercents[0].value
-  );
+  const { columnWidth } = useAppSelector(appSelector);
+  const dispatch = useAppDispatch();
 
   return (
     <Stack
@@ -30,17 +30,19 @@ export function PageStructureSlider(): JSX.Element {
       direction="row"
       sx={{ alignItems: "center", my: "20px" }}
     >
-      <p>{leftColumnSize}%</p>
+      <p>{columnWidth.left}%</p>
       <Slider
-        value={leftColumnSize}
-        onChange={(_, value) => setLeftColumnSize(value)}
+        value={columnWidth.left}
+        onChange={(_, value) =>
+          dispatch(setColumnWidth({ left: value, right: 100 - value }))
+        }
         step={null}
         valueLabelDisplay="auto"
         marks={selectablePercents}
         min={0}
         max={100}
       />
-      <p>{100 - leftColumnSize}%</p>
+      <p>{columnWidth.right}%</p>
     </Stack>
   );
 }
