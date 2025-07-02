@@ -1,4 +1,4 @@
-import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
+import { SectionId } from "./app-slice-types";
 import { AvailableFonts, Side } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 

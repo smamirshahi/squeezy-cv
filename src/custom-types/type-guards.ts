@@ -1,4 +1,4 @@
-import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
+import { SectionId } from "@store/app/app-slice-types";
 import {
   AVAILABLE_FONT_OPTIONS,
   WORD_FONT_SIZE_OPTIONS,
