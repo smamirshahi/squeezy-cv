@@ -19,7 +19,7 @@ export function CvTypography({
   text,
 }: TypographyVariantProps): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
-  const { isTextSelected } = useCvTypographyUtils();
+  const { opacity } = useCvTypographyUtils();
 
   const additionalStyle: SxProps = useMemo(() => {
     switch (variant) {
@@ -48,8 +48,7 @@ export function CvTypography({
         ...typography[variant],
         p: "0px",
         m: "0px",
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        opacity: isTextSelected(variant) ? 1 : 0.2,
+        opacity: opacity(variant),
         ...additionalStyle,
       }}
       gutterBottom

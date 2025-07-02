@@ -5,6 +5,7 @@ import { useCallback } from "react";
 
 interface ReturnProps {
   isTextSelected: (variant: AvailableFonts) => boolean;
+  opacity: (variant: AvailableFonts) => number;
 }
 
 export function useCvTypographyUtils(): ReturnProps {
@@ -17,7 +18,19 @@ export function useCvTypographyUtils(): ReturnProps {
     [selectedTypography]
   );
 
+  const opacity = useCallback(
+    (variant: AvailableFonts) => {
+      if (isTextSelected(variant)) {
+        return 1;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      return 0.2;
+    },
+    [isTextSelected]
+  );
+
   return {
     isTextSelected,
+    opacity,
   };
 }

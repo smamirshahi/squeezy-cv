@@ -11,7 +11,7 @@ interface Props {
 /** Wraps an svg icon and make the color based on the user selection */
 export function CvIcon({ icon }: Props): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
-  const { isTextSelected } = useCvTypographyUtils();
+  const { opacity } = useCvTypographyUtils();
 
   return (
     <SvgIcon
@@ -20,8 +20,7 @@ export function CvIcon({ icon }: Props): JSX.Element {
       fontSize="small"
       sx={{
         color: typography.icon.color,
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        opacity: isTextSelected("icon") ? 1 : 0.2,
+        opacity: opacity("icon"),
       }}
     />
   );
