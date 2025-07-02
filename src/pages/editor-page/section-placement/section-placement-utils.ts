@@ -1,9 +1,7 @@
-import { PreviewSectionId } from "@store/app/app-slice-types";
+import { PageStructure, PreviewSectionId } from "@store/app/app-slice-types";
 import { Side } from "@custom-types/styles-types";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { CSS, Transform } from "@dnd-kit/utilities";
-
-export type PageStructure = Record<Side, PreviewSectionId[]>;
 
 export const initialPlacement: PageStructure = {
   fullWidth: ["personalInfo", "contactInfo", "summary"],

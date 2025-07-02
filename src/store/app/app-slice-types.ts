@@ -1,3 +1,5 @@
+import { Side } from "@custom-types/styles-types";
+
 /** Sections in preview page */
 export type PreviewSectionId =
   | "personalInfo"
@@ -18,3 +20,5 @@ export type EditorSectionId =
   | "experiences"
   | "educations"
   | "skills";
+
+export type PageStructure = Record<Side, PreviewSectionId[]>;

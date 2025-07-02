@@ -13,10 +13,10 @@ import { SortableColumn } from "@pages/editor-page/section-placement/sortable-co
 import {
   findItemSideById,
   initialPlacement,
-  PageStructure,
 } from "@pages/editor-page/section-placement/section-placement-utils";
 import { Box } from "@mui/material";
 import { Side } from "@custom-types/styles-types";
+import { PageStructure } from "@store/app/app-slice-types";
 
 export function SectionPlacement(): JSX.Element {
   const [pageStructure, setPageStructure] =
