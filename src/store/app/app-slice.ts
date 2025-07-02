@@ -1,12 +1,9 @@
-import { PreviewSectionId } from "./app-slice-types";
+import { PreviewSectionId } from "@store/app/app-slice-types";
 import { AvailableFonts, Side } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
 interface AppState {
-  /** Whether to show grids on preview page */
-  shouldShowGrids: boolean;
-
   /** Whether to show borders around components in preview page */
   shouldShowBorders: boolean;
 
@@ -17,7 +14,6 @@ interface AppState {
 }
 
 export const initialState: AppState = {
-  shouldShowGrids: true,
   shouldShowBorders: true,
   selectedTypography: null,
   sides: {
@@ -36,16 +32,11 @@ const appSlice = createSlice({
   initialState,
   reducers: {
     setIsPrinting(state, action: PayloadAction<boolean>) {
-      state.shouldShowGrids = !action.payload;
       state.shouldShowBorders = !action.payload;
     },
 
     setShouldShowBorders(state, action: PayloadAction<boolean>) {
       state.shouldShowBorders = action.payload;
-    },
-
-    setShouldShowGrids(state, action: PayloadAction<boolean>) {
-      state.shouldShowGrids = action.payload;
     },
 
     setSideForSectionById(
@@ -71,7 +62,6 @@ export const { appSelector } = appSlice.selectors;
 
 export const {
   setIsPrinting,
-  setShouldShowGrids,
   setShouldShowBorders,
   setSideForSectionById,
   setSelectedTypography,
