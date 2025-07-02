@@ -1,4 +1,4 @@
-import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
+import { PreviewSectionId } from "@store/app/app-slice-types";
 import {
   AVAILABLE_FONT_OPTIONS,
   WORD_FONT_SIZE_OPTIONS,
@@ -40,7 +40,7 @@ export function isValidFontWeight(value: string): value is FontWeight {
 }
 
 /** Check if the value is a valid SectionId */
-export function isIdSectionId(value: unknown): value is SectionId {
+export function isIdSectionId(value: unknown): value is PreviewSectionId {
   return (
     typeof value === "string" &&
     [

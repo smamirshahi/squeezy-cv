@@ -1,4 +1,4 @@
-import { AccordionDetails, Paper, TextField } from "@mui/material";
+import { Paper } from "@mui/material";
 import { EditorPageButtons } from "@components/editor-page-buttons";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
@@ -8,10 +8,9 @@ import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info-editor-
 import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
-import { CVAccordion } from "@components/cv-accordion";
-import { useDebounceCallback } from "@hooks/use-debounce-callback";
-import { useAppSelector } from "@store/store-helper";
-import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
+import { EditorPageSection } from "@pages/editor-page/editor-page-section";
+import { MetaDataSection } from "@pages/editor-page/meta-data-section";
+import { PageFormatEditorPage } from "@pages/editor-page/page-format-editor-page";
 
 interface Props {
   /** The reference to the content */
@@ -20,20 +19,6 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const metaData = useAppSelector(metaDataSelector);
-
-  const { localState: localJobTitle, setLocalState: setLocalJobTitle } =
-    useDebounceCallback({
-      reduxState: metaData.title,
-      createAction: (value) => setMetaData({ field: "title", value }),
-    });
-
-  const { localState: localJobUrl, setLocalState: setLocalJobUrl } =
-    useDebounceCallback({
-      reduxState: metaData.jobUrl,
-      createAction: (value) => setMetaData({ field: "jobUrl", value }),
-    });
-
   return (
     <Paper
       elevation={3}
@@ -48,36 +33,41 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <EditorPageButtons printReference={contentRef} />
-      <TextField
-        fullWidth
-        value={localJobTitle}
-        onChange={(event) => setLocalJobTitle(event.target.value)}
-        sx={{
-          mb: "10px",
-        }}
-        label="job title"
-      />
-      <TextField
-        fullWidth
-        value={localJobUrl}
-        onChange={(event) => setLocalJobUrl(event.target.value)}
-        sx={{
-          mb: "10px",
-        }}
-        label="job url"
-        inputProps={{ style: { height: "40px" } }}
-      />
-      <StylesEditorPage />
-      <CVAccordion title="Profile">
-        <AccordionDetails>
-          <PersonalInfoEditorPage />
-          <ContactInfoEditorPage />
-        </AccordionDetails>
-      </CVAccordion>
-      <SummaryEditorPage />
-      <ExperienceEditorPage />
-      <EducationEditorPage />
-      <SkillsEditorPage />
+      <EditorPageSection title="Metadata" sectionId="metadata">
+        <MetaDataSection />
+      </EditorPageSection>
+
+      <EditorPageSection title="Typography" sectionId="typography">
+        <StylesEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Page Structure" sectionId="template">
+        <PageFormatEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Personal Info" sectionId="personalInfo">
+        <PersonalInfoEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Contact Info" sectionId="contactInfo">
+        <ContactInfoEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Professional Summary" sectionId="summary">
+        <SummaryEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Work Experience" sectionId="experiences">
+        <ExperienceEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Educations" sectionId="educations">
+        <EducationEditorPage />
+      </EditorPageSection>
+
+      <EditorPageSection title="Skills" sectionId="skills">
+        <SkillsEditorPage />
+      </EditorPageSection>
     </Paper>
   );
 }

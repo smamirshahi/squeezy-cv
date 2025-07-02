@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { CVAccordion } from "@components/cv-accordion";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addBulletPoint,
@@ -28,129 +27,127 @@ export function ExperienceEditorPage(): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
-    <CVAccordion title="Work Experience">
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {experiences.map((experience) => (
-          <Box
-            key={experience.id}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          >
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <UpdateExperienceSection
-                label="Job Title"
-                field="jobTitle"
-                experience={experience}
-              />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {experiences.map((experience) => (
+        <Box
+          key={experience.id}
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <UpdateExperienceSection
+              label="Job Title"
+              field="jobTitle"
+              experience={experience}
+            />
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={experience.shouldShow}
-                    onChange={(event) =>
-                      dispatch(
-                        updateExperience({
-                          experienceId: experience.id,
-                          key: "shouldShow",
-                          // eslint-disable-next-line @typescript-eslint/naming-convention
-                          value: event.target.checked,
-                        })
-                      )
-                    }
-                  />
-                }
-                label="Show this experience"
-              />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={experience.shouldShow}
+                  onChange={(event) =>
+                    dispatch(
+                      updateExperience({
+                        experienceId: experience.id,
+                        key: "shouldShow",
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        value: event.target.checked,
+                      })
+                    )
+                  }
+                />
+              }
+              label="Show this experience"
+            />
 
-              <IconButton
-                onClick={() => dispatch(removeExperience(experience.id))}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-            {/* Company and Location in one line */}
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <UpdateExperienceSection
-                label="Company"
-                field="company"
-                experience={experience}
-              />
-              <UpdateExperienceSection
-                label="Location"
-                field="location"
-                experience={experience}
-              />
-            </Box>
-
-            {/* Start and End Date in one line */}
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <UpdateExperienceSection
-                label="Start Date"
-                field="startDate"
-                experience={experience}
-                textFieldType="date"
-              />
-              <UpdateExperienceSection
-                label="End Date"
-                field="endDate"
-                experience={experience}
-                textFieldType="date"
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-                mb: 2,
-              }}
+            <IconButton
+              onClick={() => dispatch(removeExperience(experience.id))}
             >
-              {experience.bulletPoints.map((bulletPoint, index) => (
-                <Box
-                  key={bulletPoint.id}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                  }}
-                >
-                  <UpdateBulletPointSection
-                    bulletPoint={bulletPoint}
-                    bulletPointIndex={index}
-                  />
-                  <IconButton
-                    onClick={() =>
-                      dispatch(
-                        removeBulletPoint({
-                          experienceId: experience.id,
-                          bulletPointId: bulletPoint.id,
-                        })
-                      )
-                    }
-                    disabled={experience.bulletPoints.length === 1}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              ))}
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+          {/* Company and Location in one line */}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <UpdateExperienceSection
+              label="Company"
+              field="company"
+              experience={experience}
+            />
+            <UpdateExperienceSection
+              label="Location"
+              field="location"
+              experience={experience}
+            />
+          </Box>
 
-              <Box>
+          {/* Start and End Date in one line */}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <UpdateExperienceSection
+              label="Start Date"
+              field="startDate"
+              experience={experience}
+              textFieldType="date"
+            />
+            <UpdateExperienceSection
+              label="End Date"
+              field="endDate"
+              experience={experience}
+              textFieldType="date"
+            />
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              mb: 2,
+            }}
+          >
+            {experience.bulletPoints.map((bulletPoint, index) => (
+              <Box
+                key={bulletPoint.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <UpdateBulletPointSection
+                  bulletPoint={bulletPoint}
+                  bulletPointIndex={index}
+                />
                 <IconButton
                   onClick={() =>
-                    dispatch(addBulletPoint({ experienceId: experience.id }))
+                    dispatch(
+                      removeBulletPoint({
+                        experienceId: experience.id,
+                        bulletPointId: bulletPoint.id,
+                      })
+                    )
                   }
+                  disabled={experience.bulletPoints.length === 1}
                 >
-                  <AddIcon />
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>
+            ))}
+
+            <Box>
+              <IconButton
+                onClick={() =>
+                  dispatch(addBulletPoint({ experienceId: experience.id }))
+                }
+              >
+                <AddIcon />
+              </IconButton>
             </Box>
           </Box>
-        ))}
+        </Box>
+      ))}
 
-        <Button variant="contained" onClick={() => dispatch(addExperience())}>
-          Add Work Experience
-        </Button>
-      </Box>
-    </CVAccordion>
+      <Button variant="contained" onClick={() => dispatch(addExperience())}>
+        Add Work Experience
+      </Button>
+    </Box>
   );
 }

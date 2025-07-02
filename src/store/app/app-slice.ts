@@ -1,33 +1,39 @@
-import { SectionId } from "@components/drag-and-drop/dnd-kit-types";
-import { AvailableFonts, Side } from "@custom-types/styles-types";
+import { EditorSectionId, PageStructure } from "@store/app/app-slice-types";
+import { AvailableFonts } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
 interface AppState {
-  /** Whether to show grids on preview page */
-  shouldShowGrids: boolean;
-
   /** Whether to show borders around components in preview page */
   shouldShowBorders: boolean;
 
-  /** Temporarily solution */
-  sides: Record<SectionId, Side>;
-
   selectedTypography: AvailableFonts | null;
+
+  structure: PageStructure;
+
+  columnWidth: {
+    /** Width of the left column in preview page in percentage */
+    left: number;
+    /** Width of the right column in preview page in percentage */
+    right: number;
+  };
+
+  selectedSectionInEditorPage: EditorSectionId | null;
 }
 
 export const initialState: AppState = {
-  shouldShowGrids: true,
   shouldShowBorders: true,
   selectedTypography: null,
-  sides: {
-    personalInfo: "fullWidth",
-    contactInfo: "fullWidth",
-    summary: "fullWidth",
-    experiences: "left",
-    educations: "right",
-    skills: "right",
+  structure: {
+    fullWidth: ["personalInfo", "contactInfo", "summary"],
+    left: ["experiences"],
+    right: ["educations", "skills"],
   },
+  columnWidth: {
+    left: 50,
+    right: 50,
+  },
+  selectedSectionInEditorPage: null,
 };
 
 /** Slice to access state of app */
@@ -36,7 +42,6 @@ const appSlice = createSlice({
   initialState,
   reducers: {
     setIsPrinting(state, action: PayloadAction<boolean>) {
-      state.shouldShowGrids = !action.payload;
       state.shouldShowBorders = !action.payload;
     },
 
@@ -44,20 +49,23 @@ const appSlice = createSlice({
       state.shouldShowBorders = action.payload;
     },
 
-    setShouldShowGrids(state, action: PayloadAction<boolean>) {
-      state.shouldShowGrids = action.payload;
-    },
-
-    setSideForSectionById(
-      state,
-      action: PayloadAction<{ sectionId: SectionId; side: Side }>
-    ) {
-      const { sectionId, side } = action.payload;
-      state.sides[sectionId] = side;
+    updatePageStructure(state, action: PayloadAction<PageStructure>) {
+      state.structure = action.payload;
     },
 
     setSelectedTypography(state, action: PayloadAction<AvailableFonts | null>) {
       state.selectedTypography = action.payload;
+    },
+
+    setSelectedSectionInEditorPage(
+      state,
+      action: PayloadAction<EditorSectionId | null>
+    ) {
+      state.selectedSectionInEditorPage = action.payload;
+    },
+
+    setColumnWidth(state, action: PayloadAction<AppState["columnWidth"]>) {
+      state.columnWidth = action.payload;
     },
 
     resetAppState: () => initialState,
@@ -71,10 +79,11 @@ export const { appSelector } = appSlice.selectors;
 
 export const {
   setIsPrinting,
-  setShouldShowGrids,
   setShouldShowBorders,
-  setSideForSectionById,
+  updatePageStructure,
   setSelectedTypography,
+  setSelectedSectionInEditorPage,
+  setColumnWidth,
   resetAppState,
 } = appSlice.actions;
 
