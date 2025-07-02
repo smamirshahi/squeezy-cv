@@ -2,11 +2,11 @@ import { setPaperMargin, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@custom-types/styles-types";
-import { ThreeColumnDraggable } from "@pages/editor-page/three-column/three-column-draggable";
+import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";
 import { PageStructureSlider } from "@pages/editor-page/styles-editor-page/page-structure-slider";
 
-/** Shows the template section in editor page */
-export function PageStructureEditorPage(): JSX.Element {
+/** Shows the page format in editor page */
+export function PageFormatEditorPage(): JSX.Element {
   const { paperMargin } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
@@ -31,7 +31,7 @@ export function PageStructureEditorPage(): JSX.Element {
           </FormControl>
         </Box>
       </FormControl>
-      <ThreeColumnDraggable />
+      <SectionPlacement />
       <PageStructureSlider />
     </>
   );

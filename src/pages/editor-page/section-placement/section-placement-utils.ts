@@ -13,7 +13,7 @@ export interface Item {
 
 export type PageStructure = Record<Side, Item[]>;
 
-export const initialStructure: PageStructure = {
+export const initialPlacement: PageStructure = {
   fullWidth: [
     { id: "personalInfo", label: "Personal Info" },
     { id: "contactInfo", label: "Contact Info" },

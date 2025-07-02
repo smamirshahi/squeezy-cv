@@ -9,18 +9,18 @@ import {
   DragOverEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { SortableColumn } from "@pages/editor-page/three-column/sortable-column";
+import { SortableColumn } from "@pages/editor-page/section-placement/sortable-column";
 import {
   findItemSideById,
-  initialStructure,
+  initialPlacement,
   PageStructure,
-} from "@pages/editor-page/three-column/three-column-draggable-utils";
+} from "@pages/editor-page/section-placement/section-placement-utils";
 import { Box } from "@mui/material";
 import { Side } from "@custom-types/styles-types";
 
-export function ThreeColumnDraggable(): JSX.Element {
+export function SectionPlacement(): JSX.Element {
   const [pageStructure, setPageStructure] =
-    useState<PageStructure>(initialStructure);
+    useState<PageStructure>(initialPlacement);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

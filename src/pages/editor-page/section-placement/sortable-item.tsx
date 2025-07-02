@@ -2,13 +2,14 @@ import { useSortable } from "@dnd-kit/sortable";
 import {
   Item,
   getItemStyle,
-} from "@pages/editor-page/three-column/three-column-draggable-utils";
+} from "@pages/editor-page/section-placement/section-placement-utils";
 
 interface Props {
   /** The items to display in the sortable column */
   item: Item;
 }
 
+/** Items in each dropdown column */
 export function SortableItem({ item }: Props): JSX.Element {
   const {
     attributes,

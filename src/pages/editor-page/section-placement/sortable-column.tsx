@@ -5,11 +5,11 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Box } from "@mui/material";
-import { SortableItem } from "@pages/editor-page/three-column/sortable-item";
+import { SortableItem } from "@pages/editor-page/section-placement/sortable-item";
 import {
   Item,
   columnStyle,
-} from "@pages/editor-page/three-column/three-column-draggable-utils";
+} from "@pages/editor-page/section-placement/section-placement-utils";
 
 interface Props {
   /** Identifier for the column */
@@ -19,6 +19,7 @@ interface Props {
   items: Item[];
 }
 
+/** A column representing sortable items */
 export function SortableColumn({ side, items }: Props): JSX.Element {
   const { setNodeRef, isOver } = useDroppable({ id: side });
 

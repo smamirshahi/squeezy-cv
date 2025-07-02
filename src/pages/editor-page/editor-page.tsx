@@ -10,7 +10,7 @@ import { SummaryEditorPage } from "@pages/editor-page/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { EditorPageSection } from "@pages/editor-page/editor-page-section";
 import { MetaDataSection } from "@pages/editor-page/meta-data-section";
-import { PageStructureEditorPage } from "@pages/editor-page/page-structure-editor-page";
+import { PageFormatEditorPage } from "@pages/editor-page/page-format-editor-page";
 
 interface Props {
   /** The reference to the content */
@@ -42,7 +42,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       </EditorPageSection>
 
       <EditorPageSection title="Page Structure" sectionId="template">
-        <PageStructureEditorPage />
+        <PageFormatEditorPage />
       </EditorPageSection>
 
       <EditorPageSection title="Personal Info" sectionId="personalInfo">
