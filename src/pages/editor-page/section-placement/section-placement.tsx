@@ -17,10 +17,14 @@ import {
 import { Box } from "@mui/material";
 import { Side } from "@custom-types/styles-types";
 import { PageStructure } from "@store/app/app-slice-types";
+import { useAppDispatch } from "@store/store-helper";
+import { updatePageStructure } from "@store/app/app-slice";
 
 export function SectionPlacement(): JSX.Element {
   const [pageStructure, setPageStructure] =
     useState<PageStructure>(initialPlacement);
+
+  const dispatch = useAppDispatch();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,6 +68,7 @@ export function SectionPlacement(): JSX.Element {
       setPageStructure((prev) => ({ ...prev, [fromContainer]: newFromItems }));
       setPageStructure((prev) => ({ ...prev, [toContainer]: newToItems }));
     }
+    dispatch(updatePageStructure(pageStructure));
   }
 
   function handleDragOver(event: DragOverEvent): void {

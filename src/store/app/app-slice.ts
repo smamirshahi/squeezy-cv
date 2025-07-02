@@ -1,5 +1,5 @@
-import { EditorSectionId, PreviewSectionId } from "@store/app/app-slice-types";
-import { AvailableFonts, Side } from "@custom-types/styles-types";
+import { EditorSectionId, PageStructure } from "@store/app/app-slice-types";
+import { AvailableFonts } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
@@ -8,7 +8,7 @@ interface AppState {
   shouldShowBorders: boolean;
 
   /** Temporarily solution */
-  sides: Record<PreviewSectionId, Side>;
+  structure: PageStructure;
 
   selectedTypography: AvailableFonts | null;
 
@@ -18,13 +18,10 @@ interface AppState {
 export const initialState: AppState = {
   shouldShowBorders: true,
   selectedTypography: null,
-  sides: {
-    personalInfo: "fullWidth",
-    contactInfo: "fullWidth",
-    summary: "fullWidth",
-    experiences: "left",
-    educations: "right",
-    skills: "right",
+  structure: {
+    fullWidth: ["personalInfo", "contactInfo", "summary"],
+    left: ["experiences"],
+    right: ["educations", "skills"],
   },
   selectedSectionInEditorPage: null,
 };
@@ -42,12 +39,8 @@ const appSlice = createSlice({
       state.shouldShowBorders = action.payload;
     },
 
-    setSideForSectionById(
-      state,
-      action: PayloadAction<{ sectionId: PreviewSectionId; side: Side }>
-    ) {
-      const { sectionId, side } = action.payload;
-      state.sides[sectionId] = side;
+    updatePageStructure(state, action: PayloadAction<PageStructure>) {
+      state.structure = action.payload;
     },
 
     setSelectedTypography(state, action: PayloadAction<AvailableFonts | null>) {
@@ -73,7 +66,7 @@ export const { appSelector } = appSlice.selectors;
 export const {
   setIsPrinting,
   setShouldShowBorders,
-  setSideForSectionById,
+  updatePageStructure,
   setSelectedTypography,
   setSelectedSectionInEditorPage,
   resetAppState,
