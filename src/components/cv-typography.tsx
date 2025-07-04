@@ -3,6 +3,7 @@ import { SxProps, Typography } from "@mui/material";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { useMemo } from "react";
+import { useCvTypographyUtils } from "@components/cv-typography-utils";
 
 interface TypographyVariantProps {
   /** The variant of the typography */
@@ -18,6 +19,7 @@ export function CvTypography({
   text,
 }: TypographyVariantProps): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
+  const { opacity } = useCvTypographyUtils();
 
   const additionalStyle: SxProps = useMemo(() => {
     switch (variant) {
@@ -42,7 +44,13 @@ export function CvTypography({
 
   return (
     <Typography
-      sx={{ ...typography[variant], p: "0px", m: "0px", ...additionalStyle }}
+      sx={{
+        ...typography[variant],
+        p: "0px",
+        m: "0px",
+        opacity: opacity(variant),
+        ...additionalStyle,
+      }}
       gutterBottom
     >
       {text}
