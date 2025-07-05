@@ -10,8 +10,11 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import { useAppDispatch } from "@store/store-helper";
-import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  appSelector,
+  setSelectedSectionInEditorPage,
+} from "@store/app/app-slice";
 import { EditorPageButtons } from "@components/editor-page-buttons";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
@@ -24,20 +27,60 @@ import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-e
 import { EditorPageSection } from "@pages/editor-page/editor-page-section";
 import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section";
 import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
+import { EditorSectionId } from "@store/app/app-slice-types";
+import { useMemo } from "react";
 
 const DRAWER_WIDTH = 200;
 
-const SECTIONS = [
-  { id: "metadata", label: "Metadata" },
-  { id: "typography", label: "Typography" },
-  { id: "template", label: "Page Structure" },
-  { id: "personalInfo", label: "Personal Info" },
-  { id: "contactInfo", label: "Contact Info" },
-  { id: "summary", label: "Professional Summary" },
-  { id: "experiences", label: "Work Experience" },
-  { id: "educations", label: "Educations" },
-  { id: "skills", label: "Skills" },
-] as const;
+const SECTIONS: {
+  [key in EditorSectionId]: {
+    id: key;
+    label: string;
+    component: JSX.Element;
+  };
+} = {
+  metadata: {
+    id: "metadata",
+    label: "Metadata",
+    component: <MetaDataSection />,
+  },
+  typography: {
+    id: "typography",
+    label: "Typography",
+    component: <StylesEditorPage />,
+  },
+  template: {
+    id: "template",
+    label: "Page Structure",
+    component: <PageFormatEditorPage />,
+  },
+  personalInfo: {
+    id: "personalInfo",
+    label: "Personal Info",
+    component: <PersonalInfoEditorPage />,
+  },
+  contactInfo: {
+    id: "contactInfo",
+    label: "Contact Info",
+    component: <ContactInfoEditorPage />,
+  },
+  summary: {
+    id: "summary",
+    label: "Professional Summary",
+    component: <SummaryEditorPage />,
+  },
+  experiences: {
+    id: "experiences",
+    label: "Work Experience",
+    component: <ExperienceEditorPage />,
+  },
+  educations: {
+    id: "educations",
+    label: "Educations",
+    component: <EducationEditorPage />,
+  },
+  skills: { id: "skills", label: "Skills", component: <SkillsEditorPage /> },
+};
 
 interface Props {
   /** The reference to the content */
@@ -47,6 +90,14 @@ interface Props {
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
+  const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+
+  const content = useMemo(() => {
+    if (!selectedSectionInEditorPage) {
+      return <Box>Hello world!</Box>;
+    }
+    return SECTIONS[selectedSectionInEditorPage].component;
+  }, [selectedSectionInEditorPage]);
 
   return (
     <Paper
@@ -72,7 +123,6 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       <Box display={"flex"} flexDirection="row" gap={2} p={2}>
         <Box>
           <Drawer
-            className="mohammad"
             variant="permanent"
             sx={{
               width: DRAWER_WIDTH,
@@ -86,14 +136,14 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
           >
             <Toolbar />
             <List>
-              {SECTIONS.map((section) => (
-                <ListItem key={section.id} disablePadding>
+              {Object.entries(SECTIONS).map(([editorSectionId, value]) => (
+                <ListItem key={value.id} disablePadding>
                   <ListItemButton
                     onClick={() =>
-                      dispatch(setSelectedSectionInEditorPage(section.id))
+                      dispatch(setSelectedSectionInEditorPage(value.id))
                     }
                   >
-                    <ListItemText primary={section.label} />
+                    <ListItemText primary={value.label} />
                   </ListItemButton>
                 </ListItem>
               ))}
@@ -102,41 +152,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         </Box>
         <Box>
           <EditorPageButtons printReference={contentRef} />
-          <EditorPageSection title="Metadata" sectionId="metadata">
-            <MetaDataSection />
-          </EditorPageSection>
-
-          <EditorPageSection title="Typography" sectionId="typography">
-            <StylesEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Page Structure" sectionId="template">
-            <PageFormatEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Personal Info" sectionId="personalInfo">
-            <PersonalInfoEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Contact Info" sectionId="contactInfo">
-            <ContactInfoEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Professional Summary" sectionId="summary">
-            <SummaryEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Work Experience" sectionId="experiences">
-            <ExperienceEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Educations" sectionId="educations">
-            <EducationEditorPage />
-          </EditorPageSection>
-
-          <EditorPageSection title="Skills" sectionId="skills">
-            <SkillsEditorPage />
-          </EditorPageSection>
+          {content}
         </Box>
       </Box>
     </Paper>
