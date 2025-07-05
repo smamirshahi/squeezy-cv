@@ -24,7 +24,6 @@ import { PersonalInfoEditorPage } from "@pages/editor-page/personal-info/persona
 import { ContactInfoEditorPage } from "@pages/editor-page/contact-info/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
-import { EditorPageSection } from "@pages/editor-page/editor-page-section";
 import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section";
 import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
 import { EditorSectionId } from "@store/app/app-slice-types";
@@ -118,6 +117,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Editor
           </Typography>
+          <EditorPageButtons printReference={contentRef} />
         </Toolbar>
       </AppBar>
       <Box display={"flex"} flexDirection="row" gap={2} p={2}>
@@ -136,7 +136,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
           >
             <Toolbar />
             <List>
-              {Object.entries(SECTIONS).map(([editorSectionId, value]) => (
+              {Object.values(SECTIONS).map((value) => (
                 <ListItem key={value.id} disablePadding>
                   <ListItemButton
                     onClick={() =>
@@ -150,10 +150,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
             </List>
           </Drawer>
         </Box>
-        <Box>
-          <EditorPageButtons printReference={contentRef} />
-          {content}
-        </Box>
+        <Box>{content}</Box>
       </Box>
     </Paper>
   );
