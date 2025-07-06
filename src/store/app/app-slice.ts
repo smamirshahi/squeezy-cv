@@ -18,7 +18,7 @@ interface AppState {
     right: number;
   };
 
-  selectedSectionInEditorPage: EditorSectionId | null;
+  selectedSectionInEditorPage: EditorSectionId;
 }
 
 export const initialState: AppState = {
@@ -33,7 +33,7 @@ export const initialState: AppState = {
     left: 50,
     right: 50,
   },
-  selectedSectionInEditorPage: null,
+  selectedSectionInEditorPage: "metadata",
 };
 
 /** Slice to access state of app */
@@ -59,7 +59,7 @@ const appSlice = createSlice({
 
     setSelectedSectionInEditorPage(
       state,
-      action: PayloadAction<EditorSectionId | null>
+      action: PayloadAction<EditorSectionId>
     ) {
       state.selectedSectionInEditorPage = action.payload;
     },

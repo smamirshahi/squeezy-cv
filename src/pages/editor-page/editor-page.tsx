@@ -25,7 +25,6 @@ import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-e
 import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section";
 import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
 import { EditorSectionId } from "@store/app/app-slice-types";
-import { useMemo } from "react";
 import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-editor-page";
 
 const DRAWER_WIDTH = 200;
@@ -85,13 +84,6 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
 
-  const content = useMemo(() => {
-    if (!selectedSectionInEditorPage) {
-      return <Box>Hello world!</Box>;
-    }
-    return SECTIONS[selectedSectionInEditorPage].component;
-  }, [selectedSectionInEditorPage]);
-
   return (
     <Paper
       elevation={3}
@@ -145,7 +137,9 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
             </List>
           </Drawer>
         </Box>
-        <Box sx={{ width: "100%" }}>{content}</Box>
+        <Box sx={{ width: "100%" }}>
+          {SECTIONS[selectedSectionInEditorPage].component}
+        </Box>
       </Box>
     </Paper>
   );
