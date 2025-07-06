@@ -142,6 +142,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
                     onClick={() =>
                       dispatch(setSelectedSectionInEditorPage(value.id))
                     }
+                    selected={selectedSectionInEditorPage === value.id}
                   >
                     <ListItemText primary={value.label} />
                   </ListItemButton>
@@ -150,7 +151,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
             </List>
           </Drawer>
         </Box>
-        <Box>{content}</Box>
+        <Box sx={{ width: "100%" }}>{content}</Box>
       </Box>
     </Paper>
   );
