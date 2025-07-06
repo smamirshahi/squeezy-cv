@@ -24,9 +24,6 @@ export function SummaryEditorPage(): JSX.Element | null {
       fullWidth
       sx={{
         mt: "20px",
-        // "& .MuiInputBase-input": {
-        //   resize: "vertical",
-        // },
       }}
       onChange={(event) => setLocalState(event.target.value)}
     />

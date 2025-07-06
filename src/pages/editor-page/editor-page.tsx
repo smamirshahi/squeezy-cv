@@ -20,14 +20,13 @@ import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
 import { EducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page";
 import { SkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page";
-import { PersonalInfoEditorPage } from "@pages/editor-page/main-info/personal-info-editor-page";
-import { ContactInfoEditorPage } from "@pages/editor-page/main-info/contact-info-editor-page";
 import { SummaryEditorPage } from "@pages/editor-page/summary/summary-editor-page";
 import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
 import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section";
 import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
 import { EditorSectionId } from "@store/app/app-slice-types";
 import { useMemo } from "react";
+import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-editor-page";
 
 const DRAWER_WIDTH = 200;
 
@@ -53,15 +52,10 @@ const SECTIONS: {
     label: "Page Structure",
     component: <PageFormatEditorPage />,
   },
-  personalInfo: {
-    id: "personalInfo",
-    label: "Personal Info",
-    component: <PersonalInfoEditorPage />,
-  },
-  contactInfo: {
-    id: "contactInfo",
-    label: "Contact Info",
-    component: <ContactInfoEditorPage />,
+  mainInfo: {
+    id: "mainInfo",
+    label: "Main Info",
+    component: <MainInfoEditorPage />,
   },
   summary: {
     id: "summary",

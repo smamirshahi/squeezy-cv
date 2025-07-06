@@ -9,40 +9,36 @@ import { ContactInfoSection } from "@pages/editor-page/main-info/contact-info-se
 /** Shows the contact info in editor page */
 export function ContactInfoEditorPage(): JSX.Element {
   return (
-    <>
-      <Box display="flex" gap={2} mb={2}>
-        <ContactInfoSection
-          icon={<AlternateEmailIcon />}
-          label="Email"
-          field="email"
-        />
+    <Box display="flex" flexDirection="column" gap={2} mb={2}>
+      <ContactInfoSection
+        icon={<AlternateEmailIcon />}
+        label="Email"
+        field="email"
+      />
 
-        <ContactInfoSection
-          icon={<SmartphoneIcon />}
-          label="Phone"
-          field="phone"
-        />
+      <ContactInfoSection
+        icon={<SmartphoneIcon />}
+        label="Phone"
+        field="phone"
+      />
 
-        <ContactInfoSection
-          icon={<LinkedInIcon />}
-          label="LinkedInId"
-          field="linkedInId"
-        />
-      </Box>
+      <ContactInfoSection
+        icon={<LinkedInIcon />}
+        label="LinkedInId"
+        field="linkedInId"
+      />
 
-      <Box display="flex" gap={2} mb={2}>
-        <ContactInfoSection
-          icon={<GitHubIcon />}
-          label="Github"
-          field="gitHubId"
-        />
+      <ContactInfoSection
+        icon={<GitHubIcon />}
+        label="Github"
+        field="gitHubId"
+      />
 
-        <ContactInfoSection
-          icon={<LocationOnIcon />}
-          label="Location"
-          field="location"
-        />
-      </Box>
-    </>
+      <ContactInfoSection
+        icon={<LocationOnIcon />}
+        label="Location"
+        field="location"
+      />
+    </Box>
   );
 }
