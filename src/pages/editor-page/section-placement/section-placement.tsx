@@ -128,18 +128,22 @@ export function SectionPlacement(): JSX.Element {
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
     >
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        {/* Full-width Sortable */}
-
-        <SortableColumn side="fullWidth" itemIds={pageStructure.fullWidth} />
-      </Box>
-
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        {/* Left Column */}
-        <SortableColumn side="left" itemIds={pageStructure.left} />
-
-        {/* Right Column */}
-        <SortableColumn side="right" itemIds={pageStructure.right} />
+      <Box sx={{ display: "flex", justifyContent: "center" }} gap={2}>
+        <SortableColumn
+          title="Full Width"
+          side="fullWidth"
+          itemIds={pageStructure.fullWidth}
+        />
+        <SortableColumn
+          title="Left Side"
+          side="left"
+          itemIds={pageStructure.left}
+        />
+        <SortableColumn
+          title="Right Side"
+          side="right"
+          itemIds={pageStructure.right}
+        />
       </Box>
     </DndContext>
   );
