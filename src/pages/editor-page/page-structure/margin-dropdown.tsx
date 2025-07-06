@@ -8,7 +8,7 @@ export function MarginDropdown(): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
-    <FormControl>
+    <FormControl component="fieldset" variant="standard">
       <InputLabel id="date-format-label">Margin</InputLabel>
       <Select
         value={paperMargin}
