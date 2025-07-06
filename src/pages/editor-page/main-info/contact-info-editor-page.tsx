@@ -4,7 +4,7 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { ContactInfoSection } from "@pages/editor-page/contact-info/contact-info-section";
+import { ContactInfoSection } from "@pages/editor-page/main-info/contact-info-section";
 
 /** Shows the contact info in editor page */
 export function ContactInfoEditorPage(): JSX.Element {
