@@ -27,8 +27,17 @@ import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section"
 import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
 import { EditorSectionId } from "@store/app/app-slice-types";
 import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-editor-page";
-import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
-import { useState } from "react";
+import {
+  cvDataSelector,
+  metaDataSelector,
+  setContactInfo,
+  setMetaData,
+  setPersonalInfo,
+} from "@store/cv-data/cv-data-slice";
+import { useEffect, useState } from "react";
+import { PersonalInfo } from "@custom-types/personal-info-types";
+import { ContactInfo } from "@custom-types/contact-info-types";
+import { MetaData } from "@custom-types/json-types";
 
 const DRAWER_WIDTH = 200;
 
@@ -42,9 +51,40 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
   const metaData = useAppSelector(metaDataSelector);
+  const { personalInfo, contactInfo } = useAppSelector(cvDataSelector);
 
-  const [jobTitle, setJobTitle] = useState<string>(metaData.title);
-  const [jobUrl, setJobUrl] = useState<string>(metaData.jobUrl);
+  const [shouldShowApplyButton, setShouldShowApplyButton] =
+    useState<boolean>(true);
+
+  useEffect(() => {
+    switch (selectedSectionInEditorPage) {
+      case "metadata":
+      case "mainInfo":
+        setShouldShowApplyButton(true);
+
+        break;
+      case "typography":
+      case "template":
+      case "summary":
+      case "experiences":
+      case "educations":
+      case "skills":
+        setShouldShowApplyButton(false);
+        break;
+    }
+  }, [selectedSectionInEditorPage]);
+
+  useEffect(() => {
+    setNewMetaData(metaData);
+    setNewPersonalInfo(personalInfo);
+    setNewContactInfo(contactInfo);
+  }, [contactInfo, metaData, personalInfo]);
+
+  const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);
+  const [newPersonalInfo, setNewPersonalInfo] =
+    useState<PersonalInfo>(personalInfo);
+  const [newContactInfo, setNewContactInfo] =
+    useState<ContactInfo>(contactInfo);
 
   const SECTIONS: {
     [key in EditorSectionId]: {
@@ -58,10 +98,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       label: "Metadata",
       component: (
         <MetaDataSection
-          jobTitle={jobTitle}
-          setJobTitle={setJobTitle}
-          jobUrl={jobUrl}
-          setJobUrl={setJobUrl}
+          newMetaData={newMetaData}
+          setNewMetaData={setNewMetaData}
         />
       ),
     },
@@ -78,7 +116,14 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     mainInfo: {
       id: "mainInfo",
       label: "Main Info",
-      component: <MainInfoEditorPage />,
+      component: (
+        <MainInfoEditorPage
+          newPersonalInfo={newPersonalInfo}
+          setNewPersonalInfo={setNewPersonalInfo}
+          newContactInfo={newContactInfo}
+          setNewContactInfo={setNewContactInfo}
+        />
+      ),
     },
     summary: {
       id: "summary",
@@ -101,17 +146,12 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   function onApplyClicked(): void {
     switch (selectedSectionInEditorPage) {
       case "metadata":
-        dispatch(setMetaData({ field: "title", value: jobTitle }));
-        dispatch(setMetaData({ field: "jobUrl", value: jobUrl }));
+        dispatch(setMetaData(newMetaData));
         break;
-      case "typography":
-        console.log("Typography changes applied");
-        break;
-      case "template":
-        console.log("Template changes applied");
-        break;
+
       case "mainInfo":
-        console.log("Main Info changes applied");
+        dispatch(setPersonalInfo(newPersonalInfo));
+        dispatch(setContactInfo(newContactInfo));
         break;
       case "summary":
         console.log("Summary changes applied");
@@ -125,12 +165,16 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       case "skills":
         console.log("Skills changes applied");
         break;
+
+      default:
+        break;
     }
   }
 
   function onDiscardClicked(): void {
-    setJobTitle(metaData.title);
-    setJobUrl(metaData.jobUrl);
+    setNewMetaData(metaData);
+    setNewPersonalInfo(personalInfo);
+    setNewContactInfo(contactInfo);
   }
 
   return (
@@ -194,20 +238,21 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
           </Box>
         </Box>
       </Box>
-      <Box
-        className="mohammad"
-        display="flex"
-        justifyContent="flex-end"
-        sx={{ mr: "20px", mb: "20px" }}
-        gap={2}
-      >
-        <Button variant="contained" onClick={onApplyClicked}>
-          Apply
-        </Button>
-        <Button variant="contained" onClick={onDiscardClicked}>
-          Discard
-        </Button>
-      </Box>
+      {shouldShowApplyButton && (
+        <Box
+          display="flex"
+          justifyContent="flex-end"
+          sx={{ mr: "20px", mb: "20px" }}
+          gap={2}
+        >
+          <Button variant="contained" onClick={onApplyClicked}>
+            Apply
+          </Button>
+          <Button variant="contained" onClick={onDiscardClicked}>
+            Discard
+          </Button>
+        </Box>
+      )}
     </Paper>
   );
 }

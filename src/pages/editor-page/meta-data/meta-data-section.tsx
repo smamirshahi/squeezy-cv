@@ -1,19 +1,16 @@
 import { InformationTooltip } from "@components/information-tooltip";
+import { MetaData } from "@custom-types/json-types";
 import { Box, TextField, Typography } from "@mui/material";
 import { SetStateFunction } from "@store/store-helper";
 
 interface Props {
-  jobTitle: string;
-  setJobTitle: SetStateFunction<string>;
-  jobUrl: string;
-  setJobUrl: SetStateFunction<string>;
+  newMetaData: MetaData;
+  setNewMetaData: SetStateFunction<MetaData>;
 }
 
 export function MetaDataSection({
-  jobTitle,
-  setJobTitle,
-  jobUrl,
-  setJobUrl,
+  newMetaData,
+  setNewMetaData,
 }: Props): JSX.Element {
   return (
     <>
@@ -30,8 +27,10 @@ export function MetaDataSection({
       >
         <TextField
           fullWidth
-          value={jobTitle}
-          onChange={(event) => setJobTitle(event.target.value)}
+          value={newMetaData.title}
+          onChange={(event) =>
+            setNewMetaData({ ...newMetaData, title: event.target.value })
+          }
           label="job title"
         />
         <InformationTooltip infoText="Enter the job title you're applying for. This can be used as a reference in your documentation." />
@@ -45,8 +44,10 @@ export function MetaDataSection({
       >
         <TextField
           fullWidth
-          value={jobUrl}
-          onChange={(event) => setJobUrl(event.target.value)}
+          value={newMetaData.jobUrl}
+          onChange={(event) =>
+            setNewMetaData({ ...newMetaData, jobUrl: event.target.value })
+          }
           label="job url"
         />
         <InformationTooltip infoText="Enter the link to the job application. It will serve as a reference in your records." />

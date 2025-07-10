@@ -52,38 +52,20 @@ const cvDataSlice = createSlice({
       state.data = action.payload;
     },
 
-    setMetaData<K extends keyof MetaData>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: MetaData[K];
-      }>
-    ) {
-      state.metaData[action.payload.field] = action.payload.value;
+    setMetaData(state: CvDataState, action: PayloadAction<MetaData>) {
+      state.metaData = action.payload;
     },
 
     setStyle(state, action: PayloadAction<Style>) {
       state.style = action.payload;
     },
 
-    updatePersonalInfo<K extends keyof PersonalInfo>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: PersonalInfo[K];
-      }>
-    ) {
-      state.data.personalInfo[action.payload.field] = action.payload.value;
+    setPersonalInfo(state: CvDataState, action: PayloadAction<PersonalInfo>) {
+      state.data.personalInfo = action.payload;
     },
 
-    updateContactInfo<K extends keyof ContactInfo>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: ContactInfo[K];
-      }>
-    ) {
-      state.data.contactInfo[action.payload.field] = action.payload.value;
+    setContactInfo(state: CvDataState, action: PayloadAction<ContactInfo>) {
+      state.data.contactInfo = action.payload;
     },
 
     updateProfessionalSummary(state, action: PayloadAction<string>) {
@@ -132,8 +114,8 @@ export const {
   setCvData,
   setStyle,
   setDateFormat,
-  updatePersonalInfo,
-  updateContactInfo,
+  setPersonalInfo,
+  setContactInfo,
   updateProfessionalSummary,
   addExperience,
   removeExperience,
