@@ -1,6 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TypographyVariant } from "@custom-styles/custom-styles";
-import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { CVData, CVJson, MetaData } from "@custom-types/json-types";
 import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
 import { PersonalInfo } from "@custom-types/personal-info-types";
@@ -81,7 +80,6 @@ const cvDataSlice = createSlice({
     setSkills(state, action: PayloadAction<SkillCategory[]>) {
       state.data.skills = action.payload;
     },
-    ...experiencesReducers,
 
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
@@ -128,12 +126,6 @@ export const {
   setExperiences,
   setEducations,
   setSkills,
-  addExperience,
-  removeExperience,
-  updateExperience,
-  addBulletPoint,
-  updateExperienceBulletPoint,
-  removeBulletPoint,
   setPaperMargin,
   setTypography,
   setRatingIcon,

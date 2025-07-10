@@ -8,15 +8,9 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { SetStateFunction, useAppDispatch } from "@store/store-helper";
-import {
-  addBulletPoint,
-  addExperience,
-  removeBulletPoint,
-  removeExperience,
-  updateExperience,
-} from "@store/cv-data/cv-data-slice";
+import { SetStateFunction } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
+import { nanoid } from "@reduxjs/toolkit";
 
 interface Props {
   newExperiences: Experience[];
@@ -28,8 +22,6 @@ export function ExperienceEditorPage({
   newExperiences,
   setNewExperiences,
 }: Props): JSX.Element {
-  const dispatch = useAppDispatch();
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {newExperiences.map((experience) => (
@@ -60,13 +52,12 @@ export function ExperienceEditorPage({
                 <Switch
                   checked={experience.shouldShow}
                   onChange={(event) =>
-                    dispatch(
-                      updateExperience({
-                        experienceId: experience.id,
-                        key: "shouldShow",
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        value: event.target.checked,
-                      })
+                    setNewExperiences((prev) =>
+                      prev.map((exp) =>
+                        exp.id === experience.id
+                          ? { ...exp, shouldShow: event.target.checked }
+                          : exp
+                      )
                     )
                   }
                 />
@@ -75,7 +66,11 @@ export function ExperienceEditorPage({
             />
 
             <IconButton
-              onClick={() => dispatch(removeExperience(experience.id))}
+              onClick={() =>
+                setNewExperiences((prev) =>
+                  prev.filter((exp) => exp.id !== experience.id)
+                )
+              }
             >
               <DeleteIcon />
             </IconButton>
@@ -197,11 +192,17 @@ export function ExperienceEditorPage({
 
                 <IconButton
                   onClick={() =>
-                    dispatch(
-                      removeBulletPoint({
-                        experienceId: experience.id,
-                        bulletPointId: bulletPoint.id,
-                      })
+                    setNewExperiences((prev) =>
+                      prev.map((exp) =>
+                        exp.id === experience.id
+                          ? {
+                              ...exp,
+                              bulletPoints: exp.bulletPoints.filter(
+                                (bp) => bp.id !== bulletPoint.id
+                              ),
+                            }
+                          : exp
+                      )
                     )
                   }
                   disabled={experience.bulletPoints.length === 1}
@@ -214,7 +215,19 @@ export function ExperienceEditorPage({
             <Box>
               <IconButton
                 onClick={() =>
-                  dispatch(addBulletPoint({ experienceId: experience.id }))
+                  setNewExperiences((prev) =>
+                    prev.map((exp) =>
+                      exp.id === experience.id
+                        ? {
+                            ...exp,
+                            bulletPoints: [
+                              ...exp.bulletPoints,
+                              { id: nanoid(), text: "" },
+                            ],
+                          }
+                        : exp
+                    )
+                  )
                 }
               >
                 <AddIcon />
@@ -224,7 +237,24 @@ export function ExperienceEditorPage({
         </Box>
       ))}
 
-      <Button variant="contained" onClick={() => dispatch(addExperience())}>
+      <Button
+        variant="contained"
+        onClick={() =>
+          setNewExperiences((prev) => [
+            ...prev,
+            {
+              id: nanoid(),
+              jobTitle: "",
+              company: "",
+              location: "",
+              startDate: "",
+              endDate: "",
+              shouldShow: true,
+              bulletPoints: [{ id: nanoid(), text: "" }],
+            },
+          ])
+        }
+      >
         Add Work Experience
       </Button>
     </Box>
