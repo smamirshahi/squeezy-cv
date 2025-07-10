@@ -9,6 +9,7 @@ import {
   Toolbar,
   Typography,
   Box,
+  Button,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -84,6 +85,14 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
 
+  function onApplyClicked(): void {
+    console.log("Changes applied");
+  }
+
+  function onDiscardClicked(): void {
+    console.log("Changes discarded");
+  }
+
   return (
     <Paper
       elevation={3}
@@ -93,53 +102,71 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         padding: "0mm",
         boxSizing: "border-box",
         mx: "auto",
-
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Editor
-          </Typography>
-          <EditorPageButtons printReference={contentRef} />
-        </Toolbar>
-      </AppBar>
-      <Box display={"flex"} flexDirection="row" gap={2} p={2}>
-        <Box>
-          <Drawer
-            variant="permanent"
-            sx={{
-              width: DRAWER_WIDTH,
-              flexShrink: 0,
-              ["& .MuiDrawer-paper"]: {
-                position: "relative",
+      <Box>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Editor
+            </Typography>
+            <EditorPageButtons printReference={contentRef} />
+          </Toolbar>
+        </AppBar>
+        <Box display={"flex"} flexDirection="row" gap={2} p={2}>
+          <Box>
+            <Drawer
+              variant="permanent"
+              sx={{
                 width: DRAWER_WIDTH,
-                boxSizing: "border-box",
-              },
-            }}
-          >
-            <Toolbar />
-            <List>
-              {Object.values(SECTIONS).map((value) => (
-                <ListItem key={value.id} disablePadding>
-                  <ListItemButton
-                    onClick={() =>
-                      dispatch(setSelectedSectionInEditorPage(value.id))
-                    }
-                    selected={selectedSectionInEditorPage === value.id}
-                  >
-                    <ListItemText primary={value.label} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Drawer>
+                flexShrink: 0,
+                ["& .MuiDrawer-paper"]: {
+                  position: "relative",
+                  width: DRAWER_WIDTH,
+                  boxSizing: "border-box",
+                },
+              }}
+            >
+              <Toolbar />
+              <List>
+                {Object.values(SECTIONS).map((value) => (
+                  <ListItem key={value.id} disablePadding>
+                    <ListItemButton
+                      onClick={() =>
+                        dispatch(setSelectedSectionInEditorPage(value.id))
+                      }
+                      selected={selectedSectionInEditorPage === value.id}
+                    >
+                      <ListItemText primary={value.label} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Drawer>
+          </Box>
+          <Box sx={{ width: "100%" }}>
+            {SECTIONS[selectedSectionInEditorPage].component}
+          </Box>
         </Box>
-        <Box sx={{ width: "100%" }}>
-          {SECTIONS[selectedSectionInEditorPage].component}
-        </Box>
+      </Box>
+      <Box
+        className="mohammad"
+        display="flex"
+        justifyContent="flex-end"
+        sx={{ mr: "20px", mb: "20px" }}
+        gap={2}
+      >
+        <Button variant="contained" onClick={onApplyClicked}>
+          Apply
+        </Button>
+        <Button variant="contained" onClick={onDiscardClicked}>
+          Discard
+        </Button>
       </Box>
     </Paper>
   );
