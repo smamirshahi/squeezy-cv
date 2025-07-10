@@ -46,16 +46,10 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
   });
 
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="center"
-      sx={{ mb: "20px" }}
-      gap={1}
-    >
+    <Grid container direction="row" justifyContent="center" gap={1}>
       <Button
         component="label"
-        variant="contained"
+        color="inherit"
         role={undefined}
         tabIndex={-1}
         startIcon={<DownloadIcon />}
@@ -77,13 +71,14 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
         sx={{
           height: "40px",
           width: "180px",
+          backgroundColor: "white",
           "& .MuiInputBase-root": { height: "40px", fontSize: "1rem" },
         }}
         inputProps={{ style: { height: "40px" } }}
       />
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
-        variant="contained"
+        color="inherit"
         onClick={() => handleExport(fileName)}
         startIcon={<SaveIcon />}
       >
@@ -91,7 +86,7 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
       </Button>
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
-        variant="contained"
+        color="inherit"
         onClick={() => onPrintClicked()}
         startIcon={<PrintIcon />}
       >

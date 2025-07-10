@@ -9,20 +9,46 @@ import {
   cvDataSelector,
   removeSkillCategory,
   removeSkillItem,
+  styleSelector,
   updateSkillItem,
 } from "@store/cv-data/cv-data-slice";
 import {
   UpdateSkillCategorySection,
   UpdateSkillItemSection,
 } from "@pages/editor-page/skills-editor/skills-section";
+import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
+import CircleIcon from "@mui/icons-material/Circle";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
+import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import { useMemo } from "react";
 
 /** Shows the skill section in editor page */
 export function SkillsEditorPage(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
+  const { ratingIcon, typography } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
+
+  const ratingIconComponent = useMemo(() => {
+    switch (ratingIcon) {
+      case "circle":
+        return {
+          icon: <CircleIcon fontSize="inherit" />,
+          emptyIcon: <CircleOutlinedIcon fontSize="inherit" />,
+        };
+
+      case "star":
+        return {
+          icon: <StarBorderIcon fontSize="inherit" />,
+          emptyIcon: <StarBorderOutlinedIcon fontSize="inherit" />,
+        };
+    }
+  }, [ratingIcon]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <SkillIconDropdown />
+
       {skills.map((skill) => (
         <Box
           key={skill.id}
@@ -70,7 +96,17 @@ export function SkillsEditorPage(): JSX.Element {
                       );
                     }
                   }}
+                  icon={ratingIconComponent.icon}
+                  emptyIcon={ratingIconComponent.emptyIcon}
                   precision={0.5}
+                  sx={{
+                    "& .MuiRating-iconFilled": {
+                      color: typography.icon.color,
+                    },
+                    "& .MuiRating-iconHover": {
+                      color: typography.icon.color,
+                    },
+                  }}
                 />
                 <IconButton
                   onClick={() =>

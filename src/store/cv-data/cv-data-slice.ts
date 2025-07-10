@@ -111,6 +111,10 @@ const cvDataSlice = createSlice({
       state.style.typography[action.payload.variant] = action.payload.fontStyle;
     },
 
+    setRatingIcon(state, action: PayloadAction<Style["ratingIcon"]>) {
+      state.style.ratingIcon = action.payload;
+    },
+
     resetCvDataState: () => initialState,
   },
   selectors: {
@@ -148,6 +152,7 @@ export const {
   updateSkillItem,
   setPaperMargin,
   setTypography,
+  setRatingIcon,
   resetCvDataState,
 } = cvDataSlice.actions;
 
