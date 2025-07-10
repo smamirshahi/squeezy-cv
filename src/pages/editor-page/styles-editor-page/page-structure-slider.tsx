@@ -1,4 +1,4 @@
-import { Slider, Stack } from "@mui/material";
+import { Slider, Stack, Typography } from "@mui/material";
 import { appSelector, setColumnWidth } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
@@ -28,9 +28,9 @@ export function PageStructureSlider(): JSX.Element {
     <Stack
       spacing={2}
       direction="row"
-      sx={{ alignItems: "center", my: "20px" }}
+      sx={{ alignItems: "center", my: "20px", ml: "250px" }}
     >
-      <p>{columnWidth.left}%</p>
+      <Typography>{columnWidth.left}%</Typography>
       <Slider
         value={columnWidth.left}
         onChange={(_, value) =>
@@ -42,7 +42,7 @@ export function PageStructureSlider(): JSX.Element {
         min={0}
         max={100}
       />
-      <p>{columnWidth.right}%</p>
+      <Typography>{columnWidth.right}%</Typography>
     </Stack>
   );
 }
