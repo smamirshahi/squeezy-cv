@@ -1,31 +1,38 @@
-import { Box, Button, IconButton, Rating } from "@mui/material";
+import { Box, Button, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
 import {
   addSkillCategory,
   addSkillItem,
-  cvDataSelector,
   removeSkillCategory,
   removeSkillItem,
   styleSelector,
   updateSkillItem,
 } from "@store/cv-data/cv-data-slice";
-import {
-  UpdateSkillCategorySection,
-  UpdateSkillItemSection,
-} from "@pages/editor-page/skills-editor/skills-section";
 import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useMemo } from "react";
+import { SkillCategory } from "@custom-types/skill-types";
+
+interface Props {
+  newSkills: SkillCategory[];
+  setNewSkills: SetStateFunction<SkillCategory[]>;
+}
 
 /** Shows the skill section in editor page */
-export function SkillsEditorPage(): JSX.Element {
-  const { skills } = useAppSelector(cvDataSelector);
+export function SkillsEditorPage({
+  newSkills,
+  setNewSkills,
+}: Props): JSX.Element {
   const { ratingIcon, typography } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
@@ -49,13 +56,26 @@ export function SkillsEditorPage(): JSX.Element {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <SkillIconDropdown />
 
-      {skills.map((skill) => (
+      {newSkills.map((skill) => (
         <Box
           key={skill.id}
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateSkillCategorySection skill={skill} />
+            <TextField
+              label="Skill Category"
+              value={skill.category}
+              onChange={(event) =>
+                setNewSkills((prev) =>
+                  prev.map((sk) =>
+                    sk.id === skill.id
+                      ? { ...sk, category: event.target.value }
+                      : sk
+                  )
+                )
+              }
+              fullWidth
+            />
 
             <IconButton onClick={() => dispatch(removeSkillCategory(skill.id))}>
               <DeleteIcon />
@@ -79,9 +99,26 @@ export function SkillsEditorPage(): JSX.Element {
                   gap: 1,
                 }}
               >
-                <UpdateSkillItemSection
-                  skillItem={skillItem}
-                  skillItemIndex={index}
+                <TextField
+                  label={`Skill Item ${index + 1}`}
+                  value={skillItem.name}
+                  onChange={(event) =>
+                    setNewSkills((prev) =>
+                      prev.map((sk) =>
+                        sk.id === skill.id
+                          ? {
+                              ...sk,
+                              items: sk.items.map((item, i) =>
+                                i === index
+                                  ? { ...item, name: event.target.value }
+                                  : item
+                              ),
+                            }
+                          : sk
+                      )
+                    )
+                  }
+                  fullWidth
                 />
                 <Rating
                   value={skillItem.rating}

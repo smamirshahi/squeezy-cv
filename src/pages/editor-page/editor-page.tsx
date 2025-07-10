@@ -89,13 +89,13 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       case "mainInfo":
       case "summary":
       case "experiences":
+      case "educations":
+      case "skills":
         setShouldShowApplyButton(true);
 
         break;
       case "typography":
       case "template":
-      case "educations":
-      case "skills":
         setShouldShowApplyButton(false);
         break;
     }
