@@ -2,7 +2,6 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TypographyVariant } from "@custom-styles/custom-styles";
 import { experiencesReducers } from "@store/cv-data/experiences-reducers";
 import { educationsReducers } from "@store/cv-data/educations-reducers";
-import { skillsReducers } from "@store/cv-data/skills-reducers";
 import { CVData, CVJson, MetaData } from "@custom-types/json-types";
 import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
 import { PersonalInfo } from "@custom-types/personal-info-types";
@@ -85,7 +84,6 @@ const cvDataSlice = createSlice({
     },
     ...experiencesReducers,
     ...educationsReducers,
-    ...skillsReducers,
 
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
@@ -141,12 +139,6 @@ export const {
   addEducation,
   removeEducation,
   updateEducation,
-  addSkillCategory,
-  removeSkillCategory,
-  updateSkillCategory,
-  addSkillItem,
-  removeSkillItem,
-  updateSkillItem,
   setPaperMargin,
   setTypography,
   setRatingIcon,
