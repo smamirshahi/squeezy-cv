@@ -2,18 +2,8 @@ import { Box, Button, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import {
-  SetStateFunction,
-  useAppDispatch,
-  useAppSelector,
-} from "@store/store-helper";
-import {
-  addSkillCategory,
-  addSkillItem,
-  removeSkillCategory,
-  removeSkillItem,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
+import { SetStateFunction, useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -21,6 +11,7 @@ import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useMemo } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
+import { nanoid } from "@reduxjs/toolkit";
 
 interface Props {
   newSkills: SkillCategory[];
@@ -33,7 +24,6 @@ export function SkillsEditorPage({
   setNewSkills,
 }: Props): JSX.Element {
   const { ratingIcon, typography } = useAppSelector(styleSelector);
-  const dispatch = useAppDispatch();
 
   const ratingIconComponent = useMemo(() => {
     switch (ratingIcon) {
@@ -76,7 +66,11 @@ export function SkillsEditorPage({
               fullWidth
             />
 
-            <IconButton onClick={() => dispatch(removeSkillCategory(skill.id))}>
+            <IconButton
+              onClick={() =>
+                setNewSkills((prev) => prev.filter((sk) => sk.id !== skill.id))
+              }
+            >
               <DeleteIcon />
             </IconButton>
           </Box>
@@ -153,11 +147,17 @@ export function SkillsEditorPage({
                 />
                 <IconButton
                   onClick={() =>
-                    dispatch(
-                      removeSkillItem({
-                        skillId: skill.id,
-                        skillItemId: skillItem.id,
-                      })
+                    setNewSkills((prev) =>
+                      prev.map((sk) =>
+                        sk.id === skill.id
+                          ? {
+                              ...sk,
+                              items: sk.items.filter(
+                                (item) => item.id !== skillItem.id
+                              ),
+                            }
+                          : sk
+                      )
                     )
                   }
                   disabled={skill.items.length === 1}
@@ -168,7 +168,21 @@ export function SkillsEditorPage({
             ))}
             <Box>
               <IconButton
-                onClick={() => dispatch(addSkillItem({ skillId: skill.id }))}
+                onClick={() =>
+                  setNewSkills((prev) =>
+                    prev.map((sk) =>
+                      sk.id === skill.id
+                        ? {
+                            ...sk,
+                            items: [
+                              ...sk.items,
+                              { id: nanoid(), name: "", rating: 0 },
+                            ],
+                          }
+                        : sk
+                    )
+                  )
+                }
               >
                 <AddIcon />
               </IconButton>
@@ -177,7 +191,15 @@ export function SkillsEditorPage({
         </Box>
       ))}
 
-      <Button variant="contained" onClick={() => dispatch(addSkillCategory())}>
+      <Button
+        variant="contained"
+        onClick={() =>
+          setNewSkills((prev) => [
+            ...prev,
+            { id: nanoid(), category: "", items: [] },
+          ])
+        }
+      >
         Add New Skill Category
       </Button>
     </Box>
