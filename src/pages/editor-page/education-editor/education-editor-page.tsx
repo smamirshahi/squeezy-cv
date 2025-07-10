@@ -4,34 +4,52 @@ import {
   FormControlLabel,
   IconButton,
   Switch,
+  TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { SetStateFunction, useAppDispatch } from "@store/store-helper";
 import {
   addEducation,
-  cvDataSelector,
   removeEducation,
   updateEducation,
 } from "@store/cv-data/cv-data-slice";
-import { UpdateEducationSection } from "@pages/editor-page/education-editor/education-section";
+import { Education } from "@custom-types/education-types";
+
+interface Props {
+  newEducations: Education[];
+  setNewEducations: SetStateFunction<Education[]>;
+}
 
 /** Shows the education in editor page */
-export function EducationEditorPage(): JSX.Element {
-  const { educations } = useAppSelector(cvDataSelector);
+export function EducationEditorPage({
+  newEducations,
+  setNewEducations,
+}: Props): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {educations.map((education) => (
+      {newEducations.map((education) => (
         <Box
           key={education.id}
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateEducationSection
+            <TextField
               label="Degree"
-              field="degree"
-              education={education}
+              value={education.degree}
+              onChange={(event) =>
+                setNewEducations((prev) =>
+                  prev.map((edu) =>
+                    edu.id === education.id
+                      ? { ...edu, degree: event.target.value }
+                      : edu
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
 
             <FormControlLabel
@@ -60,37 +78,90 @@ export function EducationEditorPage(): JSX.Element {
 
           {/* Company and Location in one line */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateEducationSection
+            <TextField
               label="Institute"
-              field="institute"
-              education={education}
+              value={education.institute}
+              onChange={(event) =>
+                setNewEducations((prev) =>
+                  prev.map((edu) =>
+                    edu.id === education.id
+                      ? { ...edu, institute: event.target.value }
+                      : edu
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
-            <UpdateEducationSection
+            <TextField
               label="Location"
-              field="location"
-              education={education}
+              value={education.location}
+              onChange={(event) =>
+                setNewEducations((prev) =>
+                  prev.map((edu) =>
+                    edu.id === education.id
+                      ? { ...edu, location: event.target.value }
+                      : edu
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
           {/* Start and End Date in one line */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateEducationSection
+            <TextField
               label="Start Date"
-              field="startDate"
-              education={education}
-              textFieldType="date"
+              value={education.startDate}
+              onChange={(event) =>
+                setNewEducations((prev) =>
+                  prev.map((edu) =>
+                    edu.id === education.id
+                      ? { ...edu, startDate: event.target.value }
+                      : edu
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
-            <UpdateEducationSection
+            <TextField
               label="End Date"
-              field="endDate"
-              education={education}
-              textFieldType="date"
+              value={education.endDate}
+              onChange={(event) =>
+                setNewEducations((prev) =>
+                  prev.map((edu) =>
+                    edu.id === education.id
+                      ? { ...edu, endDate: event.target.value }
+                      : edu
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
           </Box>
-          <UpdateEducationSection
+          <TextField
             label="Dissertation Title"
-            field="dissertationTitle"
-            education={education}
+            value={education.dissertationTitle}
+            onChange={(event) =>
+              setNewEducations((prev) =>
+                prev.map((edu) =>
+                  edu.id === education.id
+                    ? { ...edu, dissertationTitle: event.target.value }
+                    : edu
+                )
+              )
+            }
+            fullWidth
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+            InputLabelProps={{ shrink: true }}
           />
         </Box>
       ))}

@@ -30,7 +30,9 @@ import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-edito
 import {
   cvDataSelector,
   metaDataSelector,
-  seExperiences,
+  setExperiences,
+  setEducations,
+  setSkills,
   setContactInfo,
   setMetaData,
   setPersonalInfo,
@@ -42,6 +44,8 @@ import { ContactInfo } from "@custom-types/contact-info-types";
 import { MetaData } from "@custom-types/json-types";
 import { ProfessionalSummary } from "@custom-types/summary-types";
 import { Experience } from "@custom-types/experience-types";
+import { Education } from "@custom-types/education-types";
+import { SkillCategory } from "@custom-types/skill-types";
 
 const DRAWER_WIDTH = 200;
 
@@ -55,8 +59,14 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
   const metaData = useAppSelector(metaDataSelector);
-  const { personalInfo, contactInfo, professionalSummary, experiences } =
-    useAppSelector(cvDataSelector);
+  const {
+    personalInfo,
+    contactInfo,
+    professionalSummary,
+    experiences,
+    educations,
+    skills,
+  } = useAppSelector(cvDataSelector);
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =
     useState<boolean>(true);
@@ -70,6 +80,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     useState<ProfessionalSummary>(professionalSummary);
   const [newExperiences, setNewExperiences] =
     useState<Experience[]>(experiences);
+  const [newEducations, setNewEducations] = useState<Education[]>(educations);
+  const [newSkills, setNewSkills] = useState<SkillCategory[]>(skills);
 
   useEffect(() => {
     switch (selectedSectionInEditorPage) {
@@ -95,7 +107,17 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewContactInfo(contactInfo);
     setNewSummary(professionalSummary);
     setNewExperiences(experiences);
-  }, [contactInfo, metaData, personalInfo, professionalSummary, experiences]);
+    setNewEducations(educations);
+    setNewSkills(skills);
+  }, [
+    contactInfo,
+    metaData,
+    personalInfo,
+    professionalSummary,
+    experiences,
+    educations,
+    skills,
+  ]);
 
   const SECTIONS: {
     [key in EditorSectionId]: {
@@ -159,9 +181,20 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     educations: {
       id: "educations",
       label: "Educations",
-      component: <EducationEditorPage />,
+      component: (
+        <EducationEditorPage
+          newEducations={newEducations}
+          setNewEducations={setNewEducations}
+        />
+      ),
     },
-    skills: { id: "skills", label: "Skills", component: <SkillsEditorPage /> },
+    skills: {
+      id: "skills",
+      label: "Skills",
+      component: (
+        <SkillsEditorPage newSkills={newSkills} setNewSkills={setNewSkills} />
+      ),
+    },
   };
 
   function onApplyClicked(): void {
@@ -178,13 +211,13 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         dispatch(setProfessionalSummary(newSummary));
         break;
       case "experiences":
-        dispatch(seExperiences(newExperiences));
+        dispatch(setExperiences(newExperiences));
         break;
       case "educations":
-        console.log("Educations changes applied");
+        dispatch(setEducations(newEducations));
         break;
       case "skills":
-        console.log("Skills changes applied");
+        dispatch(setSkills(newSkills));
         break;
 
       default:
@@ -198,6 +231,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewContactInfo(contactInfo);
     setNewSummary(professionalSummary);
     setNewExperiences(experiences);
+    setNewEducations(educations);
+    setNewSkills(skills);
   }
 
   return (
