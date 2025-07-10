@@ -7,13 +7,9 @@ import {
   TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SetStateFunction, useAppDispatch } from "@store/store-helper";
-import {
-  addEducation,
-  removeEducation,
-  updateEducation,
-} from "@store/cv-data/cv-data-slice";
+import { SetStateFunction } from "@store/store-helper";
 import { Education } from "@custom-types/education-types";
+import { nanoid } from "@reduxjs/toolkit";
 
 interface Props {
   newEducations: Education[];
@@ -25,8 +21,6 @@ export function EducationEditorPage({
   newEducations,
   setNewEducations,
 }: Props): JSX.Element {
-  const dispatch = useAppDispatch();
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {newEducations.map((education) => (
@@ -57,13 +51,12 @@ export function EducationEditorPage({
                 <Switch
                   checked={education.shouldShow}
                   onChange={(event) =>
-                    dispatch(
-                      updateEducation({
-                        educationId: education.id,
-                        key: "shouldShow",
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        value: event.target.checked,
-                      })
+                    setNewEducations((prev) =>
+                      prev.map((edu) =>
+                        edu.id === education.id
+                          ? { ...edu, shouldShow: event.target.checked }
+                          : edu
+                      )
                     )
                   }
                 />
@@ -71,7 +64,13 @@ export function EducationEditorPage({
               label="Show this education"
             />
 
-            <IconButton onClick={() => dispatch(removeEducation(education.id))}>
+            <IconButton
+              onClick={() =>
+                setNewEducations((prev) =>
+                  prev.filter((edu) => edu.id !== education.id)
+                )
+              }
+            >
               <DeleteIcon />
             </IconButton>
           </Box>
@@ -166,7 +165,24 @@ export function EducationEditorPage({
         </Box>
       ))}
 
-      <Button variant="contained" onClick={() => dispatch(addEducation())}>
+      <Button
+        variant="contained"
+        onClick={() =>
+          setNewEducations((prev) => [
+            ...prev,
+            {
+              id: nanoid(),
+              degree: "",
+              institute: "",
+              location: "",
+              startDate: "",
+              endDate: "",
+              dissertationTitle: "",
+              shouldShow: true,
+            },
+          ])
+        }
+      >
         Add Education
       </Button>
     </Box>
