@@ -194,7 +194,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       elevation={3}
       sx={{
         width: `${A4_DIMENSION_MM.height}mm`,
-        minHeight: `${A4_DIMENSION_MM.width}mm`,
+        height: "800px",
+        overflowY: "scroll",
         padding: "0mm",
         boxSizing: "border-box",
         mx: "auto",
