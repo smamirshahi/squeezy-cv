@@ -68,7 +68,7 @@ const cvDataSlice = createSlice({
       state.data.contactInfo = action.payload;
     },
 
-    updateProfessionalSummary(state, action: PayloadAction<string>) {
+    setProfessionalSummary(state, action: PayloadAction<string>) {
       state.data.professionalSummary = action.payload;
     },
     ...experiencesReducers,
@@ -116,7 +116,7 @@ export const {
   setDateFormat,
   setPersonalInfo,
   setContactInfo,
-  updateProfessionalSummary,
+  setProfessionalSummary,
   addExperience,
   removeExperience,
   updateExperience,

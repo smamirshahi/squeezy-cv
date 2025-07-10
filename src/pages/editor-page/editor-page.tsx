@@ -33,11 +33,13 @@ import {
   setContactInfo,
   setMetaData,
   setPersonalInfo,
+  setProfessionalSummary,
 } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
 import { PersonalInfo } from "@custom-types/personal-info-types";
 import { ContactInfo } from "@custom-types/contact-info-types";
 import { MetaData } from "@custom-types/json-types";
+import { ProfessionalSummary } from "@custom-types/summary-types";
 
 const DRAWER_WIDTH = 200;
 
@@ -51,21 +53,30 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
   const metaData = useAppSelector(metaDataSelector);
-  const { personalInfo, contactInfo } = useAppSelector(cvDataSelector);
+  const { personalInfo, contactInfo, professionalSummary } =
+    useAppSelector(cvDataSelector);
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =
     useState<boolean>(true);
+
+  const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);
+  const [newPersonalInfo, setNewPersonalInfo] =
+    useState<PersonalInfo>(personalInfo);
+  const [newContactInfo, setNewContactInfo] =
+    useState<ContactInfo>(contactInfo);
+  const [newSummary, setNewSummary] =
+    useState<ProfessionalSummary>(professionalSummary);
 
   useEffect(() => {
     switch (selectedSectionInEditorPage) {
       case "metadata":
       case "mainInfo":
+      case "summary":
         setShouldShowApplyButton(true);
 
         break;
       case "typography":
       case "template":
-      case "summary":
       case "experiences":
       case "educations":
       case "skills":
@@ -78,13 +89,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewMetaData(metaData);
     setNewPersonalInfo(personalInfo);
     setNewContactInfo(contactInfo);
-  }, [contactInfo, metaData, personalInfo]);
-
-  const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);
-  const [newPersonalInfo, setNewPersonalInfo] =
-    useState<PersonalInfo>(personalInfo);
-  const [newContactInfo, setNewContactInfo] =
-    useState<ContactInfo>(contactInfo);
+    setNewSummary(professionalSummary);
+  }, [contactInfo, metaData, personalInfo, professionalSummary]);
 
   const SECTIONS: {
     [key in EditorSectionId]: {
@@ -128,7 +134,12 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     summary: {
       id: "summary",
       label: "Professional Summary",
-      component: <SummaryEditorPage />,
+      component: (
+        <SummaryEditorPage
+          newSummary={newSummary}
+          setNewSummary={setNewSummary}
+        />
+      ),
     },
     experiences: {
       id: "experiences",
@@ -154,7 +165,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         dispatch(setContactInfo(newContactInfo));
         break;
       case "summary":
-        console.log("Summary changes applied");
+        dispatch(setProfessionalSummary(newSummary));
         break;
       case "experiences":
         console.log("Experiences changes applied");
@@ -175,6 +186,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewMetaData(metaData);
     setNewPersonalInfo(personalInfo);
     setNewContactInfo(contactInfo);
+    setNewSummary(professionalSummary);
   }
 
   return (
