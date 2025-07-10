@@ -61,7 +61,7 @@ export function MetaDataSection(): JSX.Element {
           mb: "10px",
         }}
       >
-        <TextField type="date" label="Application Date" fullWidth />
+        <TextField type="date" fullWidth />
         <InformationTooltip infoText="Enter the date in which you applied for the job. It will serve as a reference in your records." />
       </Box>
     </>
