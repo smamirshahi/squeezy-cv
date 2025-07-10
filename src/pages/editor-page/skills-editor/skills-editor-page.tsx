@@ -13,7 +13,6 @@ import {
   removeSkillCategory,
   removeSkillItem,
   styleSelector,
-  updateSkillItem,
 } from "@store/cv-data/cv-data-slice";
 import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -124,12 +123,19 @@ export function SkillsEditorPage({
                   value={skillItem.rating}
                   onChange={(_, newValue) => {
                     if (isRatingAcceptable(newValue)) {
-                      dispatch(
-                        updateSkillItem({
-                          skillItemId: skillItem.id,
-                          key: "rating",
-                          value: newValue ?? 0,
-                        })
+                      setNewSkills((prev) =>
+                        prev.map((sk) =>
+                          sk.id === skill.id
+                            ? {
+                                ...sk,
+                                items: sk.items.map((item, i) =>
+                                  i === index
+                                    ? { ...item, rating: newValue ?? 0 }
+                                    : item
+                                ),
+                              }
+                            : sk
+                        )
                       );
                     }
                   }}
