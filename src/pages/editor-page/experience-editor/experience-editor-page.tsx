@@ -38,7 +38,6 @@ export function ExperienceEditorPage({
           key={experience.id}
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
-          {/* Top controls: Job title, visibility toggle, delete */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               label="Job Title"
