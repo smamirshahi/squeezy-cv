@@ -4,40 +4,55 @@ import {
   FormControlLabel,
   IconButton,
   Switch,
+  TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { SetStateFunction, useAppDispatch } from "@store/store-helper";
 import {
   addBulletPoint,
   addExperience,
-  cvDataSelector,
   removeBulletPoint,
   removeExperience,
   updateExperience,
 } from "@store/cv-data/cv-data-slice";
-import {
-  UpdateBulletPointSection,
-  UpdateExperienceSection,
-} from "@pages/editor-page/experience-editor/experience-section";
+import { Experience } from "@custom-types/experience-types";
+
+interface Props {
+  newExperiences: Experience[];
+  setNewExperiences: SetStateFunction<Experience[]>;
+}
 
 /** Shows the experience in editor page */
-export function ExperienceEditorPage(): JSX.Element {
-  const { experiences } = useAppSelector(cvDataSelector);
+export function ExperienceEditorPage({
+  newExperiences,
+  setNewExperiences,
+}: Props): JSX.Element {
   const dispatch = useAppDispatch();
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {experiences.map((experience) => (
+      {newExperiences.map((experience) => (
         <Box
           key={experience.id}
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateExperienceSection
+            <TextField
               label="Job Title"
-              field="jobTitle"
-              experience={experience}
+              value={experience.jobTitle}
+              onChange={(event) =>
+                setNewExperiences((prev) =>
+                  prev.map((exp) =>
+                    exp.id === experience.id
+                      ? { ...exp, jobTitle: event.target.value }
+                      : exp
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
 
             <FormControlLabel
@@ -67,31 +82,75 @@ export function ExperienceEditorPage(): JSX.Element {
           </Box>
           {/* Company and Location in one line */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateExperienceSection
+            <TextField
               label="Company"
-              field="company"
-              experience={experience}
+              value={experience.company}
+              onChange={(event) =>
+                setNewExperiences((prev) =>
+                  prev.map((exp) =>
+                    exp.id === experience.id
+                      ? { ...exp, company: event.target.value }
+                      : exp
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
-            <UpdateExperienceSection
+            <TextField
               label="Location"
-              field="location"
-              experience={experience}
+              value={experience.location}
+              onChange={(event) =>
+                setNewExperiences((prev) =>
+                  prev.map((exp) =>
+                    exp.id === experience.id
+                      ? { ...exp, location: event.target.value }
+                      : exp
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
           {/* Start and End Date in one line */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <UpdateExperienceSection
+            <TextField
+              type="date"
               label="Start Date"
-              field="startDate"
-              experience={experience}
-              textFieldType="date"
+              value={experience.startDate}
+              onChange={(event) =>
+                setNewExperiences((prev) =>
+                  prev.map((exp) =>
+                    exp.id === experience.id
+                      ? { ...exp, startDate: event.target.value }
+                      : exp
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
-            <UpdateExperienceSection
+            <TextField
+              type="date"
               label="End Date"
-              field="endDate"
-              experience={experience}
-              textFieldType="date"
+              value={experience.endDate}
+              onChange={(event) =>
+                setNewExperiences((prev) =>
+                  prev.map((exp) =>
+                    exp.id === experience.id
+                      ? { ...exp, endDate: event.target.value }
+                      : exp
+                  )
+                )
+              }
+              fullWidth
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
@@ -112,10 +171,30 @@ export function ExperienceEditorPage(): JSX.Element {
                   gap: 1,
                 }}
               >
-                <UpdateBulletPointSection
-                  bulletPoint={bulletPoint}
-                  bulletPointIndex={index}
+                <TextField
+                  label={`Bullet Point ${index + 1}`}
+                  value={bulletPoint.text}
+                  onChange={(event) =>
+                    setNewExperiences((prev) =>
+                      prev.map((exp) =>
+                        exp.id === experience.id
+                          ? {
+                              ...exp,
+                              bulletPoints: exp.bulletPoints.map((bp, i) =>
+                                i === index
+                                  ? { ...bp, text: event.target.value }
+                                  : bp
+                              ),
+                            }
+                          : exp
+                      )
+                    )
+                  }
+                  fullWidth
+                  // eslint-disable-next-line @typescript-eslint/naming-convention -- external package naming
+                  InputLabelProps={{ shrink: true }}
                 />
+
                 <IconButton
                   onClick={() =>
                     dispatch(

@@ -30,6 +30,7 @@ import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-edito
 import {
   cvDataSelector,
   metaDataSelector,
+  seExperiences,
   setContactInfo,
   setMetaData,
   setPersonalInfo,
@@ -40,6 +41,7 @@ import { PersonalInfo } from "@custom-types/personal-info-types";
 import { ContactInfo } from "@custom-types/contact-info-types";
 import { MetaData } from "@custom-types/json-types";
 import { ProfessionalSummary } from "@custom-types/summary-types";
+import { Experience } from "@custom-types/experience-types";
 
 const DRAWER_WIDTH = 200;
 
@@ -53,7 +55,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
   const metaData = useAppSelector(metaDataSelector);
-  const { personalInfo, contactInfo, professionalSummary } =
+  const { personalInfo, contactInfo, professionalSummary, experiences } =
     useAppSelector(cvDataSelector);
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =
@@ -66,18 +68,20 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     useState<ContactInfo>(contactInfo);
   const [newSummary, setNewSummary] =
     useState<ProfessionalSummary>(professionalSummary);
+  const [newExperiences, setNewExperiences] =
+    useState<Experience[]>(experiences);
 
   useEffect(() => {
     switch (selectedSectionInEditorPage) {
       case "metadata":
       case "mainInfo":
       case "summary":
+      case "experiences":
         setShouldShowApplyButton(true);
 
         break;
       case "typography":
       case "template":
-      case "experiences":
       case "educations":
       case "skills":
         setShouldShowApplyButton(false);
@@ -90,7 +94,8 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewPersonalInfo(personalInfo);
     setNewContactInfo(contactInfo);
     setNewSummary(professionalSummary);
-  }, [contactInfo, metaData, personalInfo, professionalSummary]);
+    setNewExperiences(experiences);
+  }, [contactInfo, metaData, personalInfo, professionalSummary, experiences]);
 
   const SECTIONS: {
     [key in EditorSectionId]: {
@@ -144,7 +149,12 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     experiences: {
       id: "experiences",
       label: "Work Experience",
-      component: <ExperienceEditorPage />,
+      component: (
+        <ExperienceEditorPage
+          newExperiences={newExperiences}
+          setNewExperiences={setNewExperiences}
+        />
+      ),
     },
     educations: {
       id: "educations",
@@ -168,7 +178,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         dispatch(setProfessionalSummary(newSummary));
         break;
       case "experiences":
-        console.log("Experiences changes applied");
+        dispatch(seExperiences(newExperiences));
         break;
       case "educations":
         console.log("Educations changes applied");
@@ -187,6 +197,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     setNewPersonalInfo(personalInfo);
     setNewContactInfo(contactInfo);
     setNewSummary(professionalSummary);
+    setNewExperiences(experiences);
   }
 
   return (
@@ -194,8 +205,6 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       elevation={3}
       sx={{
         width: `${A4_DIMENSION_MM.height}mm`,
-        height: "800px",
-        overflowY: "scroll",
         padding: "0mm",
         boxSizing: "border-box",
         mx: "auto",
@@ -206,7 +215,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         justifyContent: "space-between",
       }}
     >
-      <Box>
+      <Box sx={{ height: "800px", overflowY: "scroll" }}>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -255,7 +264,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         <Box
           display="flex"
           justifyContent="flex-end"
-          sx={{ mr: "20px", mb: "20px" }}
+          sx={{ mr: "20px", my: "20px" }}
           gap={2}
         >
           <Button variant="contained" onClick={onApplyClicked}>

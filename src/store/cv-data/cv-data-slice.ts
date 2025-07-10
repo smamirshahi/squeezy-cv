@@ -7,6 +7,7 @@ import { CVData, CVJson, MetaData } from "@custom-types/json-types";
 import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
 import { PersonalInfo } from "@custom-types/personal-info-types";
 import { ContactInfo } from "@custom-types/contact-info-types";
+import { Experience } from "@custom-types/experience-types";
 
 /** State of the current CV */
 export type CvDataState = CVJson;
@@ -71,6 +72,9 @@ const cvDataSlice = createSlice({
     setProfessionalSummary(state, action: PayloadAction<string>) {
       state.data.professionalSummary = action.payload;
     },
+    seExperiences(state, action: PayloadAction<Experience[]>) {
+      state.data.experiences = action.payload;
+    },
     ...experiencesReducers,
     ...educationsReducers,
     ...skillsReducers,
@@ -117,6 +121,7 @@ export const {
   setPersonalInfo,
   setContactInfo,
   setProfessionalSummary,
+  seExperiences,
   addExperience,
   removeExperience,
   updateExperience,
