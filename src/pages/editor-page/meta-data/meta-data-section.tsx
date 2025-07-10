@@ -1,23 +1,20 @@
 import { InformationTooltip } from "@components/information-tooltip";
-import { useDebounceCallback } from "@hooks/use-debounce-callback";
 import { Box, TextField, Typography } from "@mui/material";
-import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
-import { useAppSelector } from "@store/store-helper";
+import { SetStateFunction } from "@store/store-helper";
 
-export function MetaDataSection(): JSX.Element {
-  const metaData = useAppSelector(metaDataSelector);
+interface Props {
+  jobTitle: string;
+  setJobTitle: SetStateFunction<string>;
+  jobUrl: string;
+  setJobUrl: SetStateFunction<string>;
+}
 
-  const { localState: localJobTitle, setLocalState: setLocalJobTitle } =
-    useDebounceCallback({
-      reduxState: metaData.title,
-      createAction: (value) => setMetaData({ field: "title", value }),
-    });
-
-  const { localState: localJobUrl, setLocalState: setLocalJobUrl } =
-    useDebounceCallback({
-      reduxState: metaData.jobUrl,
-      createAction: (value) => setMetaData({ field: "jobUrl", value }),
-    });
+export function MetaDataSection({
+  jobTitle,
+  setJobTitle,
+  jobUrl,
+  setJobUrl,
+}: Props): JSX.Element {
   return (
     <>
       <Typography sx={{ m: "10px" }} variant="h6">
@@ -33,8 +30,8 @@ export function MetaDataSection(): JSX.Element {
       >
         <TextField
           fullWidth
-          value={localJobTitle}
-          onChange={(event) => setLocalJobTitle(event.target.value)}
+          value={jobTitle}
+          onChange={(event) => setJobTitle(event.target.value)}
           label="job title"
         />
         <InformationTooltip infoText="Enter the job title you're applying for. This can be used as a reference in your documentation." />
@@ -48,8 +45,8 @@ export function MetaDataSection(): JSX.Element {
       >
         <TextField
           fullWidth
-          value={localJobUrl}
-          onChange={(event) => setLocalJobUrl(event.target.value)}
+          value={jobUrl}
+          onChange={(event) => setJobUrl(event.target.value)}
           label="job url"
         />
         <InformationTooltip infoText="Enter the link to the job application. It will serve as a reference in your records." />
