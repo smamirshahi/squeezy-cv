@@ -1,12 +1,12 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TypographyVariant } from "@custom-styles/custom-styles";
-import { experiencesReducers } from "@store/cv-data/experiences-reducers";
-import { educationsReducers } from "@store/cv-data/educations-reducers";
-import { skillsReducers } from "@store/cv-data/skills-reducers";
 import { CVData, CVJson, MetaData } from "@custom-types/json-types";
 import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
 import { PersonalInfo } from "@custom-types/personal-info-types";
 import { ContactInfo } from "@custom-types/contact-info-types";
+import { Experience } from "@custom-types/experience-types";
+import { Education } from "@custom-types/education-types";
+import { SkillCategory } from "@custom-types/skill-types";
 
 /** State of the current CV */
 export type CvDataState = CVJson;
@@ -52,46 +52,34 @@ const cvDataSlice = createSlice({
       state.data = action.payload;
     },
 
-    setMetaData<K extends keyof MetaData>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: MetaData[K];
-      }>
-    ) {
-      state.metaData[action.payload.field] = action.payload.value;
+    setMetaData(state: CvDataState, action: PayloadAction<MetaData>) {
+      state.metaData = action.payload;
     },
 
     setStyle(state, action: PayloadAction<Style>) {
       state.style = action.payload;
     },
 
-    updatePersonalInfo<K extends keyof PersonalInfo>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: PersonalInfo[K];
-      }>
-    ) {
-      state.data.personalInfo[action.payload.field] = action.payload.value;
+    setPersonalInfo(state: CvDataState, action: PayloadAction<PersonalInfo>) {
+      state.data.personalInfo = action.payload;
     },
 
-    updateContactInfo<K extends keyof ContactInfo>(
-      state: CvDataState,
-      action: PayloadAction<{
-        field: K;
-        value: ContactInfo[K];
-      }>
-    ) {
-      state.data.contactInfo[action.payload.field] = action.payload.value;
+    setContactInfo(state: CvDataState, action: PayloadAction<ContactInfo>) {
+      state.data.contactInfo = action.payload;
     },
 
-    updateProfessionalSummary(state, action: PayloadAction<string>) {
+    setProfessionalSummary(state, action: PayloadAction<string>) {
       state.data.professionalSummary = action.payload;
     },
-    ...experiencesReducers,
-    ...educationsReducers,
-    ...skillsReducers,
+    setExperiences(state, action: PayloadAction<Experience[]>) {
+      state.data.experiences = action.payload;
+    },
+    setEducations(state, action: PayloadAction<Education[]>) {
+      state.data.educations = action.payload;
+    },
+    setSkills(state, action: PayloadAction<SkillCategory[]>) {
+      state.data.skills = action.payload;
+    },
 
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
@@ -132,24 +120,12 @@ export const {
   setCvData,
   setStyle,
   setDateFormat,
-  updatePersonalInfo,
-  updateContactInfo,
-  updateProfessionalSummary,
-  addExperience,
-  removeExperience,
-  updateExperience,
-  addBulletPoint,
-  updateExperienceBulletPoint,
-  removeBulletPoint,
-  addEducation,
-  removeEducation,
-  updateEducation,
-  addSkillCategory,
-  removeSkillCategory,
-  updateSkillCategory,
-  addSkillItem,
-  removeSkillItem,
-  updateSkillItem,
+  setPersonalInfo,
+  setContactInfo,
+  setProfessionalSummary,
+  setExperiences,
+  setEducations,
+  setSkills,
   setPaperMargin,
   setTypography,
   setRatingIcon,

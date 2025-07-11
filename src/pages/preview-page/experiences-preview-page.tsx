@@ -49,14 +49,10 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
               />
 
               {experience.bulletPoints && (
-                // <BulletPoints bulletPoints={experience.bulletPoints} />
                 <Box component="ul" sx={{ my: "0px", pl: "20px" }}>
                   {experience.bulletPoints.map((bulletPoint) => (
-                    <li key={bulletPoint.id}>
-                      <CvTypography
-                        variant="bulletText"
-                        text={bulletPoint.text}
-                      />
+                    <li key={bulletPoint}>
+                      <CvTypography variant="bulletText" text={bulletPoint} />
                     </li>
                   ))}
                 </Box>

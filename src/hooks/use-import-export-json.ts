@@ -30,7 +30,7 @@ export function useImportExportJson(): ReturnProps {
 
   // Automatic import on mount
   useEffect(() => {
-    fetch("../../cv-export.json")
+    fetch("../../cv-data-example/cv-export.json")
       .then((response) => {
         if (!response.ok) {
           throw new Error("File not found");

@@ -1,78 +1,26 @@
-import {
-  AppBar,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Toolbar,
-  Typography,
-  Box,
-} from "@mui/material";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import {
-  appSelector,
-  setSelectedSectionInEditorPage,
-} from "@store/app/app-slice";
-import { EditorPageButtons } from "@components/editor-page-buttons";
+import { Paper, Box } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
-import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
-import { EducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page";
-import { SkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page";
-import { SummaryEditorPage } from "@pages/editor-page/summary/summary-editor-page";
-import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
-import { MetaDataSection } from "@pages/editor-page/meta-data/meta-data-section";
-import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
-import { EditorSectionId } from "@store/app/app-slice-types";
-import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-editor-page";
-
-const DRAWER_WIDTH = 200;
-
-const SECTIONS: {
-  [key in EditorSectionId]: {
-    id: key;
-    label: string;
-    component: JSX.Element;
-  };
-} = {
-  metadata: {
-    id: "metadata",
-    label: "Metadata",
-    component: <MetaDataSection />,
-  },
-  typography: {
-    id: "typography",
-    label: "Typography",
-    component: <StylesEditorPage />,
-  },
-  template: {
-    id: "template",
-    label: "Page Structure",
-    component: <PageFormatEditorPage />,
-  },
-  mainInfo: {
-    id: "mainInfo",
-    label: "Main Info",
-    component: <MainInfoEditorPage />,
-  },
-  summary: {
-    id: "summary",
-    label: "Professional Summary",
-    component: <SummaryEditorPage />,
-  },
-  experiences: {
-    id: "experiences",
-    label: "Work Experience",
-    component: <ExperienceEditorPage />,
-  },
-  educations: {
-    id: "educations",
-    label: "Educations",
-    component: <EducationEditorPage />,
-  },
-  skills: { id: "skills", label: "Skills", component: <SkillsEditorPage /> },
-};
+import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
+import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
+import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
+import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
+import { EditorTypography } from "@pages/editor-page/sections/editor-typography/editor-typography";
+import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
+import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
+import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
+import { EditorFooter } from "@pages/editor-page/editor-footer";
+import { EditorAppBar } from "@pages/editor-page/editor-app-bar";
+import { EditorSideBar } from "@pages/editor-page/editor-side-bar";
+import { EditorPageSection } from "@pages/editor-page/editor-types";
+import { useAppSelector } from "@store/store-helper";
+import { appSelector } from "@store/app/app-slice";
+import { useState } from "react";
+import { Experience } from "@custom-types/experience-types";
+import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
+import { SkillCategory } from "@custom-types/skill-types";
+import { Education } from "@custom-types/education-types";
+import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
+import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 
 interface Props {
   /** The reference to the content */
@@ -81,66 +29,119 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
-  const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+  const [newExperiences, setNewExperiences] = useState<Experience[]>([]);
+  const [newEducations, setNewEducations] = useState<Education[]>([]);
+  const [newSkills, setNewSkills] = useState<SkillCategory[]>([]);
+
+  const { addExperience } = useEditorExperience({ setNewExperiences });
+  const { addEducation } = useEditorEducation({
+    setNewEducations,
+  });
+  const { addSkillCategory } = useEditorSkills({ setNewSkills });
+
+  const editorPageSections: EditorPageSection = {
+    metadata: {
+      id: "metadata",
+      label: "Meta Data",
+      content: <EditorMetaData />,
+    },
+    typography: {
+      id: "typography",
+      label: "Typography",
+      content: <EditorTypography />,
+    },
+    template: {
+      id: "template",
+      label: "Page Structure",
+      content: <EditorPageStructure />,
+    },
+    mainInfo: {
+      id: "mainInfo",
+      label: "Main Info",
+      content: <EditorMainInfo />,
+    },
+    summary: {
+      id: "summary",
+      label: "Professional Summary",
+      content: <EditorSummary />,
+    },
+    experiences: {
+      id: "experiences",
+      label: "Work Experience",
+      content: (
+        <EditorExperience
+          newExperiences={newExperiences}
+          setNewExperiences={setNewExperiences}
+        />
+      ),
+      additionalButton: {
+        label: "Add new Experience",
+        onClick: () => {
+          addExperience();
+        },
+      },
+    },
+    educations: {
+      id: "educations",
+      label: "Educations",
+      content: (
+        <EditorEducation
+          newEducations={newEducations}
+          setNewEducations={setNewEducations}
+        />
+      ),
+      additionalButton: {
+        label: "Add new Education",
+        onClick: () => {
+          addEducation();
+        },
+      },
+    },
+    skills: {
+      id: "skills",
+      label: "Skills",
+      content: (
+        <EditorSkills newSkills={newSkills} setNewSkills={setNewSkills} />
+      ),
+      additionalButton: {
+        label: "Add new Skill Category",
+        onClick: () => {
+          addSkillCategory();
+        },
+      },
+    },
+  };
 
   return (
     <Paper
       elevation={3}
       sx={{
         width: `${A4_DIMENSION_MM.height}mm`,
-        minHeight: `${A4_DIMENSION_MM.width}mm`,
         padding: "0mm",
         boxSizing: "border-box",
         mx: "auto",
-
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Editor
-          </Typography>
-          <EditorPageButtons printReference={contentRef} />
-        </Toolbar>
-      </AppBar>
-      <Box display={"flex"} flexDirection="row" gap={2} p={2}>
-        <Box>
-          <Drawer
-            variant="permanent"
-            sx={{
-              width: DRAWER_WIDTH,
-              flexShrink: 0,
-              ["& .MuiDrawer-paper"]: {
-                position: "relative",
-                width: DRAWER_WIDTH,
-                boxSizing: "border-box",
-              },
-            }}
-          >
-            <Toolbar />
-            <List>
-              {Object.values(SECTIONS).map((value) => (
-                <ListItem key={value.id} disablePadding>
-                  <ListItemButton
-                    onClick={() =>
-                      dispatch(setSelectedSectionInEditorPage(value.id))
-                    }
-                    selected={selectedSectionInEditorPage === value.id}
-                  >
-                    <ListItemText primary={value.label} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Drawer>
-        </Box>
-        <Box sx={{ width: "100%" }}>
-          {SECTIONS[selectedSectionInEditorPage].component}
+      <Box sx={{ height: "800px", overflowY: "scroll" }}>
+        <EditorAppBar contentRef={contentRef} />
+        <Box display="flex" flexDirection="row" gap={2} p={2}>
+          <EditorSideBar editorPageSections={editorPageSections} />
+          <Box sx={{ width: "100%" }}>
+            {editorPageSections[selectedSectionInEditorPage].content}
+          </Box>
         </Box>
       </Box>
+      <EditorFooter
+        additionalButton={
+          editorPageSections[selectedSectionInEditorPage].additionalButton
+        }
+      />
     </Paper>
   );
 }

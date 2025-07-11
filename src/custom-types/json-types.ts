@@ -35,7 +35,7 @@ const MetaDataSchema = Object({
   jobUrl: String,
 
   /** The version of the CV file. It is used to later track the changes in JSON file and read based upon version */
-  version: String,
+  version: String.optional(),
 });
 
 export const CVJsonSchema = Object({

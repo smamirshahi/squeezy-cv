@@ -24,16 +24,6 @@ export function FontColorSelector({
   function onPopoverClose(): void {
     setAnchorEl(null);
     setSelectedColor(newColor);
-    // dispatch(
-    //   setTypography({
-    //     variant,
-    //     fontStyle: {
-    //       fontSize: fontStyle.fontSize,
-    //       fontWeight: fontStyle.fontWeight,
-    //       color: newColor,
-    //     },
-    //   })
-    // );
   }
 
   return (

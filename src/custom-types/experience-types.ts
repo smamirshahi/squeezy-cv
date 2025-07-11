@@ -1,13 +1,5 @@
 import { Object, String, Array, Static, Boolean } from "runtypes";
 
-export const BulletPointSchema = Object({
-  /** Specific ID for the bullet point */
-  id: String,
-
-  /** The text of the bullet point */
-  text: String,
-});
-
 export const ExperienceSchema = Object({
   /** Specific ID for the experience */
   id: String,
@@ -28,11 +20,10 @@ export const ExperienceSchema = Object({
   endDate: String.optional(),
 
   /** Bullet points for each experience */
-  bulletPoints: Array(BulletPointSchema),
+  bulletPoints: Array(String),
 
   /** Whether to hide this specific row or now */
   shouldShow: Boolean,
 });
 
 export type Experience = Static<typeof ExperienceSchema>;
-export type BulletPoint = Static<typeof BulletPointSchema>;
