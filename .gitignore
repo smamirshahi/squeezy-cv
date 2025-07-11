@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-cv-export.json
+cv-data-example
 
 # Editor directories and files
 .vscode/*

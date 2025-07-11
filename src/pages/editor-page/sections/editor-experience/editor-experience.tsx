@@ -7,7 +7,6 @@ import {
   TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import {
   SetStateFunction,
   useAppDispatch,
@@ -18,6 +17,7 @@ import { useEditorExperience } from "@pages/editor-page/sections/editor-experien
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
 import { useEffect } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
+import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
 
 interface Props {
   newExperiences: Experience[];
@@ -45,13 +45,9 @@ export function EditorExperience({
     },
   });
 
-  const {
-    updateExperience,
-    updateBulletPoint,
-    removeBulletPoint,
-    addBulletPoint,
-    removeExperience,
-  } = useEditorExperience({ setNewExperiences });
+  const { updateExperience, removeExperience } = useEditorExperience({
+    setNewExperiences,
+  });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -130,34 +126,12 @@ export function EditorExperience({
           </Box>
 
           {/* Bullet Points */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {experience.bulletPoints.map((bp, index) => (
-              <Box
-                key={bp.id}
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <TextField
-                  label={`Bullet Point ${index + 1}`}
-                  value={bp.text}
-                  onChange={(e) =>
-                    updateBulletPoint(experience.id, bp.id, e.target.value)
-                  }
-                  fullWidth
-                />
-                <IconButton
-                  onClick={() => removeBulletPoint(experience.id, bp.id)}
-                  disabled={experience.bulletPoints.length === 1}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ))}
-            <Box>
-              <IconButton onClick={() => addBulletPoint(experience.id)}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-          </Box>
+          <EditorExperienceBp
+            experienceId={experience.id}
+            bulletPoints={experience.bulletPoints}
+            updateExperience={updateExperience}
+          />
+
           <Divider />
         </Box>
       ))}

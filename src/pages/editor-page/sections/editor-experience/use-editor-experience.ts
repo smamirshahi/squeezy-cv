@@ -10,13 +10,6 @@ interface ReturnProps {
   addExperience: () => void;
   removeExperience: (id: string) => void;
   updateExperience: (id: string, update: Partial<Experience>) => void;
-  addBulletPoint: (experienceId: string) => void;
-  updateBulletPoint: (
-    experienceId: string,
-    bulletPointId: string,
-    text: string
-  ) => void;
-  removeBulletPoint: (experienceId: string, bulletPointId: string) => void;
 }
 
 export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
@@ -42,7 +35,7 @@ export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
         startDate: "",
         endDate: "",
         shouldShow: true,
-        bulletPoints: [{ id: nanoid(), text: "" }],
+        bulletPoints: [""],
       },
     ]);
   }
@@ -57,45 +50,9 @@ export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
     updateExperienceById(id, (exp) => ({ ...exp, ...update }));
   }
 
-  /** Adds a bullet point */
-  function addBulletPoint(experienceId: string): void {
-    updateExperienceById(experienceId, (exp) => ({
-      ...exp,
-      bulletPoints: [...exp.bulletPoints, { id: nanoid(), text: "" }],
-    }));
-  }
-
-  /** Updates text of a bullet point */
-  function updateBulletPoint(
-    experienceId: string,
-    bulletPointId: string,
-    text: string
-  ): void {
-    updateExperienceById(experienceId, (exp) => ({
-      ...exp,
-      bulletPoints: exp.bulletPoints.map((bp) =>
-        bp.id === bulletPointId ? { ...bp, text } : bp
-      ),
-    }));
-  }
-
-  /** Removes a bullet point */
-  function removeBulletPoint(
-    experienceId: string,
-    bulletPointId: string
-  ): void {
-    updateExperienceById(experienceId, (exp) => ({
-      ...exp,
-      bulletPoints: exp.bulletPoints.filter((bp) => bp.id !== bulletPointId),
-    }));
-  }
-
   return {
     addExperience,
     removeExperience,
     updateExperience,
-    addBulletPoint,
-    updateBulletPoint,
-    removeBulletPoint,
   };
 }
