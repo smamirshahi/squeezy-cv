@@ -1,5 +1,6 @@
 import {
   Box,
+  Divider,
   FormControlLabel,
   IconButton,
   Switch,
@@ -157,6 +158,7 @@ export function EditorExperience({
               </IconButton>
             </Box>
           </Box>
+          <Divider />
         </Box>
       ))}
     </Box>

@@ -1,5 +1,6 @@
 import {
   Box,
+  Divider,
   FormControlLabel,
   IconButton,
   Switch,
@@ -133,6 +134,7 @@ export function EditorEducation({
             }
             fullWidth
           />
+          <Divider />
         </Box>
       ))}
     </Box>

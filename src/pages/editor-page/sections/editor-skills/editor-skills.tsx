@@ -1,4 +1,4 @@
-import { Box, IconButton, Rating, TextField } from "@mui/material";
+import { Box, Divider, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
@@ -147,6 +147,7 @@ export function EditorSkills({ newSkills, setNewSkills }: Props): JSX.Element {
               </IconButton>
             </Box>
           </Box>
+          <Divider />
         </Box>
       ))}
     </Box>
