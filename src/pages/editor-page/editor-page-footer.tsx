@@ -1,12 +1,39 @@
 import { Box, Button } from "@mui/material";
 import {
+  appSelector,
   setShouldApplyChanges,
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
-import { useAppDispatch } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useEffect, useState } from "react";
 
-export function EditorPageFooter(): JSX.Element {
+export function EditorPageFooter(): JSX.Element | null {
   const dispatch = useAppDispatch();
+
+  const [shouldShowApplyButton, setShouldShowApplyButton] =
+    useState<boolean>(true);
+  const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+
+  useEffect(() => {
+    switch (selectedSectionInEditorPage) {
+      case "metadata":
+      case "mainInfo":
+      case "summary":
+      case "experiences":
+      case "educations":
+      case "skills":
+        setShouldShowApplyButton(true);
+        break;
+      case "typography":
+      case "template":
+        setShouldShowApplyButton(false);
+        break;
+    }
+  }, [selectedSectionInEditorPage]);
+
+  if (!shouldShowApplyButton) {
+    return null;
+  }
 
   return (
     <Box
