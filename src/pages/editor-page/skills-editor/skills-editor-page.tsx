@@ -16,11 +16,7 @@ import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
 import { useSkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page-utils";
-import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the skill section in editor page */
 export function SkillsEditorPage(): JSX.Element {
@@ -29,23 +25,18 @@ export function SkillsEditorPage(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
   const [newSkills, setNewSkills] = useState<SkillCategory[]>(skills);
 
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
-
   useEffect(() => {
     setNewSkills(skills);
   }, [skills]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setSkills(newSkills));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewSkills(skills);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [dispatch, newSkills, shouldApplyChanges, shouldDiscardChanges, skills]);
+    },
+  });
 
   const {
     updateSkillCategory,

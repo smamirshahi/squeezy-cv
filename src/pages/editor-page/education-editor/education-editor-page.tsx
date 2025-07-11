@@ -12,11 +12,7 @@ import { useEducationEditorPage } from "@pages/editor-page/education-editor/educ
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
-import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the education in editor page */
 export function EducationEditorPage(): JSX.Element {
@@ -24,29 +20,18 @@ export function EducationEditorPage(): JSX.Element {
   const { educations } = useAppSelector(cvDataSelector);
   const [newEducations, setNewEducations] = useState<Education[]>(educations);
 
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
-
   useEffect(() => {
     setNewEducations(educations);
   }, [educations]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setEducations(newEducations));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewEducations(educations);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [
-    dispatch,
-    educations,
-    newEducations,
-    shouldApplyChanges,
-    shouldDiscardChanges,
-  ]);
+    },
+  });
 
   const { updateEducation, removeEducation, addEducation } =
     useEducationEditorPage({

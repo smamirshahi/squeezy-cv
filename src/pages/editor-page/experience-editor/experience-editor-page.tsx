@@ -13,11 +13,7 @@ import { Experience } from "@custom-types/experience-types";
 import { useExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page-utils";
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
-import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the experience in editor page */
 export function ExperienceEditorPage(): JSX.Element {
@@ -26,29 +22,18 @@ export function ExperienceEditorPage(): JSX.Element {
   const [newExperiences, setNewExperiences] =
     useState<Experience[]>(experiences);
 
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
-
   useEffect(() => {
     setNewExperiences(experiences);
   }, [experiences]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setExperiences(newExperiences));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewExperiences(experiences);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [
-    dispatch,
-    experiences,
-    newExperiences,
-    shouldApplyChanges,
-    shouldDiscardChanges,
-  ]);
+    },
+  });
 
   const {
     updateExperience,

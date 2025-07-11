@@ -1,42 +1,28 @@
 import { InformationTooltip } from "@components/information-tooltip";
 import { MetaData } from "@custom-types/json-types";
 import { Box, TextField, Typography } from "@mui/material";
-import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
 import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 export function MetaDataEditorPage(): JSX.Element {
   const dispatch = useAppDispatch();
   const metaData = useAppSelector(metaDataSelector);
   const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
 
   useEffect(() => {
     setNewMetaData(metaData);
   }, [metaData]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setMetaData(newMetaData));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewMetaData(metaData);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [
-    dispatch,
-    metaData,
-    newMetaData,
-    shouldApplyChanges,
-    shouldDiscardChanges,
-  ]);
+    },
+  });
 
   return (
     <>

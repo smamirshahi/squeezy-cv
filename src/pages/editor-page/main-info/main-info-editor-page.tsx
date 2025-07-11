@@ -13,11 +13,7 @@ import {
   setPersonalInfo,
 } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
-import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 export function MainInfoEditorPage(): JSX.Element | null {
   const dispatch = useAppDispatch();
@@ -28,34 +24,21 @@ export function MainInfoEditorPage(): JSX.Element | null {
   const [newContactInfo, setNewContactInfo] =
     useState<ContactInfo>(contactInfo);
 
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
-
   useEffect(() => {
     setNewPersonalInfo(personalInfo);
     setNewContactInfo(contactInfo);
   }, [contactInfo, personalInfo]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setPersonalInfo(newPersonalInfo));
       dispatch(setContactInfo(newContactInfo));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewPersonalInfo(personalInfo);
       setNewContactInfo(contactInfo);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [
-    contactInfo,
-    dispatch,
-    newContactInfo,
-    newPersonalInfo,
-    personalInfo,
-    shouldApplyChanges,
-    shouldDiscardChanges,
-  ]);
+    },
+  });
 
   return (
     <>

@@ -1,16 +1,12 @@
 import { ProfessionalSummary } from "@custom-types/summary-types";
 import { TextField } from "@mui/material";
 import {
-  appSelector,
-  setShouldApplyChanges,
-  setShouldDiscardChanges,
-} from "@store/app/app-slice";
-import {
   cvDataSelector,
   setProfessionalSummary,
 } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
+import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the professional summary section in editor page */
 export function SummaryEditorPage(): JSX.Element | null {
@@ -20,29 +16,18 @@ export function SummaryEditorPage(): JSX.Element | null {
   const [newSummary, setNewSummary] =
     useState<ProfessionalSummary>(professionalSummary);
 
-  const { shouldApplyChanges, shouldDiscardChanges } =
-    useAppSelector(appSelector);
-
   useEffect(() => {
     setNewSummary(professionalSummary);
   }, [professionalSummary]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
+  useEditorPage({
+    onApplyChanges: () => {
       dispatch(setProfessionalSummary(newSummary));
-      dispatch(setShouldApplyChanges(false));
-    }
-    if (shouldDiscardChanges) {
+    },
+    onDiscardChanges: () => {
       setNewSummary(professionalSummary);
-      dispatch(setShouldDiscardChanges(false));
-    }
-  }, [
-    dispatch,
-    newSummary,
-    professionalSummary,
-    shouldApplyChanges,
-    shouldDiscardChanges,
-  ]);
+    },
+  });
 
   return (
     <TextField
