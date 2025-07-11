@@ -20,17 +20,25 @@ interface ReturnProps {
 }
 
 export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
+  /** Helper to update a single category by ID */
+  function updateCategoryById(
+    id: string,
+    updater: (cat: SkillCategory) => SkillCategory
+  ): void {
+    setNewSkills((prev) =>
+      prev.map((cat) => (cat.id === id ? updater(cat) : cat))
+    );
+  }
+
   function updateSkillCategory(
     id: string,
     update: Partial<SkillCategory>
   ): void {
-    setNewSkills((prev) =>
-      prev.map((sk) => (sk.id === id ? { ...sk, ...update } : sk))
-    );
+    updateCategoryById(id, (cat) => ({ ...cat, ...update }));
   }
 
   function removeSkillCategory(id: string): void {
-    setNewSkills((prev) => prev.filter((sk) => sk.id !== id));
+    setNewSkills((prev) => prev.filter((cat) => cat.id !== id));
   }
 
   function addSkillCategory(): void {
@@ -49,41 +57,26 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     itemId: string,
     update: { name?: string }
   ): void {
-    setNewSkills((prev) =>
-      prev.map((sk) =>
-        sk.id === categoryId
-          ? {
-              ...sk,
-              items: sk.items.map((item) =>
-                item.id === itemId ? { ...item, ...update } : item
-              ),
-            }
-          : sk
-      )
-    );
+    updateCategoryById(categoryId, (cat) => ({
+      ...cat,
+      items: cat.items.map((item) =>
+        item.id === itemId ? { ...item, ...update } : item
+      ),
+    }));
   }
 
   function removeSkillItem(categoryId: string, itemId: string): void {
-    setNewSkills((prev) =>
-      prev.map((sk) =>
-        sk.id === categoryId
-          ? { ...sk, items: sk.items.filter((item) => item.id !== itemId) }
-          : sk
-      )
-    );
+    updateCategoryById(categoryId, (cat) => ({
+      ...cat,
+      items: cat.items.filter((item) => item.id !== itemId),
+    }));
   }
 
   function addSkillItem(categoryId: string): void {
-    setNewSkills((prev) =>
-      prev.map((sk) =>
-        sk.id === categoryId
-          ? {
-              ...sk,
-              items: [...sk.items, { id: nanoid(), name: "", rating: 0 }],
-            }
-          : sk
-      )
-    );
+    updateCategoryById(categoryId, (cat) => ({
+      ...cat,
+      items: [...cat.items, { id: nanoid(), name: "", rating: 0 }],
+    }));
   }
 
   return {
