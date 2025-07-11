@@ -1,25 +1,21 @@
 import { Box, Button } from "@mui/material";
 import {
   appSelector,
+  setShouldAddNewItem,
   setShouldApplyChanges,
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 
-interface Props {
-  additionalButton?: {
-    label: string;
-    onClick: () => void;
-  };
-}
-
-export function EditorFooter({ additionalButton }: Props): JSX.Element | null {
+export function EditorFooter(): JSX.Element | null {
   const dispatch = useAppDispatch();
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =
     useState<boolean>(true);
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+  const [addNewItemButtonLabel, setAddNewItemButtonLabel] =
+    useState<string>("");
 
   useEffect(() => {
     switch (selectedSectionInEditorPage) {
@@ -38,6 +34,27 @@ export function EditorFooter({ additionalButton }: Props): JSX.Element | null {
     }
   }, [selectedSectionInEditorPage]);
 
+  useEffect(() => {
+    switch (selectedSectionInEditorPage) {
+      case "experiences":
+        setAddNewItemButtonLabel("Add new experience");
+        break;
+      case "educations":
+        setAddNewItemButtonLabel("Add new education");
+        break;
+      case "skills":
+        setAddNewItemButtonLabel("Add new skill category");
+        break;
+      case "metadata":
+      case "mainInfo":
+      case "summary":
+      case "typography":
+      case "template":
+        setAddNewItemButtonLabel("");
+        break;
+    }
+  }, [selectedSectionInEditorPage]);
+
   if (!shouldShowApplyButton) {
     return null;
   }
@@ -49,9 +66,12 @@ export function EditorFooter({ additionalButton }: Props): JSX.Element | null {
       sx={{ mr: "20px", my: "20px" }}
       gap={2}
     >
-      {additionalButton && (
-        <Button variant="contained" onClick={additionalButton.onClick}>
-          {additionalButton.label}
+      {addNewItemButtonLabel && (
+        <Button
+          variant="contained"
+          onClick={() => dispatch(setShouldAddNewItem(true))}
+        >
+          {addNewItemButtonLabel}
         </Button>
       )}
 

@@ -1,6 +1,12 @@
 import { SkillCategory } from "@custom-types/skill-types";
 import { nanoid } from "@reduxjs/toolkit";
-import { SetStateFunction } from "@store/store-helper";
+import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
+import { useEffect } from "react";
 
 interface Props {
   setNewSkills: SetStateFunction<SkillCategory[]>;
@@ -9,7 +15,6 @@ interface Props {
 interface ReturnProps {
   updateSkillCategory: (id: string, update: Partial<SkillCategory>) => void;
   removeSkillCategory: (id: string) => void;
-  addSkillCategory: () => void;
   updateSkillItem: (
     categoryId: string,
     itemId: string,
@@ -20,6 +25,27 @@ interface ReturnProps {
 }
 
 export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
+  const dispatch = useAppDispatch();
+  const { shouldAddNewItem } = useAppSelector(appSelector);
+
+  useEffect(() => {
+    /** Adds a new skill category with default structure */
+    function addSkillCategory(): void {
+      setNewSkills((prev) => [
+        ...prev,
+        {
+          id: nanoid(),
+          category: "",
+          items: [{ id: nanoid(), name: "", rating: 0 }],
+        },
+      ]);
+    }
+    if (shouldAddNewItem) {
+      addSkillCategory();
+      dispatch(setShouldAddNewItem(false));
+    }
+  }, [dispatch, setNewSkills, shouldAddNewItem]);
+
   /** Helper to update a single category by ID */
   function updateCategoryById(
     id: string,
@@ -39,17 +65,6 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
 
   function removeSkillCategory(id: string): void {
     setNewSkills((prev) => prev.filter((cat) => cat.id !== id));
-  }
-
-  function addSkillCategory(): void {
-    setNewSkills((prev) => [
-      ...prev,
-      {
-        id: nanoid(),
-        category: "",
-        items: [{ id: nanoid(), name: "", rating: 0 }],
-      },
-    ]);
   }
 
   function updateSkillItem(
@@ -82,7 +97,6 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
   return {
     updateSkillCategory,
     removeSkillCategory,
-    addSkillCategory,
     updateSkillItem,
     removeSkillItem,
     addSkillItem,

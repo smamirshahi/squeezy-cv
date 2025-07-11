@@ -7,30 +7,19 @@ import {
   TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  SetStateFunction,
-  useAppDispatch,
-  useAppSelector,
-} from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
 import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
 
-interface Props {
-  newExperiences: Experience[];
-  setNewExperiences: SetStateFunction<Experience[]>;
-}
-
 /** Shows the experience in editor page */
-export function EditorExperience({
-  newExperiences,
-  setNewExperiences,
-}: Props): JSX.Element {
+export function EditorExperience(): JSX.Element {
   const dispatch = useAppDispatch();
   const { experiences } = useAppSelector(cvDataSelector);
+  const [newExperiences, setNewExperiences] = useState<Experience[]>([]);
 
   useEffect(() => {
     setNewExperiences(experiences);

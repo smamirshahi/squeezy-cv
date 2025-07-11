@@ -9,27 +9,16 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Education } from "@custom-types/education-types";
 import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
-import {
-  SetStateFunction,
-  useAppDispatch,
-  useAppSelector,
-} from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
-interface Props {
-  newEducations: Education[];
-  setNewEducations: SetStateFunction<Education[]>;
-}
-
 /** Shows the education in editor page */
-export function EditorEducation({
-  newEducations,
-  setNewEducations,
-}: Props): JSX.Element {
+export function EditorEducation(): JSX.Element {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
+  const [newEducations, setNewEducations] = useState<Education[]>([]);
 
   useEffect(() => {
     setNewEducations(educations);

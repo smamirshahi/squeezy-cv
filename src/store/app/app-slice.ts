@@ -19,6 +19,7 @@ interface AppState {
 
   shouldApplyChanges: boolean;
   shouldDiscardChanges: boolean;
+  shouldAddNewItem: boolean;
 }
 
 export const initialState: AppState = {
@@ -35,6 +36,7 @@ export const initialState: AppState = {
   selectedSectionInEditorPage: "metadata",
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
+  shouldAddNewItem: false,
 };
 
 /** Slice to access state of app */
@@ -69,6 +71,10 @@ const appSlice = createSlice({
       state.shouldDiscardChanges = action.payload;
     },
 
+    setShouldAddNewItem(state, action: PayloadAction<boolean>) {
+      state.shouldAddNewItem = action.payload;
+    },
+
     resetAppState: () => initialState,
   },
   selectors: {
@@ -86,6 +92,7 @@ export const {
   resetAppState,
   setShouldApplyChanges,
   setShouldDiscardChanges,
+  setShouldAddNewItem,
 } = appSlice.actions;
 
 export const appReducer = appSlice.reducer;
