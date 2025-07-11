@@ -11,7 +11,7 @@ import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useMemo } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
-import { nanoid } from "@reduxjs/toolkit";
+import { useSkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page-utils";
 
 interface Props {
   newSkills: SkillCategory[];
@@ -24,6 +24,15 @@ export function SkillsEditorPage({
   setNewSkills,
 }: Props): JSX.Element {
   const { ratingIcon, typography } = useAppSelector(styleSelector);
+
+  const {
+    updateSkillCategory,
+    removeSkillCategory,
+    addSkillCategory,
+    updateSkillItem,
+    removeSkillItem,
+    addSkillItem,
+  } = useSkillsEditorPage({ setNewSkills });
 
   const ratingIconComponent = useMemo(() => {
     switch (ratingIcon) {
@@ -50,87 +59,46 @@ export function SkillsEditorPage({
           key={skill.id}
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
+          {/* Skill Category */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               label="Skill Category"
               value={skill.category}
-              onChange={(event) =>
-                setNewSkills((prev) =>
-                  prev.map((sk) =>
-                    sk.id === skill.id
-                      ? { ...sk, category: event.target.value }
-                      : sk
-                  )
-                )
+              onChange={(e) =>
+                updateSkillCategory(skill.id, { category: e.target.value })
               }
               fullWidth
             />
 
-            <IconButton
-              onClick={() =>
-                setNewSkills((prev) => prev.filter((sk) => sk.id !== skill.id))
-              }
-            >
+            <IconButton onClick={() => removeSkillCategory(skill.id)}>
               <DeleteIcon />
             </IconButton>
           </Box>
 
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              mb: 2,
-            }}
-          >
-            {skill.items.map((skillItem, index) => (
+          {/* Skill Items */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+            {skill.items.map((item, index) => (
               <Box
-                key={index}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                }}
+                key={item.id}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
                 <TextField
                   label={`Skill Item ${index + 1}`}
-                  value={skillItem.name}
-                  onChange={(event) =>
-                    setNewSkills((prev) =>
-                      prev.map((sk) =>
-                        sk.id === skill.id
-                          ? {
-                              ...sk,
-                              items: sk.items.map((item, i) =>
-                                i === index
-                                  ? { ...item, name: event.target.value }
-                                  : item
-                              ),
-                            }
-                          : sk
-                      )
-                    )
+                  value={item.name}
+                  onChange={(e) =>
+                    updateSkillItem(skill.id, item.id, {
+                      name: e.target.value,
+                    })
                   }
                   fullWidth
                 />
                 <Rating
-                  value={skillItem.rating}
+                  value={item.rating}
                   onChange={(_, newValue) => {
                     if (isRatingAcceptable(newValue)) {
-                      setNewSkills((prev) =>
-                        prev.map((sk) =>
-                          sk.id === skill.id
-                            ? {
-                                ...sk,
-                                items: sk.items.map((item, i) =>
-                                  i === index
-                                    ? { ...item, rating: newValue ?? 0 }
-                                    : item
-                                ),
-                              }
-                            : sk
-                        )
-                      );
+                      updateSkillItem(skill.id, item.id, {
+                        rating: newValue ?? 0,
+                      });
                     }
                   }}
                   icon={ratingIconComponent.icon}
@@ -146,20 +114,7 @@ export function SkillsEditorPage({
                   }}
                 />
                 <IconButton
-                  onClick={() =>
-                    setNewSkills((prev) =>
-                      prev.map((sk) =>
-                        sk.id === skill.id
-                          ? {
-                              ...sk,
-                              items: sk.items.filter(
-                                (item) => item.id !== skillItem.id
-                              ),
-                            }
-                          : sk
-                      )
-                    )
-                  }
+                  onClick={() => removeSkillItem(skill.id, item.id)}
                   disabled={skill.items.length === 1}
                 >
                   <DeleteIcon fontSize="small" />
@@ -167,23 +122,7 @@ export function SkillsEditorPage({
               </Box>
             ))}
             <Box>
-              <IconButton
-                onClick={() =>
-                  setNewSkills((prev) =>
-                    prev.map((sk) =>
-                      sk.id === skill.id
-                        ? {
-                            ...sk,
-                            items: [
-                              ...sk.items,
-                              { id: nanoid(), name: "", rating: 0 },
-                            ],
-                          }
-                        : sk
-                    )
-                  )
-                }
-              >
+              <IconButton onClick={() => addSkillItem(skill.id)}>
                 <AddIcon />
               </IconButton>
             </Box>
@@ -191,15 +130,7 @@ export function SkillsEditorPage({
         </Box>
       ))}
 
-      <Button
-        variant="contained"
-        onClick={() =>
-          setNewSkills((prev) => [
-            ...prev,
-            { id: nanoid(), category: "", items: [] },
-          ])
-        }
-      >
+      <Button variant="contained" onClick={addSkillCategory}>
         Add New Skill Category
       </Button>
     </Box>
