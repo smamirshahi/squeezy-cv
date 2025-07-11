@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Education } from "@custom-types/education-types";
-import { useEditorEducation } from "@pages/editor-page/sections/use-editor-education";
+import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";

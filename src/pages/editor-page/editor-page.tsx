@@ -1,12 +1,12 @@
 import { Paper, Box } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
-import { EditorExperience } from "@pages/editor-page/sections/editor-experience";
-import { EditorEducation } from "@pages/editor-page/sections/editor-education";
-import { EditorSkills } from "@pages/editor-page/sections/editor-skills";
+import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
+import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
+import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
-import { EditorStyles } from "@pages/editor-page/styles-editor-page/editor-styles";
+import { EditorTypography } from "@pages/editor-page/sections/editor-typography/editor-typography";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
-import { EditorPageStructure } from "@pages/editor-page/sections/page-structure/editor-page-structure";
+import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { EditorAppBar } from "@pages/editor-page/editor-app-bar";
@@ -24,13 +24,13 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const editorPageSections: EditorPageSection = {
     metadata: {
       id: "metadata",
-      label: "Metadata",
+      label: "Meta Data",
       component: <EditorMetaData />,
     },
     typography: {
       id: "typography",
       label: "Typography",
-      component: <EditorStyles />,
+      component: <EditorTypography />,
     },
     template: {
       id: "template",

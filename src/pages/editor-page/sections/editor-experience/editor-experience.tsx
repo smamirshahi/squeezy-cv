@@ -10,7 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
-import { useEditorExperience } from "@pages/editor-page/sections/use-editor-experience";
+import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";

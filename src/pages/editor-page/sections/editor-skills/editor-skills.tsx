@@ -8,14 +8,14 @@ import {
   setSkills,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
-import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
+import { SkillIconDropdown } from "@pages/editor-page/sections/editor-skills/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
-import { useEditorSkills } from "@pages/editor-page/sections/use-editor-skills";
+import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the skill section in editor page */
