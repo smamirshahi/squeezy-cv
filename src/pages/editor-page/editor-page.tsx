@@ -9,7 +9,6 @@ import {
   Toolbar,
   Typography,
   Box,
-  Button,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -46,6 +45,7 @@ import { ProfessionalSummary } from "@custom-types/summary-types";
 import { Experience } from "@custom-types/experience-types";
 import { Education } from "@custom-types/education-types";
 import { SkillCategory } from "@custom-types/skill-types";
+import { EditorPageFooter } from "@pages/editor-page/editor-page-footer";
 
 const DRAWER_WIDTH = 200;
 
@@ -296,19 +296,10 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         </Box>
       </Box>
       {shouldShowApplyButton && (
-        <Box
-          display="flex"
-          justifyContent="flex-end"
-          sx={{ mr: "20px", my: "20px" }}
-          gap={2}
-        >
-          <Button variant="contained" onClick={onApplyClicked}>
-            Apply
-          </Button>
-          <Button variant="contained" onClick={onDiscardClicked}>
-            Discard
-          </Button>
-        </Box>
+        <EditorPageFooter
+          onApplyClicked={onApplyClicked}
+          onDiscardClicked={onDiscardClicked}
+        />
       )}
     </Paper>
   );
