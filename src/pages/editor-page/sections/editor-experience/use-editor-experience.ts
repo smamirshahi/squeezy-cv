@@ -7,23 +7,31 @@ interface Props {
 }
 
 interface ReturnProps {
+  addExperience: () => void;
+  removeExperience: (id: string) => void;
   updateExperience: (id: string, update: Partial<Experience>) => void;
+  addBulletPoint: (experienceId: string) => void;
   updateBulletPoint: (
     experienceId: string,
     bulletPointId: string,
     text: string
   ) => void;
   removeBulletPoint: (experienceId: string, bulletPointId: string) => void;
-  addBulletPoint: (experienceId: string) => void;
-  removeExperience: (id: string) => void;
-  addExperience: () => void;
 }
 
 export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
-  function updateExperience(id: string, update: Partial<Experience>): void {
+  /** Updates the experience by id */
+  function updateExperienceById(
+    id: string,
+    updater: (exp: Experience) => Experience
+  ): void {
     setNewExperiences((prev) =>
-      prev.map((exp) => (exp.id === id ? { ...exp, ...update } : exp))
+      prev.map((exp) => (exp.id === id ? updater(exp) : exp))
     );
+  }
+
+  function updateExperience(id: string, update: Partial<Experience>): void {
+    updateExperienceById(id, (exp) => ({ ...exp, ...update }));
   }
 
   function updateBulletPoint(
@@ -31,49 +39,29 @@ export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
     bulletPointId: string,
     text: string
   ): void {
-    setNewExperiences((prev) =>
-      prev.map((exp) =>
-        exp.id === experienceId
-          ? {
-              ...exp,
-              bulletPoints: exp.bulletPoints.map((bp) =>
-                bp.id === bulletPointId ? { ...bp, text } : bp
-              ),
-            }
-          : exp
-      )
-    );
+    updateExperienceById(experienceId, (exp) => ({
+      ...exp,
+      bulletPoints: exp.bulletPoints.map((bp) =>
+        bp.id === bulletPointId ? { ...bp, text } : bp
+      ),
+    }));
   }
 
   function removeBulletPoint(
     experienceId: string,
     bulletPointId: string
   ): void {
-    setNewExperiences((prev) =>
-      prev.map((exp) =>
-        exp.id === experienceId
-          ? {
-              ...exp,
-              bulletPoints: exp.bulletPoints.filter(
-                (bp) => bp.id !== bulletPointId
-              ),
-            }
-          : exp
-      )
-    );
+    updateExperienceById(experienceId, (exp) => ({
+      ...exp,
+      bulletPoints: exp.bulletPoints.filter((bp) => bp.id !== bulletPointId),
+    }));
   }
 
   function addBulletPoint(experienceId: string): void {
-    setNewExperiences((prev) =>
-      prev.map((exp) =>
-        exp.id === experienceId
-          ? {
-              ...exp,
-              bulletPoints: [...exp.bulletPoints, { id: nanoid(), text: "" }],
-            }
-          : exp
-      )
-    );
+    updateExperienceById(experienceId, (exp) => ({
+      ...exp,
+      bulletPoints: [...exp.bulletPoints, { id: nanoid(), text: "" }],
+    }));
   }
 
   function removeExperience(id: string): void {
