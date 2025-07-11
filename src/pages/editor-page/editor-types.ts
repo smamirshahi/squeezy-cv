@@ -4,6 +4,6 @@ export type EditorPageSection = {
   [key in EditorSectionId]: {
     id: key;
     label: string;
-    component: JSX.Element;
+    content: JSX.Element;
   };
 };

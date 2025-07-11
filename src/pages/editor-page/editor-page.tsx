@@ -11,8 +11,9 @@ import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { EditorAppBar } from "@pages/editor-page/editor-app-bar";
 import { EditorSideBar } from "@pages/editor-page/editor-side-bar";
-import { EditorContent } from "@pages/editor-page/editor-content";
 import { EditorPageSection } from "@pages/editor-page/editor-types";
+import { useAppSelector } from "@store/store-helper";
+import { appSelector } from "@store/app/app-slice";
 
 interface Props {
   /** The reference to the content */
@@ -21,46 +22,48 @@ interface Props {
 
 /** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
+  const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+
   const editorPageSections: EditorPageSection = {
     metadata: {
       id: "metadata",
       label: "Meta Data",
-      component: <EditorMetaData />,
+      content: <EditorMetaData />,
     },
     typography: {
       id: "typography",
       label: "Typography",
-      component: <EditorTypography />,
+      content: <EditorTypography />,
     },
     template: {
       id: "template",
       label: "Page Structure",
-      component: <EditorPageStructure />,
+      content: <EditorPageStructure />,
     },
     mainInfo: {
       id: "mainInfo",
       label: "Main Info",
-      component: <EditorMainInfo />,
+      content: <EditorMainInfo />,
     },
     summary: {
       id: "summary",
       label: "Professional Summary",
-      component: <EditorSummary />,
+      content: <EditorSummary />,
     },
     experiences: {
       id: "experiences",
       label: "Work Experience",
-      component: <EditorExperience />,
+      content: <EditorExperience />,
     },
     educations: {
       id: "educations",
       label: "Educations",
-      component: <EditorEducation />,
+      content: <EditorEducation />,
     },
     skills: {
       id: "skills",
       label: "Skills",
-      component: <EditorSkills />,
+      content: <EditorSkills />,
     },
   };
 
@@ -83,7 +86,9 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         <EditorAppBar contentRef={contentRef} />
         <Box display="flex" flexDirection="row" gap={2} p={2}>
           <EditorSideBar editorPageSections={editorPageSections} />
-          <EditorContent editorPageSections={editorPageSections} />
+          <Box sx={{ width: "100%" }}>
+            {editorPageSections[selectedSectionInEditorPage].content}
+          </Box>
         </Box>
       </Box>
       <EditorFooter />
