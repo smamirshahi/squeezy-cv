@@ -4,7 +4,7 @@ import { EditorExperience } from "@pages/editor-page/sections/editor-experience/
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
-import { EditorTypography } from "@pages/editor-page/sections/editor-typography/editor-typography";
+import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";

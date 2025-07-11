@@ -8,7 +8,6 @@ import {
   setSkills,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
-import { SkillIconDropdown } from "@pages/editor-page/sections/editor-skills/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
@@ -65,8 +64,6 @@ export function EditorSkills(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <SkillIconDropdown />
-
       {newSkills.map((skill) => (
         <Box
           key={skill.id}

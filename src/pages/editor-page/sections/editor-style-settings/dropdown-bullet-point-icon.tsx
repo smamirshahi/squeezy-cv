@@ -3,16 +3,16 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@custom-types/styles-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
-export function SkillIconDropdown(): JSX.Element {
+export function DropdownBulletPointIcon(): JSX.Element {
   const { ratingIcon } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
   return (
-    <FormControl component="fieldset">
-      <InputLabel id="date-format-label">Margin</InputLabel>
+    <FormControl fullWidth>
+      <InputLabel>Bullet Point Icon</InputLabel>
       <Select
         value={ratingIcon}
-        label="Margin"
+        label="Bullet Point Icon"
         onChange={(event) =>
           dispatch(setRatingIcon(event.target.value as Style["ratingIcon"]))
         }

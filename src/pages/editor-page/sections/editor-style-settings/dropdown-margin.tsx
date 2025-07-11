@@ -3,13 +3,13 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@custom-types/styles-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
-export function MarginDropdown(): JSX.Element {
+export function DropdownMargin(): JSX.Element {
   const { paperMargin } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
   return (
-    <FormControl component="fieldset">
-      <InputLabel id="date-format-label">Margin</InputLabel>
+    <FormControl fullWidth>
+      <InputLabel>Margin</InputLabel>
       <Select
         value={paperMargin}
         label="Margin"

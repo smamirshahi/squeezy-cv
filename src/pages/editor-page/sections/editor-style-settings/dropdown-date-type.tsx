@@ -4,16 +4,14 @@ import { setDateFormat, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 /** Let user to select the date type format */
-export function DateTypeDropdown(): JSX.Element {
+export function DropdownDateType(): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
 
   const dispatch = useAppDispatch();
   return (
-    <FormControl fullWidth sx={{ my: "20px" }}>
-      <InputLabel id="date-format-label">Date Format</InputLabel>
+    <FormControl fullWidth>
+      <InputLabel>Date Format</InputLabel>
       <Select
-        labelId="date-format-label"
-        id="date-format"
         value={dateFormat}
         label="Date Format"
         onChange={(event) =>
