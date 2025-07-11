@@ -11,9 +11,9 @@ export type PreviewSectionId =
 
 /** Sections in editor page */
 export type EditorSectionId =
-  | "metadata"
-  | "typography"
-  | "template"
+  | "metaData"
+  | "styleSettings"
+  | "pageStructure"
   | "mainInfo"
   | "summary"
   | "experiences"

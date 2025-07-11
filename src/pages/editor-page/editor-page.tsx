@@ -25,18 +25,18 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
 
   const editorPageSections: EditorPageSection = {
-    metadata: {
-      id: "metadata",
+    metaData: {
+      id: "metaData",
       label: "Meta Data",
       content: <EditorMetaData />,
     },
-    typography: {
-      id: "typography",
-      label: "Typography",
+    styleSettings: {
+      id: "styleSettings",
+      label: "Style Settings",
       content: <EditorTypography />,
     },
-    template: {
-      id: "template",
+    pageStructure: {
+      id: "pageStructure",
       label: "Page Structure",
       content: <EditorPageStructure />,
     },

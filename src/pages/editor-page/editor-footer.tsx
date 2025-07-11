@@ -19,7 +19,7 @@ export function EditorFooter(): JSX.Element | null {
 
   useEffect(() => {
     switch (selectedSectionInEditorPage) {
-      case "metadata":
+      case "metaData":
       case "mainInfo":
       case "summary":
       case "experiences":
@@ -27,8 +27,8 @@ export function EditorFooter(): JSX.Element | null {
       case "skills":
         setShouldShowApplyButton(true);
         break;
-      case "typography":
-      case "template":
+      case "styleSettings":
+      case "pageStructure":
         setShouldShowApplyButton(false);
         break;
     }
@@ -45,11 +45,11 @@ export function EditorFooter(): JSX.Element | null {
       case "skills":
         setAddNewItemButtonLabel("Add new skill category");
         break;
-      case "metadata":
+      case "metaData":
       case "mainInfo":
       case "summary":
-      case "typography":
-      case "template":
+      case "styleSettings":
+      case "pageStructure":
         setAddNewItemButtonLabel("");
         break;
     }

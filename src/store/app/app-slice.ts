@@ -33,7 +33,7 @@ export const initialState: AppState = {
     left: 50,
     right: 50,
   },
-  selectedSectionInEditorPage: "metadata",
+  selectedSectionInEditorPage: "metaData",
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
   shouldAddNewItem: false,
