@@ -37,6 +37,7 @@ export const initialState: CvDataState = {
   style: {
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
+    bulletPointIcon: "disc",
     dateFormat: "MMMM/YYYY",
     typography: TypographyVariant,
     paperMargin: "narrow",
@@ -103,6 +104,10 @@ const cvDataSlice = createSlice({
       state.style.ratingIcon = action.payload;
     },
 
+    setBulletPointIcon(state, action: PayloadAction<Style["bulletPointIcon"]>) {
+      state.style.bulletPointIcon = action.payload;
+    },
+
     resetCvDataState: () => initialState,
   },
   selectors: {
@@ -129,6 +134,7 @@ export const {
   setPaperMargin,
   setTypography,
   setRatingIcon,
+  setBulletPointIcon,
   resetCvDataState,
 } = cvDataSlice.actions;
 

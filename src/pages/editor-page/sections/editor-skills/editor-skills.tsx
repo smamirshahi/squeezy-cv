@@ -8,22 +8,21 @@ import {
   setSkills,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
-import CircleIcon from "@mui/icons-material/Circle";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
 import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
+import { useRatingIcon } from "@hooks/rating-icon";
 
 /** Shows the skill section in editor page */
 export function EditorSkills(): JSX.Element {
   const dispatch = useAppDispatch();
-  const { ratingIcon, typography } = useAppSelector(styleSelector);
+  const { typography } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
 
   const [newSkills, setNewSkills] = useState<SkillCategory[]>([]);
+
+  const RatingIcon = useRatingIcon();
 
   useEffect(() => {
     setNewSkills(skills);
@@ -45,22 +44,6 @@ export function EditorSkills(): JSX.Element {
     updateSkillItem,
     removeSkillItem,
   } = useEditorSkills({ setNewSkills });
-
-  const ratingIconComponent = useMemo(() => {
-    switch (ratingIcon) {
-      case "circle":
-        return {
-          icon: <CircleIcon fontSize="inherit" />,
-          emptyIcon: <CircleOutlinedIcon fontSize="inherit" />,
-        };
-
-      case "star":
-        return {
-          icon: <StarBorderIcon fontSize="inherit" />,
-          emptyIcon: <StarBorderOutlinedIcon fontSize="inherit" />,
-        };
-    }
-  }, [ratingIcon]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -111,8 +94,8 @@ export function EditorSkills(): JSX.Element {
                       });
                     }
                   }}
-                  icon={ratingIconComponent.icon}
-                  emptyIcon={ratingIconComponent.emptyIcon}
+                  icon={RatingIcon.icon}
+                  emptyIcon={RatingIcon.emptyIcon}
                   precision={0.5}
                   sx={{
                     "& .MuiRating-iconFilled": {

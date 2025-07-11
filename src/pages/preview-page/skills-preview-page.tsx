@@ -3,10 +3,13 @@ import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import React from "react";
 import { CvTypography } from "@components/cv-typography";
+import { useRatingIcon } from "@hooks/rating-icon";
 
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage(): JSX.Element | null {
   const { skills } = useAppSelector(cvDataSelector);
+
+  const RatingIcon = useRatingIcon();
 
   if (skills.length === 0) {
     return null;
@@ -22,7 +25,13 @@ export function SkillsPreviewPage(): JSX.Element | null {
             {skill.items.map((item) => (
               <Grid key={item.id} container direction="row" alignItems="center">
                 <CvTypography variant="bulletText" text={item.name} />
-                <Rating value={item.rating} precision={0.5} readOnly />
+                <Rating
+                  value={item.rating}
+                  precision={0.5}
+                  readOnly
+                  icon={RatingIcon.icon}
+                  emptyIcon={RatingIcon.emptyIcon}
+                />
               </Grid>
             ))}
           </Grid>

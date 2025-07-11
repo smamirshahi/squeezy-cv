@@ -1,24 +1,31 @@
-import { setRatingIcon, styleSelector } from "@store/cv-data/cv-data-slice";
+import {
+  setBulletPointIcon,
+  styleSelector,
+} from "@store/cv-data/cv-data-slice";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Style } from "@custom-types/styles-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 export function DropdownBulletPointIcon(): JSX.Element {
-  const { ratingIcon } = useAppSelector(styleSelector);
+  const { bulletPointIcon } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
   return (
     <FormControl fullWidth>
       <InputLabel>Bullet Point Icon</InputLabel>
       <Select
-        value={ratingIcon}
+        value={bulletPointIcon}
         label="Bullet Point Icon"
         onChange={(event) =>
-          dispatch(setRatingIcon(event.target.value as Style["ratingIcon"]))
+          dispatch(
+            setBulletPointIcon(event.target.value as Style["bulletPointIcon"])
+          )
         }
       >
-        <MenuItem value="star">star</MenuItem>
-        <MenuItem value="circle">circle</MenuItem>
+        <MenuItem value="disc">Disc</MenuItem>
+        <MenuItem value="circle">Circle</MenuItem>
+        <MenuItem value="dash">Dash</MenuItem>
+        <MenuItem value="square">Square</MenuItem>
       </Select>
     </FormControl>
   );
