@@ -8,20 +8,48 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
 import { useExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page-utils";
-
-interface Props {
-  newExperiences: Experience[];
-  setNewExperiences: SetStateFunction<Experience[]>;
-}
+import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
+import { useEffect, useState } from "react";
+import {
+  appSelector,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
 
 /** Shows the experience in editor page */
-export function ExperienceEditorPage({
-  newExperiences,
-  setNewExperiences,
-}: Props): JSX.Element {
+export function ExperienceEditorPage(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const { experiences } = useAppSelector(cvDataSelector);
+  const [newExperiences, setNewExperiences] =
+    useState<Experience[]>(experiences);
+
+  const { shouldApplyChanges, shouldDiscardChanges } =
+    useAppSelector(appSelector);
+
+  useEffect(() => {
+    setNewExperiences(experiences);
+  }, [experiences]);
+
+  useEffect(() => {
+    if (shouldApplyChanges) {
+      dispatch(setExperiences(newExperiences));
+      dispatch(setShouldApplyChanges(false));
+    }
+    if (shouldDiscardChanges) {
+      setNewExperiences(experiences);
+      dispatch(setShouldDiscardChanges(false));
+    }
+  }, [
+    dispatch,
+    experiences,
+    newExperiences,
+    shouldApplyChanges,
+    shouldDiscardChanges,
+  ]);
+
   const {
     updateExperience,
     updateBulletPoint,

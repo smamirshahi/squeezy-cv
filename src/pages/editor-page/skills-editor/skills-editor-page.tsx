@@ -2,28 +2,50 @@ import { Box, Button, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import { SetStateFunction, useAppSelector } from "@store/store-helper";
-import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  cvDataSelector,
+  setSkills,
+  styleSelector,
+} from "@store/cv-data/cv-data-slice";
 import { SkillIconDropdown } from "@pages/editor-page/skills-editor/skill-icon-dropdown";
 import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
 import { useSkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page-utils";
-
-interface Props {
-  newSkills: SkillCategory[];
-  setNewSkills: SetStateFunction<SkillCategory[]>;
-}
+import {
+  appSelector,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
 
 /** Shows the skill section in editor page */
-export function SkillsEditorPage({
-  newSkills,
-  setNewSkills,
-}: Props): JSX.Element {
+export function SkillsEditorPage(): JSX.Element {
+  const dispatch = useAppDispatch();
   const { ratingIcon, typography } = useAppSelector(styleSelector);
+  const { skills } = useAppSelector(cvDataSelector);
+  const [newSkills, setNewSkills] = useState<SkillCategory[]>(skills);
+
+  const { shouldApplyChanges, shouldDiscardChanges } =
+    useAppSelector(appSelector);
+
+  useEffect(() => {
+    setNewSkills(skills);
+  }, [skills]);
+
+  useEffect(() => {
+    if (shouldApplyChanges) {
+      dispatch(setSkills(newSkills));
+      dispatch(setShouldApplyChanges(false));
+    }
+    if (shouldDiscardChanges) {
+      setNewSkills(skills);
+      dispatch(setShouldDiscardChanges(false));
+    }
+  }, [dispatch, newSkills, shouldApplyChanges, shouldDiscardChanges, skills]);
 
   const {
     updateSkillCategory,

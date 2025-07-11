@@ -4,9 +4,6 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** State of the App slice */
 interface AppState {
-  /** Whether to show borders around components in preview page */
-  shouldShowBorders: boolean;
-
   selectedTypography: AvailableFonts | null;
 
   structure: PageStructure;
@@ -19,10 +16,12 @@ interface AppState {
   };
 
   selectedSectionInEditorPage: EditorSectionId;
+
+  shouldApplyChanges: boolean;
+  shouldDiscardChanges: boolean;
 }
 
 export const initialState: AppState = {
-  shouldShowBorders: true,
   selectedTypography: null,
   structure: {
     fullWidth: ["personalInfo", "contactInfo", "summary"],
@@ -34,6 +33,8 @@ export const initialState: AppState = {
     right: 50,
   },
   selectedSectionInEditorPage: "metadata",
+  shouldApplyChanges: false,
+  shouldDiscardChanges: false,
 };
 
 /** Slice to access state of app */
@@ -41,14 +42,6 @@ const appSlice = createSlice({
   name: "app",
   initialState,
   reducers: {
-    setIsPrinting(state, action: PayloadAction<boolean>) {
-      state.shouldShowBorders = !action.payload;
-    },
-
-    setShouldShowBorders(state, action: PayloadAction<boolean>) {
-      state.shouldShowBorders = action.payload;
-    },
-
     updatePageStructure(state, action: PayloadAction<PageStructure>) {
       state.structure = action.payload;
     },
@@ -68,6 +61,14 @@ const appSlice = createSlice({
       state.columnWidth = action.payload;
     },
 
+    setShouldApplyChanges(state, action: PayloadAction<boolean>) {
+      state.shouldApplyChanges = action.payload;
+    },
+
+    setShouldDiscardChanges(state, action: PayloadAction<boolean>) {
+      state.shouldDiscardChanges = action.payload;
+    },
+
     resetAppState: () => initialState,
   },
   selectors: {
@@ -78,13 +79,13 @@ const appSlice = createSlice({
 export const { appSelector } = appSlice.selectors;
 
 export const {
-  setIsPrinting,
-  setShouldShowBorders,
   updatePageStructure,
   setSelectedTypography,
   setSelectedSectionInEditorPage,
   setColumnWidth,
   resetAppState,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
 } = appSlice.actions;
 
 export const appReducer = appSlice.reducer;

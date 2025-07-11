@@ -5,22 +5,58 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { PersonalInfo } from "@custom-types/personal-info-types";
-import { SetStateFunction } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { ContactInfo } from "@custom-types/contact-info-types";
+import {
+  cvDataSelector,
+  setContactInfo,
+  setPersonalInfo,
+} from "@store/cv-data/cv-data-slice";
+import { useEffect, useState } from "react";
+import {
+  appSelector,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
 
-interface Props {
-  newPersonalInfo: PersonalInfo;
-  setNewPersonalInfo: SetStateFunction<PersonalInfo>;
-  newContactInfo: ContactInfo;
-  setNewContactInfo: SetStateFunction<ContactInfo>;
-}
+export function MainInfoEditorPage(): JSX.Element | null {
+  const dispatch = useAppDispatch();
+  const { personalInfo, contactInfo } = useAppSelector(cvDataSelector);
 
-export function MainInfoEditorPage({
-  newPersonalInfo,
-  setNewPersonalInfo,
-  newContactInfo,
-  setNewContactInfo,
-}: Props): JSX.Element | null {
+  const [newPersonalInfo, setNewPersonalInfo] =
+    useState<PersonalInfo>(personalInfo);
+  const [newContactInfo, setNewContactInfo] =
+    useState<ContactInfo>(contactInfo);
+
+  const { shouldApplyChanges, shouldDiscardChanges } =
+    useAppSelector(appSelector);
+
+  useEffect(() => {
+    setNewPersonalInfo(personalInfo);
+    setNewContactInfo(contactInfo);
+  }, [contactInfo, personalInfo]);
+
+  useEffect(() => {
+    if (shouldApplyChanges) {
+      dispatch(setPersonalInfo(newPersonalInfo));
+      dispatch(setContactInfo(newContactInfo));
+      dispatch(setShouldApplyChanges(false));
+    }
+    if (shouldDiscardChanges) {
+      setNewPersonalInfo(personalInfo);
+      setNewContactInfo(contactInfo);
+      dispatch(setShouldDiscardChanges(false));
+    }
+  }, [
+    contactInfo,
+    dispatch,
+    newContactInfo,
+    newPersonalInfo,
+    personalInfo,
+    shouldApplyChanges,
+    shouldDiscardChanges,
+  ]);
+
   return (
     <>
       <Box display="flex" gap={2} mb={2}>

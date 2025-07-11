@@ -6,8 +6,6 @@ import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import { useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
-import { useAppDispatch } from "@store/store-helper";
-import { setIsPrinting } from "@store/app/app-slice";
 
 interface Props {
   /**
@@ -33,17 +31,8 @@ const VisuallyHiddenInput = styled("input")({
 export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const [fileName, setFileName] = useState<string>("");
   const { handleImport, handleExport } = useImportExportJson();
-  const dispatch = useAppDispatch();
 
-  const onPrintClicked = useReactToPrint({
-    contentRef: printReference,
-    onBeforePrint: async () => {
-      await dispatch(setIsPrinting(true));
-    },
-    onAfterPrint: async () => {
-      await dispatch(setIsPrinting(false));
-    },
-  });
+  const onPrintClicked = useReactToPrint({ contentRef: printReference });
 
   return (
     <Grid container direction="row" justifyContent="center" gap={1}>

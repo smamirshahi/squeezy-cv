@@ -1,14 +1,13 @@
 import { Box, Button } from "@mui/material";
+import {
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
+import { useAppDispatch } from "@store/store-helper";
 
-interface Props {
-  onApplyClicked: () => void;
-  onDiscardClicked: () => void;
-}
+export function EditorPageFooter(): JSX.Element {
+  const dispatch = useAppDispatch();
 
-export function EditorPageFooter({
-  onApplyClicked,
-  onDiscardClicked,
-}: Props): JSX.Element {
   return (
     <Box
       display="flex"
@@ -16,10 +15,16 @@ export function EditorPageFooter({
       sx={{ mr: "20px", my: "20px" }}
       gap={2}
     >
-      <Button variant="contained" onClick={onApplyClicked}>
+      <Button
+        variant="contained"
+        onClick={() => dispatch(setShouldApplyChanges(true))}
+      >
         Apply
       </Button>
-      <Button variant="contained" onClick={onDiscardClicked}>
+      <Button
+        variant="contained"
+        onClick={() => dispatch(setShouldDiscardChanges(true))}
+      >
         Discard
       </Button>
     </Box>

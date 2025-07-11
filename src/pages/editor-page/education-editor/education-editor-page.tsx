@@ -7,20 +7,47 @@ import {
   TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { SetStateFunction } from "@store/store-helper";
 import { Education } from "@custom-types/education-types";
 import { useEducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page-utils";
-
-interface Props {
-  newEducations: Education[];
-  setNewEducations: SetStateFunction<Education[]>;
-}
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
+import { useEffect, useState } from "react";
+import {
+  appSelector,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
 
 /** Shows the education in editor page */
-export function EducationEditorPage({
-  newEducations,
-  setNewEducations,
-}: Props): JSX.Element {
+export function EducationEditorPage(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const { educations } = useAppSelector(cvDataSelector);
+  const [newEducations, setNewEducations] = useState<Education[]>(educations);
+
+  const { shouldApplyChanges, shouldDiscardChanges } =
+    useAppSelector(appSelector);
+
+  useEffect(() => {
+    setNewEducations(educations);
+  }, [educations]);
+
+  useEffect(() => {
+    if (shouldApplyChanges) {
+      dispatch(setEducations(newEducations));
+      dispatch(setShouldApplyChanges(false));
+    }
+    if (shouldDiscardChanges) {
+      setNewEducations(educations);
+      dispatch(setShouldDiscardChanges(false));
+    }
+  }, [
+    dispatch,
+    educations,
+    newEducations,
+    shouldApplyChanges,
+    shouldDiscardChanges,
+  ]);
+
   const { updateEducation, removeEducation, addEducation } =
     useEducationEditorPage({
       setNewEducations,

@@ -1,17 +1,43 @@
 import { InformationTooltip } from "@components/information-tooltip";
 import { MetaData } from "@custom-types/json-types";
 import { Box, TextField, Typography } from "@mui/material";
-import { SetStateFunction } from "@store/store-helper";
+import {
+  appSelector,
+  setShouldApplyChanges,
+  setShouldDiscardChanges,
+} from "@store/app/app-slice";
+import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useEffect, useState } from "react";
 
-interface Props {
-  newMetaData: MetaData;
-  setNewMetaData: SetStateFunction<MetaData>;
-}
+export function MetaDataEditorPage(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const metaData = useAppSelector(metaDataSelector);
+  const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);
+  const { shouldApplyChanges, shouldDiscardChanges } =
+    useAppSelector(appSelector);
 
-export function MetaDataSection({
-  newMetaData,
-  setNewMetaData,
-}: Props): JSX.Element {
+  useEffect(() => {
+    setNewMetaData(metaData);
+  }, [metaData]);
+
+  useEffect(() => {
+    if (shouldApplyChanges) {
+      dispatch(setMetaData(newMetaData));
+      dispatch(setShouldApplyChanges(false));
+    }
+    if (shouldDiscardChanges) {
+      setNewMetaData(metaData);
+      dispatch(setShouldDiscardChanges(false));
+    }
+  }, [
+    dispatch,
+    metaData,
+    newMetaData,
+    shouldApplyChanges,
+    shouldDiscardChanges,
+  ]);
+
   return (
     <>
       <Typography sx={{ m: "10px" }} variant="h6">
