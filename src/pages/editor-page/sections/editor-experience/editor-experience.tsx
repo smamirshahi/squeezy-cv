@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   FormControlLabel,
   IconButton,
   Switch,
@@ -8,23 +7,33 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
 import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
+interface Props {
+  newExperiences: Experience[];
+  setNewExperiences: SetStateFunction<Experience[]>;
+}
+
 /** Shows the experience in editor page */
-export function EditorExperience(): JSX.Element {
+export function EditorExperience({
+  newExperiences,
+  setNewExperiences,
+}: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { experiences } = useAppSelector(cvDataSelector);
-  const [newExperiences, setNewExperiences] =
-    useState<Experience[]>(experiences);
 
   useEffect(() => {
     setNewExperiences(experiences);
-  }, [experiences]);
+  }, [experiences, setNewExperiences]);
 
   useEditorPage({
     onApplyChanges: () => {
@@ -41,7 +50,6 @@ export function EditorExperience(): JSX.Element {
     removeBulletPoint,
     addBulletPoint,
     removeExperience,
-    addExperience,
   } = useEditorExperience({ setNewExperiences });
 
   return (
@@ -151,10 +159,6 @@ export function EditorExperience(): JSX.Element {
           </Box>
         </Box>
       ))}
-
-      <Button variant="contained" onClick={addExperience}>
-        Add Work Experience
-      </Button>
     </Box>
   );
 }

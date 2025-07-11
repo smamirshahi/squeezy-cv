@@ -1,8 +1,12 @@
-import { Box, Button, IconButton, Rating, TextField } from "@mui/material";
+import { Box, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
 import {
   cvDataSelector,
   setSkills,
@@ -13,21 +17,25 @@ import CircleIcon from "@mui/icons-material/Circle";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
 import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
+interface Props {
+  newSkills: SkillCategory[];
+  setNewSkills: SetStateFunction<SkillCategory[]>;
+}
+
 /** Shows the skill section in editor page */
-export function EditorSkills(): JSX.Element {
+export function EditorSkills({ newSkills, setNewSkills }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { ratingIcon, typography } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
-  const [newSkills, setNewSkills] = useState<SkillCategory[]>(skills);
 
   useEffect(() => {
     setNewSkills(skills);
-  }, [skills]);
+  }, [skills, setNewSkills]);
 
   useEditorPage({
     onApplyChanges: () => {
@@ -41,10 +49,9 @@ export function EditorSkills(): JSX.Element {
   const {
     updateSkillCategory,
     removeSkillCategory,
-    addSkillCategory,
+    addSkillItem,
     updateSkillItem,
     removeSkillItem,
-    addSkillItem,
   } = useEditorSkills({ setNewSkills });
 
   const ratingIconComponent = useMemo(() => {
@@ -142,10 +149,6 @@ export function EditorSkills(): JSX.Element {
           </Box>
         </Box>
       ))}
-
-      <Button variant="contained" onClick={addSkillCategory}>
-        Add New Skill Category
-      </Button>
     </Box>
   );
 }

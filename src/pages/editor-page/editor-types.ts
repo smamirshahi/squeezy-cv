@@ -5,5 +5,9 @@ export type EditorPageSection = {
     id: key;
     label: string;
     content: JSX.Element;
+    additionalButton?: {
+      label: string;
+      onClick: () => void;
+    };
   };
 };

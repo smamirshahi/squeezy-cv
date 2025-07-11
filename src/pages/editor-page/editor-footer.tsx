@@ -7,7 +7,14 @@ import {
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 
-export function EditorFooter(): JSX.Element | null {
+interface Props {
+  additionalButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+export function EditorFooter({ additionalButton }: Props): JSX.Element | null {
   const dispatch = useAppDispatch();
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =
@@ -42,6 +49,12 @@ export function EditorFooter(): JSX.Element | null {
       sx={{ mr: "20px", my: "20px" }}
       gap={2}
     >
+      {additionalButton && (
+        <Button variant="contained" onClick={additionalButton.onClick}>
+          {additionalButton.label}
+        </Button>
+      )}
+
       <Button
         variant="contained"
         onClick={() => dispatch(setShouldApplyChanges(true))}

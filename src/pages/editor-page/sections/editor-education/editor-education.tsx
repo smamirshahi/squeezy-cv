@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   FormControlLabel,
   IconButton,
   Switch,
@@ -9,20 +8,31 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Education } from "@custom-types/education-types";
 import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
 import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
+interface Props {
+  newEducations: Education[];
+  setNewEducations: SetStateFunction<Education[]>;
+}
+
 /** Shows the education in editor page */
-export function EditorEducation(): JSX.Element {
+export function EditorEducation({
+  newEducations,
+  setNewEducations,
+}: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
-  const [newEducations, setNewEducations] = useState<Education[]>(educations);
 
   useEffect(() => {
     setNewEducations(educations);
-  }, [educations]);
+  }, [educations, setNewEducations]);
 
   useEditorPage({
     onApplyChanges: () => {
@@ -33,11 +43,9 @@ export function EditorEducation(): JSX.Element {
     },
   });
 
-  const { updateEducation, removeEducation, addEducation } = useEditorEducation(
-    {
-      setNewEducations,
-    }
-  );
+  const { updateEducation, removeEducation } = useEditorEducation({
+    setNewEducations,
+  });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -127,10 +135,6 @@ export function EditorEducation(): JSX.Element {
           />
         </Box>
       ))}
-
-      <Button variant="contained" onClick={addEducation}>
-        Add Education
-      </Button>
     </Box>
   );
 }
