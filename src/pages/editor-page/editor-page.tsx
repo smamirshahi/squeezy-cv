@@ -254,7 +254,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Editor
+              App version: {metaData.version}
             </Typography>
             <EditorPageButtons printReference={contentRef} />
           </Toolbar>
