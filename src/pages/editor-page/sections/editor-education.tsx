@@ -8,14 +8,14 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Education } from "@custom-types/education-types";
-import { useEducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page-utils";
+import { useEditorEducation } from "@pages/editor-page/sections/use-editor-education";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the education in editor page */
-export function EducationEditorPage(): JSX.Element {
+export function EditorEducation(): JSX.Element {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
   const [newEducations, setNewEducations] = useState<Education[]>(educations);
@@ -33,10 +33,11 @@ export function EducationEditorPage(): JSX.Element {
     },
   });
 
-  const { updateEducation, removeEducation, addEducation } =
-    useEducationEditorPage({
+  const { updateEducation, removeEducation, addEducation } = useEditorEducation(
+    {
       setNewEducations,
-    });
+    }
+  );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

@@ -7,7 +7,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 
-export function EditorPageFooter(): JSX.Element | null {
+export function EditorFooter(): JSX.Element | null {
   const dispatch = useAppDispatch();
 
   const [shouldShowApplyButton, setShouldShowApplyButton] =

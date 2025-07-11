@@ -19,9 +19,7 @@ interface ReturnProps {
   addExperience: () => void;
 }
 
-export function useExperienceEditorPage({
-  setNewExperiences,
-}: Props): ReturnProps {
+export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
   function updateExperience(id: string, update: Partial<Experience>): void {
     setNewExperiences((prev) =>
       prev.map((exp) => (exp.id === id ? { ...exp, ...update } : exp))

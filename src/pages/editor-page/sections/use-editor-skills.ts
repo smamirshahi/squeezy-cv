@@ -19,7 +19,7 @@ interface ReturnProps {
   addSkillItem: (categoryId: string) => void;
 }
 
-export function useSkillsEditorPage({ setNewSkills }: Props): ReturnProps {
+export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
   function updateSkillCategory(
     id: string,
     update: Partial<SkillCategory>

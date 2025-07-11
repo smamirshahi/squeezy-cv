@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the professional summary section in editor page */
-export function SummaryEditorPage(): JSX.Element | null {
+export function EditorSummary(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const { professionalSummary } = useAppSelector(cvDataSelector);
 

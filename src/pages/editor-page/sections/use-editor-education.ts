@@ -12,9 +12,7 @@ interface ReturnProps {
   addEducation: () => void;
 }
 
-export function useEducationEditorPage({
-  setNewEducations,
-}: Props): ReturnProps {
+export function useEditorEducation({ setNewEducations }: Props): ReturnProps {
   function updateEducation(id: string, update: Partial<Education>): void {
     setNewEducations((prev) =>
       prev.map((edu) => (edu.id === id ? { ...edu, ...update } : edu))

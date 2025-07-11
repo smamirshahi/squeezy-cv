@@ -10,13 +10,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
-import { useExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page-utils";
+import { useEditorExperience } from "@pages/editor-page/sections/use-editor-experience";
 import { cvDataSelector, setExperiences } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the experience in editor page */
-export function ExperienceEditorPage(): JSX.Element {
+export function EditorExperience(): JSX.Element {
   const dispatch = useAppDispatch();
   const { experiences } = useAppSelector(cvDataSelector);
   const [newExperiences, setNewExperiences] =
@@ -42,7 +42,7 @@ export function ExperienceEditorPage(): JSX.Element {
     addBulletPoint,
     removeExperience,
     addExperience,
-  } = useExperienceEditorPage({ setNewExperiences });
+  } = useEditorExperience({ setNewExperiences });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

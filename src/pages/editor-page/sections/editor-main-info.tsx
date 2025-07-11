@@ -15,7 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
-export function MainInfoEditorPage(): JSX.Element | null {
+export function EditorMainInfo(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const { personalInfo, contactInfo } = useAppSelector(cvDataSelector);
 

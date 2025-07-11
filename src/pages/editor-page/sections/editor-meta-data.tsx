@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
-export function MetaDataEditorPage(): JSX.Element {
+export function EditorMetaData(): JSX.Element {
   const dispatch = useAppDispatch();
   const metaData = useAppSelector(metaDataSelector);
   const [newMetaData, setNewMetaData] = useState<MetaData>(metaData);

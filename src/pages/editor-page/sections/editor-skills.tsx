@@ -15,11 +15,11 @@ import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
-import { useSkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page-utils";
+import { useEditorSkills } from "@pages/editor-page/sections/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 /** Shows the skill section in editor page */
-export function SkillsEditorPage(): JSX.Element {
+export function EditorSkills(): JSX.Element {
   const dispatch = useAppDispatch();
   const { ratingIcon, typography } = useAppSelector(styleSelector);
   const { skills } = useAppSelector(cvDataSelector);
@@ -45,7 +45,7 @@ export function SkillsEditorPage(): JSX.Element {
     updateSkillItem,
     removeSkillItem,
     addSkillItem,
-  } = useSkillsEditorPage({ setNewSkills });
+  } = useEditorSkills({ setNewSkills });
 
   const ratingIconComponent = useMemo(() => {
     switch (ratingIcon) {

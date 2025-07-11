@@ -8,8 +8,9 @@ interface Props {
   contentRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function AppBarEditorPage({ contentRef }: Props): JSX.Element {
+export function EditorAppBar({ contentRef }: Props): JSX.Element {
   const metaData = useAppSelector(metaDataSelector);
+
   return (
     <AppBar position="static">
       <Toolbar>

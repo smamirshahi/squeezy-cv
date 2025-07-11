@@ -1,18 +1,18 @@
 import { Paper, Box } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
-import { ExperienceEditorPage } from "@pages/editor-page/experience-editor/experience-editor-page";
-import { EducationEditorPage } from "@pages/editor-page/education-editor/education-editor-page";
-import { SkillsEditorPage } from "@pages/editor-page/skills-editor/skills-editor-page";
-import { SummaryEditorPage } from "@pages/editor-page/summary/summary-editor-page";
-import { StylesEditorPage } from "@pages/editor-page/styles-editor-page/styles-editor-page";
-import { MetaDataEditorPage } from "@pages/editor-page/meta-data/meta-data-editor-page";
-import { PageFormatEditorPage } from "@pages/editor-page/page-structure/page-structure-editor-page";
-import { MainInfoEditorPage } from "@pages/editor-page/main-info/main-info-editor-page";
-import { EditorPageFooter } from "@pages/editor-page/editor-page-footer";
-import { AppBarEditorPage } from "@pages/editor-page/app-bar-editor-page";
-import { SideBarEditorPage } from "@pages/editor-page/side-bar-editor-page";
-import { EditorPageContent } from "@pages/editor-page/editor-page-content";
-import { EditorPageSection } from "@pages/editor-page/editor-page-types";
+import { EditorExperience } from "@pages/editor-page/sections/editor-experience";
+import { EditorEducation } from "@pages/editor-page/sections/editor-education";
+import { EditorSkills } from "@pages/editor-page/sections/editor-skills";
+import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
+import { EditorStyles } from "@pages/editor-page/styles-editor-page/editor-styles";
+import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
+import { EditorPageStructure } from "@pages/editor-page/sections/page-structure/editor-page-structure";
+import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
+import { EditorFooter } from "@pages/editor-page/editor-footer";
+import { EditorAppBar } from "@pages/editor-page/editor-app-bar";
+import { EditorSideBar } from "@pages/editor-page/editor-side-bar";
+import { EditorContent } from "@pages/editor-page/editor-content";
+import { EditorPageSection } from "@pages/editor-page/editor-types";
 
 interface Props {
   /** The reference to the content */
@@ -25,42 +25,42 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     metadata: {
       id: "metadata",
       label: "Metadata",
-      component: <MetaDataEditorPage />,
+      component: <EditorMetaData />,
     },
     typography: {
       id: "typography",
       label: "Typography",
-      component: <StylesEditorPage />,
+      component: <EditorStyles />,
     },
     template: {
       id: "template",
       label: "Page Structure",
-      component: <PageFormatEditorPage />,
+      component: <EditorPageStructure />,
     },
     mainInfo: {
       id: "mainInfo",
       label: "Main Info",
-      component: <MainInfoEditorPage />,
+      component: <EditorMainInfo />,
     },
     summary: {
       id: "summary",
       label: "Professional Summary",
-      component: <SummaryEditorPage />,
+      component: <EditorSummary />,
     },
     experiences: {
       id: "experiences",
       label: "Work Experience",
-      component: <ExperienceEditorPage />,
+      component: <EditorExperience />,
     },
     educations: {
       id: "educations",
       label: "Educations",
-      component: <EducationEditorPage />,
+      component: <EditorEducation />,
     },
     skills: {
       id: "skills",
       label: "Skills",
-      component: <SkillsEditorPage />,
+      component: <EditorSkills />,
     },
   };
 
@@ -80,13 +80,13 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <Box sx={{ height: "800px", overflowY: "scroll" }}>
-        <AppBarEditorPage contentRef={contentRef} />
+        <EditorAppBar contentRef={contentRef} />
         <Box display="flex" flexDirection="row" gap={2} p={2}>
-          <SideBarEditorPage editorPageSections={editorPageSections} />
-          <EditorPageContent editorPageSections={editorPageSections} />
+          <EditorSideBar editorPageSections={editorPageSections} />
+          <EditorContent editorPageSections={editorPageSections} />
         </Box>
       </Box>
-      <EditorPageFooter />
+      <EditorFooter />
     </Paper>
   );
 }

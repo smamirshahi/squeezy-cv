@@ -12,7 +12,7 @@ import {
   setSelectedSectionInEditorPage,
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { EditorPageSection } from "@pages/editor-page/editor-page-types";
+import { EditorPageSection } from "@pages/editor-page/editor-types";
 
 const DRAWER_WIDTH = 200;
 
@@ -20,7 +20,7 @@ interface Props {
   editorPageSections: EditorPageSection;
 }
 
-export function SideBarEditorPage({ editorPageSections }: Props): JSX.Element {
+export function EditorSideBar({ editorPageSections }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
 
