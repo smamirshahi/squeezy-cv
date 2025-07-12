@@ -59,7 +59,7 @@ export function EditorExperience(): JSX.Element {
       {newExperiences.map((experience, index) => (
         <Accordion
           key={experience.id}
-          sx={{ marginBottom: 2 }}
+          sx={{ marginBottom: 2, width: "100%" }}
           expanded={selectedExperienceId === experience.id}
           onChange={() =>
             setSelectedExperienceId(
@@ -67,79 +67,95 @@ export function EditorExperience(): JSX.Element {
             )
           }
         >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls={`panel-${experience.id}-content`}
-            id={`panel-${experience.id}-header`}
-            sx={{ backgroundColor: "#f5f5f5" }}
+          <Box
+            display="flex"
+            justifyContent={"space-between"}
+            sx={{
+              backgroundColor: "#f5f5f5",
+            }}
           >
+            <Box display="flex">
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  swapExperiences(index, index - 1);
+                }}
+                disabled={index === 0}
+              >
+                <ArrowUpwardIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  swapExperiences(index, index + 1);
+                }}
+                disabled={index === newExperiences.length - 1}
+              >
+                <ArrowDownwardIcon fontSize="small" />
+              </IconButton>
+            </Box>
+            <AccordionSummary
+              aria-controls={`panel-${experience.id}-content`}
+              id={`panel-${experience.id}-header`}
+            >
+              <Typography component="span">
+                {experience.jobTitle} (
+                {`${dayjs(experience.startDate).format(dateFormat)} - ${
+                  experience.endDate
+                    ? dayjs(experience.endDate).format(dateFormat)
+                    : "Present"
+                }`}
+                )
+              </Typography>
+            </AccordionSummary>
+
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
+                justifyContent: "flex-end",
                 pr: 1,
               }}
             >
-              <Box>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapExperiences(index, index - 1);
-                  }}
-                  disabled={index === 0}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapExperiences(index, index + 1);
-                  }}
-                  disabled={index === newExperiences.length - 1}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-                <Typography component="span">
-                  {experience.jobTitle} (
-                  {`${dayjs(experience.startDate).format(dateFormat)} - ${
-                    experience.endDate
-                      ? dayjs(experience.endDate).format(dateFormat)
-                      : "Present"
-                  }`}
-                  )
-                </Typography>
-              </Box>
-              <Box>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateExperience(experience.id, {
-                      shouldShow: !experience.shouldShow,
-                    });
-                  }}
-                >
-                  {experience.shouldShow ? (
-                    <VisibilityIcon />
-                  ) : (
-                    <VisibilityOffIcon />
-                  )}
-                </IconButton>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateExperience(experience.id, {
+                    shouldShow: !experience.shouldShow,
+                  });
+                }}
+              >
+                {experience.shouldShow ? (
+                  <VisibilityIcon />
+                ) : (
+                  <VisibilityOffIcon />
+                )}
+              </IconButton>
 
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeExperience(experience.id);
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeExperience(experience.id);
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+              <IconButton
+                onClick={() =>
+                  setSelectedExperienceId(
+                    selectedExperienceId === experience.id
+                      ? null
+                      : experience.id
+                  )
+                }
+              >
+                <ExpandMoreIcon />
+              </IconButton>
             </Box>
-          </AccordionSummary>
+          </Box>
+
           <AccordionDetails>
             <TextField
               label="Job Title"
