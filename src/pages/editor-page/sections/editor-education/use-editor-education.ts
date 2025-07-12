@@ -15,6 +15,7 @@ interface Props {
 interface ReturnProps {
   updateEducation: (id: string, update: Partial<Education>) => void;
   removeEducation: (id: string) => void;
+  swapEducations(index1: number, index2: number): void;
 }
 
 export function useEditorEducation({ setNewEducations }: Props): ReturnProps {
@@ -54,8 +55,29 @@ export function useEditorEducation({ setNewEducations }: Props): ReturnProps {
     setNewEducations((prev) => prev.filter((edu) => edu.id !== id));
   }
 
+  /** Swap the experience order */
+  function swapEducations(index1: number, index2: number): void {
+    setNewEducations((prev) => {
+      // no change if out of bounds
+      if (
+        index1 < 0 ||
+        index2 < 0 ||
+        index1 >= prev.length ||
+        index2 >= prev.length
+      ) {
+        return prev;
+      }
+      const newArray = [...prev];
+      const temp = newArray[index1];
+      newArray[index1] = newArray[index2];
+      newArray[index2] = temp;
+      return newArray;
+    });
+  }
+
   return {
     updateEducation,
     removeEducation,
+    swapEducations,
   };
 }

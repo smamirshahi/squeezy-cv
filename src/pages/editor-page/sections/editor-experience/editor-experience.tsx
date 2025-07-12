@@ -111,6 +111,7 @@ export function EditorExperience(): JSX.Element {
               onChange={(e) =>
                 updateExperience(experience.id, { jobTitle: e.target.value })
               }
+              sx={{ mt: 2 }}
               fullWidth
             />
 
