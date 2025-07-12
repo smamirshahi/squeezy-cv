@@ -24,6 +24,8 @@ import { useEditorPage } from "@pages/editor-page/use-editor-page";
 import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 /** Shows the experience in editor page */
 export function EditorExperience(): JSX.Element {
@@ -45,29 +47,62 @@ export function EditorExperience(): JSX.Element {
     },
   });
 
-  const { updateExperience, removeExperience } = useEditorExperience({
-    setNewExperiences,
-  });
+  const { updateExperience, removeExperience, swapExperiences } =
+    useEditorExperience({
+      setNewExperiences,
+    });
 
   return (
     <>
-      {newExperiences.map((experience) => (
+      {newExperiences.map((experience, index) => (
         <Accordion key={experience.id} sx={{ marginBottom: 2 }}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel3-content"
-            id="panel3-header"
+            aria-controls={`panel-${experience.id}-content`}
+            id={`panel-${experience.id}-header`}
             sx={{ backgroundColor: "#f5f5f5" }}
           >
-            <Typography component="span">
-              {experience.jobTitle} (
-              {`${dayjs(experience.startDate).format(dateFormat)} - ${
-                experience.endDate
-                  ? dayjs(experience.endDate).format(dateFormat)
-                  : "Present"
-              }`}
-              )
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                pr: 1,
+              }}
+            >
+              <Typography component="span">
+                {experience.jobTitle} (
+                {`${dayjs(experience.startDate).format(dateFormat)} - ${
+                  experience.endDate
+                    ? dayjs(experience.endDate).format(dateFormat)
+                    : "Present"
+                }`}
+                )
+              </Typography>
+              <Box>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    swapExperiences(index, index - 1);
+                  }}
+                  disabled={index === 0}
+                >
+                  <ArrowUpwardIcon fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    swapExperiences(index, index + 1);
+                  }}
+                  disabled={index === newExperiences.length - 1}
+                >
+                  <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
           </AccordionSummary>
           <AccordionDetails>
             <TextField

@@ -15,6 +15,7 @@ interface Props {
 interface ReturnProps {
   removeExperience: (id: string) => void;
   updateExperience: (id: string, update: Partial<Experience>) => void;
+  swapExperiences(index1: number, index2: number): void;
 }
 
 export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
@@ -64,8 +65,29 @@ export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
     updateExperienceById(id, (exp) => ({ ...exp, ...update }));
   }
 
+  /** Swap the experience order */
+  function swapExperiences(index1: number, index2: number): void {
+    setNewExperiences((prev) => {
+      // no change if out of bounds
+      if (
+        index1 < 0 ||
+        index2 < 0 ||
+        index1 >= prev.length ||
+        index2 >= prev.length
+      ) {
+        return prev;
+      }
+      const newArray = [...prev];
+      const temp = newArray[index1];
+      newArray[index1] = newArray[index2];
+      newArray[index2] = temp;
+      return newArray;
+    });
+  }
+
   return {
     removeExperience,
     updateExperience,
+    swapExperiences,
   };
 }
