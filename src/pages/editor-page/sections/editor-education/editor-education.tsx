@@ -1,12 +1,9 @@
 import {
   Accordion,
-  AccordionActions,
   AccordionDetails,
   AccordionSummary,
   Box,
-  FormControlLabel,
   IconButton,
-  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -25,6 +22,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 /** Shows the education in editor page */
 export function EditorEducation(): JSX.Element {
@@ -82,15 +81,6 @@ export function EditorEducation(): JSX.Element {
                 pr: 1,
               }}
             >
-              <Typography component="span">
-                {education.degree} (
-                {`${dayjs(education.startDate).format(dateFormat)} - ${
-                  education.endDate
-                    ? dayjs(education.endDate).format(dateFormat)
-                    : "Present"
-                }`}
-                )
-              </Typography>
               <Box>
                 <IconButton
                   size="small"
@@ -111,6 +101,40 @@ export function EditorEducation(): JSX.Element {
                   disabled={index === newEducations.length - 1}
                 >
                   <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+                <Typography component="span">
+                  {education.degree} (
+                  {`${dayjs(education.startDate).format(dateFormat)} - ${
+                    education.endDate
+                      ? dayjs(education.endDate).format(dateFormat)
+                      : "Present"
+                  }`}
+                  )
+                </Typography>
+              </Box>
+              <Box>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateEducation(education.id, {
+                      shouldShow: !education.shouldShow,
+                    });
+                  }}
+                >
+                  {education.shouldShow ? (
+                    <VisibilityIcon />
+                  ) : (
+                    <VisibilityOffIcon />
+                  )}
+                </IconButton>
+
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeEducation(education.id);
+                  }}
+                >
+                  <DeleteIcon />
                 </IconButton>
               </Box>
             </Box>
@@ -177,25 +201,6 @@ export function EditorEducation(): JSX.Element {
               fullWidth
             />
           </AccordionDetails>
-          <AccordionActions sx={{ px: 3 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={education.shouldShow}
-                  onChange={(e) =>
-                    updateEducation(education.id, {
-                      shouldShow: e.target.checked,
-                    })
-                  }
-                />
-              }
-              label="Show this education"
-            />
-
-            <IconButton onClick={() => removeEducation(education.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </AccordionActions>
         </Accordion>
       ))}
     </>

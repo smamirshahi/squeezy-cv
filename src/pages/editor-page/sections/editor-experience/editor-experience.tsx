@@ -1,12 +1,9 @@
 import {
   Accordion,
-  AccordionActions,
   AccordionDetails,
   AccordionSummary,
   Box,
-  FormControlLabel,
   IconButton,
-  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -26,6 +23,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 /** Shows the experience in editor page */
 export function EditorExperience(): JSX.Element {
@@ -83,15 +82,6 @@ export function EditorExperience(): JSX.Element {
                 pr: 1,
               }}
             >
-              <Typography component="span">
-                {experience.jobTitle} (
-                {`${dayjs(experience.startDate).format(dateFormat)} - ${
-                  experience.endDate
-                    ? dayjs(experience.endDate).format(dateFormat)
-                    : "Present"
-                }`}
-                )
-              </Typography>
               <Box>
                 <IconButton
                   size="small"
@@ -112,6 +102,40 @@ export function EditorExperience(): JSX.Element {
                   disabled={index === newExperiences.length - 1}
                 >
                   <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+                <Typography component="span">
+                  {experience.jobTitle} (
+                  {`${dayjs(experience.startDate).format(dateFormat)} - ${
+                    experience.endDate
+                      ? dayjs(experience.endDate).format(dateFormat)
+                      : "Present"
+                  }`}
+                  )
+                </Typography>
+              </Box>
+              <Box>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateExperience(experience.id, {
+                      shouldShow: !experience.shouldShow,
+                    });
+                  }}
+                >
+                  {experience.shouldShow ? (
+                    <VisibilityIcon />
+                  ) : (
+                    <VisibilityOffIcon />
+                  )}
+                </IconButton>
+
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeExperience(experience.id);
+                  }}
+                >
+                  <DeleteIcon />
                 </IconButton>
               </Box>
             </Box>
@@ -174,25 +198,6 @@ export function EditorExperience(): JSX.Element {
               updateExperience={updateExperience}
             />
           </AccordionDetails>
-          <AccordionActions sx={{ px: 3 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={experience.shouldShow}
-                  onChange={(e) =>
-                    updateExperience(experience.id, {
-                      shouldShow: e.target.checked,
-                    })
-                  }
-                />
-              }
-              label="Show this experience"
-            />
-
-            <IconButton onClick={() => removeExperience(experience.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </AccordionActions>
         </Accordion>
       ))}
     </>

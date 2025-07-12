@@ -38,6 +38,7 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
           id: nanoid(),
           category: "",
           items: [{ id: nanoid(), name: "", rating: 0 }],
+          shouldShow: true,
         },
       ]);
     }

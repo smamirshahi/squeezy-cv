@@ -1,6 +1,5 @@
 import {
   Accordion,
-  AccordionActions,
   AccordionDetails,
   AccordionSummary,
   Box,
@@ -26,6 +25,8 @@ import { useRatingIcon } from "@hooks/use-rating-icon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 /** Shows the skill section in editor page */
 export function EditorSkills(): JSX.Element {
@@ -86,7 +87,6 @@ export function EditorSkills(): JSX.Element {
                 pr: 1,
               }}
             >
-              <Typography component="span">{skill.category}</Typography>
               <Box>
                 <IconButton
                   size="small"
@@ -108,10 +108,35 @@ export function EditorSkills(): JSX.Element {
                 >
                   <ArrowDownwardIcon fontSize="small" />
                 </IconButton>
+                <Typography component="span">{skill.category}</Typography>
+              </Box>
+              <Box>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateSkillCategory(skill.id, {
+                      shouldShow: !skill.shouldShow,
+                    });
+                  }}
+                >
+                  {skill.shouldShow ? (
+                    <VisibilityIcon />
+                  ) : (
+                    <VisibilityOffIcon />
+                  )}
+                </IconButton>
+
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSkillCategory(skill.id);
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             </Box>
           </AccordionSummary>
-
           <AccordionDetails>
             {/* Skill Category */}
             <Box display="flex" flexDirection="row" gap={2}>
@@ -177,11 +202,6 @@ export function EditorSkills(): JSX.Element {
               ))}
             </Box>
           </AccordionDetails>
-          <AccordionActions sx={{ px: 3 }}>
-            <IconButton onClick={() => removeSkillCategory(skill.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </AccordionActions>
         </Accordion>
       ))}
     </>

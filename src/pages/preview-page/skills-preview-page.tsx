@@ -18,25 +18,33 @@ export function SkillsPreviewPage(): JSX.Element | null {
   return (
     <>
       <CvTypography variant="headingMd" text="Skills" />
-      {skills.map((skill) => (
-        <React.Fragment key={skill.id}>
-          <CvTypography variant="headingSm" text={skill.category} />
-          <Grid container direction="row" alignItems="flex-start">
-            {skill.items.map((item) => (
-              <Grid key={item.id} container direction="row" alignItems="center">
-                <CvTypography variant="bulletText" text={item.name} />
-                <Rating
-                  value={item.rating}
-                  precision={0.5}
-                  readOnly
-                  icon={RatingIcon.icon}
-                  emptyIcon={RatingIcon.emptyIcon}
-                />
+      {skills.map(
+        (skill) =>
+          skill.shouldShow && (
+            <React.Fragment key={skill.id}>
+              <CvTypography variant="headingSm" text={skill.category} />
+              <Grid container direction="row" alignItems="flex-start">
+                {skill.items.map((item) => (
+                  <Grid
+                    key={item.id}
+                    container
+                    direction="row"
+                    alignItems="center"
+                  >
+                    <CvTypography variant="bulletText" text={item.name} />
+                    <Rating
+                      value={item.rating}
+                      precision={0.5}
+                      readOnly
+                      icon={RatingIcon.icon}
+                      emptyIcon={RatingIcon.emptyIcon}
+                    />
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-        </React.Fragment>
-      ))}
+            </React.Fragment>
+          )
+      )}
     </>
   );
 }
