@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { SkillCategory } from "@custom-types/skill-types";
 import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
-import { useRatingIcon } from "@hooks/rating-icon";
+import { useRatingIcon } from "@hooks/use-rating-icon";
 
 /** Shows the skill section in editor page */
 export function EditorSkills(): JSX.Element {

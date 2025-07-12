@@ -3,7 +3,7 @@ import { useAppSelector } from "@store/store-helper";
 import { cvDataSelector } from "@store/cv-data/cv-data-slice";
 import React from "react";
 import { CvTypography } from "@components/cv-typography";
-import { useRatingIcon } from "@hooks/rating-icon";
+import { useRatingIcon } from "@hooks/use-rating-icon";
 
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage(): JSX.Element | null {
