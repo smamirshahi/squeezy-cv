@@ -33,6 +33,9 @@ export function EditorExperience(): JSX.Element {
   const { experiences } = useAppSelector(cvDataSelector);
   const { dateFormat } = useAppSelector(styleSelector);
   const [newExperiences, setNewExperiences] = useState<Experience[]>([]);
+  const [selectedExperienceId, setSelectedExperienceId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     setNewExperiences(experiences);
@@ -55,7 +58,16 @@ export function EditorExperience(): JSX.Element {
   return (
     <>
       {newExperiences.map((experience, index) => (
-        <Accordion key={experience.id} sx={{ marginBottom: 2 }}>
+        <Accordion
+          key={experience.id}
+          sx={{ marginBottom: 2 }}
+          expanded={selectedExperienceId === experience.id}
+          onChange={() =>
+            setSelectedExperienceId(
+              selectedExperienceId === experience.id ? null : experience.id
+            )
+          }
+        >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls={`panel-${experience.id}-content`}

@@ -32,6 +32,9 @@ export function EditorEducation(): JSX.Element {
   const { educations } = useAppSelector(cvDataSelector);
   const { dateFormat } = useAppSelector(styleSelector);
   const [newEducations, setNewEducations] = useState<Education[]>([]);
+  const [selectedEducationId, setSelectedEducationId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     setNewEducations(educations);
@@ -54,7 +57,16 @@ export function EditorEducation(): JSX.Element {
   return (
     <>
       {newEducations.map((education, index) => (
-        <Accordion key={education.id} sx={{ marginBottom: 2 }}>
+        <Accordion
+          key={education.id}
+          sx={{ marginBottom: 2 }}
+          expanded={selectedEducationId === education.id}
+          onChange={() =>
+            setSelectedEducationId(
+              selectedEducationId === education.id ? null : education.id
+            )
+          }
+        >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls={`panel-${education.id}-content`}

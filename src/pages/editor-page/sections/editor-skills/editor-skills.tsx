@@ -34,6 +34,7 @@ export function EditorSkills(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
 
   const [newSkills, setNewSkills] = useState<SkillCategory[]>([]);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
   const RatingIcon = useRatingIcon();
 
@@ -62,7 +63,14 @@ export function EditorSkills(): JSX.Element {
   return (
     <>
       {newSkills.map((skill, index) => (
-        <Accordion key={skill.id} sx={{ marginBottom: 2 }}>
+        <Accordion
+          key={skill.id}
+          sx={{ marginBottom: 2 }}
+          expanded={selectedSkillId === skill.id}
+          onChange={() =>
+            setSelectedSkillId(selectedSkillId === skill.id ? null : skill.id)
+          }
+        >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls={`panel-${skill.id}-content`}
