@@ -181,8 +181,6 @@ export function EditorExperience(): JSX.Element {
               <DeleteIcon />
             </IconButton>
           </AccordionActions>
-
-          {/* <Divider /> */}
         </Accordion>
       ))}
     </>
