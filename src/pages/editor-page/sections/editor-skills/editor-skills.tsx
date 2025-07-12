@@ -106,15 +106,20 @@ export function EditorSkills(): JSX.Element {
 
           <AccordionDetails>
             {/* Skill Category */}
-            <TextField
-              label="Skill Category"
-              value={skill.category}
-              onChange={(e) =>
-                updateSkillCategory(skill.id, { category: e.target.value })
-              }
-              fullWidth
-              sx={{ my: 2 }}
-            />
+            <Box display="flex" flexDirection="row" gap={2}>
+              <TextField
+                label="Skill Category"
+                value={skill.category}
+                onChange={(e) =>
+                  updateSkillCategory(skill.id, { category: e.target.value })
+                }
+                fullWidth
+                sx={{ my: 2 }}
+              />
+              <IconButton onClick={() => addSkillItem(skill.id)}>
+                <AddIcon />
+              </IconButton>
+            </Box>
 
             {/* Skill Items */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -162,11 +167,6 @@ export function EditorSkills(): JSX.Element {
                   </IconButton>
                 </Box>
               ))}
-              <Box>
-                <IconButton onClick={() => addSkillItem(skill.id)}>
-                  <AddIcon />
-                </IconButton>
-              </Box>
             </Box>
           </AccordionDetails>
           <AccordionActions sx={{ px: 3 }}>
