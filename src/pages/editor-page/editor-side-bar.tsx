@@ -1,5 +1,4 @@
 import {
-  Box,
   Drawer,
   List,
   ListItem,
@@ -25,33 +24,31 @@ export function EditorSideBar({ editorPageSections }: Props): JSX.Element {
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
 
   return (
-    <Box>
-      <Drawer
-        variant="permanent"
-        sx={{
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: DRAWER_WIDTH,
+        flexShrink: 0,
+        ["& .MuiDrawer-paper"]: {
+          position: "relative",
           width: DRAWER_WIDTH,
-          flexShrink: 0,
-          ["& .MuiDrawer-paper"]: {
-            position: "relative",
-            width: DRAWER_WIDTH,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <List>
-          {Object.values(editorPageSections).map(({ id, label }) => (
-            <ListItem key={id} disablePadding>
-              <ListItemButton
-                onClick={() => dispatch(setSelectedSectionInEditorPage(id))}
-                selected={selectedSectionInEditorPage === id}
-              >
-                <ListItemText primary={label} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-    </Box>
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      <Toolbar />
+      <List>
+        {Object.values(editorPageSections).map(({ id, label }) => (
+          <ListItem key={id} disablePadding>
+            <ListItemButton
+              onClick={() => dispatch(setSelectedSectionInEditorPage(id))}
+              selected={selectedSectionInEditorPage === id}
+            >
+              <ListItemText primary={label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
   );
 }
