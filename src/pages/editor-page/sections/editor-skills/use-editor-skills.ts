@@ -1,6 +1,13 @@
 import { SkillCategory } from "@custom-types/skill-types";
 import { nanoid } from "@reduxjs/toolkit";
-import { SetStateFunction } from "@store/store-helper";
+import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
+import { setSkillVisibilityById } from "@store/cv-data/cv-data-slice";
+import {
+  SetStateFunction,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
+import { useEffect } from "react";
 
 interface Props {
   setNewSkills: SetStateFunction<SkillCategory[]>;
@@ -9,7 +16,6 @@ interface Props {
 interface ReturnProps {
   updateSkillCategory: (id: string, update: Partial<SkillCategory>) => void;
   removeSkillCategory: (id: string) => void;
-  addSkillCategory: () => void;
   updateSkillItem: (
     categoryId: string,
     itemId: string,
@@ -17,9 +23,32 @@ interface ReturnProps {
   ) => void;
   removeSkillItem: (categoryId: string, itemId: string) => void;
   addSkillItem: (categoryId: string) => void;
+  swapSkillCategories(index1: number, index2: number): void;
 }
 
 export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
+  const dispatch = useAppDispatch();
+  const { shouldAddNewItem } = useAppSelector(appSelector);
+
+  useEffect(() => {
+    /** Adds a new skill category with default structure */
+    function addSkillCategory(): void {
+      setNewSkills((prev) => [
+        ...prev,
+        {
+          id: nanoid(),
+          category: "",
+          items: [{ id: nanoid(), name: "", rating: 0 }],
+          shouldShow: true,
+        },
+      ]);
+    }
+    if (shouldAddNewItem) {
+      addSkillCategory();
+      dispatch(setShouldAddNewItem(false));
+    }
+  }, [dispatch, setNewSkills, shouldAddNewItem]);
+
   /** Helper to update a single category by ID */
   function updateCategoryById(
     id: string,
@@ -35,21 +64,14 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     update: Partial<SkillCategory>
   ): void {
     updateCategoryById(id, (cat) => ({ ...cat, ...update }));
+
+    if ("shouldShow" in update) {
+      dispatch(setSkillVisibilityById({ id, shouldShow: !!update.shouldShow }));
+    }
   }
 
   function removeSkillCategory(id: string): void {
     setNewSkills((prev) => prev.filter((cat) => cat.id !== id));
-  }
-
-  function addSkillCategory(): void {
-    setNewSkills((prev) => [
-      ...prev,
-      {
-        id: nanoid(),
-        category: "",
-        items: [{ id: nanoid(), name: "", rating: 0 }],
-      },
-    ]);
   }
 
   function updateSkillItem(
@@ -79,12 +101,32 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     }));
   }
 
+  /** Swap the skill categories order */
+  function swapSkillCategories(index1: number, index2: number): void {
+    setNewSkills((prev) => {
+      // no change if out of bounds
+      if (
+        index1 < 0 ||
+        index2 < 0 ||
+        index1 >= prev.length ||
+        index2 >= prev.length
+      ) {
+        return prev;
+      }
+      const newArray = [...prev];
+      const temp = newArray[index1];
+      newArray[index1] = newArray[index2];
+      newArray[index2] = temp;
+      return newArray;
+    });
+  }
+
   return {
     updateSkillCategory,
     removeSkillCategory,
-    addSkillCategory,
     updateSkillItem,
     removeSkillItem,
     addSkillItem,
+    swapSkillCategories,
   };
 }

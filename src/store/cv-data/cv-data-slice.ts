@@ -37,6 +37,7 @@ export const initialState: CvDataState = {
   style: {
     shouldShowFullContactLinks: true,
     ratingIcon: "star",
+    bulletPointIcon: "disc",
     dateFormat: "MMMM/YYYY",
     typography: TypographyVariant,
     paperMargin: "narrow",
@@ -71,14 +72,50 @@ const cvDataSlice = createSlice({
     setProfessionalSummary(state, action: PayloadAction<string>) {
       state.data.professionalSummary = action.payload;
     },
+
     setExperiences(state, action: PayloadAction<Experience[]>) {
       state.data.experiences = action.payload;
     },
+
+    setExperienceVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const experience = state.data.experiences.find((exp) => exp.id === id);
+      if (experience) {
+        experience.shouldShow = shouldShow;
+      }
+    },
+
     setEducations(state, action: PayloadAction<Education[]>) {
       state.data.educations = action.payload;
     },
+
+    setEducationVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const education = state.data.educations.find((edu) => edu.id === id);
+      if (education) {
+        education.shouldShow = shouldShow;
+      }
+    },
+
     setSkills(state, action: PayloadAction<SkillCategory[]>) {
       state.data.skills = action.payload;
+    },
+
+    setSkillVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const skill = state.data.skills.find((skill) => skill.id === id);
+      if (skill) {
+        skill.shouldShow = shouldShow;
+      }
     },
 
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
@@ -103,6 +140,10 @@ const cvDataSlice = createSlice({
       state.style.ratingIcon = action.payload;
     },
 
+    setBulletPointIcon(state, action: PayloadAction<Style["bulletPointIcon"]>) {
+      state.style.bulletPointIcon = action.payload;
+    },
+
     resetCvDataState: () => initialState,
   },
   selectors: {
@@ -124,11 +165,15 @@ export const {
   setContactInfo,
   setProfessionalSummary,
   setExperiences,
+  setExperienceVisibilityById,
   setEducations,
+  setEducationVisibilityById,
   setSkills,
+  setSkillVisibilityById,
   setPaperMargin,
   setTypography,
   setRatingIcon,
+  setBulletPointIcon,
   resetCvDataState,
 } = cvDataSlice.actions;
 

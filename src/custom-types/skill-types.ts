@@ -1,4 +1,12 @@
-import { Object, String, Array, Static, Union, Literal } from "runtypes";
+import {
+  Object,
+  String,
+  Array,
+  Static,
+  Union,
+  Literal,
+  Boolean,
+} from "runtypes";
 
 export const SkillItemSchema = Object({
   /** The ID of the skill item */
@@ -33,6 +41,9 @@ export const SkillCategorySchema = Object({
 
   /** The name of the skill item */
   items: Array(SkillItemSchema),
+
+  // /** Whether to hide this specific row or now */
+  shouldShow: Boolean,
 });
 
 export type SkillCategory = Static<typeof SkillCategorySchema>;

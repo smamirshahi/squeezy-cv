@@ -12,7 +12,10 @@ export function EditorAppBar({ contentRef }: Props): JSX.Element {
   const metaData = useAppSelector(metaDataSelector);
 
   return (
-    <AppBar position="static">
+    <AppBar
+      position="sticky"
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    >
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           App version: {metaData.version}

@@ -1,14 +1,29 @@
 import { Box, Grid } from "@mui/material";
-import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvTypography } from "@components/cv-typography";
+import { useMemo } from "react";
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage(): JSX.Element | null {
   const { experiences } = useAppSelector(cvDataSelector);
+  const { bulletPointIcon } = useAppSelector(styleSelector);
+
+  const listStyleType = useMemo(() => {
+    switch (bulletPointIcon) {
+      case "disc":
+        return { listStyleType: "disc" };
+      case "circle":
+        return { listStyleType: "circle" };
+      case "dash":
+        return { listStyleType: '"– "' };
+      case "square":
+        return { listStyleType: "square" };
+    }
+  }, [bulletPointIcon]);
 
   if (experiences.length === 0) {
     return null;
@@ -49,7 +64,10 @@ export function ExperiencesPreviewPage(): JSX.Element | null {
               />
 
               {experience.bulletPoints && (
-                <Box component="ul" sx={{ my: "0px", pl: "20px" }}>
+                <Box
+                  component="ul"
+                  sx={{ my: "0px", pl: "20px", ...listStyleType }}
+                >
                   {experience.bulletPoints.map((bulletPoint) => (
                     <li key={bulletPoint}>
                       <CvTypography variant="bulletText" text={bulletPoint} />

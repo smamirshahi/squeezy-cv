@@ -1,35 +1,23 @@
-import {
-  Box,
-  Divider,
-  FormControlLabel,
-  IconButton,
-  Switch,
-  TextField,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { AccordionDetails, Box, TextField } from "@mui/material";
 import { Education } from "@custom-types/education-types";
 import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
-  SetStateFunction,
-  useAppDispatch,
-  useAppSelector,
-} from "@store/store-helper";
-import { cvDataSelector, setEducations } from "@store/cv-data/cv-data-slice";
-import { useEffect } from "react";
+  cvDataSelector,
+  setEducations,
+  styleSelector,
+} from "@store/cv-data/cv-data-slice";
+import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
-
-interface Props {
-  newEducations: Education[];
-  setNewEducations: SetStateFunction<Education[]>;
-}
+import dayjs from "dayjs";
+import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
 /** Shows the education in editor page */
-export function EditorEducation({
-  newEducations,
-  setNewEducations,
-}: Props): JSX.Element {
+export function EditorEducation(): JSX.Element {
   const dispatch = useAppDispatch();
   const { educations } = useAppSelector(cvDataSelector);
+  const { dateFormat } = useAppSelector(styleSelector);
+  const [newEducations, setNewEducations] = useState<Education[]>([]);
 
   useEffect(() => {
     setNewEducations(educations);
@@ -44,99 +32,93 @@ export function EditorEducation({
     },
   });
 
-  const { updateEducation, removeEducation } = useEditorEducation({
-    setNewEducations,
-  });
+  const { updateEducation, removeEducation, swapEducations } =
+    useEditorEducation({
+      setNewEducations,
+    });
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {newEducations.map((education) => (
-        <Box
+    <>
+      {newEducations.map((education, index) => (
+        <EditorAccordionHeader
           key={education.id}
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          accordionIndex={index}
+          swapFunction={swapEducations}
+          removeFunction={removeEducation}
+          updateFunction={updateEducation}
+          title={`${education.degree} (
+                  ${dayjs(education.startDate).format(dateFormat)} - ${
+                    education.endDate
+                      ? dayjs(education.endDate).format(dateFormat)
+                      : "Present"
+                  }`}
+          entity={{ id: education.id, shouldShow: education.shouldShow }}
+          isLastEntity={index === newEducations.length - 1}
         >
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <AccordionDetails>
             <TextField
               label="Degree"
               value={education.degree}
               onChange={(e) =>
                 updateEducation(education.id, { degree: e.target.value })
               }
+              sx={{ mt: 2 }}
               fullWidth
             />
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={education.shouldShow}
-                  onChange={(e) =>
-                    updateEducation(education.id, {
-                      shouldShow: e.target.checked,
-                    })
-                  }
-                />
-              }
-              label="Show this education"
-            />
+            {/* Institute and Location */}
+            <Box sx={{ display: "flex", gap: 2, my: 2 }}>
+              <TextField
+                label="Institute"
+                value={education.institute}
+                onChange={(e) =>
+                  updateEducation(education.id, { institute: e.target.value })
+                }
+                fullWidth
+              />
+              <TextField
+                label="Location"
+                value={education.location}
+                onChange={(e) =>
+                  updateEducation(education.id, { location: e.target.value })
+                }
+                fullWidth
+              />
+            </Box>
 
-            <IconButton onClick={() => removeEducation(education.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
+            {/* Dates */}
+            <Box sx={{ display: "flex", gap: 2, my: 2 }}>
+              <TextField
+                label="Start Date"
+                value={education.startDate}
+                onChange={(e) =>
+                  updateEducation(education.id, { startDate: e.target.value })
+                }
+                fullWidth
+              />
+              <TextField
+                label="End Date"
+                value={education.endDate}
+                onChange={(e) =>
+                  updateEducation(education.id, { endDate: e.target.value })
+                }
+                fullWidth
+              />
+            </Box>
 
-          {/* Institute and Location */}
-          <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label="Institute"
-              value={education.institute}
+              label="Dissertation Title"
+              value={education.dissertationTitle}
               onChange={(e) =>
-                updateEducation(education.id, { institute: e.target.value })
+                updateEducation(education.id, {
+                  dissertationTitle: e.target.value,
+                })
               }
               fullWidth
             />
-            <TextField
-              label="Location"
-              value={education.location}
-              onChange={(e) =>
-                updateEducation(education.id, { location: e.target.value })
-              }
-              fullWidth
-            />
-          </Box>
-
-          {/* Dates */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label="Start Date"
-              value={education.startDate}
-              onChange={(e) =>
-                updateEducation(education.id, { startDate: e.target.value })
-              }
-              fullWidth
-            />
-            <TextField
-              label="End Date"
-              value={education.endDate}
-              onChange={(e) =>
-                updateEducation(education.id, { endDate: e.target.value })
-              }
-              fullWidth
-            />
-          </Box>
-
-          <TextField
-            label="Dissertation Title"
-            value={education.dissertationTitle}
-            onChange={(e) =>
-              updateEducation(education.id, {
-                dissertationTitle: e.target.value,
-              })
-            }
-            fullWidth
-          />
-          <Divider />
-        </Box>
+          </AccordionDetails>
+        </EditorAccordionHeader>
       ))}
-    </Box>
+    </>
   );
 }

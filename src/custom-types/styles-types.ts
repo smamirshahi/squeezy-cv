@@ -61,6 +61,14 @@ export const StyleSchema = Object({
   /** The rating icon */
   ratingIcon: Union(Literal("star"), Literal("circle")),
 
+  /** The bullet point icon */
+  bulletPointIcon: Union(
+    Literal("disc"),
+    Literal("circle"),
+    Literal("dash"),
+    Literal("square")
+  ),
+
   /** The date format */
   dateFormat: Union(
     Literal("DD/MM/YYYY"),
