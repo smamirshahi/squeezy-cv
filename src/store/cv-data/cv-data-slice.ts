@@ -107,6 +107,17 @@ const cvDataSlice = createSlice({
       state.data.skills = action.payload;
     },
 
+    setSkillVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const skill = state.data.skills.find((skill) => skill.id === id);
+      if (skill) {
+        skill.shouldShow = shouldShow;
+      }
+    },
+
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
     },
@@ -158,6 +169,7 @@ export const {
   setEducations,
   setEducationVisibilityById,
   setSkills,
+  setSkillVisibilityById,
   setPaperMargin,
   setTypography,
   setRatingIcon,

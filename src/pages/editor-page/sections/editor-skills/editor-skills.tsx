@@ -1,12 +1,9 @@
 import {
-  Accordion,
   AccordionDetails,
-  AccordionSummary,
   Box,
   IconButton,
   Rating,
   TextField,
-  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,11 +19,7 @@ import { SkillCategory } from "@custom-types/skill-types";
 import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 import { useRatingIcon } from "@hooks/use-rating-icon";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
 /** Shows the skill section in editor page */
 export function EditorSkills(): JSX.Element {
@@ -35,7 +28,6 @@ export function EditorSkills(): JSX.Element {
   const { skills } = useAppSelector(cvDataSelector);
 
   const [newSkills, setNewSkills] = useState<SkillCategory[]>([]);
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
   const RatingIcon = useRatingIcon();
 
@@ -64,79 +56,16 @@ export function EditorSkills(): JSX.Element {
   return (
     <>
       {newSkills.map((skill, index) => (
-        <Accordion
+        <EditorAccordionHeader
           key={skill.id}
-          sx={{ marginBottom: 2 }}
-          expanded={selectedSkillId === skill.id}
-          onChange={() =>
-            setSelectedSkillId(selectedSkillId === skill.id ? null : skill.id)
-          }
+          accordionIndex={index}
+          swapFunction={swapSkillCategories}
+          removeFunction={removeSkillCategory}
+          updateFunction={updateSkillCategory}
+          title={skill.category}
+          entity={{ id: skill.id, shouldShow: skill.shouldShow }}
+          isLastEntity={index === newSkills.length - 1}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls={`panel-${skill.id}-content`}
-            id={`panel-${skill.id}-header`}
-            sx={{ backgroundColor: "#f5f5f5" }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-                pr: 1,
-              }}
-            >
-              <Box>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapSkillCategories(index, index - 1);
-                  }}
-                  disabled={index === 0}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapSkillCategories(index, index + 1);
-                  }}
-                  disabled={index === newSkills.length - 1}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-                <Typography component="span">{skill.category}</Typography>
-              </Box>
-              <Box>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateSkillCategory(skill.id, {
-                      shouldShow: !skill.shouldShow,
-                    });
-                  }}
-                >
-                  {skill.shouldShow ? (
-                    <VisibilityIcon />
-                  ) : (
-                    <VisibilityOffIcon />
-                  )}
-                </IconButton>
-
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeSkillCategory(skill.id);
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          </AccordionSummary>
           <AccordionDetails>
             {/* Skill Category */}
             <Box display="flex" flexDirection="row" gap={2}>
@@ -202,7 +131,7 @@ export function EditorSkills(): JSX.Element {
               ))}
             </Box>
           </AccordionDetails>
-        </Accordion>
+        </EditorAccordionHeader>
       ))}
     </>
   );

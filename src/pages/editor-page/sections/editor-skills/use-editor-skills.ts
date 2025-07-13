@@ -1,6 +1,7 @@
 import { SkillCategory } from "@custom-types/skill-types";
 import { nanoid } from "@reduxjs/toolkit";
 import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
+import { setSkillVisibilityById } from "@store/cv-data/cv-data-slice";
 import {
   SetStateFunction,
   useAppDispatch,
@@ -63,6 +64,10 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     update: Partial<SkillCategory>
   ): void {
     updateCategoryById(id, (cat) => ({ ...cat, ...update }));
+
+    if ("shouldShow" in update) {
+      dispatch(setSkillVisibilityById({ id, shouldShow: !!update.shouldShow }));
+    }
   }
 
   function removeSkillCategory(id: string): void {
