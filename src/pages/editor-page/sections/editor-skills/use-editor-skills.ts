@@ -24,6 +24,7 @@ interface ReturnProps {
   removeSkillItem: (categoryId: string, itemId: string) => void;
   addSkillItem: (categoryId: string) => void;
   swapSkillCategories(index1: number, index2: number): void;
+  swapSkillItems(categoryId: string, index1: number, index2: number): void;
 }
 
 export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
@@ -121,6 +122,28 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     });
   }
 
+  function swapSkillItems(
+    categoryId: string,
+    index1: number,
+    index2: number
+  ): void {
+    updateCategoryById(categoryId, (cat) => {
+      const newItems = [...cat.items];
+      if (
+        index1 < 0 ||
+        index2 < 0 ||
+        index1 >= newItems.length ||
+        index2 >= newItems.length
+      ) {
+        return cat;
+      }
+      const temp = newItems[index1];
+      newItems[index1] = newItems[index2];
+      newItems[index2] = temp;
+      return { ...cat, items: newItems };
+    });
+  }
+
   return {
     updateSkillCategory,
     removeSkillCategory,
@@ -128,5 +151,6 @@ export function useEditorSkills({ setNewSkills }: Props): ReturnProps {
     removeSkillItem,
     addSkillItem,
     swapSkillCategories,
+    swapSkillItems,
   };
 }

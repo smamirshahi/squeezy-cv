@@ -7,12 +7,11 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { PropsWithChildren, useState } from "react";
 import { Experience } from "@custom-types/experience-types";
+import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 interface Props {
   accordionIndex: number;
@@ -52,28 +51,11 @@ export function EditorAccordionHeader({
           backgroundColor: "#f5f5f5",
         }}
       >
-        <Box display="flex">
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              swapFunction(accordionIndex, accordionIndex - 1);
-            }}
-            disabled={accordionIndex === 0}
-          >
-            <ArrowUpwardIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              swapFunction(accordionIndex, accordionIndex + 1);
-            }}
-            disabled={isLastEntity}
-          >
-            <ArrowDownwardIcon fontSize="small" />
-          </IconButton>
-        </Box>
+        <SortingIcons
+          index={accordionIndex}
+          swapFunction={swapFunction}
+          isLastEntity={isLastEntity}
+        />
         <AccordionSummary
           aria-controls={`panel-${entity.id}-content`}
           id={`panel-${entity.id}-header`}
