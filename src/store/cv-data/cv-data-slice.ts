@@ -92,6 +92,17 @@ const cvDataSlice = createSlice({
       state.data.educations = action.payload;
     },
 
+    setEducationVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const education = state.data.educations.find((edu) => edu.id === id);
+      if (education) {
+        education.shouldShow = shouldShow;
+      }
+    },
+
     setSkills(state, action: PayloadAction<SkillCategory[]>) {
       state.data.skills = action.payload;
     },
@@ -145,6 +156,7 @@ export const {
   setExperiences,
   setExperienceVisibilityById,
   setEducations,
+  setEducationVisibilityById,
   setSkills,
   setPaperMargin,
   setTypography,

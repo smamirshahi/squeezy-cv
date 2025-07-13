@@ -1,13 +1,4 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { AccordionDetails, Box, TextField } from "@mui/material";
 import { Education } from "@custom-types/education-types";
 import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -18,12 +9,8 @@ import {
 } from "@store/cv-data/cv-data-slice";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
 /** Shows the education in editor page */
 export function EditorEducation(): JSX.Element {
@@ -31,9 +18,6 @@ export function EditorEducation(): JSX.Element {
   const { educations } = useAppSelector(cvDataSelector);
   const { dateFormat } = useAppSelector(styleSelector);
   const [newEducations, setNewEducations] = useState<Education[]>([]);
-  const [selectedEducationId, setSelectedEducationId] = useState<string | null>(
-    null
-  );
 
   useEffect(() => {
     setNewEducations(educations);
@@ -56,89 +40,21 @@ export function EditorEducation(): JSX.Element {
   return (
     <>
       {newEducations.map((education, index) => (
-        <Accordion
+        <EditorAccordionHeader
           key={education.id}
-          sx={{ marginBottom: 2 }}
-          expanded={selectedEducationId === education.id}
-          onChange={() =>
-            setSelectedEducationId(
-              selectedEducationId === education.id ? null : education.id
-            )
-          }
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls={`panel-${education.id}-content`}
-            id={`panel-${education.id}-header`}
-            sx={{ backgroundColor: "#f5f5f5" }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-                pr: 1,
-              }}
-            >
-              <Box>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapEducations(index, index - 1);
-                  }}
-                  disabled={index === 0}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    swapEducations(index, index + 1);
-                  }}
-                  disabled={index === newEducations.length - 1}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-                <Typography component="span">
-                  {education.degree} (
-                  {`${dayjs(education.startDate).format(dateFormat)} - ${
+          accordionIndex={index}
+          swapFunction={swapEducations}
+          removeFunction={removeEducation}
+          updateFunction={updateEducation}
+          title={`${education.degree} (
+                  ${dayjs(education.startDate).format(dateFormat)} - ${
                     education.endDate
                       ? dayjs(education.endDate).format(dateFormat)
                       : "Present"
                   }`}
-                  )
-                </Typography>
-              </Box>
-              <Box>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateEducation(education.id, {
-                      shouldShow: !education.shouldShow,
-                    });
-                  }}
-                >
-                  {education.shouldShow ? (
-                    <VisibilityIcon />
-                  ) : (
-                    <VisibilityOffIcon />
-                  )}
-                </IconButton>
-
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeEducation(education.id);
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          </AccordionSummary>
+          entity={{ id: education.id, shouldShow: education.shouldShow }}
+          isLastEntity={index === newEducations.length - 1}
+        >
           <AccordionDetails>
             <TextField
               label="Degree"
@@ -201,7 +117,7 @@ export function EditorEducation(): JSX.Element {
               fullWidth
             />
           </AccordionDetails>
-        </Accordion>
+        </EditorAccordionHeader>
       ))}
     </>
   );
