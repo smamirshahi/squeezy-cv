@@ -1,13 +1,4 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { AccordionDetails, Box, TextField } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { Experience } from "@custom-types/experience-types";
 import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
@@ -19,12 +10,8 @@ import {
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import dayjs from "dayjs";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 /** Shows the experience in editor page */
 export function EditorExperience(): JSX.Element {
@@ -32,9 +19,6 @@ export function EditorExperience(): JSX.Element {
   const { experiences } = useAppSelector(cvDataSelector);
   const { dateFormat } = useAppSelector(styleSelector);
   const [newExperiences, setNewExperiences] = useState<Experience[]>([]);
-  const [selectedExperienceId, setSelectedExperienceId] = useState<
-    string | null
-  >(null);
 
   useEffect(() => {
     setNewExperiences(experiences);
@@ -57,105 +41,21 @@ export function EditorExperience(): JSX.Element {
   return (
     <>
       {newExperiences.map((experience, index) => (
-        <Accordion
+        <EditorAccordionHeader
           key={experience.id}
-          sx={{ marginBottom: 2, width: "100%" }}
-          expanded={selectedExperienceId === experience.id}
-          onChange={() =>
-            setSelectedExperienceId(
-              selectedExperienceId === experience.id ? null : experience.id
-            )
-          }
+          accordionIndex={index}
+          swapFunction={swapExperiences}
+          removeFunction={removeExperience}
+          updateFunction={updateExperience}
+          title={`${experience.jobTitle} (
+          ${dayjs(experience.startDate).format(dateFormat)} - ${
+            experience.endDate
+              ? dayjs(experience.endDate).format(dateFormat)
+              : "Present"
+          }`}
+          entity={{ id: experience.id, shouldShow: experience.shouldShow }}
+          isLastEntity={index === newExperiences.length - 1}
         >
-          <Box
-            display="flex"
-            justifyContent={"space-between"}
-            sx={{
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <Box display="flex">
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  swapExperiences(index, index - 1);
-                }}
-                disabled={index === 0}
-              >
-                <ArrowUpwardIcon fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  swapExperiences(index, index + 1);
-                }}
-                disabled={index === newExperiences.length - 1}
-              >
-                <ArrowDownwardIcon fontSize="small" />
-              </IconButton>
-            </Box>
-            <AccordionSummary
-              aria-controls={`panel-${experience.id}-content`}
-              id={`panel-${experience.id}-header`}
-            >
-              <Typography component="span">
-                {experience.jobTitle} (
-                {`${dayjs(experience.startDate).format(dateFormat)} - ${
-                  experience.endDate
-                    ? dayjs(experience.endDate).format(dateFormat)
-                    : "Present"
-                }`}
-                )
-              </Typography>
-            </AccordionSummary>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                pr: 1,
-              }}
-            >
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateExperience(experience.id, {
-                    shouldShow: !experience.shouldShow,
-                  });
-                }}
-              >
-                {experience.shouldShow ? (
-                  <VisibilityIcon />
-                ) : (
-                  <VisibilityOffIcon />
-                )}
-              </IconButton>
-
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeExperience(experience.id);
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-              <IconButton
-                onClick={() =>
-                  setSelectedExperienceId(
-                    selectedExperienceId === experience.id
-                      ? null
-                      : experience.id
-                  )
-                }
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </Box>
-          </Box>
-
           <AccordionDetails>
             <TextField
               label="Job Title"
@@ -214,7 +114,7 @@ export function EditorExperience(): JSX.Element {
               updateExperience={updateExperience}
             />
           </AccordionDetails>
-        </Accordion>
+        </EditorAccordionHeader>
       ))}
     </>
   );
