@@ -72,12 +72,26 @@ const cvDataSlice = createSlice({
     setProfessionalSummary(state, action: PayloadAction<string>) {
       state.data.professionalSummary = action.payload;
     },
+
     setExperiences(state, action: PayloadAction<Experience[]>) {
       state.data.experiences = action.payload;
     },
+
+    setExperienceVisibilityById(
+      state,
+      action: PayloadAction<{ id: string; shouldShow: boolean }>
+    ) {
+      const { id, shouldShow } = action.payload;
+      const experience = state.data.experiences.find((exp) => exp.id === id);
+      if (experience) {
+        experience.shouldShow = shouldShow;
+      }
+    },
+
     setEducations(state, action: PayloadAction<Education[]>) {
       state.data.educations = action.payload;
     },
+
     setSkills(state, action: PayloadAction<SkillCategory[]>) {
       state.data.skills = action.payload;
     },
@@ -129,6 +143,7 @@ export const {
   setContactInfo,
   setProfessionalSummary,
   setExperiences,
+  setExperienceVisibilityById,
   setEducations,
   setSkills,
   setPaperMargin,

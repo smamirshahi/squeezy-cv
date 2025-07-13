@@ -1,6 +1,7 @@
 import { Experience } from "@custom-types/experience-types";
 import { nanoid } from "@reduxjs/toolkit";
 import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
+import { setExperienceVisibilityById } from "@store/cv-data/cv-data-slice";
 import {
   SetStateFunction,
   useAppDispatch,
@@ -63,6 +64,12 @@ export function useEditorExperience({ setNewExperiences }: Props): ReturnProps {
   /** Updates top-level fields of an experience */
   function updateExperience(id: string, update: Partial<Experience>): void {
     updateExperienceById(id, (exp) => ({ ...exp, ...update }));
+
+    if ("shouldShow" in update) {
+      dispatch(
+        setExperienceVisibilityById({ id, shouldShow: !!update.shouldShow })
+      );
+    }
   }
 
   /** Swap the experience order */
