@@ -2,6 +2,7 @@ import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import {
   Bullet,
   CURRENT_VAULT_VERSION,
+  Profile,
   SectionType,
   Vault,
 } from "@custom-types/vault-types";
@@ -261,6 +262,61 @@ const vaultSlice = createSlice({
       }
     },
 
+    /** Merges the given values into the profile. Pass `undefined` for an optional field to clear it. */
+    updateProfile(state, action: PayloadAction<Partial<Profile>>) {
+      Object.assign(state.profile, action.payload);
+    },
+
+    addLink: {
+      reducer(
+        state,
+        action: PayloadAction<{ id: string; label: string; url: string }>
+      ) {
+        state.links.push({ ...action.payload, tags: [] });
+      },
+      prepare(input: { label?: string; url?: string; id?: string }) {
+        return {
+          payload: {
+            id: input.id ?? nanoid(),
+            label: input.label ?? "",
+            url: input.url ?? "",
+          },
+        };
+      },
+    },
+
+    updateLink(
+      state,
+      action: PayloadAction<{
+        id: string;
+        update: { label?: string; url?: string; tags?: string[] };
+      }>
+    ) {
+      const link = state.links.find((l) => l.id === action.payload.id);
+      if (!link) {
+        return;
+      }
+      const { label, url, tags } = action.payload.update;
+      if (label !== undefined) {
+        link.label = label;
+      }
+      if (url !== undefined) {
+        link.url = url;
+      }
+      if (tags !== undefined) {
+        link.tags = normalizeTags(tags);
+      }
+    },
+
+    removeLink(state, action: PayloadAction<{ id: string }>) {
+      state.links = state.links.filter((l) => l.id !== action.payload.id);
+    },
+
+    moveLink(state, action: PayloadAction<{ id: string; toIndex: number }>) {
+      const from = state.links.findIndex((l) => l.id === action.payload.id);
+      moveInArray(state.links, from, action.payload.toIndex);
+    },
+
     resetVaultState: () => initialState,
   },
   selectors: {
@@ -288,6 +344,11 @@ export const {
   setBulletAlt,
   removeBullet,
   moveBullet,
+  updateProfile,
+  addLink,
+  updateLink,
+  removeLink,
+  moveLink,
   resetVaultState,
 } = vaultSlice.actions;
 
