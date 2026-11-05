@@ -27,7 +27,7 @@ const DataSchema = Object({
   skills: Array(SkillCategorySchema),
 });
 
-const MetaDataSchema = Object({
+export const MetaDataSchema = Object({
   /** This title serves as a placeholder to describe for what purpose the CV is being written */
   title: String,
 
