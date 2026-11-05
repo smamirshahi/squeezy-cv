@@ -23,7 +23,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
+    "resolveJsonModule": true,
+
     "paths": {
+      "@fixtures/*": ["fixtures/*"],
       "@components/*": ["src/components/*"],
       "@custom-types/*": ["src/custom-types/*"],
       "@custom-styles/*": ["src/custom-styles/*"],
@@ -32,5 +35,5 @@
       "@store/*": ["src/store/*"],
     }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "fixtures", "vite.config.ts"]
 }

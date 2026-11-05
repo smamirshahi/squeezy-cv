@@ -23,3 +23,8 @@ cv-data-example
 *.njsproj
 *.sln
 *.sw?
+
+# Personal data and secrets (see data.example/)
+/cv-export.json
+/data/
+.env
