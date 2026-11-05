@@ -2,15 +2,28 @@ import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkIcon from "@mui/icons-material/Link";
 import { Grid } from "@mui/material";
 import { IconWithText } from "@components/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useAppSelector } from "@store/store-helper";
-import { cvDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { vaultSelector } from "@store/vault/vault-slice";
+import {
+  LinkKind,
+  getLinkDisplayText,
+  getLinkKind,
+} from "@store/vault/link-utils";
+
+const LINK_ICONS: Record<LinkKind, React.ElementType> = {
+  linkedin: LinkedInIcon,
+  github: GitHubIcon,
+  generic: LinkIcon,
+};
 
 /** Contact Information (details) */
 export function ContactInfoPreviewPage(): JSX.Element | null {
-  const { contactInfo } = useAppSelector(cvDataSelector);
+  const { profile, links } = useAppSelector(vaultSelector);
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
@@ -18,41 +31,27 @@ export function ContactInfoPreviewPage(): JSX.Element | null {
       <IconWithText
         variant="bulletText"
         icon={AlternateEmailIcon}
-        text={contactInfo.email}
+        text={profile.email ?? ""}
       />
       <IconWithText
         variant="bulletText"
         icon={SmartphoneIcon}
-        text={contactInfo.phone}
+        text={profile.phone ?? ""}
       />
       <IconWithText
         variant="bulletText"
         icon={LocationOnIcon}
-        text={contactInfo.location}
+        text={profile.location ?? ""}
       />
 
-      {contactInfo.linkedInId && (
+      {links.map((link) => (
         <IconWithText
+          key={link.id}
           variant="bulletText"
-          icon={LinkedInIcon}
-          text={
-            shouldShowFullContactLinks
-              ? `https://www.linkedin.com/in/${contactInfo.linkedInId}`
-              : contactInfo.linkedInId
-          }
+          icon={LINK_ICONS[getLinkKind(link.url)]}
+          text={getLinkDisplayText(link.url, shouldShowFullContactLinks)}
         />
-      )}
-      {contactInfo.gitHubId && (
-        <IconWithText
-          variant="bulletText"
-          icon={GitHubIcon}
-          text={
-            shouldShowFullContactLinks
-              ? `https://github.com/${contactInfo.gitHubId}`
-              : contactInfo.gitHubId
-          }
-        />
-      )}
+      ))}
     </Grid>
   );
 }

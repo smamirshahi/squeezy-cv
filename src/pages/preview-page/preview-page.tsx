@@ -8,16 +8,35 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
-import { PreviewSectionId } from "@store/app/app-slice-types";
+import { sectionsSelector } from "@store/vault/vault-slice";
+import { Section } from "@custom-types/vault-types";
 
-const idToComponent: Record<PreviewSectionId, JSX.Element> = {
-  personalInfo: <PersonalInfoPreviewPage />,
-  contactInfo: <ContactInfoPreviewPage />,
-  summary: <SummaryPreviewPage />,
-  experiences: <ExperiencesPreviewPage />,
-  educations: <EducationsPreviewPage />,
-  skills: <SkillsPreviewPage />,
-};
+/** Renders one part of the CV: the header parts, or a vault section by its type */
+function renderPart(id: string, sections: Section[]): JSX.Element | null {
+  if (id === "personalInfo") {
+    return <PersonalInfoPreviewPage key={id} />;
+  }
+  if (id === "contactInfo") {
+    return <ContactInfoPreviewPage key={id} />;
+  }
+  const section = sections.find((s) => s.id === id);
+  if (!section) {
+    return null;
+  }
+  switch (section.type) {
+    case "summary":
+      return <SummaryPreviewPage key={id} section={section} />;
+    case "experience":
+      return <ExperiencesPreviewPage key={id} section={section} />;
+    case "education":
+      return <EducationsPreviewPage key={id} section={section} />;
+    case "skills":
+      return <SkillsPreviewPage key={id} section={section} />;
+    default:
+      // Other section types get their renderer together with their editor
+      return null;
+  }
+}
 
 interface Props {
   /** The reference to the content */
@@ -26,6 +45,7 @@ interface Props {
 
 export function PreviewPage({ contentRef }: Props): JSX.Element {
   const { structure, columnWidth } = useAppSelector(appSelector);
+  const sections = useAppSelector(sectionsSelector);
 
   return (
     <Paper
@@ -49,7 +69,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
             mb: 2,
           }}
         >
-          {structure.fullWidth.map((sectionId) => idToComponent[sectionId])}
+          {structure.fullWidth.map((id) => renderPart(id, sections))}
         </Box>
 
         {/* Second row: left and right with percentages */}
@@ -67,7 +87,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
               flexShrink: 1,
             }}
           >
-            {structure.left.map((sectionId) => idToComponent[sectionId])}
+            {structure.left.map((id) => renderPart(id, sections))}
           </Box>
           <Box
             sx={{
@@ -76,7 +96,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
               flexShrink: 1,
             }}
           >
-            {structure.right.map((sectionId) => idToComponent[sectionId])}
+            {structure.right.map((id) => renderPart(id, sections))}
           </Box>
         </Box>
       </Box>

@@ -38,7 +38,7 @@ export function EditorSideBar({ editorPageSections }: Props): JSX.Element {
     >
       <Toolbar />
       <List>
-        {Object.values(editorPageSections).map(({ id, label }) => (
+        {editorPageSections.map(({ id, label }) => (
           <ListItem key={id} disablePadding>
             <ListItemButton
               onClick={() => dispatch(setSelectedSectionInEditorPage(id))}

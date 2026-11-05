@@ -1,30 +1,7 @@
-import { PageStructure, PreviewSectionId } from "@store/app/app-slice-types";
+import { PageStructure } from "@store/app/app-slice-types";
 import { Side } from "@custom-types/styles-types";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { CSS, Transform } from "@dnd-kit/utilities";
-
-export const initialPlacement: PageStructure = {
-  fullWidth: ["personalInfo", "contactInfo", "summary"],
-  left: ["experiences"],
-  right: ["educations", "skills"],
-};
-
-export function getLabelById(id: PreviewSectionId): string {
-  switch (id) {
-    case "personalInfo":
-      return "Personal Info";
-    case "contactInfo":
-      return "Contact Info";
-    case "summary":
-      return "Personal Summary";
-    case "experiences":
-      return "Experiences";
-    case "educations":
-      return "Educations";
-    case "skills":
-      return "Skills";
-  }
-}
 
 export function findItemSideById(
   structure: PageStructure,

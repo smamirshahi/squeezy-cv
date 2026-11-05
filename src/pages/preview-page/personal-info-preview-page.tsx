@@ -1,13 +1,13 @@
 import { Grid } from "@mui/material";
-import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { vaultSelector } from "@store/vault/vault-slice";
 import { useAppSelector } from "@store/store-helper";
 import { CvTypography } from "@components/cv-typography";
 
-/** Shows the personal info in preview page */
+/** Shows the name and headline in preview page */
 export function PersonalInfoPreviewPage(): JSX.Element | null {
-  const { personalInfo } = useAppSelector(cvDataSelector);
+  const { profile } = useAppSelector(vaultSelector);
 
-  if (!personalInfo.name) {
+  if (!profile.fullName) {
     return null;
   }
 
@@ -18,8 +18,8 @@ export function PersonalInfoPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingLg" text={personalInfo.name} />
-      <CvTypography variant="bodyLg" text={personalInfo.jobTitle} />
+      <CvTypography variant="headingLg" text={profile.fullName} />
+      <CvTypography variant="bodyLg" text={profile.headline ?? ""} />
     </Grid>
   );
 }

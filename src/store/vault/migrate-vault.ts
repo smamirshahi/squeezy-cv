@@ -151,11 +151,16 @@ export function migrateLegacyFile(
     : [];
 
   const sections: Section[] = [
-    { id: "summary", type: "summary", title: "Summary", items: summaryItems },
+    {
+      id: "summary",
+      type: "summary",
+      title: "Professional Summary",
+      items: summaryItems,
+    },
     {
       id: "experience",
       type: "experience",
-      title: "Experience",
+      title: "Work Experience",
       items: data.experiences.map((e) => ({
         id: e.id,
         fields: definedFields({

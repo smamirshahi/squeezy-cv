@@ -1,67 +1,69 @@
 import { AccordionDetails, Box, TextField } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { Experience } from "@custom-types/experience-types";
-import { useEditorExperience } from "@pages/editor-page/sections/editor-experience/use-editor-experience";
+import { useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { setItemBullets } from "@store/vault/vault-slice";
 import {
-  cvDataSelector,
-  setExperiences,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
-import { useEditorPage } from "@pages/editor-page/use-editor-page";
+  NewItemTemplate,
+  useSectionDraft,
+} from "@pages/editor-page/use-section-draft";
 import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import dayjs from "dayjs";
 
+const NEW_EXPERIENCE: NewItemTemplate = {
+  fields: {
+    jobTitle: "",
+    company: "",
+    location: "",
+    startDate: "",
+    endDate: "",
+  },
+  bullets: [{ text: "" }],
+};
+
+interface Props {
+  /** Id of the experience section being edited */
+  sectionId: string;
+}
+
 /** Shows the experience in editor page */
-export function EditorExperience(): JSX.Element {
-  const dispatch = useAppDispatch();
-  const { experiences } = useAppSelector(cvDataSelector);
+export function EditorExperience({ sectionId }: Props): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
-  const [newExperiences, setNewExperiences] = useState<Experience[]>([]);
+  const {
+    section,
+    updateFields,
+    removeItem,
+    moveItem,
+    setVisibility,
+    draftDispatch,
+  } = useSectionDraft(sectionId, NEW_EXPERIENCE);
 
-  useEffect(() => {
-    setNewExperiences(experiences);
-  }, [experiences, setNewExperiences]);
-
-  useEditorPage({
-    onApplyChanges: () => {
-      dispatch(setExperiences(newExperiences));
-    },
-    onDiscardChanges: () => {
-      setNewExperiences(experiences);
-    },
-  });
-
-  const { updateExperience, removeExperience, swapExperiences } =
-    useEditorExperience({
-      setNewExperiences,
-    });
+  const items = section?.items ?? [];
 
   return (
     <>
-      {newExperiences.map((experience, index) => (
+      {items.map((item, index) => (
         <EditorAccordionHeader
-          key={experience.id}
+          key={item.id}
           accordionIndex={index}
-          swapFunction={swapExperiences}
-          removeFunction={removeExperience}
-          updateFunction={updateExperience}
-          title={`${experience.jobTitle} (
-          ${dayjs(experience.startDate).format(dateFormat)} - ${
-            experience.endDate
-              ? dayjs(experience.endDate).format(dateFormat)
+          swapFunction={moveItem}
+          removeFunction={removeItem}
+          onVisibilityChange={setVisibility}
+          title={`${item.fields.jobTitle ?? ""} (
+          ${dayjs(item.fields.startDate).format(dateFormat)} - ${
+            item.fields.endDate
+              ? dayjs(item.fields.endDate).format(dateFormat)
               : "Present"
           }`}
-          entity={{ id: experience.id, shouldShow: experience.shouldShow }}
-          isLastEntity={index === newExperiences.length - 1}
+          entity={{ id: item.id, shouldShow: item.shouldShow }}
+          isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>
             <TextField
               label="Job Title"
-              value={experience.jobTitle}
+              value={item.fields.jobTitle ?? ""}
               onChange={(e) =>
-                updateExperience(experience.id, { jobTitle: e.target.value })
+                updateFields(item.id, { jobTitle: e.target.value })
               }
               sx={{ mt: 2 }}
               fullWidth
@@ -71,17 +73,17 @@ export function EditorExperience(): JSX.Element {
             <Box sx={{ display: "flex", gap: 2, my: 2 }}>
               <TextField
                 label="Company"
-                value={experience.company}
+                value={item.fields.company ?? ""}
                 onChange={(e) =>
-                  updateExperience(experience.id, { company: e.target.value })
+                  updateFields(item.id, { company: e.target.value })
                 }
                 fullWidth
               />
               <TextField
                 label="Location"
-                value={experience.location}
+                value={item.fields.location ?? ""}
                 onChange={(e) =>
-                  updateExperience(experience.id, { location: e.target.value })
+                  updateFields(item.id, { location: e.target.value })
                 }
                 fullWidth
               />
@@ -91,17 +93,17 @@ export function EditorExperience(): JSX.Element {
             <Box sx={{ display: "flex", gap: 2, my: 2 }}>
               <TextField
                 type="date"
-                value={experience.startDate}
+                value={item.fields.startDate ?? ""}
                 onChange={(e) =>
-                  updateExperience(experience.id, { startDate: e.target.value })
+                  updateFields(item.id, { startDate: e.target.value })
                 }
                 fullWidth
               />
               <TextField
                 type="date"
-                value={experience.endDate}
+                value={item.fields.endDate ?? ""}
                 onChange={(e) =>
-                  updateExperience(experience.id, { endDate: e.target.value })
+                  updateFields(item.id, { endDate: e.target.value })
                 }
                 fullWidth
               />
@@ -109,9 +111,12 @@ export function EditorExperience(): JSX.Element {
 
             {/* Bullet Points */}
             <EditorExperienceBp
-              experienceId={experience.id}
-              bulletPoints={experience.bulletPoints}
-              updateExperience={updateExperience}
+              bullets={item.bullets}
+              onChange={(bullets) =>
+                draftDispatch(
+                  setItemBullets({ sectionId, itemId: item.id, bullets })
+                )
+              }
             />
           </AccordionDetails>
         </EditorAccordionHeader>

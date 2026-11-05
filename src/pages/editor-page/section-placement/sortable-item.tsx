@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
-import {
-  getItemStyle,
-  getLabelById,
-} from "@pages/editor-page/section-placement/section-placement-utils";
+import { getItemStyle } from "@pages/editor-page/section-placement/section-placement-utils";
+import { getPreviewPartLabel } from "@store/vault/section-labels";
+import { sectionsSelector } from "@store/vault/vault-slice";
+import { useAppSelector } from "@store/store-helper";
 import { PreviewSectionId } from "@store/app/app-slice-types";
 
 interface Props {
@@ -21,11 +21,12 @@ export function SortableItem({ itemId }: Props): JSX.Element {
     isDragging,
   } = useSortable({ id: itemId });
 
+  const sections = useAppSelector(sectionsSelector);
   const style = getItemStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {getLabelById(itemId)}
+      {getPreviewPartLabel(itemId, sections)}
     </div>
   );
 }

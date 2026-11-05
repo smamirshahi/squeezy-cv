@@ -8,79 +8,85 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
-  cvDataSelector,
-  setSkills,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
-import { SkillCategory } from "@custom-types/skill-types";
-import { useEditorSkills } from "@pages/editor-page/sections/editor-skills/use-editor-skills";
-import { useEditorPage } from "@pages/editor-page/use-editor-page";
+  addBullet,
+  moveBullet,
+  removeBullet,
+  updateBullet,
+} from "@store/vault/vault-slice";
+import {
+  NewItemTemplate,
+  useSectionDraft,
+} from "@pages/editor-page/use-section-draft";
 import { useRatingIcon } from "@hooks/use-rating-icon";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
+const NEW_SKILL_CATEGORY: NewItemTemplate = {
+  fields: { category: "" },
+  bullets: [{ text: "", rating: 0 }],
+};
+
+interface Props {
+  /** Id of the skills section being edited */
+  sectionId: string;
+}
+
 /** Shows the skill section in editor page */
-export function EditorSkills(): JSX.Element {
-  const dispatch = useAppDispatch();
+export function EditorSkills({ sectionId }: Props): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
-  const { skills } = useAppSelector(cvDataSelector);
-
-  const [newSkills, setNewSkills] = useState<SkillCategory[]>([]);
-
   const RatingIcon = useRatingIcon();
 
-  useEffect(() => {
-    setNewSkills(skills);
-  }, [skills, setNewSkills]);
-
-  useEditorPage({
-    onApplyChanges: () => {
-      dispatch(setSkills(newSkills));
-    },
-    onDiscardChanges: () => {
-      setNewSkills(skills);
-    },
-  });
-
   const {
-    updateSkillCategory,
-    removeSkillCategory,
-    addSkillItem,
-    updateSkillItem,
-    removeSkillItem,
-    swapSkillCategories,
-    swapSkillItems,
-  } = useEditorSkills({ setNewSkills });
+    section,
+    updateFields,
+    removeItem,
+    moveItem,
+    setVisibility,
+    draftDispatch,
+  } = useSectionDraft(sectionId, NEW_SKILL_CATEGORY);
+
+  const items = section?.items ?? [];
 
   return (
     <>
-      {newSkills.map((skill, index) => (
+      {items.map((group, index) => (
         <EditorAccordionHeader
-          key={skill.id}
+          key={group.id}
           accordionIndex={index}
-          swapFunction={swapSkillCategories}
-          removeFunction={removeSkillCategory}
-          updateFunction={updateSkillCategory}
-          title={skill.category}
-          entity={{ id: skill.id, shouldShow: skill.shouldShow }}
-          isLastEntity={index === newSkills.length - 1}
+          swapFunction={moveItem}
+          removeFunction={removeItem}
+          onVisibilityChange={setVisibility}
+          title={group.fields.category ?? ""}
+          entity={{ id: group.id, shouldShow: group.shouldShow }}
+          isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>
             {/* Skill Category */}
             <Box display="flex" flexDirection="row" gap={2}>
               <TextField
                 label="Skill Category"
-                value={skill.category}
+                value={group.fields.category ?? ""}
                 onChange={(e) =>
-                  updateSkillCategory(skill.id, { category: e.target.value })
+                  updateFields(group.id, { category: e.target.value })
                 }
                 fullWidth
                 sx={{ my: 2 }}
               />
-              <IconButton onClick={() => addSkillItem(skill.id)}>
+              <IconButton
+                onClick={() =>
+                  draftDispatch(
+                    addBullet({
+                      sectionId,
+                      itemId: group.id,
+                      text: "",
+                      rating: 0,
+                    })
+                  )
+                }
+              >
                 <AddIcon />
               </IconButton>
             </Box>
@@ -94,58 +100,76 @@ export function EditorSkills(): JSX.Element {
                 mx: "20px",
               }}
             >
-              {skill.items.map((item, itemIndex) => (
-                <Box
-                  key={item.id}
-                  sx={{ display: "flex", alignItems: "center", gap: 1, my: 1 }}
-                >
-                  <SortingIcons
-                    index={itemIndex}
-                    swapFunction={(fromIndex, toIndex) =>
-                      swapSkillItems(skill.id, fromIndex, toIndex)
-                    }
-                    isLastEntity={skill.items.length - 1 === itemIndex}
-                  />
-                  <TextField
-                    label={`Skill Item ${itemIndex + 1}`}
-                    value={item.name}
-                    onChange={(e) =>
-                      updateSkillItem(skill.id, item.id, {
-                        name: e.target.value,
-                      })
-                    }
-                    sx={{ width: "50%" }}
-                  />
-                  <Rating
-                    value={item.rating}
-                    onChange={(_, newValue) => {
-                      if (isRatingAcceptable(newValue)) {
-                        updateSkillItem(skill.id, item.id, {
-                          rating: newValue ?? 0,
-                        });
-                      }
-                    }}
-                    icon={RatingIcon.icon}
-                    emptyIcon={RatingIcon.emptyIcon}
-                    precision={0.5}
+              {group.bullets.map((skill, skillIndex) => {
+                const ref = {
+                  sectionId,
+                  itemId: group.id,
+                  bulletId: skill.id,
+                };
+                return (
+                  <Box
+                    key={skill.id}
                     sx={{
-                      ml: "20px",
-                      "& .MuiRating-iconFilled": {
-                        color: typography.icon.color,
-                      },
-                      "& .MuiRating-iconHover": {
-                        color: typography.icon.color,
-                      },
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      my: 1,
                     }}
-                  />
-                  <IconButton
-                    onClick={() => removeSkillItem(skill.id, item.id)}
-                    disabled={skill.items.length === 1}
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              ))}
+                    <SortingIcons
+                      index={skillIndex}
+                      swapFunction={(_fromIndex, toIndex) =>
+                        draftDispatch(moveBullet({ ...ref, toIndex }))
+                      }
+                      isLastEntity={group.bullets.length - 1 === skillIndex}
+                    />
+                    <TextField
+                      label={`Skill Item ${skillIndex + 1}`}
+                      value={skill.text}
+                      onChange={(e) =>
+                        draftDispatch(
+                          updateBullet({
+                            ...ref,
+                            update: { text: e.target.value },
+                          })
+                        )
+                      }
+                      sx={{ width: "50%" }}
+                    />
+                    <Rating
+                      value={skill.rating ?? 0}
+                      onChange={(_, newValue) => {
+                        if (isRatingAcceptable(newValue)) {
+                          draftDispatch(
+                            updateBullet({
+                              ...ref,
+                              update: { rating: newValue ?? 0 },
+                            })
+                          );
+                        }
+                      }}
+                      icon={RatingIcon.icon}
+                      emptyIcon={RatingIcon.emptyIcon}
+                      precision={0.5}
+                      sx={{
+                        ml: "20px",
+                        "& .MuiRating-iconFilled": {
+                          color: typography.icon.color,
+                        },
+                        "& .MuiRating-iconHover": {
+                          color: typography.icon.color,
+                        },
+                      }}
+                    />
+                    <IconButton
+                      onClick={() => draftDispatch(removeBullet(ref))}
+                      disabled={group.bullets.length === 1}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                );
+              })}
             </Box>
           </AccordionDetails>
         </EditorAccordionHeader>

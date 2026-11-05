@@ -1,68 +1,74 @@
-import { Box, InputAdornment, TextField } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { PersonalInfo } from "@custom-types/personal-info-types";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import { useEffect, useMemo } from "react";
+import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { ContactInfo } from "@custom-types/contact-info-types";
 import {
-  cvDataSelector,
-  setContactInfo,
-  setPersonalInfo,
-} from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
-import { useEditorPage } from "@pages/editor-page/use-editor-page";
+  addLink,
+  initialState,
+  moveLink,
+  removeLink,
+  setLinks,
+  setProfile,
+  updateLink,
+  updateProfile,
+  vaultSelector,
+} from "@store/vault/vault-slice";
+import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
+import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
+/** Edits the name, headline, contact details and the list of links */
 export function EditorMainInfo(): JSX.Element | null {
   const dispatch = useAppDispatch();
-  const { personalInfo, contactInfo } = useAppSelector(cvDataSelector);
+  const { profile, links } = useAppSelector(vaultSelector);
+  const { shouldAddNewItem } = useAppSelector(appSelector);
 
-  const [newPersonalInfo, setNewPersonalInfo] =
-    useState<PersonalInfo>(personalInfo);
-  const [newContactInfo, setNewContactInfo] =
-    useState<ContactInfo>(contactInfo);
+  const source = useMemo(
+    () => ({ ...initialState, profile, links }),
+    [profile, links]
+  );
 
-  useEffect(() => {
-    setNewPersonalInfo(personalInfo);
-    setNewContactInfo(contactInfo);
-  }, [contactInfo, personalInfo]);
-
-  useEditorPage({
-    onApplyChanges: () => {
-      dispatch(setPersonalInfo(newPersonalInfo));
-      dispatch(setContactInfo(newContactInfo));
-    },
-    onDiscardChanges: () => {
-      setNewPersonalInfo(personalInfo);
-      setNewContactInfo(contactInfo);
-    },
+  const { draft, draftDispatch } = useVaultDraft(source, (applied) => {
+    dispatch(setProfile(applied.profile));
+    dispatch(setLinks(applied.links));
   });
+
+  // The footer button "Add new link"
+  useEffect(() => {
+    if (shouldAddNewItem) {
+      draftDispatch(addLink({}));
+      dispatch(setShouldAddNewItem(false));
+    }
+  }, [dispatch, draftDispatch, shouldAddNewItem]);
 
   return (
     <>
       <Box display="flex" gap={2} mb={2}>
         <TextField
-          id="outlined-basic"
           label="Full Name"
           variant="outlined"
-          value={newPersonalInfo.name}
+          value={draft.profile.fullName}
           onChange={(event) =>
-            setNewPersonalInfo({ ...newPersonalInfo, name: event.target.value })
+            draftDispatch(updateProfile({ fullName: event.target.value }))
           }
           fullWidth
         />
         <TextField
-          id="outlined-basic"
           label="Job Title"
           variant="outlined"
-          value={newPersonalInfo.jobTitle}
+          value={draft.profile.headline ?? ""}
           onChange={(event) =>
-            setNewPersonalInfo({
-              ...newPersonalInfo,
-              jobTitle: event.target.value,
-            })
+            draftDispatch(updateProfile({ headline: event.target.value }))
           }
           fullWidth
         />
@@ -80,12 +86,9 @@ export function EditorMainInfo(): JSX.Element | null {
             },
           }}
           variant="outlined"
-          value={newContactInfo.email}
+          value={draft.profile.email ?? ""}
           onChange={(event) =>
-            setNewContactInfo({
-              ...newContactInfo,
-              email: event.target.value,
-            })
+            draftDispatch(updateProfile({ email: event.target.value }))
           }
         />
         <TextField
@@ -100,52 +103,9 @@ export function EditorMainInfo(): JSX.Element | null {
             },
           }}
           variant="outlined"
-          value={newContactInfo.phone}
+          value={draft.profile.phone ?? ""}
           onChange={(event) =>
-            setNewContactInfo({
-              ...newContactInfo,
-              phone: event.target.value,
-            })
-          }
-        />
-        <TextField
-          label="LinkedInId"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LinkedInIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          variant="outlined"
-          value={newContactInfo.linkedInId}
-          onChange={(event) =>
-            setNewContactInfo({
-              ...newContactInfo,
-              linkedInId: event.target.value,
-            })
-          }
-        />
-        <TextField
-          label="Github"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <GitHubIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          variant="outlined"
-          value={newContactInfo.gitHubId}
-          onChange={(event) =>
-            setNewContactInfo({
-              ...newContactInfo,
-              gitHubId: event.target.value,
-            })
+            draftDispatch(updateProfile({ phone: event.target.value }))
           }
         />
         <TextField
@@ -160,15 +120,68 @@ export function EditorMainInfo(): JSX.Element | null {
             },
           }}
           variant="outlined"
-          value={newContactInfo.location}
+          value={draft.profile.location ?? ""}
           onChange={(event) =>
-            setNewContactInfo({
-              ...newContactInfo,
-              location: event.target.value,
-            })
+            draftDispatch(updateProfile({ location: event.target.value }))
           }
         />
       </Box>
+
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h6">Links</Typography>
+        <IconButton
+          aria-label="Add link"
+          onClick={() => draftDispatch(addLink({}))}
+        >
+          <AddIcon />
+        </IconButton>
+      </Box>
+      {draft.links.map((link, index) => (
+        <Box
+          key={link.id}
+          display="flex"
+          alignItems="center"
+          gap={1}
+          sx={{ my: 1 }}
+        >
+          <SortingIcons
+            index={index}
+            swapFunction={(_from, toIndex) =>
+              draftDispatch(moveLink({ id: link.id, toIndex }))
+            }
+            isLastEntity={index === draft.links.length - 1}
+          />
+          <TextField
+            label="Label"
+            value={link.label}
+            onChange={(event) =>
+              draftDispatch(
+                updateLink({
+                  id: link.id,
+                  update: { label: event.target.value },
+                })
+              )
+            }
+            sx={{ width: "30%" }}
+          />
+          <TextField
+            label="URL"
+            value={link.url}
+            onChange={(event) =>
+              draftDispatch(
+                updateLink({ id: link.id, update: { url: event.target.value } })
+              )
+            }
+            fullWidth
+          />
+          <IconButton
+            aria-label="Remove link"
+            onClick={() => draftDispatch(removeLink({ id: link.id }))}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      ))}
     </>
   );
 }
