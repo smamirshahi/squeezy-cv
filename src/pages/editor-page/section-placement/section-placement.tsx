@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -10,21 +10,22 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { SortableColumn } from "@pages/editor-page/section-placement/sortable-column";
-import {
-  findItemSideById,
-  initialPlacement,
-} from "@pages/editor-page/section-placement/section-placement-utils";
+import { findItemSideById } from "@pages/editor-page/section-placement/section-placement-utils";
 import { Box } from "@mui/material";
 import { Side } from "@custom-types/styles-types";
 import { PageStructure } from "@store/app/app-slice-types";
-import { useAppDispatch } from "@store/store-helper";
-import { updatePageStructure } from "@store/app/app-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { appSelector, updatePageStructure } from "@store/app/app-slice";
 
 export function SectionPlacement(): JSX.Element {
-  const [pageStructure, setPageStructure] =
-    useState<PageStructure>(initialPlacement);
-
   const dispatch = useAppDispatch();
+  const { structure } = useAppSelector(appSelector);
+  const [pageStructure, setPageStructure] = useState<PageStructure>(structure);
+
+  // Follow the store, e.g. when a section was added, deleted or imported
+  useEffect(() => {
+    setPageStructure(structure);
+  }, [structure]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

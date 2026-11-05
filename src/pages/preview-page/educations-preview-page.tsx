@@ -1,16 +1,17 @@
 import { Grid } from "@mui/material";
-import { cvDataSelector } from "@store/cv-data/cv-data-slice";
-import { useAppSelector } from "@store/store-helper";
+import { Section } from "@custom-types/vault-types";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvTypography } from "@components/cv-typography";
 
-/** Renders the whole education part in preview page */
-export function EducationsPreviewPage(): JSX.Element | null {
-  const { educations } = useAppSelector(cvDataSelector);
+interface Props {
+  section: Section;
+}
 
-  if (educations.length === 0) {
+/** Renders the whole education part in preview page */
+export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
+  if (section.items.length === 0) {
     return null;
   }
 
@@ -21,37 +22,43 @@ export function EducationsPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text="Education" />
-      {educations.map(
-        (education, index) =>
-          education.shouldShow && (
+      <CvTypography variant="headingMd" text={section.title} />
+      {section.items.map(
+        (item) =>
+          item.shouldShow && (
             <Grid
-              key={index}
+              key={item.id}
               container
               direction="column"
               alignItems="flex-start"
               sx={{ mb: "10px" }}
             >
-              <CvTypography variant="headingSm" text={education.degree} />
+              <CvTypography
+                variant="headingSm"
+                text={item.fields.degree ?? ""}
+              />
               <Grid container direction="row" alignItems="center" gap={3}>
-                <CvTypography variant="bodyMd" text={education.institute} />
+                <CvTypography
+                  variant="bodyMd"
+                  text={item.fields.institute ?? ""}
+                />
                 <IconWithText
                   icon={LocationOnIcon}
-                  text={education.location}
+                  text={item.fields.location ?? ""}
                   variant="bodyMd"
                 />
               </Grid>
               <DatePeriod
                 datePeriod={{
-                  start: education.startDate,
-                  end: education.endDate,
+                  start: item.fields.startDate ?? "",
+                  end: item.fields.endDate,
                 }}
               />
 
-              {education.dissertationTitle && (
+              {item.fields.dissertationTitle && (
                 <CvTypography
                   variant="bulletText"
-                  text={`Dissertation Title: ${education.dissertationTitle}`}
+                  text={`Dissertation Title: ${item.fields.dissertationTitle}`}
                 />
               )}
             </Grid>

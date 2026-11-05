@@ -1,11 +1,13 @@
 import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import {
   Bullet,
-  CURRENT_VAULT_VERSION,
+  LinkItem,
   Profile,
+  Section,
   SectionType,
   Vault,
 } from "@custom-types/vault-types";
+import { createDefaultVault } from "@store/vault/default-vault";
 import {
   findBullet,
   findItem,
@@ -17,12 +19,7 @@ import {
 /** State of the vault slice: the facts, independent of any one CV */
 export type VaultState = Vault;
 
-export const initialState: VaultState = {
-  version: CURRENT_VAULT_VERSION,
-  profile: { fullName: "" },
-  links: [],
-  sections: [],
-};
+export const initialState: VaultState = createDefaultVault();
 
 interface AddSectionPayload {
   id: string;
@@ -55,6 +52,14 @@ const vaultSlice = createSlice({
   reducers: {
     setVault(_state, action: PayloadAction<Vault>) {
       return action.payload;
+    },
+
+    /** Replaces the section that has the same id (used to apply an edited draft) */
+    setSection(state, action: PayloadAction<Section>) {
+      const index = state.sections.findIndex((s) => s.id === action.payload.id);
+      if (index !== -1) {
+        state.sections[index] = action.payload;
+      }
     },
 
     addSection: {
@@ -176,25 +181,45 @@ const vaultSlice = createSlice({
     addBullet: {
       reducer(
         state,
-        action: PayloadAction<ItemRef & { id: string; text: string }>
+        action: PayloadAction<
+          ItemRef & { id: string; text: string; rating?: number }
+        >
       ) {
-        const { sectionId, itemId, id, text } = action.payload;
-        findItem(state, sectionId, itemId)?.bullets.push({
-          id,
-          text,
-          tags: [],
-        });
+        const { sectionId, itemId, id, text, rating } = action.payload;
+        const bullet: Bullet = { id, text, tags: [] };
+        if (rating !== undefined) {
+          bullet.rating = rating;
+        }
+        findItem(state, sectionId, itemId)?.bullets.push(bullet);
       },
-      prepare(input: ItemRef & { id?: string; text?: string }) {
+      prepare(
+        input: ItemRef & { id?: string; text?: string; rating?: number }
+      ) {
         return {
           payload: {
             sectionId: input.sectionId,
             itemId: input.itemId,
             id: input.id ?? nanoid(),
             text: input.text ?? "",
+            rating: input.rating,
           },
         };
       },
+    },
+
+    /** Replaces all bullets of an item (e.g. after editing them as one text block) */
+    setItemBullets(
+      state,
+      action: PayloadAction<ItemRef & { bullets: Bullet[] }>
+    ) {
+      const item = findItem(
+        state,
+        action.payload.sectionId,
+        action.payload.itemId
+      );
+      if (item) {
+        item.bullets = action.payload.bullets;
+      }
     },
 
     /** Changes the canonical text, tags or rating of a bullet */
@@ -267,6 +292,16 @@ const vaultSlice = createSlice({
       Object.assign(state.profile, action.payload);
     },
 
+    /** Replaces the whole profile (used to apply an edited draft) */
+    setProfile(state, action: PayloadAction<Profile>) {
+      state.profile = action.payload;
+    },
+
+    /** Replaces all links (used to apply an edited draft) */
+    setLinks(state, action: PayloadAction<LinkItem[]>) {
+      state.links = action.payload;
+    },
+
     addLink: {
       reducer(
         state,
@@ -329,6 +364,7 @@ export const { vaultSelector, sectionsSelector } = vaultSlice.selectors;
 
 export const {
   setVault,
+  setSection,
   addSection,
   removeSection,
   renameSection,
@@ -340,11 +376,14 @@ export const {
   setItemVisibility,
   setItemTags,
   addBullet,
+  setItemBullets,
   updateBullet,
   setBulletAlt,
   removeBullet,
   moveBullet,
   updateProfile,
+  setProfile,
+  setLinks,
   addLink,
   updateLink,
   removeLink,

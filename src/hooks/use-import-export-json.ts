@@ -1,12 +1,23 @@
 import { useCallback, useEffect } from "react";
-import { CVJson, CVJsonSchema } from "@custom-types/json-types";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { migrateCvFile } from "@store/vault/migrate-vault";
 import {
-  cvDataSelector,
-  setCvData,
+  createCvFile,
+  parseCvFileText,
+  serializeCvFile,
+} from "@store/vault/cv-file";
+import { CvFile } from "@custom-types/vault-types";
+import {
+  AppDispatch,
+  useAppDispatch,
+  useAppSelector,
+} from "@store/store-helper";
+import {
+  metaDataSelector,
+  setMetaData,
   setStyle,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
+import { setVault, vaultSelector } from "@store/vault/vault-slice";
 
 interface ReturnProps {
   /**
@@ -22,10 +33,18 @@ interface ReturnProps {
   handleImport: (e: React.ChangeEvent<HTMLInputElement>) => string;
 }
 
+/** Puts a loaded CV file into the store */
+function loadCvFile(dispatch: AppDispatch, file: CvFile): void {
+  dispatch(setVault(file.vault));
+  dispatch(setStyle(file.style));
+  dispatch(setMetaData(file.metaData));
+}
+
 /** Custom hook to handle importing and exporting CV data in JSON format */
 export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
-  const cvData = useAppSelector(cvDataSelector);
+  const vault = useAppSelector(vaultSelector);
+  const metaData = useAppSelector(metaDataSelector);
   const style = useAppSelector(styleSelector);
 
   // In development only: start with the fake sample CV instead of an empty form
@@ -35,9 +54,7 @@ export function useImportExportJson(): ReturnProps {
     }
     import("@fixtures/sample-cv.json")
       .then((module) => {
-        const parsed = CVJsonSchema.check(module.default);
-        dispatch(setCvData(parsed.data));
-        dispatch(setStyle(parsed.style));
+        loadCvFile(dispatch, migrateCvFile(module.default));
       })
       .catch((_error) => {
         // eslint-disable-next-line no-console
@@ -55,11 +72,7 @@ export function useImportExportJson(): ReturnProps {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const raw = JSON.parse(event.target?.result as string);
-          const parsed = CVJsonSchema.check(raw);
-          dispatch(setCvData(parsed.data));
-          dispatch(setStyle(parsed.style));
-          // alert("CV imported successfully!");
+          loadCvFile(dispatch, parseCvFileText(event.target?.result as string));
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert
           alert("Invalid file format.");
@@ -73,23 +86,10 @@ export function useImportExportJson(): ReturnProps {
 
   const handleExport = useCallback(
     (fileName: string) => {
-      if (!cvData) {
-        // eslint-disable-next-line no-alert
-        alert("No CV data to export.");
-        return;
-      }
-      const fileData: CVJson = {
-        metaData: {
-          version: "1.0",
-          title: "",
-          jobUrl: "",
-        },
-        data: cvData,
-        style,
-      };
-      const blob = new Blob([JSON.stringify(fileData, null, 2)], {
-        type: "application/json",
-      });
+      const blob = new Blob(
+        [serializeCvFile(createCvFile(vault, metaData, style))],
+        { type: "application/json" }
+      );
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
@@ -98,7 +98,7 @@ export function useImportExportJson(): ReturnProps {
       a.click();
       URL.revokeObjectURL(url);
     },
-    [cvData, style]
+    [vault, metaData, style]
   );
 
   return {

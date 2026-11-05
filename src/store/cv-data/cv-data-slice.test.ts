@@ -1,106 +1,64 @@
 import { describe, expect, it } from "vitest";
 import {
-  CvDataState,
   cvDataReducer,
   initialState,
   resetCvDataState,
-  setCvData,
-  setEducationVisibilityById,
-  setExperienceVisibilityById,
-  setSkillVisibilityById,
+  setBulletPointIcon,
+  setDateFormat,
+  setMetaData,
+  setPaperMargin,
+  setRatingIcon,
+  setStyle,
+  setTypography,
 } from "@store/cv-data/cv-data-slice";
 
-function stateWithOneOfEach(): CvDataState {
-  return {
-    ...initialState,
-    data: {
-      ...initialState.data,
-      experiences: [
-        {
-          id: "exp-1",
-          company: "Acme",
-          jobTitle: "Dev",
-          location: "London",
-          startDate: "2020-01-01",
-          bulletPoints: [],
-          shouldShow: true,
-        },
-      ],
-      educations: [
-        {
-          id: "edu-1",
-          institute: "Uni",
-          degree: "BSc",
-          location: "Leeds",
-          startDate: "2010-01-01",
-          endDate: "2014-01-01",
-          shouldShow: true,
-        },
-      ],
-      skills: [
-        {
-          id: "skill-1",
-          category: "Frontend",
-          items: [{ id: "item-1", name: "React", rating: 5 }],
-          shouldShow: true,
-        },
-      ],
-    },
-  };
-}
-
-describe("cvDataSlice visibility reducers", () => {
-  it("hides and re-shows an experience by id", () => {
-    const hidden = cvDataReducer(
-      stateWithOneOfEach(),
-      setExperienceVisibilityById({ id: "exp-1", shouldShow: false })
-    );
-    expect(hidden.data.experiences[0].shouldShow).toBe(false);
-
-    const shown = cvDataReducer(
-      hidden,
-      setExperienceVisibilityById({ id: "exp-1", shouldShow: true })
-    );
-    expect(shown.data.experiences[0].shouldShow).toBe(true);
-  });
-
-  it("hides an education by id", () => {
-    const next = cvDataReducer(
-      stateWithOneOfEach(),
-      setEducationVisibilityById({ id: "edu-1", shouldShow: false })
-    );
-    expect(next.data.educations[0].shouldShow).toBe(false);
-  });
-
-  it("hides a skill category by id", () => {
-    const next = cvDataReducer(
-      stateWithOneOfEach(),
-      setSkillVisibilityById({ id: "skill-1", shouldShow: false })
-    );
-    expect(next.data.skills[0].shouldShow).toBe(false);
-  });
-
-  it("ignores unknown ids without changing state", () => {
-    const before = stateWithOneOfEach();
-    const next = cvDataReducer(
-      before,
-      setSkillVisibilityById({ id: "missing", shouldShow: false })
-    );
-    expect(next).toEqual(before);
-  });
-});
-
-describe("cvDataSlice data reducers", () => {
-  it("replaces data with setCvData and leaves style and metadata alone", () => {
-    const data = stateWithOneOfEach().data;
-    const next = cvDataReducer(initialState, setCvData(data));
-    expect(next.data).toEqual(data);
+describe("cvDataSlice", () => {
+  it("replaces the meta data and leaves the style alone", () => {
+    const metaData = { title: "Acme", jobUrl: "https://example.com/job" };
+    const next = cvDataReducer(initialState, setMetaData(metaData));
+    expect(next.metaData).toEqual(metaData);
     expect(next.style).toEqual(initialState.style);
+  });
+
+  it("replaces the whole style", () => {
+    const style = { ...initialState.style, paperMargin: "normal" as const };
+    const next = cvDataReducer(initialState, setStyle(style));
+    expect(next.style).toEqual(style);
     expect(next.metaData).toEqual(initialState.metaData);
   });
 
+  it("changes single style settings independently", () => {
+    let state = cvDataReducer(initialState, setDateFormat("DD/MM/YYYY"));
+    state = cvDataReducer(state, setPaperMargin("normal"));
+    state = cvDataReducer(state, setRatingIcon("circle"));
+    state = cvDataReducer(state, setBulletPointIcon("dash"));
+    expect(state.style).toMatchObject({
+      dateFormat: "DD/MM/YYYY",
+      paperMargin: "normal",
+      ratingIcon: "circle",
+      bulletPointIcon: "dash",
+    });
+    expect(state.style.typography).toEqual(initialState.style.typography);
+  });
+
+  it("changes one typography variant only", () => {
+    const fontStyle = {
+      fontSize: "20pt",
+      fontWeight: "700",
+      color: "#000000",
+    } as const;
+    const next = cvDataReducer(
+      initialState,
+      setTypography({ variant: "headingLg", fontStyle })
+    );
+    expect(next.style.typography.headingLg).toEqual(fontStyle);
+    expect(next.style.typography.bodyMd).toEqual(
+      initialState.style.typography.bodyMd
+    );
+  });
+
   it("resets to the initial state", () => {
-    const next = cvDataReducer(stateWithOneOfEach(), resetCvDataState());
-    expect(next).toEqual(initialState);
+    const changed = cvDataReducer(initialState, setPaperMargin("normal"));
+    expect(cvDataReducer(changed, resetCvDataState())).toEqual(initialState);
   });
 });

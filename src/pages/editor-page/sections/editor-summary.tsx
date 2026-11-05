@@ -1,45 +1,61 @@
-import { ProfessionalSummary } from "@custom-types/summary-types";
 import { TextField } from "@mui/material";
-import {
-  cvDataSelector,
-  setProfessionalSummary,
-} from "@store/cv-data/cv-data-slice";
+import { nanoid } from "@reduxjs/toolkit";
+import { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { useEffect, useState } from "react";
-import { useEditorPage } from "@pages/editor-page/use-editor-page";
+import {
+  addItem,
+  initialState,
+  setSection,
+  updateItemFields,
+  vaultSelector,
+} from "@store/vault/vault-slice";
+import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
+
+interface Props {
+  /** Id of the summary section being edited */
+  sectionId: string;
+}
 
 /** Shows the professional summary section in editor page */
-export function EditorSummary(): JSX.Element | null {
+export function EditorSummary({ sectionId }: Props): JSX.Element | null {
   const dispatch = useAppDispatch();
-  const { professionalSummary } = useAppSelector(cvDataSelector);
+  const stored = useAppSelector(vaultSelector).sections.find(
+    (s) => s.id === sectionId
+  );
+  const source = useMemo(
+    () => ({ ...initialState, sections: stored ? [stored] : [] }),
+    [stored]
+  );
 
-  const [newSummary, setNewSummary] =
-    useState<ProfessionalSummary>(professionalSummary);
-
-  useEffect(() => {
-    setNewSummary(professionalSummary);
-  }, [professionalSummary]);
-
-  useEditorPage({
-    onApplyChanges: () => {
-      dispatch(setProfessionalSummary(newSummary));
-    },
-    onDiscardChanges: () => {
-      setNewSummary(professionalSummary);
-    },
+  const { draft, draftDispatch } = useVaultDraft(source, (applied) => {
+    if (applied.sections[0]) {
+      dispatch(setSection(applied.sections[0]));
+    }
   });
+
+  const item = draft.sections[0]?.items[0];
+
+  function handleChange(text: string): void {
+    if (item) {
+      draftDispatch(
+        updateItemFields({ sectionId, itemId: item.id, fields: { text } })
+      );
+    } else {
+      draftDispatch(addItem({ sectionId, id: nanoid(), fields: { text } }));
+    }
+  }
 
   return (
     <TextField
       label="Professional Summary"
       variant="outlined"
       multiline
-      value={newSummary}
+      value={item?.fields.text ?? ""}
       fullWidth
       sx={{
         mt: "20px",
       }}
-      onChange={(event) => setNewSummary(event.target.value)}
+      onChange={(event) => handleChange(event.target.value)}
     />
   );
 }

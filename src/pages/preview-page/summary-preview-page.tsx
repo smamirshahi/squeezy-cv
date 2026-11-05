@@ -1,13 +1,16 @@
 import { Grid } from "@mui/material";
-import { useAppSelector } from "@store/store-helper";
-import { cvDataSelector } from "@store/cv-data/cv-data-slice";
+import { Section } from "@custom-types/vault-types";
 import { CvTypography } from "@components/cv-typography";
 
-/** Shows the professional summary page in preview mode */
-export function SummaryPreviewPage(): JSX.Element | null {
-  const { professionalSummary } = useAppSelector(cvDataSelector);
+interface Props {
+  section: Section;
+}
 
-  if (!professionalSummary) {
+/** Shows the professional summary page in preview mode */
+export function SummaryPreviewPage({ section }: Props): JSX.Element | null {
+  const text = section.items.find((i) => i.shouldShow)?.fields.text;
+
+  if (!text) {
     return null;
   }
   return (
@@ -17,8 +20,8 @@ export function SummaryPreviewPage(): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text="Professional Summary" />
-      <CvTypography variant="bulletText" text={professionalSummary} />
+      <CvTypography variant="headingMd" text={section.title} />
+      <CvTypography variant="bulletText" text={text} />
     </Grid>
   );
 }

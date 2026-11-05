@@ -6,54 +6,18 @@ import {
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { useEffect, useState } from "react";
+import { sectionsSelector } from "@store/vault/vault-slice";
+import { getAddButtonLabel } from "@pages/editor-page/editor-footer-utils";
 
 export function EditorFooter(): JSX.Element | null {
   const dispatch = useAppDispatch();
-
-  const [shouldShowApplyButton, setShouldShowApplyButton] =
-    useState<boolean>(true);
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
-  const [addNewItemButtonLabel, setAddNewItemButtonLabel] =
-    useState<string>("");
+  const sections = useAppSelector(sectionsSelector);
 
-  useEffect(() => {
-    switch (selectedSectionInEditorPage) {
-      case "metaData":
-      case "mainInfo":
-      case "summary":
-      case "experiences":
-      case "educations":
-      case "skills":
-        setShouldShowApplyButton(true);
-        break;
-      case "styleSettings":
-      case "pageStructure":
-        setShouldShowApplyButton(false);
-        break;
-    }
-  }, [selectedSectionInEditorPage]);
-
-  useEffect(() => {
-    switch (selectedSectionInEditorPage) {
-      case "experiences":
-        setAddNewItemButtonLabel("Add new experience");
-        break;
-      case "educations":
-        setAddNewItemButtonLabel("Add new education");
-        break;
-      case "skills":
-        setAddNewItemButtonLabel("Add new skill category");
-        break;
-      case "metaData":
-      case "mainInfo":
-      case "summary":
-      case "styleSettings":
-      case "pageStructure":
-        setAddNewItemButtonLabel("");
-        break;
-    }
-  }, [selectedSectionInEditorPage]);
+  const { shouldShowApplyButton, addNewItemButtonLabel } = getAddButtonLabel(
+    selectedSectionInEditorPage,
+    sections
+  );
 
   if (!shouldShowApplyButton) {
     return null;

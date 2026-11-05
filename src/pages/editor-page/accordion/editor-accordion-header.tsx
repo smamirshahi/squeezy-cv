@@ -10,14 +10,13 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { PropsWithChildren, useState } from "react";
-import { Experience } from "@custom-types/experience-types";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 interface Props {
   accordionIndex: number;
   swapFunction: (index1: number, index2: number) => void;
   removeFunction: (id: string) => void;
-  updateFunction: (id: string, update: Partial<Experience>) => void;
+  onVisibilityChange: (id: string, shouldShow: boolean) => void;
   title: string;
   entity: { id: string; shouldShow: boolean };
   isLastEntity: boolean;
@@ -29,7 +28,7 @@ export function EditorAccordionHeader({
   title,
   removeFunction,
   entity,
-  updateFunction,
+  onVisibilityChange,
   children,
   isLastEntity,
 }: PropsWithChildren<Props>): JSX.Element {
@@ -74,9 +73,7 @@ export function EditorAccordionHeader({
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              updateFunction(entity.id, {
-                shouldShow: !entity.shouldShow,
-              });
+              onVisibilityChange(entity.id, !entity.shouldShow);
             }}
           >
             {entity.shouldShow ? <VisibilityIcon /> : <VisibilityOffIcon />}

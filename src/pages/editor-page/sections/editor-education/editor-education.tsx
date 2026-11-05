@@ -1,66 +1,62 @@
 import { AccordionDetails, Box, TextField } from "@mui/material";
-import { Education } from "@custom-types/education-types";
-import { useEditorEducation } from "@pages/editor-page/sections/editor-education/use-editor-education";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
-  cvDataSelector,
-  setEducations,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
-import { useEffect, useState } from "react";
-import { useEditorPage } from "@pages/editor-page/use-editor-page";
+  NewItemTemplate,
+  useSectionDraft,
+} from "@pages/editor-page/use-section-draft";
 import dayjs from "dayjs";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
+const NEW_EDUCATION: NewItemTemplate = {
+  fields: {
+    degree: "",
+    institute: "",
+    location: "",
+    startDate: "",
+    endDate: "",
+    dissertationTitle: "",
+  },
+  bullets: [],
+};
+
+interface Props {
+  /** Id of the education section being edited */
+  sectionId: string;
+}
+
 /** Shows the education in editor page */
-export function EditorEducation(): JSX.Element {
-  const dispatch = useAppDispatch();
-  const { educations } = useAppSelector(cvDataSelector);
+export function EditorEducation({ sectionId }: Props): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
-  const [newEducations, setNewEducations] = useState<Education[]>([]);
+  const { section, updateFields, removeItem, moveItem, setVisibility } =
+    useSectionDraft(sectionId, NEW_EDUCATION);
 
-  useEffect(() => {
-    setNewEducations(educations);
-  }, [educations, setNewEducations]);
-
-  useEditorPage({
-    onApplyChanges: () => {
-      dispatch(setEducations(newEducations));
-    },
-    onDiscardChanges: () => {
-      setNewEducations(educations);
-    },
-  });
-
-  const { updateEducation, removeEducation, swapEducations } =
-    useEditorEducation({
-      setNewEducations,
-    });
+  const items = section?.items ?? [];
 
   return (
     <>
-      {newEducations.map((education, index) => (
+      {items.map((item, index) => (
         <EditorAccordionHeader
-          key={education.id}
+          key={item.id}
           accordionIndex={index}
-          swapFunction={swapEducations}
-          removeFunction={removeEducation}
-          updateFunction={updateEducation}
-          title={`${education.degree} (
-                  ${dayjs(education.startDate).format(dateFormat)} - ${
-                    education.endDate
-                      ? dayjs(education.endDate).format(dateFormat)
+          swapFunction={moveItem}
+          removeFunction={removeItem}
+          onVisibilityChange={setVisibility}
+          title={`${item.fields.degree ?? ""} (
+                  ${dayjs(item.fields.startDate).format(dateFormat)} - ${
+                    item.fields.endDate
+                      ? dayjs(item.fields.endDate).format(dateFormat)
                       : "Present"
                   }`}
-          entity={{ id: education.id, shouldShow: education.shouldShow }}
-          isLastEntity={index === newEducations.length - 1}
+          entity={{ id: item.id, shouldShow: item.shouldShow }}
+          isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>
             <TextField
               label="Degree"
-              value={education.degree}
+              value={item.fields.degree ?? ""}
               onChange={(e) =>
-                updateEducation(education.id, { degree: e.target.value })
+                updateFields(item.id, { degree: e.target.value })
               }
               sx={{ mt: 2 }}
               fullWidth
@@ -70,17 +66,17 @@ export function EditorEducation(): JSX.Element {
             <Box sx={{ display: "flex", gap: 2, my: 2 }}>
               <TextField
                 label="Institute"
-                value={education.institute}
+                value={item.fields.institute ?? ""}
                 onChange={(e) =>
-                  updateEducation(education.id, { institute: e.target.value })
+                  updateFields(item.id, { institute: e.target.value })
                 }
                 fullWidth
               />
               <TextField
                 label="Location"
-                value={education.location}
+                value={item.fields.location ?? ""}
                 onChange={(e) =>
-                  updateEducation(education.id, { location: e.target.value })
+                  updateFields(item.id, { location: e.target.value })
                 }
                 fullWidth
               />
@@ -90,17 +86,17 @@ export function EditorEducation(): JSX.Element {
             <Box sx={{ display: "flex", gap: 2, my: 2 }}>
               <TextField
                 label="Start Date"
-                value={education.startDate}
+                value={item.fields.startDate ?? ""}
                 onChange={(e) =>
-                  updateEducation(education.id, { startDate: e.target.value })
+                  updateFields(item.id, { startDate: e.target.value })
                 }
                 fullWidth
               />
               <TextField
                 label="End Date"
-                value={education.endDate}
+                value={item.fields.endDate ?? ""}
                 onChange={(e) =>
-                  updateEducation(education.id, { endDate: e.target.value })
+                  updateFields(item.id, { endDate: e.target.value })
                 }
                 fullWidth
               />
@@ -108,11 +104,9 @@ export function EditorEducation(): JSX.Element {
 
             <TextField
               label="Dissertation Title"
-              value={education.dissertationTitle}
+              value={item.fields.dissertationTitle ?? ""}
               onChange={(e) =>
-                updateEducation(education.id, {
-                  dissertationTitle: e.target.value,
-                })
+                updateFields(item.id, { dissertationTitle: e.target.value })
               }
               fullWidth
             />

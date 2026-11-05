@@ -1,4 +1,4 @@
-import { Paper, Box } from "@mui/material";
+import { Paper, Box, Typography } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
@@ -12,6 +12,8 @@ import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { EditorAppBar } from "@pages/editor-page/editor-app-bar";
 import { EditorSideBar } from "@pages/editor-page/editor-side-bar";
 import { EditorPageSection } from "@pages/editor-page/editor-types";
+import { Section } from "@custom-types/vault-types";
+import { sectionsSelector } from "@store/vault/vault-slice";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 
@@ -21,51 +23,56 @@ interface Props {
 }
 
 /** Shows the editor section */
+/** The editor for one vault section, chosen by the type of the section */
+function renderSectionEditor(section: Section): JSX.Element {
+  switch (section.type) {
+    case "summary":
+      return <EditorSummary key={section.id} sectionId={section.id} />;
+    case "experience":
+      return <EditorExperience key={section.id} sectionId={section.id} />;
+    case "education":
+      return <EditorEducation key={section.id} sectionId={section.id} />;
+    case "skills":
+      return <EditorSkills key={section.id} sectionId={section.id} />;
+    default:
+      return (
+        <Typography key={section.id}>
+          Sections of type &quot;{section.type}&quot; cannot be edited yet.
+        </Typography>
+      );
+  }
+}
+
+/** Shows the editor section */
 export function EditorPage({ contentRef }: Props): JSX.Element {
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
+  const sections = useAppSelector(sectionsSelector);
 
-  const editorPageSections: EditorPageSection = {
-    metaData: {
-      id: "metaData",
-      label: "Meta Data",
-      content: <EditorMetaData />,
-    },
-    styleSettings: {
+  const editorPageSections: EditorPageSection = [
+    { id: "metaData", label: "Meta Data", content: <EditorMetaData /> },
+    {
       id: "styleSettings",
       label: "Style Settings",
       content: <EditorTypography />,
     },
-    pageStructure: {
+    {
       id: "pageStructure",
       label: "Page Structure",
       content: <EditorPageStructure />,
     },
-    mainInfo: {
-      id: "mainInfo",
-      label: "Main Info",
-      content: <EditorMainInfo />,
-    },
-    summary: {
-      id: "summary",
-      label: "Professional Summary",
-      content: <EditorSummary />,
-    },
-    experiences: {
-      id: "experiences",
-      label: "Work Experience",
-      content: <EditorExperience />,
-    },
-    educations: {
-      id: "educations",
-      label: "Educations",
-      content: <EditorEducation />,
-    },
-    skills: {
-      id: "skills",
-      label: "Skills",
-      content: <EditorSkills />,
-    },
-  };
+    { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },
+    ...sections.map((section) => ({
+      id: section.id,
+      label: section.title,
+      content: renderSectionEditor(section),
+    })),
+  ];
+
+  // A deleted or unknown page falls back to the first one
+  const selectedPage =
+    editorPageSections.find(
+      (page) => page.id === selectedSectionInEditorPage
+    ) ?? editorPageSections[0];
 
   return (
     <Paper
@@ -86,9 +93,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
         <EditorAppBar contentRef={contentRef} />
         <Box display="flex" flexDirection="row" gap={2} p={2}>
           <EditorSideBar editorPageSections={editorPageSections} />
-          <Box sx={{ width: "100%" }}>
-            {editorPageSections[selectedSectionInEditorPage].content}
-          </Box>
+          <Box sx={{ width: "100%" }}>{selectedPage.content}</Box>
         </Box>
       </Box>
       <EditorFooter />

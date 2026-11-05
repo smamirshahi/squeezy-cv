@@ -53,3 +53,19 @@ export function findBullet(
     (b) => b.id === bulletId
   );
 }
+
+/**
+ * Turns an edited list of bullet texts back into bullets. Bullets are matched by
+ * position: an existing bullet keeps its id, tags, alternative wordings and rating when
+ * only its text changes; extra texts get new bullets; missing texts drop the last ones.
+ */
+export function replaceBulletTexts(
+  bullets: Bullet[],
+  texts: string[],
+  newId: () => string
+): Bullet[] {
+  return texts.map((text, index) => {
+    const existing = bullets[index];
+    return existing ? { ...existing, text } : { id: newId(), text, tags: [] };
+  });
+}
