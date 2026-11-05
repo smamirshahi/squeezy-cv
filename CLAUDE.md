@@ -4,13 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-CV Builder: a client-only React 19 + TypeScript + Vite app (MUI v7, Redux Toolkit) with a split view — an editor on the left and a live A4 preview on the right, printable to PDF via `react-to-print`. There is no backend yet. See `CV-BUILDER-PLAN` issues on GitHub (#28-#49) for the roadmap.
+CV Builder: a React 19 + TypeScript + Vite app (MUI v7, Redux Toolkit) with a split view — an editor on the left and a live A4 preview on the right, printable to PDF via `react-to-print` — plus a small local Fastify server that stores the data as JSON files. See the GitHub issues #28-#49 for the roadmap (phases 0-1 done).
+
+## Layout
+
+One package, three folders in `src/`:
+
+- `src/web` — the React app (components, hooks, pages, Redux store, styles). Entry: `src/web/main.tsx`.
+- `src/server` — the local API (Node, Fastify). Entry: `src/server/main.ts`.
+- `src/shared` — code both sides import: the `runtypes` schemas (`shared/custom-types`) and the pure vault logic (`shared/vault`: migration, file format, helpers). Keep it free of React, Redux and Node APIs.
 
 ## Commands
 
 Package manager is **pnpm**.
 
-- `pnpm dev` — Vite dev server
+- `pnpm dev` — web (Vite, :5173) and server (:3001) together; Vite proxies `/api` to the server. `pnpm dev:web` / `pnpm dev:server` run one of them; `pnpm server` runs the server once, without watching. `PORT` and `DATA_DIR` (default `./data`) configure the server.
 - `pnpm build` — `tsc -b && vite build`
 - `pnpm test` — Vitest (once); `pnpm test:watch`. Single file: `pnpm exec vitest run src/path/file.test.ts`. Tests live next to the code as `*.test.ts(x)`. Default environment is node; component tests start with `// @vitest-environment jsdom` and use Testing Library (see `pages/editor-page/editors.test.tsx`). jsdom is pinned to v26 because newer versions need a newer Node than some machines here have.
 - `pnpm lint:check` — ESLint on `src`, no changes (what CI runs); `pnpm lint` does the same with `--fix`
@@ -19,7 +27,7 @@ Package manager is **pnpm**.
 
 ## Architecture
 
-**Path aliases are mandatory.** ESLint (`no-restricted-imports`) forbids relative imports (`./`, `../`). Use `@components/*`, `@custom-types/*`, `@custom-styles/*`, `@hooks/*`, `@pages/*`, `@store/*`, `@fixtures/*` (defined in `tsconfig.json`, resolved by `vite-tsconfig-paths`). The only exceptions are `main.tsx` (`./index.css`, `./App`), which carry eslint-disable comments. Also use `useAppDispatch`/`useAppSelector` from `@store/store-helper`, never raw `useDispatch`/`useSelector`.
+**Path aliases are mandatory.** ESLint (`no-restricted-imports`) forbids relative imports (`./`, `../`). Use `@components/*`, `@custom-styles/*`, `@hooks/*`, `@pages/*`, `@store/*` (all under `src/web`), `@shared/*`, `@custom-types/*` (`src/shared/custom-types`), `@server/*`, `@fixtures/*` (defined in `tsconfig.json`, resolved by `vite-tsconfig-paths`). The only exceptions are `src/web/main.tsx` (`./index.css`, `./App`), which carry eslint-disable comments. Also use `useAppDispatch`/`useAppSelector` from `@store/store-helper`, never raw `useDispatch`/`useSelector`.
 
 **State (three Redux slices, `src/store/`):**
 
@@ -34,5 +42,7 @@ Package manager is **pnpm**.
 **Preview** (`pages/preview-page/`) reads the vault and lays parts out according to `app.structure`. Drag-and-drop of parts between columns is in `editor-page/section-placement/` using `@dnd-kit`. Typography/fonts/colors come from `custom-styles/` and `style`; shared text rendering goes through `components/cv-typography*`.
 
 **Import/export** (`hooks/use-import-export-json.ts`): export downloads a `CvFile`; import goes through `parseCvFileText` (which migrates). In dev only (`import.meta.env.DEV`) the app starts with the fake `fixtures/sample-cv.json`; the dynamic import is stripped from production builds.
+
+**Server** (`src/server/`): `buildServer({storage})` in `app.ts` builds the API (`/api/health`, `/api/vault`, `/api/variants[/:id]`); `main.ts` only wires config and starts it on `127.0.0.1`. All data access goes through the `CvStorage` interface (`storage/cv-storage.ts`); `FileCvStorage` keeps `vault.json` and `variants/<id>.json` in `DATA_DIR`. Rules it enforces: every read and write is validated with the shared schemas (reads of old files go through `migrateCvFile`); writes are atomic (temp file + rename) and serialised per file; the previous readable version is kept as `.bak`, an unreadable file is moved to `.corrupt-<time>` and never replaces the backup; a corrupt file is reported (HTTP 500 `corrupt`) and never treated as empty; variant ids are whitelisted (`[A-Za-z0-9_-]{1,64}`) because they become file names; requests with a non-local `Host` or `Origin` are refused with 403. `StoredVariantSchema` is a minimal envelope until the full variant model exists.
 
 **Personal data:** the real CV goes in `data/` (git-ignored, as is `cv-export.json`); never commit it. `data.example/` shows the layout and `fixtures/` holds fake data for tests. Older real exports are handled by the migration.
