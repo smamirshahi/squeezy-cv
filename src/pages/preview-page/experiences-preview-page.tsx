@@ -6,7 +6,7 @@ import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvTypography } from "@components/cv-typography";
-import { useMemo } from "react";
+import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
 interface Props {
   section: Section;
@@ -16,18 +16,7 @@ interface Props {
 export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
   const { bulletPointIcon } = useAppSelector(styleSelector);
 
-  const listStyleType = useMemo(() => {
-    switch (bulletPointIcon) {
-      case "disc":
-        return { listStyleType: "disc" };
-      case "circle":
-        return { listStyleType: "circle" };
-      case "dash":
-        return { listStyleType: '"– "' };
-      case "square":
-        return { listStyleType: "square" };
-    }
-  }, [bulletPointIcon]);
+  const listStyleType = getBulletListStyle(bulletPointIcon);
 
   if (section.items.length === 0) {
     return null;

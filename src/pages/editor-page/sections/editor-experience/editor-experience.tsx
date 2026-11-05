@@ -7,6 +7,7 @@ import {
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
 import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
+import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import dayjs from "dayjs";
 
@@ -117,6 +118,12 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
                   setItemBullets({ sectionId, itemId: item.id, bullets })
                 )
               }
+            />
+            <ItemExtras
+              sectionId={sectionId}
+              item={item}
+              draftDispatch={draftDispatch}
+              shouldEditBullets
             />
           </AccordionDetails>
         </EditorAccordionHeader>

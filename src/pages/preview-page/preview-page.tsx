@@ -4,6 +4,7 @@ import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
 import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
+import { GenericSectionPreviewPage } from "@pages/preview-page/generic-section-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
@@ -33,8 +34,7 @@ function renderPart(id: string, sections: Section[]): JSX.Element | null {
     case "skills":
       return <SkillsPreviewPage key={id} section={section} />;
     default:
-      // Other section types get their renderer together with their editor
-      return null;
+      return <GenericSectionPreviewPage key={id} section={section} />;
   }
 }
 

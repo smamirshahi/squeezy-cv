@@ -15,7 +15,6 @@ import { EditorPage } from "@pages/editor-page/editor-page";
 import { App } from "../../App";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@store/vault/migrate-vault";
 import { addSection, removeSection, setVault } from "@store/vault/vault-slice";
@@ -105,16 +104,26 @@ describe("EditorPage", () => {
     expect(screen.getByText(/does not affect the CV page/)).toBeTruthy();
   });
 
-  it("shows a message for a section type that has no editor yet", () => {
+  it("opens the generic editor for sections without a special layout", () => {
     const store = createStore();
     renderEditor(store);
     act(() => {
       store.dispatch(
         addSection({ id: "proj", type: "projects", title: "Projects" })
       );
-      store.dispatch(setSelectedSectionInEditorPage("proj"));
     });
-    expect(screen.getByText(/cannot be edited yet/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Projects" }));
+    expect(screen.getByText("Add new item")).toBeTruthy();
+    fireEvent.click(screen.getByText("Add new item"));
+    expect(screen.getAllByLabelText("Title")).toHaveLength(1);
+  });
+
+  it("has a Sections page without Apply that manages sections", () => {
+    const store = createStore();
+    renderEditor(store);
+    fireEvent.click(screen.getByRole("button", { name: "Sections" }));
+    expect(screen.queryByText("Apply")).toBeNull();
+    expect(screen.getAllByLabelText("Section title")).toHaveLength(4);
   });
 });
 

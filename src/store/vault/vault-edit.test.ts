@@ -12,7 +12,13 @@ import {
 } from "@store/vault/vault-slice";
 import { createDefaultVault } from "@store/vault/default-vault";
 import { migrateLegacyFile } from "@store/vault/migrate-vault";
-import { replaceBulletTexts } from "@store/vault/vault-utils";
+import { collectTags, replaceBulletTexts } from "@store/vault/vault-utils";
+import {
+  SECTION_TYPES,
+  SECTION_TYPE_LABELS,
+  SPECIAL_SECTION_TYPES,
+  getDefaultSectionTitle,
+} from "@store/vault/section-types";
 import {
   createCvFile,
   parseCvFileText,
@@ -210,6 +216,15 @@ describe("labels", () => {
     expect(getAddButtonLabel("skills", sections).addNewItemButtonLabel).toBe(
       "Add new skill category"
     );
+    expect(getAddButtonLabel("sections", sections).shouldShowApplyButton).toBe(
+      false
+    );
+    expect(
+      getAddButtonLabel("proj", [
+        ...sections,
+        { id: "proj", type: "projects", title: "P", items: [] },
+      ]).addNewItemButtonLabel
+    ).toBe("Add new item");
     expect(getAddButtonLabel("summary", sections)).toEqual({
       shouldShowApplyButton: true,
       addNewItemButtonLabel: "",
@@ -217,5 +232,45 @@ describe("labels", () => {
     expect(getAddButtonLabel("metaData", sections).addNewItemButtonLabel).toBe(
       ""
     );
+  });
+});
+
+describe("collectTags", () => {
+  it("collects distinct tags from items, bullets and links, sorted, case-insensitive", () => {
+    const vault = freshVault();
+    vault.links[0].tags = ["Web"];
+    vault.sections[1].items[0].tags = ["react", "Leadership"];
+    vault.sections[1].items[1].tags = ["REACT", "ci-cd"];
+    vault.sections[1].items[0].bullets[0].tags = ["testing", "web"];
+    expect(collectTags(vault)).toEqual([
+      "ci-cd",
+      "Leadership",
+      "react",
+      "testing",
+      "Web",
+    ]);
+  });
+
+  it("returns nothing for a vault without tags", () => {
+    expect(collectTags(freshVault())).toEqual([]);
+  });
+});
+
+describe("section types", () => {
+  it("has a label for every type and a default title", () => {
+    for (const type of SECTION_TYPES) {
+      expect(SECTION_TYPE_LABELS[type]).toBeTruthy();
+      expect(getDefaultSectionTitle(type)).toBe(SECTION_TYPE_LABELS[type]);
+    }
+    expect(SECTION_TYPES).toHaveLength(9);
+  });
+
+  it("knows which types have a special layout", () => {
+    expect(SPECIAL_SECTION_TYPES).toEqual([
+      "summary",
+      "experience",
+      "education",
+      "skills",
+    ]);
   });
 });
