@@ -1,12 +1,17 @@
 import { Section } from "@custom-types/vault-types";
 
 /** Pages of the editor that change nothing in the CV data, so they have no Apply/Discard */
-const PAGES_WITHOUT_APPLY = ["styleSettings", "pageStructure"];
+const PAGES_WITHOUT_APPLY = ["styleSettings", "pageStructure", "sections"];
 
 const ADD_LABELS: Partial<Record<Section["type"], string>> = {
   experience: "Add new experience",
   education: "Add new education",
   skills: "Add new skill category",
+  projects: "Add new item",
+  certifications: "Add new item",
+  publications: "Add new item",
+  volunteering: "Add new item",
+  custom: "Add new item",
 };
 
 /** What the editor footer shows for the selected editor page */

@@ -1,8 +1,10 @@
-import { Paper, Box, Typography } from "@mui/material";
+import { Paper, Box } from "@mui/material";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
+import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
+import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
@@ -35,11 +37,7 @@ function renderSectionEditor(section: Section): JSX.Element {
     case "skills":
       return <EditorSkills key={section.id} sectionId={section.id} />;
     default:
-      return (
-        <Typography key={section.id}>
-          Sections of type &quot;{section.type}&quot; cannot be edited yet.
-        </Typography>
-      );
+      return <EditorGenericSection key={section.id} sectionId={section.id} />;
   }
 }
 
@@ -60,6 +58,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       label: "Page Structure",
       content: <EditorPageStructure />,
     },
+    { id: "sections", label: "Sections", content: <EditorSections /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },
     ...sections.map((section) => ({
       id: section.id,

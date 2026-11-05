@@ -21,6 +21,7 @@ import {
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
 import { useRatingIcon } from "@hooks/use-rating-icon";
+import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
@@ -171,6 +172,11 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
                 );
               })}
             </Box>
+            <ItemExtras
+              sectionId={sectionId}
+              item={group}
+              draftDispatch={draftDispatch}
+            />
           </AccordionDetails>
         </EditorAccordionHeader>
       ))}
