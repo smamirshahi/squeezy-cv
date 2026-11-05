@@ -461,5 +461,5 @@ export default tseslint.config(
       "@typescript-eslint/naming-convention": "off",
       "@typescript-eslint/no-unused-vars": "off",
     },
-  },
+  }
 );
