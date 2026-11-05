@@ -27,12 +27,14 @@
 
     "paths": {
       "@fixtures/*": ["fixtures/*"],
-      "@components/*": ["src/components/*"],
-      "@custom-types/*": ["src/custom-types/*"],
-      "@custom-styles/*": ["src/custom-styles/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@pages/*": ["src/pages/*"],
-      "@store/*": ["src/store/*"],
+      "@shared/*": ["src/shared/*"],
+      "@server/*": ["src/server/*"],
+      "@custom-types/*": ["src/shared/custom-types/*"],
+      "@components/*": ["src/web/components/*"],
+      "@custom-styles/*": ["src/web/custom-styles/*"],
+      "@hooks/*": ["src/web/hooks/*"],
+      "@pages/*": ["src/web/pages/*"],
+      "@store/*": ["src/web/store/*"],
     }
   },
   "include": ["src", "fixtures", "vite.config.ts"]
