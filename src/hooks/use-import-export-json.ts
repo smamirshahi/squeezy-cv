@@ -28,23 +28,20 @@ export function useImportExportJson(): ReturnProps {
   const cvData = useAppSelector(cvDataSelector);
   const style = useAppSelector(styleSelector);
 
-  // Automatic import on mount
+  // In development only: start with the fake sample CV instead of an empty form
   useEffect(() => {
-    fetch("../../cv-data-example/cv-export.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("File not found");
-        }
-        return response.json();
-      })
-      .then((raw) => {
-        const parsed = CVJsonSchema.check(raw);
+    if (!import.meta.env.DEV) {
+      return;
+    }
+    import("@fixtures/sample-cv.json")
+      .then((module) => {
+        const parsed = CVJsonSchema.check(module.default);
         dispatch(setCvData(parsed.data));
         dispatch(setStyle(parsed.style));
       })
       .catch((_error) => {
         // eslint-disable-next-line no-console
-        console.error("Failed to load default CV file.");
+        console.error("Failed to load the sample CV.");
       });
   }, [dispatch]);
 

@@ -1,0 +1,157 @@
+{
+  "metaData": {
+    "version": "1.0",
+    "title": "Sample CV",
+    "jobUrl": ""
+  },
+  "data": {
+    "personalInfo": {
+      "name": "Jane Doe",
+      "jobTitle": "Software Developer"
+    },
+    "contactInfo": {
+      "email": "jane.doe@example.com",
+      "phone": "+44 7700 900000",
+      "location": "London, UK",
+      "linkedInId": "janedoe-example",
+      "gitHubId": "janedoe-example"
+    },
+    "professionalSummary": "Front-end developer with six years of experience building React and TypeScript applications. Focused on clear interfaces, tested code and steady delivery.",
+    "experiences": [
+      {
+        "id": "exp-1",
+        "jobTitle": "Senior Software Developer",
+        "company": "Example Ltd",
+        "location": "London, UK",
+        "startDate": "2022-03-01",
+        "bulletPoints": [
+          "Led development of a React dashboard used by 200 internal users",
+          "Introduced Redux Toolkit and cut state-related bugs",
+          "Mentored two junior developers"
+        ],
+        "shouldShow": true
+      },
+      {
+        "id": "exp-2",
+        "jobTitle": "Software Developer",
+        "company": "Sample Systems",
+        "location": "Leeds, UK",
+        "startDate": "2018-09-01",
+        "endDate": "2022-02-28",
+        "bulletPoints": [
+          "Built reusable form components in TypeScript",
+          "Added unit tests that raised coverage from 30% to 80%"
+        ],
+        "shouldShow": true
+      },
+      {
+        "id": "exp-3",
+        "jobTitle": "Intern",
+        "company": "Demo Co",
+        "location": "Remote",
+        "startDate": "2018-01-01",
+        "endDate": "2018-06-30",
+        "bulletPoints": [
+          "Fixed UI bugs in a legacy jQuery application"
+        ],
+        "shouldShow": false
+      }
+    ],
+    "educations": [
+      {
+        "id": "edu-1",
+        "degree": "BSc Computer Science",
+        "institute": "University of Example",
+        "location": "Leeds, UK",
+        "startDate": "2014-09-01",
+        "endDate": "2018-06-30",
+        "shouldShow": true
+      }
+    ],
+    "skills": [
+      {
+        "id": "sk-1",
+        "category": "Languages",
+        "items": [
+          {
+            "id": "sk-1-1",
+            "name": "English",
+            "rating": 5
+          },
+          {
+            "id": "sk-1-2",
+            "name": "French",
+            "rating": 2.5
+          }
+        ],
+        "shouldShow": true
+      },
+      {
+        "id": "sk-2",
+        "category": "Frontend",
+        "items": [
+          {
+            "id": "sk-2-1",
+            "name": "React",
+            "rating": 5
+          },
+          {
+            "id": "sk-2-2",
+            "name": "TypeScript",
+            "rating": 4.5
+          }
+        ],
+        "shouldShow": true
+      }
+    ]
+  },
+  "style": {
+    "shouldShowFullContactLinks": true,
+    "ratingIcon": "star",
+    "dateFormat": "MMM/YYYY",
+    "paperMargin": "narrow",
+    "typography": {
+      "headingLg": {
+        "fontSize": "18pt",
+        "fontWeight": "700",
+        "color": "#222222"
+      },
+      "headingMd": {
+        "fontSize": "13pt",
+        "fontWeight": "700",
+        "color": "#333333"
+      },
+      "headingSm": {
+        "fontSize": "11pt",
+        "fontWeight": "700",
+        "color": "#222222"
+      },
+      "bodyLg": {
+        "fontSize": "13pt",
+        "fontWeight": "400",
+        "color": "#444444"
+      },
+      "bodyMd": {
+        "fontSize": "10pt",
+        "fontWeight": "400",
+        "color": "#555555"
+      },
+      "bodySm": {
+        "fontSize": "9pt",
+        "fontWeight": "400",
+        "color": "#777777"
+      },
+      "bulletText": {
+        "fontSize": "9pt",
+        "fontWeight": "400",
+        "color": "#333333"
+      },
+      "icon": {
+        "fontSize": "20pt",
+        "fontWeight": "400",
+        "color": "#1976d2"
+      }
+    },
+    "bulletPointIcon": "disc"
+  }
+}
