@@ -5,7 +5,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { SaveStatus } from "@pages/editor-page/save-status";
 import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
-import { useDownloadPdf } from "@hooks/use-download-pdf";
+import { useState } from "react";
+import { ExportDialog } from "@pages/workspace/export-dialog";
 import { activateVariant } from "@hooks/use-sync-active-variant";
 import { setTool } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -23,7 +24,7 @@ export function TopBar(): JSX.Element {
   const { pageCount, usedPercent, linesOver } = useAppSelector(
     (s) => s.app.fit
   );
-  const { download, isBusy } = useDownloadPdf();
+  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const isFitting = pageCount <= variant.pageLimit && linesOver === 0;
 
   return (
@@ -97,14 +98,17 @@ export function TopBar(): JSX.Element {
       <Button
         size="small"
         variant="outlined"
-        disabled={isBusy}
         startIcon={<PictureAsPdfIcon />}
-        onClick={() => void download("")}
+        onClick={() => setIsExportOpen(true)}
         sx={{ borderColor: "rgba(255,255,255,.3)" }}
       >
         Export PDF
       </Button>
       <MarkAsApplied />
+      <ExportDialog
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+      />
     </Box>
   );
 }

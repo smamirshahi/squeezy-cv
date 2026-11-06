@@ -50,8 +50,10 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByText("Saved", { exact: true }).waitFor();
 
     // Export the PDF
+    await page.getByRole("button", { name: "Export PDF" }).click();
+    await page.getByText("Text is selectable").waitFor();
     const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "PDF" }).click();
+    await page.getByRole("button", { name: "Download PDF" }).click();
     const file = await (await download).path();
     const { readFile } = await import("node:fs/promises");
     const pdf = await readPdf(await readFile(file));
