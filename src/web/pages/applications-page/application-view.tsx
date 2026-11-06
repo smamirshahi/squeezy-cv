@@ -42,6 +42,9 @@ type LoadState =
 
 interface Props {
   applicationId: string;
+
+  /** Shown in the side panel of the list: no back link, no page margins */
+  isEmbedded?: boolean;
 }
 
 function messageOf(error: unknown): string {
@@ -64,7 +67,10 @@ function goBackToList(event: React.MouseEvent): void {
 }
 
 /** One application: where it stands, its timeline, and the exact CV that was sent */
-export function ApplicationView({ applicationId }: Props): JSX.Element {
+export function ApplicationView({
+  applicationId,
+  isEmbedded = false,
+}: Props): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [message, setMessage] = useState<string>("");
@@ -176,17 +182,19 @@ export function ApplicationView({ applicationId }: Props): JSX.Element {
   return (
     <Box
       sx={{
-        maxWidth: 960,
+        maxWidth: isEmbedded ? undefined : 960,
         mx: "auto",
-        p: 3,
+        p: isEmbedded ? 2 : 3,
         display: "flex",
         flexDirection: "column",
         gap: 3,
       }}
     >
-      <Link href="/?applications" underline="hover" onClick={goBackToList}>
-        ← All applications
-      </Link>
+      {!isEmbedded && (
+        <Link href="/?applications" underline="hover" onClick={goBackToList}>
+          ← All applications
+        </Link>
+      )}
 
       <Box
         display="flex"

@@ -36,6 +36,7 @@ import {
   isNoReply,
   toIsoDay,
 } from "@shared/application/application-utils";
+import { ApplicationView } from "@pages/applications-page/application-view";
 import { createApiClient } from "@store/persistence/api-client";
 
 type LoadState =
@@ -83,10 +84,6 @@ function StatusLabel({
   );
 }
 
-function openApplication(id: string): void {
-  window.location.assign(`/?application=${encodeURIComponent(id)}`);
-}
-
 /** All job applications: search, filter by status, click one to open it */
 export function ApplicationsPage(): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
@@ -94,6 +91,7 @@ export function ApplicationsPage(): JSX.Element {
   const [view, setView] = useState<ListView>(() =>
     queryToView(window.location.search)
   );
+  const [selectedId, setSelectedId] = useState<string>("");
   const today = toIsoDay(new Date());
 
   useEffect(() => {
@@ -141,49 +139,76 @@ export function ApplicationsPage(): JSX.Element {
   }
 
   return (
-    <Box
-      sx={{
-        maxWidth: 1000,
-        mx: "auto",
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-      }}
-    >
-      <Link href="/" underline="hover">
-        ← Back to the editor
-      </Link>
-      <Typography variant="h4" component="h1">
-        Applications
-      </Typography>
+    <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          maxWidth: selectedId ? undefined : 1000,
+          mx: selectedId ? 0 : "auto",
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Link href="/" underline="hover">
+          ← Back to the editor
+        </Link>
+        <Typography variant="h4" component="h1">
+          Applications
+        </Typography>
 
-      {state.status === "loading" && <Typography>Loading…</Typography>}
-      {state.status === "error" && (
-        <Alert severity="error">{state.message}</Alert>
-      )}
+        {state.status === "loading" && <Typography>Loading…</Typography>}
+        {state.status === "error" && (
+          <Alert severity="error">{state.message}</Alert>
+        )}
 
-      {state.status === "ready" && state.applications.length === 0 && (
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography gutterBottom>No applications yet.</Typography>
-          <Typography color="text.secondary" gutterBottom>
-            Tailor a CV in the editor, then press{" "}
-            <strong>Mark as applied</strong>.
-          </Typography>
-          <Button href="/" variant="contained">
-            Go to the editor
-          </Button>
-        </Paper>
-      )}
+        {state.status === "ready" && state.applications.length === 0 && (
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography gutterBottom>No applications yet.</Typography>
+            <Typography color="text.secondary" gutterBottom>
+              Tailor a CV in the editor, then press{" "}
+              <strong>Mark as applied</strong>.
+            </Typography>
+            <Button href="/" variant="contained">
+              Go to the editor
+            </Button>
+          </Paper>
+        )}
 
-      {state.status === "ready" && state.applications.length > 0 && (
-        <ApplicationsTable
-          applications={state.applications}
-          view={view}
-          onViewChange={setView}
-          onSort={sortBy}
-          today={today}
-        />
+        {state.status === "ready" && state.applications.length > 0 && (
+          <ApplicationsTable
+            applications={state.applications}
+            view={view}
+            onViewChange={setView}
+            onSort={sortBy}
+            today={today}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+        )}
+      </Box>
+      {selectedId && (
+        <Box
+          component="aside"
+          aria-label="Application detail"
+          sx={{
+            width: 560,
+            flex: "none",
+            minHeight: "100vh",
+            borderLeft: "1px solid #DDE0E4",
+            boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
+            bgcolor: "#fff",
+            color: "#213547",
+          }}
+        >
+          <ApplicationView
+            key={selectedId}
+            applicationId={selectedId}
+            isEmbedded
+          />
+        </Box>
       )}
     </Box>
   );
@@ -195,6 +220,8 @@ interface TableProps {
   onViewChange: (view: ListView) => void;
   onSort: (key: SortKey) => void;
   today: string;
+  selectedId: string;
+  onSelect: (id: string) => void;
 }
 
 function ApplicationsTable({
@@ -203,6 +230,8 @@ function ApplicationsTable({
   onViewChange,
   onSort,
   today,
+  selectedId,
+  onSelect,
 }: TableProps): JSX.Element {
   const shown = arrangeApplications([...applications], view);
   return (
@@ -303,7 +332,8 @@ function ApplicationsTable({
                   key={application.id}
                   hover
                   sx={{ cursor: "pointer" }}
-                  onClick={() => openApplication(application.id)}
+                  selected={application.id === selectedId}
+                  onClick={() => onSelect(application.id)}
                 >
                   <TableCell>
                     <Link
