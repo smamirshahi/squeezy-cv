@@ -167,6 +167,28 @@ describe("inline vault item editor", () => {
     ).toBe(false);
   });
 
+  it("sets and clears Years, ignores invalid years, and keeps levels when tracking is turned off", () => {
+    const store = setup();
+    open("Languages");
+    const first = stored(store, "Languages").bullets[0];
+    fireEvent.click(screen.getByLabelText(`${first.text} level 4`));
+    const years = screen.getByLabelText(`${first.text} years`);
+
+    fireEvent.change(years, { target: { value: "7" } });
+    expect(stored(store, "Languages").bullets[0].years).toBe(7);
+    fireEvent.change(years, { target: { value: "-2" } });
+    fireEvent.change(years, { target: { value: "2.5" } });
+    expect(stored(store, "Languages").bullets[0].years).toBe(7);
+    fireEvent.change(years, { target: { value: "" } });
+    expect(stored(store, "Languages").bullets[0].years).toBeUndefined();
+
+    fireEvent.click(screen.getByLabelText(/Track my level/));
+    expect(screen.queryByLabelText(`${first.text} level 4`)).toBeNull();
+    expect(stored(store, "Languages").bullets[0].rating).toBe(4);
+    fireEvent.click(screen.getByLabelText(/Track my level/));
+    expect(screen.getByLabelText(`${first.text} level 4`)).toBeTruthy();
+  });
+
   it("edits a skills group inline: group name, skill names, levels, add, move and remove", () => {
     const store = setup();
     open("Languages");

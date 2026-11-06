@@ -89,3 +89,26 @@ export function collectTags(vault: Vault): string[] {
   }
   return [...seen.values()].sort((a, b) => a.localeCompare(b));
 }
+
+/** Whether a skills section uses levels: the explicit choice, else whether any skill has one */
+export function tracksLevels(section: Section): boolean {
+  return (
+    section.tracksLevel ??
+    section.items.some((item) => item.bullets.some((bullet) => !!bullet.rating))
+  );
+}
+
+/** Whether a number of years is acceptable: a whole number from 0 to 80 */
+export function isYearsAcceptable(years: number): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+  return Number.isInteger(years) && years >= 0 && years <= 80;
+}
+
+/** The name of a level (a rating in steps of 0.5; halves are named by the whole level below) */
+export function levelLabel(rating: number | undefined): string {
+  const labels = ["No level", "Learning", "Working", "Proficient", "Advanced"];
+  if (!rating) {
+    return labels[0];
+  }
+  return labels[Math.floor(rating)] ?? "Expert";
+}

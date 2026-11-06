@@ -48,6 +48,9 @@ export const BulletSchema = Object({
 
   /** 0 to 5 in steps of 0.5. Only used by skill entries, where `text` is the skill name. */
   rating: Number.optional(),
+
+  /** Whole years of experience with the skill. Only used by skill entries. */
+  years: Number.optional(),
 });
 
 export const SectionTypeSchema = Union(
@@ -93,6 +96,12 @@ export const SectionSchema = Object({
 
   /** The heading shown on the CV */
   title: String,
+
+  /**
+   * Skills sections only: whether levels are used. Missing means "yes if any skill has one"
+   * (see `tracksLevels`). Turning it off keeps the stored levels.
+   */
+  tracksLevel: Boolean.optional(),
 
   items: Array(ItemSchema),
 });
