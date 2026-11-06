@@ -24,6 +24,11 @@ import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
 import {
+  isYearsAcceptable,
+  levelLabel,
+  tracksLevels,
+} from "@shared/vault/vault-utils";
+import {
   FieldSpec,
   fieldSpecsFor,
   fromMonthValue,
@@ -39,6 +44,7 @@ import {
   removeItem,
   setBulletAlt,
   setItemTags,
+  setSectionTracksLevel,
   updateBullet,
   updateItemFields,
 } from "@store/vault/vault-slice";
@@ -237,28 +243,68 @@ function BulletCard({
           }}
           sx={{ flex: 1 }}
         />
-        <Rating
-          name={`level-${bullet.id}`}
-          value={bullet.rating ?? 0}
-          precision={0.5}
-          getLabelText={(value) => `${skillName} level ${value}`}
-          onChange={(_, value) => {
-            const rating = value ?? 0;
-            if (isRatingAcceptable(rating)) {
-              dispatch(updateBullet({ ...ref, update: { rating } }));
+        {tracksLevels(section) && (
+          <>
+            <Rating
+              name={`level-${bullet.id}`}
+              value={bullet.rating ?? 0}
+              precision={0.5}
+              getLabelText={(value) => `${skillName} level ${value}`}
+              onChange={(_, value) => {
+                const rating = value ?? 0;
+                if (isRatingAcceptable(rating)) {
+                  dispatch(updateBullet({ ...ref, update: { rating } }));
+                }
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: 12,
+                width: 72,
+                color: bullet.rating
+                  ? WORKSPACE_COLORS.text
+                  : WORKSPACE_COLORS.muted,
+              }}
+            >
+              {levelLabel(bullet.rating)}
+            </Typography>
+            <Button
+              size="small"
+              aria-label={`Clear level of ${skillName}`}
+              disabled={!bullet.rating}
+              onClick={() =>
+                dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
+              }
+            >
+              No level
+            </Button>
+          </>
+        )}
+        <TextField
+          size="small"
+          label="Years"
+          type="number"
+          value={bullet.years ?? ""}
+          onChange={(event) => {
+            const text = event.target.value.trim();
+            if (text === "") {
+              dispatch(updateBullet({ ...ref, update: { years: null } }));
+              return;
+            }
+            const years = Number(text);
+            if (isYearsAcceptable(years)) {
+              dispatch(updateBullet({ ...ref, update: { years } }));
             }
           }}
+          slotProps={{
+            htmlInput: {
+              min: 0,
+              step: 1,
+              "aria-label": `${skillName} years`,
+            },
+          }}
+          sx={{ width: 80 }}
         />
-        <Button
-          size="small"
-          aria-label={`Clear level of ${skillName}`}
-          disabled={!bullet.rating}
-          onClick={() =>
-            dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
-          }
-        >
-          No level
-        </Button>
         <IconButton
           size="small"
           aria-label={`Remove skill ${index + 1}`}
@@ -554,6 +600,31 @@ export function VaultItemEditor({
         </Box>
       </Box>
 
+      {isSkills && (
+        <>
+          <Alert severity="warning" sx={{ py: 0 }}>
+            You are editing vault facts. Levels and years are stored here, and
+            each variant decides whether and how to show them. The AI never
+            changes a level.
+          </Alert>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={tracksLevels(section)}
+                onChange={(event) =>
+                  dispatch(
+                    setSectionTracksLevel({
+                      id: section.id,
+                      tracksLevel: event.target.checked,
+                    })
+                  )
+                }
+              />
+            }
+            label="Track my level (optional)"
+          />
+        </>
+      )}
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography sx={{ fontWeight: 700, flex: 1 }}>
           {isSkills ? "Skills" : "Bullets"} · {item.bullets.length}

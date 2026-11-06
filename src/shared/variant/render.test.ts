@@ -324,3 +324,38 @@ describe("computeOrders", () => {
     expect(computeOrders(ids, id, toIndex)).toEqual(expected);
   });
 });
+
+describe("skill levels", () => {
+  it("leaves levels out when the section does not track them, keeping the stored value", () => {
+    const rated: Vault = {
+      ...vault,
+      sections: vault.sections.map((section) =>
+        section.type === "skills"
+          ? {
+              ...section,
+              items: section.items.map((item) => ({
+                ...item,
+                bullets: item.bullets.map((b) => ({ ...b, rating: 4 })),
+              })),
+            }
+          : section
+      ),
+    };
+    const variant = createDefaultVariant(file, "main");
+    const skills = rated.sections.find((s) => s.type === "skills")!;
+    const on = sectionPart(allParts(render(rated, variant)), skills.id)!;
+    expect(on.items[0].bullets[0].rating).toBe(4);
+
+    const off: Vault = {
+      ...rated,
+      sections: rated.sections.map((s) =>
+        s.id === skills.id ? { ...s, tracksLevel: false } : s
+      ),
+    };
+    const hidden = sectionPart(allParts(render(off, variant)), skills.id)!;
+    expect(hidden.items[0].bullets[0].rating).toBeUndefined();
+    expect(
+      off.sections.find((s) => s.id === skills.id)!.items[0].bullets[0].rating
+    ).toBe(4);
+  });
+});

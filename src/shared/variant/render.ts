@@ -10,12 +10,14 @@ import {
 } from "@custom-types/vault-types";
 import { HEADER_IDS } from "@shared/vault/default-vault";
 import { reconcileStructure } from "@shared/vault/page-structure";
+import { tracksLevels } from "@shared/vault/vault-utils";
 
 export interface RenderedBullet {
   id: string;
   /** The wording chosen by the variant */
   text: string;
   rating?: number;
+  years?: number;
 }
 
 export interface RenderedItem {
@@ -109,7 +111,8 @@ function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
 
 function renderItems(
   items: Item[],
-  selection: Variant["selection"]
+  selection: Variant["selection"],
+  hasLevels: boolean
 ): RenderedItem[] {
   return resolveItems(items, selection).map((item) => ({
     id: item.id,
@@ -117,7 +120,9 @@ function renderItems(
     bullets: item.bullets.map((bullet) => ({
       id: bullet.id,
       text: bullet.text,
-      ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
+      ...(bullet.rating === undefined || !hasLevels
+        ? {}
+        : { rating: bullet.rating }),
     })),
     emphasis: selection[item.id]?.emphasis ?? "normal",
   }));
@@ -149,7 +154,11 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
     if (!section) {
       return [];
     }
-    const items = renderItems(section.items, variant.selection);
+    const items = renderItems(
+      section.items,
+      variant.selection,
+      section.type !== "skills" || tracksLevels(section)
+    );
     return items.length === 0
       ? []
       : [

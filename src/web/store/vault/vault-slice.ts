@@ -12,6 +12,7 @@ import {
   findBullet,
   findItem,
   findSection,
+  isYearsAcceptable,
   moveInArray,
   normalizeTags,
 } from "@shared/vault/vault-utils";
@@ -81,6 +82,17 @@ const vaultSlice = createSlice({
       const section = state.sections.find((s) => s.id === action.payload.id);
       if (section) {
         section.title = action.payload.title;
+      }
+    },
+
+    /** Turns levels on or off for a skills section. The stored levels are kept. */
+    setSectionTracksLevel(
+      state,
+      action: PayloadAction<{ id: string; tracksLevel: boolean }>
+    ) {
+      const section = state.sections.find((s) => s.id === action.payload.id);
+      if (section) {
+        section.tracksLevel = action.payload.tracksLevel;
       }
     },
 
@@ -227,7 +239,13 @@ const vaultSlice = createSlice({
       state,
       action: PayloadAction<
         BulletRef & {
-          update: { text?: string; tags?: string[]; rating?: number };
+          update: {
+            text?: string;
+            tags?: string[];
+            rating?: number;
+            /** null removes the years */
+            years?: number | null;
+          };
         }
       >
     ) {
@@ -244,6 +262,14 @@ const vaultSlice = createSlice({
       }
       if (update.rating !== undefined) {
         bullet.rating = update.rating;
+      }
+      if (update.years === null) {
+        delete bullet.years;
+      } else if (
+        update.years !== undefined &&
+        isYearsAcceptable(update.years)
+      ) {
+        bullet.years = update.years;
       }
     },
 
@@ -368,6 +394,7 @@ export const {
   addSection,
   removeSection,
   renameSection,
+  setSectionTracksLevel,
   moveSection,
   addItem,
   removeItem,
