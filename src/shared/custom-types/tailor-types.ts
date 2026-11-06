@@ -2,6 +2,7 @@ import {
   Array,
   Boolean,
   Literal,
+  Null,
   Number,
   Object,
   Static,
@@ -82,6 +83,37 @@ export const ProposalSchema = Object({
   gaps: Array(String),
 });
 
+/**
+ * What a model may send back for the proposal. Deliberately forgiving about what small models
+ * get wrong (a missing reason, a null, extra keys): `toProposal` fills the gaps and turns it
+ * into a strict `Proposal`. Everything that matters (ids, facts) is still checked after that.
+ */
+export const RawProposalSchema = Object({
+  items: Array(
+    Object({
+      itemId: String,
+      relevance: Number.optional(),
+      isIncluded: Boolean.optional(),
+      isHighlighted: Boolean.optional(),
+      reason: String.optional(),
+    })
+  ).optional(),
+  bullets: Array(
+    Object({
+      bulletId: String,
+      itemId: String.optional(),
+      isIncluded: Boolean.optional(),
+      rewrite: Union(
+        Object({ wording: String.optional(), text: String }),
+        Null
+      ).optional(),
+      reason: String.optional(),
+    })
+  ).optional(),
+  statement: String.optional(),
+  gaps: Array(String).optional(),
+});
+
 export const TailorRequestSchema = Object({
   /** The text of the job advert */
   jobAd: String,
@@ -96,6 +128,7 @@ export const TailorResultSchema = Object({
   warnings: Array(String),
 });
 
+export type RawProposal = Static<typeof RawProposalSchema>;
 export type Requirements = Static<typeof RequirementsSchema>;
 export type ItemProposal = Static<typeof ItemProposalSchema>;
 export type BulletProposal = Static<typeof BulletProposalSchema>;

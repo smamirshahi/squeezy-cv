@@ -93,7 +93,9 @@ describe("tailor", () => {
     const second = JSON.parse(ai.requests[1].input);
     expect(second.requirements).toEqual(REQUIREMENTS);
     expect(second.tone).toBe("formal");
-    expect(JSON.stringify(second.cv)).toContain(firstItem.id);
+    // the model sees short names, not the CV's long random ids
+    expect(JSON.stringify(second.cv)).toContain('"id":"i2"');
+    expect(JSON.stringify(second.cv)).not.toContain(firstItem.id);
 
     expect(result.requirements).toEqual(REQUIREMENTS);
     expect(result.proposal.gaps).toEqual(["WCAG 2.2"]);
@@ -392,4 +394,155 @@ describe("expected shape on the fixture adverts", () => {
       expect(Array.isArray(result.proposal.gaps)).toBe(true);
     }
   );
+});
+
+describe("tolerating a small model's mistakes", () => {
+  const item = vault.sections
+    .flatMap((s) => s.items)
+    .find((i) => i.bullets.length >= 2)!;
+  const itemRef = `i${vault.sections.flatMap((s) => s.items).indexOf(item) + 1}`;
+
+  async function run(
+    raw: unknown
+  ): Promise<Awaited<ReturnType<typeof tailor>>> {
+    return tailor(fakeAi(raw), vault, { jobAd: "x", tone: "neutral" });
+  }
+
+  it("understands short names and maps them back to the real ids", async () => {
+    const result = await run({
+      items: [
+        {
+          itemId: itemRef,
+          relevance: 0.8,
+          isIncluded: true,
+          isHighlighted: true,
+          reason: "r",
+        },
+      ],
+      bullets: [
+        { bulletId: `${itemRef}.b1`, isIncluded: false, reason: "r" },
+        {
+          bulletId: `${itemRef}.b2`,
+          isIncluded: true,
+          rewrite: { wording: "short", text: item.bullets[1].text },
+          reason: "r",
+        },
+      ],
+      statement: "",
+      gaps: [],
+    });
+    expect(result.proposal.items[0].itemId).toBe(item.id);
+    expect(result.proposal.bullets.map((b) => [b.itemId, b.bulletId])).toEqual([
+      [item.id, item.bullets[0].id],
+      [item.id, item.bullets[1].id],
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("copes with exactly what llama3.2:3b sent: bullet text as id, a long id as item id, no reasons, a stray key", async () => {
+    const result = await run({
+      items: [
+        {
+          itemId: itemRef,
+          relevance: 0.9,
+          isIncluded: true,
+          isHighlighted: false,
+          reason: "Relevant",
+        },
+      ],
+      bullets: [
+        {
+          itemId: "some-long-bullet-id-that-is-not-an-item",
+          bulletId: item.bullets[0].text,
+          isIncluded: true,
+          rewrite: {
+            wording: "formal",
+            text: "A formal version of the same thing",
+          },
+        },
+      ],
+      statement: "Results-driven developer",
+      gaps: ["WCAG"],
+      reason: "stray key the schema never asked for",
+    });
+    expect(result.proposal.bullets[0].itemId).toBe(item.id);
+    expect(result.proposal.bullets[0].bulletId).toBe(item.bullets[0].id);
+    expect(result.proposal.bullets[0].reason).toBe("");
+    expect(result.proposal.bullets[0].rewrite?.wording).toBe("formal");
+  });
+
+  it("fills in what is missing and ignores a null rewrite or an unknown wording", async () => {
+    const result = await run({
+      items: [{ itemId: itemRef }],
+      bullets: [
+        { bulletId: `${itemRef}.b1`, rewrite: null },
+        {
+          bulletId: `${itemRef}.b2`,
+          rewrite: { wording: "poetic", text: item.bullets[1].text },
+        },
+      ],
+    });
+    expect(result.proposal.items[0]).toMatchObject({
+      isIncluded: true,
+      isHighlighted: false,
+      relevance: 0.5,
+      reason: "",
+    });
+    expect(result.proposal.bullets[0].rewrite).toBeUndefined();
+    expect(result.proposal.bullets[1].rewrite?.wording).toBe("short");
+    expect(result.proposal.statement).toBe("");
+    expect(result.proposal.gaps).toEqual([]);
+  });
+
+  it("treats a bullet listed among the items as a bullet entry", async () => {
+    const result = await run({
+      items: [
+        { itemId: itemRef, relevance: 0.7 },
+        { itemId: `${itemRef}.b1`, isIncluded: false },
+      ],
+    });
+    expect(result.proposal.items.map((i) => i.itemId)).toEqual([item.id]);
+    expect(result.proposal.bullets).toEqual([
+      {
+        itemId: item.id,
+        bulletId: item.bullets[0].id,
+        isIncluded: false,
+        reason: "",
+        flags: [],
+      },
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("still drops names that do not exist, and still flags invented facts", async () => {
+    const result = await run({
+      items: [{ itemId: "i999" }],
+      bullets: [
+        { bulletId: "i999.b1", isIncluded: true },
+        {
+          bulletId: `${itemRef}.b1`,
+          rewrite: {
+            wording: "short",
+            text: `${item.bullets[0].text} using Kubernetes`,
+          },
+        },
+      ],
+    });
+    expect(result.proposal.items).toEqual([]);
+    expect(result.proposal.bullets).toHaveLength(1);
+    expect((result.proposal.bullets[0].flags ?? []).join(" ")).toContain(
+      "Kubernetes"
+    );
+    expect(result.warnings.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("still rejects an answer that is not even the right shape", async () => {
+    const ai = new FakeAi({
+      "extract-requirements": REQUIREMENTS,
+      "propose-selection": { items: "nope" },
+    });
+    await expect(
+      tailor(ai, vault, { jobAd: "x", tone: "neutral" })
+    ).rejects.toThrow();
+  });
 });
