@@ -87,13 +87,17 @@ function result(): TailorResult {
 
 function stubServer(over: {
   isConfigured?: boolean;
+  provider?: "claude" | "ollama";
   tailor?: { status: number; body: unknown };
 }): ReturnType<typeof vi.fn> {
   const fetchMock = vi.fn((url: string) => {
     if (url === "/api/ai/status") {
       return Promise.resolve(
         new Response(
-          JSON.stringify({ isConfigured: over.isConfigured ?? true })
+          JSON.stringify({
+            isConfigured: over.isConfigured ?? true,
+            provider: over.provider ?? "claude",
+          })
         )
       );
     }
@@ -155,10 +159,17 @@ describe("AiAssistant: before analysing", () => {
     ).toBeTruthy();
   });
 
+  it("says the CV stays on this computer when the local model is used", async () => {
+    stubServer({ provider: "ollama" });
+    show(makeStore());
+    expect(await screen.findByText(/stay on this computer/)).toBeTruthy();
+    expect(screen.queryByText(/sent to Anthropic/)).toBeNull();
+  });
+
   it("cannot analyse without an API key, and says how to set one", async () => {
     stubServer({ isConfigured: false });
     show(makeStore());
-    await screen.findByText(/No API key is set/);
+    await screen.findByText(/AI is not set up/);
     fireEvent.change(screen.getByLabelText("Job advert"), {
       target: { value: "x" },
     });

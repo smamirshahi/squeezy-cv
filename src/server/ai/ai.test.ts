@@ -139,11 +139,9 @@ describe("the API key", () => {
         )
       )
     );
-    const send = createAnthropicSender({
-      apiKey: KEY,
-      model: "claude-opus-5-5",
-      timeoutMs: 5000,
-    });
+    const send = createAnthropicSender(
+      readAiConfig({ ANTHROPIC_API_KEY: KEY, AI_TIMEOUT_MS: "5000" })
+    );
     const error = await send("s", [{ role: "user", content: "hi" }]).catch(
       (e: unknown) => e
     );
@@ -161,14 +159,18 @@ describe("the API key", () => {
       ai: new ClaudeAiClient(() => Promise.reject(new Error("unused"))),
     });
     const response = await app.inject({ method: "GET", url: "/api/ai/status" });
-    expect(response.json()).toEqual({ isConfigured: true });
+    expect(response.json()).toEqual({
+      isConfigured: true,
+      provider: "claude",
+    });
     await app.close();
   });
 });
 
 describe("configuration", () => {
   it("reads the key, model and timeout, with defaults", () => {
-    expect(readAiConfig({})).toEqual({
+    expect(readAiConfig({})).toMatchObject({
+      provider: "claude",
       apiKey: undefined,
       model: "claude-opus-5-5",
       timeoutMs: 120000,
@@ -179,7 +181,7 @@ describe("configuration", () => {
         ANTHROPIC_MODEL: "m",
         AI_TIMEOUT_MS: "5000",
       })
-    ).toEqual({ apiKey: "k", model: "m", timeoutMs: 5000 });
+    ).toMatchObject({ apiKey: "k", model: "m", timeoutMs: 5000 });
     expect(readAiConfig({ ANTHROPIC_API_KEY: "  " }).apiKey).toBeUndefined();
     expect(() => readAiConfig({ AI_TIMEOUT_MS: "-1" })).toThrow(
       /AI_TIMEOUT_MS/

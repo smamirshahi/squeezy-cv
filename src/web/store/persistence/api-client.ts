@@ -81,7 +81,10 @@ export interface ApiClient {
   deleteVariant: (id: string) => Promise<void>;
 
   /** Whether the server has an AI key (it never says what it is) */
-  getAiStatus: () => Promise<{ isConfigured: boolean }>;
+  getAiStatus: () => Promise<{
+    isConfigured: boolean;
+    provider: "claude" | "ollama";
+  }>;
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
@@ -128,6 +131,7 @@ export function createApiClient(
     async getAiStatus() {
       return (await request(fetchImpl, "GET", "/api/ai/status")) as {
         isConfigured: boolean;
+        provider: "claude" | "ollama";
       };
     },
     async tailor(body) {
