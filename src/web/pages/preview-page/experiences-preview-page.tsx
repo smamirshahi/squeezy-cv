@@ -61,7 +61,6 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
               container
               direction="row"
               sx={{
-                flexDirection: "column",
                 alignItems: "center",
                 gap: 3,
               }}

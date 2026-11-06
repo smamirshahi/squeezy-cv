@@ -55,7 +55,6 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
               container
               direction="row"
               sx={{
-                flexDirection: "column",
                 alignItems: "center",
                 gap: 3,
               }}

@@ -62,7 +62,6 @@ export function GenericSectionPreviewPage({
               container
               direction="row"
               sx={{
-                flexDirection: "column",
                 alignItems: "center",
                 gap: 3,
               }}
@@ -97,7 +96,6 @@ export function GenericSectionPreviewPage({
             <Box
               component="ul"
               sx={{
-                flexDirection: "column",
                 my: "0px",
                 pl: "20px",
                 ...getBulletListStyle(bulletPointIcon),
