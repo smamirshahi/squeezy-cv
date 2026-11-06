@@ -15,6 +15,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "react-redux";
+import { documentText } from "@shared/variant/document-text";
+import { render } from "@shared/variant/render";
 import { exportChecks, suggestFileName } from "@shared/export/export-checks";
 import { saveActiveVariant } from "@hooks/save-active-variant";
 import { useImportExportJson } from "@hooks/use-import-export-json";
@@ -91,6 +93,8 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
     usedPercent: fit.usedPercent,
     linesOver: fit.linesOver,
     hiddenItemCount,
+    tailor: variant.tailor,
+    cvText: documentText(render(vault, variant)),
   });
 
   function download(): void {

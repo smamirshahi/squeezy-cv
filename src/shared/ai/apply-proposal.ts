@@ -1,5 +1,10 @@
 import { Proposal } from "@custom-types/tailor-types";
-import { Variant, VariantLayout } from "@custom-types/variant-types";
+import { Requirements } from "@custom-types/requirements-types";
+import {
+  TailorRecord,
+  Variant,
+  VariantLayout,
+} from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { canAutoAccept } from "@shared/ai/guardrails";
 
@@ -238,4 +243,39 @@ export function numberChanges(
     }
   }
   return numbers;
+}
+
+/**
+ * What to remember about a tailoring run on the variant it made: the job's requirements, the
+ * gaps, and the flagged rewordings that were accepted by hand (the checker could not confirm
+ * them). `at` is "YYYY-MM-DD".
+ */
+export function buildTailorRecord(
+  requirements: Requirements,
+  proposal: Proposal,
+  decisions: Decisions,
+  at: string
+): TailorRecord {
+  return {
+    at,
+    jobTitle: requirements.jobTitle,
+    requirements,
+    gaps: proposal.gaps,
+    acceptedFlagged: proposal.bullets.flatMap((bullet) => {
+      const decision = decisions.bullets[bullet.bulletId];
+      return bullet.rewrite &&
+        decision?.isAccepted &&
+        decision.isRewriteAccepted &&
+        !canAutoAccept(bullet.flags)
+        ? [
+            {
+              bulletId: bullet.bulletId,
+              wording: bullet.rewrite.wording,
+              text: bullet.rewrite.text,
+              flags: bullet.flags ?? [],
+            },
+          ]
+        : [];
+    }),
+  };
 }

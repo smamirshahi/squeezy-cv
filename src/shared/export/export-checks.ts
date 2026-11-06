@@ -1,4 +1,6 @@
+import { TailorRecord } from "@custom-types/variant-types";
 import { Profile } from "@custom-types/vault-types";
+import { isGapCoveredByCv } from "@shared/ai/gap-coverage";
 
 export type CheckLevel = "ok" | "warning";
 
@@ -18,6 +20,10 @@ export interface ExportCheckInput {
 
   /** Items the variant hides, to say what is left out */
   hiddenItemCount: number;
+
+  /** What tailoring said when the variant was made, and the words of the CV as it will be sent */
+  tailor?: TailorRecord;
+  cvText?: string;
 }
 
 /** A file name without characters that file systems dislike, words joined with dashes */
@@ -96,5 +102,64 @@ export function exportChecks(input: ExportCheckInput): ExportCheck[] {
       detail: "Left out of the PDF, still in your vault.",
     });
   }
+  if (input.tailor && input.cvText !== undefined) {
+    checks.push(...tailorChecks(input.tailor, input.cvText));
+  }
+  return checks;
+}
+
+/** Quote at most this many items in a check's detail */
+const MAX_LISTED = 5;
+
+function list(items: string[]): string {
+  const shown = items.slice(0, MAX_LISTED).join("; ");
+  return items.length > MAX_LISTED
+    ? `${shown}; and ${items.length - MAX_LISTED} more`
+    : shown;
+}
+
+/**
+ * Checks against the job this variant was tailored for: rewordings the checker flagged and
+ * the user accepted (still in the CV?), and what the job insists on that the CV does not show.
+ */
+function tailorChecks(tailor: TailorRecord, cvText: string): ExportCheck[] {
+  const checks: ExportCheck[] = [];
+  const flagged = tailor.acceptedFlagged.filter((entry) =>
+    cvText.includes(entry.text)
+  );
+  checks.push(
+    flagged.length > 0
+      ? {
+          id: "flagged",
+          level: "warning",
+          title: `${flagged.length} reworded ${flagged.length === 1 ? "point was" : "points were"} flagged and are in the CV`,
+          detail: `Check that every claim is true: ${list(flagged.map((entry) => `“${entry.text}” (${entry.flags.join(", ")})`))}.`,
+        }
+      : {
+          id: "flagged",
+          level: "ok",
+          title: "No flagged rewordings in the CV",
+          detail: "Every reworded point passed the checker or was left out.",
+        }
+  );
+
+  const uncovered = tailor.requirements.mustHave.filter(
+    (requirement) => !isGapCoveredByCv(requirement, cvText)
+  );
+  checks.push(
+    uncovered.length > 0
+      ? {
+          id: "requirements",
+          level: "warning",
+          title: `${uncovered.length} must-have ${uncovered.length === 1 ? "requirement is" : "requirements are"} not shown`,
+          detail: `${tailor.jobTitle || "The job"} asks for: ${list(uncovered)}. Only add them if they are true.`,
+        }
+      : {
+          id: "requirements",
+          level: "ok",
+          title: "Every must-have requirement is shown",
+          detail: `Checked against “${tailor.jobTitle || "the job"}”.`,
+        }
+  );
   return checks;
 }
