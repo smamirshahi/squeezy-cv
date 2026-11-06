@@ -14,6 +14,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { styled } from "@mui/material/styles";
+import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
@@ -253,7 +254,19 @@ export function VaultPage(): JSX.Element {
   );
   const variants = useAppSelector(variantsSelector);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const sections = useAppSelector(sectionsSelector);
   const page = pages.find((entry) => entry.id === selectedPageId) ?? pages[0];
+  // An item chosen in the tree is edited inline (no Apply step); skills keep their own editor (ratings)
+  const selectedSection = sections.find((section) =>
+    section.items.some((item) => item.id === selectedItemId)
+  );
+  const selectedItem = selectedSection?.items.find(
+    (item) => item.id === selectedItemId
+  );
+  const hasInlineEditor =
+    selectedSection !== undefined &&
+    selectedItem !== undefined &&
+    !["skills", "summary"].includes(selectedSection.type);
   const isFact = !SETTING_PAGES.has(page.id) && page.id !== "ai";
 
   return (
@@ -276,7 +289,15 @@ export function VaultPage(): JSX.Element {
           gap: 2,
         }}
       >
-        {isFact && (
+        {hasInlineEditor && (
+          <VaultItemEditor
+            key={selectedItem.id}
+            section={selectedSection}
+            item={selectedItem}
+            onSelectItem={setSelectedItemId}
+          />
+        )}
+        {!hasInlineEditor && isFact && (
           <Alert severity="warning">
             You are editing a <b>vault fact</b>. Changes apply to all{" "}
             {variants.length} {variants.length === 1 ? "variant" : "variants"}{" "}
@@ -284,10 +305,16 @@ export function VaultPage(): JSX.Element {
             instead.
           </Alert>
         )}
-        <Box sx={{ bgcolor: WORKSPACE_COLORS.panel, borderRadius: 1, p: 2 }}>
-          {page.content}
-        </Box>
-        <EditorFooter />
+        {!hasInlineEditor && (
+          <>
+            <Box
+              sx={{ bgcolor: WORKSPACE_COLORS.panel, borderRadius: 1, p: 2 }}
+            >
+              {page.content}
+            </Box>
+            <EditorFooter />
+          </>
+        )}
       </Box>
       <AppearsIn itemId={selectedItemId} />
     </>

@@ -38,6 +38,9 @@ describe("import of a messy CV with a small model's answer", () => {
     expect(degree.fields.startDate).toBe("2013-01-01");
     expect(degree.fields.endDate).toBe("2016-01-01");
     expect(vault.sections[1].items[0].bullets).toHaveLength(3);
+    // the app's own key for the institution, so the editor and the page show it
+    expect(degree.fields.institute).toBe("University of Leeds");
+    expect(degree.fields).not.toHaveProperty("institution");
   });
 
   it("warns about the instruction hidden in the pasted text", () => {

@@ -6,6 +6,7 @@ const LABEL_FIELDS = [
   "title",
   "category",
   "company",
+  "institute",
   "institution",
   "text",
 ];

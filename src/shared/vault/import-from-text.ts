@@ -34,6 +34,22 @@ function splitYearRange(
   return fields;
 }
 
+/** Keys the model (or an older prompt) may use for what the app calls something else */
+function renameFields(
+  type: string,
+  fields: Record<string, string>
+): Record<string, string> {
+  if (
+    type === "education" &&
+    "institution" in fields &&
+    !("institute" in fields)
+  ) {
+    const { institution, ...rest } = fields;
+    return { ...rest, institute: institution };
+  }
+  return fields;
+}
+
 const INSTRUCTION_LIKE =
   /(ignore|disregard|forget)\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts?)/i;
 
@@ -92,7 +108,7 @@ export function importToVault(
     items: section.items.map((item): Item => {
       const fields: Record<string, string> = {};
       const bullets = item.bullets ?? [];
-      const rawFields = splitYearRange(item.fields);
+      const rawFields = splitYearRange(renameFields(section.type, item.fields));
       for (const [key, value] of Object.entries(rawFields)) {
         if (value.trim() === "" && !DATE_FIELDS.has(key)) {
           continue; // small models fill unknown fields with ""

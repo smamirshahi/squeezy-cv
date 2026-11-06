@@ -1,0 +1,89 @@
+import { SectionType } from "@custom-types/vault-types";
+
+export interface FieldSpec {
+  key: string;
+  label: string;
+
+  /** "month" is a date stored as ISO "YYYY-MM-DD" (the day is always 01 when typed) */
+  kind: "text" | "month" | "multiline";
+
+  /** Columns it spans in a three-column grid */
+  span: 1 | 2 | 3;
+
+  /** An end date: empty means "Present" */
+  isEnd?: boolean;
+}
+
+const START: FieldSpec = {
+  key: "startDate",
+  label: "Start",
+  kind: "month",
+  span: 1,
+};
+const END: FieldSpec = {
+  key: "endDate",
+  label: "End",
+  kind: "month",
+  span: 1,
+  isEnd: true,
+};
+
+/**
+ * The fields of an item in the vault editor, by section type. The keys are the ones the page
+ * draws (do not rename them). Types the editor has no special form for use the generic one.
+ */
+export function fieldSpecsFor(type: SectionType): FieldSpec[] {
+  switch (type) {
+    case "experience":
+      return [
+        { key: "jobTitle", label: "Job title", kind: "text", span: 2 },
+        { key: "company", label: "Organisation", kind: "text", span: 1 },
+        { key: "location", label: "Location", kind: "text", span: 1 },
+        START,
+        END,
+      ];
+    case "education":
+      return [
+        { key: "degree", label: "Degree", kind: "text", span: 2 },
+        { key: "institute", label: "Institute", kind: "text", span: 1 },
+        { key: "location", label: "Location", kind: "text", span: 1 },
+        START,
+        END,
+        {
+          key: "dissertationTitle",
+          label: "Dissertation title",
+          kind: "text",
+          span: 3,
+        },
+      ];
+    case "skills":
+      return [{ key: "category", label: "Group", kind: "text", span: 3 }];
+    case "summary":
+      return [{ key: "text", label: "Summary", kind: "multiline", span: 3 }];
+    default:
+      return [
+        { key: "title", label: "Title", kind: "text", span: 2 },
+        { key: "subtitle", label: "Subtitle", kind: "text", span: 1 },
+        { key: "location", label: "Location", kind: "text", span: 1 },
+        START,
+        END,
+        {
+          key: "description",
+          label: "Description",
+          kind: "multiline",
+          span: 3,
+        },
+      ];
+  }
+}
+
+/** "2021-03-15" as the value of a month input ("2021-03"); anything else is empty */
+export function toMonthValue(iso: string | undefined): string {
+  const match = /^(\d{4})-(\d{2})/.exec(iso ?? "");
+  return match ? `${match[1]}-${match[2]}` : "";
+}
+
+/** A month input's "2021-03" as the stored ISO day; empty stays empty */
+export function fromMonthValue(month: string): string {
+  return /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : "";
+}
