@@ -10,7 +10,7 @@ import {
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
-import { EditorPage } from "@pages/editor-page/editor-page";
+import { VaultPage } from "@pages/workspace/vault-page";
 // eslint-disable-next-line no-restricted-imports -- App.tsx is the only module outside the aliased folders
 import { App } from "../../App";
 import { rootReducer } from "@store/store";
@@ -32,12 +32,12 @@ function createStore(): AppStore {
 function renderEditor(store: AppStore): void {
   render(
     <Provider store={store}>
-      <EditorPage />
+      <VaultPage />
     </Provider>
   );
 }
 
-describe("EditorPage", () => {
+describe("VaultPage", () => {
   it("lists the fixed pages and one page per vault section", () => {
     renderEditor(createStore());
     for (const label of [
@@ -59,12 +59,12 @@ describe("EditorPage", () => {
     renderEditor(store);
     expect(screen.queryByText("Add new experience")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Work Experience" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Work Experience/ }));
     expect(store.getState().app.selectedSectionInEditorPage).toBe("experience");
     expect(screen.getAllByLabelText("Job Title")).toHaveLength(3);
     expect(screen.getByText("Add new experience")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Skills" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Skills/ }));
     expect(screen.getByText("Add new skill category")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Main Info" }));
@@ -74,7 +74,7 @@ describe("EditorPage", () => {
   it("the footer buttons add an item and apply it end to end", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: "Work Experience" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Work Experience/ }));
     fireEvent.click(screen.getByText("Add new experience"));
     expect(screen.getAllByLabelText("Job Title")).toHaveLength(4);
     fireEvent.click(screen.getByText("Apply"));
@@ -95,7 +95,7 @@ describe("EditorPage", () => {
   it("falls back to the first page when the selected section is deleted", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: "Education" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Education/ }));
     expect(screen.getAllByLabelText("Degree").length).toBe(1);
     act(() => {
       store.dispatch(removeSection({ id: "education" }));
@@ -112,7 +112,7 @@ describe("EditorPage", () => {
         addSection({ id: "proj", type: "projects", title: "Projects" })
       );
     });
-    fireEvent.click(screen.getByRole("button", { name: "Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Projects/ }));
     expect(screen.getByText("Add new item")).toBeTruthy();
     fireEvent.click(screen.getByText("Add new item"));
     expect(screen.getAllByLabelText("Title")).toHaveLength(1);
