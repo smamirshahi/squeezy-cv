@@ -88,4 +88,6 @@ Package manager is **pnpm**.
 
 **AI import (#101).** "Paste CV text, AI sorts it" (first-run screen and the Vault tree): `POST /api/ai/import {text}` (`server/ai/import-cv.ts`, prompt `import-cv.md`) returns `{vault, warnings}`. The model answers in the loose `RawImportSchema` (`custom-types/import-types.ts`); the pure `shared/vault/import-from-text.ts` (`importToVault`) gives it ids, turns dates into ISO and warns about every name/email/phone/bullet that is not in the pasted text (possible invention); `mergeIntoVault` adds the result to the existing vault without overwriting (empty profile fields filled, items into the first section of the same type, links deduped by URL). No scrubbing: the text is the personal data, so the dialog warns that Claude sends all of it to Anthropic (Ollama keeps it local). Nothing is added until the user confirms, and nothing is saved until Save.
 
+**Canvas shortcuts (#93).** `workspace/use-canvas-shortcuts.ts`: with an item selected on the page, H shows/hides it, B toggles emphasis, Alt+Up/Down moves it in its section, Escape deselects (ignored while typing). Not built: Tab to the next block, zoom.
+
 **Personal data:** the real CV goes in `data/` (git-ignored, as is `cv-export.json`); never commit it. `data.example/` shows the layout and `fixtures/` holds fake data for tests. Older real exports are handled by the migration.
