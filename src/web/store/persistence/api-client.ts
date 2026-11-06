@@ -1,3 +1,8 @@
+import {
+  TailorRequest,
+  TailorResult,
+  TailorResultSchema,
+} from "@custom-types/tailor-types";
 import { Variant, VariantSchema } from "@custom-types/variant-types";
 import { CvFile, CvFileSchema } from "@custom-types/vault-types";
 
@@ -75,6 +80,12 @@ export interface ApiClient {
   saveVariant: (variant: Variant) => Promise<void>;
   deleteVariant: (id: string) => Promise<void>;
 
+  /** Whether the server has an AI key (it never says what it is) */
+  getAiStatus: () => Promise<{ isConfigured: boolean }>;
+
+  /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
+  tailor: (request: TailorRequest) => Promise<TailorResult>;
+
   /** The PDF of a saved variant, made by the server */
   createPdf: (variantId: string) => Promise<Blob>;
 }
@@ -112,6 +123,16 @@ export function createApiClient(
         "PUT",
         `/api/variants/${encodeURIComponent(variant.id)}`,
         variant
+      );
+    },
+    async getAiStatus() {
+      return (await request(fetchImpl, "GET", "/api/ai/status")) as {
+        isConfigured: boolean;
+      };
+    },
+    async tailor(body) {
+      return TailorResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/tailor", body)
       );
     },
     async createPdf(variantId) {

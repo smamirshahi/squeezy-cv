@@ -76,6 +76,12 @@ const variantsSlice = createSlice({
       },
     },
 
+    /** Adds a finished variant (e.g. one made from an AI proposal) and makes it the active one */
+    insertVariant(state, action: PayloadAction<Variant>) {
+      state.variants.push(action.payload);
+      state.activeId = action.payload.id;
+    },
+
     duplicateVariant: {
       reducer(
         state,
@@ -276,6 +282,7 @@ export const variantsReducer = variantsSlice.reducer;
 export const {
   setVariants,
   createVariant: addVariant,
+  insertVariant,
   duplicateVariant,
   renameVariant,
   deleteVariant,
