@@ -59,6 +59,12 @@ export const BulletProposalSchema = Object({
   }).optional(),
 
   reason: String,
+
+  /**
+   * Set by the server, never trusted from the model: what in the rewrite is not in the
+   * CV (empty when nothing). A flagged rewrite must not be accepted automatically.
+   */
+  flags: Array(String).optional(),
 });
 
 /** The model's proposal (step 2 of tailoring) */
@@ -68,6 +74,9 @@ export const ProposalSchema = Object({
 
   /** A draft personal statement, only from facts in the CV */
   statement: String,
+
+  /** Set by the server: what in the statement is not in the CV */
+  statementFlags: Array(String).optional(),
 
   /** Things the job asks for that the CV does not show. For the user to decide on. */
   gaps: Array(String),

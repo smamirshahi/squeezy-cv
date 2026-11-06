@@ -10,7 +10,22 @@ import {
 import { Tone } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { AiClient } from "@server/ai/ai-types";
+import { checkRewrite, describeFlags } from "@shared/ai/guardrails";
 import { getItemLabel } from "@shared/variant/item-label";
+
+/** How much of a bullet is quoted in a warning */
+const QUOTE_LENGTH = 40;
+
+/** All the text of the CV that a statement may draw on */
+function allText(vault: Vault): string[] {
+  return vault.sections.flatMap((section) =>
+    section.items.flatMap((item) => [
+      ...Object.values(item.fields),
+      ...item.tags,
+      ...item.bullets.map((b) => b.text),
+    ])
+  );
+}
 
 /** What the model is told about the CV: ids, text, tags. Nothing it does not need. */
 export function describeCv(vault: Vault): unknown {
@@ -49,6 +64,9 @@ export function sanitiseProposal(vault: Vault, proposal: Proposal): Sanitised {
   const itemIds = new Set(
     vault.sections.flatMap((s) => s.items.map((i) => i.id))
   );
+  const itemById = new Map(
+    vault.sections.flatMap((s) => s.items).map((item) => [item.id, item])
+  );
   const bulletIds = new Map(
     vault.sections
       .flatMap((s) => s.items)
@@ -77,10 +95,43 @@ export function sanitiseProposal(vault: Vault, proposal: Proposal): Sanitised {
       );
       continue;
     }
-    bullets.push(entry);
+    // The model's own flags are never trusted: they are always recomputed here
+    const rest = { ...entry };
+    delete rest.flags;
+    if (!rest.rewrite) {
+      bullets.push({ ...rest, flags: [] });
+      continue;
+    }
+    const item = itemById.get(entry.itemId);
+    const original = item?.bullets.find((b) => b.id === entry.bulletId);
+    const sources = [
+      original?.text ?? "",
+      ...Object.values(item?.fields ?? {}),
+      ...(item?.bullets.map((b) => b.text) ?? []),
+      ...(item?.tags ?? []),
+    ];
+    const check = checkRewrite(rest.rewrite.text, sources);
+    const flags = describeFlags(check.flags);
+    if (flags.length > 0) {
+      warnings.push(
+        `A rewording of "${original?.text.slice(0, QUOTE_LENGTH) ?? ""}" needs your check: ${flags.join("; ")}.`
+      );
+    }
+    bullets.push({ ...rest, flags });
   }
 
-  return { proposal: { ...proposal, items, bullets }, warnings };
+  const statementCheck = checkRewrite(proposal.statement, allText(vault));
+  const statementFlags = describeFlags(statementCheck.flags);
+  if (statementFlags.length > 0) {
+    warnings.push(
+      `The draft statement needs your check: ${statementFlags.join("; ")}.`
+    );
+  }
+
+  return {
+    proposal: { ...proposal, items, bullets, statementFlags },
+    warnings,
+  };
 }
 
 export interface TailorInput {
