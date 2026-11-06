@@ -41,7 +41,11 @@ import {
   setItemSelection,
   setPageLimit,
 } from "@store/variants/variants-slice";
-import { FIT_DEFAULTS } from "@shared/layout/fit";
+import {
+  FIT_DEFAULTS,
+  FIT_LIMIT_RANGES,
+  clampFitLimit,
+} from "@shared/layout/fit";
 import { sectionsSelector } from "@store/vault/vault-slice";
 import { Side } from "@custom-types/styles-types";
 
@@ -84,6 +88,49 @@ export function moveSection(
   return null;
 }
 
+interface LimitFieldProps {
+  limitKey: keyof typeof FIT_LIMIT_RANGES;
+  label: string;
+
+  /** 100 when the stored value is a ratio shown as a percentage */
+  scale: number;
+  stored: number;
+  onCommit: (value: number) => void;
+}
+
+/**
+ * One auto-fit limit. What is typed stays as typed (an empty field is not 0); a number is
+ * saved clamped to its range, and when the field is left it shows the saved value.
+ */
+function LimitField({
+  limitKey,
+  label,
+  scale,
+  stored,
+  onCommit,
+}: LimitFieldProps): JSX.Element {
+  const shown = String(Math.round(stored * scale * 10) / 10);
+  const [text, setText] = useState<string | null>(null);
+  const { min, max } = FIT_LIMIT_RANGES[limitKey];
+  return (
+    <TextField
+      size="small"
+      type="number"
+      label={label}
+      value={text ?? shown}
+      helperText={`${Math.round(min * scale)}–${Math.round(max * scale)}`}
+      onChange={(event) => {
+        setText(event.target.value);
+        const parsed = Number(event.target.value);
+        if (event.target.value.trim() !== "" && Number.isFinite(parsed)) {
+          onCommit(clampFitLimit(limitKey, parsed / scale));
+        }
+      }}
+      onBlur={() => setText(null)}
+    />
+  );
+}
+
 /** Nothing selected: page-wide settings and the list of sections */
 function PageInspector(): JSX.Element {
   const dispatch = useAppDispatch();
@@ -91,6 +138,15 @@ function PageInspector(): JSX.Element {
   const sections = useAppSelector(sectionsSelector);
   const structure = useAppSelector((s) => s.app.structure);
   const order = SIDES.flatMap((side) => structure[side]);
+
+  function setLimit(key: keyof typeof FIT_LIMIT_RANGES, value: number): void {
+    dispatch(
+      setFitLimits({
+        id: variant.id,
+        limits: { ...variant.fitLimits, [key]: value },
+      })
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -146,58 +202,26 @@ function PageInspector(): JSX.Element {
       />
       <Heading>Auto-fit limits</Heading>
       <Box sx={{ display: "flex", gap: 1 }}>
-        <TextField
-          size="small"
-          type="number"
+        <LimitField
+          limitKey="minSpacing"
           label="Spacing ≥ %"
-          value={Math.round(
-            (variant.fitLimits?.minSpacing ?? FIT_DEFAULTS.minSpacing) * PERCENT
-          )}
-          onChange={(event) =>
-            dispatch(
-              setFitLimits({
-                id: variant.id,
-                limits: {
-                  ...variant.fitLimits,
-                  minSpacing: Number(event.target.value) / PERCENT,
-                },
-              })
-            )
-          }
+          scale={PERCENT}
+          stored={variant.fitLimits?.minSpacing ?? FIT_DEFAULTS.minSpacing}
+          onCommit={(value) => setLimit("minSpacing", value)}
         />
-        <TextField
-          size="small"
-          type="number"
+        <LimitField
+          limitKey="minMarginMm"
           label="Margins ≥ mm"
-          value={variant.fitLimits?.minMarginMm ?? FIT_DEFAULTS.minMarginMm}
-          onChange={(event) =>
-            dispatch(
-              setFitLimits({
-                id: variant.id,
-                limits: {
-                  ...variant.fitLimits,
-                  minMarginMm: Number(event.target.value),
-                },
-              })
-            )
-          }
+          scale={1}
+          stored={variant.fitLimits?.minMarginMm ?? FIT_DEFAULTS.minMarginMm}
+          onCommit={(value) => setLimit("minMarginMm", value)}
         />
-        <TextField
-          size="small"
-          type="number"
+        <LimitField
+          limitKey="minBodyPt"
           label="Text ≥ pt"
-          value={variant.fitLimits?.minBodyPt ?? FIT_DEFAULTS.minBodyPt}
-          onChange={(event) =>
-            dispatch(
-              setFitLimits({
-                id: variant.id,
-                limits: {
-                  ...variant.fitLimits,
-                  minBodyPt: Number(event.target.value),
-                },
-              })
-            )
-          }
+          scale={1}
+          stored={variant.fitLimits?.minBodyPt ?? FIT_DEFAULTS.minBodyPt}
+          onCommit={(value) => setLimit("minBodyPt", value)}
         />
       </Box>
       <Heading>Sections</Heading>

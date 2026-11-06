@@ -17,6 +17,7 @@ import {
   updateItemSelection as changeItemSelection,
 } from "@shared/variant/variant-utils";
 import { NO_LOCKS, VariantLocks } from "@shared/variant/variant-lock";
+import { clampFitLimits } from "@shared/layout/fit";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
 
@@ -288,7 +289,7 @@ const variantsSlice = createSlice({
     ) {
       const variant = state.variants.find((v) => v.id === action.payload.id);
       if (variant) {
-        variant.fitLimits = action.payload.limits;
+        variant.fitLimits = clampFitLimits(action.payload.limits);
         // The old result no longer follows the limits
         delete variant.tuning;
       }
