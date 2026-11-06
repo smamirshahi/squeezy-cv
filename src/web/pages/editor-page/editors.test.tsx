@@ -18,6 +18,8 @@ import {
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
+import { createDefaultVariant } from "@shared/variant/variant-utils";
+import { setVariants } from "@store/variants/variants-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
@@ -33,6 +35,7 @@ function createStore(): AppStore {
   const store = configureStore({ reducer: rootReducer });
   const file = migrateCvFile(sample);
   store.dispatch(setVault(file.vault));
+  store.dispatch(setVariants([createDefaultVariant(file, "v1")]));
   store.dispatch(setStyle(file.style));
   return store;
 }
@@ -193,7 +196,11 @@ describe("EditorExperience", () => {
     const eyes = screen.getAllByTestId("VisibilityOffIcon");
     fireEvent.click(eyes[0].closest("button")!);
 
-    expect(storedSection(store, "experience").items[2].shouldShow).toBe(true);
+    // visibility belongs to the active variant; the vault item is untouched
+    expect(
+      store.getState().variants.variants[0].selection["exp-3"]?.isVisible
+    ).toBe(true);
+    expect(storedSection(store, "experience").items[2].shouldShow).toBe(false);
     expect(input("Company").value).toBe("Edited Co");
     expect(storedSection(store, "experience").items[0].fields.company).toBe(
       "Example Ltd"
@@ -202,7 +209,9 @@ describe("EditorExperience", () => {
     click(setShouldApplyChanges, store);
     const items = storedSection(store, "experience").items;
     expect(items[0].fields.company).toBe("Edited Co");
-    expect(items[2].shouldShow).toBe(true);
+    expect(
+      store.getState().variants.variants[0].selection["exp-3"]?.isVisible
+    ).toBe(true);
   });
 
   it("follows the store when a new CV is loaded", () => {

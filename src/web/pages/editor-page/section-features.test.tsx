@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { setItemSelection } from "@store/variants/variants-slice";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   act,
@@ -17,12 +18,7 @@ import { AppStore } from "@store/store-helper";
 import { setShouldApplyChanges } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import {
-  addItem,
-  addSection,
-  setItemVisibility,
-  setVault,
-} from "@store/vault/vault-slice";
+import { addItem, addSection, setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
 import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
@@ -342,7 +338,13 @@ describe("generic sections", () => {
         sectionId: "proj",
         id: "p2",
         fields: { title: "Secret project" },
-        shouldShow: false,
+      })
+    );
+    store.dispatch(
+      setItemSelection({
+        variantId: store.getState().variants.activeId,
+        itemId: "p2",
+        change: { isVisible: false },
       })
     );
     // the page structure normally gets this from useSyncStructure
@@ -361,7 +363,11 @@ describe("generic sections", () => {
     expect(html).not.toContain("Secret project");
 
     store.dispatch(
-      setItemVisibility({ sectionId: "proj", itemId: "p2", shouldShow: true })
+      setItemSelection({
+        variantId: store.getState().variants.activeId,
+        itemId: "p2",
+        change: { isVisible: true },
+      })
     );
     expect(
       renderToString(

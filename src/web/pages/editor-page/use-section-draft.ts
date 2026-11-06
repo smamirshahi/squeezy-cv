@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { nanoid } from "@reduxjs/toolkit";
-import { Item, Section } from "@custom-types/vault-types";
+import { Section } from "@custom-types/vault-types";
 import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -9,11 +9,14 @@ import {
   initialState,
   moveItem,
   removeItem,
-  setItemVisibility,
   setSection,
   updateItemFields,
   vaultSelector,
 } from "@store/vault/vault-slice";
+import {
+  activeVariantSelector,
+  setItemSelection,
+} from "@store/variants/variants-slice";
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 import { useEffect } from "react";
 
@@ -36,6 +39,10 @@ interface ReturnProps {
   moveItem: (fromIndex: number, toIndex: number) => void;
 
   /** Shows or hides an item. The store is updated at once so the preview follows. */
+  /** Whether the item is shown in the active variant */
+  isVisible: (itemId: string) => boolean;
+
+  /** Shows or hides the item in the active variant, at once */
   setVisibility: (itemId: string, shouldShow: boolean) => void;
 
   /** The draft's dispatch, for edits that are specific to one section type */
@@ -55,20 +62,18 @@ export function useSectionDraft(
     (s) => s.id === sectionId
   );
   const { shouldAddNewItem } = useAppSelector(appSelector);
+  const variant = useAppSelector(activeVariantSelector);
 
   const source = useMemo(
     () => ({ ...initialState, sections: stored ? [stored] : [] }),
     [stored]
   );
 
-  const { draft, draftDispatch, skipNextReset } = useVaultDraft(
-    source,
-    (applied) => {
-      if (applied.sections[0]) {
-        dispatch(setSection(applied.sections[0]));
-      }
+  const { draft, draftDispatch } = useVaultDraft(source, (applied) => {
+    if (applied.sections[0]) {
+      dispatch(setSection(applied.sections[0]));
     }
-  );
+  });
 
   useEffect(() => {
     if (!shouldAddNewItem) {
@@ -84,10 +89,6 @@ export function useSectionDraft(
 
   const section = draft.sections[0];
 
-  function currentItem(itemId: string): Item | undefined {
-    return section?.items.find((i) => i.id === itemId);
-  }
-
   return {
     section,
     draftDispatch,
@@ -100,16 +101,16 @@ export function useSectionDraft(
         draftDispatch(moveItem({ sectionId, itemId: item.id, toIndex }));
       }
     },
+    isVisible: (itemId) => variant.selection[itemId]?.isVisible !== false,
     setVisibility: (itemId, shouldShow) => {
-      draftDispatch(setItemVisibility({ sectionId, itemId, shouldShow }));
-      if (
-        stored?.items.find((i) => i.id === itemId)?.shouldShow !== shouldShow
-      ) {
-        if (currentItem(itemId)) {
-          skipNextReset();
-        }
-        dispatch(setItemVisibility({ sectionId, itemId, shouldShow }));
-      }
+      // Visibility belongs to the active variant; the vault item stays as it is
+      dispatch(
+        setItemSelection({
+          variantId: variant.id,
+          itemId,
+          change: { isVisible: shouldShow },
+        })
+      );
     },
   };
 }

@@ -33,6 +33,7 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
     removeItem,
     moveItem,
     setVisibility,
+    isVisible,
     draftDispatch,
   } = useSectionDraft(sectionId, NEW_ITEM);
 
@@ -48,7 +49,7 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
           removeFunction={removeItem}
           onVisibilityChange={setVisibility}
           title={item.fields.title || "(untitled)"}
-          entity={{ id: item.id, shouldShow: item.shouldShow }}
+          entity={{ id: item.id, shouldShow: isVisible(item.id) }}
           isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>

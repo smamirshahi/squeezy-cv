@@ -2,6 +2,7 @@ import { Side } from "@custom-types/styles-types";
 import { Emphasis, Tone, Variant } from "@custom-types/variant-types";
 import {
   Bullet,
+  Item,
   LinkItem,
   Profile,
   SectionType,
@@ -53,43 +54,68 @@ function pickText(bullet: Bullet, wording: string | undefined): string {
   return bullet.text;
 }
 
-function renderBullets(
-  bullets: Bullet[],
-  choices: Record<string, { isVisible: boolean; wording?: string }> | undefined
-): RenderedBullet[] {
-  const result: RenderedBullet[] = [];
-  for (const bullet of bullets) {
-    const choice = choices?.[bullet.id];
-    if (choice && !choice.isVisible) {
-      continue;
-    }
-    result.push({
-      id: bullet.id,
-      text: pickText(bullet, choice?.wording),
-      ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
+/** Items in the order the variant shows them (hidden ones included): ordered ones first, the rest in vault order */
+export function sortItemsByVariant(
+  items: Item[],
+  selection: Variant["selection"]
+): Item[] {
+  return items
+    .map((item, index) => ({ item, index, order: selection[item.id]?.order }))
+    .sort((a, b) => {
+      const orderA = a.order ?? Infinity;
+      const orderB = b.order ?? Infinity;
+      return orderA === orderB ? a.index - b.index : orderA - orderB;
+    })
+    .map(({ item }) => item);
+}
+
+/** The visible items in variant order, each with its visible bullets carrying the chosen wording */
+function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
+  return sortItemsByVariant(items, selection)
+    .filter((item) => selection[item.id]?.isVisible !== false)
+    .map((item) => {
+      const choices = selection[item.id]?.bullets;
+      return {
+        ...item,
+        shouldShow: true,
+        bullets: item.bullets
+          .filter((bullet) => choices?.[bullet.id]?.isVisible !== false)
+          .map((bullet) => ({
+            ...bullet,
+            text: pickText(bullet, choices?.[bullet.id]?.wording),
+          })),
+      };
     });
-  }
-  return result;
 }
 
 function renderItems(
-  items: Vault["sections"][number]["items"],
+  items: Item[],
   selection: Variant["selection"]
 ): RenderedItem[] {
-  return items
-    .map((item, index) => ({ item, index, choice: selection[item.id] }))
-    .filter(({ choice }) => choice?.isVisible !== false)
-    .sort((a, b) => {
-      const orderA = a.choice?.order ?? Infinity;
-      const orderB = b.choice?.order ?? Infinity;
-      return orderA === orderB ? a.index - b.index : orderA - orderB;
-    })
-    .map(({ item, choice }) => ({
-      id: item.id,
-      fields: item.fields,
-      bullets: renderBullets(item.bullets, choice?.bullets),
-      emphasis: choice?.emphasis ?? "normal",
-    }));
+  return resolveItems(items, selection).map((item) => ({
+    id: item.id,
+    fields: item.fields,
+    bullets: item.bullets.map((bullet) => ({
+      id: bullet.id,
+      text: bullet.text,
+      ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
+    })),
+    emphasis: selection[item.id]?.emphasis ?? "normal",
+  }));
+}
+
+/**
+ * The vault as the variant shows it: same sections, but only the visible items in variant
+ * order, with the chosen bullet wordings. Lets components that read a `Section` draw a variant.
+ */
+export function resolveVault(vault: Vault, variant: Variant): Vault {
+  return {
+    ...vault,
+    sections: vault.sections.map((section) => ({
+      ...section,
+      items: resolveItems(section.items, variant.selection),
+    })),
+  };
 }
 
 /**

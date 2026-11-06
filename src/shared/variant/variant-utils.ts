@@ -1,11 +1,13 @@
 import { Style } from "@custom-types/styles-types";
 import {
+  BulletSelection,
   CURRENT_VARIANT_VERSION,
   ItemSelection,
   Variant,
 } from "@custom-types/variant-types";
-import { CvFile, Vault } from "@custom-types/vault-types";
+import { CvFile, Item, Vault } from "@custom-types/vault-types";
 import { HEADER_IDS } from "@shared/vault/default-vault";
+import { sortItemsByVariant } from "@shared/variant/render";
 import { reconcileStructure } from "@shared/vault/page-structure";
 
 const DEFAULT_PAGE_LIMIT = 2;
@@ -90,4 +92,38 @@ export function updateItemSelection(
     ...variant,
     selection: { ...variant.selection, [itemId]: { ...current, ...change } },
   };
+}
+
+/**
+ * The `order` values that put `itemId` at `toIndex` among the items of a section, as the
+ * variant shows them (hidden ones included). Every item of the section gets a value.
+ */
+export function computeItemOrders(
+  items: Item[],
+  variant: Variant,
+  itemId: string,
+  toIndex: number
+): Record<string, number> {
+  const ids = sortItemsByVariant(items, variant.selection).map((i) => i.id);
+  const from = ids.indexOf(itemId);
+  if (from < 0) {
+    return {};
+  }
+  ids.splice(from, 1);
+  ids.splice(Math.max(0, Math.min(toIndex, ids.length)), 0, itemId);
+  return Object.fromEntries(ids.map((id, index) => [id, index]));
+}
+
+/** Changes one bullet's selection (merged with what is there) and returns a new variant */
+export function updateBulletSelection(
+  variant: Variant,
+  itemId: string,
+  bulletId: string,
+  change: Partial<BulletSelection>
+): Variant {
+  const item = variant.selection[itemId] ?? { isVisible: true };
+  const current = item.bullets?.[bulletId] ?? { isVisible: true };
+  return updateItemSelection(variant, itemId, {
+    bullets: { ...item.bullets, [bulletId]: { ...current, ...change } },
+  });
 }

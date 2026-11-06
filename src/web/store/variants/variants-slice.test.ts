@@ -11,7 +11,10 @@ import {
   initialState,
   renameVariant,
   setActiveVariant,
+  setBulletSelection,
+  setItemOrders,
   setItemSelection,
+  setVariantAppearance,
   setVariants,
   variantsReducer,
 } from "@store/variants/variants-slice";
@@ -127,5 +130,46 @@ describe("variants slice", () => {
   it("selects the active variant", () => {
     const state = withTwo();
     expect(activeVariantSelector({ variants: state }).id).toBe("second");
+  });
+});
+
+describe("variants slice: bullets, order and appearance", () => {
+  it("sets a bullet selection in one variant only", () => {
+    const state = variantsReducer(
+      withTwo(),
+      setBulletSelection({
+        variantId: "second",
+        itemId: "i",
+        bulletId: "b",
+        change: { isVisible: false },
+      })
+    );
+    expect(state.variants[1].selection.i.bullets?.b.isVisible).toBe(false);
+    expect(state.variants[0].selection.i).toBeUndefined();
+  });
+
+  it("sets several item orders at once", () => {
+    const state = variantsReducer(
+      withTwo(),
+      setItemOrders({ variantId: "second", orders: { a: 1, b: 0 } })
+    );
+    expect(state.variants[1].selection.a.order).toBe(1);
+    expect(state.variants[1].selection.b.order).toBe(0);
+    expect(state.variants[1].selection.a.isVisible).toBe(true);
+  });
+
+  it("stores layout and style in the variant", () => {
+    const layout = { fullWidth: ["personalInfo"], left: [], right: [] };
+    const state = variantsReducer(
+      withTwo(),
+      setVariantAppearance({
+        id: "second",
+        layout,
+        style: { ...style, paperMargin: "narrow" },
+      })
+    );
+    expect(state.variants[1].layout).toEqual(layout);
+    expect(state.variants[1].style.paperMargin).toBe("narrow");
+    expect(state.variants[0].layout).not.toEqual(layout);
   });
 });
