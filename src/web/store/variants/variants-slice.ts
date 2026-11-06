@@ -7,6 +7,7 @@ import {
   FitTuning,
   ItemSelection,
   SkillDisplay,
+  SkillGroupBy,
   Tone,
   Variant,
   VariantLayout,
@@ -269,13 +270,17 @@ const variantsSlice = createSlice({
         display?: SkillDisplay;
         columns?: 1 | 2;
         minLevel?: number;
+        groupBy?: SkillGroupBy;
       }>
     ) {
       const variant = state.variants.find((v) => v.id === action.payload.id);
       if (!variant) {
         return;
       }
-      const { display, columns, minLevel } = action.payload;
+      const { display, columns, minLevel, groupBy } = action.payload;
+      if (groupBy !== undefined) {
+        variant.skillGroupBy = groupBy;
+      }
       if (display !== undefined) {
         variant.skillDisplay = display;
       }

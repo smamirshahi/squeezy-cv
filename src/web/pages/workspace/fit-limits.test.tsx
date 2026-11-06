@@ -83,4 +83,25 @@ describe("skills style in the inspector", () => {
     expect(variant.skillColumns).toBe(2);
     expect(store.getState().vault.sections).toEqual(vault.sections);
   });
+
+  it("groups flat, and the skill list hides and counts skills for this variant only", () => {
+    const store = setup();
+    const vault = migrateCvFile(sample).vault;
+    const skills = vault.sections.find((s) => s.type === "skills")!;
+    act(() => {
+      store.dispatch(setVault(vault));
+      store.dispatch(setSelectedBlock({ sectionId: skills.id }));
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Flat, highest level first" })
+    );
+    expect(activeVariantSelector(store.getState()).skillGroupBy).toBe("level");
+
+    const total = skills.items.flatMap((i) => i.bullets).length;
+    expect(screen.getByText(`${total} of ${total} shown`)).toBeTruthy();
+    const first = skills.items[0].bullets[0];
+    fireEvent.click(screen.getByRole("button", { name: `Hide ${first.text}` }));
+    expect(screen.getByText(`${total - 1} of ${total} shown`)).toBeTruthy();
+    expect(store.getState().vault.sections).toEqual(vault.sections);
+  });
 });

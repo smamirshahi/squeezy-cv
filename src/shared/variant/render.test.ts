@@ -426,4 +426,19 @@ describe("skill display (variant)", () => {
     expect(part.skillStyle?.display).toBe("none");
     expect(part.items.flatMap((i) => i.bullets).length).toBeGreaterThan(1);
   });
+
+  it("flat grouping merges the groups into one list, highest level first, in this variant only", () => {
+    const v = ratedVault();
+    const variant = {
+      ...createDefaultVariant(file, "main"),
+      skillGroupBy: "level",
+    } as Variant;
+    const part = skills(render(v, variant), v);
+    expect(part.items).toHaveLength(1);
+    expect(part.items[0].fields.category).toBeUndefined();
+    const levels = part.items[0].bullets.map((b) => b.rating ?? 0);
+    expect(levels).toEqual([...levels].sort((a, b) => b - a));
+    const normal = skills(render(v, createDefaultVariant(file, "main")), v);
+    expect(normal.items.length).toBeGreaterThan(1);
+  });
 });
