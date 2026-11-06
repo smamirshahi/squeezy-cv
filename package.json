@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest",
+    "data:push": "git -C data push",
     "preview": "vite preview",
     "format-check": "prettier --check .",
     "format-fix": "prettier --write ."

@@ -8,6 +8,7 @@ import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
 } from "@custom-types/tailor-types";
+import { BackupService } from "@server/backup/backup-service";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
   CvStorage,
@@ -94,6 +95,9 @@ export interface ServerOptions {
 
   /** Which provider `ai` is, for the page to say where the CV goes */
   aiProvider?: "claude" | "ollama";
+
+  /** Versions the data folder. Without it, /api/backup says it is off. */
+  backup?: BackupService;
   isLoggingEnabled?: boolean;
 }
 
@@ -103,6 +107,7 @@ export function buildServer({
   pdf,
   ai,
   aiProvider = "claude",
+  backup,
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -163,6 +168,37 @@ export function buildServer({
   });
 
   app.get("/api/health", () => ({ status: "ok" }));
+
+  app.get(
+    "/api/backup",
+    async () =>
+      (await backup?.status()) ?? {
+        isEnabled: false,
+        hasRemote: false,
+        unpushedCommits: 0,
+      }
+  );
+
+  app.post("/api/backup/push", async (_request, reply) => {
+    if (!backup?.isEnabled) {
+      return sendError(
+        reply,
+        HTTP_NOT_IMPLEMENTED,
+        "backup_unavailable",
+        "The data folder is not a git repository, so there is nothing to push."
+      );
+    }
+    try {
+      return await backup.push();
+    } catch (error) {
+      return sendError(
+        reply,
+        HTTP_BAD_GATEWAY,
+        "backup_failed",
+        error instanceof Error ? error.message : "The push failed."
+      );
+    }
+  });
 
   app.get("/api/ai/status", () => ({
     isConfigured: ai !== undefined,
