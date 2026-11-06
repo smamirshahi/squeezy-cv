@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { useStore } from "react-redux";
 import { Application } from "@custom-types/application-types";
@@ -48,9 +48,38 @@ function emptyForm(): Form {
  * (data and PDF) and records the application as Applied.
  */
 export function MarkAsApplied(): JSX.Element {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  return (
+    <>
+      <Button
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
+        color="inherit"
+        onClick={() => setIsOpen(true)}
+        startIcon={<WorkOutlineIcon />}
+      >
+        Mark as applied
+      </Button>
+      <MarkAsAppliedDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </>
+  );
+}
+
+interface DialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+
+  /** Role to start with (e.g. the job title the variant was tailored to) */
+  initialRole?: string;
+}
+
+/** The form and the saving behind "Mark as applied"; also used by the export dialog */
+export function MarkAsAppliedDialog({
+  isOpen,
+  onClose,
+  initialRole = "",
+}: DialogProps): JSX.Element {
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [form, setForm] = useState<Form>(emptyForm);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -64,12 +93,16 @@ export function MarkAsApplied(): JSX.Element {
       setForm((previous) => ({ ...previous, [key]: event.target.value }));
   }
 
-  function open(): void {
-    setForm(emptyForm());
-    setError("");
-    setAreMoreOpen(false);
-    setIsOpen(true);
-  }
+  // A fresh form each time the dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setForm({ ...emptyForm(), role: initialRole });
+      setError("");
+      setAreMoreOpen(false);
+    }
+    // only when it opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   async function submit(): Promise<void> {
     setIsBusy(true);
@@ -86,7 +119,7 @@ export function MarkAsApplied(): JSX.Element {
         notes: form.notes,
       });
       await refreshLocks(api, store.dispatch);
-      setIsOpen(false);
+      onClose();
       setCreated(application);
     } catch (caught) {
       setError(
@@ -104,18 +137,9 @@ export function MarkAsApplied(): JSX.Element {
 
   return (
     <>
-      <Button
-        sx={{ height: "40px", minWidth: "auto", px: 1 }}
-        color="inherit"
-        onClick={open}
-        startIcon={<WorkOutlineIcon />}
-      >
-        Mark as applied
-      </Button>
-
       <Dialog
         open={isOpen}
-        onClose={isBusy ? undefined : () => setIsOpen(false)}
+        onClose={isBusy ? undefined : onClose}
         fullWidth
         maxWidth="sm"
       >
@@ -187,7 +211,7 @@ export function MarkAsApplied(): JSX.Element {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)} disabled={isBusy}>
+          <Button onClick={onClose} disabled={isBusy}>
             Cancel
           </Button>
           <Button
