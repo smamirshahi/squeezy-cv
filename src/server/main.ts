@@ -1,5 +1,6 @@
 import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
+import { createAiClient } from "@server/ai/claude-client";
 import { readConfig } from "@server/config";
 import { PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
@@ -12,10 +13,11 @@ try {
 }
 
 const config = readConfig(process.env, process.cwd());
+const aiConfig = readAiConfig(process.env);
 const app = buildServer({
   storage: new FileCvStorage(config.dataDir),
   pdf: new PlaywrightPdfRenderer(config.webUrl),
-  isAiConfigured: Boolean(readAiConfig(process.env).apiKey),
+  ai: aiConfig.apiKey ? createAiClient(aiConfig) : undefined,
   isLoggingEnabled: true,
 });
 

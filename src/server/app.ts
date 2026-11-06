@@ -2,6 +2,12 @@ import Fastify, { FastifyInstance, FastifyReply } from "fastify";
 import { ValidationError } from "runtypes";
 import { CvFileSchema } from "@custom-types/vault-types";
 import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
+import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
+import { tailor } from "@server/ai/tailor";
+import {
+  MAX_JOB_AD_LENGTH,
+  TailorRequestSchema,
+} from "@custom-types/tailor-types";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
   CvStorage,
@@ -18,6 +24,26 @@ const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 const HTTP_SERVER_ERROR = 500;
 const HTTP_NOT_IMPLEMENTED = 501;
+const HTTP_UNPROCESSABLE = 422;
+const HTTP_BAD_GATEWAY = 502;
+const HTTP_UNAVAILABLE = 503;
+const HTTP_GATEWAY_TIMEOUT = 504;
+
+function statusOfAi(code: AiErrorCode): number {
+  switch (code) {
+    case "not_configured":
+      return HTTP_UNAVAILABLE;
+    case "timeout":
+      return HTTP_GATEWAY_TIMEOUT;
+    case "refused":
+      return HTTP_UNPROCESSABLE;
+    case "truncated":
+      return HTTP_UNPROCESSABLE;
+    case "api_error":
+    case "invalid_output":
+      return HTTP_BAD_GATEWAY;
+  }
+}
 const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
 function statusOf(code: StorageErrorCode): number {
@@ -63,8 +89,8 @@ export interface ServerOptions {
   /** Makes PDFs. Without it, /api/pdf answers 501. */
   pdf?: PdfRenderer;
 
-  /** Whether an AI key is set. Only this yes/no ever leaves the server, never the key. */
-  isAiConfigured?: boolean;
+  /** The AI client. Without it (no key set), the AI routes answer 503. */
+  ai?: AiClient;
   isLoggingEnabled?: boolean;
 }
 
@@ -72,7 +98,7 @@ export interface ServerOptions {
 export function buildServer({
   storage,
   pdf,
-  isAiConfigured = false,
+  ai,
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -104,6 +130,14 @@ export function buildServer({
     if (error instanceof StorageError) {
       return sendError(reply, statusOf(error.code), error.code, error.message);
     }
+    if (error instanceof AiError) {
+      return sendError(
+        reply,
+        statusOfAi(error.code),
+        `ai_${error.code}`,
+        error.message
+      );
+    }
     if (error instanceof ValidationError) {
       return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
     }
@@ -126,7 +160,30 @@ export function buildServer({
 
   app.get("/api/health", () => ({ status: "ok" }));
 
-  app.get("/api/ai/status", () => ({ isConfigured: isAiConfigured }));
+  app.get("/api/ai/status", () => ({ isConfigured: ai !== undefined }));
+
+  app.post("/api/ai/tailor", async (request, reply) => {
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "No API key. Set ANTHROPIC_API_KEY in .env (see .env.example)."
+      );
+    }
+    const body = TailorRequestSchema.check(request.body);
+    const jobAd = body.jobAd.trim();
+    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
+      );
+    }
+    const { vault } = await storage.loadVault();
+    return tailor(ai, vault, { jobAd, tone: body.tone });
+  });
 
   app.get("/api/vault", () => storage.loadVault());
 

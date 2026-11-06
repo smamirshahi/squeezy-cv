@@ -158,7 +158,7 @@ describe("the API key", () => {
   it("is not in the status route, which only says whether one is set", async () => {
     const app = buildServer({
       storage: new FileCvStorage("/nonexistent"),
-      isAiConfigured: true,
+      ai: new ClaudeAiClient(() => Promise.reject(new Error("unused"))),
     });
     const response = await app.inject({ method: "GET", url: "/api/ai/status" });
     expect(response.json()).toEqual({ isConfigured: true });

@@ -1,0 +1,11 @@
+Data Analyst - Harbour Health Trust (Manchester)
+
+Join our analytics team to turn patient-flow data into decisions.
+
+You must have:
+- Strong SQL and Python skills
+- Experience building dashboards in Power BI or Tableau
+- A degree in a numerate subject
+
+It would be a bonus to have experience in the NHS or another regulated environment, and knowledge
+of statistical modelling. Clear communication with non-technical colleagues is essential.
