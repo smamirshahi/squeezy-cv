@@ -17,7 +17,7 @@ Fields by section type (use only these keys, and only when the text gives the va
 
 - summary: one item with { "text": the whole summary paragraph }.
 - experience: { "jobTitle", "company", "location", "startDate", "endDate" }; bullets are the achievements.
-- education: { "degree", "institution", "location", "startDate", "endDate" }; bullets are extra points (grade, modules).
+- education: { "degree", "institute", "location", "startDate", "endDate" }; bullets are extra points (grade, modules).
 - skills: one item per group with { "category": the group name }; bullets are the individual skills, one each.
 - projects, certifications, publications, volunteering, custom: { "title", "subtitle", "location", "startDate", "endDate", "description" }.
 
