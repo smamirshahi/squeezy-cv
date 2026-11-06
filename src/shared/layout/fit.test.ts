@@ -4,6 +4,8 @@ import {
   FitInput,
   FitState,
   FitTuning,
+  clampFitLimit,
+  clampFitLimits,
   defaultFloors,
   describeFit,
   startFit,
@@ -223,5 +225,27 @@ describe("fill mode", () => {
         PAGE + 1e-9
       );
     }
+  });
+});
+
+describe("limits typed by the user", () => {
+  it("are kept inside their range, and rounded", () => {
+    expect(clampFitLimit("minSpacing", 0)).toBe(0.2);
+    expect(clampFitLimit("minSpacing", 5)).toBe(1);
+    expect(clampFitLimit("minMarginMm", 0)).toBe(5);
+    expect(clampFitLimit("minMarginMm", 100)).toBe(30);
+    expect(clampFitLimit("minBodyPt", 2)).toBe(6);
+    expect(clampFitLimit("minBodyPt", 9.5)).toBe(9.5);
+  });
+
+  it("fall back to the default for something that is not a number", () => {
+    expect(clampFitLimit("minBodyPt", Number.NaN)).toBe(FIT_DEFAULTS.minBodyPt);
+  });
+
+  it("clamps a whole set of limits and leaves unset ones unset", () => {
+    expect(clampFitLimits({ minSpacing: 0, minBodyPt: 99 })).toEqual({
+      minSpacing: 0.2,
+      minBodyPt: 14,
+    });
   });
 });

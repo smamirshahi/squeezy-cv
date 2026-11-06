@@ -79,6 +79,41 @@ export const FIT_DEFAULTS = {
   maxFontScale: 1.1,
 } as const;
 
+/** What the user may type for each limit (spacing is a ratio; margin in mm; body text in pt) */
+export const FIT_LIMIT_RANGES = {
+  minSpacing: { min: 0.2, max: 1 },
+  minMarginMm: { min: 5, max: 30 },
+  minBodyPt: { min: 6, max: 14 },
+} as const;
+
+/** Keeps a typed limit inside its range; anything that is not a number becomes the default */
+export function clampFitLimit(
+  key: keyof typeof FIT_LIMIT_RANGES,
+  value: number
+): number {
+  const { min, max } = FIT_LIMIT_RANGES[key];
+  if (!Number.isFinite(value)) {
+    return FIT_DEFAULTS[key];
+  }
+  return round(Math.min(max, Math.max(min, value)));
+}
+
+/** The user's limits with every value inside its range, so an empty or silly field cannot break auto-fit */
+export function clampFitLimits<T extends Record<string, number | undefined>>(
+  limits: T
+): T {
+  const result: Record<string, number | undefined> = { ...limits };
+  for (const key of Object.keys(
+    FIT_LIMIT_RANGES
+  ) as (keyof typeof FIT_LIMIT_RANGES)[]) {
+    const value = limits[key];
+    if (value !== undefined) {
+      result[key] = clampFitLimit(key, value);
+    }
+  }
+  return result as T;
+}
+
 const SHRINK_ORDER: FitPhase[] = ["spacing", "margin", "font", "hide"];
 const FILL_ORDER: FitPhase[] = ["spacing", "font"];
 
