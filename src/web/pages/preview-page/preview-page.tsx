@@ -60,8 +60,16 @@ export function PreviewPage({
   );
   const restartKey = useMemo(
     () =>
-      JSON.stringify([rendered, style, columnWidth, pageLimit, fitMode, base]),
-    [rendered, style, columnWidth, pageLimit, fitMode, base]
+      JSON.stringify([
+        rendered,
+        style,
+        columnWidth,
+        pageLimit,
+        fitMode,
+        base,
+        variant.fitLimits,
+      ]),
+    [rendered, style, columnWidth, pageLimit, fitMode, base, variant.fitLimits]
   );
   const fit = useAutoFit(
     {
@@ -70,6 +78,7 @@ export function PreviewPage({
       pageLimit,
       base,
       bodyPt: parseFloat(style.typography.bulletText.fontSize),
+      limits: variant.fitLimits,
       restartKey,
     },
     (tuning) => {

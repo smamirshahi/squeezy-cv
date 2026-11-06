@@ -2,6 +2,7 @@ import { PayloadAction, createSlice, current, nanoid } from "@reduxjs/toolkit";
 import { Style } from "@custom-types/styles-types";
 import {
   BulletSelection,
+  FitLimitsValue,
   FitMode,
   FitTuning,
   ItemSelection,
@@ -247,6 +248,18 @@ const variantsSlice = createSlice({
       }
     },
 
+    setFitLimits(
+      state,
+      action: PayloadAction<{ id: string; limits: FitLimitsValue }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (variant) {
+        variant.fitLimits = action.payload.limits;
+        // The old result no longer follows the limits
+        delete variant.tuning;
+      }
+    },
+
     /** Stores the result of an auto-fit run (null clears it) */
     setTuning(
       state,
@@ -294,6 +307,7 @@ export const {
   setVariantAppearance,
   setPageLimit,
   setAutoFit,
+  setFitLimits,
   setTuning,
 } = variantsSlice.actions;
 
