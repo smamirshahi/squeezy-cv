@@ -1,37 +1,52 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Chip, Radio, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Chip,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
+} from "@mui/material";
+import {
+  AI_TASKS,
+  AI_TASK_LABELS,
+  AiProviderId,
+  AiTask,
+} from "@shared/ai/providers";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
-import { createApiClient } from "@store/persistence/api-client";
+import {
+  AiStatus,
+  ApiError,
+  createApiClient,
+} from "@store/persistence/api-client";
 
-interface ProviderCard {
-  id: "claude" | "ollama";
-  title: string;
-  tag: string;
-  detail: string;
+/** Where each task's text goes, for the line under the choice */
+function destinationText(
+  task: AiTask,
+  status: AiStatus,
+  provider: AiProviderId
+): string {
+  const info = status.providers?.find((p) => p.id === provider);
+  if (!info) {
+    return "";
+  }
+  if (!info.isOnline) {
+    return "Nothing leaves this computer.";
+  }
+  return task === "import"
+    ? `The whole text you paste, including your name and contact details, goes to ${info.recipient}.`
+    : `Masked text goes to ${info.recipient} (not your name or contact details).`;
 }
 
-const PROVIDERS: ProviderCard[] = [
-  {
-    id: "claude",
-    title: "Claude",
-    tag: "cloud · paid",
-    detail: "Masked text goes to Anthropic. Billed per use.",
-  },
-  {
-    id: "ollama",
-    title: "Ollama",
-    tag: "local · free",
-    detail: "Runs on this computer. Nothing leaves it.",
-  },
-];
-
-/** The AI provider in use and what is sent, masked and never sent (design B7) */
+/**
+ * AI provider and privacy (design B7): which provider each task uses, online or offline, with
+ * where the text goes. Keys stay in the .env file; only the choice is stored.
+ */
 export function AiSetup(): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
-  const [status, setStatus] = useState<{
-    isConfigured: boolean;
-    provider: "claude" | "ollama";
-  } | null>(null);
+  const [status, setStatus] = useState<AiStatus | null>(null);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     api
@@ -40,6 +55,21 @@ export function AiSetup(): JSX.Element {
       .catch(() => setStatus(null));
   }, [api]);
 
+  async function choose(task: AiTask, provider: AiProviderId): Promise<void> {
+    setError("");
+    try {
+      const choice = await api.setAiChoice({ [task]: provider });
+      setStatus((current) => (current ? { ...current, choice } : current));
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError || caught instanceof Error
+          ? caught.message
+          : "Could not change the provider."
+      );
+    }
+  }
+
+  const providers = status?.providers ?? [];
   return (
     <Box
       sx={{
@@ -51,8 +81,9 @@ export function AiSetup(): JSX.Element {
     >
       <Box
         sx={{
-          maxWidth: 640,
+          maxWidth: 720,
           bgcolor: WORKSPACE_COLORS.panel,
+          color: WORKSPACE_COLORS.text,
           p: 3,
           borderRadius: 1,
           display: "flex",
@@ -63,44 +94,81 @@ export function AiSetup(): JSX.Element {
         <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
           AI provider and privacy
         </Typography>
-        {PROVIDERS.map((provider) => {
-          const isCurrent = status?.provider === provider.id;
-          return (
-            <Box
-              key={provider.id}
-              sx={{
-                display: "flex",
-                gap: 1,
-                p: 1.5,
-                border: `1px solid ${isCurrent ? WORKSPACE_COLORS.accent : WORKSPACE_COLORS.border}`,
-                borderRadius: 1,
-              }}
-            >
-              <Radio
-                checked={isCurrent}
-                disabled
-                inputProps={{ "aria-label": provider.title }}
-              />
-              <Box>
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <Typography fontWeight="bold">{provider.title}</Typography>
-                  <Chip size="small" label={provider.tag} />
-                  {isCurrent && !status?.isConfigured && (
-                    <Chip size="small" color="warning" label="not set up" />
-                  )}
-                </Box>
+        {!status && (
+          <Alert severity="info">
+            The local server did not answer, so the provider cannot be shown.
+          </Alert>
+        )}
+        {error && <Alert severity="error">{error}</Alert>}
+        {status &&
+          AI_TASKS.map((task) => {
+            const current = status.choice?.[task] ?? status.provider;
+            return (
+              <Box
+                key={task}
+                role="group"
+                aria-label={AI_TASK_LABELS[task]}
+                sx={{
+                  p: 1.5,
+                  border: `1px solid ${WORKSPACE_COLORS.border}`,
+                  borderRadius: 1,
+                }}
+              >
+                <Typography fontWeight="bold">
+                  {AI_TASK_LABELS[task]}
+                </Typography>
+                <RadioGroup
+                  value={current}
+                  onChange={(event) =>
+                    void choose(task, event.target.value as AiProviderId)
+                  }
+                >
+                  {providers.map((provider) => (
+                    <FormControlLabel
+                      key={provider.id}
+                      value={provider.id}
+                      disabled={!provider.isConfigured}
+                      control={<Radio size="small" />}
+                      label={
+                        <Box
+                          sx={{ display: "flex", gap: 1, alignItems: "center" }}
+                        >
+                          <span>{provider.label}</span>
+                          <Chip
+                            size="small"
+                            label={provider.isOnline ? "online" : "offline"}
+                            color={provider.isOnline ? "default" : "success"}
+                          />
+                          {!provider.isConfigured && (
+                            <Chip
+                              size="small"
+                              color="warning"
+                              label="not set up"
+                            />
+                          )}
+                          <Typography
+                            sx={{ fontSize: 12, color: "text.secondary" }}
+                          >
+                            {provider.detail}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  ))}
+                </RadioGroup>
                 <Typography sx={{ fontSize: 12.5, color: "text.secondary" }}>
-                  {provider.detail}
+                  {destinationText(task, status, current)}
                 </Typography>
               </Box>
-            </Box>
-          );
-        })}
+            );
+          })}
         <Typography sx={{ fontSize: 12.5, color: "text.secondary" }}>
-          The provider is chosen in the <code>.env</code> file (
-          <code>AI_PROVIDER=claude</code> or <code>ollama</code>); restart the
-          server after changing it. Choosing it here, and online versus offline
-          per task, is planned.
+          Keys and settings stay in the <code>.env</code> file (for example{" "}
+          <code>ANTHROPIC_API_KEY</code>); a provider without a key shows “not
+          set up”. <code>AI_PROVIDER</code> there is the starting choice; what
+          you pick here is remembered on this computer. Cloud AI can use what it
+          is sent to improve its models, depending on the service and plan: for
+          anything sensitive use an offline provider.
         </Typography>
         <Box
           sx={{
@@ -121,8 +189,9 @@ export function AiSetup(): JSX.Element {
           <br />
           <b>Never sent:</b> PDF files, your saved data files
           <br />
-          On the Tailor page, “Preview the exact request” shows the real
-          messages.
+          Employer names, dates and wording can still identify a person; masking
+          reduces the risk, it does not remove it. On the Tailor page, “Preview
+          the exact request” shows the real messages.
         </Box>
       </Box>
     </Box>

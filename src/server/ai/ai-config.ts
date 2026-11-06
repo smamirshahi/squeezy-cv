@@ -19,6 +19,9 @@ export interface AiConfig {
   model: string;
   timeoutMs: number;
   ollama: OllamaConfig;
+
+  /** The timeout each provider uses: AI_TIMEOUT_MS when set, else the provider's own default */
+  timeouts: Record<AiProvider, number>;
 }
 
 const DEFAULT_MODEL = "claude-opus-5-5";
@@ -82,6 +85,18 @@ export function readAiConfig(
       provider === "ollama" ? DEFAULT_OLLAMA_TIMEOUT_MS : DEFAULT_TIMEOUT_MS,
       "AI_TIMEOUT_MS"
     ),
+    timeouts: {
+      claude: positiveInteger(
+        env.AI_TIMEOUT_MS,
+        DEFAULT_TIMEOUT_MS,
+        "AI_TIMEOUT_MS"
+      ),
+      ollama: positiveInteger(
+        env.AI_TIMEOUT_MS,
+        DEFAULT_OLLAMA_TIMEOUT_MS,
+        "AI_TIMEOUT_MS"
+      ),
+    },
     ollama: {
       url: ollamaUrl.replace(/\/$/, ""),
       model: env.OLLAMA_MODEL?.trim() || DEFAULT_OLLAMA_MODEL,
@@ -92,6 +107,11 @@ export function readAiConfig(
       ),
     },
   };
+}
+
+/** The configuration as if `provider` were the chosen one (its own timeout) */
+export function configFor(config: AiConfig, provider: AiProvider): AiConfig {
+  return { ...config, provider, timeoutMs: config.timeouts[provider] };
 }
 
 /** Removes the key from any text before it is shown or logged */

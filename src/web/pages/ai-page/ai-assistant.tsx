@@ -46,7 +46,12 @@ import { RenderedColumns } from "@pages/preview-page/rendered-columns";
 import { render } from "@shared/variant/render";
 import { canAutoAccept } from "@shared/ai/guardrails";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
-import { ApiError, createApiClient } from "@store/persistence/api-client";
+import { AI_PROVIDER_INFO, AiProviderInfo } from "@shared/ai/providers";
+import {
+  ApiError,
+  createApiClient,
+  taskProvider,
+} from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
@@ -101,7 +106,9 @@ export function AiAssistant(): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
 
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
-  const [provider, setProvider] = useState<"claude" | "ollama">("claude");
+  const [provider, setProvider] = useState<AiProviderInfo>(
+    AI_PROVIDER_INFO.claude
+  );
   const [jobAd, setJobAd] = useState<string>("");
   const [tone, setTone] = useState<Tone>("neutral");
   const [pageLimit, setPageLimit] = useState<number>(base.pageLimit);
@@ -116,8 +123,9 @@ export function AiAssistant(): JSX.Element {
     api
       .getAiStatus()
       .then((status) => {
-        setIsConfigured(status.isConfigured);
-        setProvider(status.provider);
+        const tailoring = taskProvider(status, "tailor");
+        setIsConfigured(tailoring.isConfigured);
+        setProvider(tailoring.info);
       })
       .catch(() => setIsConfigured(false));
   }, [api]);
@@ -283,9 +291,9 @@ export function AiAssistant(): JSX.Element {
           </Alert>
         )}
         <Alert severity="info" sx={{ mb: 2 }}>
-          {provider === "ollama"
-            ? "Using your local Ollama model: your CV and the advert stay on this computer."
-            : "When you press Analyse, your CV (without your name and contact details) and the advert are sent to Anthropic's API."}
+          {provider.isOnline
+            ? `When you press Analyse, your CV (without your name and contact details) and the advert are sent to ${provider.recipient}.`
+            : `Using ${provider.label} on this computer: your CV and the advert stay on this computer.`}
         </Alert>
 
         <TextField
@@ -346,7 +354,7 @@ export function AiAssistant(): JSX.Element {
             Preview the exact request
           </Button>
           {isBusy && <CircularProgress size={22} />}
-          {isBusy && provider === "ollama" && (
+          {isBusy && !provider.isOnline && (
             <Typography variant="body2">
               A local model can take several minutes. Keep this page open.
             </Typography>

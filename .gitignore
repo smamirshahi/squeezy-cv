@@ -28,3 +28,6 @@ cv-data-example
 /cv-export.json
 /data/
 .env
+
+# The AI provider chosen in the app (no secrets)
+.ai-settings.json

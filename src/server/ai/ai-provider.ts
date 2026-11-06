@@ -1,4 +1,4 @@
-import { AiConfig } from "@server/ai/ai-config";
+import { AiConfig, AiProvider, configFor } from "@server/ai/ai-config";
 import { AiClient } from "@server/ai/ai-types";
 import { ClaudeAiClient, createAiClient } from "@server/ai/claude-client";
 import { createOllamaSender } from "@server/ai/ollama-client";
@@ -20,4 +20,21 @@ export function createConfiguredAi(config: AiConfig): AiClient | undefined {
   return config.provider === "ollama"
     ? new ClaudeAiClient(createOllamaSender(config))
     : createAiClient(config);
+}
+
+/**
+ * Every provider that can be used right now: Claude when there is a key, Ollama always (it is
+ * only found to be missing when it is asked). Which one a task uses is `AiRegistry`'s business.
+ */
+export function createAiClients(
+  config: AiConfig
+): Partial<Record<AiProvider, AiClient>> {
+  const clients: Partial<Record<AiProvider, AiClient>> = {};
+  for (const provider of ["claude", "ollama"] as const) {
+    const client = createConfiguredAi(configFor(config, provider));
+    if (client) {
+      clients[provider] = client;
+    }
+  }
+  return clients;
 }
