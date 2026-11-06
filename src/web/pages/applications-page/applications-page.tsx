@@ -40,6 +40,10 @@ import {
   toIsoDay,
 } from "@shared/application/application-utils";
 import { ApplicationView } from "@pages/applications-page/application-view";
+import {
+  APPLICATIONS_TOP_BAR_HEIGHT,
+  ApplicationsTopBar,
+} from "@pages/applications-page/applications-top-bar";
 import { createApiClient } from "@store/persistence/api-client";
 
 type LoadState =
@@ -142,77 +146,77 @@ export function ApplicationsPage(): JSX.Element {
   }
 
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-      <Box
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          maxWidth: selectedId ? undefined : 1000,
-          mx: selectedId ? 0 : "auto",
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Link href="/" underline="hover">
-          ← Back to the editor
-        </Link>
-        <Typography variant="h4" component="h1">
-          Applications
-        </Typography>
-
-        {state.status === "loading" && <Typography>Loading…</Typography>}
-        {state.status === "error" && (
-          <Alert severity="error">{state.message}</Alert>
-        )}
-
-        {state.status === "ready" && state.applications.length === 0 && (
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography gutterBottom>No applications yet.</Typography>
-            <Typography color="text.secondary" gutterBottom>
-              Tailor a CV in the editor, then press{" "}
-              <strong>Mark as applied</strong>.
-            </Typography>
-            <Button href="/" variant="contained">
-              Go to the editor
-            </Button>
-          </Paper>
-        )}
-
-        {state.status === "ready" && state.applications.length > 0 && (
-          <ApplicationsTable
-            applications={state.applications}
-            view={view}
-            onViewChange={setView}
-            onSort={sortBy}
-            today={today}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        )}
-      </Box>
-      {selectedId && (
+    <Box>
+      <ApplicationsTopBar />
+      <Box sx={{ display: "flex", alignItems: "flex-start" }}>
         <Box
-          component="aside"
-          aria-label="Application detail"
           sx={{
-            width: 560,
-            flex: "none",
-            minHeight: "100vh",
-            borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-            boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
-            bgcolor: WORKSPACE_COLORS.panel,
-            color: WORKSPACE_COLORS.text,
+            flex: 1,
+            minWidth: 0,
+            maxWidth: selectedId ? undefined : 1000,
+            mx: selectedId ? 0 : "auto",
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
         >
-          <ApplicationView
-            key={selectedId}
-            applicationId={selectedId}
-            isEmbedded
-          />
+          <Typography variant="h4" component="h1">
+            Applications
+          </Typography>
+
+          {state.status === "loading" && <Typography>Loading…</Typography>}
+          {state.status === "error" && (
+            <Alert severity="error">{state.message}</Alert>
+          )}
+
+          {state.status === "ready" && state.applications.length === 0 && (
+            <Paper variant="outlined" sx={{ p: 3 }}>
+              <Typography gutterBottom>No applications yet.</Typography>
+              <Typography color="text.secondary" gutterBottom>
+                Tailor a CV in the editor, then press{" "}
+                <strong>Mark as applied</strong>.
+              </Typography>
+              <Button href="/" variant="contained">
+                Go to the editor
+              </Button>
+            </Paper>
+          )}
+
+          {state.status === "ready" && state.applications.length > 0 && (
+            <ApplicationsTable
+              applications={state.applications}
+              view={view}
+              onViewChange={setView}
+              onSort={sortBy}
+              today={today}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          )}
         </Box>
-      )}
+        {selectedId && (
+          <Box
+            component="aside"
+            aria-label="Application detail"
+            sx={{
+              width: 560,
+              flex: "none",
+              minHeight: `calc(100vh - ${APPLICATIONS_TOP_BAR_HEIGHT}px)`,
+              borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+              boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
+              bgcolor: WORKSPACE_COLORS.panel,
+              color: WORKSPACE_COLORS.text,
+            }}
+          >
+            <ApplicationView
+              key={selectedId}
+              applicationId={selectedId}
+              isEmbedded
+            />
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
