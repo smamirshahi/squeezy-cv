@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Box } from "@mui/material";
+import { AiSetup } from "@pages/workspace/ai-setup";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
@@ -62,6 +63,7 @@ export function Workspace(): JSX.Element {
         )}
         {tool === "vault" && <VaultPage />}
         {tool === "tailor" && <AiAssistant />}
+        {tool === "ai" && <AiSetup />}
       </Box>
     </Box>
   );

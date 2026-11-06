@@ -80,4 +80,6 @@ Package manager is **pnpm**.
 
 **States (#100).** `workspace/workspace-states.tsx`: `ConnectionBanner` (under the top bar when the server is offline or its data unreadable: Retry, and Download as JSON when there are unsaved changes) and `FirstRun` (over the canvas when `isVaultEmpty(vault)` from `shared/vault/is-vault-empty.ts`: Import JSON or add details by hand). The "paste CV text" button waits for #101.
 
+**AI setup and request preview (#99).** `POST /api/ai/tailor/preview {jobAd, tone}` (`server/ai/preview.ts`, `previewTailorRequest`) runs the real `tailor()` with a recording client and returns the messages as they would leave the machine (after `scrub`); it needs no key and sends nothing. The Tailor page has "Preview the exact request" (`ai-page/request-preview.tsx`); the rail's "AI setup" (`workspace/ai-setup.tsx`) shows the provider (read from `GET /api/ai/status`; still chosen in `.env`) and what is sent / masked / never sent. Choosing the provider in the UI is #102.
+
 **Personal data:** the real CV goes in `data/` (git-ignored, as is `cv-export.json`); never commit it. `data.example/` shows the layout and `fixtures/` holds fake data for tests. Older real exports are handled by the migration.

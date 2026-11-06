@@ -2,6 +2,7 @@ import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { WorkspaceTool, setTool } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -33,6 +34,12 @@ const ITEMS: RailItem[] = [
   },
 ];
 
+const SETTINGS: RailItem = {
+  label: "AI setup",
+  icon: <MemoryIcon fontSize="small" />,
+  tool: "ai",
+};
+
 /** The left rail: switches between the tools of the workspace */
 export function ToolRail(): JSX.Element {
   const dispatch = useAppDispatch();
@@ -54,7 +61,10 @@ export function ToolRail(): JSX.Element {
         gap: 0.25,
       }}
     >
-      {ITEMS.map((item) => {
+      {[...ITEMS, null, SETTINGS].map((item) => {
+        if (item === null) {
+          return <Box key="spacer" sx={{ flex: 1 }} />;
+        }
         const isOn = item.tool === tool;
         return (
           <ButtonBase

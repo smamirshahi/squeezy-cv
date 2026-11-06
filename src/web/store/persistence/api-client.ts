@@ -79,6 +79,12 @@ async function request(
   return payload;
 }
 
+/** The messages tailoring would send, see the server's `previewTailorRequest` */
+export interface TailorPreview {
+  provider: "claude" | "ollama";
+  calls: { promptName: string; system: string; input: string }[];
+}
+
 export interface ApiClient {
   loadVault: () => Promise<CvFile>;
   saveVault: (file: CvFile) => Promise<void>;
@@ -95,6 +101,9 @@ export interface ApiClient {
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
+
+  /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
+  previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
 
   /** The PDF of a saved variant, made by the server */
   createPdf: (variantId: string) => Promise<Blob>;
@@ -161,6 +170,14 @@ export function createApiClient(
       return TailorResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/tailor", body)
       );
+    },
+    async previewTailor(body) {
+      return (await request(
+        fetchImpl,
+        "POST",
+        "/api/ai/tailor/preview",
+        body
+      )) as TailorPreview;
     },
     async createPdf(variantId) {
       return (await request(
