@@ -157,8 +157,16 @@ describe("the AI routes with a registry", () => {
     expect(status).toMatchObject({ isConfigured: true, provider: "claude" });
     expect(status.providers.map((p: { id: string }) => p.id)).toEqual([
       "claude",
+      "gemini",
+      "groq",
       "ollama",
     ]);
+    // only the ones with a client are set up
+    expect(
+      status.providers
+        .filter((p: { isConfigured: boolean }) => p.isConfigured)
+        .map((p: { id: string }) => p.id)
+    ).toEqual(["claude", "ollama"]);
     expect(status.choice).toEqual({
       tailor: "claude",
       import: "claude",
