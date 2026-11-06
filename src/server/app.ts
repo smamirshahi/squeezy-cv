@@ -13,6 +13,7 @@ import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
 import { AiChoiceError, AiRegistry } from "@server/ai/ai-registry";
+import { AiProviderId } from "@shared/ai/providers";
 import {
   HideRequestSchema,
   MAX_HIDE_CANDIDATES,
@@ -120,7 +121,7 @@ export interface ServerOptions {
   ai?: AiClient;
 
   /** Which provider `ai` is, for the page to say where the CV goes */
-  aiProvider?: "claude" | "ollama";
+  aiProvider?: AiProviderId;
 
   /** Several providers and the user's choice per task. When given, `ai` and `aiProvider` are not used. */
   aiRegistry?: AiRegistry;

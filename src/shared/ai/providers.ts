@@ -1,5 +1,5 @@
 /** The AI services the app can use. Add a provider here, in `server/ai/ai-registry.ts` and in `ai-provider.ts`. */
-export const AI_PROVIDER_IDS = ["claude", "ollama"] as const;
+export const AI_PROVIDER_IDS = ["claude", "gemini", "groq", "ollama"] as const;
 export type AiProviderId = (typeof AI_PROVIDER_IDS)[number];
 
 /** What the AI is used for; the user picks a provider for each */
@@ -26,6 +26,9 @@ export interface AiProviderInfo {
 
   /** One line on cost and where text goes */
   detail: string;
+
+  /** A caution to show with the provider (free tiers may train on what they receive) */
+  warning?: string;
 }
 
 export const AI_PROVIDER_INFO: Record<AiProviderId, AiProviderInfo> = {
@@ -35,6 +38,24 @@ export const AI_PROVIDER_INFO: Record<AiProviderId, AiProviderInfo> = {
     isOnline: true,
     recipient: "Anthropic",
     detail: "Sent to Anthropic. Billed per use.",
+  },
+  gemini: {
+    id: "gemini",
+    label: "Gemini",
+    isOnline: true,
+    recipient: "Google",
+    detail: "Sent to Google. Has a free tier.",
+    warning:
+      "Free tiers may use what you send to improve Google's models. Use Ollama for anything sensitive.",
+  },
+  groq: {
+    id: "groq",
+    label: "Groq",
+    isOnline: true,
+    recipient: "Groq",
+    detail: "Sent to Groq. Has a free tier.",
+    warning:
+      "Free tiers may keep or use what you send. Check Groq's data terms, and use Ollama for anything sensitive.",
   },
   ollama: {
     id: "ollama",

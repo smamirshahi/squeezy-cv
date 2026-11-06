@@ -159,15 +159,21 @@ export function AiSetup(): JSX.Element {
                 <Typography sx={{ fontSize: 12.5, color: "text.secondary" }}>
                   {destinationText(task, status, current)}
                 </Typography>
+                {providers.find((p) => p.id === current)?.warning && (
+                  <Typography sx={{ fontSize: 12.5, color: "var(--wrt)" }}>
+                    {providers.find((p) => p.id === current)?.warning}
+                  </Typography>
+                )}
               </Box>
             );
           })}
         <Typography sx={{ fontSize: 12.5, color: "text.secondary" }}>
           Keys and settings stay in the <code>.env</code> file (for example{" "}
-          <code>ANTHROPIC_API_KEY</code>); a provider without a key shows “not
-          set up”. <code>AI_PROVIDER</code> there is the starting choice; what
-          you pick here is remembered on this computer. Cloud AI can use what it
-          is sent to improve its models, depending on the service and plan: for
+          <code>ANTHROPIC_API_KEY</code>, <code>GEMINI_API_KEY</code>,{" "}
+          <code>GROQ_API_KEY</code>); a provider without a key shows “not set
+          up”. <code>AI_PROVIDER</code> there is the starting choice; what you
+          pick here is remembered on this computer. Cloud AI can use what it is
+          sent to improve its models, depending on the service and plan: for
           anything sensitive use an offline provider.
         </Typography>
         <Box
