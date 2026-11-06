@@ -57,18 +57,7 @@ export function Workspace(): JSX.Element {
           </>
         )}
         {tool === "vault" && <VaultPage />}
-        {tool === "tailor" && (
-          <Box
-            sx={{
-              flex: 1,
-              overflow: "auto",
-              bgcolor: WORKSPACE_COLORS.panel,
-              p: 3,
-            }}
-          >
-            <AiAssistant />
-          </Box>
-        )}
+        {tool === "tailor" && <AiAssistant />}
       </Box>
     </Box>
   );

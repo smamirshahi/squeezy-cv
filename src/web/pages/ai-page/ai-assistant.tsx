@@ -10,6 +10,8 @@ import {
   FormControlLabel,
   MenuItem,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { MAX_JOB_AD_LENGTH, TailorResult } from "@custom-types/tailor-types";
@@ -23,6 +25,9 @@ import {
   defaultDecisions,
   describeItemChange,
 } from "@shared/ai/apply-proposal";
+import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
+import { RenderedColumns } from "@pages/preview-page/rendered-columns";
+import { render } from "@shared/variant/render";
 import { canAutoAccept } from "@shared/ai/guardrails";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
 import { ApiError, createApiClient } from "@store/persistence/api-client";
@@ -149,131 +154,242 @@ export function AiAssistant(): JSX.Element {
     setCreated(name);
   }
 
+  const [view, setView] = useState<"current" | "proposed">("proposed");
+  const columnWidth = useAppSelector((s) => s.app.columnWidth);
+  const structure = useAppSelector((s) => s.app.structure);
+
+  // The CV as it would be with the accepted changes, drawn live in the middle
+  const proposed = useMemo(() => {
+    if (!result || !decisions) {
+      return null;
+    }
+    const { variant, altUpdates } = applyProposal(
+      vault,
+      base,
+      result.proposal,
+      decisions,
+      { id: "preview", name: "preview" }
+    );
+    const previewVault = structuredClone(vault);
+    for (const update of altUpdates) {
+      const bullet = previewVault.sections
+        .find((section) => section.id === update.sectionId)
+        ?.items.find((item) => item.id === update.itemId)
+        ?.bullets.find((entry) => entry.id === update.bulletId);
+      if (bullet) {
+        bullet.alt = { ...bullet.alt, [update.wording]: update.text };
+      }
+    }
+    return render(previewVault, { ...variant, layout: structure });
+  }, [result, decisions, vault, base, structure]);
+  const current = useMemo(
+    () => render(vault, { ...base, layout: structure }),
+    [vault, base, structure]
+  );
+  const shown = view === "proposed" && proposed ? proposed : current;
+
   return (
-    <>
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        AI assistant
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        Paste a job advert. The AI suggests which items to show, what to
-        highlight, rewordings and what your CV is missing. It may only select,
-        highlight and rephrase what you already wrote. You review everything;
-        nothing changes until you create a variant, and your current variant
-        stays as it is.
-      </Typography>
+    <Box sx={{ display: "flex", flex: 1, minWidth: 0, minHeight: 0 }}>
+      <Box
+        component="aside"
+        aria-label="Job ad and analysis"
+        sx={{
+          width: 360,
+          flex: "none",
+          overflow: "auto",
+          p: 2,
+          bgcolor: "#fff",
+          borderRight: "1px solid #DDE0E4",
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          AI assistant
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          Paste a job advert. The AI suggests which items to show, what to
+          highlight, rewordings and what your CV is missing. It may only select,
+          highlight and rephrase what you already wrote. You review everything;
+          nothing changes until you create a variant, and your current variant
+          stays as it is.
+        </Typography>
 
-      {isConfigured === false && (
+        {isConfigured === false && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            AI is not set up. Either put <code>ANTHROPIC_API_KEY=...</code> in
+            the <code>.env</code> file (paid, Claude), or use a free local model
+            with <code>AI_PROVIDER=ollama</code> (see <code>.env.example</code>
+            ), then restart the server.
+          </Alert>
+        )}
+        {!isSaved && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            The AI works on the saved CV. Save your changes first.
+          </Alert>
+        )}
         <Alert severity="info" sx={{ mb: 2 }}>
-          AI is not set up. Either put <code>ANTHROPIC_API_KEY=...</code> in the{" "}
-          <code>.env</code> file (paid, Claude), or use a free local model with{" "}
-          <code>AI_PROVIDER=ollama</code> (see <code>.env.example</code>), then
-          restart the server.
+          {provider === "ollama"
+            ? "Using your local Ollama model: your CV and the advert stay on this computer."
+            : "When you press Analyse, your CV (without your name and contact details) and the advert are sent to Anthropic's API."}
         </Alert>
-      )}
-      {!isSaved && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          The AI works on the saved CV. Save your changes first.
-        </Alert>
-      )}
-      <Alert severity="info" sx={{ mb: 2 }}>
-        {provider === "ollama"
-          ? "Using your local Ollama model: your CV and the advert stay on this computer."
-          : "When you press Analyse, your CV (without your name and contact details) and the advert are sent to Anthropic's API."}
-      </Alert>
 
-      <TextField
-        label="Job advert"
-        multiline
-        minRows={6}
-        fullWidth
-        value={jobAd}
-        onChange={(event) => setJobAd(event.target.value)}
-        helperText={`${jobAd.length} / ${MAX_JOB_AD_LENGTH} characters`}
-      />
-      <Box display="flex" gap={2} sx={{ mt: 1 }} alignItems="center">
         <TextField
-          select
+          label="Job advert"
+          multiline
+          minRows={6}
+          fullWidth
+          value={jobAd}
+          onChange={(event) => setJobAd(event.target.value)}
+          helperText={`${jobAd.length} / ${MAX_JOB_AD_LENGTH} characters`}
+        />
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          gap={2}
+          sx={{ mt: 1 }}
+          alignItems="center"
+        >
+          <TextField
+            select
+            size="small"
+            label="Tone"
+            value={tone}
+            onChange={(event) => setTone(event.target.value as Tone)}
+            sx={{ minWidth: 160 }}
+          >
+            {TONES.map((t) => (
+              <MenuItem key={t.value} value={t.value}>
+                {t.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            size="small"
+            label="Page limit"
+            value={pageLimit}
+            onChange={(event) => setPageLimit(Number(event.target.value))}
+            sx={{ minWidth: 120 }}
+          >
+            <MenuItem value={1}>1 page</MenuItem>
+            <MenuItem value={2}>2 pages</MenuItem>
+          </TextField>
+          <Button
+            variant="contained"
+            disabled={
+              isBusy || !isConfigured || !isSaved || jobAd.trim().length === 0
+            }
+            onClick={() => void analyse()}
+          >
+            Analyse
+          </Button>
+          {isBusy && <CircularProgress size={22} />}
+          {isBusy && provider === "ollama" && (
+            <Typography variant="body2">
+              A local model can take several minutes. Keep this page open.
+            </Typography>
+          )}
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {result && <Analysis result={result} />}
+      </Box>
+      <Box
+        component="main"
+        aria-label="Proposed CV"
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          overflow: "auto",
+          bgcolor: "#D6D9DD",
+          p: 2,
+        }}
+      >
+        <ToggleButtonGroup
+          exclusive
           size="small"
-          label="Tone"
-          value={tone}
-          onChange={(event) => setTone(event.target.value as Tone)}
-          sx={{ minWidth: 160 }}
+          value={view}
+          onChange={(_event, value: "current" | "proposed" | null) => {
+            if (value) {
+              setView(value);
+            }
+          }}
+          sx={{ mb: 2, bgcolor: "#fff" }}
         >
-          {TONES.map((t) => (
-            <MenuItem key={t.value} value={t.value}>
-              {t.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          select
-          size="small"
-          label="Page limit"
-          value={pageLimit}
-          onChange={(event) => setPageLimit(Number(event.target.value))}
-          sx={{ minWidth: 120 }}
-        >
-          <MenuItem value={1}>1 page</MenuItem>
-          <MenuItem value={2}>2 pages</MenuItem>
-        </TextField>
-        <Button
-          variant="contained"
-          disabled={
-            isBusy || !isConfigured || !isSaved || jobAd.trim().length === 0
-          }
-          onClick={() => void analyse()}
-        >
-          Analyse
-        </Button>
-        {isBusy && <CircularProgress size={22} />}
-        {isBusy && provider === "ollama" && (
+          <ToggleButton value="current">Current</ToggleButton>
+          <ToggleButton value="proposed" disabled={!proposed}>
+            Proposed
+          </ToggleButton>
+        </ToggleButtonGroup>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box
+            sx={{
+              zoom: 0.72,
+              width: `${A4_DIMENSION_MM.width}mm`,
+              minHeight: `${A4_DIMENSION_MM.height}mm`,
+              boxSizing: "border-box",
+              p: `${PAPER_MARGIN_MM.normal}mm`,
+              bgcolor: "#fff",
+              color: "#000",
+              boxShadow: 3,
+              fontSize: "12pt",
+              fontFamily: "Calibri, sans-serif",
+              "& a": { color: "inherit", textDecoration: "none" },
+            }}
+          >
+            <RenderedColumns rendered={shown} columnWidth={columnWidth} />
+          </Box>
+        </Box>
+      </Box>
+      <Box
+        component="aside"
+        aria-label="Review"
+        sx={{
+          width: 400,
+          flex: "none",
+          overflow: "auto",
+          p: 2,
+          bgcolor: "#fff",
+          borderLeft: "1px solid #DDE0E4",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold">
+          Review
+        </Typography>
+        {result && decisions ? (
+          <Changes
+            result={result}
+            decisions={decisions}
+            setDecisions={setDecisions}
+            onCreate={create}
+          />
+        ) : (
           <Typography variant="body2">
-            A local model can take several minutes. Keep this page open.
+            Analyse a job advert to see the proposed changes here.
           </Typography>
         )}
+        {created && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Created the variant &quot;{created}&quot; and switched to it. Save
+            to keep it.
+          </Alert>
+        )}
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {result && decisions && (
-        <Review
-          result={result}
-          decisions={decisions}
-          setDecisions={setDecisions}
-          onCreate={create}
-        />
-      )}
-      {created && (
-        <Alert severity="success" sx={{ mt: 2 }}>
-          Created the variant &quot;{created}&quot; and switched to it. Save to
-          keep it.
-        </Alert>
-      )}
-    </>
+    </Box>
   );
 }
 
-interface ReviewProps {
+interface AnalysisProps {
   result: TailorResult;
-  decisions: Decisions;
-  setDecisions: (next: Decisions) => void;
-  onCreate: () => void;
 }
 
-function Review({
-  result,
-  decisions,
-  setDecisions,
-  onCreate,
-}: ReviewProps): JSX.Element {
-  const vault = useAppSelector(vaultSelector);
-  const base = useAppSelector(activeVariantSelector);
+/** What the job asks for, what the CV lacks, warnings and the draft statement */
+function Analysis({ result }: AnalysisProps): JSX.Element {
   const { requirements, proposal, warnings } = result;
-  const sorted = [...proposal.items].sort((a, b) => b.relevance - a.relevance);
 
   return (
     <Box sx={{ mt: 3 }}>
@@ -323,7 +439,31 @@ function Review({
           </Typography>
         </Box>
       )}
+    </Box>
+  );
+}
 
+interface ChangesProps {
+  result: TailorResult;
+  decisions: Decisions;
+  setDecisions: (next: Decisions) => void;
+  onCreate: () => void;
+}
+
+/** The proposed changes, each with a checkbox, and the button that creates the variant */
+function Changes({
+  result,
+  decisions,
+  setDecisions,
+  onCreate,
+}: ChangesProps): JSX.Element {
+  const vault = useAppSelector(vaultSelector);
+  const base = useAppSelector(activeVariantSelector);
+  const { proposal } = result;
+  const sorted = [...proposal.items].sort((a, b) => b.relevance - a.relevance);
+
+  return (
+    <Box>
       <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 2 }}>
         Proposed changes
       </Typography>
