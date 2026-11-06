@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Box } from "@mui/material";
-import { EditorPage } from "@pages/editor-page/editor-page";
+import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { Inspector } from "@pages/workspace/inspector";
@@ -56,18 +56,7 @@ export function Workspace(): JSX.Element {
             <Inspector />
           </>
         )}
-        {tool === "vault" && (
-          <Box
-            sx={{
-              flex: 1,
-              overflow: "auto",
-              bgcolor: WORKSPACE_COLORS.canvas,
-              p: 2,
-            }}
-          >
-            <EditorPage />
-          </Box>
-        )}
+        {tool === "vault" && <VaultPage />}
         {tool === "tailor" && (
           <Box
             sx={{
