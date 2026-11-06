@@ -11,7 +11,11 @@ import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { appSelector } from "@store/app/app-slice";
+import {
+  appSelector,
+  setPageCount,
+  setSelectedBlock,
+} from "@store/app/app-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import {
   activeVariantSelector,
@@ -121,6 +125,35 @@ export function PreviewPage({
   const paperRef = useRef<HTMLDivElement | null>(null);
   const pagination = usePagination(paperRef, marginMm, layoutKey);
   const { pageCount, breaks } = pagination;
+  useEffect(() => {
+    if (!isPrintView) {
+      dispatch(setPageCount(pageCount));
+    }
+  }, [dispatch, isPrintView, pageCount]);
+
+  // Clicking a part of the CV selects it; the inspector shows it
+  const selectedBlock = useAppSelector((s) => s.app.selectedBlock);
+  function handleSelect(event: React.MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const itemElement = target.closest<HTMLElement>("[data-cv-item]");
+    const sectionElement = target.closest<HTMLElement>("[data-cv-section]");
+    dispatch(
+      setSelectedBlock(
+        sectionElement
+          ? {
+              sectionId: sectionElement.dataset.cvSection ?? "",
+              itemId: itemElement?.dataset.cvItem,
+            }
+          : null
+      )
+    );
+  }
+  let selectedSelector = "";
+  if (selectedBlock) {
+    selectedSelector = selectedBlock.itemId
+      ? `[data-cv-item="${selectedBlock.itemId}"]`
+      : `[data-cv-section="${selectedBlock.sectionId}"]`;
+  }
 
   // Take the next auto-fit step once the pages of what is drawn now have been measured
   const { step } = fit;
@@ -166,8 +199,25 @@ export function PreviewPage({
         }}
         elevation={3}
         style={paperVariables}
+        onClick={isPrintView ? undefined : handleSelect}
         sx={{
           position: "relative",
+          ...(isPrintView || !selectedSelector
+            ? {}
+            : {
+                [`& ${selectedSelector}`]: {
+                  outline: "2px solid #B8400D",
+                  outlineOffset: "3px",
+                  borderRadius: "2px",
+                },
+              }),
+          ...(isPrintView
+            ? {}
+            : {
+                "& [data-cv-item]:hover, & [data-cv-section]:hover": {
+                  cursor: "pointer",
+                },
+              }),
           flexShrink: 0,
           ...(isPrintView
             ? {

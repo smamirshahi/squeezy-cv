@@ -135,7 +135,7 @@ interface BulletsProps {
 }
 
 /** The bullets of one item: show/hide, wording, order */
-function ItemBullets({ item }: BulletsProps): JSX.Element {
+export function ItemBullets({ item }: BulletsProps): JSX.Element {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sensors = useReorderSensors();

@@ -2,6 +2,14 @@ import { EditorSectionId, PageStructure } from "@store/app/app-slice-types";
 import { AvailableFonts } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
+/** The tools in the left rail of the workspace */
+export type WorkspaceTool = "variants" | "vault" | "tailor";
+
+export interface SelectedBlock {
+  sectionId: string;
+  itemId?: string;
+}
+
 /** State of the App slice */
 interface AppState {
   selectedTypography: AvailableFonts | null;
@@ -16,6 +24,15 @@ interface AppState {
   };
 
   selectedSectionInEditorPage: EditorSectionId;
+
+  /** Which tool of the workspace is open */
+  tool: WorkspaceTool;
+
+  /** The block selected on the canvas: a section, or one item of it */
+  selectedBlock: SelectedBlock | null;
+
+  /** Pages the preview measured, for the top bar */
+  pageCount: number;
 
   shouldApplyChanges: boolean;
   shouldDiscardChanges: boolean;
@@ -41,6 +58,9 @@ export const initialState: AppState = {
     right: 50,
   },
   selectedSectionInEditorPage: "metaData",
+  tool: "variants",
+  selectedBlock: null,
+  pageCount: 1,
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
   shouldAddNewItem: false,
@@ -64,6 +84,18 @@ const appSlice = createSlice({
       action: PayloadAction<EditorSectionId>
     ) {
       state.selectedSectionInEditorPage = action.payload;
+    },
+
+    setTool(state, action: PayloadAction<WorkspaceTool>) {
+      state.tool = action.payload;
+    },
+
+    setSelectedBlock(state, action: PayloadAction<SelectedBlock | null>) {
+      state.selectedBlock = action.payload;
+    },
+
+    setPageCount(state, action: PayloadAction<number>) {
+      state.pageCount = action.payload;
     },
 
     setColumnWidth(state, action: PayloadAction<AppState["columnWidth"]>) {
@@ -95,6 +127,9 @@ export const {
   updatePageStructure,
   setSelectedTypography,
   setSelectedSectionInEditorPage,
+  setTool,
+  setSelectedBlock,
+  setPageCount,
   setColumnWidth,
   resetAppState,
   setShouldApplyChanges,
