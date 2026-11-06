@@ -40,6 +40,9 @@ export const SkillDisplaySchema = Union(
   Literal("stars")
 );
 
+/** Skills by their vault groups, or one flat list with the highest level first */
+export const SkillGroupBySchema = Union(Literal("group"), Literal("level"));
+
 export const EmphasisSchema = Union(Literal("normal"), Literal("high"));
 
 export const BulletSelectionSchema = Object({
@@ -152,6 +155,9 @@ export const VariantSchema = Object({
   /** How skill levels are shown on the page (the levels themselves live in the vault) */
   skillDisplay: SkillDisplaySchema.optional(),
 
+  /** Missing = by group */
+  skillGroupBy: SkillGroupBySchema.optional(),
+
   /** Columns of the skill lists, 1 or 2 (default 1) */
   skillColumns: Union(Literal(1), Literal(2)).optional(),
 
@@ -166,6 +172,7 @@ export type TailorRecord = Static<typeof TailorRecordSchema>;
 export type FitTuning = Static<typeof FitTuningSchema>;
 export type FitLimitsValue = Static<typeof FitLimitsSchema>;
 export type FitMode = Static<typeof FitModeSchema>;
+export type SkillGroupBy = Static<typeof SkillGroupBySchema>;
 export type SkillDisplay = Static<typeof SkillDisplaySchema>;
 export type Tone = Static<typeof ToneSchema>;
 export type Wording = Static<typeof WordingSchema>;

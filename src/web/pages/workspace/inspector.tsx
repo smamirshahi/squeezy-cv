@@ -24,6 +24,7 @@ import {
   twoColumnLayout,
 } from "@shared/vault/page-structure";
 import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
+import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
 import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -50,7 +51,11 @@ import {
 } from "@shared/layout/fit";
 import { sectionsSelector } from "@store/vault/vault-slice";
 import { Side } from "@custom-types/styles-types";
-import { SkillDisplay, Variant } from "@custom-types/variant-types";
+import {
+  SkillGroupBy,
+  SkillDisplay,
+  Variant,
+} from "@custom-types/variant-types";
 import { tracksLevels } from "@shared/vault/vault-utils";
 import { Section } from "@custom-types/vault-types";
 
@@ -327,6 +332,20 @@ function SkillStyleControls({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      <Heading>Group by</Heading>
+      <ToggleButtonGroup
+        exclusive
+        fullWidth
+        size="small"
+        aria-label="Skill grouping"
+        value={variant.skillGroupBy ?? "group"}
+        onChange={(_event, value: SkillGroupBy | null) =>
+          value && dispatch(setSkillStyle({ id: variant.id, groupBy: value }))
+        }
+      >
+        <ToggleButton value="group">Vault groups</ToggleButton>
+        <ToggleButton value="level">Flat, highest level first</ToggleButton>
+      </ToggleButtonGroup>
       <Heading>Layout</Heading>
       <ToggleButtonGroup
         exclusive
@@ -362,6 +381,7 @@ function SkillStyleControls({
           </Box>
         </>
       )}
+      <SkillList section={section} variant={variant} />
       <Typography
         sx={{
           fontSize: 12,

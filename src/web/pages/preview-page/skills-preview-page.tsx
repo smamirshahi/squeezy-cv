@@ -85,12 +85,14 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
       />
       {section.items.map((group) => (
         <React.Fragment key={group.id}>
-          <CvTypography
-            variant="headingSm"
-            pageBreak="keep-with-next"
-            isEmphasised={group.emphasis === "high"}
-            text={group.fields.category ?? ""}
-          />
+          {group.fields.category !== undefined && (
+            <CvTypography
+              variant="headingSm"
+              pageBreak="keep-with-next"
+              isEmphasised={group.emphasis === "high"}
+              text={group.fields.category}
+            />
+          )}
           <Grid container direction="row" alignItems="flex-start">
             {group.bullets.map((skill) => (
               <Grid

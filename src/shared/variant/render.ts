@@ -143,6 +143,31 @@ function renderItems(
     }));
 }
 
+/** One item with every visible skill, the highest level first (unrated last, ties keep their order) */
+function flattenSkills(items: RenderedItem[]): RenderedItem[] {
+  if (items.length === 0) {
+    return items;
+  }
+  const bullets = items
+    .flatMap((item) => item.bullets)
+    .map((bullet, index) => ({ bullet, index }))
+    .sort(
+      (a, b) =>
+        (b.bullet.rating ?? 0) - (a.bullet.rating ?? 0) || a.index - b.index
+    )
+    .map(({ bullet }) => bullet);
+  return bullets.length === 0
+    ? []
+    : [
+        {
+          id: items[0].id,
+          fields: {},
+          bullets,
+          emphasis: "normal",
+        },
+      ];
+}
+
 /**
  * Resolves a vault and a variant into the document to draw. Pure: same input, same output.
  * The layout is reconciled with the vault, so a section added later still appears and a
@@ -171,12 +196,16 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
     }
     const isSkills = section.type === "skills";
     const hasLevels = !isSkills || tracksLevels(section);
-    const items = renderItems(
+    const grouped = renderItems(
       section.items,
       variant.selection,
       hasLevels,
       isSkills && hasLevels ? variant.skillMinLevel : undefined
     );
+    const items =
+      isSkills && variant.skillGroupBy === "level"
+        ? flattenSkills(grouped)
+        : grouped;
     return items.length === 0
       ? []
       : [
