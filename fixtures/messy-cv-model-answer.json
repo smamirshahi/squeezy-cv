@@ -1,0 +1,144 @@
+{
+  "profile": {
+    "fullName": "JORDAN A. EXAMPLE",
+    "headline": "Senior Data Analyst",
+    "email": "jordan.example@example.invalid",
+    "phone": "+44 (0)7700 900123",
+    "location": "Leeds, UK",
+    "rightToWork": "British citizen",
+    "Nobel Prize winner": null
+  },
+  "links": [
+    {
+      "label": "linkedin.com/in/jordan-example-fake",
+      "url": "linkedin.com/in/jordan-example-fake"
+    },
+    {
+      "label": "github.com/jordan-example-fake",
+      "url": "github.com/jordan-example-fake"
+    }
+  ],
+  "sections": [
+    {
+      "type": "summary",
+      "title": "PROFILE",
+      "items": [
+        {
+          "fields": {
+            "text": "Analytical data professional with 8 years' experience turning messy data into decisions.   Strong at SQL and stakeholder communication."
+          },
+          "bullets": [],
+          "tags": []
+        }
+      ]
+    },
+    {
+      "type": "experience",
+      "title": "WORK HISTORY",
+      "items": [
+        {
+          "fields": {
+            "jobTitle": "Senior Data Analyst",
+            "company": "Northwind Retail Ltd",
+            "location": "Leeds",
+            "startDate": "2021-03"
+          },
+          "bullets": [
+            "Cut weekly reporting time from 6 hours to 45 minutes by automating dashboards in Power BI",
+            "Led a team of 3 analysts on a churn model that saved £120k a year",
+            "Presented findings to the board each quarter"
+          ],
+          "tags": []
+        },
+        {
+          "fields": {
+            "jobTitle": "Data Analyst",
+            "company": "Contoso Logistics",
+            "location": "Manchester",
+            "startDate": "2017-09",
+            "endDate": "2021-02"
+          },
+          "bullets": [
+            "Built SQL pipelines feeding 14 regional reports",
+            "Trained 20 colleagues on Excel and self-service BI"
+          ],
+          "tags": []
+        }
+      ]
+    },
+    {
+      "type": "education",
+      "title": "EDUCATION",
+      "items": [
+        {
+          "fields": {
+            "degree": "BSc (Hons) Mathematics",
+            "institution": "University of Leeds",
+            "location": "",
+            "startDate": "2013",
+            "endDate": "2016"
+          },
+          "bullets": [
+            "Modules: statistics, linear algebra"
+          ],
+          "tags": []
+        }
+      ]
+    },
+    {
+      "type": "skills",
+      "title": "TECHNICAL SKILLS",
+      "items": [
+        {
+          "fields": {
+            "category": "Languages"
+          },
+          "bullets": [
+            "SQL",
+            "Python",
+            "R"
+          ],
+          "tags": []
+        },
+        {
+          "fields": {
+            "category": "Tools"
+          },
+          "bullets": [
+            "Power BI",
+            "Excel",
+            "Git"
+          ],
+          "tags": []
+        },
+        {
+          "fields": {
+            "category": "Soft skills"
+          },
+          "bullets": [
+            "communication",
+            "mentoring"
+          ],
+          "tags": []
+        }
+      ]
+    },
+    {
+      "type": "certifications",
+      "title": "CERTIFICATIONS",
+      "items": [
+        {
+          "fields": {
+            "title": "Microsoft Certified: Data Analyst Associate"
+          },
+          "bullets": [],
+          "tags": [],
+          "subtitle": "",
+          "location": "",
+          "startDate": "",
+          "endDate": "2022"
+        }
+      ]
+    }
+  ]
+}
