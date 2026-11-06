@@ -5,6 +5,7 @@ import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
+import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
@@ -30,43 +31,52 @@ export function GenericSectionPreviewPage({
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text={section.title} />
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
       {visibleItems.map((item) => (
         <Grid
           container
           key={item.id}
           direction="column"
           alignItems="flex-start"
-          sx={{ mb: "10px", breakInside: "avoid" }}
+          sx={{ mb: "10px" }}
         >
-          <CvTypography
-            variant="headingSm"
-            isEmphasised={item.emphasis === "high"}
-            text={item.fields.title ?? ""}
-          />
-          <Grid container direction="row" alignItems="center" gap={3}>
+          <CvBlock shouldKeepWithNext>
             <CvTypography
-              variant="bodyMd"
+              variant="headingSm"
               isEmphasised={item.emphasis === "high"}
-              text={item.fields.subtitle ?? ""}
+              text={item.fields.title ?? ""}
             />
-            <IconWithText
-              icon={LocationOnIcon}
-              text={item.fields.location ?? ""}
-              variant="bodyMd"
-            />
-          </Grid>
-          {item.fields.startDate && (
-            <DatePeriod
-              datePeriod={{
-                start: item.fields.startDate,
-                end: item.fields.endDate,
-              }}
-            />
-          )}
-          {item.fields.description && (
-            <CvTypography variant="bulletText" text={item.fields.description} />
-          )}
+            <Grid container direction="row" alignItems="center" gap={3}>
+              <CvTypography
+                variant="bodyMd"
+                isEmphasised={item.emphasis === "high"}
+                text={item.fields.subtitle ?? ""}
+              />
+              <IconWithText
+                icon={LocationOnIcon}
+                text={item.fields.location ?? ""}
+                variant="bodyMd"
+              />
+            </Grid>
+            {item.fields.startDate && (
+              <DatePeriod
+                datePeriod={{
+                  start: item.fields.startDate,
+                  end: item.fields.endDate,
+                }}
+              />
+            )}
+            {item.fields.description && (
+              <CvTypography
+                variant="bulletText"
+                text={item.fields.description}
+              />
+            )}
+          </CvBlock>
           {item.bullets.length > 0 && (
             <Box
               component="ul"
@@ -77,7 +87,11 @@ export function GenericSectionPreviewPage({
               }}
             >
               {item.bullets.map((bullet) => (
-                <li key={bullet.id}>
+                <li
+                  key={bullet.id}
+                  data-cv-block=""
+                  style={{ breakInside: "avoid" }}
+                >
                   <CvTypography variant="bulletText" text={bullet.text} />
                 </li>
               ))}

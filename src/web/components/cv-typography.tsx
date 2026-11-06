@@ -14,6 +14,12 @@ interface TypographyVariantProps {
 
   /** Draws the text bold (an item highlighted in the variant) */
   isEmphasised?: boolean;
+
+  /**
+   * Page breaks: "keep-with-next" for headings (stay on the page of what follows),
+   * "avoid-inside" for a paragraph that must not be split
+   */
+  pageBreak?: "keep-with-next" | "avoid-inside";
 }
 
 /** Creates a new typography which is connected to store */
@@ -21,6 +27,7 @@ export function CvTypography({
   variant,
   text,
   isEmphasised = false,
+  pageBreak,
 }: TypographyVariantProps): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
   const { opacity } = useCvTypographyUtils();
@@ -55,7 +62,11 @@ export function CvTypography({
         opacity: opacity(variant),
         ...additionalStyle,
         ...(isEmphasised ? { fontWeight: 700 } : {}),
+        ...(pageBreak ? { breakInside: "avoid" } : {}),
+        ...(pageBreak === "keep-with-next" ? { breakAfter: "avoid" } : {}),
       }}
+      data-cv-block={pageBreak ? "" : undefined}
+      data-cv-keep={pageBreak === "keep-with-next" ? "" : undefined}
       gutterBottom
     >
       {text}

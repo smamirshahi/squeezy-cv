@@ -187,6 +187,16 @@ const variantsSlice = createSlice({
       state.variants[index] = variant;
     },
 
+    setPageLimit(
+      state,
+      action: PayloadAction<{ id: string; pageLimit: number }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (variant) {
+        variant.pageLimit = action.payload.pageLimit;
+      }
+    },
+
     /** Stores the page layout and style the editor currently shows into the variant */
     setVariantAppearance(
       state,
@@ -214,6 +224,7 @@ export const {
   setBulletSelection,
   setItemOrders,
   setVariantAppearance,
+  setPageLimit,
 } = variantsSlice.actions;
 
 export function variantsSelector(state: {

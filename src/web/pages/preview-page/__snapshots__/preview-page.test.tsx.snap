@@ -1,7 +1,8 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`UK single-column template > is the default: header first, then each section in order 1`] = `
-"Jane Doe
+"1 page (limit 2)
+Jane Doe
 Software Developer
 jane.doe@example.com
 +44 7700 900000
