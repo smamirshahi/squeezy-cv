@@ -12,14 +12,31 @@ const NORMAL_LINE_HEIGHT_RATIO = 1.2;
 /** `scrollHeight` is a whole number of px; a CV that exactly fills the page must still be one page */
 const ROUNDING_PX = 1;
 
-/** Where the blocks (`data-cv-block`) inside `root` are, in px from `originTop` */
-export function measureBlocks(root: HTMLElement, originTop: number): Block[] {
+/**
+ * How much the canvas zoom scales the paper on screen: the painted width over the layout
+ * width. 1 when it is not scaled (and in tests, where both are 0).
+ */
+export function screenScale(paper: HTMLElement): number {
+  const layoutWidth = paper.offsetWidth;
+  const paintedWidth = paper.getBoundingClientRect().width;
+  return layoutWidth > 0 && paintedWidth > 0 ? paintedWidth / layoutWidth : 1;
+}
+
+/**
+ * Where the blocks (`data-cv-block`) inside `root` are, in px from `originTop`. `scale` is the
+ * screen scale of the zoom: the numbers are in the paper's own (unzoomed) px.
+ */
+export function measureBlocks(
+  root: HTMLElement,
+  originTop: number,
+  scale = 1
+): Block[] {
   return Array.from(root.querySelectorAll<HTMLElement>("[data-cv-block]")).map(
     (element) => {
       const rect = element.getBoundingClientRect();
       return {
-        top: rect.top - originTop,
-        height: rect.height,
+        top: (rect.top - originTop) / scale,
+        height: rect.height / scale,
         shouldKeepWithNext: element.hasAttribute("data-cv-keep"),
       };
     }
@@ -32,11 +49,12 @@ export function measurePagination(
   marginMm: number
 ): MeasuredLayout {
   const marginPx = marginMm * PX_PER_MM;
-  const origin = paper.getBoundingClientRect().top + marginPx;
+  const scale = screenScale(paper);
+  const origin = paper.getBoundingClientRect().top + marginPx * scale;
   const pageHeight = (A4_DIMENSION_MM.height - 2 * marginMm) * PX_PER_MM;
   // scrollHeight is rounded up to whole pixels: do not count that as another page
   const contentHeight = paper.scrollHeight - 2 * marginPx - ROUNDING_PX;
-  const blocks = measureBlocks(paper, origin);
+  const blocks = measureBlocks(paper, origin, scale);
   const pagination = paginate(blocks, contentHeight, pageHeight);
   // The paper has a minimum height of one page, so its scroll height says nothing about how
   // full the page is: the bottom of the last block does.
@@ -49,19 +67,24 @@ export function measurePagination(
     usedHeight: lastBottom + (pagination.totalHeight - contentHeight),
     pageHeight,
     lineHeightPx: measureLineHeight(paper),
-    breakLabels: pagination.breaks.map((y) => labelAt(paper, origin, y)),
+    breakLabels: pagination.breaks.map((y) => labelAt(paper, origin, y, scale)),
   };
 }
 
 const LABEL_LENGTH = 40;
 
 /** The text of the first block at or below `y`, to say what a page starts with */
-function labelAt(paper: HTMLElement, origin: number, y: number): string {
+function labelAt(
+  paper: HTMLElement,
+  origin: number,
+  y: number,
+  scale: number
+): string {
   const elements = Array.from(
     paper.querySelectorAll<HTMLElement>("[data-cv-block]")
   );
   const found = elements.find(
-    (element) => element.getBoundingClientRect().top - origin >= y - 1
+    (element) => (element.getBoundingClientRect().top - origin) / scale >= y - 1
   );
   const text = (found?.textContent ?? "").replace(/\s+/g, " ").trim();
   return text.length > LABEL_LENGTH
