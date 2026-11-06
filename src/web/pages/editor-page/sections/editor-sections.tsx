@@ -63,10 +63,12 @@ export function EditorSections(): JSX.Element {
       {sections.map((section, index) => (
         <Box
           key={section.id}
-          display="flex"
-          alignItems="center"
-          gap={1}
-          sx={{ my: 1 }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            my: 1,
+          }}
         >
           <SortingIcons
             index={index}
@@ -98,7 +100,13 @@ export function EditorSections(): JSX.Element {
       <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
         Add a section
       </Typography>
-      <Box display="flex" gap={1} alignItems="center">
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          alignItems: "center",
+        }}
+      >
         <TextField
           select
           label="Type"

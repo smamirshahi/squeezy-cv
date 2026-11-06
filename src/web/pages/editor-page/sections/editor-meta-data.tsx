@@ -31,9 +31,9 @@ export function EditorMetaData(): JSX.Element {
         own reference to track when and where you applied.
       </Typography>
       <Box
-        display="flex"
-        flexDirection="row"
         sx={{
+          display: "flex",
+          flexDirection: "row",
           mb: "10px",
         }}
       >
@@ -48,9 +48,9 @@ export function EditorMetaData(): JSX.Element {
         <InformationTooltip infoText="Enter the job title you're applying for. This can be used as a reference in your documentation." />
       </Box>
       <Box
-        display="flex"
-        flexDirection="row"
         sx={{
+          display: "flex",
+          flexDirection: "row",
           mb: "10px",
         }}
       >
@@ -65,9 +65,9 @@ export function EditorMetaData(): JSX.Element {
         <InformationTooltip infoText="Enter the link to the job application. It will serve as a reference in your records." />
       </Box>
       <Box
-        display="flex"
-        flexDirection="row"
         sx={{
+          display: "flex",
+          flexDirection: "row",
           mb: "10px",
         }}
       >

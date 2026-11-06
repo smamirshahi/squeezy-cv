@@ -25,10 +25,13 @@ export function EditorFooter(): JSX.Element | null {
 
   return (
     <Box
-      display="flex"
-      justifyContent="flex-end"
-      sx={{ mr: "20px", my: "20px" }}
-      gap={2}
+      sx={{
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: 2,
+        mr: "20px",
+        my: "20px",
+      }}
     >
       {addNewItemButtonLabel && (
         <Button

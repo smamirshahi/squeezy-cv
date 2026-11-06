@@ -45,9 +45,9 @@ export function EditorAccordionHeader({
       }
     >
       <Box
-        display="flex"
-        justifyContent={"space-between"}
         sx={{
+          display: "flex",
+          justifyContent: "space-between",
           backgroundColor: WORKSPACE_COLORS.hover,
         }}
       >

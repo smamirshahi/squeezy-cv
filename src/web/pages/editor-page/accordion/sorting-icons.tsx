@@ -14,7 +14,11 @@ export function SortingIcons({
   isLastEntity,
 }: Props): JSX.Element {
   return (
-    <Box display="flex">
+    <Box
+      sx={{
+        display: "flex",
+      }}
+    >
       <IconButton
         size="small"
         onClick={(e) => {

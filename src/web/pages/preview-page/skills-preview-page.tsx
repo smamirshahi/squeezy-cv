@@ -93,18 +93,26 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
               text={group.fields.category}
             />
           )}
-          <Grid container direction="row" alignItems="flex-start">
+          <Grid
+            container
+            direction="row"
+            sx={{
+              alignItems: "flex-start",
+            }}
+          >
             {group.bullets.map((skill) => (
               <Grid
                 key={skill.id}
                 data-cv-block=""
-                sx={{ breakInside: "avoid" }}
                 size={
                   columns === 2 ? 6 : display === undefined ? undefined : 12
                 }
                 container
                 direction="row"
-                alignItems="center"
+                sx={{
+                  alignItems: "center",
+                  breakInside: "avoid",
+                }}
               >
                 <CvTypography variant="bulletText" text={skill.text} />
                 {display === undefined ? (

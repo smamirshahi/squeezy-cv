@@ -129,7 +129,11 @@ export function AiSetup(): JSX.Element {
                   borderRadius: 1,
                 }}
               >
-                <Typography fontWeight="bold">
+                <Typography
+                  sx={{
+                    fontWeight: "bold",
+                  }}
+                >
                   {AI_TASK_LABELS[task]}
                 </Typography>
                 <RadioGroup

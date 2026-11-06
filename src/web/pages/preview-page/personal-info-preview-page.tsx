@@ -16,9 +16,12 @@ export function PersonalInfoPreviewPage(): JSX.Element | null {
   return (
     <Grid
       container
-      direction="column"
-      alignItems="flex-start"
-      sx={{ m: "0px", p: "0px" }}
+      sx={{
+        flexDirection: "column",
+        alignItems: "flex-start",
+        m: "0px",
+        p: "0px",
+      }}
     >
       <CvTypography variant="headingLg" text={profile.fullName} />
       <CvTypography variant="bodyLg" text={profile.headline ?? ""} />

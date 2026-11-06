@@ -159,10 +159,12 @@ export function FitPanel(): JSX.Element | null {
               <Checkbox
                 size="small"
                 checked={candidate.isHidden}
-                inputProps={{ "aria-label": `Hide ${candidate.label}` }}
                 onChange={(event) =>
                   setHidden(candidate.itemId, event.target.checked)
                 }
+                slotProps={{
+                  input: { "aria-label": `Hide ${candidate.label}` },
+                }}
               />
             }
             label={

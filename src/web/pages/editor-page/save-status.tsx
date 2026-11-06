@@ -33,7 +33,14 @@ export function SaveStatus(): JSX.Element {
   }
 
   return (
-    <Box display="flex" alignItems="center" gap={1} sx={{ mr: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        mr: 2,
+      }}
+    >
       <Chip
         size="small"
         color={color}

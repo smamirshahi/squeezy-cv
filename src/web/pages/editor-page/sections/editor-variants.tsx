@@ -75,7 +75,14 @@ export function EditorVariants(): JSX.Element {
         at once.
       </Typography>
 
-      <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <TextField
           select
           label="Active variant"
@@ -130,7 +137,14 @@ export function EditorVariants(): JSX.Element {
         </TextField>
       </Box>
 
-      <Box display="flex" alignItems="center" gap={2} sx={{ mt: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          mt: 1,
+        }}
+      >
         <FormControlLabel
           label="Auto-fit to the page limit"
           control={

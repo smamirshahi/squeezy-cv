@@ -17,9 +17,12 @@ export function SummaryPreviewPage({ section }: Props): JSX.Element | null {
     <Grid
       data-cv-section={section.id}
       container
-      direction="column"
-      alignItems="flex-start"
-      sx={{ m: "0px", p: "0px" }}
+      sx={{
+        flexDirection: "column",
+        alignItems: "flex-start",
+        m: "0px",
+        p: "0px",
+      }}
     >
       <CvTypography
         variant="headingMd"

@@ -306,11 +306,13 @@ export function AiAssistant(): JSX.Element {
           helperText={`${jobAd.length} / ${MAX_JOB_AD_LENGTH} characters`}
         />
         <Box
-          display="flex"
-          flexWrap="wrap"
-          gap={2}
-          sx={{ mt: 1 }}
-          alignItems="center"
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            alignItems: "center",
+            mt: 1,
+          }}
         >
           <TextField
             select
@@ -469,7 +471,12 @@ export function AiAssistant(): JSX.Element {
           borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
-        <Typography variant="subtitle1" fontWeight="bold">
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
           Review
         </Typography>
         {result && decisions ? (
@@ -508,14 +515,26 @@ function Analysis({ result }: AnalysisProps): JSX.Element {
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Typography variant="subtitle1" fontWeight="bold">
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: "bold",
+        }}
+      >
         What the job asks for
       </Typography>
       <Typography variant="body2">
         {requirements.jobTitle}
         {requirements.seniority ? ` (${requirements.seniority})` : ""}
       </Typography>
-      <Box display="flex" flexWrap="wrap" gap={0.5} sx={{ my: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 0.5,
+          my: 1,
+        }}
+      >
         {requirements.mustHave.map((r) => (
           <Chip key={`m-${r}`} size="small" color="primary" label={r} />
         ))}
@@ -538,7 +557,12 @@ function Analysis({ result }: AnalysisProps): JSX.Element {
 
       {proposal.statement && (
         <Box sx={{ my: 2 }}>
-          <Typography variant="subtitle1" fontWeight="bold">
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: "bold",
+            }}
+          >
             Draft personal statement
           </Typography>
           <Typography variant="body2" sx={{ fontStyle: "italic" }}>
@@ -549,7 +573,12 @@ function Analysis({ result }: AnalysisProps): JSX.Element {
               Check: {proposal.statementFlags?.join("; ")}
             </Typography>
           )}
-          <Typography variant="caption" display="block">
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+            }}
+          >
             Not applied automatically. Copy it into your summary if you like it.
           </Typography>
         </Box>
@@ -675,7 +704,13 @@ function Changes({
 
   return (
     <Box>
-      <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 2 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: "bold",
+          mt: 2,
+        }}
+      >
         Proposed changes
       </Typography>
       {sectionMoves.length > 0 && (
@@ -702,7 +737,13 @@ function Changes({
             }
           />
           {proposal.sectionOrderReason && (
-            <Typography variant="caption" display="block" sx={{ pl: 4 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                pl: 4,
+              }}
+            >
               {proposal.sectionOrderReason}
             </Typography>
           )}
@@ -783,7 +824,13 @@ function Changes({
                 />
               }
             />
-            <Typography variant="caption" display="block" sx={{ pl: 4 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                pl: 4,
+              }}
+            >
               {entry.reason}
             </Typography>
             {bulletProposals.map((bullet) => {

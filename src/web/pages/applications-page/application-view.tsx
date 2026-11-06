@@ -198,17 +198,24 @@ export function ApplicationView({
       )}
 
       <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        gap={2}
-        flexWrap="wrap"
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
       >
         <Box>
           <Typography variant="h4" component="h1">
             {application.company}
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography
+            variant="h6"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {application.role}
           </Typography>
           {application.jobUrl && (
@@ -217,7 +224,13 @@ export function ApplicationView({
             </Link>
           )}
         </Box>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           {hasNoReply && <Chip label="No reply" color="warning" />}
           <TextField
             select
@@ -260,17 +273,24 @@ export function ApplicationView({
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
-          gap={1}
-          sx={{ mb: 1 }}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
+            mb: 1,
+          }}
         >
           <Typography variant="h6" component="h2">
             The CV you sent
           </Typography>
-          <Box display="flex" gap={1}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+            }}
+          >
             <Button
               href={applicationPdfUrl(application.id)}
               download={`${application.id}.pdf`}
@@ -282,7 +302,13 @@ export function ApplicationView({
             </Button>
           </Box>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1,
+          }}
+        >
           Saved on {formatDay(application.appliedAt)}. It cannot be changed.
         </Typography>
         <Box
@@ -345,7 +371,14 @@ export function ApplicationView({
           Change status to {nextStatus ? STATUS_LABELS[nextStatus] : ""}
         </DialogTitle>
         <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} sx={{ pt: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              pt: 1,
+            }}
+          >
             <TextField
               label="Date"
               type="date"
