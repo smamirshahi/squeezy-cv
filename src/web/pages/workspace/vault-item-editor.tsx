@@ -13,6 +13,7 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
+  Rating,
   TextField,
   Typography,
 } from "@mui/material";
@@ -20,6 +21,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
+import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
 import {
   FieldSpec,
@@ -179,6 +181,94 @@ function BulletCard({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
   const altCount = ALT_KINDS.filter(({ kind }) => bullet.alt?.[kind]).length;
+
+  if (section.type === "skills") {
+    const skillName = bullet.text || `Skill ${index + 1}`;
+    return (
+      <Box
+        sx={{
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderRadius: 1.5,
+          bgcolor: WORKSPACE_COLORS.panel,
+          p: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Box sx={{ display: "flex" }}>
+          <IconButton
+            size="small"
+            aria-label={`Move skill ${index + 1} up`}
+            disabled={index === 0}
+            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index - 1 }))}
+          >
+            <ArrowUpwardIcon fontSize="inherit" />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label={`Move skill ${index + 1} down`}
+            disabled={index === count - 1}
+            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index + 1 }))}
+          >
+            <ArrowDownwardIcon fontSize="inherit" />
+          </IconButton>
+        </Box>
+        <TextField
+          size="small"
+          value={bullet.text}
+          placeholder="Skill name"
+          onChange={(event) =>
+            dispatch(
+              updateBullet({ ...ref, update: { text: event.target.value } })
+            )
+          }
+          onKeyDown={(event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onNewAfter(index);
+            }
+          }}
+          slotProps={{
+            htmlInput: {
+              "aria-label": `Skill ${index + 1} name`,
+              "data-bullet-input": bullet.id,
+            },
+          }}
+          sx={{ flex: 1 }}
+        />
+        <Rating
+          name={`level-${bullet.id}`}
+          value={bullet.rating ?? 0}
+          precision={0.5}
+          getLabelText={(value) => `${skillName} level ${value}`}
+          onChange={(_, value) => {
+            const rating = value ?? 0;
+            if (isRatingAcceptable(rating)) {
+              dispatch(updateBullet({ ...ref, update: { rating } }));
+            }
+          }}
+        />
+        <Button
+          size="small"
+          aria-label={`Clear level of ${skillName}`}
+          disabled={!bullet.rating}
+          onClick={() =>
+            dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
+          }
+        >
+          No level
+        </Button>
+        <IconButton
+          size="small"
+          aria-label={`Remove skill ${index + 1}`}
+          onClick={() => dispatch(removeBullet(ref))}
+        >
+          <DeleteOutlineIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -340,6 +430,7 @@ export function VaultItemEditor({
     (variant) => variant.selection[item.id]?.isVisible !== false
   ).length;
   const ref = { sectionId: section.id, itemId: item.id };
+  const isSkills = section.type === "skills";
 
   useEffect(() => {
     if (!focusBulletId) {
@@ -465,10 +556,12 @@ export function VaultItemEditor({
 
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography sx={{ fontWeight: 700, flex: 1 }}>
-          Bullets · {item.bullets.length}
+          {isSkills ? "Skills" : "Bullets"} · {item.bullets.length}
         </Typography>
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          Ctrl/⌘+Enter in a bullet adds the next one
+          {isSkills
+            ? "Enter in a skill adds the next one. A level is optional."
+            : "Ctrl/⌘+Enter in a bullet adds the next one"}
         </Typography>
       </Box>
       {item.bullets.map((bullet, bulletIndex) => (
@@ -487,7 +580,7 @@ export function VaultItemEditor({
           variant="outlined"
           onClick={() => newBulletAfter(item.bullets.length - 1)}
         >
-          Add bullet
+          {isSkills ? "Add skill" : "Add bullet"}
         </Button>
         <Box sx={{ flex: 1 }} />
         <Button color="error" onClick={() => setIsRemoving(true)}>
