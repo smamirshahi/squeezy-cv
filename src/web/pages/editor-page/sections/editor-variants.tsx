@@ -160,6 +160,7 @@ export function EditorVariants(): JSX.Element {
                     isLastEntity={index === items.length - 1}
                   />
                   <FormControlLabel
+                    sx={{ flexGrow: 1 }}
                     label={getItemLabel(item)}
                     control={
                       <Checkbox
@@ -172,6 +173,30 @@ export function EditorVariants(): JSX.Element {
                               variantId: variant.id,
                               itemId: item.id,
                               change: { isVisible: event.target.checked },
+                            })
+                          )
+                        }
+                      />
+                    }
+                  />
+                  <FormControlLabel
+                    label="Highlight"
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={
+                          variant.selection[item.id]?.emphasis === "high"
+                        }
+                        onChange={(event) =>
+                          dispatch(
+                            setItemSelection({
+                              variantId: variant.id,
+                              itemId: item.id,
+                              change: {
+                                emphasis: event.target.checked
+                                  ? "high"
+                                  : "normal",
+                              },
                             })
                           )
                         }

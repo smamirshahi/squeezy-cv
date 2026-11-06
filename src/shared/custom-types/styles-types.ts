@@ -58,6 +58,9 @@ export const StyleSchema = Object({
   /** Whether to show full URL for contact or just the ID */
   shouldShowFullContactLinks: Boolean,
 
+  /** Whether the right-to-work line (from the profile) is shown under the name */
+  shouldShowRightToWork: Boolean.optional(),
+
   /** The rating icon */
   ratingIcon: Union(Literal("star"), Literal("circle")),
 
@@ -71,9 +74,11 @@ export const StyleSchema = Object({
 
   /** The date format */
   dateFormat: Union(
+    Literal("MMM YYYY"),
     Literal("DD/MM/YYYY"),
     Literal("MMM/YYYY"),
-    Literal("MMMM/YYYY")
+    Literal("MMMM/YYYY"),
+    Literal("YYYY.MM.DD")
   ),
 
   /** Displays different font names and sizes */

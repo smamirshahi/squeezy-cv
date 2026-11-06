@@ -1,14 +1,14 @@
 import { Grid } from "@mui/material";
-import { Section } from "@custom-types/vault-types";
+import { RenderedSection } from "@shared/variant/render";
 import { CvTypography } from "@components/cv-typography";
 
 interface Props {
-  section: Section;
+  section: RenderedSection;
 }
 
 /** Shows the professional summary page in preview mode */
 export function SummaryPreviewPage({ section }: Props): JSX.Element | null {
-  const text = section.items.find((i) => i.shouldShow)?.fields.text;
+  const text = section.items[0]?.fields.text;
 
   if (!text) {
     return null;

@@ -103,6 +103,9 @@ export const ProfileSchema = Object({
   email: String.optional(),
   phone: String.optional(),
   location: String.optional(),
+
+  /** e.g. "Eligible to work in the UK". Shown under the name when the style asks for it. */
+  rightToWork: String.optional(),
 });
 
 export const VaultSchema = Object({

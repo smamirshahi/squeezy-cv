@@ -12,32 +12,28 @@ import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import { activeVariantSelector } from "@store/variants/variants-slice";
-import { resolveVault } from "@shared/variant/render";
-import { Section } from "@custom-types/vault-types";
+import { RenderedPart, render } from "@shared/variant/render";
 
-/** Renders one part of the CV: the header parts, or a vault section by its type */
-function renderPart(id: string, sections: Section[]): JSX.Element | null {
-  if (id === "personalInfo") {
-    return <PersonalInfoPreviewPage key={id} />;
-  }
-  if (id === "contactInfo") {
-    return <ContactInfoPreviewPage key={id} />;
-  }
-  const section = sections.find((s) => s.id === id);
-  if (!section) {
-    return null;
-  }
-  switch (section.type) {
-    case "summary":
-      return <SummaryPreviewPage key={id} section={section} />;
-    case "experience":
-      return <ExperiencesPreviewPage key={id} section={section} />;
-    case "education":
-      return <EducationsPreviewPage key={id} section={section} />;
-    case "skills":
-      return <SkillsPreviewPage key={id} section={section} />;
-    default:
-      return <GenericSectionPreviewPage key={id} section={section} />;
+/** Renders one part of the CV: the header parts, or a section by its type */
+function renderPart(part: RenderedPart): JSX.Element | null {
+  switch (part.kind) {
+    case "personalInfo":
+      return <PersonalInfoPreviewPage key={part.id} />;
+    case "contactInfo":
+      return <ContactInfoPreviewPage key={part.id} />;
+    case "section":
+      switch (part.type) {
+        case "summary":
+          return <SummaryPreviewPage key={part.id} section={part} />;
+        case "experience":
+          return <ExperiencesPreviewPage key={part.id} section={part} />;
+        case "education":
+          return <EducationsPreviewPage key={part.id} section={part} />;
+        case "skills":
+          return <SkillsPreviewPage key={part.id} section={part} />;
+        default:
+          return <GenericSectionPreviewPage key={part.id} section={part} />;
+      }
   }
 }
 
@@ -50,10 +46,11 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
   const { structure, columnWidth } = useAppSelector(appSelector);
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
-  // Only what the active variant shows, in its order and wording
-  const sections = useMemo(
-    () => resolveVault(vault, variant).sections,
-    [vault, variant]
+  // What the active variant shows, in its order and wording. The layout is the one the
+  // editor currently has, so changes to it show at once.
+  const document = useMemo(
+    () => render(vault, { ...variant, layout: structure }),
+    [vault, variant, structure]
   );
 
   return (
@@ -69,6 +66,10 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
         mx: "auto",
         fontSize: "12pt",
         fontFamily: "Calibri, sans-serif",
+        // The page is always black on white, whatever the editor's theme does
+        color: "#000",
+        backgroundColor: "#fff",
+        "& a": { color: "inherit", textDecoration: "none" },
       }}
     >
       <Box>
@@ -79,7 +80,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
             mb: 2,
           }}
         >
-          {structure.fullWidth.map((id) => renderPart(id, sections))}
+          {document.columns.fullWidth.map(renderPart)}
         </Box>
 
         {/* Second row: left and right with percentages */}
@@ -97,7 +98,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
               flexShrink: 1,
             }}
           >
-            {structure.left.map((id) => renderPart(id, sections))}
+            {document.columns.left.map(renderPart)}
           </Box>
           <Box
             sx={{
@@ -106,7 +107,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
               flexShrink: 1,
             }}
           >
-            {structure.right.map((id) => renderPart(id, sections))}
+            {document.columns.right.map(renderPart)}
           </Box>
         </Box>
       </Box>

@@ -36,6 +36,8 @@ export type RenderedPart =
       items: RenderedItem[];
     };
 
+export type RenderedSection = Extract<RenderedPart, { kind: "section" }>;
+
 /** What the preview and the PDF draw: parts per column, with all choices already applied */
 export interface RenderedDocument {
   tone: Tone;
@@ -102,20 +104,6 @@ function renderItems(
     })),
     emphasis: selection[item.id]?.emphasis ?? "normal",
   }));
-}
-
-/**
- * The vault as the variant shows it: same sections, but only the visible items in variant
- * order, with the chosen bullet wordings. Lets components that read a `Section` draw a variant.
- */
-export function resolveVault(vault: Vault, variant: Variant): Vault {
-  return {
-    ...vault,
-    sections: vault.sections.map((section) => ({
-      ...section,
-      items: resolveItems(section.items, variant.selection),
-    })),
-  };
 }
 
 /**

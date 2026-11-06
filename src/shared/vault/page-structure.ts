@@ -1,4 +1,6 @@
 import { Side } from "@custom-types/styles-types";
+import { SectionType } from "@custom-types/vault-types";
+import { HEADER_IDS } from "@shared/vault/default-vault";
 
 /** Which section ids sit in which column of the preview */
 export type SectionColumns = Record<Side, string[]>;
@@ -37,4 +39,32 @@ export function reconcileStructure(
   }
 
   return result;
+}
+
+/** UK default: header, then every section below the other, full width, in the given order */
+export function singleColumnLayout(sections: { id: string }[]): SectionColumns {
+  return {
+    fullWidth: [...HEADER_IDS, ...sections.map((s) => s.id)],
+    left: [],
+    right: [],
+  };
+}
+
+/**
+ * Two columns: header and summary across the top, experience on the left, everything
+ * else on the right
+ */
+export function twoColumnLayout(
+  sections: { id: string; type: SectionType }[]
+): SectionColumns {
+  return {
+    fullWidth: [
+      ...HEADER_IDS,
+      ...sections.filter((s) => s.type === "summary").map((s) => s.id),
+    ],
+    left: sections.filter((s) => s.type === "experience").map((s) => s.id),
+    right: sections
+      .filter((s) => s.type !== "summary" && s.type !== "experience")
+      .map((s) => s.id),
+  };
 }

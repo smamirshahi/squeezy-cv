@@ -1,5 +1,5 @@
 import { Box, Grid } from "@mui/material";
-import { Section } from "@custom-types/vault-types";
+import { RenderedSection } from "@shared/variant/render";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { DatePeriod } from "@components/date-period";
@@ -9,7 +9,7 @@ import { CvTypography } from "@components/cv-typography";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
 interface Props {
-  section: Section;
+  section: RenderedSection;
 }
 
 /** Renders a section without a special layout (projects, certifications, ...) */
@@ -17,7 +17,7 @@ export function GenericSectionPreviewPage({
   section,
 }: Props): JSX.Element | null {
   const { bulletPointIcon } = useAppSelector(styleSelector);
-  const visibleItems = section.items.filter((item) => item.shouldShow);
+  const visibleItems = section.items;
 
   if (visibleItems.length === 0) {
     return null;
@@ -37,11 +37,19 @@ export function GenericSectionPreviewPage({
           key={item.id}
           direction="column"
           alignItems="flex-start"
-          sx={{ mb: "10px" }}
+          sx={{ mb: "10px", breakInside: "avoid" }}
         >
-          <CvTypography variant="headingSm" text={item.fields.title ?? ""} />
+          <CvTypography
+            variant="headingSm"
+            isEmphasised={item.emphasis === "high"}
+            text={item.fields.title ?? ""}
+          />
           <Grid container direction="row" alignItems="center" gap={3}>
-            <CvTypography variant="bodyMd" text={item.fields.subtitle ?? ""} />
+            <CvTypography
+              variant="bodyMd"
+              isEmphasised={item.emphasis === "high"}
+              text={item.fields.subtitle ?? ""}
+            />
             <IconWithText
               icon={LocationOnIcon}
               text={item.fields.location ?? ""}

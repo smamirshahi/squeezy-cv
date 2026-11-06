@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UK single-column template > is the default: header first, then each section in order 1`] = `
+"Jane Doe
+Software Developer
+jane.doe@example.com
++44 7700 900000
+London, UK
+https://www.linkedin.com/in/janedoe-example
+https://github.com/janedoe-example
+Professional Summary
+Front-end developer with six years of experience building React and TypeScript applications. Focused on clear interfaces, tested code and steady delivery.
+Work Experience
+Senior Software Developer
+Example Ltd
+London, UK
+Mar/2022 - Present
+Led development of a React dashboard used by 200 internal users
+Introduced Redux Toolkit and cut state-related bugs
+Mentored two junior developers
+Software Developer
+Sample Systems
+Leeds, UK
+Sep/2018 - Feb/2022
+Built reusable form components in TypeScript
+Added unit tests that raised coverage from 30% to 80%
+Education
+BSc Computer Science
+University of Example
+Leeds, UK
+Sep/2014 - Jun/2018
+Skills
+Languages
+English
+French
+Frontend
+React
+TypeScript"
+`;

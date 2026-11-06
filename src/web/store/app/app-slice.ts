@@ -25,9 +25,16 @@ interface AppState {
 export const initialState: AppState = {
   selectedTypography: null,
   structure: {
-    fullWidth: ["personalInfo", "contactInfo", "summary"],
-    left: ["experience"],
-    right: ["education", "skills"],
+    fullWidth: [
+      "personalInfo",
+      "contactInfo",
+      "summary",
+      "experience",
+      "education",
+      "skills",
+    ],
+    left: [],
+    right: [],
   },
   columnWidth: {
     left: 50,

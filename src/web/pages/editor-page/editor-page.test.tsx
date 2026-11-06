@@ -135,7 +135,9 @@ describe("App", () => {
         <App />
       </Provider>
     );
-    expect(store.getState().app.structure.left).toEqual(["experience"]);
+    // the default page is one column
+    expect(store.getState().app.structure.fullWidth).toContain("experience");
+    expect(store.getState().app.structure.left).toEqual([]);
 
     act(() => {
       store.dispatch(
