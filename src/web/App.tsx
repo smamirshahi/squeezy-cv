@@ -11,8 +11,11 @@ export function App(): JSX.Element {
   return (
     <Box
       sx={{
-        width: "500mm",
+        width: "100%",
+        boxSizing: "border-box",
         display: "flex",
+        // Side by side on wide screens, stacked on narrow ones
+        flexWrap: "wrap",
         gap: 2,
         padding: 2,
         justifyContent: "center",

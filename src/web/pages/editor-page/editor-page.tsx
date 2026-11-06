@@ -77,7 +77,10 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
     <Paper
       elevation={3}
       sx={{
-        width: `${A4_DIMENSION_MM.height}mm`,
+        // Grows up to the old fixed width, shrinks (and wraps below the preview's row) on narrow screens
+        flex: "1 1 480px",
+        maxWidth: `${A4_DIMENSION_MM.height}mm`,
+        minWidth: 0,
         padding: "0mm",
         boxSizing: "border-box",
         mx: "auto",
