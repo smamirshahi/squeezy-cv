@@ -32,7 +32,7 @@ function EditorApp(): JSX.Element {
         backgroundColor: "#f0f0f0",
       }}
     >
-      <EditorPage contentRef={contentRef} />
+      <EditorPage />
       <PreviewPage contentRef={contentRef} />
     </Box>
   );

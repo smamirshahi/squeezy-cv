@@ -21,11 +21,6 @@ import { sectionsSelector } from "@store/vault/vault-slice";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 
-interface Props {
-  /** The reference to the content */
-  contentRef: React.RefObject<HTMLDivElement | null>;
-}
-
 /** Shows the editor section */
 /** The editor for one vault section, chosen by the type of the section */
 function renderSectionEditor(section: Section): JSX.Element {
@@ -44,7 +39,7 @@ function renderSectionEditor(section: Section): JSX.Element {
 }
 
 /** Shows the editor section */
-export function EditorPage({ contentRef }: Props): JSX.Element {
+export function EditorPage(): JSX.Element {
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
   const sections = useAppSelector(sectionsSelector);
 
@@ -96,7 +91,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       }}
     >
       <Box sx={{ height: "800px", overflowY: "scroll" }}>
-        <EditorAppBar contentRef={contentRef} />
+        <EditorAppBar />
         <Box display="flex" flexDirection="row" gap={2} p={2}>
           <EditorSideBar editorPageSections={editorPageSections} />
           <Box sx={{ width: "100%" }}>{selectedPage.content}</Box>
