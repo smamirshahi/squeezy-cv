@@ -27,6 +27,8 @@ import {
   ListView,
   SortKey,
   arrangeApplications,
+  countByStatus,
+  countNoReply,
   queryToView,
   summariseApplications,
   viewToQuery,
@@ -215,6 +217,95 @@ export function ApplicationsPage(): JSX.Element {
   );
 }
 
+interface TilesProps {
+  applications: ApplicationSummary[];
+  status: ListView["status"];
+  today: string;
+  onChange: (status: ListView["status"]) => void;
+}
+
+/** One tile per status with its count; a tile is also the filter. "No reply" is derived, never stored. */
+function StatusTiles({
+  applications,
+  status,
+  today,
+  onChange,
+}: TilesProps): JSX.Element {
+  const counts = countByStatus(applications);
+  const readable = applications.filter((a) => !a.isCorrupt).length;
+  const tiles: { key: ListView["status"]; label: string; count: number }[] = [
+    { key: "all", label: "All", count: readable },
+    ...APPLICATION_STATUSES.map((s) => ({
+      key: s,
+      label: STATUS_LABELS[s],
+      count: counts[s],
+    })),
+    {
+      key: "noReply",
+      label: "No reply",
+      count: countNoReply(applications, today),
+    },
+  ];
+  return (
+    <Box
+      role="group"
+      aria-label="Filter by status"
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))",
+        gap: 1,
+      }}
+    >
+      {tiles.map((tile) => {
+        const isOn = status === tile.key;
+        const isWarning = tile.key === "noReply" && tile.count > 0;
+        return (
+          <Box
+            key={tile.key}
+            component="button"
+            type="button"
+            aria-pressed={isOn}
+            onClick={() => onChange(tile.key)}
+            sx={{
+              textAlign: "left",
+              p: "8px 10px",
+              cursor: "pointer",
+              font: "inherit",
+              color: WORKSPACE_COLORS.text,
+              bgcolor: isOn
+                ? WORKSPACE_COLORS.accentSoft
+                : WORKSPACE_COLORS.panel,
+              border: `1px solid ${
+                isOn
+                  ? WORKSPACE_COLORS.accent
+                  : isWarning
+                    ? "var(--wrb)"
+                    : WORKSPACE_COLORS.border
+              }`,
+              borderRadius: 1.5,
+            }}
+          >
+            <Typography
+              component="span"
+              display="block"
+              sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+            >
+              {tile.label}
+            </Typography>
+            <Typography
+              component="span"
+              display="block"
+              sx={{ fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
+            >
+              {tile.count}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
 interface TableProps {
   applications: ApplicationSummary[];
   view: ListView;
@@ -234,7 +325,7 @@ function ApplicationsTable({
   selectedId,
   onSelect,
 }: TableProps): JSX.Element {
-  const shown = arrangeApplications([...applications], view);
+  const shown = arrangeApplications([...applications], view, today);
   return (
     <>
       <Typography color="text.secondary">
@@ -260,24 +351,12 @@ function ApplicationsTable({
         }}
       />
 
-      <Box
-        display="flex"
-        gap={1}
-        flexWrap="wrap"
-        role="group"
-        aria-label="Filter by status"
-      >
-        {(["all", ...APPLICATION_STATUSES] as const).map((status) => (
-          <Chip
-            key={status}
-            label={status === "all" ? "All" : STATUS_LABELS[status]}
-            color={view.status === status ? "primary" : "default"}
-            variant={view.status === status ? "filled" : "outlined"}
-            aria-pressed={view.status === status}
-            onClick={() => onViewChange({ ...view, status })}
-          />
-        ))}
-      </Box>
+      <StatusTiles
+        applications={applications}
+        status={view.status}
+        today={today}
+        onChange={(status) => onViewChange({ ...view, status })}
+      />
 
       <Paper variant="outlined">
         <Table size="small">
