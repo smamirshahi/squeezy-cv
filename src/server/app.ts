@@ -10,10 +10,15 @@ import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
+import { importCv } from "@server/ai/import-cv";
 import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
 } from "@custom-types/tailor-types";
+import {
+  ImportRequestSchema,
+  MAX_IMPORT_LENGTH,
+} from "@custom-types/import-types";
 import {
   ApplicationInputError,
   createApplication,
@@ -246,6 +251,29 @@ export function buildServer({
     }
     const { vault } = await storage.loadVault();
     return tailor(ai, vault, { jobAd, tone: body.tone });
+  });
+
+  // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
+  app.post("/api/ai/import", async (request, reply) => {
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
+      );
+    }
+    const body = ImportRequestSchema.check(request.body);
+    const text = body.text.trim();
+    if (text.length === 0 || text.length > MAX_IMPORT_LENGTH) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The text must be 1 to ${MAX_IMPORT_LENGTH} characters.`
+      );
+    }
+    return importCv(ai, text);
   });
 
   // What tailoring would send, without sending it (works without a key)

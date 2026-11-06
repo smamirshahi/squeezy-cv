@@ -11,7 +11,12 @@ import {
   TailorResultSchema,
 } from "@custom-types/tailor-types";
 import { Variant, VariantSchema } from "@custom-types/variant-types";
-import { CvFile, CvFileSchema } from "@custom-types/vault-types";
+import {
+  CvFile,
+  CvFileSchema,
+  Vault,
+  VaultSchema,
+} from "@custom-types/vault-types";
 
 /** What the server lists for a saved variant */
 export interface VariantSummary {
@@ -79,6 +84,12 @@ async function request(
   return payload;
 }
 
+/** The result of sorting pasted CV text: a vault to review, and what looked wrong */
+export interface ImportedCv {
+  vault: Vault;
+  warnings: string[];
+}
+
 /** The messages tailoring would send, see the server's `previewTailorRequest` */
 export interface TailorPreview {
   provider: "claude" | "ollama";
@@ -101,6 +112,9 @@ export interface ApiClient {
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
+
+  /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */
+  importCv: (text: string) => Promise<ImportedCv>;
 
   /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
   previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
@@ -170,6 +184,15 @@ export function createApiClient(
       return TailorResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/tailor", body)
       );
+    },
+    async importCv(text) {
+      const result = (await request(fetchImpl, "POST", "/api/ai/import", {
+        text,
+      })) as { vault: unknown; warnings: string[] };
+      return {
+        vault: VaultSchema.check(result.vault),
+        warnings: result.warnings,
+      };
     },
     async previewTailor(body) {
       return (await request(

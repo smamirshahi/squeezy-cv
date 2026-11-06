@@ -13,6 +13,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { styled } from "@mui/material/styles";
+import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
@@ -49,6 +50,7 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
   const sections = useAppSelector(sectionsSelector);
   const selectedPage = useAppSelector((s) => s.app.selectedSectionInEditorPage);
   const { handleImport, handleExport } = useImportExportJson();
+  const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
   const factPages = pages.filter((page) => FACT_PAGES.has(page.id));
   const settingPages = pages.filter((page) => SETTING_PAGES.has(page.id));
@@ -136,8 +138,20 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
           display: "flex",
           gap: 1,
           borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+          flexWrap: "wrap",
         }}
       >
+        <Button
+          size="small"
+          variant="contained"
+          onClick={() => setIsImportOpen(true)}
+        >
+          Paste CV text, AI sorts it
+        </Button>
+        <ImportCvDialog
+          isOpen={isImportOpen}
+          onClose={() => setIsImportOpen(false)}
+        />
         <Button component="label" size="small" variant="outlined">
           Import JSON
           <HiddenInput type="file" accept=".json" onChange={handleImport} />

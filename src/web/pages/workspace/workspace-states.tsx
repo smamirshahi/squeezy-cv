@@ -1,5 +1,7 @@
 import { Alert, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useState } from "react";
+import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { isVaultEmpty } from "@shared/vault/is-vault-empty";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { useHasUnsavedChanges, useSaveActions } from "@hooks/use-persistence";
@@ -59,6 +61,7 @@ export function FirstRun(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
   const { handleImport } = useImportExportJson();
+  const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
   if (!isVaultEmpty(vault)) {
     return null;
@@ -93,7 +96,14 @@ export function FirstRun(): JSX.Element | null {
         <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
           Add your facts once. Every CV is a view of them.
         </Typography>
-        <Button component="label" variant="contained">
+        <Button variant="contained" onClick={() => setIsImportOpen(true)}>
+          Paste CV text, AI sorts it
+        </Button>
+        <ImportCvDialog
+          isOpen={isImportOpen}
+          onClose={() => setIsImportOpen(false)}
+        />
+        <Button component="label" variant="outlined">
           Import JSON
           <HiddenInput type="file" accept=".json" onChange={handleImport} />
         </Button>
