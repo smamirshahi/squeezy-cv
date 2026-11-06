@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -115,7 +116,7 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
             width: 360,
             height: 500,
             flex: "none",
-            bgcolor: "#D6D9DD",
+            bgcolor: WORKSPACE_COLORS.canvas,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -149,7 +150,10 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
             {checks.map((check) => (
               <Box
                 key={check.id}
-                sx={{ py: 0.75, borderTop: "1px solid #DDE0E4" }}
+                sx={{
+                  py: 0.75,
+                  borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+                }}
               >
                 <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
                   {check.level === "ok" ? "✓" : "⚠"} {check.title}

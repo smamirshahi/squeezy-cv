@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
   Box,
@@ -288,7 +289,11 @@ export function ApplicationView({
           component="iframe"
           title="The CV you sent"
           src={applicationPdfUrl(application.id)}
-          sx={{ width: "100%", height: 900, border: "1px solid #ccc" }}
+          sx={{
+            width: "100%",
+            height: 900,
+            border: `1px solid ${WORKSPACE_COLORS.border}`,
+          }}
         />
       </Paper>
 

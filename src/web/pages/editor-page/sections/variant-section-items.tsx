@@ -1,12 +1,18 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Box,
   Checkbox,
+  Chip,
   FormControlLabel,
   IconButton,
   MenuItem,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import {
   DndContext,
@@ -122,7 +128,9 @@ function SortableRow({ id, children }: RowProps): JSX.Element {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? DRAGGED_OPACITY : 1,
-        backgroundColor: isDragging ? "#e3f2fd" : "transparent",
+        backgroundColor: isDragging
+          ? WORKSPACE_COLORS.accentSoft
+          : "transparent",
       }}
     >
       {children(handle)}
@@ -132,10 +140,20 @@ function SortableRow({ id, children }: RowProps): JSX.Element {
 
 interface BulletsProps {
   item: Item;
+
+  /** Draw each bullet as a card (the workspace inspector) instead of a compact row */
+  isCard?: boolean;
 }
 
+const CARD_WORDINGS: { key: Wording; label: string }[] = [
+  { key: "text", label: "Canon." },
+  { key: "short", label: "Short" },
+  { key: "long", label: "Long" },
+  { key: "formal", label: "Formal" },
+];
+
 /** The bullets of one item: show/hide, wording, order */
-export function ItemBullets({ item }: BulletsProps): JSX.Element {
+export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sensors = useReorderSensors();
@@ -167,6 +185,116 @@ export function ItemBullets({ item }: BulletsProps): JSX.Element {
         {bullets.map((bullet, index) => {
           const choice = variant.selection[item.id]?.bullets?.[bullet.id];
           const wordings = availableWordings(item, bullet.id);
+          const isShown = choice?.isVisible !== false;
+          if (isCard) {
+            return (
+              <SortableRow key={bullet.id} id={bullet.id}>
+                {(handle) => (
+                  <Box
+                    sx={{
+                      border: `1px solid ${WORKSPACE_COLORS.border}`,
+                      borderRadius: 1.5,
+                      mb: 1,
+                      bgcolor: isShown
+                        ? WORKSPACE_COLORS.panel
+                        : WORKSPACE_COLORS.panelAlt,
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      alignItems="flex-start"
+                      gap={0.25}
+                      p={0.75}
+                    >
+                      {handle}
+                      <IconButton
+                        size="small"
+                        aria-label={`${isShown ? "Hide" : "Show"} bullet: ${shorten(bullet.text)}`}
+                        aria-pressed={isShown}
+                        onClick={() =>
+                          dispatch(
+                            setBulletSelection({
+                              variantId: variant.id,
+                              itemId: item.id,
+                              bulletId: bullet.id,
+                              change: { isVisible: !isShown },
+                            })
+                          )
+                        }
+                      >
+                        {isShown ? (
+                          <VisibilityIcon fontSize="inherit" />
+                        ) : (
+                          <VisibilityOffIcon fontSize="inherit" />
+                        )}
+                      </IconButton>
+                      <Typography
+                        sx={{
+                          flex: 1,
+                          fontSize: 12.5,
+                          lineHeight: 1.4,
+                          pt: 0.5,
+                          color: isShown ? undefined : WORKSPACE_COLORS.muted,
+                        }}
+                      >
+                        {bullet.text}
+                      </Typography>
+                      <SortingIcons
+                        index={index}
+                        swapFunction={(_from, toIndex) =>
+                          moveBullet(bullet.id, toIndex)
+                        }
+                        isLastEntity={index === bullets.length - 1}
+                      />
+                    </Box>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={0.75}
+                      sx={{ px: 1, pb: 1, pl: 6 }}
+                    >
+                      {bullet.tags.slice(0, 2).map((tag) => (
+                        <Chip key={tag} size="small" label={tag} />
+                      ))}
+                      <Box sx={{ flex: 1 }} />
+                      <ToggleButtonGroup
+                        exclusive
+                        size="small"
+                        aria-label="Wording"
+                        value={choice?.wording ?? "text"}
+                        onChange={(_event, value: Wording | null) => {
+                          if (value) {
+                            dispatch(
+                              setBulletSelection({
+                                variantId: variant.id,
+                                itemId: item.id,
+                                bulletId: bullet.id,
+                                change: { wording: value },
+                              })
+                            );
+                          }
+                        }}
+                      >
+                        {CARD_WORDINGS.filter(
+                          (w) =>
+                            w.key !== "formal" || wordings.includes("formal")
+                        ).map((w) => (
+                          <ToggleButton
+                            key={w.key}
+                            value={w.key}
+                            disabled={!wordings.includes(w.key)}
+                            sx={{ py: 0, px: 0.75, fontSize: 11.5, height: 22 }}
+                          >
+                            {w.label}
+                          </ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+                    </Box>
+                  </Box>
+                )}
+              </SortableRow>
+            );
+          }
           return (
             <SortableRow key={bullet.id} id={bullet.id}>
               {(handle) => (

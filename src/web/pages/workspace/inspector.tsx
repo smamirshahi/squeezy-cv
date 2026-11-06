@@ -333,7 +333,7 @@ function BlockInspector(): JSX.Element | null {
                 </Button>
               </Box>
               {item.bullets.length > 0 && <Heading>Bullets</Heading>}
-              <ItemBullets item={item} />
+              <ItemBullets item={item} isCard />
             </>
           ) : (
             <Typography sx={{ fontSize: 13 }}>
