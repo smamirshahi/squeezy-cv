@@ -1,3 +1,4 @@
+import { AppThemeProvider } from "@custom-styles/theme";
 import { Workspace } from "@pages/workspace/workspace";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
 import { ApplicationView } from "@pages/applications-page/application-view";
@@ -15,11 +16,16 @@ export function App(): JSX.Element {
   if (printVariantId) {
     return <PrintView variantId={printVariantId} />;
   }
-  if (params.has("applications")) {
-    return <ApplicationsPage />;
-  }
-  if (applicationId) {
-    return <ApplicationView applicationId={applicationId} />;
-  }
-  return <Workspace />;
+  // The print page has no theme: the PDF is always the light default
+  return (
+    <AppThemeProvider>
+      {params.has("applications") ? (
+        <ApplicationsPage />
+      ) : applicationId ? (
+        <ApplicationView applicationId={applicationId} />
+      ) : (
+        <Workspace />
+      )}
+    </AppThemeProvider>
+  );
 }

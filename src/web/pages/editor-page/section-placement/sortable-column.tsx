@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { Side } from "@custom-types/styles-types";
 import { useDroppable } from "@dnd-kit/core";
 import {
@@ -44,7 +45,9 @@ export function SortableColumn({ title, side, itemIds }: Props): JSX.Element {
           ref={setNodeRef}
           sx={{
             ...columnStyle,
-            background: isOver ? "#e3f2fd" : columnStyle.background,
+            background: isOver
+              ? WORKSPACE_COLORS.accentSoft
+              : columnStyle.background,
           }}
         >
           {itemIds.map((id) => (

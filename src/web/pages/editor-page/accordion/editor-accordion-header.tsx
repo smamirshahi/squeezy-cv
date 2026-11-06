@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Accordion,
   AccordionSummary,
@@ -47,7 +48,7 @@ export function EditorAccordionHeader({
         display="flex"
         justifyContent={"space-between"}
         sx={{
-          backgroundColor: "#f5f5f5",
+          backgroundColor: WORKSPACE_COLORS.hover,
         }}
       >
         <SortingIcons

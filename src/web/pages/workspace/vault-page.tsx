@@ -1,3 +1,4 @@
+import { cssVar } from "@custom-styles/theme";
 import { useState } from "react";
 import {
   Alert,
@@ -268,7 +269,7 @@ export function VaultPage(): JSX.Element {
           flex: 1,
           minWidth: 0,
           overflow: "auto",
-          bgcolor: "#F3F4F5",
+          bgcolor: cssVar("bg"),
           p: 3,
           display: "flex",
           flexDirection: "column",

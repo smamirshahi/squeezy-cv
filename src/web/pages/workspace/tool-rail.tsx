@@ -2,10 +2,13 @@ import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { WorkspaceTool, setTool } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useThemeMode } from "@custom-styles/theme";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 interface RailItem {
@@ -44,6 +47,7 @@ const SETTINGS: RailItem = {
 export function ToolRail(): JSX.Element {
   const dispatch = useAppDispatch();
   const tool = useAppSelector((s) => s.app.tool);
+  const { mode, toggle } = useThemeMode();
 
   return (
     <Box
@@ -61,9 +65,40 @@ export function ToolRail(): JSX.Element {
         gap: 0.25,
       }}
     >
-      {[...ITEMS, null, SETTINGS].map((item) => {
+      {[...ITEMS, null, SETTINGS, "theme" as const].map((item) => {
         if (item === null) {
           return <Box key="spacer" sx={{ flex: 1 }} />;
+        }
+        if (item === "theme") {
+          return (
+            <ButtonBase
+              key="theme"
+              onClick={toggle}
+              aria-label={
+                mode === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
+              }
+              sx={{
+                width: 44,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              {mode === "dark" ? (
+                <LightModeOutlinedIcon fontSize="small" />
+              ) : (
+                <DarkModeOutlinedIcon fontSize="small" />
+              )}
+              <Typography sx={{ fontSize: 10.5 }}>
+                {mode === "dark" ? "Light" : "Dark"}
+              </Typography>
+            </ButtonBase>
+          );
         }
         const isOn = item.tool === tool;
         return (
@@ -87,7 +122,7 @@ export function ToolRail(): JSX.Element {
                 ? WORKSPACE_COLORS.accentText
                 : WORKSPACE_COLORS.muted,
               bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
-              "&:hover": { bgcolor: isOn ? undefined : "#E3E6E9" },
+              "&:hover": { bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover },
             }}
           >
             {item.icon}

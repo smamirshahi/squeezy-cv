@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Box,
   Card,
@@ -34,7 +35,9 @@ export function FontCards(): JSX.Element {
                 m: "10px",
                 border: "1px solid black",
                 backgroundColor:
-                  selectedTypography === variant ? "#e7e7e7" : undefined,
+                  selectedTypography === variant
+                    ? WORKSPACE_COLORS.hover
+                    : undefined,
               }}
             >
               <CardActionArea

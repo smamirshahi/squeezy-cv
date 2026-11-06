@@ -61,7 +61,7 @@ function Row(props: RowProps): JSX.Element {
         boxShadow: isSelected
           ? `inset 3px 0 0 ${WORKSPACE_COLORS.accent}`
           : "none",
-        "&:hover": { bgcolor: isSelected ? undefined : "#E3E6E9" },
+        "&:hover": { bgcolor: isSelected ? undefined : WORKSPACE_COLORS.hover },
       }}
     >
       {props.onEye ? (
@@ -331,8 +331,8 @@ export function Outline({ onClose }: Props): JSX.Element {
           py: 0.5,
           borderRadius: 1,
           fontSize: 12,
-          bgcolor: announcement ? "#1F1F1C" : "transparent",
-          color: "#fff",
+          bgcolor: announcement ? WORKSPACE_COLORS.text : "transparent",
+          color: WORKSPACE_COLORS.panel,
         }}
       >
         {announcement}

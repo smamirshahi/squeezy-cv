@@ -40,11 +40,6 @@ export function useActiveVariantLock(): {
   };
 }
 
-/** True for a variant that was sent: it is shown with a lock and its tooltip text */
-export function useVariantLockText(variantId: string): string {
-  return useAppSelector((s) => describeLock(s.variants.locks, variantId));
-}
-
 /** Disables every button and field inside while the active variant is read-only */
 export function LockedFieldset({
   children,

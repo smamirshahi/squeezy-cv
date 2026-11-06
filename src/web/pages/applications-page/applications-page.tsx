@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
   Box,
@@ -197,10 +198,10 @@ export function ApplicationsPage(): JSX.Element {
             width: 560,
             flex: "none",
             minHeight: "100vh",
-            borderLeft: "1px solid #DDE0E4",
+            borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
             boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
-            bgcolor: "#fff",
-            color: "#213547",
+            bgcolor: WORKSPACE_COLORS.panel,
+            color: WORKSPACE_COLORS.text,
           }}
         >
           <ApplicationView

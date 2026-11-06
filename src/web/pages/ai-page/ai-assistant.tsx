@@ -1,3 +1,4 @@
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useEffect, useMemo, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
@@ -200,8 +201,8 @@ export function AiAssistant(): JSX.Element {
           flex: "none",
           overflow: "auto",
           p: 2,
-          bgcolor: "#fff",
-          borderRight: "1px solid #DDE0E4",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
         <Typography variant="h6" sx={{ mb: 1 }}>
@@ -319,7 +320,7 @@ export function AiAssistant(): JSX.Element {
           flex: 1,
           minWidth: 0,
           overflow: "auto",
-          bgcolor: "#D6D9DD",
+          bgcolor: WORKSPACE_COLORS.canvas,
           p: 2,
         }}
       >
@@ -332,7 +333,7 @@ export function AiAssistant(): JSX.Element {
               setView(value);
             }
           }}
-          sx={{ mb: 2, bgcolor: "#fff" }}
+          sx={{ mb: 2, bgcolor: WORKSPACE_COLORS.panel }}
         >
           <ToggleButton value="current">Current</ToggleButton>
           <ToggleButton value="proposed" disabled={!proposed}>
@@ -367,8 +368,8 @@ export function AiAssistant(): JSX.Element {
           flex: "none",
           overflow: "auto",
           p: 2,
-          bgcolor: "#fff",
-          borderLeft: "1px solid #DDE0E4",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
         <Typography variant="subtitle1" fontWeight="bold">
