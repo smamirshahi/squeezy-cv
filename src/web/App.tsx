@@ -1,12 +1,14 @@
 import { Box } from "@mui/material";
 import { useRef } from "react";
+import { PrintView } from "@pages/print-page/print-view";
 import { EditorPage } from "@pages/editor-page/editor-page";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useSyncStructure } from "@hooks/use-sync-structure";
 import { usePersistence } from "@hooks/use-persistence";
 import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
 
-export function App(): JSX.Element {
+/** The editor with the preview next to it */
+function EditorApp(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
   useSyncStructure();
   useSyncActiveVariant();
@@ -31,5 +33,17 @@ export function App(): JSX.Element {
       <EditorPage contentRef={contentRef} />
       <PreviewPage contentRef={contentRef} />
     </Box>
+  );
+}
+
+/** The print-only page when the address has `?print=<variantId>`, otherwise the editor */
+export function App(): JSX.Element {
+  const printVariantId = new URLSearchParams(window.location.search).get(
+    "print"
+  );
+  return printVariantId ? (
+    <PrintView variantId={printVariantId} />
+  ) : (
+    <EditorApp />
   );
 }

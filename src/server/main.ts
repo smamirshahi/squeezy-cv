@@ -1,10 +1,12 @@
 import { buildServer } from "@server/app";
 import { readConfig } from "@server/config";
+import { PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
 const config = readConfig(process.env, process.cwd());
 const app = buildServer({
   storage: new FileCvStorage(config.dataDir),
+  pdf: new PlaywrightPdfRenderer(config.webUrl),
   isLoggingEnabled: true,
 });
 

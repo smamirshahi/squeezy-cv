@@ -1,7 +1,8 @@
 import Fastify, { FastifyInstance, FastifyReply } from "fastify";
 import { ValidationError } from "runtypes";
 import { CvFileSchema } from "@custom-types/vault-types";
-import { VariantSchema } from "@custom-types/variant-types";
+import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
+import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
   CvStorage,
   StorageError,
@@ -16,6 +17,7 @@ const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 const HTTP_SERVER_ERROR = 500;
+const HTTP_NOT_IMPLEMENTED = 501;
 const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
 function statusOf(code: StorageErrorCode): number {
@@ -57,12 +59,16 @@ function sendError(
 
 export interface ServerOptions {
   storage: CvStorage;
+
+  /** Makes PDFs. Without it, /api/pdf answers 501. */
+  pdf?: PdfRenderer;
   isLoggingEnabled?: boolean;
 }
 
 /** Builds the API. It does not listen; `main.ts` (or a test) decides how to run it. */
 export function buildServer({
   storage,
+  pdf,
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -153,6 +159,58 @@ export function buildServer({
       return { status: "deleted" };
     }
   );
+
+  app.post<{ Body: { variantId?: unknown } }>(
+    "/api/pdf",
+    async (request, reply) => {
+      if (!pdf) {
+        return sendError(
+          reply,
+          HTTP_NOT_IMPLEMENTED,
+          "pdf_unavailable",
+          "PDF export is not set up on this server."
+        );
+      }
+      const variantId = request.body?.variantId;
+      if (
+        typeof variantId !== "string" ||
+        !VARIANT_ID_PATTERN.test(variantId)
+      ) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "invalid",
+          "variantId is missing or not valid."
+        );
+      }
+      // The page that gets printed loads the variant from here, so it must exist and be readable
+      await storage.loadVariant(variantId);
+      let bytes: Buffer;
+      try {
+        bytes = await pdf.render(variantId);
+      } catch (error) {
+        app.log.error(error);
+        const reason = error instanceof Error ? error.message : "unknown error";
+        return sendError(
+          reply,
+          HTTP_SERVER_ERROR,
+          "pdf_failed",
+          `The PDF could not be made: ${reason}. Is the web app running, and is Chromium installed (pnpm exec playwright install chromium)?`
+        );
+      }
+      return reply
+        .header("Content-Type", "application/pdf")
+        .header(
+          "Content-Disposition",
+          `attachment; filename="${variantId}.pdf"`
+        )
+        .send(bytes);
+    }
+  );
+
+  app.addHook("onClose", async () => {
+    await pdf?.close();
+  });
 
   return app;
 }
