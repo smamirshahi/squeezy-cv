@@ -53,6 +53,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
       elevation={3}
       sx={{
         width: `${A4_DIMENSION_MM.width}mm`,
+        flexShrink: 0,
         minHeight: `${A4_DIMENSION_MM.height}mm`,
         padding: "10mm",
         boxSizing: "border-box",
