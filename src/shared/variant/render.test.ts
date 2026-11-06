@@ -359,3 +359,71 @@ describe("skill levels", () => {
     ).toBe(4);
   });
 });
+
+describe("skill display (variant)", () => {
+  const ratings = [5, 3, 0];
+  function ratedVault(tracksLevel?: boolean): Vault {
+    return {
+      ...vault,
+      sections: vault.sections.map((section) =>
+        section.type === "skills"
+          ? {
+              ...section,
+              ...(tracksLevel === undefined ? {} : { tracksLevel }),
+              items: section.items.map((item) => ({
+                ...item,
+                bullets: item.bullets.map((b, i) => ({
+                  ...b,
+                  rating: ratings[i % ratings.length],
+                })),
+              })),
+            }
+          : section
+      ),
+    };
+  }
+  function skills(doc: ReturnType<typeof render>, v: Vault) {
+    const id = v.sections.find((s) => s.type === "skills")!.id;
+    return sectionPart(allParts(doc), id)!;
+  }
+
+  it("passes display and columns to the section; no choice keeps the earlier look", () => {
+    const v = ratedVault();
+    const base = createDefaultVariant(file, "main");
+    expect(skills(render(v, base), v).skillStyle).toEqual({ columns: 1 });
+    const chosen = {
+      ...base,
+      skillDisplay: "bars",
+      skillColumns: 2,
+    } as Variant;
+    expect(skills(render(v, chosen), v).skillStyle).toEqual({
+      display: "bars",
+      columns: 2,
+    });
+  });
+
+  it("minimum level hides lower and unrated skills in this variant only", () => {
+    const v = ratedVault();
+    const variant = { ...createDefaultVariant(file, "main"), skillMinLevel: 4 };
+    const shown = skills(render(v, variant), v).items.flatMap((i) => i.bullets);
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.every((b) => (b.rating ?? 0) >= 4)).toBe(true);
+    const all = skills(
+      render(v, createDefaultVariant(file, "main")),
+      v
+    ).items.flatMap((i) => i.bullets).length;
+    expect(shown.length).toBeLessThan(all);
+  });
+
+  it("a section that does not track levels is a plain list whatever the variant says", () => {
+    const v = ratedVault(false);
+    const variant = {
+      ...createDefaultVariant(file, "main"),
+      skillDisplay: "stars",
+      skillMinLevel: 5,
+    } as Variant;
+    const part = skills(render(v, variant), v);
+    expect(part.skillStyle?.display).toBe("none");
+    expect(part.items.flatMap((i) => i.bullets).length).toBeGreaterThan(1);
+  });
+});

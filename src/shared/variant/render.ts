@@ -1,5 +1,10 @@
 import { Side } from "@custom-types/styles-types";
-import { Emphasis, Tone, Variant } from "@custom-types/variant-types";
+import {
+  Emphasis,
+  SkillDisplay,
+  Tone,
+  Variant,
+} from "@custom-types/variant-types";
 import {
   Bullet,
   Item,
@@ -17,7 +22,6 @@ export interface RenderedBullet {
   /** The wording chosen by the variant */
   text: string;
   rating?: number;
-  years?: number;
 }
 
 export interface RenderedItem {
@@ -36,6 +40,8 @@ export type RenderedPart =
       type: SectionType;
       title: string;
       items: RenderedItem[];
+      /** Skills sections only: how to draw the levels and lay the list out */
+      skillStyle?: { display?: SkillDisplay; columns: 1 | 2 };
     };
 
 export type RenderedSection = Extract<RenderedPart, { kind: "section" }>;
@@ -112,20 +118,29 @@ function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
 function renderItems(
   items: Item[],
   selection: Variant["selection"],
-  hasLevels: boolean
+  hasLevels: boolean,
+  minLevel?: number
 ): RenderedItem[] {
-  return resolveItems(items, selection).map((item) => ({
-    id: item.id,
-    fields: item.fields,
-    bullets: item.bullets.map((bullet) => ({
-      id: bullet.id,
-      text: bullet.text,
-      ...(bullet.rating === undefined || !hasLevels
-        ? {}
-        : { rating: bullet.rating }),
-    })),
-    emphasis: selection[item.id]?.emphasis ?? "normal",
-  }));
+  return resolveItems(items, selection)
+    .map((item) => ({
+      ...item,
+      bullets: minLevel
+        ? item.bullets.filter((bullet) => (bullet.rating ?? 0) >= minLevel)
+        : item.bullets,
+    }))
+    .filter((item) => !minLevel || item.bullets.length > 0)
+    .map((item) => ({
+      id: item.id,
+      fields: item.fields,
+      bullets: item.bullets.map((bullet) => ({
+        id: bullet.id,
+        text: bullet.text,
+        ...(bullet.rating === undefined || !hasLevels
+          ? {}
+          : { rating: bullet.rating }),
+      })),
+      emphasis: selection[item.id]?.emphasis ?? "normal",
+    }));
 }
 
 /**
@@ -154,10 +169,13 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
     if (!section) {
       return [];
     }
+    const isSkills = section.type === "skills";
+    const hasLevels = !isSkills || tracksLevels(section);
     const items = renderItems(
       section.items,
       variant.selection,
-      section.type !== "skills" || tracksLevels(section)
+      hasLevels,
+      isSkills && hasLevels ? variant.skillMinLevel : undefined
     );
     return items.length === 0
       ? []
@@ -168,6 +186,19 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
             type: section.type,
             title: section.title,
             items,
+            ...(isSkills
+              ? {
+                  skillStyle: {
+                    // without levels there is nothing to draw: a plain list
+                    ...(hasLevels
+                      ? variant.skillDisplay
+                        ? { display: variant.skillDisplay }
+                        : {}
+                      : { display: "none" as const }),
+                    columns: variant.skillColumns ?? 1,
+                  },
+                }
+              : {}),
           },
         ];
   }

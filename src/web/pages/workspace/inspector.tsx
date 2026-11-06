@@ -4,6 +4,7 @@ import {
   Button,
   FormControlLabel,
   IconButton,
+  Slider,
   Switch,
   Tab,
   TextField,
@@ -40,6 +41,7 @@ import {
   setFitLimits,
   setItemSelection,
   setPageLimit,
+  setSkillStyle,
 } from "@store/variants/variants-slice";
 import {
   FIT_DEFAULTS,
@@ -48,6 +50,9 @@ import {
 } from "@shared/layout/fit";
 import { sectionsSelector } from "@store/vault/vault-slice";
 import { Side } from "@custom-types/styles-types";
+import { SkillDisplay, Variant } from "@custom-types/variant-types";
+import { tracksLevels } from "@shared/vault/vault-utils";
+import { Section } from "@custom-types/vault-types";
 
 const PERCENT = 100;
 const SIDES: Side[] = ["fullWidth", "left", "right"];
@@ -270,6 +275,109 @@ function PageInspector(): JSX.Element {
   );
 }
 
+const SKILL_DISPLAYS: { value: SkillDisplay; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "dots", label: "Dots" },
+  { value: "bars", label: "Bars" },
+  { value: "stars", label: "Stars" },
+];
+
+const MAX_LEVEL = 5;
+
+interface SkillStyleProps {
+  variant: Variant;
+  section: Section;
+}
+
+/** How this variant shows the levels of a skills section (the levels live in the vault) */
+function SkillStyleControls({
+  variant,
+  section,
+}: SkillStyleProps): JSX.Element {
+  const dispatch = useAppDispatch();
+  const hasLevels = tracksLevels(section);
+  // a variant without a choice keeps the earlier look, which is stars
+  const display = variant.skillDisplay ?? "stars";
+  const columns = variant.skillColumns ?? 1;
+  const minLevel = variant.skillMinLevel ?? 0;
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Heading>Show levels as</Heading>
+      {!hasLevels && (
+        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+          Levels are turned off in the vault (Track my level), so the page shows
+          names only.
+        </Typography>
+      )}
+      <ToggleButtonGroup
+        exclusive
+        fullWidth
+        size="small"
+        aria-label="Skill display"
+        value={display}
+        disabled={!hasLevels}
+        onChange={(_event, value: SkillDisplay | null) =>
+          value && dispatch(setSkillStyle({ id: variant.id, display: value }))
+        }
+      >
+        {SKILL_DISPLAYS.map(({ value, label }) => (
+          <ToggleButton key={value} value={value}>
+            {label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+      <Heading>Layout</Heading>
+      <ToggleButtonGroup
+        exclusive
+        fullWidth
+        size="small"
+        aria-label="Skill columns"
+        value={columns}
+        onChange={(_event, value: 1 | 2 | null) =>
+          value && dispatch(setSkillStyle({ id: variant.id, columns: value }))
+        }
+      >
+        <ToggleButton value={1}>1 column</ToggleButton>
+        <ToggleButton value={2}>2 columns</ToggleButton>
+      </ToggleButtonGroup>
+      {hasLevels && (
+        <>
+          <Heading>Minimum level</Heading>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, px: 1 }}>
+            <Slider
+              min={0}
+              max={MAX_LEVEL}
+              step={1}
+              marks
+              value={minLevel}
+              aria-label="Minimum level"
+              onChange={(_event, value) =>
+                dispatch(setSkillStyle({ id: variant.id, minLevel: value }))
+              }
+            />
+            <Typography sx={{ fontWeight: 700, width: 56 }}>
+              {minLevel === 0 ? "Any" : minLevel}
+            </Typography>
+          </Box>
+        </>
+      )}
+      <Typography
+        sx={{
+          fontSize: 12,
+          p: 1,
+          borderRadius: 1,
+          bgcolor: WORKSPACE_COLORS.panelAlt,
+        }}
+      >
+        <b>ATS note.</b> Skill names always stay real text. Dots and stars are
+        text symbols; bars are drawn shapes that a parser can ignore. Some
+        recruiters prefer no ratings.
+      </Typography>
+    </Box>
+  );
+}
+
 /** One selected item (or section): what it does in this variant, and a way to the vault */
 function BlockInspector(): JSX.Element | null {
   const dispatch = useAppDispatch();
@@ -314,6 +422,9 @@ function BlockInspector(): JSX.Element | null {
           >
             Changes here affect only “{variant.name}”.
           </Typography>
+          {section.type === "skills" && (
+            <SkillStyleControls variant={variant} section={section} />
+          )}
           {item ? (
             <>
               <Box sx={{ display: "flex", gap: 1 }}>
