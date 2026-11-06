@@ -157,6 +157,104 @@ export function toProposal(refs: CvRefs, raw: RawProposal): Proposal {
   };
 }
 
+/** One-word advert headings that small models copy into the requirement lists */
+const HEADING_WORDS = new Set([
+  "essential",
+  "desirable",
+  "required",
+  "requirements",
+  "preferred",
+  "optional",
+  "mandatory",
+  "skills",
+  "experience",
+  "qualifications",
+  "bonus",
+  "must",
+  "have",
+]);
+
+/** Words that say nothing about a skill, so they do not count when matching a gap to the CV */
+const FILLER_WORDS = new Set([
+  "experience",
+  "experienced",
+  "knowledge",
+  "skills",
+  "skill",
+  "strong",
+  "good",
+  "proven",
+  "years",
+  "year",
+  "with",
+  "and",
+  "the",
+  "of",
+  "in",
+  "to",
+  "using",
+  "use",
+  "working",
+  "work",
+  "ability",
+  "understanding",
+  "familiarity",
+  "proficiency",
+  "demonstrable",
+  "solid",
+  "hands-on",
+]);
+
+function normaliseTerm(text: string): string {
+  return text
+    .trim()
+    .replace(/[:\-–—]+$/, "")
+    .trim();
+}
+
+/** Removes heading-like entries ("Essential", "Desirable:") from a requirement list */
+export function cleanRequirementList(list: string[]): string[] {
+  return list
+    .map(normaliseTerm)
+    .filter(
+      (entry) =>
+        entry !== "" &&
+        !(!/\s/.test(entry) && HEADING_WORDS.has(entry.toLowerCase()))
+    );
+}
+
+export function cleanRequirements(requirements: Requirements): Requirements {
+  return {
+    ...requirements,
+    mustHave: cleanRequirementList(requirements.mustHave),
+    niceToHave: cleanRequirementList(requirements.niceToHave),
+    keywords: cleanRequirementList(requirements.keywords),
+  };
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * True when every meaningful word of the gap already appears in the CV text, i.e. the gap is
+ * not a gap (the model said Redux Toolkit was missing but the CV has it).
+ */
+export function isGapCoveredByCv(gap: string, cvText: string): boolean {
+  const terms = gap
+    .toLowerCase()
+    .split(/[^a-z0-9+#.]+/)
+    .map((t) => t.replace(/^\.+|\.+$/g, ""))
+    .filter((t) => t.length > 1 && !FILLER_WORDS.has(t));
+  if (terms.length === 0) {
+    return false;
+  }
+  const haystack = cvText.toLowerCase();
+  return terms.every((term) =>
+    new RegExp(`(^|[^a-z0-9])${escapeRegExp(term)}($|[^a-z0-9])`).test(haystack)
+  );
+}
+
 interface Sanitised {
   proposal: Proposal;
   warnings: string[];
@@ -235,8 +333,11 @@ export function sanitiseProposal(vault: Vault, proposal: Proposal): Sanitised {
     );
   }
 
+  const cvText = allText(vault).join("\n");
+  const gaps = proposal.gaps.filter((gap) => !isGapCoveredByCv(gap, cvText));
+
   return {
-    proposal: { ...proposal, items, bullets, statementFlags },
+    proposal: { ...proposal, items, bullets, statementFlags, gaps },
     warnings,
   };
 }
@@ -255,11 +356,13 @@ export async function tailor(
   vault: Vault,
   input: TailorInput
 ): Promise<TailorResult> {
-  const requirements: Requirements = await ai.generate({
-    promptName: "extract-requirements",
-    input: input.jobAd,
-    schema: RequirementsSchema,
-  });
+  const requirements: Requirements = cleanRequirements(
+    await ai.generate({
+      promptName: "extract-requirements",
+      input: input.jobAd,
+      schema: RequirementsSchema,
+    })
+  );
 
   const refs = buildRefs(vault);
   const raw = await ai.generate({
