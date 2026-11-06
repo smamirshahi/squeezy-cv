@@ -73,6 +73,13 @@ export const FitTuningSchema = Object({
   fontScale: Number,
 });
 
+/** How far auto-fit may go; missing values use the defaults */
+export const FitLimitsSchema = Object({
+  minSpacing: Number.optional(),
+  minMarginMm: Number.optional(),
+  minBodyPt: Number.optional(),
+});
+
 export const FitModeSchema = Union(Literal("fit"), Literal("fill"));
 
 export const VariantSchema = Object({
@@ -102,11 +109,15 @@ export const VariantSchema = Object({
 
   fitMode: FitModeSchema.optional(),
 
+  /** User limits for auto-fit (spacing, margin and body text floors) */
+  fitLimits: FitLimitsSchema.optional(),
+
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),
 });
 
 export type FitTuning = Static<typeof FitTuningSchema>;
+export type FitLimitsValue = Static<typeof FitLimitsSchema>;
 export type FitMode = Static<typeof FitModeSchema>;
 export type Tone = Static<typeof ToneSchema>;
 export type Wording = Static<typeof WordingSchema>;

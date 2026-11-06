@@ -70,10 +70,10 @@ export const FIT_STEPS = {
   fontScale: 0.02,
 } as const;
 
-/** Sensible limits: gaps down to 40%, margins no smaller than 12 mm, body text no smaller than 9.5 pt */
+/** Sensible limits: gaps down to 40%, margins no smaller than 14 mm, body text no smaller than 9.5 pt */
 export const FIT_DEFAULTS = {
   minSpacing: 0.4,
-  minMarginMm: 12,
+  minMarginMm: 14,
   minBodyPt: 9.5,
   maxSpacing: 1.6,
   maxFontScale: 1.1,
@@ -254,11 +254,33 @@ export function describeFit(input: FitInput, state: FitState): string[] {
   return lines;
 }
 
-/** The floors for a CV whose body text is `bodyPt` points: see `FIT_DEFAULTS` */
-export function defaultFloors(baseMarginMm: number, bodyPt: number): FitTuning {
+/** What the user may change about how far auto-fit goes */
+export interface FitLimits {
+  /** Gaps never shrink below this multiple of the style's (0.4 = 40%) */
+  minSpacing?: number;
+
+  /** Margins never shrink below this many mm */
+  minMarginMm?: number;
+
+  /** Body text never shrinks below this many points */
+  minBodyPt?: number;
+}
+
+/** The floors for a CV whose body text is `bodyPt` points: see `FIT_DEFAULTS`, or the user's `limits` */
+export function defaultFloors(
+  baseMarginMm: number,
+  bodyPt: number,
+  limits: FitLimits = {}
+): FitTuning {
   return {
-    spacing: FIT_DEFAULTS.minSpacing,
-    marginMm: Math.min(baseMarginMm, FIT_DEFAULTS.minMarginMm),
-    fontScale: Math.min(1, round(FIT_DEFAULTS.minBodyPt / bodyPt)),
+    spacing: limits.minSpacing ?? FIT_DEFAULTS.minSpacing,
+    marginMm: Math.min(
+      baseMarginMm,
+      limits.minMarginMm ?? FIT_DEFAULTS.minMarginMm
+    ),
+    fontScale: Math.min(
+      1,
+      round((limits.minBodyPt ?? FIT_DEFAULTS.minBodyPt) / bodyPt)
+    ),
   };
 }

@@ -6,6 +6,7 @@ import {
   IconButton,
   Switch,
   Tab,
+  TextField,
   Tabs,
   ToggleButton,
   ToggleButtonGroup,
@@ -35,12 +36,15 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
   setAutoFit,
+  setFitLimits,
   setItemSelection,
   setPageLimit,
 } from "@store/variants/variants-slice";
+import { FIT_DEFAULTS } from "@shared/layout/fit";
 import { sectionsSelector } from "@store/vault/vault-slice";
 import { Side } from "@custom-types/styles-types";
 
+const PERCENT = 100;
 const SIDES: Side[] = ["fullWidth", "left", "right"];
 
 function Heading({ children }: { children: string }): JSX.Element {
@@ -139,6 +143,62 @@ function PageInspector(): JSX.Element {
         }
         label="Auto-fit to the page limit"
       />
+      <Heading>Auto-fit limits</Heading>
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <TextField
+          size="small"
+          type="number"
+          label="Spacing ≥ %"
+          value={Math.round(
+            (variant.fitLimits?.minSpacing ?? FIT_DEFAULTS.minSpacing) * PERCENT
+          )}
+          onChange={(event) =>
+            dispatch(
+              setFitLimits({
+                id: variant.id,
+                limits: {
+                  ...variant.fitLimits,
+                  minSpacing: Number(event.target.value) / PERCENT,
+                },
+              })
+            )
+          }
+        />
+        <TextField
+          size="small"
+          type="number"
+          label="Margins ≥ mm"
+          value={variant.fitLimits?.minMarginMm ?? FIT_DEFAULTS.minMarginMm}
+          onChange={(event) =>
+            dispatch(
+              setFitLimits({
+                id: variant.id,
+                limits: {
+                  ...variant.fitLimits,
+                  minMarginMm: Number(event.target.value),
+                },
+              })
+            )
+          }
+        />
+        <TextField
+          size="small"
+          type="number"
+          label="Text ≥ pt"
+          value={variant.fitLimits?.minBodyPt ?? FIT_DEFAULTS.minBodyPt}
+          onChange={(event) =>
+            dispatch(
+              setFitLimits({
+                id: variant.id,
+                limits: {
+                  ...variant.fitLimits,
+                  minBodyPt: Number(event.target.value),
+                },
+              })
+            )
+          }
+        />
+      </Box>
       <Heading>Sections</Heading>
       {order.map((id) => {
         const section = sections.find((s) => s.id === id);

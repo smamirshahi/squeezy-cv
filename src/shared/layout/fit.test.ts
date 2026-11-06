@@ -166,6 +166,19 @@ describe("floors", () => {
     expect(defaultFloors(20, 12).fontScale).toBeCloseTo(9.5 / 12, 2);
     expect(defaultFloors(20, 9).fontScale).toBe(1);
   });
+
+  it("uses the limits the user set", () => {
+    const floors = defaultFloors(20, 10, {
+      minSpacing: 0.7,
+      minMarginMm: 16,
+      minBodyPt: 9,
+    });
+    expect(floors).toEqual({ spacing: 0.7, marginMm: 16, fontScale: 0.9 });
+  });
+
+  it("never raises a margin above the one the style has", () => {
+    expect(defaultFloors(10, 10, { minMarginMm: 16 }).marginMm).toBe(10);
+  });
 });
 
 describe("fill mode", () => {

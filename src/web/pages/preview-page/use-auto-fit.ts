@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { FitMode, FitTuning } from "@custom-types/variant-types";
+import {
+  FitLimitsValue,
+  FitMode,
+  FitTuning,
+} from "@custom-types/variant-types";
 import {
   FIT_DEFAULTS,
   FitInput,
@@ -17,6 +21,9 @@ interface Options {
 
   /** The values as the style says */
   base: FitTuning;
+
+  /** The user's floors for spacing, margin and body text */
+  limits?: FitLimitsValue;
 
   /** Body text size in pt, to keep it readable */
   bodyPt: number;
@@ -50,14 +57,15 @@ export function useAutoFit(
   options: Options,
   onDone: (tuning: FitTuning) => void
 ): Result {
-  const { isEnabled, mode, pageLimit, base, bodyPt, restartKey } = options;
+  const { isEnabled, mode, pageLimit, base, bodyPt, limits, restartKey } =
+    options;
 
   const input: FitInput = useMemo(
     () => ({
       mode,
       pageLimit,
       base,
-      floors: defaultFloors(base.marginMm, bodyPt),
+      floors: defaultFloors(base.marginMm, bodyPt, limits),
       ceilings: {
         spacing: FIT_DEFAULTS.maxSpacing,
         fontScale: FIT_DEFAULTS.maxFontScale,
@@ -65,7 +73,7 @@ export function useAutoFit(
       // Nothing yet says which items matter less, so none are hidden automatically
       hideCandidates: [],
     }),
-    [mode, pageLimit, base, bodyPt]
+    [mode, pageLimit, base, bodyPt, limits]
   );
 
   const [state, setState] = useState<FitState>(() => startFit(input));
