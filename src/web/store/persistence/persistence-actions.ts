@@ -19,6 +19,7 @@ import {
   setStorageStatus,
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
+import { clearHistory } from "@store/history/history";
 import { computeVariantLocks } from "@shared/variant/variant-lock";
 import {
   relockVariants,
@@ -40,6 +41,8 @@ export function loadCvFileIntoStore(
   dispatch(setMetaData(file.metaData));
   dispatch(setVariants(list));
   activateVariant(dispatch, list[0]);
+  // a loaded file starts a new history: undo never goes back to the file before it
+  dispatch(clearHistory());
 }
 
 /**
