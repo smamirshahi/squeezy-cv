@@ -2,10 +2,10 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { CvFile } from "@custom-types/vault-types";
 import {
-  StoredVariant,
-  StoredVariantSchema,
+  Variant,
+  VariantSchema,
   VARIANT_ID_PATTERN,
-} from "@custom-types/stored-variant-types";
+} from "@custom-types/variant-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   CvStorage,
@@ -32,7 +32,7 @@ function isReadableVault(raw: unknown): boolean {
 }
 
 function isReadableVariant(raw: unknown): boolean {
-  return StoredVariantSchema.guard(raw);
+  return VariantSchema.guard(raw);
 }
 
 function describe(error: unknown): string {
@@ -121,7 +121,7 @@ export class FileCvStorage implements CvStorage {
     return result;
   }
 
-  async loadVariant(id: string): Promise<StoredVariant> {
+  async loadVariant(id: string): Promise<Variant> {
     const filePath = this.variantPath(id);
     let raw: unknown;
     try {
@@ -135,7 +135,7 @@ export class FileCvStorage implements CvStorage {
     if (raw === undefined) {
       throw new StorageError("not_found", `There is no variant ${id}.`);
     }
-    if (!StoredVariantSchema.guard(raw) || raw.id !== id) {
+    if (!VariantSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(
         "corrupt",
         `Variant ${id} is not a valid variant file. The file was left untouched.`
@@ -144,7 +144,7 @@ export class FileCvStorage implements CvStorage {
     return raw;
   }
 
-  async saveVariant(variant: StoredVariant): Promise<void> {
+  async saveVariant(variant: Variant): Promise<void> {
     const filePath = this.variantPath(variant.id);
     await this.queue.run(filePath, () =>
       writeJsonAtomic(filePath, variant, isReadableVariant)

@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance, FastifyReply } from "fastify";
 import { ValidationError } from "runtypes";
 import { CvFileSchema } from "@custom-types/vault-types";
-import { StoredVariantSchema } from "@custom-types/stored-variant-types";
+import { VariantSchema } from "@custom-types/variant-types";
 import {
   CvStorage,
   StorageError,
@@ -132,7 +132,7 @@ export function buildServer({
   app.put<{ Params: { id: string } }>(
     "/api/variants/:id",
     async (request, reply) => {
-      const variant = StoredVariantSchema.check(request.body);
+      const variant = VariantSchema.check(request.body);
       if (variant.id !== request.params.id) {
         return sendError(
           reply,

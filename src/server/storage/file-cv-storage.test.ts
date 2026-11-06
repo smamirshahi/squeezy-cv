@@ -11,9 +11,18 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { createVariant } from "@shared/variant/variant-utils";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { StorageError } from "@server/storage/cv-storage";
 import { KeyedQueue } from "@server/storage/file-utils";
+
+function makeVariant(
+  id: string,
+  name: string
+): ReturnType<typeof createVariant> {
+  const file = migrateCvFile(sample);
+  return createVariant(file.vault, file.style, id, name);
+}
 
 let dir: string;
 let storage: FileCvStorage;
@@ -145,9 +154,7 @@ describe("vault", () => {
 
 describe("variants", () => {
   const variant = {
-    id: "acme-react",
-    version: 1,
-    name: "Acme - Senior React Dev",
+    ...makeVariant("acme-react", "Acme - Senior React Dev"),
     extra: { keep: true },
   };
 
@@ -157,7 +164,7 @@ describe("variants", () => {
 
   it("saves, loads and lists variants, keeping extra fields", async () => {
     await storage.saveVariant(variant);
-    await storage.saveVariant({ id: "b_2", version: 1, name: "Second" });
+    await storage.saveVariant(makeVariant("b_2", "Second"));
     expect(await storage.loadVariant("acme-react")).toEqual(variant);
     expect(await storage.listVariants()).toEqual([
       { id: "acme-react", name: "Acme - Senior React Dev", isCorrupt: false },
@@ -218,16 +225,13 @@ describe("variants", () => {
     "a.b",
   ])("rejects the unsafe id %j", async (id) => {
     await expectCode(storage.loadVariant(id), "invalid_id");
-    await expectCode(
-      storage.saveVariant({ id, version: 1, name: "n" }),
-      "invalid_id"
-    );
+    await expectCode(storage.saveVariant(makeVariant(id, "n")), "invalid_id");
     await expectCode(storage.deleteVariant(id), "invalid_id");
   });
 
   it("never writes outside the data folder", async () => {
     await expectCode(
-      storage.saveVariant({ id: "../../evil", version: 1, name: "n" }),
+      storage.saveVariant(makeVariant("../../evil", "n")),
       "invalid_id"
     );
     expect(await readdir(path.dirname(dir))).not.toContain("evil.json");
