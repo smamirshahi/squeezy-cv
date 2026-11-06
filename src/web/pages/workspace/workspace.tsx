@@ -4,6 +4,7 @@ import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { Inspector } from "@pages/workspace/inspector";
+import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -34,6 +35,7 @@ export function Workspace(): JSX.Element {
       }}
     >
       <TopBar />
+      <ConnectionBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {tool === "variants" && (
@@ -49,8 +51,10 @@ export function Workspace(): JSX.Element {
                 py: 3,
                 display: "flex",
                 justifyContent: "center",
+                position: "relative",
               }}
             >
+              <FirstRun />
               <PreviewPage contentRef={contentRef} />
             </Box>
             <Inspector />
