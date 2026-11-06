@@ -1,4 +1,9 @@
 import {
+  HideRequest,
+  HideResult,
+  HideResultSchema,
+} from "@custom-types/hide-types";
+import {
   Application,
   ApplicationPatch,
   ApplicationSchema,
@@ -123,6 +128,9 @@ export interface ApiClient {
   /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */
   importCv: (text: string) => Promise<ImportedCv>;
 
+  /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
+  suggestHide: (request: HideRequest) => Promise<HideResult>;
+
   /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
   previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
 
@@ -204,6 +212,11 @@ export function createApiClient(
         vault: VaultSchema.check(result.vault),
         warnings: result.warnings,
       };
+    },
+    async suggestHide(body) {
+      return HideResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/hide", body)
+      );
     },
     async previewTailor(body) {
       return (await request(

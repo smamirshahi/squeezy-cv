@@ -1,8 +1,11 @@
+import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControlLabel,
   Typography,
 } from "@mui/material";
@@ -10,6 +13,8 @@ import {
   pickItemsToHide,
   rankHideCandidates,
 } from "@shared/layout/hide-candidates";
+import { HideResult } from "@custom-types/hide-types";
+import { ApiError, createApiClient } from "@store/persistence/api-client";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -37,6 +42,22 @@ export function FitPanel(): JSX.Element | null {
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
   const { linesOver, lineHeightPx } = useAppSelector((s) => s.app.fit);
+  const api = useMemo(() => createApiClient(), []);
+  const [ai, setAi] = useState<{
+    isConfigured: boolean;
+    provider: "claude" | "ollama";
+  } | null>(null);
+  const [isAsking, setIsAsking] = useState<boolean>(false);
+  const [aiResult, setAiResult] = useState<HideResult | null>(null);
+  const [aiError, setAiError] = useState<string>("");
+  const [dismissed, setDismissed] = useState<boolean>(false);
+
+  useEffect(() => {
+    api
+      .getAiStatus()
+      .then(setAi)
+      .catch(() => setAi(null));
+  }, [api]);
 
   const candidates = rankHideCandidates(vault, variant);
   const hiddenCount = candidates.filter((c) => c.isHidden).length;
@@ -53,6 +74,51 @@ export function FitPanel(): JSX.Element | null {
       })
     );
   }
+
+  async function askAi(): Promise<void> {
+    setIsAsking(true);
+    setAiError("");
+    setAiResult(null);
+    setDismissed(false);
+    try {
+      const visible = candidates
+        .filter((candidate) => !candidate.isHidden)
+        .map((candidate) => ({
+          itemId: candidate.itemId,
+          label: candidate.label,
+          section: candidate.sectionTitle,
+          lines: measureLines(candidate.itemId, lineHeightPx),
+          relevance: candidate.relevance,
+        }))
+        .filter((candidate) => candidate.lines > 0);
+      setAiResult(
+        await api.suggestHide({
+          linesOver,
+          candidates: visible,
+          ...(variant.tailor
+            ? {
+                jobTitle: variant.tailor.jobTitle,
+                mustHave: variant.tailor.requirements.mustHave,
+              }
+            : {}),
+        })
+      );
+    } catch (caught) {
+      setAiError(
+        caught instanceof ApiError || caught instanceof Error
+          ? caught.message
+          : "The AI request failed."
+      );
+    } finally {
+      setIsAsking(false);
+    }
+  }
+
+  const suggestions = (aiResult?.suggestions ?? []).filter((suggestion) =>
+    candidates.some((c) => c.itemId === suggestion.itemId && !c.isHidden)
+  );
+  const labelOf = (itemId: string): string =>
+    candidates.find((c) => c.itemId === itemId)?.label ?? "";
 
   const listed = candidates.slice(0, MAX_LISTED);
   return (
@@ -127,6 +193,77 @@ export function FitPanel(): JSX.Element | null {
         >
           Hide the least relevant until it fits
         </Button>
+      )}
+      {linesOver > 0 && ai?.isConfigured && (
+        <>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={isAsking}
+            onClick={() => void askAi()}
+          >
+            Ask AI to pick what to hide
+          </Button>
+          <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+            {ai.provider === "ollama"
+              ? "Item titles and the job's must-haves go to your local model only."
+              : "Sends item titles, section names and the job's must-haves to Anthropic; not your name or contact details."}
+          </Typography>
+          {isAsking && <CircularProgress size={18} />}
+          {aiError && <Alert severity="error">{aiError}</Alert>}
+          {!dismissed && aiResult && (
+            <Box
+              role="region"
+              aria-label="AI suggestion"
+              sx={{
+                mt: 0.5,
+                p: 1,
+                borderRadius: 1,
+                bgcolor: WORKSPACE_COLORS.aiSoft,
+                color: WORKSPACE_COLORS.aiText,
+              }}
+            >
+              <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
+                The AI would hide
+              </Typography>
+              {suggestions.length === 0 && (
+                <Typography sx={{ fontSize: 12 }}>
+                  Nothing usable. Pick by hand above.
+                </Typography>
+              )}
+              {suggestions.map((suggestion) => (
+                <Typography
+                  key={suggestion.itemId}
+                  sx={{ fontSize: 12.5, mt: 0.5 }}
+                >
+                  <strong>{labelOf(suggestion.itemId)}</strong>
+                  {suggestion.reason ? `: ${suggestion.reason}` : ""}
+                </Typography>
+              ))}
+              {aiResult.warnings.map((warning) => (
+                <Typography key={warning} sx={{ fontSize: 11.5, mt: 0.5 }}>
+                  {warning}
+                </Typography>
+              ))}
+              <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  disabled={suggestions.length === 0}
+                  onClick={() => {
+                    suggestions.forEach((s) => setHidden(s.itemId, true));
+                    setDismissed(true);
+                  }}
+                >
+                  Hide these
+                </Button>
+                <Button size="small" onClick={() => setDismissed(true)}>
+                  Dismiss
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );
