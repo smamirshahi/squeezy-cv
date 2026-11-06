@@ -20,7 +20,6 @@ export default tseslint.config(
       ecmaVersion: "latest",
       sourceType: "module",
       parserOptions: {
-        project: "./tsconfig.json",
         projectService: true,
         ecmaFeatures: {
           jsx: true,

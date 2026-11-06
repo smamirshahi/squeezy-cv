@@ -3,7 +3,6 @@ import {
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { Style } from "@custom-types/styles-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 export function DropdownBulletPointIcon(): JSX.Element {
@@ -16,11 +15,7 @@ export function DropdownBulletPointIcon(): JSX.Element {
       <Select
         value={bulletPointIcon}
         label="Bullet Point Icon"
-        onChange={(event) =>
-          dispatch(
-            setBulletPointIcon(event.target.value as Style["bulletPointIcon"])
-          )
-        }
+        onChange={(event) => dispatch(setBulletPointIcon(event.target.value))}
       >
         <MenuItem value="disc">Disc</MenuItem>
         <MenuItem value="circle">Circle</MenuItem>

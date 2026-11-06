@@ -148,7 +148,7 @@ export function createGroqSender(
   return async (system: string, messages: ChatMessage[]) => {
     const payload = (await postJson(
       `${baseUrl}/v1/chat/completions`,
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
       { Authorization: `Bearer ${apiKey ?? ""}` },
       {
         model,
