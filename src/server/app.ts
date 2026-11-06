@@ -11,6 +11,11 @@ import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
+import { pickHide } from "@server/ai/pick-hide";
+import {
+  HideRequestSchema,
+  MAX_HIDE_CANDIDATES,
+} from "@custom-types/hide-types";
 import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
@@ -253,6 +258,31 @@ export function buildServer({
     }
     const { vault } = await storage.loadVault();
     return tailor(ai, vault, { jobAd, tone: body.tone });
+  });
+
+  // Which items to hide so the CV fits (the user confirms; nothing is changed here)
+  app.post("/api/ai/hide", async (request, reply) => {
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
+      );
+    }
+    const body = HideRequestSchema.check(request.body);
+    if (
+      body.candidates.length === 0 ||
+      body.candidates.length > MAX_HIDE_CANDIDATES
+    ) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `Send 1 to ${MAX_HIDE_CANDIDATES} items.`
+      );
+    }
+    return pickHide(ai, body);
   });
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
