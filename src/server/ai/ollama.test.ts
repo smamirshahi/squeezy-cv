@@ -242,7 +242,10 @@ describe("choosing the provider", () => {
       aiProvider: "ollama",
     });
     const response = await app.inject({ method: "GET", url: "/api/ai/status" });
-    expect(response.json()).toEqual({ isConfigured: true, provider: "ollama" });
+    expect(response.json()).toMatchObject({
+      isConfigured: true,
+      provider: "ollama",
+    });
     await app.close();
   });
 });

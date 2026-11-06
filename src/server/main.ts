@@ -1,6 +1,7 @@
 import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
-import { createConfiguredAi } from "@server/ai/ai-provider";
+import { AiRegistry, FileAiSettings } from "@server/ai/ai-registry";
+import { createAiClients } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
 import { BackupService } from "@server/backup/backup-service";
 import { GitDataRepo } from "@server/backup/data-repo";
@@ -18,12 +19,19 @@ try {
 const config = readConfig(process.env, process.cwd());
 const aiConfig = readAiConfig(process.env);
 const backup = new BackupService(new GitDataRepo(config.dataDir));
+const aiRegistry = new AiRegistry(
+  createAiClients(aiConfig),
+  aiConfig.provider,
+  new FileAiSettings(
+    process.env.AI_SETTINGS_FILE?.trim() || ".ai-settings.json"
+  )
+);
+await aiRegistry.load();
 const app = buildServer({
   storage: new VersionedCvStorage(new FileCvStorage(config.dataDir), backup),
   backup,
   pdf: new PlaywrightPdfRenderer(config.webUrl),
-  ai: createConfiguredAi(aiConfig),
-  aiProvider: aiConfig.provider,
+  aiRegistry,
   isLoggingEnabled: true,
 });
 

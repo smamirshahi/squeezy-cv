@@ -159,7 +159,7 @@ describe("the API key", () => {
       ai: new ClaudeAiClient(() => Promise.reject(new Error("unused"))),
     });
     const response = await app.inject({ method: "GET", url: "/api/ai/status" });
-    expect(response.json()).toEqual({
+    expect(response.json()).toMatchObject({
       isConfigured: true,
       provider: "claude",
     });

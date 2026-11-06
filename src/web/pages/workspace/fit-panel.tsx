@@ -14,7 +14,12 @@ import {
   rankHideCandidates,
 } from "@shared/layout/hide-candidates";
 import { HideResult } from "@custom-types/hide-types";
-import { ApiError, createApiClient } from "@store/persistence/api-client";
+import {
+  AiStatus,
+  ApiError,
+  createApiClient,
+  taskProvider,
+} from "@store/persistence/api-client";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -43,10 +48,8 @@ export function FitPanel(): JSX.Element | null {
   const variant = useAppSelector(activeVariantSelector);
   const { linesOver, lineHeightPx } = useAppSelector((s) => s.app.fit);
   const api = useMemo(() => createApiClient(), []);
-  const [ai, setAi] = useState<{
-    isConfigured: boolean;
-    provider: "claude" | "ollama";
-  } | null>(null);
+  const [aiStatus, setAi] = useState<AiStatus | null>(null);
+  const ai = aiStatus ? taskProvider(aiStatus, "hide") : null;
   const [isAsking, setIsAsking] = useState<boolean>(false);
   const [aiResult, setAiResult] = useState<HideResult | null>(null);
   const [aiError, setAiError] = useState<string>("");
@@ -205,9 +208,9 @@ export function FitPanel(): JSX.Element | null {
             Ask AI to pick what to hide
           </Button>
           <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
-            {ai.provider === "ollama"
-              ? "Item titles and the job's must-haves go to your local model only."
-              : "Sends item titles, section names and the job's must-haves to Anthropic; not your name or contact details."}
+            {ai.info.isOnline
+              ? `Sends item titles, section names and the job's must-haves to ${ai.info.recipient}; not your name or contact details.`
+              : "Item titles and the job's must-haves go to your local model only."}
           </Typography>
           {isAsking && <CircularProgress size={18} />}
           {aiError && <Alert severity="error">{aiError}</Alert>}

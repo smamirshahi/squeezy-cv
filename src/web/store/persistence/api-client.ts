@@ -1,4 +1,11 @@
 import {
+  AI_PROVIDER_INFO,
+  AiChoice,
+  AiProviderId,
+  AiProviderInfo,
+  AiTask,
+} from "@shared/ai/providers";
+import {
   HideRequest,
   HideResult,
   HideResultSchema,
@@ -97,8 +104,29 @@ export interface ImportedCv {
 
 /** The messages tailoring would send, see the server's `previewTailorRequest` */
 export interface TailorPreview {
-  provider: "claude" | "ollama";
+  provider: AiProviderId;
   calls: { promptName: string; system: string; input: string }[];
+}
+
+/** What the server says about AI. `isConfigured` and `provider` are tailoring's; the rest is for the chooser. */
+export interface AiStatus {
+  isConfigured: boolean;
+  provider: AiProviderId;
+  providers?: (AiProviderInfo & { isConfigured: boolean })[];
+  choice?: AiChoice;
+}
+
+/** The provider a task uses and whether it is set up, from a status (older answers have only tailoring's) */
+export function taskProvider(
+  status: AiStatus,
+  task: AiTask
+): { info: AiProviderInfo; isConfigured: boolean } {
+  const id = status.choice?.[task] ?? status.provider;
+  const entry = status.providers?.find((p) => p.id === id);
+  return {
+    info: AI_PROVIDER_INFO[id],
+    isConfigured: entry ? entry.isConfigured : status.isConfigured,
+  };
 }
 
 export interface ApiClient {
@@ -116,11 +144,11 @@ export interface ApiClient {
     options?: { isUnlocked?: boolean }
   ) => Promise<void>;
 
-  /** Whether the server has an AI key (it never says what it is) */
-  getAiStatus: () => Promise<{
-    isConfigured: boolean;
-    provider: "claude" | "ollama";
-  }>;
+  /** Which AI providers are set up and which one each task uses (never a key) */
+  getAiStatus: () => Promise<AiStatus>;
+
+  /** Chooses the provider for some tasks. The server refuses one that is not set up. */
+  setAiChoice: (change: Partial<AiChoice>) => Promise<AiChoice>;
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
@@ -194,10 +222,16 @@ export function createApiClient(
       );
     },
     async getAiStatus() {
-      return (await request(fetchImpl, "GET", "/api/ai/status")) as {
-        isConfigured: boolean;
-        provider: "claude" | "ollama";
-      };
+      return (await request(fetchImpl, "GET", "/api/ai/status")) as AiStatus;
+    },
+    async setAiChoice(change) {
+      const answer = (await request(
+        fetchImpl,
+        "PUT",
+        "/api/ai/choice",
+        change
+      )) as { choice: AiChoice };
+      return answer.choice;
     },
     async tailor(body) {
       return TailorResultSchema.check(

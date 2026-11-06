@@ -12,6 +12,7 @@ import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
+import { AiChoiceError, AiRegistry } from "@server/ai/ai-registry";
 import {
   HideRequestSchema,
   MAX_HIDE_CANDIDATES,
@@ -121,6 +122,9 @@ export interface ServerOptions {
   /** Which provider `ai` is, for the page to say where the CV goes */
   aiProvider?: "claude" | "ollama";
 
+  /** Several providers and the user's choice per task. When given, `ai` and `aiProvider` are not used. */
+  aiRegistry?: AiRegistry;
+
   /** The clock, so tests can fix "today" */
   now?: () => Date;
 
@@ -135,10 +139,12 @@ export function buildServer({
   pdf,
   ai,
   aiProvider = "claude",
+  aiRegistry,
   backup,
   now = () => new Date(),
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
+  const registry = aiRegistry ?? AiRegistry.single(ai, aiProvider);
   const app = Fastify({
     // eslint-disable-next-line @typescript-eslint/naming-convention -- Fastify option name
     logger: isLoggingEnabled,
@@ -232,12 +238,38 @@ export function buildServer({
     }
   });
 
-  app.get("/api/ai/status", () => ({
-    isConfigured: ai !== undefined,
-    provider: aiProvider,
-  }));
+  // `isConfigured` and `provider` are those of tailoring (older pages read only these);
+  // `providers` and `choice` are for the chooser and for the other tasks' notices
+  app.get("/api/ai/status", () => {
+    const tailoring = registry.forTask("tailor");
+    return {
+      isConfigured: tailoring.client !== undefined,
+      provider: tailoring.provider,
+      providers: registry.providers(),
+      choice: registry.choice(),
+    };
+  });
+
+  // Which provider each task uses. Keys stay in .env; only the choice is stored.
+  app.put("/api/ai/choice", async (request, reply) => {
+    try {
+      await registry.choose(request.body as Record<string, string>);
+    } catch (error) {
+      if (error instanceof AiChoiceError) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "provider_unavailable",
+          error.message
+        );
+      }
+      throw error;
+    }
+    return { choice: registry.choice() };
+  });
 
   app.post("/api/ai/tailor", async (request, reply) => {
+    const { client: ai } = registry.forTask("tailor");
     if (!ai) {
       return sendError(
         reply,
@@ -262,6 +294,7 @@ export function buildServer({
 
   // Which items to hide so the CV fits (the user confirms; nothing is changed here)
   app.post("/api/ai/hide", async (request, reply) => {
+    const { client: ai } = registry.forTask("hide");
     if (!ai) {
       return sendError(
         reply,
@@ -287,6 +320,7 @@ export function buildServer({
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
   app.post("/api/ai/import", async (request, reply) => {
+    const { client: ai } = registry.forTask("import");
     if (!ai) {
       return sendError(
         reply,
@@ -322,7 +356,7 @@ export function buildServer({
     }
     const { vault } = await storage.loadVault();
     return {
-      provider: aiProvider,
+      provider: registry.forTask("tailor").provider,
       calls: await previewTailorRequest(vault, { jobAd, tone: body.tone }),
     };
   });

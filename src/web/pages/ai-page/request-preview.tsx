@@ -1,3 +1,4 @@
+import { AI_PROVIDER_INFO } from "@shared/ai/providers";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -60,9 +61,9 @@ export function RequestPreview({
         {preview && (
           <>
             <Alert severity="info" sx={{ mb: 2 }}>
-              {preview.provider === "ollama"
-                ? "This goes to your local Ollama model and stays on this computer."
-                : "This goes to Anthropic's API."}{" "}
+              {AI_PROVIDER_INFO[preview.provider].isOnline
+                ? `This goes to ${AI_PROVIDER_INFO[preview.provider].recipient}.`
+                : `This goes to your local ${AI_PROVIDER_INFO[preview.provider].label} model and stays on this computer.`}{" "}
               Name, email, phone, address and links are replaced by placeholders
               such as [Candidate Name]. Nothing has been sent by showing this.
             </Alert>

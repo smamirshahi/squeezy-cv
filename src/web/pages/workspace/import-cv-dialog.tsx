@@ -14,9 +14,11 @@ import {
 import { MAX_IMPORT_LENGTH } from "@custom-types/import-types";
 import { mergeIntoVault } from "@shared/vault/import-from-text";
 import {
+  AiStatus,
   ApiError,
   ImportedCv,
   createApiClient,
+  taskProvider,
 } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { setVault, vaultSelector } from "@store/vault/vault-slice";
@@ -39,10 +41,8 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [result, setResult] = useState<ImportedCv | null>(null);
-  const [status, setStatus] = useState<{
-    isConfigured: boolean;
-    provider: "claude" | "ollama";
-  } | null>(null);
+  const [status, setStatus] = useState<AiStatus | null>(null);
+  const target = status ? taskProvider(status, "import") : null;
 
   useEffect(() => {
     if (isOpen) {
@@ -83,12 +83,12 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
     <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Paste CV text, AI sorts it</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Alert severity={status?.provider === "ollama" ? "info" : "warning"}>
-          {status?.provider === "ollama"
-            ? "Using your local Ollama model: the text stays on this computer."
-            : "The whole text you paste, including your name and contact details, is sent to Anthropic's API. Use a local Ollama model if you do not want that."}
+        <Alert severity={target && !target.info.isOnline ? "info" : "warning"}>
+          {target && !target.info.isOnline
+            ? `Using ${target.info.label} on this computer: the text stays here.`
+            : `The whole text you paste, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in AI setup if you do not want that.`}
         </Alert>
-        {status && !status.isConfigured && (
+        {target && !target.isConfigured && (
           <Alert severity="info">
             AI is not set up. Put <code>ANTHROPIC_API_KEY=...</code> in{" "}
             <code>.env</code>, or use <code>AI_PROVIDER=ollama</code>, then
@@ -139,7 +139,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           variant="outlined"
           disabled={
             isBusy ||
-            !status?.isConfigured ||
+            !target?.isConfigured ||
             text.trim().length === 0 ||
             text.length > MAX_IMPORT_LENGTH
           }
