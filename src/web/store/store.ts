@@ -1,4 +1,5 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { historyReducer, withUndo } from "@store/history/history";
 import { cvDataReducer } from "@store/cv-data/cv-data-slice";
 import { appReducer } from "@store/app/app-slice";
 import { persistenceReducer } from "@store/persistence/persistence-slice";
@@ -11,8 +12,12 @@ export const rootReducer = {
   variants: variantsReducer,
   app: appReducer,
   persistence: persistenceReducer,
+  history: historyReducer,
 };
 
+/** The reducers with undo and redo around them (see `history/history.ts`) */
+export const undoableReducer = withUndo(combineReducers(rootReducer));
+
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: undoableReducer,
 });

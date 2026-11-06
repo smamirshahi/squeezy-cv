@@ -4,6 +4,7 @@ import { AiSetup } from "@pages/workspace/ai-setup";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
+import { useUndoShortcuts } from "@pages/workspace/use-undo-shortcuts";
 import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
 import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
@@ -28,6 +29,7 @@ export function Workspace(): JSX.Element {
   const tool = useAppSelector((s) => s.app.tool);
   const zoom = useAppSelector((s) => s.app.canvasZoom);
   useCanvasShortcuts(tool === "variants");
+  useUndoShortcuts();
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   // "O" opens and closes the outline, unless the user is typing
   useEffect(() => {

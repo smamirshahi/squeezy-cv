@@ -2,12 +2,16 @@ import {
   Box,
   Button,
   Chip,
+  IconButton,
   MenuItem,
   Select,
   Tooltip,
   Typography,
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
+import RedoIcon from "@mui/icons-material/Redo";
+import UndoIcon from "@mui/icons-material/Undo";
+import { redo, undo } from "@store/history/history";
 import { describeLock } from "@shared/variant/variant-lock";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -25,6 +29,71 @@ import {
   variantsSelector,
 } from "@store/variants/variants-slice";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+
+/** Label of a history step for a tooltip: the action name without its slice prefix */
+function stepLabel(type: string | undefined): string {
+  return type ? type.replace(/^[a-z]+\//, "") : "";
+}
+
+/** Undo and redo for every edit (manual or by the chat) since the file was loaded */
+function UndoRedo(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const { past, future } = useAppSelector((s) => s.history);
+  return (
+    <Box sx={{ display: "flex", gap: 0.25 }}>
+      <Tooltip
+        title={
+          past.length > 0
+            ? `Undo ${stepLabel(past.at(-1)?.type)} (⌘Z)`
+            : "Nothing to undo"
+        }
+      >
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Undo"
+            disabled={past.length === 0}
+            onClick={() => dispatch(undo())}
+            sx={{
+              color: WORKSPACE_COLORS.barText,
+              "&.Mui-disabled": {
+                opacity: 0.35,
+                color: WORKSPACE_COLORS.barText,
+              },
+            }}
+          >
+            <UndoIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title={
+          future.length > 0
+            ? `Redo ${stepLabel(future[0]?.type)} (⇧⌘Z)`
+            : "Nothing to redo"
+        }
+      >
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Redo"
+            disabled={future.length === 0}
+            onClick={() => dispatch(redo())}
+            sx={{
+              color: WORKSPACE_COLORS.barText,
+              "&.Mui-disabled": {
+                opacity: 0.35,
+                color: WORKSPACE_COLORS.barText,
+              },
+            }}
+          >
+            <RedoIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Box>
+  );
+}
 
 /** The dark bar on top: variant, fit, save state and the main actions */
 export function TopBar(): JSX.Element {
@@ -105,6 +174,7 @@ export function TopBar(): JSX.Element {
         }}
       />
       <Box sx={{ flex: 1 }} />
+      <UndoRedo />
       <SaveStatus />
       <Button
         size="small"
