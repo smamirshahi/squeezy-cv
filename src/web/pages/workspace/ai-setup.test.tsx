@@ -140,4 +140,35 @@ describe("AI setup chooser", () => {
         .checked
     ).toBe(true);
   });
+
+  it("has an option to also hide employer and school names, saved on the server", async () => {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) =>
+      Promise.resolve(
+        new Response(
+          url === "/api/ai/privacy"
+            ? JSON.stringify(JSON.parse(init?.body as string))
+            : JSON.stringify(status())
+        )
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AiSetup />);
+    const box = await screen.findByRole("checkbox", {
+      name: /Also hide employer and school names/,
+    });
+    expect((box as HTMLInputElement).checked).toBe(false);
+    fireEvent.click(box);
+    await waitFor(() =>
+      expect(
+        screen.getByRole<HTMLInputElement>("checkbox", {
+          name: /Also hide employer and school names/,
+        }).checked
+      ).toBe(true)
+    );
+    const put = fetchMock.mock.calls.find(([url]) => url === "/api/ai/privacy");
+    expect(JSON.parse(put?.[1]?.body as string)).toEqual({
+      maskOrganisations: true,
+    });
+    expect(screen.getByText(/employers → \[Company n\]/)).toBeTruthy();
+  });
 });

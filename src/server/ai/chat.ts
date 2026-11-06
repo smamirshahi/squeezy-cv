@@ -1,3 +1,4 @@
+import { personalOf } from "@shared/ai/redact-personal";
 import {
   ChatRequest,
   ChatResponse,
@@ -236,7 +237,8 @@ function toRefs(map: Map<string, string>, ids: string[]): string[] {
 export async function chat(
   ai: AiClient,
   vault: Vault,
-  request: ChatRequest
+  request: ChatRequest,
+  options: { isMaskingOrganisations?: boolean } = {}
 ): Promise<ChatResponse> {
   const refs = buildRefs(vault);
   const raw = await ai.generate({
@@ -254,7 +256,7 @@ export async function chat(
       cv: describeCv(vault, refs),
     }),
     schema: RawChatAnswerSchema,
-    personal: { profile: vault.profile, links: vault.links },
+    personal: personalOf(vault, options.isMaskingOrganisations === true),
   });
   const { operations, warnings } = toOperations(vault, refs, raw);
   const reply =

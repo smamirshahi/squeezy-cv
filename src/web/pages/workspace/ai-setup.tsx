@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
+  Checkbox,
   Chip,
   FormControlLabel,
   Radio,
@@ -65,6 +66,20 @@ export function AiSetup(): JSX.Element {
         caught instanceof ApiError || caught instanceof Error
           ? caught.message
           : "Could not change the provider."
+      );
+    }
+  }
+
+  async function setMasking(isMasking: boolean): Promise<void> {
+    setError("");
+    try {
+      const saved = await api.setMaskOrganisations(isMasking);
+      setStatus((current) =>
+        current ? { ...current, maskOrganisations: saved } : current
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Could not save the setting."
       );
     }
   }
@@ -192,6 +207,9 @@ export function AiSetup(): JSX.Element {
           <br />
           <b>Masked:</b> your name → [Candidate Name], email → [Email], phone →
           [Phone Number], address → [Address], links → [Link n]
+          {status?.maskOrganisations
+            ? ", employers → [Company n], schools → [School n]"
+            : ""}
           <br />
           <b>Never sent:</b> PDF files, your saved data files
           <br />
@@ -199,6 +217,25 @@ export function AiSetup(): JSX.Element {
           reduces the risk, it does not remove it. On the Tailor page, “Preview
           the exact request” shows the real messages.
         </Box>
+        {status && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={status.maskOrganisations === true}
+                onChange={(event) => void setMasking(event.target.checked)}
+              />
+            }
+            label={
+              <span>
+                <b>Also hide employer and school names</b> from Tailor and Chat.
+                They are replaced by [Company 1], [School 1]… on the way out and
+                put back in the answer. The AI then cannot tell that “Google” is
+                a strong name, and a name it changes is shown as a warning.
+                Dates and wording are still sent.
+              </span>
+            }
+          />
+        )}
       </Box>
     </Box>
   );

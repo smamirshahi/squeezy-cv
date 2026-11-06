@@ -1,9 +1,21 @@
-import { LinkItem, Profile } from "@custom-types/vault-types";
+import { LinkItem, Profile, Section } from "@custom-types/vault-types";
 
 /** The personal details that must never leave the machine */
 export interface PersonalData {
   profile: Profile;
   links: LinkItem[];
+
+  /**
+   * Employer and school names to hide as well (optional mode, #133). Each name gets its own
+   * placeholder, `[Company 1]` or `[School 1]`, numbered by its place in the list.
+   */
+  organisations?: Organisations;
+}
+
+/** Names of employers and schools as written in the CV */
+export interface Organisations {
+  companies: string[];
+  schools: string[];
 }
 
 /** placeholder (e.g. "[Email]") -> the real value */
@@ -29,6 +41,11 @@ interface Rule {
 
 const MIN_NAME_PART_LENGTH = 2;
 const MIN_PHONE_DIGITS = 7;
+const MIN_ORGANISATION_LENGTH = 3;
+
+/** Endings of company names that a bullet may leave out ("at Example" for "Example Ltd") */
+const LEGAL_SUFFIX =
+  /[\s,]+(?:ltd\.?|limited|inc\.?|incorporated|llc|llp|plc|gmbh|corp\.?|corporation|co\.?)$/i;
 
 /** Words of the placeholders themselves: a name part equal to one of them is not replaced */
 const PLACEHOLDER_WORDS = new Set([
@@ -56,6 +73,8 @@ const PLACEHOLDER_STARTS = [
   "address",
   "right to work",
   "link",
+  "company",
+  "school",
 ];
 
 function escapeRegExp(text: string): string {
@@ -128,6 +147,76 @@ function isUsable(value: string | undefined): value is string {
   return value !== undefined && value.trim() !== "";
 }
 
+/** A name for an organisation: the full name, or without its "Ltd"/"Inc" ending */
+function organisationPattern(name: string): RegExp {
+  const full = escapeRegExp(name).replace(/\s+/g, "\\s+");
+  const short = name.replace(LEGAL_SUFFIX, "").trim();
+  if (short.length >= MIN_ORGANISATION_LENGTH && short !== name) {
+    const shortSource = escapeRegExp(short).replace(/\s+/g, "\\s+");
+    return wordPattern(`(?:${full}|${shortSource})`);
+  }
+  return wordPattern(full);
+}
+
+/** Longest names first, so "Example Labs" is replaced before "Example" */
+function organisationRules(organisations: Organisations | undefined): Rule[] {
+  if (!organisations) {
+    return [];
+  }
+  const rules: Rule[] = [];
+  const groups: [string, string[]][] = [
+    ["Company", organisations.companies],
+    ["School", organisations.schools],
+  ];
+  for (const [label, names] of groups) {
+    names.forEach((raw, index) => {
+      const name = raw.trim();
+      if (name.length >= MIN_ORGANISATION_LENGTH) {
+        rules.push({
+          placeholder: `[${label} ${index + 1}]`,
+          value: name,
+          pattern: organisationPattern(name),
+        });
+      }
+    });
+  }
+  return rules.sort((a, b) => b.value.length - a.value.length);
+}
+
+/** The employers (experience sections) and schools (education sections) named in the CV, once each */
+export function organisationsOf(sections: Section[]): Organisations {
+  function names(type: Section["type"], key: string): string[] {
+    const found = new Map<string, string>();
+    for (const section of sections.filter((entry) => entry.type === type)) {
+      for (const item of section.items) {
+        const name = (item.fields[key] ?? "").trim();
+        if (name && !found.has(name.toLowerCase())) {
+          found.set(name.toLowerCase(), name);
+        }
+      }
+    }
+    return [...found.values()];
+  }
+  return {
+    companies: names("experience", "company"),
+    schools: names("education", "institute"),
+  };
+}
+
+/** What to keep out of a request for this CV; `isMaskingOrganisations` adds employers and schools */
+export function personalOf(
+  vault: { profile: Profile; links: LinkItem[]; sections: Section[] },
+  isMaskingOrganisations: boolean
+): PersonalData {
+  return {
+    profile: vault.profile,
+    links: vault.links,
+    ...(isMaskingOrganisations
+      ? { organisations: organisationsOf(vault.sections) }
+      : {}),
+  };
+}
+
 /**
  * The replacements for this person, in the order they are applied: the longest and most
  * specific first (email and links contain the name), name parts last.
@@ -151,6 +240,9 @@ function buildRules(data: PersonalData): Rule[] {
   });
   if (isUsable(profile.phone)) {
     add("[Phone Number]", profile.phone.trim(), phonePattern(profile.phone));
+  }
+  for (const rule of organisationRules(data.organisations)) {
+    rules.push(rule);
   }
   if (isUsable(profile.fullName)) {
     add(

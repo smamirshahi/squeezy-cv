@@ -278,4 +278,36 @@ describe("personal data never reaches the model", () => {
     expect(result.greeting).toBe("Hi Mohammad Amirshahi [Phone Numbr]");
     expect(warnings).toHaveLength(1);
   });
+
+  it("with employer and school masking, sends [Company n] and [School n], restores them, and warns about a changed one", async () => {
+    const orgs = {
+      ...personal,
+      organisations: {
+        companies: ["Example Ltd"],
+        schools: ["Leeds University"],
+      },
+    };
+    const sent: string[] = [];
+    const warnings: string[] = [];
+    const send: MessageSender = (system, messages) => {
+      sent.push(system, ...messages.map((m) => m.content));
+      return Promise.resolve({
+        text: '{"greeting":"Ten years at [Company 1] and [School 1], not [Company 3]"}',
+        stopReason: "end_turn",
+      });
+    };
+    const result = await new ClaudeAiClient(send).generate({
+      promptName: "json-only",
+      input: "Example Ltd and Leeds University",
+      schema,
+      personal: orgs,
+      onWarning: (m) => warnings.push(m),
+    });
+    expect(sent.join("\n")).not.toMatch(/Example|Leeds/);
+    expect(sent.join("\n")).toContain("[Company 1] and [School 1]");
+    expect(result.greeting).toBe(
+      "Ten years at Example Ltd and Leeds University, not [Company 3]"
+    );
+    expect(warnings).toEqual([expect.stringContaining("[Company 3]")]);
+  });
 });
