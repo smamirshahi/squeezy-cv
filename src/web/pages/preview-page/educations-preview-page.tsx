@@ -3,6 +3,7 @@ import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
+import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 
 interface Props {
@@ -22,7 +23,11 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text={section.title} />
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
       {section.items.map((item) => (
         <Grid
           key={item.id}
@@ -31,36 +36,38 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
           alignItems="flex-start"
           sx={{ mb: "10px", breakInside: "avoid" }}
         >
-          <CvTypography
-            variant="headingSm"
-            isEmphasised={item.emphasis === "high"}
-            text={item.fields.degree ?? ""}
-          />
-          <Grid container direction="row" alignItems="center" gap={3}>
+          <CvBlock>
             <CvTypography
-              variant="bodyMd"
+              variant="headingSm"
               isEmphasised={item.emphasis === "high"}
-              text={item.fields.institute ?? ""}
+              text={item.fields.degree ?? ""}
             />
-            <IconWithText
-              icon={LocationOnIcon}
-              text={item.fields.location ?? ""}
-              variant="bodyMd"
+            <Grid container direction="row" alignItems="center" gap={3}>
+              <CvTypography
+                variant="bodyMd"
+                isEmphasised={item.emphasis === "high"}
+                text={item.fields.institute ?? ""}
+              />
+              <IconWithText
+                icon={LocationOnIcon}
+                text={item.fields.location ?? ""}
+                variant="bodyMd"
+              />
+            </Grid>
+            <DatePeriod
+              datePeriod={{
+                start: item.fields.startDate ?? "",
+                end: item.fields.endDate,
+              }}
             />
-          </Grid>
-          <DatePeriod
-            datePeriod={{
-              start: item.fields.startDate ?? "",
-              end: item.fields.endDate,
-            }}
-          />
 
-          {item.fields.dissertationTitle && (
-            <CvTypography
-              variant="bulletText"
-              text={`Dissertation Title: ${item.fields.dissertationTitle}`}
-            />
-          )}
+            {item.fields.dissertationTitle && (
+              <CvTypography
+                variant="bulletText"
+                text={`Dissertation Title: ${item.fields.dissertationTitle}`}
+              />
+            )}
+          </CvBlock>
         </Grid>
       ))}
     </Grid>

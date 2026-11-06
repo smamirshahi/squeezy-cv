@@ -11,6 +11,12 @@ export const GRID_SIZE_PX = 20;
 /** Distance between every two sections in px */
 export const DISTANCE_BETWEEN_SECTIONS_PX = GRID_SIZE_PX;
 
+/** Space between the edge of the paper and the text, in mm, for each margin setting */
+export const PAPER_MARGIN_MM = {
+  narrow: 10,
+  normal: 20,
+} as const;
+
 /** The dimension of A4 paper in mm */
 export const A4_DIMENSION_MM = {
   width: 210,

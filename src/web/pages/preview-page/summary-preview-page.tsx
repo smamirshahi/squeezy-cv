@@ -20,8 +20,12 @@ export function SummaryPreviewPage({ section }: Props): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text={section.title} />
-      <CvTypography variant="bulletText" text={text} />
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
+      <CvTypography variant="bulletText" pageBreak="avoid-inside" text={text} />
     </Grid>
   );
 }

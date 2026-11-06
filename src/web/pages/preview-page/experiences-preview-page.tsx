@@ -5,6 +5,7 @@ import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
+import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
@@ -29,46 +30,55 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
       alignItems="flex-start"
       sx={{ m: "0px", p: "0px" }}
     >
-      <CvTypography variant="headingMd" text={section.title} />
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
       {section.items.map((item) => (
         <Grid
           container
           key={item.id}
           direction="column"
           alignItems="flex-start"
-          sx={{ mb: "10px", breakInside: "avoid" }}
+          sx={{ mb: "10px" }}
         >
-          <CvTypography
-            variant="headingSm"
-            isEmphasised={item.emphasis === "high"}
-            text={item.fields.jobTitle ?? ""}
-          />
-          <Grid container direction="row" alignItems="center" gap={3}>
+          <CvBlock shouldKeepWithNext>
             <CvTypography
-              variant="bodyMd"
+              variant="headingSm"
               isEmphasised={item.emphasis === "high"}
-              text={item.fields.company ?? ""}
+              text={item.fields.jobTitle ?? ""}
             />
-            <IconWithText
-              icon={LocationOnIcon}
-              text={item.fields.location ?? ""}
-              variant="bodyMd"
+            <Grid container direction="row" alignItems="center" gap={3}>
+              <CvTypography
+                variant="bodyMd"
+                isEmphasised={item.emphasis === "high"}
+                text={item.fields.company ?? ""}
+              />
+              <IconWithText
+                icon={LocationOnIcon}
+                text={item.fields.location ?? ""}
+                variant="bodyMd"
+              />
+            </Grid>
+            <DatePeriod
+              datePeriod={{
+                start: item.fields.startDate ?? "",
+                end: item.fields.endDate,
+              }}
             />
-          </Grid>
-          <DatePeriod
-            datePeriod={{
-              start: item.fields.startDate ?? "",
-              end: item.fields.endDate,
-            }}
-          />
-
+          </CvBlock>
           {item.bullets.length > 0 && (
             <Box
               component="ul"
               sx={{ my: "0px", pl: "20px", ...listStyleType }}
             >
               {item.bullets.map((bullet) => (
-                <li key={bullet.id}>
+                <li
+                  key={bullet.id}
+                  data-cv-block=""
+                  style={{ breakInside: "avoid" }}
+                >
                   <CvTypography variant="bulletText" text={bullet.text} />
                 </li>
               ))}

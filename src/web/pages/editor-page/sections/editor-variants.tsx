@@ -31,6 +31,7 @@ import {
   setBulletSelection,
   setItemOrders,
   setItemSelection,
+  setPageLimit,
   variantsSelector,
 } from "@store/variants/variants-slice";
 import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
@@ -127,6 +128,26 @@ export function EditorVariants(): JSX.Element {
         >
           Delete
         </Button>
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+        <TextField
+          select
+          label="Page limit"
+          value={variant.pageLimit}
+          onChange={(event) =>
+            dispatch(
+              setPageLimit({
+                id: variant.id,
+                pageLimit: Number(event.target.value),
+              })
+            )
+          }
+          sx={{ minWidth: 160 }}
+        >
+          <MenuItem value={1}>1 page</MenuItem>
+          <MenuItem value={2}>2 pages</MenuItem>
+        </TextField>
       </Box>
 
       {sections.map((section) => {

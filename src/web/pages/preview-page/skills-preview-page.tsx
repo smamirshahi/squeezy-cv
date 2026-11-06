@@ -18,11 +18,16 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
 
   return (
     <>
-      <CvTypography variant="headingMd" text={section.title} />
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
       {section.items.map((group) => (
         <React.Fragment key={group.id}>
           <CvTypography
             variant="headingSm"
+            pageBreak="keep-with-next"
             isEmphasised={group.emphasis === "high"}
             text={group.fields.category ?? ""}
           />
@@ -30,6 +35,8 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
             {group.bullets.map((skill) => (
               <Grid
                 key={skill.id}
+                data-cv-block=""
+                sx={{ breakInside: "avoid" }}
                 container
                 direction="row"
                 alignItems="center"
