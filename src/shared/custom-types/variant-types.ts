@@ -49,6 +49,9 @@ export const ItemSelectionSchema = Object({
 
   emphasis: EmphasisSchema.optional(),
 
+  /** How relevant the item is to this variant's target (0-100), set by tailoring. Used to pick what to hide first when it does not fit. */
+  relevance: Number.optional(),
+
   /** Position within its section. Items without one keep their vault position after those with one. */
   order: Number.optional(),
 

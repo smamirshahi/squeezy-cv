@@ -135,7 +135,13 @@ export function PreviewPage({
   useEffect(() => {
     if (!isPrintView) {
       dispatch(
-        setFit({ pageCount, usedPercent, linesOver, overflowStartsWith })
+        setFit({
+          pageCount,
+          usedPercent,
+          linesOver,
+          lineHeightPx: pagination.lineHeightPx,
+          overflowStartsWith,
+        })
       );
     }
   }, [
@@ -144,6 +150,7 @@ export function PreviewPage({
     pageCount,
     usedPercent,
     linesOver,
+    pagination.lineHeightPx,
     overflowStartsWith,
   ]);
 
