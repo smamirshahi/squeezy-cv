@@ -11,12 +11,16 @@ interface TypographyVariantProps {
 
   /** The text to display */
   text: string;
+
+  /** Draws the text bold (an item highlighted in the variant) */
+  isEmphasised?: boolean;
 }
 
 /** Creates a new typography which is connected to store */
 export function CvTypography({
   variant,
   text,
+  isEmphasised = false,
 }: TypographyVariantProps): JSX.Element {
   const { typography } = useAppSelector(styleSelector);
   const { opacity } = useCvTypographyUtils();
@@ -50,6 +54,7 @@ export function CvTypography({
         m: "0px",
         opacity: opacity(variant),
         ...additionalStyle,
+        ...(isEmphasised ? { fontWeight: 700 } : {}),
       }}
       gutterBottom
     >

@@ -18,6 +18,7 @@ export function DropdownDateType(): JSX.Element {
           dispatch(setDateFormat(event.target.value as Style["dateFormat"]))
         }
       >
+        <MenuItem value="MMM YYYY">MMM YYYY (Dec 2018)</MenuItem>
         <MenuItem value="DD/MM/YYYY">DD/MM/YYYY (01/12/2018)</MenuItem>
         <MenuItem value="MMM/YYYY">MMM/YYYY (Dec/2018)</MenuItem>
         <MenuItem value="MMMM/YYYY">MMMM/YYYY (December 2018)</MenuItem>

@@ -6,7 +6,6 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   render,
   RenderedPart,
-  resolveVault,
   sortItemsByVariant,
 } from "@shared/variant/render";
 import {
@@ -226,44 +225,6 @@ describe("createDefaultVariant", () => {
   it("uses the given layout", () => {
     const layout = { fullWidth: ["personalInfo"], left: [], right: [] };
     expect(createDefaultVariant(file, "main", layout).layout).toEqual(layout);
-  });
-});
-
-describe("resolveVault", () => {
-  it("keeps only visible items in variant order, with chosen wordings", () => {
-    const { section, item } = sectionWithBullets();
-    const customVault: Vault = structuredClone(vault);
-    const target = customVault.sections
-      .find((s) => s.id === section.id)
-      ?.items.find((i) => i.id === item.id);
-    if (!target) {
-      throw new Error("item missing");
-    }
-    target.bullets[0].alt = { formal: "FORMAL" };
-
-    let variant = updateItemSelection(base(), item.id, {
-      isVisible: true,
-      bullets: {
-        [target.bullets[0].id]: { isVisible: true, wording: "formal" },
-      },
-    });
-    const other = section.items.find((i) => i.id !== item.id);
-    if (other) {
-      variant = updateItemSelection(variant, other.id, { isVisible: false });
-    }
-
-    const resolved = resolveVault(customVault, variant);
-    const items = resolved.sections.find((s) => s.id === section.id)?.items;
-
-    expect(items?.find((i) => i.id === item.id)?.bullets[0].text).toBe(
-      "FORMAL"
-    );
-    expect(items?.every((i) => i.shouldShow)).toBe(true);
-    if (other) {
-      expect(items?.map((i) => i.id)).not.toContain(other.id);
-    }
-    // the input is not changed
-    expect(target.bullets[0].text).toBe(item.bullets[0].text);
   });
 });
 

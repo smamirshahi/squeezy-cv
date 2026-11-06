@@ -72,6 +72,16 @@ export function EditorMainInfo(): JSX.Element | null {
           }
           fullWidth
         />
+        <TextField
+          label="Right to work (optional)"
+          helperText='e.g. "Eligible to work in the UK". Shown under your name when turned on in Style Settings.'
+          variant="outlined"
+          value={draft.profile.rightToWork ?? ""}
+          onChange={(event) =>
+            draftDispatch(updateProfile({ rightToWork: event.target.value }))
+          }
+          fullWidth
+        />
       </Box>
       <Box display="flex" flexDirection="column" gap={2} mb={2}>
         <TextField

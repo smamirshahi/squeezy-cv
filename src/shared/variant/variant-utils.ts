@@ -6,21 +6,10 @@ import {
   Variant,
 } from "@custom-types/variant-types";
 import { CvFile, Item, Vault } from "@custom-types/vault-types";
-import { HEADER_IDS } from "@shared/vault/default-vault";
 import { sortItemsByVariant } from "@shared/variant/render";
-import { reconcileStructure } from "@shared/vault/page-structure";
+import { singleColumnLayout } from "@shared/vault/page-structure";
 
 const DEFAULT_PAGE_LIMIT = 2;
-
-/** The standard column placement for the given sections: header on top, one column for the rest */
-function defaultLayout(vault: Vault): Variant["layout"] {
-  const sectionIds = vault.sections.map((section) => section.id);
-  return reconcileStructure(
-    { fullWidth: [...HEADER_IDS], left: [], right: [] },
-    [...HEADER_IDS, ...sectionIds],
-    "left"
-  );
-}
 
 /** Items hidden in the vault (`shouldShow: false`) are hidden in the variant too */
 function selectionFromVault(vault: Vault): Variant["selection"] {
@@ -48,7 +37,7 @@ export function createVariant(
     name,
     tone: "neutral",
     pageLimit: DEFAULT_PAGE_LIMIT,
-    layout: defaultLayout(vault),
+    layout: singleColumnLayout(vault.sections),
     selection: selectionFromVault(vault),
     style,
   };

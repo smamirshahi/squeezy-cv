@@ -17,9 +17,10 @@ export const initialState: CvDataState = {
   },
   style: {
     shouldShowFullContactLinks: true,
+    shouldShowRightToWork: false,
     ratingIcon: "star",
     bulletPointIcon: "disc",
-    dateFormat: "MMMM/YYYY",
+    dateFormat: "MMM YYYY",
     typography: TypographyVariant,
     paperMargin: "narrow",
   },
@@ -36,6 +37,10 @@ const cvDataSlice = createSlice({
 
     setStyle(state, action: PayloadAction<Style>) {
       state.style = action.payload;
+    },
+
+    setShouldShowRightToWork(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowRightToWork = action.payload;
     },
 
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
@@ -78,6 +83,7 @@ export const {
   setMetaData,
   setStyle,
   setDateFormat,
+  setShouldShowRightToWork,
   setPaperMargin,
   setTypography,
   setRatingIcon,

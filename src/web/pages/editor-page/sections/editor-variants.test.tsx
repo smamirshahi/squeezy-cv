@@ -11,6 +11,7 @@ import { setVault } from "@store/vault/vault-slice";
 import { setVariants } from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
 import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
 import { updatePageStructure } from "@store/app/app-slice";
@@ -118,5 +119,35 @@ describe("EditorVariants", () => {
     fireEvent.mouseDown(screen.getByLabelText("Active variant"));
     fireEvent.click(screen.getAllByRole("option")[0]);
     expect(store.getState().app.structure).toEqual(custom);
+  });
+});
+
+describe("layout templates", () => {
+  it("switches between the single-column and two-column template", () => {
+    const store = makeStore();
+    render(
+      <Provider store={store}>
+        <EditorPageStructure />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Two columns" }));
+    expect(store.getState().app.structure.left).toEqual(["experience"]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Single column (UK)" }));
+    const { fullWidth, left, right } = store.getState().app.structure;
+    expect(left).toEqual([]);
+    expect(right).toEqual([]);
+    expect(fullWidth).toContain("experience");
+  });
+
+  it("starts new variants as one column", () => {
+    const layout = createDefaultVariant(migrateCvFile(sample), "x").layout;
+    expect(layout.left).toEqual([]);
+    expect(layout.right).toEqual([]);
+    expect(layout.fullWidth.slice(0, 2)).toEqual([
+      "personalInfo",
+      "contactInfo",
+    ]);
   });
 });
