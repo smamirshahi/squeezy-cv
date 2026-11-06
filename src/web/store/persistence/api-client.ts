@@ -28,7 +28,8 @@ async function request(
   fetchImpl: FetchLike,
   method: string,
   url: string,
-  body?: unknown
+  body?: unknown,
+  expects: "json" | "blob" = "json"
 ): Promise<unknown> {
   let response: Response;
   try {
@@ -44,6 +45,10 @@ async function request(
     });
   } catch {
     throw new ApiError("unreachable", "The local server cannot be reached.");
+  }
+
+  if (response.ok && expects === "blob") {
+    return response.blob();
   }
 
   let payload: unknown;
@@ -69,6 +74,9 @@ export interface ApiClient {
   loadVariant: (id: string) => Promise<Variant>;
   saveVariant: (variant: Variant) => Promise<void>;
   deleteVariant: (id: string) => Promise<void>;
+
+  /** The PDF of a saved variant, made by the server */
+  createPdf: (variantId: string) => Promise<Blob>;
 }
 
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
@@ -105,6 +113,15 @@ export function createApiClient(
         `/api/variants/${encodeURIComponent(variant.id)}`,
         variant
       );
+    },
+    async createPdf(variantId) {
+      return (await request(
+        fetchImpl,
+        "POST",
+        "/api/pdf",
+        { variantId },
+        "blob"
+      )) as Blob;
     },
     async deleteVariant(id) {
       await request(

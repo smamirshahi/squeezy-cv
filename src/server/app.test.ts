@@ -7,6 +7,7 @@ import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { createVariant } from "@shared/variant/variant-utils";
 import { buildServer } from "@server/app";
+import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { readConfig } from "@server/config";
 
@@ -274,6 +275,7 @@ describe("readConfig", () => {
       host: "127.0.0.1",
       port: 3001,
       dataDir: "/work/data",
+      webUrl: "http://localhost:5173",
     });
   });
 
@@ -291,5 +293,119 @@ describe("readConfig", () => {
 
   it.each(["abc", "0", "70000", "3.5", "-1"])("rejects the port %s", (port) => {
     expect(() => readConfig({ PORT: port }, "/work")).toThrow(/PORT/);
+  });
+
+  it("takes WEB_URL only if it points to this machine", () => {
+    expect(
+      readConfig({ WEB_URL: "http://localhost:4173" }, "/work").webUrl
+    ).toBe("http://localhost:4173");
+    for (const bad of [
+      "https://example.com",
+      "http://127.0.0.1.evil.com",
+      "file:///etc/passwd",
+      "not a url",
+    ]) {
+      expect(() => readConfig({ WEB_URL: bad }, "/work")).toThrow(/WEB_URL/);
+    }
+  });
+});
+
+describe("POST /api/pdf", () => {
+  const PDF_BYTES = Buffer.from("%PDF-1.7 fake");
+
+  class FakePdf implements PdfRenderer {
+    requested: string[] = [];
+    shouldFail = false;
+    isClosed = false;
+
+    render(variantId: string): Promise<Buffer> {
+      this.requested.push(variantId);
+      return this.shouldFail
+        ? Promise.reject(new Error("Chromium is missing"))
+        : Promise.resolve(PDF_BYTES);
+    }
+
+    close(): Promise<void> {
+      this.isClosed = true;
+      return Promise.resolve();
+    }
+  }
+
+  let pdf: FakePdf;
+
+  beforeEach(async () => {
+    await app.close();
+    pdf = new FakePdf();
+    app = buildServer({ storage: new FileCvStorage(dir), pdf });
+    await app.inject({
+      method: "PUT",
+      url: "/api/variants/acme",
+      payload: variant,
+    });
+  });
+
+  type Injected = Awaited<ReturnType<FastifyInstance["inject"]>>;
+
+  async function post(payload: unknown): Promise<Injected> {
+    return app.inject({
+      method: "POST",
+      url: "/api/pdf",
+      payload: payload as object,
+    });
+  }
+
+  it("returns the PDF for a saved variant", async () => {
+    const response = await post({ variantId: "acme" });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toBe("application/pdf");
+    expect(response.headers["content-disposition"]).toContain("acme.pdf");
+    expect(response.rawPayload.equals(PDF_BYTES)).toBe(true);
+    expect(pdf.requested).toEqual(["acme"]);
+  });
+
+  it.each([
+    {},
+    { variantId: 5 },
+    { variantId: "../vault" },
+    { variantId: "a b" },
+  ])("refuses a bad variant id %j without rendering", async (body) => {
+    const response = await post(body);
+    expect(response.statusCode).toBe(400);
+    expect(pdf.requested).toEqual([]);
+  });
+
+  it("answers 404 for a variant that is not saved, without rendering", async () => {
+    const response = await post({ variantId: "nope" });
+    expect(response.statusCode).toBe(404);
+    expect(pdf.requested).toEqual([]);
+  });
+
+  it("explains a failed render", async () => {
+    pdf.shouldFail = true;
+    const response = await post({ variantId: "acme" });
+    expect(response.statusCode).toBe(500);
+    expect(response.json().code).toBe("pdf_failed");
+    expect(response.json().message).toContain("Chromium is missing");
+  });
+
+  it("answers 501 when the server has no PDF renderer", async () => {
+    await app.close();
+    app = buildServer({ storage: new FileCvStorage(dir) });
+    expect((await post({ variantId: "acme" })).statusCode).toBe(501);
+  });
+
+  it("is refused for non-local requests like every other route", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/pdf",
+      headers: { host: "evil.example.com" },
+      payload: { variantId: "acme" },
+    });
+    expect(response.statusCode).toBe(403);
+  });
+
+  it("closes the renderer when the server closes", async () => {
+    await app.close();
+    expect(pdf.isClosed).toBe(true);
   });
 });

@@ -47,9 +47,18 @@ function renderPart(part: RenderedPart): JSX.Element | null {
 interface Props {
   /** The reference to the content */
   contentRef: React.RefObject<HTMLDivElement | null>;
+
+  /**
+   * The page as it is printed to PDF: no page count, markers or shadow, margins come from
+   * the page (see `PrintView`) and the saved auto-fit result is used, not recalculated.
+   */
+  isPrintView?: boolean;
 }
 
-export function PreviewPage({ contentRef }: Props): JSX.Element {
+export function PreviewPage({
+  contentRef,
+  isPrintView = false,
+}: Props): JSX.Element {
   const { structure, columnWidth } = useAppSelector(appSelector);
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
@@ -82,7 +91,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
   );
   const fit = useAutoFit(
     {
-      isEnabled: isAutoFit,
+      isEnabled: isAutoFit && !isPrintView,
       mode: fitMode,
       pageLimit,
       base,
@@ -95,7 +104,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
       }
     }
   );
-  const { tuning } = fit;
+  const tuning = isPrintView ? (variant.tuning ?? base) : fit.tuning;
   const marginMm = tuning.marginMm;
 
   // Anything that can change how tall the content is
@@ -124,29 +133,32 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
 
   return (
     <Box sx={{ flexShrink: 0, mx: "auto" }}>
-      <Box sx={{ mb: 1, width: `${A4_DIMENSION_MM.width}mm` }}>
-        {pageCount > pageLimit ? (
-          <Alert severity="warning">
-            This CV is {pageCount} pages long; this variant is set to{" "}
-            {pageLimit}. Shorten it, hide items or change the limit.
-          </Alert>
-        ) : (
-          <Typography variant="body2">
-            {pageCount} {pageCount === 1 ? "page" : "pages"} (limit {pageLimit})
-          </Typography>
-        )}
-        {isAutoFit && fit.state.status === "does-not-fit" && (
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            This does not fit even with the smallest spacing, margins and text
-            size allowed. Shorten the CV or hide items.
-          </Alert>
-        )}
-        {isAutoFit && fit.changes.length > 0 && (
-          <Typography variant="body2" sx={{ mt: 0.5 }}>
-            Auto-fit changed: {fit.changes.join("; ")}
-          </Typography>
-        )}
-      </Box>
+      {!isPrintView && (
+        <Box sx={{ mb: 1, width: `${A4_DIMENSION_MM.width}mm` }}>
+          {pageCount > pageLimit ? (
+            <Alert severity="warning">
+              This CV is {pageCount} pages long; this variant is set to{" "}
+              {pageLimit}. Shorten it, hide items or change the limit.
+            </Alert>
+          ) : (
+            <Typography variant="body2">
+              {pageCount} {pageCount === 1 ? "page" : "pages"} (limit{" "}
+              {pageLimit})
+            </Typography>
+          )}
+          {isAutoFit && fit.state.status === "does-not-fit" && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              This does not fit even with the smallest spacing, margins and text
+              size allowed. Shorten the CV or hide items.
+            </Alert>
+          )}
+          {isAutoFit && fit.changes.length > 0 && (
+            <Typography variant="body2" sx={{ mt: 0.5 }}>
+              Auto-fit changed: {fit.changes.join("; ")}
+            </Typography>
+          )}
+        </Box>
+      )}
       <Paper
         ref={(element: HTMLDivElement | null) => {
           paperRef.current = element;
@@ -156,10 +168,19 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
         style={paperVariables}
         sx={{
           position: "relative",
-          width: `${A4_DIMENSION_MM.width}mm`,
           flexShrink: 0,
-          minHeight: `${A4_DIMENSION_MM.height}mm`,
-          padding: `${marginMm}mm`,
+          ...(isPrintView
+            ? {
+                // The printed page has the margin, so the paper is just the text area
+                width: `${A4_DIMENSION_MM.width - 2 * marginMm}mm`,
+                padding: 0,
+                boxShadow: "none",
+              }
+            : {
+                width: `${A4_DIMENSION_MM.width}mm`,
+                minHeight: `${A4_DIMENSION_MM.height}mm`,
+                padding: `${marginMm}mm`,
+              }),
           boxSizing: "border-box",
           fontSize: "12pt",
           fontFamily: "Calibri, sans-serif",
@@ -208,28 +229,29 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
             </Box>
           </Box>
         </Box>
-        {breaks.map((y, index) => (
-          <Box
-            key={y}
-            aria-hidden
-            className="cv-page-marker"
-            sx={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: `${marginToPx(marginMm) + y}px`,
-              borderTop: "1px dashed #d32f2f",
-              color: "#d32f2f",
-              fontSize: "9pt",
-              textAlign: "right",
-              pointerEvents: "none",
-              // eslint-disable-next-line @typescript-eslint/naming-convention -- CSS at-rule
-              "@media print": { display: "none" },
-            }}
-          >
-            Page {index + 2}
-          </Box>
-        ))}
+        {!isPrintView &&
+          breaks.map((y, index) => (
+            <Box
+              key={y}
+              aria-hidden
+              className="cv-page-marker"
+              sx={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: `${marginToPx(marginMm) + y}px`,
+                borderTop: "1px dashed #d32f2f",
+                color: "#d32f2f",
+                fontSize: "9pt",
+                textAlign: "right",
+                pointerEvents: "none",
+                // eslint-disable-next-line @typescript-eslint/naming-convention -- CSS at-rule
+                "@media print": { display: "none" },
+              }}
+            >
+              Page {index + 2}
+            </Box>
+          ))}
       </Paper>
     </Box>
   );

@@ -4,6 +4,8 @@ import { useImportExportJson } from "@hooks/use-import-export-json";
 import { styled } from "@mui/material/styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import { useDownloadPdf } from "@hooks/use-download-pdf";
 import { useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 
@@ -31,6 +33,8 @@ const VisuallyHiddenInput = styled("input")({
 export function EditorPageButtons({ printReference }: Props): JSX.Element {
   const [fileName, setFileName] = useState<string>("");
   const { handleImport, handleExport } = useImportExportJson();
+
+  const { download, isBusy } = useDownloadPdf();
 
   const onPrintClicked = useReactToPrint({ contentRef: printReference });
 
@@ -72,6 +76,15 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
         startIcon={<SaveIcon />}
       >
         Save
+      </Button>
+      <Button
+        sx={{ height: "40px", minWidth: "auto", px: 1 }}
+        color="inherit"
+        disabled={isBusy}
+        onClick={() => void download(fileName)}
+        startIcon={<PictureAsPdfIcon />}
+      >
+        PDF
       </Button>
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
