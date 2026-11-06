@@ -1,3 +1,5 @@
+import { PersonalData } from "@shared/ai/redact-personal";
+
 /** What a runtypes schema offers: throws if the value does not match */
 export interface Schema<T> {
   check: (value: unknown) => T;
@@ -38,6 +40,16 @@ export interface GenerateRequest<T> {
 
   /** Total tries including the first (default 3) */
   maxAttempts?: number;
+
+  /**
+   * Whose details to keep out of everything sent to the model. They are replaced by
+   * placeholders on the way out and put back in the answer. Leave it out only for text that
+   * cannot contain personal data.
+   */
+  personal?: PersonalData;
+
+  /** Called with a plain-language warning, e.g. when the model altered a placeholder */
+  onWarning?: (message: string) => void;
 }
 
 export interface AiClient {

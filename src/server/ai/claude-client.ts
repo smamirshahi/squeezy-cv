@@ -9,6 +9,7 @@ import {
   MessageSender,
 } from "@server/ai/ai-types";
 import { loadPrompt } from "@server/ai/prompts";
+import { PersonalData, restore, scrub } from "@shared/ai/redact-personal";
 
 const DEFAULT_ATTEMPTS = 3;
 const MAX_OUTPUT_TOKENS = 16_000;
@@ -31,6 +32,43 @@ function describeProblem(error: unknown): string {
 }
 
 /**
+ * Wraps a sender so that personal details are replaced by placeholders in everything it is
+ * given (system prompt and every message, so retries too) and put back in what it returns.
+ * This is the one place where data leaves for the model.
+ */
+function withScrubbing<T>(
+  send: MessageSender,
+  request: GenerateRequest<T>
+): MessageSender {
+  const { personal } = request;
+  if (!personal) {
+    return send;
+  }
+  const data: PersonalData = personal;
+  const warned = new Set<string>();
+  return async (system, messages) => {
+    const { map } = scrub("", data);
+    function out(text: string): string {
+      return scrub(text, data).text;
+    }
+    const result = await send(
+      out(system),
+      messages.map((m) => ({ role: m.role, content: out(m.content) }))
+    );
+    const restored = restore(result.text, map, { isForJson: true });
+    for (const token of restored.unresolved) {
+      if (!warned.has(token)) {
+        warned.add(token);
+        request.onWarning?.(
+          `The model changed or invented the placeholder ${token}; it could not be replaced with a real value.`
+        );
+      }
+    }
+    return { ...result, text: restored.text };
+  };
+}
+
+/**
  * Asks the model for JSON, checks it against the schema, and when it is wrong tells the
  * model what was wrong and asks again, up to `maxAttempts` in total. Output that never
  * validates is rejected, never passed on.
@@ -44,11 +82,12 @@ export class ClaudeAiClient implements AiClient {
   async generate<T>(request: GenerateRequest<T>): Promise<T> {
     const attempts = request.maxAttempts ?? DEFAULT_ATTEMPTS;
     const system = loadPrompt(request.promptName);
+    const send = withScrubbing(this.send, request);
     const messages: ChatMessage[] = [{ role: "user", content: request.input }];
     let lastProblem = "";
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
-      const result = await this.send(system, messages);
+      const result = await send(system, messages);
       if (result.stopReason === "refusal") {
         throw new AiError("refused", "The model declined this request.");
       }

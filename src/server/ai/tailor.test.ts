@@ -5,7 +5,13 @@ import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { buildServer } from "@server/app";
-import { AiClient, AiError, GenerateRequest } from "@server/ai/ai-types";
+import {
+  AiClient,
+  AiError,
+  GenerateRequest,
+  MessageSender,
+} from "@server/ai/ai-types";
+import { ClaudeAiClient } from "@server/ai/claude-client";
 import { loadPrompt } from "@server/ai/prompts";
 import { describeCv, sanitiseProposal, tailor } from "@server/ai/tailor";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
@@ -544,5 +550,43 @@ describe("tolerating a small model's mistakes", () => {
     await expect(
       tailor(ai, vault, { jobAd: "x", tone: "neutral" })
     ).rejects.toThrow();
+  });
+});
+
+describe("tailor keeps the profile away from the model", () => {
+  it("sends no name, email, phone or link in any request", async () => {
+    const sent: string[] = [];
+    const answers = [
+      REQUIREMENTS,
+      { items: [], bullets: [], statement: "", gaps: [] },
+    ];
+    const send: MessageSender = (system, messages) => {
+      sent.push(system, ...messages.map((m) => m.content));
+      return Promise.resolve({
+        text: JSON.stringify(answers.shift()),
+        stopReason: "end_turn",
+      });
+    };
+    const { profile, links } = vault;
+    await tailor(new ClaudeAiClient(send), vault, {
+      jobAd: `Dear ${profile.fullName}, we need a React developer. Write to ${profile.email ?? ""}`,
+      tone: "neutral",
+    });
+    const body = sent.join("\n").toLowerCase();
+    const secrets = [
+      profile.fullName,
+      ...profile.fullName.split(/\s+/),
+      profile.email,
+      profile.phone,
+      ...links.map((l) => l.url),
+    ].filter((v): v is string => Boolean(v) && v!.length > 2);
+    expect(secrets.length).toBeGreaterThan(0);
+    for (const secret of secrets) {
+      expect(body).not.toMatch(
+        new RegExp(
+          `(?<![a-z0-9])${secret.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![a-z0-9])`
+        )
+      );
+    }
   });
 });
