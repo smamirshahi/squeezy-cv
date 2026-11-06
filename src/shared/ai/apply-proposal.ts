@@ -114,6 +114,7 @@ export function applyProposal(
         ...current,
         isVisible: entry.isIncluded,
         emphasis: entry.isHighlighted ? "high" : "normal",
+        relevance: entry.relevance,
         order: position,
       };
     });

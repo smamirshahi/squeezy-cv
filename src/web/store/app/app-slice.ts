@@ -9,6 +9,7 @@ export interface FitInfo {
   pageCount: number;
   usedPercent: number;
   linesOver: number;
+  lineHeightPx: number;
   /** What the first page beyond the limit starts with, when it overflows */
   overflowStartsWith: string;
 }
@@ -68,7 +69,13 @@ export const initialState: AppState = {
   selectedSectionInEditorPage: "metaData",
   tool: "variants",
   selectedBlock: null,
-  fit: { pageCount: 1, usedPercent: 0, linesOver: 0, overflowStartsWith: "" },
+  fit: {
+    pageCount: 1,
+    usedPercent: 0,
+    linesOver: 0,
+    lineHeightPx: 16,
+    overflowStartsWith: "",
+  },
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
   shouldAddNewItem: false,

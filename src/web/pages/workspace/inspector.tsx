@@ -22,6 +22,7 @@ import {
   twoColumnLayout,
 } from "@shared/vault/page-structure";
 import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
+import { FitPanel } from "@pages/workspace/fit-panel";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   setSelectedBlock,
@@ -88,6 +89,7 @@ function PageInspector(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <FitPanel />
       <Heading>Page limit</Heading>
       <ToggleButtonGroup
         exclusive
