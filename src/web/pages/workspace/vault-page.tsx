@@ -256,7 +256,7 @@ export function VaultPage(): JSX.Element {
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   const sections = useAppSelector(sectionsSelector);
   const page = pages.find((entry) => entry.id === selectedPageId) ?? pages[0];
-  // An item chosen in the tree is edited inline (no Apply step); skills keep their own editor (ratings)
+  // An item chosen in the tree is edited inline (no Apply step); only the summary has no item list
   const selectedSection = sections.find((section) =>
     section.items.some((item) => item.id === selectedItemId)
   );
@@ -266,7 +266,7 @@ export function VaultPage(): JSX.Element {
   const hasInlineEditor =
     selectedSection !== undefined &&
     selectedItem !== undefined &&
-    !["skills", "summary"].includes(selectedSection.type);
+    selectedSection.type !== "summary";
   const isFact = !SETTING_PAGES.has(page.id) && page.id !== "ai";
 
   return (

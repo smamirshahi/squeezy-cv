@@ -167,9 +167,38 @@ describe("inline vault item editor", () => {
     ).toBe(false);
   });
 
-  it("skills keep their own editor (ratings)", () => {
-    setup();
+  it("edits a skills group inline: group name, skill names, levels, add, move and remove", () => {
+    const store = setup();
     open("Languages");
-    expect(screen.queryByLabelText("Edit item")).toBeNull();
+    const editor = screen.getByLabelText("Edit item");
+    expect(within(editor).getByText("Skills · 2")).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Group"), {
+      target: { value: "Spoken languages" },
+    });
+    expect(stored(store, "Spoken languages")).toBeDefined();
+
+    fireEvent.change(screen.getByLabelText("Skill 2 name"), {
+      target: { value: "Français" },
+    });
+    expect(stored(store, "Spoken languages").bullets[1].text).toBe("Français");
+
+    // level: pick 3 stars, then clear it (levels are optional)
+    fireEvent.click(screen.getByLabelText("Français level 3"));
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Clear level of Français" })
+    );
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
+    expect(stored(store, "Spoken languages").bullets).toHaveLength(3);
+
+    const secondId = stored(store, "Spoken languages").bullets[1].id;
+    fireEvent.click(screen.getByRole("button", { name: "Move skill 2 up" }));
+    expect(stored(store, "Spoken languages").bullets[0].id).toBe(secondId);
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove skill 3" }));
+    expect(stored(store, "Spoken languages").bullets).toHaveLength(2);
   });
 });
