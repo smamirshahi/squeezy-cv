@@ -89,7 +89,7 @@ describe("page status in the preview", () => {
         <PreviewPage contentRef={{ current: null }} />
       </Provider>
     );
-    expect(screen.getByText("1 page (limit 2)")).toBeTruthy();
+    expect(screen.getByText(/^1 page \(limit 2\)/)).toBeTruthy();
   });
 
   it("warns when the CV is longer than the limit and shows the page start", () => {

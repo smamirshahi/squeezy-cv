@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Alert, Box, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Typography } from "@mui/material";
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
@@ -11,18 +11,17 @@ import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import {
-  appSelector,
-  setPageCount,
-  setSelectedBlock,
-} from "@store/app/app-slice";
+import { appSelector, setFit, setSelectedBlock } from "@store/app/app-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import {
   activeVariantSelector,
+  setAutoFit,
+  setPageLimit,
   setTuning,
 } from "@store/variants/variants-slice";
 import { FitTuning } from "@custom-types/variant-types";
 import { useAutoFit } from "@pages/preview-page/use-auto-fit";
+import { computeFitMetrics } from "@shared/layout/fit-metrics";
 import { RenderedPart, render } from "@shared/variant/render";
 
 /** Renders one part of the CV: the header parts, or a section by its type */
@@ -125,11 +124,28 @@ export function PreviewPage({
   const paperRef = useRef<HTMLDivElement | null>(null);
   const pagination = usePagination(paperRef, marginMm, layoutKey);
   const { pageCount, breaks } = pagination;
+  const metrics = computeFitMetrics({
+    totalHeight: pagination.usedHeight,
+    pageHeight: pagination.pageHeight,
+    pageLimit,
+    lineHeightPx: pagination.lineHeightPx,
+  });
+  const { usedPercent, linesOver } = metrics;
+  const overflowStartsWith = pagination.breakLabels[pageLimit - 1] ?? "";
   useEffect(() => {
     if (!isPrintView) {
-      dispatch(setPageCount(pageCount));
+      dispatch(
+        setFit({ pageCount, usedPercent, linesOver, overflowStartsWith })
+      );
     }
-  }, [dispatch, isPrintView, pageCount]);
+  }, [
+    dispatch,
+    isPrintView,
+    pageCount,
+    usedPercent,
+    linesOver,
+    overflowStartsWith,
+  ]);
 
   // Clicking a part of the CV selects it; the inspector shows it
   const selectedBlock = useAppSelector((s) => s.app.selectedBlock);
@@ -169,20 +185,87 @@ export function PreviewPage({
       {!isPrintView && (
         <Box sx={{ mb: 1, width: `${A4_DIMENSION_MM.width}mm` }}>
           {pageCount > pageLimit ? (
-            <Alert severity="warning">
+            <Alert
+              severity="warning"
+              action={
+                <>
+                  {!isAutoFit && (
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() =>
+                        dispatch(
+                          setAutoFit({ id: variant.id, isAutoFit: true })
+                        )
+                      }
+                    >
+                      Auto-fit
+                    </Button>
+                  )}
+                  {pageLimit === 1 && (
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() =>
+                        dispatch(setPageLimit({ id: variant.id, pageLimit: 2 }))
+                      }
+                    >
+                      Allow 2 pages
+                    </Button>
+                  )}
+                </>
+              }
+            >
               This CV is {pageCount} pages long; this variant is set to{" "}
               {pageLimit}. Shorten it, hide items or change the limit.
+              {linesOver > 0 && (
+                <>
+                  {" "}
+                  {linesOver} {linesOver === 1 ? "line is" : "lines are"} over
+                  {overflowStartsWith
+                    ? `; page ${pageLimit + 1} starts at “${overflowStartsWith}”`
+                    : ""}
+                  . Nothing has been hidden or shrunk unless auto-fit is on.
+                </>
+              )}
             </Alert>
           ) : (
             <Typography variant="body2">
               {pageCount} {pageCount === 1 ? "page" : "pages"} (limit{" "}
-              {pageLimit})
+              {pageLimit}) · {usedPercent}% used
             </Typography>
           )}
           {isAutoFit && fit.state.status === "does-not-fit" && (
-            <Alert severity="warning" sx={{ mt: 1 }}>
+            <Alert
+              severity="warning"
+              sx={{ mt: 1 }}
+              action={
+                <>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() =>
+                      dispatch(setAutoFit({ id: variant.id, isAutoFit: false }))
+                    }
+                  >
+                    Undo auto-fit
+                  </Button>
+                  {pageLimit === 1 && (
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() =>
+                        dispatch(setPageLimit({ id: variant.id, pageLimit: 2 }))
+                      }
+                    >
+                      Allow 2 pages
+                    </Button>
+                  )}
+                </>
+              }
+            >
               This does not fit even with the smallest spacing, margins and text
-              size allowed. Shorten the CV or hide items.
+              size allowed. Your CV was not cut: shorten it or hide items.
             </Alert>
           )}
           {isAutoFit && fit.changes.length > 0 && (

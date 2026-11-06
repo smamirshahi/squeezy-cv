@@ -20,9 +20,11 @@ export function TopBar(): JSX.Element {
   const dispatch = useAppDispatch();
   const variants = useAppSelector(variantsSelector);
   const variant = useAppSelector(activeVariantSelector);
-  const pageCount = useAppSelector((s) => s.app.pageCount);
+  const { pageCount, usedPercent, linesOver } = useAppSelector(
+    (s) => s.app.fit
+  );
   const { download, isBusy } = useDownloadPdf();
-  const isFitting = pageCount <= variant.pageLimit;
+  const isFitting = pageCount <= variant.pageLimit && linesOver === 0;
 
   return (
     <Box
@@ -72,8 +74,8 @@ export function TopBar(): JSX.Element {
         icon={isFitting ? <CheckIcon /> : <WarningAmberIcon />}
         label={
           isFitting
-            ? `Fits ${variant.pageLimit} ${variant.pageLimit === 1 ? "page" : "pages"}`
-            : `${pageCount} pages, limit ${variant.pageLimit}`
+            ? `Fits ${variant.pageLimit} ${variant.pageLimit === 1 ? "page" : "pages"} · ${usedPercent}%`
+            : `${linesOver} ${linesOver === 1 ? "line" : "lines"} over ${variant.pageLimit} ${variant.pageLimit === 1 ? "page" : "pages"}`
         }
         sx={{
           bgcolor: isFitting ? WORKSPACE_COLORS.okBg : WORKSPACE_COLORS.errBg,

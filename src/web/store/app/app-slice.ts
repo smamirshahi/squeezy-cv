@@ -5,6 +5,14 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 /** The tools in the left rail of the workspace */
 export type WorkspaceTool = "variants" | "vault" | "tailor";
 
+export interface FitInfo {
+  pageCount: number;
+  usedPercent: number;
+  linesOver: number;
+  /** What the first page beyond the limit starts with, when it overflows */
+  overflowStartsWith: string;
+}
+
 export interface SelectedBlock {
   sectionId: string;
   itemId?: string;
@@ -31,8 +39,8 @@ interface AppState {
   /** The block selected on the canvas: a section, or one item of it */
   selectedBlock: SelectedBlock | null;
 
-  /** Pages the preview measured, for the top bar */
-  pageCount: number;
+  /** What the preview measured, for the top bar and the overflow banner */
+  fit: FitInfo;
 
   shouldApplyChanges: boolean;
   shouldDiscardChanges: boolean;
@@ -60,7 +68,7 @@ export const initialState: AppState = {
   selectedSectionInEditorPage: "metaData",
   tool: "variants",
   selectedBlock: null,
-  pageCount: 1,
+  fit: { pageCount: 1, usedPercent: 0, linesOver: 0, overflowStartsWith: "" },
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
   shouldAddNewItem: false,
@@ -94,8 +102,8 @@ const appSlice = createSlice({
       state.selectedBlock = action.payload;
     },
 
-    setPageCount(state, action: PayloadAction<number>) {
-      state.pageCount = action.payload;
+    setFit(state, action: PayloadAction<FitInfo>) {
+      state.fit = action.payload;
     },
 
     setColumnWidth(state, action: PayloadAction<AppState["columnWidth"]>) {
@@ -129,7 +137,7 @@ export const {
   setSelectedSectionInEditorPage,
   setTool,
   setSelectedBlock,
-  setPageCount,
+  setFit,
   setColumnWidth,
   resetAppState,
   setShouldApplyChanges,

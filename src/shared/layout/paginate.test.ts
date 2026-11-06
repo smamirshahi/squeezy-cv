@@ -56,7 +56,7 @@ describe("paginate", () => {
       [60],
     ],
   ])("%s", (_name, blocks, contentHeight, pageCount, breaks) => {
-    expect(paginate(blocks, contentHeight, PAGE)).toEqual({
+    expect(paginate(blocks, contentHeight, PAGE)).toMatchObject({
       pageCount,
       breaks,
     });
