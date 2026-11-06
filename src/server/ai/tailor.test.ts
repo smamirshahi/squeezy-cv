@@ -173,6 +173,8 @@ describe("tailor", () => {
     expect(prompt).toMatch(/Never add a fact/);
     expect(prompt).toMatch(/British spelling/);
     expect(prompt).toMatch(/gaps/);
+    // a short answer matters on a slow local model
+    expect(prompt).toMatch(/ONLY for a bullet you want/);
   });
 });
 

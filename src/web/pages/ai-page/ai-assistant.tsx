@@ -226,6 +226,11 @@ export function AiAssistant(): JSX.Element {
           Analyse
         </Button>
         {isBusy && <CircularProgress size={22} />}
+        {isBusy && provider === "ollama" && (
+          <Typography variant="body2">
+            A local model can take several minutes. Keep this page open.
+          </Typography>
+        )}
       </Box>
 
       {error && (
