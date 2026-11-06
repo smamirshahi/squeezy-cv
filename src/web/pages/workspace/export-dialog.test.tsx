@@ -97,9 +97,9 @@ async function openDialog(): Promise<void> {
   );
   await waitFor(() =>
     expect(
-      screen.getByRole("button", {
-        name: "Download PDF",
-      }).disabled
+      screen
+        .getByRole("button", { name: "Download PDF" })
+        .hasAttribute("disabled")
     ).toBe(false)
   );
 }
