@@ -48,6 +48,21 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
 
+/**
+ * Back to the list. If we came from it, step back in history so its search and filters
+ * are still there; otherwise (e.g. a link from the "Saved" message) just open the list.
+ */
+function goBackToList(event: React.MouseEvent): void {
+  const isFromList =
+    document.referrer !== "" &&
+    new URL(document.referrer).origin === window.location.origin &&
+    new URL(document.referrer).searchParams.has("applications");
+  if (isFromList && window.history.length > 1) {
+    event.preventDefault();
+    window.history.back();
+  }
+}
+
 /** One application: where it stands, its timeline, and the exact CV that was sent */
 export function ApplicationView({ applicationId }: Props): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
@@ -104,7 +119,7 @@ export function ApplicationView({ applicationId }: Props): JSX.Element {
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="error">{state.message}</Alert>
-        <Link href="/">Back to the editor</Link>
+        <Link href="/?applications">All applications</Link>
       </Box>
     );
   }
@@ -151,7 +166,7 @@ export function ApplicationView({ applicationId }: Props): JSX.Element {
   async function remove(): Promise<void> {
     try {
       await api.deleteApplication(applicationId);
-      window.location.assign("/");
+      window.location.assign("/?applications");
     } catch (caught) {
       setIsDeleting(false);
       setError(messageOf(caught));
@@ -169,8 +184,8 @@ export function ApplicationView({ applicationId }: Props): JSX.Element {
         gap: 3,
       }}
     >
-      <Link href="/" underline="hover">
-        ← Back to the editor
+      <Link href="/?applications" underline="hover" onClick={goBackToList}>
+        ← All applications
       </Link>
 
       <Box

@@ -133,4 +133,30 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByRole("listitem").filter({ hasText: "Interview" }).waitFor();
     await page.getByRole("listitem").filter({ hasText: "Applied" }).waitFor();
   });
+
+  it("lists the applications, opens one, and goes back to the same search", async () => {
+    await page.goto(`${app.webUrl}/?applications`);
+    await page.getByRole("heading", { name: "Applications" }).waitFor();
+    await page.getByText("1 application: 1 interview").waitFor();
+    const row = page.getByRole("row").filter({ hasText: "Acme Ltd" });
+    await row.getByText("Interview").waitFor();
+
+    // search narrows the list and the address remembers it
+    await page.getByLabel("Search company or role").fill("senior");
+    await page.getByRole("row").filter({ hasText: "Acme Ltd" }).waitFor();
+    await page.getByLabel("Search company or role").fill("nothing like this");
+    await page.getByText("No application matches this search.").waitFor();
+    await page.getByLabel("Search company or role").fill("acme");
+
+    // click the row to open it
+    await page.getByRole("row").filter({ hasText: "Acme Ltd" }).click();
+    await page.getByRole("heading", { name: "Acme Ltd" }).waitFor();
+
+    // back keeps the search
+    await page.getByRole("link", { name: "← All applications" }).click();
+    await page.getByRole("heading", { name: "Applications" }).waitFor();
+    expect(await page.getByLabel("Search company or role").inputValue()).toBe(
+      "acme"
+    );
+  });
 });
