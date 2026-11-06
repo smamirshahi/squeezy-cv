@@ -1,23 +1,13 @@
-import { useCallback, useEffect } from "react";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { useCallback } from "react";
 import {
   createCvFile,
   parseCvFileText,
   serializeCvFile,
 } from "@shared/vault/cv-file";
-import { CvFile } from "@custom-types/vault-types";
-import {
-  AppDispatch,
-  useAppDispatch,
-  useAppSelector,
-} from "@store/store-helper";
-import {
-  metaDataSelector,
-  setMetaData,
-  setStyle,
-  styleSelector,
-} from "@store/cv-data/cv-data-slice";
-import { setVault, vaultSelector } from "@store/vault/vault-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { loadCvFileIntoStore } from "@store/persistence/persistence-actions";
+import { metaDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
+import { vaultSelector } from "@store/vault/vault-slice";
 
 interface ReturnProps {
   /**
@@ -33,34 +23,12 @@ interface ReturnProps {
   handleImport: (e: React.ChangeEvent<HTMLInputElement>) => string;
 }
 
-/** Puts a loaded CV file into the store */
-function loadCvFile(dispatch: AppDispatch, file: CvFile): void {
-  dispatch(setVault(file.vault));
-  dispatch(setStyle(file.style));
-  dispatch(setMetaData(file.metaData));
-}
-
 /** Custom hook to handle importing and exporting CV data in JSON format */
 export function useImportExportJson(): ReturnProps {
   const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
   const metaData = useAppSelector(metaDataSelector);
   const style = useAppSelector(styleSelector);
-
-  // In development only: start with the fake sample CV instead of an empty form
-  useEffect(() => {
-    if (!import.meta.env.DEV) {
-      return;
-    }
-    import("@fixtures/sample-cv.json")
-      .then((module) => {
-        loadCvFile(dispatch, migrateCvFile(module.default));
-      })
-      .catch((_error) => {
-        // eslint-disable-next-line no-console
-        console.error("Failed to load the sample CV.");
-      });
-  }, [dispatch]);
 
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +40,10 @@ export function useImportExportJson(): ReturnProps {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          loadCvFile(dispatch, parseCvFileText(event.target?.result as string));
+          loadCvFileIntoStore(
+            dispatch,
+            parseCvFileText(event.target?.result as string)
+          );
         } catch (_error: unknown) {
           // eslint-disable-next-line no-alert
           alert("Invalid file format.");

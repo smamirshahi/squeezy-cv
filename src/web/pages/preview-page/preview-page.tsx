@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Box, Paper } from "@mui/material";
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
@@ -9,7 +10,9 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
-import { sectionsSelector } from "@store/vault/vault-slice";
+import { vaultSelector } from "@store/vault/vault-slice";
+import { activeVariantSelector } from "@store/variants/variants-slice";
+import { resolveVault } from "@shared/variant/render";
 import { Section } from "@custom-types/vault-types";
 
 /** Renders one part of the CV: the header parts, or a vault section by its type */
@@ -45,7 +48,13 @@ interface Props {
 
 export function PreviewPage({ contentRef }: Props): JSX.Element {
   const { structure, columnWidth } = useAppSelector(appSelector);
-  const sections = useAppSelector(sectionsSelector);
+  const vault = useAppSelector(vaultSelector);
+  const variant = useAppSelector(activeVariantSelector);
+  // Only what the active variant shows, in its order and wording
+  const sections = useMemo(
+    () => resolveVault(vault, variant).sections,
+    [vault, variant]
+  );
 
   return (
     <Paper

@@ -46,6 +46,7 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
     removeItem,
     moveItem,
     setVisibility,
+    isVisible,
     draftDispatch,
   } = useSectionDraft(sectionId, NEW_SKILL_CATEGORY);
 
@@ -61,7 +62,7 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
           removeFunction={removeItem}
           onVisibilityChange={setVisibility}
           title={group.fields.category ?? ""}
-          entity={{ id: group.id, shouldShow: group.shouldShow }}
+          entity={{ id: group.id, shouldShow: isVisible(group.id) }}
           isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>

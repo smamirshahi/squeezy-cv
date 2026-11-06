@@ -8,11 +8,12 @@ import { PreviewPage } from "@pages/preview-page/preview-page";
 import { rootReducer } from "@store/store";
 import { setMetaData, setStyle } from "@store/cv-data/cv-data-slice";
 import { updatePageStructure } from "@store/app/app-slice";
+import { createDefaultVariant } from "@shared/variant/variant-utils";
+import { setItemSelection, setVariants } from "@store/variants/variants-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   moveSection,
   removeSection,
-  setItemVisibility,
   setVault,
   updateProfile,
 } from "@store/vault/vault-slice";
@@ -27,6 +28,7 @@ function makeStore(): AppStore {
   const store = createStore();
   const file = migrateCvFile(sample);
   store.dispatch(setVault(file.vault));
+  store.dispatch(setVariants([createDefaultVariant(file, "v1")]));
   store.dispatch(setStyle(file.style));
   store.dispatch(setMetaData(file.metaData));
   return store;
@@ -72,10 +74,10 @@ describe("PreviewPage (rendered from the vault)", () => {
   it("shows an item as soon as it is made visible", () => {
     const store = makeStore();
     store.dispatch(
-      setItemVisibility({
-        sectionId: "experience",
+      setItemSelection({
+        variantId: "v1",
         itemId: "exp-3",
-        shouldShow: true,
+        change: { isVisible: true },
       })
     );
     expect(render(store)).toContain("Demo Co");

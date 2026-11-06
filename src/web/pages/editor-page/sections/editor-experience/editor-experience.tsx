@@ -36,6 +36,7 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
     removeItem,
     moveItem,
     setVisibility,
+    isVisible,
     draftDispatch,
   } = useSectionDraft(sectionId, NEW_EXPERIENCE);
 
@@ -56,7 +57,7 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
               ? dayjs(item.fields.endDate).format(dateFormat)
               : "Present"
           }`}
-          entity={{ id: item.id, shouldShow: item.shouldShow }}
+          entity={{ id: item.id, shouldShow: isVisible(item.id) }}
           isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>

@@ -1,0 +1,29 @@
+import { Item } from "@custom-types/vault-types";
+
+const LABEL_FIELDS = [
+  "jobTitle",
+  "degree",
+  "title",
+  "category",
+  "company",
+  "institution",
+  "text",
+];
+const MAX_LABEL_LENGTH = 60;
+
+/** Shortens text to one line for lists */
+export function shorten(text: string, max = MAX_LABEL_LENGTH): string {
+  const oneLine = text.replace(/\s+/g, " ").trim();
+  return oneLine.length > max ? `${oneLine.slice(0, max - 1)}…` : oneLine;
+}
+
+/** A short name for an item in lists, from its first filled-in field */
+export function getItemLabel(item: Item): string {
+  for (const key of LABEL_FIELDS) {
+    const value = item.fields[key]?.trim();
+    if (value) {
+      return shorten(value);
+    }
+  }
+  return "(untitled)";
+}

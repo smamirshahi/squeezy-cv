@@ -3,10 +3,14 @@ import { useRef } from "react";
 import { EditorPage } from "@pages/editor-page/editor-page";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useSyncStructure } from "@hooks/use-sync-structure";
+import { usePersistence } from "@hooks/use-persistence";
+import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
 
 export function App(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
   useSyncStructure();
+  useSyncActiveVariant();
+  usePersistence();
 
   return (
     <Box

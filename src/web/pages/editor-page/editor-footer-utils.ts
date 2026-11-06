@@ -1,7 +1,12 @@
 import { Section } from "@custom-types/vault-types";
 
 /** Pages of the editor that change nothing in the CV data, so they have no Apply/Discard */
-const PAGES_WITHOUT_APPLY = ["styleSettings", "pageStructure", "sections"];
+const PAGES_WITHOUT_APPLY = [
+  "styleSettings",
+  "pageStructure",
+  "sections",
+  "variants",
+];
 
 const ADD_LABELS: Partial<Record<Section["type"], string>> = {
   experience: "Add new experience",

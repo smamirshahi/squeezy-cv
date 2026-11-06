@@ -1,10 +1,16 @@
 import { PayloadAction, createSlice, current, nanoid } from "@reduxjs/toolkit";
 import { Style } from "@custom-types/styles-types";
-import { ItemSelection, Variant } from "@custom-types/variant-types";
+import {
+  BulletSelection,
+  ItemSelection,
+  Variant,
+  VariantLayout,
+} from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import {
   createVariant,
   duplicateVariant as copyVariant,
+  updateBulletSelection,
   updateItemSelection as changeItemSelection,
 } from "@shared/variant/variant-utils";
 import { createDefaultVault } from "@shared/vault/default-vault";
@@ -132,10 +138,64 @@ const variantsSlice = createSlice({
       );
       if (index >= 0) {
         state.variants[index] = changeItemSelection(
-          state.variants[index],
+          current(state.variants[index]),
           action.payload.itemId,
           action.payload.change
         );
+      }
+    },
+
+    setBulletSelection(
+      state,
+      action: PayloadAction<{
+        variantId: string;
+        itemId: string;
+        bulletId: string;
+        change: Partial<BulletSelection>;
+      }>
+    ) {
+      const { variantId, itemId, bulletId, change } = action.payload;
+      const index = state.variants.findIndex((v) => v.id === variantId);
+      if (index >= 0) {
+        state.variants[index] = updateBulletSelection(
+          current(state.variants[index]),
+          itemId,
+          bulletId,
+          change
+        );
+      }
+    },
+
+    /** Sets the position of several items at once, see `computeItemOrders` */
+    setItemOrders(
+      state,
+      action: PayloadAction<{
+        variantId: string;
+        orders: Record<string, number>;
+      }>
+    ) {
+      const index = state.variants.findIndex(
+        (v) => v.id === action.payload.variantId
+      );
+      if (index < 0) {
+        return;
+      }
+      let variant = current(state.variants[index]);
+      for (const [itemId, order] of Object.entries(action.payload.orders)) {
+        variant = changeItemSelection(variant, itemId, { order });
+      }
+      state.variants[index] = variant;
+    },
+
+    /** Stores the page layout and style the editor currently shows into the variant */
+    setVariantAppearance(
+      state,
+      action: PayloadAction<{ id: string; layout: VariantLayout; style: Style }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (variant) {
+        variant.layout = action.payload.layout;
+        variant.style = action.payload.style;
       }
     },
   },
@@ -151,6 +211,9 @@ export const {
   deleteVariant,
   setActiveVariant,
   setItemSelection,
+  setBulletSelection,
+  setItemOrders,
+  setVariantAppearance,
 } = variantsSlice.actions;
 
 export function variantsSelector(state: {

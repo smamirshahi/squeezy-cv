@@ -3,11 +3,18 @@ import sample from "@fixtures/sample-cv.json";
 import { Variant } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { render, RenderedPart } from "@shared/variant/render";
+import {
+  render,
+  RenderedPart,
+  resolveVault,
+  sortItemsByVariant,
+} from "@shared/variant/render";
 import {
   createDefaultVariant,
+  computeItemOrders,
   createVariant,
   duplicateVariant,
+  updateBulletSelection,
   updateItemSelection,
 } from "@shared/variant/variant-utils";
 
@@ -219,5 +226,93 @@ describe("createDefaultVariant", () => {
   it("uses the given layout", () => {
     const layout = { fullWidth: ["personalInfo"], left: [], right: [] };
     expect(createDefaultVariant(file, "main", layout).layout).toEqual(layout);
+  });
+});
+
+describe("resolveVault", () => {
+  it("keeps only visible items in variant order, with chosen wordings", () => {
+    const { section, item } = sectionWithBullets();
+    const customVault: Vault = structuredClone(vault);
+    const target = customVault.sections
+      .find((s) => s.id === section.id)
+      ?.items.find((i) => i.id === item.id);
+    if (!target) {
+      throw new Error("item missing");
+    }
+    target.bullets[0].alt = { formal: "FORMAL" };
+
+    let variant = updateItemSelection(base(), item.id, {
+      isVisible: true,
+      bullets: {
+        [target.bullets[0].id]: { isVisible: true, wording: "formal" },
+      },
+    });
+    const other = section.items.find((i) => i.id !== item.id);
+    if (other) {
+      variant = updateItemSelection(variant, other.id, { isVisible: false });
+    }
+
+    const resolved = resolveVault(customVault, variant);
+    const items = resolved.sections.find((s) => s.id === section.id)?.items;
+
+    expect(items?.find((i) => i.id === item.id)?.bullets[0].text).toBe(
+      "FORMAL"
+    );
+    expect(items?.every((i) => i.shouldShow)).toBe(true);
+    if (other) {
+      expect(items?.map((i) => i.id)).not.toContain(other.id);
+    }
+    // the input is not changed
+    expect(target.bullets[0].text).toBe(item.bullets[0].text);
+  });
+});
+
+describe("computeItemOrders", () => {
+  it("moves an item to a position and numbers all items of the section", () => {
+    const section = firstSectionWithItems(2);
+    const ids = section.items.map((i) => i.id);
+    const last = ids[ids.length - 1];
+
+    const orders = computeItemOrders(section.items, base(), last, 0);
+
+    expect(Object.keys(orders).sort()).toEqual([...ids].sort());
+    expect(orders[last]).toBe(0);
+
+    let variant = base();
+    for (const [id, order] of Object.entries(orders)) {
+      variant = updateItemSelection(variant, id, { order });
+    }
+    expect(sortItemsByVariant(section.items, variant.selection)[0].id).toBe(
+      last
+    );
+  });
+
+  it("ignores unknown items and clamps the position", () => {
+    const section = firstSectionWithItems(2);
+    expect(computeItemOrders(section.items, base(), "nope", 0)).toEqual({});
+    const first = section.items[0].id;
+    expect(computeItemOrders(section.items, base(), first, 99)[first]).toBe(
+      section.items.length - 1
+    );
+  });
+});
+
+describe("updateBulletSelection", () => {
+  it("merges into the existing choice without changing the input", () => {
+    const original = base();
+    const next = updateBulletSelection(original, "i", "b", {
+      wording: "short",
+    });
+    const again = updateBulletSelection(next, "i", "b", { isVisible: false });
+
+    expect(next.selection.i.bullets?.b).toEqual({
+      isVisible: true,
+      wording: "short",
+    });
+    expect(again.selection.i.bullets?.b).toEqual({
+      isVisible: false,
+      wording: "short",
+    });
+    expect(original.selection.i).toBeUndefined();
   });
 });

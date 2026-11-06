@@ -4,6 +4,7 @@ import { EditorExperience } from "@pages/editor-page/sections/editor-experience/
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
+import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
 import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
@@ -58,6 +59,7 @@ export function EditorPage({ contentRef }: Props): JSX.Element {
       label: "Page Structure",
       content: <EditorPageStructure />,
     },
+    { id: "variants", label: "Variants", content: <EditorVariants /> },
     { id: "sections", label: "Sections", content: <EditorSections /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },
     ...sections.map((section) => ({
