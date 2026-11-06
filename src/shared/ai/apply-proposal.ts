@@ -1,5 +1,5 @@
 import { Proposal } from "@custom-types/tailor-types";
-import { Variant } from "@custom-types/variant-types";
+import { Variant, VariantLayout } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { canAutoAccept } from "@shared/ai/guardrails";
 
@@ -10,6 +10,9 @@ export interface Decisions {
 
   /** By bullet id: apply showing/hiding, and separately the rewording */
   bullets: Record<string, { isAccepted: boolean; isRewriteAccepted: boolean }>;
+
+  /** Apply the suggested order of the sections (only meaningful when the proposal has one) */
+  isSectionOrderAccepted?: boolean;
 }
 
 /** An alternative wording to add to a bullet in the vault. The original text is never changed. */
@@ -44,7 +47,69 @@ export function defaultDecisions(proposal: Proposal): Decisions {
         },
       ])
     ),
+    ...(proposal.sectionOrder ? { isSectionOrderAccepted: true } : {}),
   };
+}
+
+/**
+ * Puts the section ids of each column in the relative order of `order`. Header parts and
+ * sections not in `order` keep their places. Pure.
+ */
+export function reorderLayoutSections(
+  layout: VariantLayout,
+  order: string[]
+): VariantLayout {
+  const rank = new Map(order.map((id, index) => [id, index]));
+  function sortColumn(ids: string[]): string[] {
+    const slots = ids
+      .map((id, index) => (rank.has(id) ? index : -1))
+      .filter((index) => index >= 0);
+    const sorted = slots
+      .map((index) => ids[index])
+      .sort((a, b) => (rank.get(a) ?? 0) - (rank.get(b) ?? 0));
+    const result = [...ids];
+    slots.forEach((slot, position) => {
+      result[slot] = sorted[position];
+    });
+    return result;
+  }
+  return {
+    fullWidth: sortColumn(layout.fullWidth),
+    left: sortColumn(layout.left),
+    right: sortColumn(layout.right),
+  };
+}
+
+export interface SectionMove {
+  sectionId: string;
+  title: string;
+
+  /** 1-based positions among the sections */
+  from: number;
+  to: number;
+}
+
+/** Which sections the suggested order moves, and from where to where */
+export function describeSectionMoves(
+  vault: Vault,
+  order: string[] | undefined
+): SectionMove[] {
+  if (!order) {
+    return [];
+  }
+  return vault.sections.flatMap((section, index) => {
+    const to = order.indexOf(section.id);
+    return to >= 0 && to !== index
+      ? [
+          {
+            sectionId: section.id,
+            title: section.title,
+            from: index + 1,
+            to: to + 1,
+          },
+        ]
+      : [];
+  });
 }
 
 export interface ItemChange {
@@ -93,6 +158,12 @@ export function applyProposal(
     name: newVariant.name,
   };
   delete variant.tuning;
+  if (proposal.sectionOrder && decisions.isSectionOrderAccepted) {
+    variant.layout = reorderLayoutSections(
+      variant.layout,
+      proposal.sectionOrder
+    );
+  }
   const altUpdates: AltUpdate[] = [];
 
   for (const section of vault.sections) {
@@ -147,4 +218,24 @@ export function applyProposal(
   }
 
   return { variant, altUpdates };
+}
+
+/**
+ * Numbers the entries that propose something (a change to the item, or to its bullets), in the
+ * order the review list shows them (most relevant first). The paper's pins and the list use
+ * the same numbers. Items with nothing to review get no number.
+ */
+export function numberChanges(
+  variant: Variant,
+  proposal: Proposal
+): Map<string, number> {
+  const numbers = new Map<string, number>();
+  const sorted = [...proposal.items].sort((a, b) => b.relevance - a.relevance);
+  for (const entry of sorted) {
+    const hasBullets = proposal.bullets.some((b) => b.itemId === entry.itemId);
+    if (describeItemChange(variant, entry).hasChange || hasBullets) {
+      numbers.set(entry.itemId, numbers.size + 1);
+    }
+  }
+  return numbers;
 }

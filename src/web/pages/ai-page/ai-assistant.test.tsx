@@ -335,3 +335,46 @@ describe("AiAssistant: the review", () => {
     expect(await screen.findByText(/did not return valid output/)).toBeTruthy();
   });
 });
+
+describe("AiAssistant: pins and diff", () => {
+  it("numbers the changes on the paper and in the list with the same numbers, and links them", async () => {
+    stubServer({});
+    await analyse(makeStore());
+    // job2 is the most relevant (highlighted), so it is change 1; job1 has bullet proposals: 2
+    const pin = await screen.findByRole("button", { name: "Change 1" });
+    expect(screen.getByRole("button", { name: "Change 2" })).toBeTruthy();
+    const listButton = screen.getByRole("button", {
+      name: "Show change 1 on the page",
+    });
+    fireEvent.click(pin);
+    expect(
+      document.getElementById(`review-${job2.id}`)?.getAttribute("id")
+    ).toBeTruthy();
+    fireEvent.click(listButton);
+  });
+
+  it("shows the differences word by word in the Diff view", async () => {
+    stubServer({});
+    await analyse(makeStore());
+    fireEvent.click(screen.getByRole("button", { name: "Diff" }));
+    const region = screen.getByRole("region", { name: "Differences" });
+    // the short wording only removes words: they are struck through
+    expect(region.querySelector("del")?.textContent).toContain("development");
+    expect(region.querySelector("ins")).toBeNull();
+    expect(region.textContent).toContain("highlighted");
+  });
+
+  it("offers a section reorder, and the Proposed view follows the checkbox", async () => {
+    const withOrder = result();
+    const sectionIds = file.vault.sections.map((s) => s.id);
+    withOrder.proposal.sectionOrder = [...sectionIds].reverse();
+    withOrder.proposal.sectionOrderReason = "Skills matter most here.";
+    stubServer({ tailor: { status: 200, body: withOrder } });
+    await analyse(makeStore());
+    const box = screen.getByRole("checkbox", { name: /Reorder the sections/ });
+    expect((box as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText("Skills matter most here.")).toBeTruthy();
+    fireEvent.click(box);
+    expect((box as HTMLInputElement).checked).toBe(false);
+  });
+});

@@ -34,13 +34,22 @@ function allText(vault: Vault): string[] {
  * or copy the bullet text instead). `refs` maps a name back to the real thing.
  */
 export interface CvRefs {
+  /** "s1", "s2", ... -> section id */
+  sections: Map<string, string>;
   items: Map<string, string>;
   bullets: Map<string, { itemId: string; bulletId: string; text: string }>;
 }
 
 export function buildRefs(vault: Vault): CvRefs {
-  const refs: CvRefs = { items: new Map(), bullets: new Map() };
+  const refs: CvRefs = {
+    sections: new Map(),
+    items: new Map(),
+    bullets: new Map(),
+  };
   let itemNumber = 0;
+  vault.sections.forEach((section, index) =>
+    refs.sections.set(`s${index + 1}`, section.id)
+  );
   for (const section of vault.sections) {
     for (const item of section.items) {
       itemNumber += 1;
@@ -62,12 +71,14 @@ export function describeCv(
   vault: Vault,
   refs: CvRefs = buildRefs(vault)
 ): unknown {
+  const sectionRef = new Map([...refs.sections].map(([ref, id]) => [id, ref]));
   const itemRef = new Map([...refs.items].map(([ref, id]) => [id, ref]));
   const bulletRef = new Map(
     [...refs.bullets].map(([ref, value]) => [value.bulletId, ref])
   );
   return {
     sections: vault.sections.map((section) => ({
+      id: sectionRef.get(section.id),
       title: section.title,
       type: section.type,
       items: section.items.map((item) => ({
@@ -149,9 +160,19 @@ export function toProposal(refs: CvRefs, raw: RawProposal): Proposal {
     };
   });
 
+  const sectionOrder = (raw.sectionOrder ?? []).map(
+    (ref) => refs.sections.get(ref.trim()) ?? ref
+  );
+
   return {
     items,
     bullets,
+    ...(sectionOrder.length > 0
+      ? {
+          sectionOrder,
+          sectionOrderReason: raw.sectionOrderReason ?? "",
+        }
+      : {}),
     statement: raw.statement ?? "",
     gaps: raw.gaps ?? [],
   };
@@ -255,6 +276,27 @@ export function isGapCoveredByCv(gap: string, cvText: string): boolean {
   );
 }
 
+/**
+ * The suggested section order made safe: unknown ids and repeats are dropped, sections the model
+ * forgot keep their place at the end in the CV's own order. Undefined when nothing would move.
+ */
+export function sanitiseSectionOrder(
+  vault: Vault,
+  order: string[] | undefined
+): string[] | undefined {
+  if (!order || order.length === 0) {
+    return undefined;
+  }
+  const known = vault.sections.map((section) => section.id);
+  const wanted = order.filter(
+    (id, index) => known.includes(id) && order.indexOf(id) === index
+  );
+  const complete = [...wanted, ...known.filter((id) => !wanted.includes(id))];
+  return complete.every((id, index) => id === known[index])
+    ? undefined
+    : complete;
+}
+
 interface Sanitised {
   proposal: Proposal;
   warnings: string[];
@@ -333,11 +375,23 @@ export function sanitiseProposal(vault: Vault, proposal: Proposal): Sanitised {
     );
   }
 
+  const sectionOrder = sanitiseSectionOrder(vault, proposal.sectionOrder);
+
   const cvText = allText(vault).join("\n");
   const gaps = proposal.gaps.filter((gap) => !isGapCoveredByCv(gap, cvText));
 
   return {
-    proposal: { ...proposal, items, bullets, statementFlags, gaps },
+    proposal: {
+      ...proposal,
+      items,
+      bullets,
+      statementFlags,
+      gaps,
+      sectionOrder: sectionOrder ?? undefined,
+      sectionOrderReason: sectionOrder
+        ? proposal.sectionOrderReason
+        : undefined,
+    },
     warnings,
   };
 }

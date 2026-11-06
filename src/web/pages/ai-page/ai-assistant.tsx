@@ -1,5 +1,12 @@
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
-import { useEffect, useMemo, useState } from "react";
+import {
+  RefObject,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
   Alert,
@@ -25,7 +32,12 @@ import {
   applyProposal,
   defaultDecisions,
   describeItemChange,
+  describeSectionMoves,
+  numberChanges,
+  reorderLayoutSections,
 } from "@shared/ai/apply-proposal";
+import { diffDocuments, isDiffEmpty } from "@shared/ai/diff-documents";
+import { DiffView } from "@pages/ai-page/diff-view";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { RequestPreview } from "@pages/ai-page/request-preview";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";
@@ -157,7 +169,9 @@ export function AiAssistant(): JSX.Element {
     setCreated(name);
   }
 
-  const [view, setView] = useState<"current" | "proposed">("proposed");
+  const [view, setView] = useState<"current" | "proposed" | "diff">("proposed");
+  const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
+  const paperRef = useRef<HTMLDivElement>(null);
   const columnWidth = useAppSelector((s) => s.app.columnWidth);
   const structure = useAppSelector((s) => s.app.structure);
 
@@ -183,13 +197,40 @@ export function AiAssistant(): JSX.Element {
         bullet.alt = { ...bullet.alt, [update.wording]: update.text };
       }
     }
-    return render(previewVault, { ...variant, layout: structure });
+    const layout =
+      result.proposal.sectionOrder && decisions.isSectionOrderAccepted
+        ? reorderLayoutSections(structure, result.proposal.sectionOrder)
+        : structure;
+    return render(previewVault, { ...variant, layout });
   }, [result, decisions, vault, base, structure]);
   const current = useMemo(
     () => render(vault, { ...base, layout: structure }),
     [vault, base, structure]
   );
   const shown = view === "proposed" && proposed ? proposed : current;
+  const diff = useMemo(
+    () => (proposed ? diffDocuments(current, proposed) : null),
+    [current, proposed]
+  );
+  const numbers = useMemo(
+    () =>
+      result ? numberChanges(base, result.proposal) : new Map<string, number>(),
+    [result, base]
+  );
+
+  /** Pin or list number clicked: highlight both and bring the other side into view */
+  function focusItem(itemId: string, source: "pin" | "list"): void {
+    setFocusedItemId(itemId);
+    if (source === "pin") {
+      document
+        .getElementById(`review-${itemId}`)
+        ?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    } else {
+      paperRef.current
+        ?.querySelector(`[data-cv-item="${itemId}"]`)
+        ?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+    }
+  }
 
   return (
     <Box sx={{ display: "flex", flex: 1, minWidth: 0, minHeight: 0 }}>
@@ -328,7 +369,7 @@ export function AiAssistant(): JSX.Element {
           exclusive
           size="small"
           value={view}
-          onChange={(_event, value: "current" | "proposed" | null) => {
+          onChange={(_event, value: "current" | "proposed" | "diff" | null) => {
             if (value) {
               setView(value);
             }
@@ -339,10 +380,39 @@ export function AiAssistant(): JSX.Element {
           <ToggleButton value="proposed" disabled={!proposed}>
             Proposed
           </ToggleButton>
+          <ToggleButton value="diff" disabled={!proposed}>
+            Diff
+          </ToggleButton>
         </ToggleButtonGroup>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        {view === "diff" && diff && (
+          <>
+            {isDiffEmpty(diff) && (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                The accepted changes do not change anything compared with the
+                current variant.
+              </Alert>
+            )}
+            <DiffView diff={diff} />
+          </>
+        )}
+        <Box
+          sx={{
+            display: view === "diff" ? "none" : "flex",
+            justifyContent: "center",
+          }}
+        >
           <Box
+            ref={paperRef}
             sx={{
+              position: "relative",
+              ...(focusedItemId
+                ? {
+                    [`& [data-cv-item="${focusedItemId}"]`]: {
+                      outline: `2px solid ${WORKSPACE_COLORS.accent}`,
+                      outlineOffset: "2px",
+                    },
+                  }
+                : {}),
               zoom: 0.72,
               width: `${A4_DIMENSION_MM.width}mm`,
               minHeight: `${A4_DIMENSION_MM.height}mm`,
@@ -357,6 +427,13 @@ export function AiAssistant(): JSX.Element {
             }}
           >
             <RenderedColumns rendered={shown} columnWidth={columnWidth} />
+            <PaperPins
+              paperRef={paperRef}
+              numbers={numbers}
+              layoutKey={shown}
+              focusedItemId={focusedItemId}
+              onSelect={(itemId) => focusItem(itemId, "pin")}
+            />
           </Box>
         </Box>
       </Box>
@@ -381,6 +458,9 @@ export function AiAssistant(): JSX.Element {
             decisions={decisions}
             setDecisions={setDecisions}
             onCreate={create}
+            numbers={numbers}
+            focusedItemId={focusedItemId}
+            onFocusItem={(itemId) => focusItem(itemId, "list")}
           />
         ) : (
           <Typography variant="body2">
@@ -458,7 +538,99 @@ function Analysis({ result }: AnalysisProps): JSX.Element {
   );
 }
 
+interface PinsProps {
+  paperRef: RefObject<HTMLDivElement | null>;
+  numbers: Map<string, number>;
+
+  /** Changes when the drawn CV changes, so the pins are measured again */
+  layoutKey: unknown;
+  focusedItemId: string | null;
+  onSelect: (itemId: string) => void;
+}
+
+interface Pin {
+  itemId: string;
+  n: number;
+  top: number;
+}
+
+/** Where an element is inside the paper, in the paper's own (zoomed) units */
+function offsetInPaper(element: HTMLElement, paper: HTMLElement): number {
+  let top = 0;
+  let node: HTMLElement | null = element;
+  while (node && node !== paper) {
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return top;
+}
+
+/** Numbered pins in the margin of the paper, next to the items the review list numbers */
+function PaperPins({
+  paperRef,
+  numbers,
+  layoutKey,
+  focusedItemId,
+  onSelect,
+}: PinsProps): JSX.Element {
+  const [pins, setPins] = useState<Pin[]>([]);
+
+  useLayoutEffect(() => {
+    const paper = paperRef.current;
+    if (!paper) {
+      return;
+    }
+    const next = [...numbers].flatMap(([itemId, n]) => {
+      const element = paper.querySelector<HTMLElement>(
+        `[data-cv-item="${itemId}"]`
+      );
+      return element ? [{ itemId, n, top: offsetInPaper(element, paper) }] : [];
+    });
+    setPins((previous) =>
+      JSON.stringify(previous) === JSON.stringify(next) ? previous : next
+    );
+  }, [paperRef, numbers, layoutKey]);
+
+  return (
+    <>
+      {pins.map((pin) => (
+        <Box
+          key={pin.itemId}
+          component="button"
+          type="button"
+          aria-label={`Change ${pin.n}`}
+          onClick={() => onSelect(pin.itemId)}
+          sx={{
+            position: "absolute",
+            left: "4mm",
+            top: pin.top,
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            border: 0,
+            p: 0,
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 700,
+            color: WORKSPACE_COLORS.accentContrast,
+            bgcolor: WORKSPACE_COLORS.accent,
+            boxShadow:
+              focusedItemId === pin.itemId
+                ? `0 0 0 3px ${WORKSPACE_COLORS.accentSoft}`
+                : "none",
+          }}
+        >
+          {pin.n}
+        </Box>
+      ))}
+    </>
+  );
+}
+
 interface ChangesProps {
+  numbers: Map<string, number>;
+  focusedItemId: string | null;
+  onFocusItem: (itemId: string) => void;
   result: TailorResult;
   decisions: Decisions;
   setDecisions: (next: Decisions) => void;
@@ -471,17 +643,51 @@ function Changes({
   decisions,
   setDecisions,
   onCreate,
+  numbers,
+  focusedItemId,
+  onFocusItem,
 }: ChangesProps): JSX.Element {
   const vault = useAppSelector(vaultSelector);
   const base = useAppSelector(activeVariantSelector);
   const { proposal } = result;
   const sorted = [...proposal.items].sort((a, b) => b.relevance - a.relevance);
+  const sectionMoves = describeSectionMoves(vault, proposal.sectionOrder);
 
   return (
     <Box>
       <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 2 }}>
         Proposed changes
       </Typography>
+      {sectionMoves.length > 0 && (
+        <Box sx={{ mt: 1 }}>
+          <FormControlLabel
+            label={
+              <span>
+                <strong>Reorder the sections</strong>{" "}
+                {sectionMoves
+                  .map((m) => `${m.title} ${m.from} → ${m.to}`)
+                  .join(", ")}
+              </span>
+            }
+            control={
+              <Checkbox
+                checked={decisions.isSectionOrderAccepted ?? false}
+                onChange={(event) =>
+                  setDecisions({
+                    ...decisions,
+                    isSectionOrderAccepted: event.target.checked,
+                  })
+                }
+              />
+            }
+          />
+          {proposal.sectionOrderReason && (
+            <Typography variant="caption" display="block" sx={{ pl: 4 }}>
+              {proposal.sectionOrderReason}
+            </Typography>
+          )}
+        </Box>
+      )}
       {sorted.map((entry) => {
         const found = findItem(vault, entry.itemId);
         if (!found) {
@@ -492,10 +698,48 @@ function Changes({
           (b) => b.itemId === entry.itemId
         );
         return (
-          <Box key={entry.itemId} sx={{ mt: 1.5 }}>
+          <Box
+            key={entry.itemId}
+            id={`review-${entry.itemId}`}
+            sx={{
+              mt: 1.5,
+              pl: 1,
+              borderLeft: `3px solid ${
+                focusedItemId === entry.itemId
+                  ? WORKSPACE_COLORS.accent
+                  : "transparent"
+              }`,
+            }}
+          >
             <FormControlLabel
               label={
                 <span>
+                  {numbers.has(entry.itemId) && (
+                    <Box
+                      component="button"
+                      type="button"
+                      aria-label={`Show change ${numbers.get(entry.itemId)} on the page`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        onFocusItem(entry.itemId);
+                      }}
+                      sx={{
+                        mr: 0.75,
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        border: 0,
+                        p: 0,
+                        cursor: "pointer",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: WORKSPACE_COLORS.accentContrast,
+                        bgcolor: WORKSPACE_COLORS.accent,
+                      }}
+                    >
+                      {numbers.get(entry.itemId)}
+                    </Box>
+                  )}
                   <strong>{getItemLabel(found.item)}</strong>{" "}
                   <Chip
                     size="small"
