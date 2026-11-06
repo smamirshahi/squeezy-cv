@@ -4,6 +4,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { WorkspaceTool, setTool } from "@store/app/app-slice";
@@ -29,6 +30,11 @@ const ITEMS: RailItem[] = [
     label: "Tailor",
     icon: <AutoAwesomeIcon fontSize="small" />,
     tool: "tailor",
+  },
+  {
+    label: "Chat",
+    icon: <ChatBubbleOutlineIcon fontSize="small" />,
+    tool: "chat",
   },
   {
     label: "Applied",

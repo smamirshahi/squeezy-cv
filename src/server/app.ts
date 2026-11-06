@@ -12,6 +12,12 @@ import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
+import { chat } from "@server/ai/chat";
+import {
+  ChatRequestSchema,
+  MAX_CHAT_HISTORY,
+  MAX_CHAT_MESSAGE_LENGTH,
+} from "@custom-types/chat-types";
 import { AiChoiceError, AiRegistry } from "@server/ai/ai-registry";
 import { AiProviderId } from "@shared/ai/providers";
 import {
@@ -291,6 +297,35 @@ export function buildServer({
     }
     const { vault } = await storage.loadVault();
     return tailor(ai, vault, { jobAd, tone: body.tone });
+  });
+
+  // One chat turn: a reply and typed operations for the user to approve (nothing is changed here)
+  app.post("/api/ai/chat", async (request, reply) => {
+    const { client: ai } = registry.forTask("chat");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = ChatRequestSchema.check(request.body);
+    const message = body.message.trim();
+    if (message.length === 0 || message.length > MAX_CHAT_MESSAGE_LENGTH) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The message must be 1 to ${MAX_CHAT_MESSAGE_LENGTH} characters.`
+      );
+    }
+    const { vault } = await storage.loadVault();
+    return chat(ai, vault, {
+      ...body,
+      message,
+      history: (body.history ?? []).slice(-MAX_CHAT_HISTORY),
+    });
   });
 
   // Which items to hide so the CV fits (the user confirms; nothing is changed here)

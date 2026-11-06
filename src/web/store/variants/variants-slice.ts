@@ -6,6 +6,7 @@ import {
   FitMode,
   FitTuning,
   ItemSelection,
+  Tone,
   Variant,
   VariantLayout,
 } from "@custom-types/variant-types";
@@ -252,6 +253,13 @@ const variantsSlice = createSlice({
       state.variants[index] = variant;
     },
 
+    setTone(state, action: PayloadAction<{ id: string; tone: Tone }>) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (variant) {
+        variant.tone = action.payload.tone;
+      }
+    },
+
     setPageLimit(
       state,
       action: PayloadAction<{ id: string; pageLimit: number }>
@@ -399,6 +407,7 @@ export const {
   setBulletOrders,
   setItemOrders,
   setVariantAppearance,
+  setTone,
   setPageLimit,
   setAutoFit,
   setFitLimits,
