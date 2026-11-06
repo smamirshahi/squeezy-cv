@@ -1,18 +1,11 @@
 import { useEffect } from "react";
-import { computeItemOrders } from "@shared/variant/variant-utils";
-import { sortItemsByVariant } from "@shared/variant/render";
+import { useBlockActions } from "@pages/workspace/use-block-actions";
 import {
   ZOOM_STEP,
   setCanvasZoom,
   setSelectedBlock,
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import {
-  activeVariantSelector,
-  setItemOrders,
-  setItemSelection,
-} from "@store/variants/variants-slice";
-import { sectionsSelector } from "@store/vault/vault-slice";
 
 /** The items on the page in reading order, from the DOM */
 function pageItems(): HTMLElement[] {
@@ -30,8 +23,7 @@ function pageItems(): HTMLElement[] {
  */
 export function useCanvasShortcuts(isActive: boolean): void {
   const dispatch = useAppDispatch();
-  const variant = useAppSelector(activeVariantSelector);
-  const sections = useAppSelector(sectionsSelector);
+  const actions = useBlockActions();
   const block = useAppSelector((s) => s.app.selectedBlock);
   const zoom = useAppSelector((s) => s.app.canvasZoom);
 
@@ -88,57 +80,20 @@ export function useCanvasShortcuts(isActive: boolean): void {
       if (!block) {
         return;
       }
-      const section = sections.find((s) => s.id === block.sectionId);
-      const itemId = block.itemId;
-      if (!section || !itemId) {
-        return;
-      }
-      const choice = variant.selection[itemId];
       const key = event.key.toLowerCase();
       if (key === "h" && !event.altKey) {
-        dispatch(
-          setItemSelection({
-            variantId: variant.id,
-            itemId,
-            change: { isVisible: choice?.isVisible === false },
-          })
-        );
+        actions.toggleShown();
       } else if (key === "b" && !event.altKey) {
-        dispatch(
-          setItemSelection({
-            variantId: variant.id,
-            itemId,
-            change: {
-              emphasis: choice?.emphasis === "high" ? "normal" : "high",
-            },
-          })
-        );
+        actions.toggleEmphasis();
       } else if (
         event.altKey &&
         (event.key === "ArrowUp" || event.key === "ArrowDown")
       ) {
         event.preventDefault();
-        const ids = sortItemsByVariant(section.items, variant.selection).map(
-          (item) => item.id
-        );
-        const toIndex =
-          ids.indexOf(itemId) + (event.key === "ArrowUp" ? -1 : 1);
-        if (toIndex >= 0 && toIndex < ids.length) {
-          dispatch(
-            setItemOrders({
-              variantId: variant.id,
-              orders: computeItemOrders(
-                section.items,
-                variant,
-                itemId,
-                toIndex
-              ),
-            })
-          );
-        }
+        actions.move(event.key === "ArrowUp" ? -1 : 1);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isActive, block, variant, sections, zoom, dispatch]);
+  }, [isActive, block, zoom, dispatch, actions]);
 }
