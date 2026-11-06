@@ -82,7 +82,7 @@ export function getDropIndex(
   return index < 0 ? null : index;
 }
 
-function useReorderSensors(): ReturnType<typeof useSensors> {
+export function useReorderSensors(): ReturnType<typeof useSensors> {
   return useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: DRAG_START_DISTANCE_PX },
@@ -97,7 +97,7 @@ interface RowProps {
 }
 
 /** A row that can be dragged by its handle, or moved with the keyboard when the handle has focus */
-function SortableRow({ id, children }: RowProps): JSX.Element {
+export function SortableRow({ id, children }: RowProps): JSX.Element {
   const {
     attributes,
     listeners,
