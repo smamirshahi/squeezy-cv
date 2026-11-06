@@ -1,9 +1,10 @@
-import { useRef } from "react";
-import { Box } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { Box, Button } from "@mui/material";
 import { AiSetup } from "@pages/workspace/ai-setup";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
+import { Outline } from "@pages/workspace/outline";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { ToolRail } from "@pages/workspace/tool-rail";
@@ -21,6 +22,27 @@ import { useAppSelector } from "@store/store-helper";
 export function Workspace(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
   const tool = useAppSelector((s) => s.app.tool);
+  const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
+  // "O" opens and closes the outline, unless the user is typing
+  useEffect(() => {
+    function onKey(event: KeyboardEvent): void {
+      const target = event.target as HTMLElement;
+      const isTyping =
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+        target.isContentEditable;
+      if (
+        event.key.toLowerCase() === "o" &&
+        !isTyping &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey
+      ) {
+        setIsOutlineOpen((wasOpen) => !wasOpen);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   useSyncStructure();
   useSyncActiveVariant();
   usePersistence();
@@ -41,6 +63,9 @@ export function Workspace(): JSX.Element {
         <ToolRail />
         {tool === "variants" && (
           <>
+            {isOutlineOpen && (
+              <Outline onClose={() => setIsOutlineOpen(false)} />
+            )}
             <Box
               component="main"
               aria-label="Canvas"
@@ -56,6 +81,14 @@ export function Workspace(): JSX.Element {
               }}
             >
               <FirstRun />
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
+                sx={{ position: "absolute", left: 12, top: 12, zIndex: 3 }}
+              >
+                {isOutlineOpen ? "Hide outline" : "Outline (O)"}
+              </Button>
               <PreviewPage contentRef={contentRef} />
             </Box>
             <Inspector />
