@@ -107,7 +107,11 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
         {error && <Alert severity="error">{error}</Alert>}
         {result && (
           <Box>
-            <Typography fontWeight="bold">
+            <Typography
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
               Found: {result.vault.profile.fullName || "(no name)"}
             </Typography>
             <Typography variant="body2">
@@ -124,7 +128,13 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
                 {warning}
               </Alert>
             ))}
-            <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mt: 1,
+              }}
+            >
               Nothing is added until you press the button. It is added to your
               vault (existing details are kept); check it in the Vault, then
               Save.

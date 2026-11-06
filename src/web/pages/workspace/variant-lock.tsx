@@ -91,7 +91,12 @@ export function UnlockDialog({
           saved snapshot and its PDF) is <strong>not</strong> changed, but this
           variant will no longer match it.
         </Typography>
-        <Typography color="text.secondary" variant="body2">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Safer: create a new variant from this one and edit that instead. It
           locks again when you save.
         </Typography>

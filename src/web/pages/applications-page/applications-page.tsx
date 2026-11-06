@@ -72,7 +72,13 @@ function StatusLabel({
   today: string;
 }): JSX.Element {
   return (
-    <Box display="flex" gap={0.5} flexWrap="wrap">
+    <Box
+      sx={{
+        display: "flex",
+        gap: 0.5,
+        flexWrap: "wrap",
+      }}
+    >
       <Chip
         size="small"
         label={STATUS_LABELS[application.status]}
@@ -173,7 +179,12 @@ export function ApplicationsPage(): JSX.Element {
           {state.status === "ready" && state.applications.length === 0 && (
             <Paper variant="outlined" sx={{ p: 3 }}>
               <Typography gutterBottom>No applications yet.</Typography>
-              <Typography color="text.secondary" gutterBottom>
+              <Typography
+                gutterBottom
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Tailor a CV in the editor, then press{" "}
                 <strong>Mark as applied</strong>.
               </Typography>
@@ -291,15 +302,22 @@ function StatusTiles({
           >
             <Typography
               component="span"
-              display="block"
-              sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+              sx={{
+                display: "block",
+                fontSize: 12,
+                color: WORKSPACE_COLORS.muted,
+              }}
             >
               {tile.label}
             </Typography>
             <Typography
               component="span"
-              display="block"
-              sx={{ fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
+              sx={{
+                display: "block",
+                fontSize: 22,
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
             >
               {tile.count}
             </Typography>
@@ -332,7 +350,11 @@ function ApplicationsTable({
   const shown = arrangeApplications([...applications], view, today);
   return (
     <>
-      <Typography color="text.secondary">
+      <Typography
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         {summariseApplications(applications, today)}
       </Typography>
 

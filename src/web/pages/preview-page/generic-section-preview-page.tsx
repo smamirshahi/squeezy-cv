@@ -29,9 +29,12 @@ export function GenericSectionPreviewPage({
     <Grid
       data-cv-section={section.id}
       container
-      direction="column"
-      alignItems="flex-start"
-      sx={{ m: "0px", p: "0px" }}
+      sx={{
+        flexDirection: "column",
+        alignItems: "flex-start",
+        m: "0px",
+        p: "0px",
+      }}
     >
       <CvTypography
         variant="headingMd"
@@ -43,9 +46,11 @@ export function GenericSectionPreviewPage({
           container
           key={item.id}
           data-cv-item={item.id}
-          direction="column"
-          alignItems="flex-start"
-          sx={{ mb: spaced(GAP_PX.item) }}
+          sx={{
+            flexDirection: "column",
+            alignItems: "flex-start",
+            mb: spaced(GAP_PX.item),
+          }}
         >
           <CvBlock shouldKeepWithNext>
             <CvTypography
@@ -53,7 +58,14 @@ export function GenericSectionPreviewPage({
               isEmphasised={item.emphasis === "high"}
               text={item.fields.title ?? ""}
             />
-            <Grid container direction="row" alignItems="center" gap={3}>
+            <Grid
+              container
+              direction="row"
+              sx={{
+                alignItems: "center",
+                gap: 3,
+              }}
+            >
               <CvTypography
                 variant="bodyMd"
                 isEmphasised={item.emphasis === "high"}

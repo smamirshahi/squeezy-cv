@@ -20,7 +20,13 @@ export function EditorPageStructure(): JSX.Element {
         Start from a template, then drag parts to fine-tune. This belongs to the
         active variant.
       </Typography>
-      <Box display="flex" gap={1} sx={{ mb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          mb: 2,
+        }}
+      >
         <Button
           variant="outlined"
           onClick={() =>

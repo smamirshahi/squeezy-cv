@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";

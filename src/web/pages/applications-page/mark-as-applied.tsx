@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { useStore } from "react-redux";
@@ -145,11 +145,24 @@ export function MarkAsAppliedDialog({
       >
         <DialogTitle>Mark as applied</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             Saves the CV exactly as it is now (with its PDF), so you can always
             see what you sent.
           </Typography>
-          <Box display="flex" flexDirection="column" gap={2} sx={{ pt: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              pt: 1,
+            }}
+          >
             <TextField
               label="Company"
               required
@@ -188,7 +201,13 @@ export function MarkAsAppliedDialog({
                 : "Add job description and notes"}
             </Link>
             <Collapse in={areMoreOpen}>
-              <Box display="flex" flexDirection="column" gap={2}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
                 <TextField
                   label="Job description"
                   multiline

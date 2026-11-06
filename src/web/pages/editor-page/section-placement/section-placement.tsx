@@ -67,7 +67,13 @@ export function SectionPlacement(): JSX.Element {
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
     >
-      <Box sx={{ display: "flex", justifyContent: "center" }} gap={2}>
+      <Box
+        sx={{
+          gap: 2,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <SortableColumn
           title="Full Width"
           side="fullWidth"

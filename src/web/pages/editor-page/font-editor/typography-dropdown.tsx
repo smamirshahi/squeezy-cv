@@ -65,7 +65,13 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
           horizontal: "left",
         }}
       >
-        <Box display="flex" p={2} gap={4}>
+        <Box
+          sx={{
+            display: "flex",
+            p: 2,
+            gap: 4,
+          }}
+        >
           <FontSizeRadioButton
             selectedSize={selectedSize}
             setSelectedSize={setSelectedSize}
@@ -79,7 +85,13 @@ export function TypographyDropdown({ variant, fontStyle }: Props): JSX.Element {
             setSelectedColor={setSelectedColor}
           />
         </Box>
-        <Box display="flex" justifyContent="flex-end" p={1}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            p: 1,
+          }}
+        >
           <Button onClick={handleApply} size="small" variant="contained">
             Apply
           </Button>

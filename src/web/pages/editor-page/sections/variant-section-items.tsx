@@ -201,10 +201,12 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                     }}
                   >
                     <Box
-                      display="flex"
-                      alignItems="flex-start"
-                      gap={0.25}
-                      p={0.75}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 0.25,
+                        p: 0.75,
+                      }}
                     >
                       {handle}
                       <IconButton
@@ -248,10 +250,14 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                       />
                     </Box>
                     <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={0.75}
-                      sx={{ px: 1, pb: 1, pl: 6 }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        px: 1,
+                        pb: 1,
+                        pl: 6,
+                      }}
                     >
                       {bullet.tags.slice(0, 2).map((tag) => (
                         <Chip key={tag} size="small" label={tag} />
@@ -298,7 +304,14 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
           return (
             <SortableRow key={bullet.id} id={bullet.id}>
               {(handle) => (
-                <Box display="flex" alignItems="center" gap={1} sx={{ pl: 6 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    pl: 6,
+                  }}
+                >
                   {handle}
                   <SortingIcons
                     index={index}
@@ -389,7 +402,12 @@ export function VariantSectionItems({ section }: Props): JSX.Element | null {
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Typography variant="subtitle1" fontWeight="bold">
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: "bold",
+        }}
+      >
         {section.title}
       </Typography>
       <DndContext
@@ -410,7 +428,12 @@ export function VariantSectionItems({ section }: Props): JSX.Element | null {
               <SortableRow key={item.id} id={item.id}>
                 {(handle) => (
                   <Box sx={{ mt: 1 }}>
-                    <Box display="flex" alignItems="center">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       {handle}
                       <SortingIcons
                         index={index}

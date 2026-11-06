@@ -69,7 +69,11 @@ export function RequestPreview({
             </Alert>
             {preview.calls.map((call, index) => (
               <Box key={call.promptName} sx={{ mb: 2 }}>
-                <Typography fontWeight="bold">
+                <Typography
+                  sx={{
+                    fontWeight: "bold",
+                  }}
+                >
                   Message {index + 1}: {call.promptName}
                   {index === 1
                     ? " (requirements shown are a stand-in for the answer to message 1)"

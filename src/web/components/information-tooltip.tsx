@@ -1,4 +1,4 @@
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 
 interface Props {

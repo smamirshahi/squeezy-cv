@@ -93,7 +93,9 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
               >
                 <ListItemText
                   primary={section.title}
-                  primaryTypographyProps={{ fontWeight: 600 }}
+                  slotProps={{
+                    primary: { sx: { fontWeight: 600 } },
+                  }}
                 />
                 <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
                   {section.items.length}

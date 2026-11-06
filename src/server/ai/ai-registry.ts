@@ -43,9 +43,7 @@ export class FileAiSettings implements AiSettingsStore {
   async load(): Promise<AiSettingsData> {
     try {
       const parsed: unknown = JSON.parse(await readFile(this.filePath, "utf8"));
-      return typeof parsed === "object" && parsed !== null
-        ? (parsed as AiSettingsData)
-        : {};
+      return typeof parsed === "object" && parsed !== null ? parsed : {};
     } catch {
       return {};
     }

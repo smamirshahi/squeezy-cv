@@ -1,4 +1,3 @@
-import { Style } from "@custom-types/styles-types";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { setDateFormat, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -14,9 +13,7 @@ export function DropdownDateType(): JSX.Element {
       <Select
         value={dateFormat}
         label="Date Format"
-        onChange={(event) =>
-          dispatch(setDateFormat(event.target.value as Style["dateFormat"]))
-        }
+        onChange={(event) => dispatch(setDateFormat(event.target.value))}
       >
         <MenuItem value="MMM YYYY">MMM YYYY (Dec 2018)</MenuItem>
         <MenuItem value="DD/MM/YYYY">DD/MM/YYYY (01/12/2018)</MenuItem>

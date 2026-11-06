@@ -26,7 +26,11 @@ afterEach(() => {
 /** jsdom has no layout, so give elements the positions we want */
 function setRect(element: Element, top: number, height: number): void {
   element.getBoundingClientRect = () =>
-    ({ top, height, bottom: top + height }) as DOMRect;
+    ({
+      top,
+      height,
+      bottom: top + height,
+    }) as DOMRect;
 }
 
 function fakeLayout(paper: HTMLElement, scrollHeight: number): void {
@@ -100,7 +104,11 @@ describe("page status in the preview", () => {
       get: () => 3200,
     });
     HTMLElement.prototype.getBoundingClientRect = () =>
-      ({ top: 0, height: 0, bottom: 0 }) as DOMRect;
+      ({
+        top: 0,
+        height: 0,
+        bottom: 0,
+      }) as DOMRect;
     try {
       const { container } = render(
         <Provider store={store}>

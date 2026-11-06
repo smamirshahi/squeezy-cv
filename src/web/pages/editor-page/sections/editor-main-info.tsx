@@ -53,7 +53,13 @@ export function EditorMainInfo(): JSX.Element | null {
 
   return (
     <>
-      <Box display="flex" gap={2} mb={2}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <TextField
           label="Full Name"
           variant="outlined"
@@ -83,7 +89,14 @@ export function EditorMainInfo(): JSX.Element | null {
           fullWidth
         />
       </Box>
-      <Box display="flex" flexDirection="column" gap={2} mb={2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <TextField
           label="Email"
           slotProps={{
@@ -137,7 +150,13 @@ export function EditorMainInfo(): JSX.Element | null {
         />
       </Box>
 
-      <Box display="flex" alignItems="center" justifyContent="space-between">
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Typography variant="h6">Links</Typography>
         <IconButton
           aria-label="Add link"
@@ -149,10 +168,12 @@ export function EditorMainInfo(): JSX.Element | null {
       {draft.links.map((link, index) => (
         <Box
           key={link.id}
-          display="flex"
-          alignItems="center"
-          gap={1}
-          sx={{ my: 1 }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            my: 1,
+          }}
         >
           <SortingIcons
             index={index}

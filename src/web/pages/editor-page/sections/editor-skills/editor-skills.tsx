@@ -67,7 +67,13 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
         >
           <AccordionDetails>
             {/* Skill Category */}
-            <Box display="flex" flexDirection="row" gap={2}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 2,
+              }}
+            >
               <TextField
                 label="Skill Category"
                 value={group.fields.category ?? ""}
