@@ -1,0 +1,61 @@
+/** What a runtypes schema offers: throws if the value does not match */
+export interface Schema<T> {
+  check: (value: unknown) => T;
+}
+
+export type AiErrorCode =
+  /** No API key is set */
+  | "not_configured"
+  | "timeout"
+  | "api_error"
+  /** The model declined (safety) */
+  | "refused"
+  /** The answer was cut off at the token limit */
+  | "truncated"
+  /** Still not valid after all attempts */
+  | "invalid_output";
+
+/** A failure of an AI call. The message never contains the API key. */
+export class AiError extends Error {
+  readonly code: AiErrorCode;
+
+  constructor(code: AiErrorCode, message: string) {
+    super(message);
+    this.name = "AiError";
+    this.code = code;
+  }
+}
+
+export interface GenerateRequest<T> {
+  /** Name of a prompt file in `ai/prompts/` used as the system prompt */
+  promptName: string;
+
+  /** The task, including the data it works on */
+  input: string;
+
+  /** The answer must be JSON that passes this schema */
+  schema: Schema<T>;
+
+  /** Total tries including the first (default 3) */
+  maxAttempts?: number;
+}
+
+export interface AiClient {
+  generate<T>(request: GenerateRequest<T>): Promise<T>;
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface SenderResult {
+  text: string;
+  stopReason: "end_turn" | "max_tokens" | "refusal" | "other";
+}
+
+/** One call to the model. The only part that touches the network, so tests can replace it. */
+export type MessageSender = (
+  system: string,
+  messages: ChatMessage[]
+) => Promise<SenderResult>;
