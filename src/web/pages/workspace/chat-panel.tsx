@@ -13,6 +13,7 @@ import { Operation } from "@custom-types/chat-types";
 import { buildChatContext } from "@shared/chat/chat-context";
 import { describeOperation } from "@shared/chat/describe-operation";
 import { shorten } from "@shared/variant/item-label";
+import { Turn, loadChat, saveChat } from "@pages/workspace/chat-memory";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { operationsToActions } from "@store/chat/operations-to-actions";
 import { batch, undo } from "@store/history/history";
@@ -31,21 +32,6 @@ import { vaultSelector } from "@store/vault/vault-slice";
 import { useStore } from "react-redux";
 import { RootState } from "@store/store-helper";
 
-interface Turn {
-  id: number;
-  role: "user" | "assistant";
-  content: string;
-  operations?: Operation[];
-  warnings?: string[];
-
-  /** Which operations are ticked (all, except flagged rewordings) */
-  selected?: boolean[];
-
-  /** Set once applied: how many history steps there were then, so Undo only shows while it is still the last step */
-  appliedAtStep?: number;
-  appliedCount?: number;
-}
-
 const MAX_SENT_TURNS = 6;
 
 function isFlagged(op: Operation): boolean {
@@ -58,6 +44,12 @@ function isFlagged(op: Operation): boolean {
  * undoable step through the same reducers as a manual edit. Flagged rewordings start unticked.
  */
 export function ChatPanel(): JSX.Element {
+  const variantId = useAppSelector(activeVariantSelector).id;
+  // each variant has its own conversation
+  return <ChatConversation key={variantId} variantId={variantId} />;
+}
+
+function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
@@ -69,7 +61,7 @@ export function ChatPanel(): JSX.Element {
   const steps = useAppSelector((s) => s.history.past.length);
 
   const [status, setStatus] = useState<AiStatus | null>(null);
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<Turn[]>(() => loadChat(variantId));
   const [text, setText] = useState<string>("");
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -82,6 +74,11 @@ export function ChatPanel(): JSX.Element {
       .then(setStatus)
       .catch(() => setStatus(null));
   }, [api]);
+
+  // the conversation is kept in this browser (not in the data folder), one per variant
+  useEffect(() => {
+    saveChat(variantId, turns);
+  }, [variantId, turns]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: "end" });
@@ -172,10 +169,24 @@ export function ChatPanel(): JSX.Element {
       <Box
         sx={{ p: 1.5, borderBottom: `1px solid ${WORKSPACE_COLORS.border}` }}
       >
-        <Typography sx={{ fontWeight: 700 }}>Chat</Typography>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography sx={{ fontWeight: 700, flex: 1 }}>Chat</Typography>
+          {turns.length > 0 && (
+            <Button
+              size="small"
+              disabled={isBusy}
+              onClick={() => {
+                setTurns([]);
+                setError("");
+              }}
+            >
+              Clear conversation
+            </Button>
+          )}
+        </Box>
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           Ask for changes to “{variant.name}”. You approve each one; Undo brings
-          it back.
+          it back. The conversation is kept in this browser only.
         </Typography>
       </Box>
       <Box

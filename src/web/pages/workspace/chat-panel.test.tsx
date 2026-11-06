@@ -29,6 +29,7 @@ import { ChatResponse } from "@custom-types/chat-types";
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
   vi.unstubAllGlobals();
 });
 
@@ -262,5 +263,26 @@ describe("ChatPanel", () => {
     expect(screen.getByLabelText<HTMLInputElement>("Message").disabled).toBe(
       true
     );
+  });
+
+  it("remembers the conversation per variant after the panel is closed and reopened, and can clear it", async () => {
+    stub();
+    setup();
+    await ask("Hide the oldest job");
+    cleanup();
+
+    // a new visit (e.g. after a reload): the same variant shows the same conversation
+    setup();
+    expect(await screen.findByText("Hide the oldest job")).toBeTruthy();
+    expect(screen.getByText(answer.reply)).toBeTruthy();
+    // applied/undo state of an earlier visit is not offered, the choices still are
+    expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear conversation" }));
+    expect(screen.queryByText("Hide the oldest job")).toBeNull();
+    cleanup();
+    setup();
+    await screen.findByLabelText("Message");
+    expect(screen.queryByText("Hide the oldest job")).toBeNull();
   });
 });
