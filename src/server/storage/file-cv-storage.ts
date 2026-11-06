@@ -54,7 +54,7 @@ function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Keeps everything as JSON files in one folder (`vault.json`, `variants/<id>.json` and `applications/<id>/application.json` + `cv.pdf`) */
+/** Keeps everything as JSON files in one folder: `vault.json`, `variants/`, `applications/<id>/` */
 export class FileCvStorage implements CvStorage {
   private readonly queue = new KeyedQueue();
 
@@ -282,6 +282,7 @@ export class FileCvStorage implements CvStorage {
         throw new StorageError("not_found", `There is no application ${id}.`);
       }
       // Keep it aside instead of destroying it for good (git history has it too)
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option names
       await fs.rm(`${dir}.deleted`, { recursive: true, force: true });
       await fs.rename(dir, `${dir}.deleted`);
     });

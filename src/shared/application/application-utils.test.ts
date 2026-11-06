@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
-import { ApplicationSchema } from "@custom-types/application-types";
+import {
+  Application,
+  ApplicationSchema,
+} from "@custom-types/application-types";
 import {
   ApplicationInputError,
   createApplication,
   createApplicationId,
   daysBetween,
+  formatDay,
   isIsoDay,
   isNoReply,
   lastUpdateDay,
@@ -19,7 +23,7 @@ const file = migrateCvFile(sample);
 const variant = createVariant(file.vault, file.style, "v1", "Acme");
 const input = { variantId: "v1", company: " Acme Ltd ", role: "Senior Dev" };
 
-function make(overrides = {}) {
+function make(overrides = {}): Application {
   return createApplication(
     { ...input, ...overrides },
     file.vault,
@@ -216,5 +220,13 @@ describe("isIsoDay", () => {
     expect(isIsoDay("2026-02-29")).toBe(false);
     expect(isIsoDay("2026-13-01")).toBe(false);
     expect(isIsoDay("6 Nov 2026")).toBe(false);
+  });
+});
+
+describe("formatDay", () => {
+  it("writes a day out in words", () => {
+    expect(formatDay("2026-11-06")).toBe("6 Nov 2026");
+    expect(formatDay("2026-01-31")).toBe("31 Jan 2026");
+    expect(formatDay("")).toBe("");
   });
 });

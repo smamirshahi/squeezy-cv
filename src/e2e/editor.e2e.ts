@@ -97,4 +97,40 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
       preview.indexOf("Example Ltd")
     );
   });
+
+  it("marks the CV as applied, keeps what was sent, and tracks the status", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+    await page.getByText("Saved", { exact: true }).waitFor();
+
+    await page.getByRole("button", { name: "Mark as applied" }).click();
+    await page.getByRole("textbox", { name: /^Company/ }).fill("Acme Ltd");
+    await page.getByRole("textbox", { name: /^Role/ }).fill("Senior Dev");
+    await page.getByRole("button", { name: "Save application" }).click();
+    await page.getByText("Saved: Acme Ltd, Senior Dev").waitFor();
+    await page.getByRole("link", { name: "View" }).click();
+
+    // The application page: who, where it stands, and the CV that was sent
+    await page.getByRole("heading", { name: "Acme Ltd" }).waitFor();
+    await page.getByText("The CV you sent").waitFor();
+    const src = await page.locator("iframe").getAttribute("src");
+    expect(src).toMatch(/^\/api\/applications\/.+\/pdf$/);
+    const response = await page.request.get(`${app.webUrl}${src}`);
+    expect(response.headers()["content-type"]).toBe("application/pdf");
+    const sent = await readPdf(await response.body());
+    expect(sent.pageCount).toBe(1);
+    expect(sent.text).toContain("Jane Doe");
+
+    // Hearing back: change the status
+    await page.getByRole("combobox").click();
+    await page.getByRole("option", { name: "Interview" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await page.getByRole("listitem").filter({ hasText: "Interview" }).waitFor();
+
+    // It is still there after a reload, with the whole timeline
+    await page.reload();
+    await page.getByRole("heading", { name: "Acme Ltd" }).waitFor();
+    await page.getByRole("listitem").filter({ hasText: "Interview" }).waitFor();
+    await page.getByRole("listitem").filter({ hasText: "Applied" }).waitFor();
+  });
 });

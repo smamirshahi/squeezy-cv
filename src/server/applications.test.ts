@@ -55,6 +55,7 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- the response type of inject() is not exported
 function apply(payload: object) {
   return app.inject({ method: "POST", url: "/api/applications", payload });
 }

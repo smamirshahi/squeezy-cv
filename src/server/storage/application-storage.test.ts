@@ -1,3 +1,4 @@
+import { Application } from "@custom-types/application-types";
 import {
   mkdir,
   mkdtemp,
@@ -19,7 +20,7 @@ import { FileCvStorage } from "@server/storage/file-cv-storage";
 const file = migrateCvFile(sample);
 const variant = createVariant(file.vault, file.style, "v1", "Acme");
 
-function make(company: string, suffix: string) {
+function make(company: string, suffix: string): Application {
   return createApplication(
     { variantId: "v1", company, role: "Dev" },
     file.vault,

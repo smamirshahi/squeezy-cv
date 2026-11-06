@@ -14,7 +14,12 @@ import { render } from "@shared/variant/render";
 /** An Applied application with no news for this many days is shown as "No reply" */
 export const NO_REPLY_DAYS = 30;
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+const MS_PER_DAY =
+  HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 const MAX_ID_LENGTH = 64;
 const MAX_SLUG_LENGTH = 20;
 const MAX_TEXT_LENGTH = 200;
@@ -192,11 +197,7 @@ export function updateApplication(
   ];
   for (const [key, label, maxLength] of textPatches) {
     if (key in patch) {
-      const text = optionalText(
-        patch[key] as string | undefined,
-        label,
-        maxLength
-      );
+      const text = optionalText(patch[key], label, maxLength);
       const target = next as unknown as Record<string, unknown>;
       if (text) {
         target[key] = text;
@@ -266,3 +267,27 @@ export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   rejected: "Rejected",
   withdrawn: "Withdrawn",
 };
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/** "2026-11-06" -> "6 Nov 2026" (fixed English, independent of the machine's language) */
+export function formatDay(day: string): string {
+  if (!isIsoDay(day)) {
+    return day;
+  }
+  const [year, month, date] = day.split("-").map(Number);
+  return `${date} ${MONTHS[month - 1]} ${year}`;
+}
