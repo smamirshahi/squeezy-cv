@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Alert, Box, Paper, Typography } from "@mui/material";
 import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
 import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
@@ -10,10 +10,15 @@ import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
-import { useAppSelector } from "@store/store-helper";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { appSelector } from "@store/app/app-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import {
+  activeVariantSelector,
+  setTuning,
+} from "@store/variants/variants-slice";
+import { FitTuning } from "@custom-types/variant-types";
+import { useAutoFit } from "@pages/preview-page/use-auto-fit";
 import { RenderedPart, render } from "@shared/variant/render";
 
 /** Renders one part of the CV: the header parts, or a section by its type */
@@ -56,16 +61,66 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
   );
 
   const style = useAppSelector(styleSelector);
-  const { paperMargin } = style;
-  const marginMm = PAPER_MARGIN_MM[paperMargin];
+  const dispatch = useAppDispatch();
+  const pageLimit = variant.pageLimit;
+  const isAutoFit = variant.isAutoFit ?? false;
+  const fitMode = variant.fitMode ?? "fit";
+
+  // The values auto-fit starts from: the style's own
+  const base = useMemo<FitTuning>(
+    () => ({
+      spacing: 1,
+      marginMm: PAPER_MARGIN_MM[style.paperMargin],
+      fontScale: 1,
+    }),
+    [style.paperMargin]
+  );
+  const restartKey = useMemo(
+    () =>
+      JSON.stringify([rendered, style, columnWidth, pageLimit, fitMode, base]),
+    [rendered, style, columnWidth, pageLimit, fitMode, base]
+  );
+  const fit = useAutoFit(
+    {
+      isEnabled: isAutoFit,
+      mode: fitMode,
+      pageLimit,
+      base,
+      bodyPt: parseFloat(style.typography.bulletText.fontSize),
+      restartKey,
+    },
+    (tuning) => {
+      if (JSON.stringify(tuning) !== JSON.stringify(variant.tuning)) {
+        dispatch(setTuning({ id: variant.id, tuning }));
+      }
+    }
+  );
+  const { tuning } = fit;
+  const marginMm = tuning.marginMm;
+
   // Anything that can change how tall the content is
   const layoutKey = useMemo(
-    () => ({ rendered, style, columnWidth }),
-    [rendered, style, columnWidth]
+    () => ({ rendered, style, columnWidth, tuning }),
+    [rendered, style, columnWidth, tuning]
   );
+  /* eslint-disable @typescript-eslint/naming-convention -- CSS custom properties */
+  const paperVariables = {
+    "--cv-spacing": tuning.spacing,
+    "--cv-font-scale": tuning.fontScale,
+  } as React.CSSProperties;
+  /* eslint-enable @typescript-eslint/naming-convention */
   const paperRef = useRef<HTMLDivElement | null>(null);
-  const { pageCount, breaks } = usePagination(paperRef, marginMm, layoutKey);
-  const pageLimit = variant.pageLimit;
+  const pagination = usePagination(paperRef, marginMm, layoutKey);
+  const { pageCount, breaks } = pagination;
+
+  // Take the next auto-fit step once the pages of what is drawn now have been measured
+  const { step } = fit;
+  const isFitRunning = fit.isRunning;
+  useEffect(() => {
+    if (isFitRunning && pagination.key === layoutKey) {
+      step(pageCount);
+    }
+  }, [isFitRunning, pagination, layoutKey, pageCount, step]);
 
   return (
     <Box sx={{ flexShrink: 0, mx: "auto" }}>
@@ -80,6 +135,17 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
             {pageCount} {pageCount === 1 ? "page" : "pages"} (limit {pageLimit})
           </Typography>
         )}
+        {isAutoFit && fit.state.status === "does-not-fit" && (
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            This does not fit even with the smallest spacing, margins and text
+            size allowed. Shorten the CV or hide items.
+          </Alert>
+        )}
+        {isAutoFit && fit.changes.length > 0 && (
+          <Typography variant="body2" sx={{ mt: 0.5 }}>
+            Auto-fit changed: {fit.changes.join("; ")}
+          </Typography>
+        )}
       </Box>
       <Paper
         ref={(element: HTMLDivElement | null) => {
@@ -87,6 +153,7 @@ export function PreviewPage({ contentRef }: Props): JSX.Element {
           contentRef.current = element;
         }}
         elevation={3}
+        style={paperVariables}
         sx={{
           position: "relative",
           width: `${A4_DIMENSION_MM.width}mm`,

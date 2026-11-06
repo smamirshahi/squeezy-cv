@@ -10,10 +10,11 @@ import {
   DialogTitle,
   FormControlLabel,
   MenuItem,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
-import { Wording } from "@custom-types/variant-types";
+import { FitMode, Wording } from "@custom-types/variant-types";
 import { Item } from "@custom-types/vault-types";
 import { activateVariant } from "@hooks/use-sync-active-variant";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
@@ -31,6 +32,7 @@ import {
   setBulletSelection,
   setItemOrders,
   setItemSelection,
+  setAutoFit,
   setPageLimit,
   variantsSelector,
 } from "@store/variants/variants-slice";
@@ -147,6 +149,45 @@ export function EditorVariants(): JSX.Element {
         >
           <MenuItem value={1}>1 page</MenuItem>
           <MenuItem value={2}>2 pages</MenuItem>
+        </TextField>
+      </Box>
+
+      <Box display="flex" alignItems="center" gap={2} sx={{ mt: 1 }}>
+        <FormControlLabel
+          label="Auto-fit to the page limit"
+          control={
+            <Switch
+              checked={variant.isAutoFit ?? false}
+              onChange={(event) =>
+                dispatch(
+                  setAutoFit({
+                    id: variant.id,
+                    isAutoFit: event.target.checked,
+                  })
+                )
+              }
+            />
+          }
+        />
+        <TextField
+          select
+          size="small"
+          label="Auto-fit mode"
+          disabled={!variant.isAutoFit}
+          value={variant.fitMode ?? "fit"}
+          onChange={(event) =>
+            dispatch(
+              setAutoFit({
+                id: variant.id,
+                isAutoFit: true,
+                fitMode: event.target.value as FitMode,
+              })
+            )
+          }
+          sx={{ minWidth: 200 }}
+        >
+          <MenuItem value="fit">Shrink to fit</MenuItem>
+          <MenuItem value="fill">Fill the page</MenuItem>
         </TextField>
       </Box>
 

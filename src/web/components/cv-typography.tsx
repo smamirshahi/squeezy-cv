@@ -1,4 +1,5 @@
 import { AvailableFonts } from "@custom-types/styles-types";
+import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { SxProps, Typography } from "@mui/material";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
@@ -37,7 +38,11 @@ export function CvTypography({
       case "headingLg":
         return {};
       case "headingMd":
-        return { borderBottom: "2px solid black", width: "100%" };
+        return {
+          borderBottom: "2px solid black",
+          width: "100%",
+          mt: spaced(GAP_PX.sectionTop),
+        };
       case "headingSm":
         return {};
       case "bodyLg":
@@ -60,6 +65,8 @@ export function CvTypography({
         p: "0px",
         m: "0px",
         opacity: opacity(variant),
+        // Auto-fit can scale all text through the paper's --cv-font-scale
+        fontSize: `calc(${typography[variant].fontSize} * var(--cv-font-scale, 1))`,
         ...additionalStyle,
         ...(isEmphasised ? { fontWeight: 700 } : {}),
         ...(pageBreak ? { breakInside: "avoid" } : {}),

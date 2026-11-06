@@ -37,7 +37,12 @@ export function marginToPx(marginMm: number): number {
   return marginMm * PX_PER_MM;
 }
 
-const SINGLE_PAGE: Pagination = { pageCount: 1, breaks: [] };
+/** The pagination of the content that was measured, with the `contentKey` it was measured for */
+export interface MeasuredPagination extends Pagination {
+  key: unknown;
+}
+
+const SINGLE_PAGE: MeasuredPagination = { pageCount: 1, breaks: [], key: null };
 
 /**
  * The page count and page starts of the CV shown in `paperRef`. Measured after every
@@ -47,8 +52,8 @@ export function usePagination(
   paperRef: RefObject<HTMLElement | null>,
   marginMm: number,
   contentKey: unknown
-): Pagination {
-  const [pagination, setPagination] = useState<Pagination>(SINGLE_PAGE);
+): MeasuredPagination {
+  const [pagination, setPagination] = useState<MeasuredPagination>(SINGLE_PAGE);
 
   useLayoutEffect(() => {
     const paper = paperRef.current;
@@ -59,9 +64,13 @@ export function usePagination(
       if (!paper) {
         return;
       }
-      const next = measurePagination(paper, marginMm);
+      const measured = measurePagination(paper, marginMm);
       setPagination((previous) =>
-        JSON.stringify(previous) === JSON.stringify(next) ? previous : next
+        previous.key === contentKey &&
+        previous.pageCount === measured.pageCount &&
+        JSON.stringify(previous.breaks) === JSON.stringify(measured.breaks)
+          ? previous
+          : { ...measured, key: contentKey }
       );
     }
     update();
