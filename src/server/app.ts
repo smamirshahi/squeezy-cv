@@ -62,6 +62,9 @@ export interface ServerOptions {
 
   /** Makes PDFs. Without it, /api/pdf answers 501. */
   pdf?: PdfRenderer;
+
+  /** Whether an AI key is set. Only this yes/no ever leaves the server, never the key. */
+  isAiConfigured?: boolean;
   isLoggingEnabled?: boolean;
 }
 
@@ -69,6 +72,7 @@ export interface ServerOptions {
 export function buildServer({
   storage,
   pdf,
+  isAiConfigured = false,
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -121,6 +125,8 @@ export function buildServer({
   });
 
   app.get("/api/health", () => ({ status: "ok" }));
+
+  app.get("/api/ai/status", () => ({ isConfigured: isAiConfigured }));
 
   app.get("/api/vault", () => storage.loadVault());
 

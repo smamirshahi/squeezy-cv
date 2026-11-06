@@ -1,12 +1,21 @@
 import { buildServer } from "@server/app";
+import { readAiConfig } from "@server/ai/ai-config";
 import { readConfig } from "@server/config";
 import { PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
+
+// Settings and secrets (e.g. ANTHROPIC_API_KEY) from .env, if there is one
+try {
+  process.loadEnvFile(".env");
+} catch {
+  // no .env: use the real environment only
+}
 
 const config = readConfig(process.env, process.cwd());
 const app = buildServer({
   storage: new FileCvStorage(config.dataDir),
   pdf: new PlaywrightPdfRenderer(config.webUrl),
+  isAiConfigured: Boolean(readAiConfig(process.env).apiKey),
   isLoggingEnabled: true,
 });
 
