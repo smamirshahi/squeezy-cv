@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Alert, Box, Button, Paper, Typography } from "@mui/material";
-import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
-import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
-import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
-import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
-import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
-import { GenericSectionPreviewPage } from "@pages/preview-page/generic-section-preview-page";
-import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
@@ -22,30 +15,8 @@ import {
 import { FitTuning } from "@custom-types/variant-types";
 import { useAutoFit } from "@pages/preview-page/use-auto-fit";
 import { computeFitMetrics } from "@shared/layout/fit-metrics";
-import { RenderedPart, render } from "@shared/variant/render";
-
-/** Renders one part of the CV: the header parts, or a section by its type */
-function renderPart(part: RenderedPart): JSX.Element | null {
-  switch (part.kind) {
-    case "personalInfo":
-      return <PersonalInfoPreviewPage key={part.id} />;
-    case "contactInfo":
-      return <ContactInfoPreviewPage key={part.id} />;
-    case "section":
-      switch (part.type) {
-        case "summary":
-          return <SummaryPreviewPage key={part.id} section={part} />;
-        case "experience":
-          return <ExperiencesPreviewPage key={part.id} section={part} />;
-        case "education":
-          return <EducationsPreviewPage key={part.id} section={part} />;
-        case "skills":
-          return <SkillsPreviewPage key={part.id} section={part} />;
-        default:
-          return <GenericSectionPreviewPage key={part.id} section={part} />;
-      }
-  }
-}
+import { render } from "@shared/variant/render";
+import { RenderedColumns } from "@pages/preview-page/rendered-columns";
 
 interface Props {
   /** The reference to the content */
@@ -330,45 +301,7 @@ export function PreviewPage({
           "& a": { color: "inherit", textDecoration: "none" },
         }}
       >
-        <Box>
-          {/* Full-width top row */}
-          <Box
-            sx={{
-              width: "100%",
-              mb: 2,
-            }}
-          >
-            {rendered.columns.fullWidth.map(renderPart)}
-          </Box>
-
-          {/* Second row: left and right with percentages */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "10mm",
-            }}
-          >
-            <Box
-              sx={{
-                flexBasis: `${columnWidth.left}%`,
-                flexGrow: 0,
-                flexShrink: 1,
-              }}
-            >
-              {rendered.columns.left.map(renderPart)}
-            </Box>
-            <Box
-              sx={{
-                flexBasis: `${columnWidth.right}%`,
-                flexGrow: 0,
-                flexShrink: 1,
-              }}
-            >
-              {rendered.columns.right.map(renderPart)}
-            </Box>
-          </Box>
-        </Box>
+        <RenderedColumns rendered={rendered} columnWidth={columnWidth} />
         {!isPrintView &&
           breaks.map((y, index) => (
             <Box

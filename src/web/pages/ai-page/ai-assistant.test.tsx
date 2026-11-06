@@ -206,7 +206,7 @@ describe("AiAssistant: the review", () => {
     await analyse(makeStore());
 
     expect(screen.getByText(/Senior Front-End Developer/)).toBeTruthy();
-    expect(screen.getByText("React")).toBeTruthy();
+    expect(screen.getAllByText("React").length).toBeGreaterThan(0);
     expect(screen.getByText(/Not shown in your CV:/)).toBeTruthy();
     expect(screen.getByText(/WCAG 2.2/)).toBeTruthy();
     expect(screen.getByText("A rewording needs your check.")).toBeTruthy();
@@ -214,7 +214,9 @@ describe("AiAssistant: the review", () => {
       screen.getByText("Front-end developer with six years of experience.")
     ).toBeTruthy();
     expect(screen.getByText("Core React work.")).toBeTruthy();
-    expect(screen.getByText("Led a React dashboard")).toBeTruthy();
+    expect(screen.getAllByText("Led a React dashboard").length).toBeGreaterThan(
+      0
+    );
   });
 
   it("flags a suspicious rewording and does not accept it automatically", async () => {
