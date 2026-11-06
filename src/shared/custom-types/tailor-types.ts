@@ -73,6 +73,15 @@ export const ProposalSchema = Object({
   items: Array(ItemProposalSchema),
   bullets: Array(BulletProposalSchema),
 
+  /**
+   * Section ids (real ones) in the order the model suggests, when it suggests a change.
+   * Set by `sanitiseProposal` to a complete list without duplicates, or left out.
+   */
+  sectionOrder: Array(String).optional(),
+
+  /** One short sentence: why the sections are moved */
+  sectionOrderReason: String.optional(),
+
   /** A draft personal statement, only from facts in the CV */
   statement: String,
 
@@ -110,6 +119,9 @@ export const RawProposalSchema = Object({
       reason: String.optional(),
     })
   ).optional(),
+  /** Section ids ("s1", "s2", ...) in the suggested order */
+  sectionOrder: Array(String).optional(),
+  sectionOrderReason: String.optional(),
   statement: String.optional(),
   gaps: Array(String).optional(),
 });

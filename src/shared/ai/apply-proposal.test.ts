@@ -7,6 +7,9 @@ import {
   applyProposal,
   defaultDecisions,
   describeItemChange,
+  describeSectionMoves,
+  numberChanges,
+  reorderLayoutSections,
 } from "@shared/ai/apply-proposal";
 import { render } from "@shared/variant/render";
 import {
@@ -230,5 +233,88 @@ describe("applyProposal", () => {
       }
     );
     expect(variant.tuning).toBeUndefined();
+  });
+});
+
+describe("section moves", () => {
+  const ids = vault.sections.map((s) => s.id);
+  const reversed = [...ids].reverse();
+
+  it("reorders the sections inside each column and leaves the header parts", () => {
+    const layout = {
+      fullWidth: ["personalInfo", ...ids.slice(0, 2)],
+      left: ids.slice(2),
+      right: [],
+    };
+    const result = reorderLayoutSections(layout, reversed);
+    expect(result.fullWidth[0]).toBe("personalInfo");
+    expect(result.fullWidth.slice(1)).toEqual([ids[1], ids[0]]);
+    expect(result.left).toEqual(ids.slice(2).reverse());
+  });
+
+  it("describes which sections move where (1-based)", () => {
+    const moves = describeSectionMoves(vault, reversed);
+    expect(moves[0]).toMatchObject({
+      sectionId: ids[0],
+      from: 1,
+      to: ids.length,
+    });
+    expect(describeSectionMoves(vault, undefined)).toEqual([]);
+  });
+
+  it("applies the order to the new variant only when accepted", () => {
+    const p = proposal({ sectionOrder: reversed });
+    const accepted = applyProposal(
+      vault,
+      base,
+      p,
+      { ...defaultDecisions(p), isSectionOrderAccepted: true },
+      { id: "n", name: "N" }
+    );
+    const declined = applyProposal(
+      vault,
+      base,
+      p,
+      { ...defaultDecisions(p), isSectionOrderAccepted: false },
+      { id: "n", name: "N" }
+    );
+    const sectionIds = (v: { layout: typeof base.layout }): string[] =>
+      [...v.layout.fullWidth, ...v.layout.left, ...v.layout.right].filter(
+        (id) => ids.includes(id)
+      );
+    expect(sectionIds(declined.variant)).toEqual(sectionIds(base));
+    expect(sectionIds(accepted.variant)).toEqual(
+      [...sectionIds(base)].sort(
+        (a, b) => reversed.indexOf(a) - reversed.indexOf(b)
+      )
+    );
+    expect(defaultDecisions(p).isSectionOrderAccepted).toBe(true);
+    expect(defaultDecisions(proposal()).isSectionOrderAccepted).toBeUndefined();
+  });
+});
+
+describe("numberChanges", () => {
+  it("numbers items that propose something, most relevant first, and skips the rest", () => {
+    const p = proposal();
+    const numbers = numberChanges(base, p);
+    // job2 (0.9, highlighted) = 1, job1 (0.4, has bullet proposals) = 2
+    expect(numbers.get(job2.id)).toBe(1);
+    expect(numbers.get(job1.id)).toBe(2);
+    expect([...numbers.values()].sort()).toEqual(
+      [...numbers.values()].map((_n, i) => i + 1)
+    );
+    const quiet = proposal({
+      items: [
+        {
+          itemId: job1.id,
+          relevance: 0.4,
+          isIncluded: true,
+          isHighlighted: false,
+          reason: "r",
+        },
+      ],
+      bullets: [],
+    });
+    expect(numberChanges(base, quiet).size).toBe(0);
   });
 });

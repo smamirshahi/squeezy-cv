@@ -590,3 +590,52 @@ describe("tailor keeps the profile away from the model", () => {
     }
   });
 });
+
+describe("section order in the proposal", () => {
+  const ids = vault.sections.map((s) => s.id);
+  const run = (order: string[] | undefined): ReturnType<typeof tailor> =>
+    tailor(
+      fakeAi({
+        items: [],
+        bullets: [],
+        ...(order
+          ? { sectionOrder: order, sectionOrderReason: "Skills first" }
+          : {}),
+        statement: "",
+        gaps: [],
+      }),
+      vault,
+      { jobAd: "x", tone: "neutral" }
+    );
+
+  it("tells the model the sections' short names", () => {
+    const cv = describeCv(vault) as { sections: { id: string }[] };
+    expect(cv.sections.map((s) => s.id)).toEqual(
+      ids.map((_id, index) => `s${index + 1}`)
+    );
+  });
+
+  it("maps short names to real ids and keeps a complete order", async () => {
+    const result = await run(["s3", "s1"]);
+    expect(result.proposal.sectionOrder).toEqual([
+      ids[2],
+      ids[0],
+      ...ids.filter((_id, i) => i !== 0 && i !== 2),
+    ]);
+    expect(result.proposal.sectionOrderReason).toBe("Skills first");
+  });
+
+  it("drops unknown and repeated ids, and an order that changes nothing", async () => {
+    const same = await run(ids.map((_id, i) => `s${i + 1}`));
+    expect(same.proposal.sectionOrder).toBeUndefined();
+    const junk = await run(["s2", "s2", "s99", "s1"]);
+    expect(junk.proposal.sectionOrder?.slice(0, 2)).toEqual([ids[1], ids[0]]);
+    expect(new Set(junk.proposal.sectionOrder).size).toBe(ids.length);
+  });
+
+  it("is absent when the model does not suggest one", async () => {
+    const none = await run(undefined);
+    expect(none.proposal.sectionOrder).toBeUndefined();
+    expect(none.proposal.sectionOrderReason).toBeUndefined();
+  });
+});

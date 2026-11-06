@@ -12,6 +12,8 @@ commentary, no markdown fences), with exactly these keys:
 "bullets": [{ "bulletId": "i1.b2", "isIncluded": boolean,
 "rewrite": { "wording": "short" | "long" | "formal", "text": string } (optional),
 "reason": string }],
+"sectionOrder": string[] (optional),
+"sectionOrderReason": string (optional),
 "statement": string,
 "gaps": string[]
 }
@@ -28,6 +30,9 @@ Rules:
 - A "rewrite" must say the same thing as the original bullet, in the given tone, with the job's
   keywords where they are true. "short" is about half the length, "long" adds clarity but no facts,
   "formal" is a more formal register. Keep every number and name from the original unchanged.
+- "sectionOrder" (optional): the ids of ALL sections ("s1", "s2", ...) in the order you suggest for this job, e.g.
+  skills before experience when the job is about specific tools. Leave it out unless a different order is clearly
+  better; never drop or invent a section. "sectionOrderReason" is one short sentence.
 - "statement" is a draft personal statement of two or three sentences built only from the CV; use
   "" if the CV does not give enough to write one.
 - "gaps" lists what the job asks for that the CV does not show, one short phrase each. Do not hide
