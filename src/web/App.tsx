@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { useRef } from "react";
+import { ApplicationsPage } from "@pages/applications-page/applications-page";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { PrintView } from "@pages/print-page/print-view";
 import { EditorPage } from "@pages/editor-page/editor-page";
@@ -39,7 +40,8 @@ function EditorApp(): JSX.Element {
 
 /**
  * Which page to show, from the address: `?print=<variantId>` is the print-only page,
- * `?application=<id>` one application, anything else the editor.
+ * `?applications` the list of applications, `?application=<id>` one of them, anything
+ * else the editor.
  */
 export function App(): JSX.Element {
   const params = new URLSearchParams(window.location.search);
@@ -47,6 +49,9 @@ export function App(): JSX.Element {
   const applicationId = params.get("application");
   if (printVariantId) {
     return <PrintView variantId={printVariantId} />;
+  }
+  if (params.has("applications")) {
+    return <ApplicationsPage />;
   }
   if (applicationId) {
     return <ApplicationView applicationId={applicationId} />;
