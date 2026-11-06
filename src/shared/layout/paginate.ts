@@ -16,6 +16,9 @@ export interface Pagination {
    * out in one piece (the unbroken preview). Has `pageCount - 1` entries.
    */
   breaks: number[];
+
+  /** Height of the content once groups pushed to the next page are counted, in px */
+  totalHeight: number;
 }
 
 /** Tolerance for float rounding when comparing positions */
@@ -96,5 +99,5 @@ export function paginate(
     const shiftHere = above.length > 0 ? above[above.length - 1].shift : 0;
     breaks.push(y - shiftHere);
   }
-  return { pageCount, breaks };
+  return { pageCount, breaks, totalHeight: contentHeight + shift };
 }

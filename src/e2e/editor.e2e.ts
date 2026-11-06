@@ -31,7 +31,7 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
     // measured by the real browser: the short sample is one page, no warning
-    await page.getByText("1 page (limit 2)").waitFor();
+    await page.getByText(/^1 page \(limit 2\)/).waitFor();
 
     // Hide an item in this variant: click it on the page, use the inspector
     await page
