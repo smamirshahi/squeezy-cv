@@ -1,5 +1,10 @@
+import { randomBytes } from "node:crypto";
 import Fastify, { FastifyInstance, FastifyReply } from "fastify";
 import { ValidationError } from "runtypes";
+import {
+  ApplicationPatchSchema,
+  NewApplicationSchema,
+} from "@custom-types/application-types";
 import { CvFileSchema } from "@custom-types/vault-types";
 import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
@@ -8,6 +13,12 @@ import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
 } from "@custom-types/tailor-types";
+import {
+  ApplicationInputError,
+  createApplication,
+  toIsoDay,
+  updateApplication,
+} from "@shared/application/application-utils";
 import { BackupService } from "@server/backup/backup-service";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
@@ -20,6 +31,7 @@ import {
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
+const ID_SUFFIX_BYTES = 3;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
@@ -96,6 +108,9 @@ export interface ServerOptions {
   /** Which provider `ai` is, for the page to say where the CV goes */
   aiProvider?: "claude" | "ollama";
 
+  /** The clock, so tests can fix "today" */
+  now?: () => Date;
+
   /** Versions the data folder. Without it, /api/backup says it is off. */
   backup?: BackupService;
   isLoggingEnabled?: boolean;
@@ -108,6 +123,7 @@ export function buildServer({
   ai,
   aiProvider = "claude",
   backup,
+  now = () => new Date(),
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -146,6 +162,9 @@ export function buildServer({
         `ai_${error.code}`,
         error.message
       );
+    }
+    if (error instanceof ApplicationInputError) {
+      return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
     }
     if (error instanceof ValidationError) {
       return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
@@ -262,6 +281,82 @@ export function buildServer({
     "/api/variants/:id",
     async (request) => {
       await storage.deleteVariant(request.params.id);
+      return { status: "deleted" };
+    }
+  );
+
+  app.get("/api/applications", () => storage.listApplications());
+
+  app.get<{ Params: { id: string } }>("/api/applications/:id", (request) =>
+    storage.loadApplication(request.params.id)
+  );
+
+  app.get<{ Params: { id: string } }>(
+    "/api/applications/:id/pdf",
+    async (request, reply) => {
+      const bytes = await storage.loadApplicationPdf(request.params.id);
+      return reply
+        .header("Content-Type", "application/pdf")
+        .header(
+          "Content-Disposition",
+          `inline; filename="${request.params.id}.pdf"`
+        )
+        .send(bytes);
+    }
+  );
+
+  // Freezes the saved CV (data and PDF) as what was sent. Nothing is stored unless both work.
+  app.post("/api/applications", async (request, reply) => {
+    if (!pdf) {
+      return sendError(
+        reply,
+        HTTP_NOT_IMPLEMENTED,
+        "pdf_unavailable",
+        "PDF export is not set up on this server, so the CV cannot be saved with the application."
+      );
+    }
+    const input = NewApplicationSchema.check(request.body);
+    const { vault } = await storage.loadVault();
+    const variant = await storage.loadVariant(input.variantId);
+    const application = createApplication(
+      input,
+      vault,
+      variant,
+      toIsoDay(now()),
+      randomBytes(ID_SUFFIX_BYTES).toString("hex")
+    );
+    let bytes: Buffer;
+    try {
+      bytes = await pdf.render(variant.id);
+    } catch (error) {
+      app.log.error(error);
+      const reason = error instanceof Error ? error.message : "unknown error";
+      return sendError(
+        reply,
+        HTTP_SERVER_ERROR,
+        "pdf_failed",
+        `The PDF could not be made: ${reason}. Is the web app running, and is Chromium installed (pnpm exec playwright install chromium)?`
+      );
+    }
+    await storage.saveApplication(application, bytes);
+    return application;
+  });
+
+  app.patch<{ Params: { id: string } }>(
+    "/api/applications/:id",
+    async (request) => {
+      const patch = ApplicationPatchSchema.check(request.body);
+      const existing = await storage.loadApplication(request.params.id);
+      const updated = updateApplication(existing, patch, toIsoDay(now()));
+      await storage.saveApplication(updated);
+      return updated;
+    }
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    "/api/applications/:id",
+    async (request) => {
+      await storage.deleteApplication(request.params.id);
       return { status: "deleted" };
     }
   );

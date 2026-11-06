@@ -1,3 +1,7 @@
+import {
+  Application,
+  ApplicationSummary,
+} from "@custom-types/application-types";
 import { CvFile } from "@custom-types/vault-types";
 import { Variant } from "@custom-types/variant-types";
 
@@ -37,4 +41,17 @@ export interface CvStorage {
 
   /** Throws StorageError "not_found" if there is no such variant */
   deleteVariant(id: string): Promise<void>;
+
+  /** Newest first is up to the caller; a damaged one is listed with `isCorrupt` */
+  listApplications(): Promise<ApplicationSummary[]>;
+  loadApplication(id: string): Promise<Application>;
+
+  /** The PDF of the CV that was sent. Throws "not_found" if there is none. */
+  loadApplicationPdf(id: string): Promise<Buffer>;
+
+  /** `pdf` is given when an application is created and left out when it is only edited */
+  saveApplication(application: Application, pdf?: Buffer): Promise<void>;
+
+  /** Throws StorageError "not_found" if there is no such application */
+  deleteApplication(id: string): Promise<void>;
 }

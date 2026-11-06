@@ -1,11 +1,18 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import {
+  APPLICATION_ID_PATTERN,
+  Application,
+  ApplicationSchema,
+  ApplicationSummary,
+} from "@custom-types/application-types";
 import { CvFile } from "@custom-types/vault-types";
 import {
   Variant,
   VariantSchema,
   VARIANT_ID_PATTERN,
 } from "@custom-types/variant-types";
+import { summariseApplication } from "@shared/application/application-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   CvStorage,
@@ -16,11 +23,15 @@ import {
   KeyedQueue,
   fileExists,
   readJsonFile,
+  writeBytesAtomic,
   writeJsonAtomic,
 } from "@server/storage/file-utils";
 
 const VAULT_FILE = "vault.json";
 const VARIANTS_DIR = "variants";
+const APPLICATIONS_DIR = "applications";
+const APPLICATION_FILE = "application.json";
+const APPLICATION_PDF = "cv.pdf";
 
 function isReadableVault(raw: unknown): boolean {
   try {
@@ -35,11 +46,15 @@ function isReadableVariant(raw: unknown): boolean {
   return VariantSchema.guard(raw);
 }
 
+function isReadableApplication(raw: unknown): boolean {
+  return ApplicationSchema.guard(raw);
+}
+
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Keeps everything as JSON files in one folder (`vault.json` and `variants/<id>.json`) */
+/** Keeps everything as JSON files in one folder (`vault.json`, `variants/<id>.json` and `applications/<id>/application.json` + `cv.pdf`) */
 export class FileCvStorage implements CvStorage {
   private readonly queue = new KeyedQueue();
 
@@ -160,6 +175,115 @@ export class FileCvStorage implements CvStorage {
       // Keep a backup instead of destroying the data for good
       await fs.copyFile(filePath, `${filePath}.deleted`);
       await fs.rm(filePath);
+    });
+  }
+  private applicationDir(id: string): string {
+    if (!APPLICATION_ID_PATTERN.test(id)) {
+      throw new StorageError(
+        "invalid_id",
+        "An application id may only contain letters, digits, - and _ (at most 64)."
+      );
+    }
+    return path.join(this.dataDir, APPLICATIONS_DIR, id);
+  }
+
+  async listApplications(): Promise<ApplicationSummary[]> {
+    const dir = path.join(this.dataDir, APPLICATIONS_DIR);
+    let names: string[];
+    try {
+      names = await fs.readdir(dir);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        return [];
+      }
+      throw error;
+    }
+
+    const result: ApplicationSummary[] = [];
+    // Names with a dot (e.g. "<id>.deleted") are not applications
+    for (const id of names.sort()) {
+      if (!APPLICATION_ID_PATTERN.test(id)) {
+        continue;
+      }
+      try {
+        result.push(summariseApplication(await this.loadApplication(id)));
+      } catch (error) {
+        if (error instanceof StorageError && error.code === "not_found") {
+          continue;
+        }
+        result.push({
+          id,
+          company: "",
+          role: "",
+          status: "applied",
+          appliedAt: "",
+          updatedAt: "",
+          isCorrupt: true,
+        });
+      }
+    }
+    return result;
+  }
+
+  async loadApplication(id: string): Promise<Application> {
+    const filePath = path.join(this.applicationDir(id), APPLICATION_FILE);
+    let raw: unknown;
+    try {
+      raw = await readJsonFile(filePath);
+    } catch (error) {
+      throw new StorageError(
+        "corrupt",
+        `Application ${id} cannot be read: ${describe(error)}. The file was left untouched.`
+      );
+    }
+    if (raw === undefined) {
+      throw new StorageError("not_found", `There is no application ${id}.`);
+    }
+    if (!ApplicationSchema.guard(raw) || raw.id !== id) {
+      throw new StorageError(
+        "corrupt",
+        `Application ${id} is not a valid application file. The file was left untouched.`
+      );
+    }
+    return raw;
+  }
+
+  async loadApplicationPdf(id: string): Promise<Buffer> {
+    const filePath = path.join(this.applicationDir(id), APPLICATION_PDF);
+    try {
+      return await fs.readFile(filePath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        throw new StorageError(
+          "not_found",
+          `Application ${id} has no saved PDF.`
+        );
+      }
+      throw error;
+    }
+  }
+
+  async saveApplication(application: Application, pdf?: Buffer): Promise<void> {
+    const dir = this.applicationDir(application.id);
+    const filePath = path.join(dir, APPLICATION_FILE);
+    await this.queue.run(dir, async () => {
+      // PDF first: a readable application file always has its PDF next to it
+      if (pdf) {
+        await writeBytesAtomic(path.join(dir, APPLICATION_PDF), pdf);
+      }
+      await writeJsonAtomic(filePath, application, isReadableApplication);
+    });
+  }
+
+  async deleteApplication(id: string): Promise<void> {
+    const dir = this.applicationDir(id);
+    await this.queue.run(dir, async () => {
+      if (!(await fileExists(dir))) {
+        throw new StorageError("not_found", `There is no application ${id}.`);
+      }
+      // Keep it aside instead of destroying it for good (git history has it too)
+      await fs.rm(`${dir}.deleted`, { recursive: true, force: true });
+      await fs.rename(dir, `${dir}.deleted`);
     });
   }
 }
