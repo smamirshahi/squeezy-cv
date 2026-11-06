@@ -1,0 +1,16 @@
+Senior Front-End Developer - Northbridge Digital (Leeds, hybrid)
+
+We build accessible web applications for public-sector clients, and we are looking for a Senior
+Front-End Developer to join a team of eight.
+
+Essential:
+- Several years of professional experience with React and TypeScript
+- A track record of mentoring less experienced developers
+- Experience writing automated tests (unit and end to end)
+
+Desirable:
+- Experience with Redux Toolkit
+- Knowledge of web accessibility (WCAG 2.2)
+- Experience working in an agile team
+
+You will lead the development of reusable components and improve code quality across the team.
