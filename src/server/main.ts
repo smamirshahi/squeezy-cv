@@ -2,6 +2,9 @@ import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
 import { createConfiguredAi } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
+import { BackupService } from "@server/backup/backup-service";
+import { GitDataRepo } from "@server/backup/data-repo";
+import { VersionedCvStorage } from "@server/backup/versioned-storage";
 import { PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
@@ -14,8 +17,10 @@ try {
 
 const config = readConfig(process.env, process.cwd());
 const aiConfig = readAiConfig(process.env);
+const backup = new BackupService(new GitDataRepo(config.dataDir));
 const app = buildServer({
-  storage: new FileCvStorage(config.dataDir),
+  storage: new VersionedCvStorage(new FileCvStorage(config.dataDir), backup),
+  backup,
   pdf: new PlaywrightPdfRenderer(config.webUrl),
   ai: createConfiguredAi(aiConfig),
   aiProvider: aiConfig.provider,
@@ -32,6 +37,11 @@ app
   .listen({ host: config.host, port: config.port })
   .then(() => {
     app.log.info(`CV data folder: ${config.dataDir}`);
+    app.log.info(
+      backup.isEnabled
+        ? "Data folder is a git repository: saves are committed."
+        : "Data folder is not a git repository: saves are not versioned."
+    );
   })
   .catch((error: unknown) => {
     app.log.error(error);
