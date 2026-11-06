@@ -6,6 +6,7 @@ const PAGES_WITHOUT_APPLY = [
   "pageStructure",
   "sections",
   "variants",
+  "ai",
 ];
 
 const ADD_LABELS: Partial<Record<Section["type"], string>> = {
