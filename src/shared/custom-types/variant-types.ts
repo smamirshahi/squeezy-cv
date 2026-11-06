@@ -32,6 +32,14 @@ export const WordingSchema = Union(
   Literal("formal")
 );
 
+/** How a skill's level is drawn. Missing = the earlier look (stars from the style's rating icon). */
+export const SkillDisplaySchema = Union(
+  Literal("none"),
+  Literal("dots"),
+  Literal("bars"),
+  Literal("stars")
+);
+
 export const EmphasisSchema = Union(Literal("normal"), Literal("high"));
 
 export const BulletSelectionSchema = Object({
@@ -141,6 +149,15 @@ export const VariantSchema = Object({
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),
 
+  /** How skill levels are shown on the page (the levels themselves live in the vault) */
+  skillDisplay: SkillDisplaySchema.optional(),
+
+  /** Columns of the skill lists, 1 or 2 (default 1) */
+  skillColumns: Union(Literal(1), Literal(2)).optional(),
+
+  /** Skills with a level below this (1-5) are not shown in this variant. Unrated skills count as 0. */
+  skillMinLevel: Number.optional(),
+
   /** Set when the variant was made from a tailoring proposal */
   tailor: TailorRecordSchema.optional(),
 });
@@ -149,6 +166,7 @@ export type TailorRecord = Static<typeof TailorRecordSchema>;
 export type FitTuning = Static<typeof FitTuningSchema>;
 export type FitLimitsValue = Static<typeof FitLimitsSchema>;
 export type FitMode = Static<typeof FitModeSchema>;
+export type SkillDisplay = Static<typeof SkillDisplaySchema>;
 export type Tone = Static<typeof ToneSchema>;
 export type Wording = Static<typeof WordingSchema>;
 export type Emphasis = Static<typeof EmphasisSchema>;

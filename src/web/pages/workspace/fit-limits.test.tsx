@@ -1,12 +1,22 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { Inspector } from "@pages/workspace/inspector";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { activeVariantSelector } from "@store/variants/variants-slice";
+import { setSelectedBlock } from "@store/app/app-slice";
+import { setVault } from "@store/vault/vault-slice";
+import sample from "@fixtures/sample-cv.json";
+import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 afterEach(cleanup);
 
@@ -53,5 +63,24 @@ describe("auto-fit limit fields", () => {
     expect(screen.getByLabelText<HTMLInputElement>("Spacing ≥ %").value).toBe(
       "40"
     );
+  });
+});
+
+describe("skills style in the inspector", () => {
+  it("changes only the active variant: level style, columns, minimum level", () => {
+    const store = setup();
+    const vault = migrateCvFile(sample).vault;
+    const skills = vault.sections.find((s) => s.type === "skills")!;
+    act(() => {
+      store.dispatch(setVault(vault));
+      store.dispatch(setSelectedBlock({ sectionId: skills.id }));
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Bars" }));
+    fireEvent.click(screen.getByRole("button", { name: "2 columns" }));
+    const variant = activeVariantSelector(store.getState());
+    expect(variant.skillDisplay).toBe("bars");
+    expect(variant.skillColumns).toBe(2);
+    expect(store.getState().vault.sections).toEqual(vault.sections);
   });
 });

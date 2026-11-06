@@ -6,6 +6,7 @@ import {
   FitMode,
   FitTuning,
   ItemSelection,
+  SkillDisplay,
   Tone,
   Variant,
   VariantLayout,
@@ -260,6 +261,37 @@ const variantsSlice = createSlice({
       }
     },
 
+    /** How skills are shown in a variant: level style, columns, minimum level */
+    setSkillStyle(
+      state,
+      action: PayloadAction<{
+        id: string;
+        display?: SkillDisplay;
+        columns?: 1 | 2;
+        minLevel?: number;
+      }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (!variant) {
+        return;
+      }
+      const { display, columns, minLevel } = action.payload;
+      if (display !== undefined) {
+        variant.skillDisplay = display;
+      }
+      if (columns !== undefined) {
+        variant.skillColumns = columns;
+      }
+      if (minLevel !== undefined) {
+        const level = Math.round(minLevel);
+        if (level <= 0) {
+          delete variant.skillMinLevel;
+        } else {
+          variant.skillMinLevel = Math.min(level, 5);
+        }
+      }
+    },
+
     setPageLimit(
       state,
       action: PayloadAction<{ id: string; pageLimit: number }>
@@ -409,6 +441,7 @@ export const {
   setVariantAppearance,
   setTone,
   setPageLimit,
+  setSkillStyle,
   setAutoFit,
   setFitLimits,
   setTuning,
