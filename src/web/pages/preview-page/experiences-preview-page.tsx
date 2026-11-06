@@ -26,6 +26,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
 
   return (
     <Grid
+      data-cv-section={section.id}
       container
       direction="column"
       alignItems="flex-start"
@@ -40,6 +41,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
         <Grid
           container
           key={item.id}
+          data-cv-item={item.id}
           direction="column"
           alignItems="flex-start"
           sx={{ mb: spaced(GAP_PX.item) }}

@@ -19,6 +19,7 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
 
   return (
     <Grid
+      data-cv-section={section.id}
       container
       direction="column"
       alignItems="flex-start"
@@ -32,6 +33,7 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
       {section.items.map((item) => (
         <Grid
           key={item.id}
+          data-cv-item={item.id}
           container
           direction="column"
           alignItems="flex-start"

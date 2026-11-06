@@ -17,7 +17,7 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
   }
 
   return (
-    <>
+    <div data-cv-section={section.id}>
       <CvTypography
         variant="headingMd"
         pageBreak="keep-with-next"
@@ -54,6 +54,6 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
           </Grid>
         </React.Fragment>
       ))}
-    </>
+    </div>
   );
 }

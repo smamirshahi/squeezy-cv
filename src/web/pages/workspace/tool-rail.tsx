@@ -1,0 +1,90 @@
+import { Box, ButtonBase, Typography } from "@mui/material";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import LayersIcon from "@mui/icons-material/Layers";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import { WorkspaceTool, setTool } from "@store/app/app-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+
+interface RailItem {
+  label: string;
+  icon: JSX.Element;
+  tool?: WorkspaceTool;
+  href?: string;
+}
+
+const ITEMS: RailItem[] = [
+  { label: "Vault", icon: <FolderOpenIcon fontSize="small" />, tool: "vault" },
+  {
+    label: "Variants",
+    icon: <LayersIcon fontSize="small" />,
+    tool: "variants",
+  },
+  {
+    label: "Tailor",
+    icon: <AutoAwesomeIcon fontSize="small" />,
+    tool: "tailor",
+  },
+  {
+    label: "Applied",
+    icon: <DescriptionOutlinedIcon fontSize="small" />,
+    href: "/?applications",
+  },
+];
+
+/** The left rail: switches between the tools of the workspace */
+export function ToolRail(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const tool = useAppSelector((s) => s.app.tool);
+
+  return (
+    <Box
+      component="nav"
+      aria-label="Tools"
+      sx={{
+        width: 56,
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.panel,
+        borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        py: 1,
+        gap: 0.25,
+      }}
+    >
+      {ITEMS.map((item) => {
+        const isOn = item.tool === tool;
+        return (
+          <ButtonBase
+            key={item.label}
+            component={item.href ? "a" : "button"}
+            href={item.href}
+            aria-current={isOn ? "page" : undefined}
+            onClick={
+              item.tool
+                ? () => dispatch(setTool(item.tool as WorkspaceTool))
+                : undefined
+            }
+            sx={{
+              width: 44,
+              py: 0.9,
+              borderRadius: 1,
+              flexDirection: "column",
+              gap: 0.25,
+              color: isOn
+                ? WORKSPACE_COLORS.accentText
+                : WORKSPACE_COLORS.muted,
+              bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
+              "&:hover": { bgcolor: isOn ? undefined : "#E3E6E9" },
+            }}
+          >
+            {item.icon}
+            <Typography sx={{ fontSize: 10.5 }}>{item.label}</Typography>
+          </ButtonBase>
+        );
+      })}
+    </Box>
+  );
+}

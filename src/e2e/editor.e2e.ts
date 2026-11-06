@@ -6,8 +6,6 @@ import { RunningApp, startApp } from "@e2e/start-app";
 import { readPdf } from "@e2e/read-pdf";
 import { sampleFile } from "@e2e/fixtures";
 
-const KEY_DELAY_MS = 150;
-
 let app: RunningApp;
 let browser: Browser;
 let page: Page;
@@ -25,21 +23,6 @@ afterAll(async () => {
   await app?.close();
 });
 
-/** Moves a part of the page one place up with the keyboard (dnd-kit: Space, arrow, Space) */
-async function moveUp(label: string): Promise<void> {
-  const part = page
-    .locator('[aria-roledescription="sortable"]')
-    .filter({ hasText: label });
-  await part.focus();
-  // dnd-kit starts listening for the arrow keys a moment after the pick-up
-  await page.keyboard.press("Space");
-  await page.waitForTimeout(KEY_DELAY_MS);
-  await page.keyboard.press("ArrowUp");
-  await page.waitForTimeout(KEY_DELAY_MS);
-  await page.keyboard.press("Space");
-  await page.waitForTimeout(KEY_DELAY_MS);
-}
-
 describe("editing in the browser, saving, and exporting a PDF", () => {
   it("loads the saved vault, hides an item, reorders a section, saves and exports", async () => {
     await page.goto(app.webUrl);
@@ -50,14 +33,17 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     // measured by the real browser: the short sample is one page, no warning
     await page.getByText("1 page (limit 2)").waitFor();
 
-    // Hide an item in this variant (Variants page)
-    await page.getByRole("button", { name: "Variants", exact: true }).click();
-    await page.getByLabel("Software Developer", { exact: true }).uncheck();
+    // Hide an item in this variant: click it on the page, use the inspector
+    await page
+      .locator("[data-cv-item]")
+      .filter({ hasText: "Sample Systems" })
+      .click();
+    await page.getByRole("button", { name: "Shown", exact: true }).click();
     await page.getByText("Unsaved changes").waitFor();
 
-    // Reorder: Education above Work Experience (Page Structure page)
-    await page.getByRole("button", { name: "Page Structure" }).click();
-    await moveUp("Education");
+    // Reorder: Education above Work Experience (sections list in the page inspector)
+    await page.getByRole("button", { name: "Back to page settings" }).click();
+    await page.getByRole("button", { name: "Move Education up" }).click();
 
     // Save to the server
     await page.getByRole("button", { name: "Save", exact: true }).click();
