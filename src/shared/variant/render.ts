@@ -56,19 +56,36 @@ function pickText(bullet: Bullet, wording: string | undefined): string {
   return bullet.text;
 }
 
-/** Items in the order the variant shows them (hidden ones included): ordered ones first, the rest in vault order */
-export function sortItemsByVariant(
-  items: Item[],
-  selection: Variant["selection"]
-): Item[] {
-  return items
-    .map((item, index) => ({ item, index, order: selection[item.id]?.order }))
+/** Entries ordered by their `order` value; ones without one keep their place after those with one */
+function sortByOrder<T extends { id: string }>(
+  entries: T[],
+  orderOf: (id: string) => number | undefined
+): T[] {
+  return entries
+    .map((entry, index) => ({ entry, index, order: orderOf(entry.id) }))
     .sort((a, b) => {
       const orderA = a.order ?? Infinity;
       const orderB = b.order ?? Infinity;
       return orderA === orderB ? a.index - b.index : orderA - orderB;
     })
-    .map(({ item }) => item);
+    .map(({ entry }) => entry);
+}
+
+/** Items in the order the variant shows them (hidden ones included) */
+export function sortItemsByVariant(
+  items: Item[],
+  selection: Variant["selection"]
+): Item[] {
+  return sortByOrder(items, (id) => selection[id]?.order);
+}
+
+/** Bullets of an item in the order the variant shows them (hidden ones included) */
+export function sortBulletsByVariant(
+  item: Item,
+  selection: Variant["selection"]
+): Bullet[] {
+  const choices = selection[item.id]?.bullets;
+  return sortByOrder(item.bullets, (id) => choices?.[id]?.order);
 }
 
 /** The visible items in variant order, each with its visible bullets carrying the chosen wording */
@@ -80,7 +97,7 @@ function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
       return {
         ...item,
         shouldShow: true,
-        bullets: item.bullets
+        bullets: sortBulletsByVariant(item, selection)
           .filter((bullet) => choices?.[bullet.id]?.isVisible !== false)
           .map((bullet) => ({
             ...bullet,

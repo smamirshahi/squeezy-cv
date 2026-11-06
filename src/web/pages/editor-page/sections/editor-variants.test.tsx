@@ -12,6 +12,9 @@ import { setVariants } from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
+import { DragEndEvent } from "@dnd-kit/core";
+import { shorten } from "@shared/variant/item-label";
+import { getDropIndex } from "@pages/editor-page/sections/variant-section-items";
 import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
 import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
 import { updatePageStructure } from "@store/app/app-slice";
@@ -149,5 +152,65 @@ describe("layout templates", () => {
       "personalInfo",
       "contactInfo",
     ]);
+  });
+});
+
+describe("reordering", () => {
+  it("moves a bullet down with the arrow buttons, in the active variant only", () => {
+    const store = makeStore();
+    show(store);
+
+    const item = store
+      .getState()
+      .vault.sections.flatMap((s) => s.items)
+      .find((i) => i.bullets.length >= 2);
+    if (!item) {
+      throw new Error("fixture needs an item with two bullets");
+    }
+    // the first bullet's "down" arrow: bullets come after their item's own arrows
+    const label = shorten(item.bullets[0].text);
+    // go up from the bullet's text to the row that holds its arrows
+    let row: HTMLElement | null = screen.getByText(label);
+    while (row && !row.querySelector('[data-testid="ArrowDownwardIcon"]')) {
+      row = row.parentElement;
+    }
+    const down = row?.querySelector('[data-testid="ArrowDownwardIcon"]');
+    fireEvent.click(down!.closest("button")!);
+
+    const orders =
+      store.getState().variants.variants[0].selection[item.id].bullets;
+    expect(orders?.[item.bullets[0].id].order).toBe(1);
+    expect(orders?.[item.bullets[1].id].order).toBe(0);
+  });
+
+  it("works out the drop index of a drag", () => {
+    const ids = ["a", "b", "c"];
+    function event(active: string, over: string | null): DragEndEvent {
+      return {
+        active: { id: active },
+        over: over === null ? null : { id: over },
+      } as DragEndEvent;
+    }
+    expect(getDropIndex(ids, event("a", "c"))).toBe(2);
+    expect(getDropIndex(ids, event("c", "a"))).toBe(0);
+    expect(getDropIndex(ids, event("a", "a"))).toBeNull();
+    expect(getDropIndex(ids, event("a", null))).toBeNull();
+    expect(getDropIndex(ids, event("a", "zzz"))).toBeNull();
+  });
+
+  it("has a drag handle for every item and bullet", () => {
+    const store = makeStore();
+    show(store);
+    const total = store.getState().vault.sections.reduce(
+      (sum, s) =>
+        sum +
+        s.items.reduce(
+          // the bullets of a hidden item are not listed
+          (n, i) => n + 1 + (i.shouldShow ? i.bullets.length : 0),
+          0
+        ),
+      0
+    );
+    expect(screen.getAllByLabelText("Drag to reorder")).toHaveLength(total);
   });
 });

@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,13 +13,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { FitMode, Wording } from "@custom-types/variant-types";
-import { Item } from "@custom-types/vault-types";
+import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-variant";
-import { getItemLabel, shorten } from "@shared/variant/item-label";
-import { sortItemsByVariant } from "@shared/variant/render";
-import { computeItemOrders } from "@shared/variant/variant-utils";
-import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
+import { VariantSectionItems } from "@pages/editor-page/sections/variant-section-items";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -29,29 +24,11 @@ import {
   deleteVariant,
   duplicateVariant,
   renameVariant,
-  setBulletSelection,
-  setItemOrders,
-  setItemSelection,
   setAutoFit,
   setPageLimit,
   variantsSelector,
 } from "@store/variants/variants-slice";
 import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
-
-const WORDING_LABELS: Record<Wording, string> = {
-  text: "Original",
-  short: "Short",
-  long: "Long",
-  formal: "Formal",
-};
-
-function availableWordings(item: Item, bulletId: string): Wording[] {
-  const alt = item.bullets.find((b) => b.id === bulletId)?.alt;
-  return [
-    "text",
-    ...(["short", "long", "formal"] as const).filter((key) => alt?.[key]),
-  ];
-}
 
 /**
  * Creates, switches, renames and deletes variants, and chooses per variant which items
@@ -191,149 +168,9 @@ export function EditorVariants(): JSX.Element {
         </TextField>
       </Box>
 
-      {sections.map((section) => {
-        const items = sortItemsByVariant(section.items, variant.selection);
-        if (items.length === 0) {
-          return null;
-        }
-        return (
-          <Box key={section.id} sx={{ mt: 3 }}>
-            <Typography variant="subtitle1" fontWeight="bold">
-              {section.title}
-            </Typography>
-            {items.map((item, index) => (
-              <Box key={item.id} sx={{ mt: 1 }}>
-                <Box display="flex" alignItems="center">
-                  <SortingIcons
-                    index={index}
-                    swapFunction={(_from, toIndex) =>
-                      dispatch(
-                        setItemOrders({
-                          variantId: variant.id,
-                          orders: computeItemOrders(
-                            section.items,
-                            variant,
-                            item.id,
-                            toIndex
-                          ),
-                        })
-                      )
-                    }
-                    isLastEntity={index === items.length - 1}
-                  />
-                  <FormControlLabel
-                    sx={{ flexGrow: 1 }}
-                    label={getItemLabel(item)}
-                    control={
-                      <Checkbox
-                        checked={
-                          variant.selection[item.id]?.isVisible !== false
-                        }
-                        onChange={(event) =>
-                          dispatch(
-                            setItemSelection({
-                              variantId: variant.id,
-                              itemId: item.id,
-                              change: { isVisible: event.target.checked },
-                            })
-                          )
-                        }
-                      />
-                    }
-                  />
-                  <FormControlLabel
-                    label="Highlight"
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={
-                          variant.selection[item.id]?.emphasis === "high"
-                        }
-                        onChange={(event) =>
-                          dispatch(
-                            setItemSelection({
-                              variantId: variant.id,
-                              itemId: item.id,
-                              change: {
-                                emphasis: event.target.checked
-                                  ? "high"
-                                  : "normal",
-                              },
-                            })
-                          )
-                        }
-                      />
-                    }
-                  />
-                </Box>
-                {variant.selection[item.id]?.isVisible !== false &&
-                  item.bullets.map((bullet) => {
-                    const choice =
-                      variant.selection[item.id]?.bullets?.[bullet.id];
-                    const wordings = availableWordings(item, bullet.id);
-                    return (
-                      <Box
-                        key={bullet.id}
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        sx={{ pl: 8 }}
-                      >
-                        <FormControlLabel
-                          sx={{ flexGrow: 1 }}
-                          label={shorten(bullet.text)}
-                          control={
-                            <Checkbox
-                              size="small"
-                              checked={choice?.isVisible !== false}
-                              onChange={(event) =>
-                                dispatch(
-                                  setBulletSelection({
-                                    variantId: variant.id,
-                                    itemId: item.id,
-                                    bulletId: bullet.id,
-                                    change: { isVisible: event.target.checked },
-                                  })
-                                )
-                              }
-                            />
-                          }
-                        />
-                        {wordings.length > 1 && (
-                          <TextField
-                            select
-                            size="small"
-                            label="Wording"
-                            value={choice?.wording ?? "text"}
-                            onChange={(event) =>
-                              dispatch(
-                                setBulletSelection({
-                                  variantId: variant.id,
-                                  itemId: item.id,
-                                  bulletId: bullet.id,
-                                  change: {
-                                    wording: event.target.value as Wording,
-                                  },
-                                })
-                              )
-                            }
-                            sx={{ minWidth: 120 }}
-                          >
-                            {wordings.map((w) => (
-                              <MenuItem key={w} value={w}>
-                                {WORDING_LABELS[w]}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        )}
-                      </Box>
-                    );
-                  })}
-              </Box>
-            ))}
-          </Box>
-        );
-      })}
+      {sections.map((section) => (
+        <VariantSectionItems key={section.id} section={section} />
+      ))}
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
         <DialogTitle>Delete variant?</DialogTitle>

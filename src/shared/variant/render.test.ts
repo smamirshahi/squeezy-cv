@@ -10,7 +10,9 @@ import {
 } from "@shared/variant/render";
 import {
   createDefaultVariant,
+  computeBulletOrders,
   computeItemOrders,
+  computeOrders,
   createVariant,
   duplicateVariant,
   updateBulletSelection,
@@ -275,5 +277,50 @@ describe("updateBulletSelection", () => {
       wording: "short",
     });
     expect(original.selection.i).toBeUndefined();
+  });
+});
+
+describe("bullet order", () => {
+  it("shows bullets in the variant's order, unordered ones after, hidden ones skipped", () => {
+    const { section, item } = sectionWithBullets();
+    const ids = item.bullets.map((b) => b.id);
+    if (ids.length < 2) {
+      throw new Error("fixture needs an item with two bullets");
+    }
+    const last = ids[ids.length - 1];
+
+    let variant = base();
+    for (const [id, order] of Object.entries(
+      computeBulletOrders(item, variant, last, 0)
+    )) {
+      variant = updateBulletSelection(variant, item.id, id, { order });
+    }
+    const shown = sectionPart(allParts(render(vault, variant)), section.id)
+      ?.items.find((i) => i.id === item.id)
+      ?.bullets.map((b) => b.id);
+
+    expect(shown?.[0]).toBe(last);
+    expect([...(shown ?? [])].sort()).toEqual([...ids].sort());
+
+    variant = updateBulletSelection(variant, item.id, last, {
+      isVisible: false,
+    });
+    const hidden = sectionPart(allParts(render(vault, variant)), section.id)
+      ?.items.find((i) => i.id === item.id)
+      ?.bullets.map((b) => b.id);
+    expect(hidden).not.toContain(last);
+  });
+});
+
+describe("computeOrders", () => {
+  it.each([
+    ["to the front", ["a", "b", "c"], "c", 0, { c: 0, a: 1, b: 2 }],
+    ["to the end", ["a", "b", "c"], "a", 2, { b: 0, c: 1, a: 2 }],
+    ["to the middle", ["a", "b", "c"], "a", 1, { b: 0, a: 1, c: 2 }],
+    ["clamped past the end", ["a", "b"], "a", 9, { b: 0, a: 1 }],
+    ["clamped before the start", ["a", "b"], "b", -3, { b: 0, a: 1 }],
+    ["unknown id", ["a", "b"], "x", 0, {}],
+  ])("%s", (_name, ids, id, toIndex, expected) => {
+    expect(computeOrders(ids, id, toIndex)).toEqual(expected);
   });
 });

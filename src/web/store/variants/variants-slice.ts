@@ -189,6 +189,27 @@ const variantsSlice = createSlice({
       state.variants[index] = variant;
     },
 
+    /** Sets the position of several bullets of one item at once, see `computeBulletOrders` */
+    setBulletOrders(
+      state,
+      action: PayloadAction<{
+        variantId: string;
+        itemId: string;
+        orders: Record<string, number>;
+      }>
+    ) {
+      const { variantId, itemId, orders } = action.payload;
+      const index = state.variants.findIndex((v) => v.id === variantId);
+      if (index < 0) {
+        return;
+      }
+      let variant = current(state.variants[index]);
+      for (const [bulletId, order] of Object.entries(orders)) {
+        variant = updateBulletSelection(variant, itemId, bulletId, { order });
+      }
+      state.variants[index] = variant;
+    },
+
     setPageLimit(
       state,
       action: PayloadAction<{ id: string; pageLimit: number }>
@@ -261,6 +282,7 @@ export const {
   setActiveVariant,
   setItemSelection,
   setBulletSelection,
+  setBulletOrders,
   setItemOrders,
   setVariantAppearance,
   setPageLimit,

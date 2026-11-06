@@ -6,7 +6,10 @@ import {
   Variant,
 } from "@custom-types/variant-types";
 import { CvFile, Item, Vault } from "@custom-types/vault-types";
-import { sortItemsByVariant } from "@shared/variant/render";
+import {
+  sortBulletsByVariant,
+  sortItemsByVariant,
+} from "@shared/variant/render";
 import { singleColumnLayout } from "@shared/vault/page-structure";
 
 const DEFAULT_PAGE_LIMIT = 2;
@@ -84,23 +87,50 @@ export function updateItemSelection(
 }
 
 /**
- * The `order` values that put `itemId` at `toIndex` among the items of a section, as the
- * variant shows them (hidden ones included). Every item of the section gets a value.
+ * The `order` values that put `id` at `toIndex` in `ids` (the current order). Every id
+ * gets a value; an unknown id changes nothing.
  */
+export function computeOrders(
+  ids: string[],
+  id: string,
+  toIndex: number
+): Record<string, number> {
+  const list = [...ids];
+  const from = list.indexOf(id);
+  if (from < 0) {
+    return {};
+  }
+  list.splice(from, 1);
+  list.splice(Math.max(0, Math.min(toIndex, list.length)), 0, id);
+  return Object.fromEntries(list.map((entry, index) => [entry, index]));
+}
+
+/** `computeOrders` for the items of a section, as the variant shows them (hidden ones included) */
 export function computeItemOrders(
   items: Item[],
   variant: Variant,
   itemId: string,
   toIndex: number
 ): Record<string, number> {
-  const ids = sortItemsByVariant(items, variant.selection).map((i) => i.id);
-  const from = ids.indexOf(itemId);
-  if (from < 0) {
-    return {};
-  }
-  ids.splice(from, 1);
-  ids.splice(Math.max(0, Math.min(toIndex, ids.length)), 0, itemId);
-  return Object.fromEntries(ids.map((id, index) => [id, index]));
+  return computeOrders(
+    sortItemsByVariant(items, variant.selection).map((i) => i.id),
+    itemId,
+    toIndex
+  );
+}
+
+/** `computeOrders` for the bullets of an item, as the variant shows them (hidden ones included) */
+export function computeBulletOrders(
+  item: Item,
+  variant: Variant,
+  bulletId: string,
+  toIndex: number
+): Record<string, number> {
+  return computeOrders(
+    sortBulletsByVariant(item, variant.selection).map((b) => b.id),
+    bulletId,
+    toIndex
+  );
 }
 
 /** Changes one bullet's selection (merged with what is there) and returns a new variant */
