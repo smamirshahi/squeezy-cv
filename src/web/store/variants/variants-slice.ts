@@ -2,6 +2,8 @@ import { PayloadAction, createSlice, current, nanoid } from "@reduxjs/toolkit";
 import { Style } from "@custom-types/styles-types";
 import {
   BulletSelection,
+  FitMode,
+  FitTuning,
   ItemSelection,
   Variant,
   VariantLayout,
@@ -197,6 +199,43 @@ const variantsSlice = createSlice({
       }
     },
 
+    setAutoFit(
+      state,
+      action: PayloadAction<{
+        id: string;
+        isAutoFit: boolean;
+        fitMode?: FitMode;
+      }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (!variant) {
+        return;
+      }
+      variant.isAutoFit = action.payload.isAutoFit;
+      if (action.payload.fitMode) {
+        variant.fitMode = action.payload.fitMode;
+      }
+      if (!action.payload.isAutoFit) {
+        delete variant.tuning;
+      }
+    },
+
+    /** Stores the result of an auto-fit run (null clears it) */
+    setTuning(
+      state,
+      action: PayloadAction<{ id: string; tuning: FitTuning | null }>
+    ) {
+      const variant = state.variants.find((v) => v.id === action.payload.id);
+      if (!variant) {
+        return;
+      }
+      if (action.payload.tuning) {
+        variant.tuning = action.payload.tuning;
+      } else {
+        delete variant.tuning;
+      }
+    },
+
     /** Stores the page layout and style the editor currently shows into the variant */
     setVariantAppearance(
       state,
@@ -225,6 +264,8 @@ export const {
   setItemOrders,
   setVariantAppearance,
   setPageLimit,
+  setAutoFit,
+  setTuning,
 } = variantsSlice.actions;
 
 export function variantsSelector(state: {

@@ -1,4 +1,5 @@
 import { Box, Grid } from "@mui/material";
+import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { RenderedSection } from "@shared/variant/render";
@@ -41,7 +42,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
           key={item.id}
           direction="column"
           alignItems="flex-start"
-          sx={{ mb: "10px" }}
+          sx={{ mb: spaced(GAP_PX.item) }}
         >
           <CvBlock shouldKeepWithNext>
             <CvTypography

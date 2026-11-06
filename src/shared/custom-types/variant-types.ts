@@ -60,6 +60,15 @@ export const VariantLayoutSchema = Object({
   right: Array(String),
 });
 
+/** What auto-fit changed to make the CV fit. 1 means "as the style says". */
+export const FitTuningSchema = Object({
+  spacing: Number,
+  marginMm: Number,
+  fontScale: Number,
+});
+
+export const FitModeSchema = Union(Literal("fit"), Literal("fill"));
+
 export const VariantSchema = Object({
   /** Stable id, also the file name */
   id: String,
@@ -81,8 +90,18 @@ export const VariantSchema = Object({
   selection: Record(String, ItemSelectionSchema),
 
   style: StyleSchema,
+
+  /** Whether the preview shrinks (or fills) the CV to the page limit */
+  isAutoFit: Boolean.optional(),
+
+  fitMode: FitModeSchema.optional(),
+
+  /** The result of the last auto-fit, so printing gives the same page */
+  tuning: FitTuningSchema.optional(),
 });
 
+export type FitTuning = Static<typeof FitTuningSchema>;
+export type FitMode = Static<typeof FitModeSchema>;
 export type Tone = Static<typeof ToneSchema>;
 export type Wording = Static<typeof WordingSchema>;
 export type Emphasis = Static<typeof EmphasisSchema>;

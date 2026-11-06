@@ -1,4 +1,5 @@
 import { Grid } from "@mui/material";
+import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -34,7 +35,7 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
           container
           direction="column"
           alignItems="flex-start"
-          sx={{ mb: "10px", breakInside: "avoid" }}
+          sx={{ mb: spaced(GAP_PX.item), breakInside: "avoid" }}
         >
           <CvBlock>
             <CvTypography

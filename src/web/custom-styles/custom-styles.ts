@@ -17,6 +17,20 @@ export const PAPER_MARGIN_MM = {
   normal: 20,
 } as const;
 
+/** Gaps in px that auto-fit can scale, see `spaced` */
+export const GAP_PX = {
+  item: 10,
+  sectionTop: 8,
+  bullet: 2,
+} as const;
+
+/**
+ * A gap in px that auto-fit can shrink or grow: the paper sets `--cv-spacing` (1 = normal).
+ */
+export function spaced(px: number): string {
+  return `calc(${px}px * var(--cv-spacing, 1))`;
+}
+
 /** The dimension of A4 paper in mm */
 export const A4_DIMENSION_MM = {
   width: 210,
