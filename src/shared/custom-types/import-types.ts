@@ -19,8 +19,8 @@ export const RawImportSchema = Object({
       items: Array(
         Object({
           fields: Record(String, String),
-          /** Plain text; for skills groups the individual skills */
-          bullets: Array(String),
+          /** Plain text; for skills groups the individual skills. Small models leave it out when there are none. */
+          bullets: Array(String).optional(),
           tags: Array(String).optional(),
         })
       ),

@@ -77,7 +77,7 @@ describe("importToVault", () => {
 
   it("reports a bullet the model made up", () => {
     const made = raw();
-    made.sections[0].items[0].bullets.push("Saved the company £2m");
+    made.sections[0].items[0].bullets?.push("Saved the company £2m");
     const { warnings } = importToVault(made, SOURCE, newId);
     expect(warnings).toEqual([
       "A Work Experience point is not in the text you pasted: “Saved the company £2m”.",
@@ -121,5 +121,22 @@ describe("mergeIntoVault", () => {
         (s) => s.type === "experience"
       )
     ).toBe(true);
+  });
+});
+
+describe("import robustness", () => {
+  it("accepts items without bullets, drops empty fields and splits a year range", () => {
+    const made = raw();
+    const item = made.sections[0].items[0];
+    delete item.bullets;
+    item.fields = { jobTitle: "Lead", location: "", startDate: "2013-2016" };
+    const { vault } = importToVault(made, SOURCE, newId);
+    const out = vault.sections[0].items[0];
+    expect(out.bullets).toEqual([]);
+    expect(out.fields).toEqual({
+      jobTitle: "Lead",
+      startDate: "2013-01-01",
+      endDate: "2016-01-01",
+    });
   });
 });

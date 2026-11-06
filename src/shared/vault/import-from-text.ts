@@ -21,6 +21,22 @@ function normalise(text: string): string {
   return text.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+/** "2013-2016" in startDate with no endDate is a range the model did not split */
+function splitYearRange(
+  fields: Record<string, string>
+): Record<string, string> {
+  const range = /^(\d{4})\s*[-–]\s*(\d{4})$/.exec(
+    fields.startDate?.trim() ?? ""
+  );
+  if (range && !fields.endDate?.trim()) {
+    return { ...fields, startDate: range[1], endDate: range[2] };
+  }
+  return fields;
+}
+
+const INSTRUCTION_LIKE =
+  /(ignore|disregard|forget)\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts?)/i;
+
 export interface ImportOutcome {
   vault: Vault;
 
@@ -46,7 +62,25 @@ export function importToVault(
     }
   }
 
-  const profile = { ...raw.profile };
+  if (INSTRUCTION_LIKE.test(source)) {
+    warnings.push(
+      "The pasted text contains a line that looks like an instruction to the AI. It was treated as text; check the result for anything you did not write."
+    );
+  }
+
+  // only the known keys: a small model may add others (even ones taken from injected text)
+  const { fullName, headline, email, phone, location, rightToWork } =
+    raw.profile;
+  const profile = Object.fromEntries(
+    Object.entries({
+      fullName,
+      headline,
+      email,
+      phone,
+      location,
+      rightToWork,
+    }).filter(([, value]) => typeof value === "string")
+  ) as RawImport["profile"];
   check("The name", profile.fullName);
   check("The email", profile.email);
   check("The phone number", profile.phone);
@@ -57,7 +91,12 @@ export function importToVault(
     title: section.title,
     items: section.items.map((item): Item => {
       const fields: Record<string, string> = {};
-      for (const [key, value] of Object.entries(item.fields)) {
+      const bullets = item.bullets ?? [];
+      const rawFields = splitYearRange(item.fields);
+      for (const [key, value] of Object.entries(rawFields)) {
+        if (value.trim() === "" && !DATE_FIELDS.has(key)) {
+          continue; // small models fill unknown fields with ""
+        }
         if (DATE_FIELDS.has(key) && value.trim() !== "") {
           const iso = toIsoDate(value);
           if (iso) {
@@ -71,13 +110,13 @@ export function importToVault(
           fields[key] = value;
         }
       }
-      for (const bullet of item.bullets) {
+      for (const bullet of bullets) {
         check(`A ${section.title} point`, bullet);
       }
       return {
         id: newId(),
         fields,
-        bullets: item.bullets.map((text) => ({
+        bullets: bullets.map((text) => ({
           id: newId(),
           text,
           tags: [],
