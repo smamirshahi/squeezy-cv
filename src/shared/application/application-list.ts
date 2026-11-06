@@ -12,8 +12,8 @@ export interface ListView {
   /** Matches company or role, ignoring case */
   query: string;
 
-  /** Only this status, or all */
-  status: ApplicationStatus | "all";
+  /** Only this status, only those with no reply ("noReply", needs `today`), or all */
+  status: ApplicationStatus | "all" | "noReply";
   sortKey: SortKey;
   sortDirection: SortDirection;
 }
@@ -42,14 +42,19 @@ function compare(
 /** Search, status filter and sort. Damaged entries stay visible (searching cannot hide a problem). */
 export function arrangeApplications(
   applications: ApplicationSummary[],
-  view: ListView
+  view: ListView,
+  today?: string
 ): ApplicationSummary[] {
   const query = view.query.trim().toLowerCase();
   const shown = applications.filter((application) => {
     if (application.isCorrupt) {
       return true;
     }
-    if (view.status !== "all" && application.status !== view.status) {
+    if (view.status === "noReply") {
+      if (today === undefined || !isNoReply(application, today)) {
+        return false;
+      }
+    } else if (view.status !== "all" && application.status !== view.status) {
       return false;
     }
     return (
@@ -83,6 +88,16 @@ export function countByStatus(
     }
   }
   return counts;
+}
+
+/** How many applications are still "Applied" after a long quiet time */
+export function countNoReply(
+  applications: ApplicationSummary[],
+  today: string
+): number {
+  return applications.filter(
+    (application) => !application.isCorrupt && isNoReply(application, today)
+  ).length;
 }
 
 function plural(count: number, one: string, many: string): string {
@@ -144,7 +159,10 @@ export function queryToView(search: string): ListView {
   const direction = params.get("dir");
   return {
     query: params.get("q") ?? "",
-    status: APPLICATION_STATUSES.find((s) => s === status) ?? "all",
+    status:
+      status === "noReply"
+        ? "noReply"
+        : (APPLICATION_STATUSES.find((s) => s === status) ?? "all"),
     sortKey: sort === "company" || sort === "appliedAt" ? sort : "appliedAt",
     sortDirection:
       direction === "asc" || direction === "desc" ? direction : "desc",

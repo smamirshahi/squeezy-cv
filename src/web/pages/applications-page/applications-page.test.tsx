@@ -94,11 +94,36 @@ describe("Applications page", () => {
     stubList(list);
     render(<ApplicationsPage />);
     await screen.findByText("Beta Labs");
-    fireEvent.click(screen.getByRole("button", { name: "Rejected" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
     expect(companies()).toEqual(["Acme Ltd"]);
     expect(window.location.search).toBe("?applications&status=rejected");
-    fireEvent.click(screen.getByRole("button", { name: "All" }));
+    fireEvent.click(screen.getByRole("button", { name: /^All/ }));
     expect(companies()).toHaveLength(3);
+  });
+
+  it("shows a tile per status with its count, and a tile is a filter", async () => {
+    const old = entry("d", "Old Co", "Dev", "applied", "2026-01-01");
+    stubList([...list, old]);
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const tiles = within(
+      screen.getByRole("group", { name: "Filter by status" })
+    );
+    const tile = (name: RegExp): HTMLElement =>
+      tiles.getByRole("button", { name });
+    expect(tile(/^All/).textContent).toBe("All4");
+    expect(tile(/^Applied/).textContent).toBe("Applied2");
+    expect(tile(/^Interview/).textContent).toBe("Interview1");
+    expect(tile(/^Rejected/).textContent).toBe("Rejected1");
+    expect(tile(/^Withdrawn/).textContent).toBe("Withdrawn0");
+    // only the 2026-01-01 one has had no news for a month
+    expect(tile(/^No reply/).textContent).toBe("No reply1");
+    expect(tile(/^All/).getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(tile(/^No reply/));
+    expect(companies()).toEqual(["Old Co"]);
+    expect(tile(/^No reply/).getAttribute("aria-pressed")).toBe("true");
+    expect(window.location.search).toBe("?applications&status=noReply");
   });
 
   it("starts from the filters in the address (coming back from an application)", async () => {
@@ -126,7 +151,10 @@ describe("Applications page", () => {
     stubList([entry("o", "Old Co", "Dev", "applied", "2020-01-01")]);
     render(<ApplicationsPage />);
     await screen.findByText("Old Co");
-    expect(screen.getByText("No reply")).toBeTruthy();
+    // the chip in the row (the tile of the same name is in the filter group)
+    expect(
+      within(screen.getByRole("table")).getByText("No reply")
+    ).toBeTruthy();
   });
 
   it("explains the next step when there are none", async () => {
@@ -158,7 +186,7 @@ describe("Applications page", () => {
     ]);
     render(<ApplicationsPage />);
     await screen.findByText(/Cannot read the application/);
-    fireEvent.click(screen.getByRole("button", { name: "Rejected" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
     expect(screen.getByText(/Cannot read the application/)).toBeTruthy();
   });
 });

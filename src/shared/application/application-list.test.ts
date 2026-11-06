@@ -6,6 +6,7 @@ import {
 import {
   DEFAULT_LIST_VIEW,
   arrangeApplications,
+  countNoReply,
   queryToView,
   summariseApplications,
   viewToQuery,
@@ -91,6 +92,30 @@ describe("arrangeApplications", () => {
     const copy = [...all];
     arrangeApplications(all, DEFAULT_LIST_VIEW);
     expect(all).toEqual(copy);
+  });
+});
+
+describe("the No reply filter", () => {
+  const today = "2026-11-06";
+  const quiet = entry("q", "Quiet", "2026-09-01");
+  const recent = entry("r", "Recent", "2026-11-01");
+  const replied = entry("p", "Replied", "2026-09-01", "interview");
+  const all = [quiet, recent, replied, broken];
+
+  it("keeps only Applied entries that have been quiet for a month", () => {
+    const view = { ...DEFAULT_LIST_VIEW, status: "noReply" as const };
+    expect(
+      arrangeApplications([...all], view, today)
+        .filter((a) => !a.isCorrupt)
+        .map((a) => a.company)
+    ).toEqual(["Quiet"]);
+    expect(arrangeApplications([...all], view, today)).toContain(broken);
+  });
+
+  it("counts them, and the address round-trips the filter", () => {
+    expect(countNoReply(all, today)).toBe(1);
+    const view = { ...DEFAULT_LIST_VIEW, status: "noReply" as const };
+    expect(queryToView(viewToQuery(view)).status).toBe("noReply");
   });
 });
 
