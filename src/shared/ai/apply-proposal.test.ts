@@ -5,6 +5,7 @@ import {
   AppliedProposal,
   Decisions,
   applyProposal,
+  buildTailorRecord,
   defaultDecisions,
   describeItemChange,
   describeSectionMoves,
@@ -316,5 +317,50 @@ describe("numberChanges", () => {
       bullets: [],
     });
     expect(numberChanges(base, quiet).size).toBe(0);
+  });
+});
+
+describe("buildTailorRecord", () => {
+  const requirements = {
+    jobTitle: "Dev",
+    seniority: "",
+    mustHave: ["React"],
+    niceToHave: [],
+    keywords: [],
+  };
+  const FLAG = 'name "Kubernetes" is not in your CV';
+
+  it("keeps only rewordings that were flagged AND accepted by hand", () => {
+    const clean = proposal();
+    const p = proposal({
+      bullets: [{ ...clean.bullets[0], flags: [FLAG] }, clean.bullets[1]],
+    });
+    const decisions = defaultDecisions(p);
+    // by default a flagged rewording is not accepted, so nothing is recorded
+    expect(
+      buildTailorRecord(requirements, p, decisions, "2026-11-06")
+        .acceptedFlagged
+    ).toEqual([]);
+    const byHand = structuredClone(decisions);
+    byHand.bullets[job1.bullets[0].id].isRewriteAccepted = true;
+    const record = buildTailorRecord(requirements, p, byHand, "2026-11-06");
+    expect(record.acceptedFlagged).toEqual([
+      {
+        bulletId: job1.bullets[0].id,
+        wording: "short",
+        text: "Led a React dashboard",
+        flags: [FLAG],
+      },
+    ]);
+    expect(record).toMatchObject({
+      at: "2026-11-06",
+      jobTitle: "Dev",
+      gaps: p.gaps,
+    });
+    // a clean accepted rewording is never recorded
+    expect(
+      buildTailorRecord(requirements, clean, defaultDecisions(clean), "x")
+        .acceptedFlagged
+    ).toEqual([]);
   });
 });

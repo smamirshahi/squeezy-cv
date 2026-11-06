@@ -12,6 +12,7 @@ import { Tone } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { AiClient } from "@server/ai/ai-types";
 import { checkRewrite, describeFlags } from "@shared/ai/guardrails";
+import { isGapCoveredByCv } from "@shared/ai/gap-coverage";
 import { getItemLabel } from "@shared/variant/item-label";
 
 /** How much of a bullet is quoted in a warning */
@@ -96,6 +97,8 @@ export function describeCv(
     })),
   };
 }
+
+export { isGapCoveredByCv };
 
 const WORDINGS = ["short", "long", "formal"] as const;
 const DEFAULT_RELEVANCE = 0.5;
@@ -195,37 +198,6 @@ const HEADING_WORDS = new Set([
   "have",
 ]);
 
-/** Words that say nothing about a skill, so they do not count when matching a gap to the CV */
-const FILLER_WORDS = new Set([
-  "experience",
-  "experienced",
-  "knowledge",
-  "skills",
-  "skill",
-  "strong",
-  "good",
-  "proven",
-  "years",
-  "year",
-  "with",
-  "and",
-  "the",
-  "of",
-  "in",
-  "to",
-  "using",
-  "use",
-  "working",
-  "work",
-  "ability",
-  "understanding",
-  "familiarity",
-  "proficiency",
-  "demonstrable",
-  "solid",
-  "hands-on",
-]);
-
 function normaliseTerm(text: string): string {
   return text
     .trim()
@@ -251,29 +223,6 @@ export function cleanRequirements(requirements: Requirements): Requirements {
     niceToHave: cleanRequirementList(requirements.niceToHave),
     keywords: cleanRequirementList(requirements.keywords),
   };
-}
-
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * True when every meaningful word of the gap already appears in the CV text, i.e. the gap is
- * not a gap (the model said Redux Toolkit was missing but the CV has it).
- */
-export function isGapCoveredByCv(gap: string, cvText: string): boolean {
-  const terms = gap
-    .toLowerCase()
-    .split(/[^a-z0-9+#.]+/)
-    .map((t) => t.replace(/^\.+|\.+$/g, ""))
-    .filter((t) => t.length > 1 && !FILLER_WORDS.has(t));
-  if (terms.length === 0) {
-    return false;
-  }
-  const haystack = cvText.toLowerCase();
-  return terms.every((term) =>
-    new RegExp(`(^|[^a-z0-9])${escapeRegExp(term)}($|[^a-z0-9])`).test(haystack)
-  );
 }
 
 /**

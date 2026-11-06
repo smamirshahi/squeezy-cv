@@ -9,6 +9,7 @@ import {
   String,
   Union,
 } from "runtypes";
+import { RequirementsSchema } from "@custom-types/requirements-types";
 import { StyleSchema } from "@custom-types/styles-types";
 
 /** The current version of the variant format. Bump it together with a migration. */
@@ -82,6 +83,31 @@ export const FitLimitsSchema = Object({
 
 export const FitModeSchema = Union(Literal("fit"), Literal("fill"));
 
+/**
+ * What the AI tailoring said when this variant was made from a job advert. Kept so the export
+ * can still check the CV against the job. Never used to change the variant.
+ */
+export const TailorRecordSchema = Object({
+  /** Day it was made, "YYYY-MM-DD" */
+  at: String,
+
+  jobTitle: String,
+  requirements: RequirementsSchema,
+
+  /** What the job asks for that the CV did not show (after the checks) */
+  gaps: Array(String),
+
+  /** Rewordings the checker flagged and the user accepted by hand: they must be true */
+  acceptedFlagged: Array(
+    Object({
+      bulletId: String,
+      wording: String,
+      text: String,
+      flags: Array(String),
+    })
+  ),
+});
+
 export const VariantSchema = Object({
   /** Stable id, also the file name */
   id: String,
@@ -114,8 +140,12 @@ export const VariantSchema = Object({
 
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),
+
+  /** Set when the variant was made from a tailoring proposal */
+  tailor: TailorRecordSchema.optional(),
 });
 
+export type TailorRecord = Static<typeof TailorRecordSchema>;
 export type FitTuning = Static<typeof FitTuningSchema>;
 export type FitLimitsValue = Static<typeof FitLimitsSchema>;
 export type FitMode = Static<typeof FitModeSchema>;

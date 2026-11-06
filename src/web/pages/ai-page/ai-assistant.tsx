@@ -30,6 +30,7 @@ import {
   Decisions,
   ItemChange,
   applyProposal,
+  buildTailorRecord,
   defaultDecisions,
   describeItemChange,
   describeSectionMoves,
@@ -39,6 +40,7 @@ import {
 import { diffDocuments, isDiffEmpty } from "@shared/ai/diff-documents";
 import { DiffView } from "@pages/ai-page/diff-view";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
+import { toIsoDay } from "@shared/application/application-utils";
 import { RequestPreview } from "@pages/ai-page/request-preview";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";
 import { render } from "@shared/variant/render";
@@ -164,8 +166,18 @@ export function AiAssistant(): JSX.Element {
         })
       );
     }
-    dispatch(insertVariant({ ...variant, pageLimit }));
-    activateVariant(dispatch, { ...variant, pageLimit });
+    const tailored = {
+      ...variant,
+      pageLimit,
+      tailor: buildTailorRecord(
+        result.requirements,
+        result.proposal,
+        decisions,
+        toIsoDay(new Date())
+      ),
+    };
+    dispatch(insertVariant(tailored));
+    activateVariant(dispatch, tailored);
     setCreated(name);
   }
 

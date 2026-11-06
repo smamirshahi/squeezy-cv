@@ -9,24 +9,10 @@ import {
   String,
   Union,
 } from "runtypes";
+import { RequirementsSchema } from "@custom-types/requirements-types";
 import { ToneSchema } from "@custom-types/variant-types";
 
-/** What a job advert asks for (step 1 of tailoring) */
-export const RequirementsSchema = Object({
-  jobTitle: String,
-
-  /** e.g. "junior", "mid", "senior", "lead"; empty if the advert does not say */
-  seniority: String,
-
-  /** Skills and experience the advert insists on */
-  mustHave: Array(String),
-
-  /** Skills and experience that are a plus */
-  niceToHave: Array(String),
-
-  /** Words an applicant-tracking system is likely to look for */
-  keywords: Array(String),
-});
+export { RequirementsSchema };
 
 export const RewriteWordingSchema = Union(
   Literal("short"),
@@ -141,7 +127,7 @@ export const TailorResultSchema = Object({
 });
 
 export type RawProposal = Static<typeof RawProposalSchema>;
-export type Requirements = Static<typeof RequirementsSchema>;
+export type { Requirements } from "@custom-types/requirements-types";
 export type ItemProposal = Static<typeof ItemProposalSchema>;
 export type BulletProposal = Static<typeof BulletProposalSchema>;
 export type Proposal = Static<typeof ProposalSchema>;

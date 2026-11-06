@@ -294,6 +294,12 @@ describe("AiAssistant: the review", () => {
       .vault.sections.find((s) => s.id === experience.id)!
       .items.find((i) => i.id === job1.id)!.bullets;
     expect(bullets[1].alt?.formal).toBe("Used Kubernetes for state");
+    // the flagged wording that was ticked by hand is remembered on the variant for the export check
+    const record = store.getState().variants.variants[1].tailor;
+    expect(record?.jobTitle).toBe("Senior Front-End Developer");
+    expect(record?.acceptedFlagged.map((f) => f.text)).toEqual([
+      "Used Kubernetes for state",
+    ]);
   });
 
   it("does not apply an item you un-tick", async () => {
