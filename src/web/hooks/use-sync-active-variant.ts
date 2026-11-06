@@ -9,6 +9,7 @@ import {
 } from "@store/store-helper";
 import {
   activeVariantSelector,
+  isActiveVariantReadOnlySelector,
   setActiveVariant,
   setVariantAppearance,
 } from "@store/variants/variants-slice";
@@ -32,15 +33,30 @@ export function useSyncActiveVariant(): void {
   const variant = useAppSelector(activeVariantSelector);
   const { structure } = useAppSelector(appSelector);
   const style = useAppSelector(styleSelector);
+  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
 
   useEffect(() => {
     if (
       JSON.stringify(variant.layout) !== JSON.stringify(structure) ||
       JSON.stringify(variant.style) !== JSON.stringify(style)
     ) {
+      if (isReadOnly) {
+        // a sent variant cannot change: put the editor back to what it says
+        dispatch(updatePageStructure(variant.layout));
+        dispatch(setStyle(variant.style));
+        return;
+      }
       dispatch(
         setVariantAppearance({ id: variant.id, layout: structure, style })
       );
     }
-  }, [dispatch, variant.id, variant.layout, variant.style, structure, style]);
+  }, [
+    dispatch,
+    isReadOnly,
+    variant.id,
+    variant.layout,
+    variant.style,
+    structure,
+    style,
+  ]);
 }

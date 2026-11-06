@@ -217,6 +217,7 @@ export class FileCvStorage implements CvStorage {
           role: "",
           status: "applied",
           appliedAt: "",
+          variantId: "",
           updatedAt: "",
           isCorrupt: true,
         });

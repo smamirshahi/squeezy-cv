@@ -101,8 +101,15 @@ export interface ApiClient {
   saveVault: (file: CvFile) => Promise<void>;
   listVariants: () => Promise<VariantSummary[]>;
   loadVariant: (id: string) => Promise<Variant>;
-  saveVariant: (variant: Variant) => Promise<void>;
-  deleteVariant: (id: string) => Promise<void>;
+  /** `isUnlocked`: the user approved changing a variant that was sent (otherwise the server answers 409 "locked") */
+  saveVariant: (
+    variant: Variant,
+    options?: { isUnlocked?: boolean }
+  ) => Promise<void>;
+  deleteVariant: (
+    id: string,
+    options?: { isUnlocked?: boolean }
+  ) => Promise<void>;
 
   /** Whether the server has an AI key (it never says what it is) */
   getAiStatus: () => Promise<{
@@ -139,6 +146,10 @@ export function applicationPdfUrl(id: string): string {
   return `/api/applications/${encodeURIComponent(id)}/pdf`;
 }
 
+function unlockQuery(options?: { isUnlocked?: boolean }): string {
+  return options?.isUnlocked ? "?unlock=true" : "";
+}
+
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
 export function createApiClient(
   fetchImpl: FetchLike = (input, init) => fetch(input, init)
@@ -166,11 +177,11 @@ export function createApiClient(
         )
       );
     },
-    async saveVariant(variant) {
+    async saveVariant(variant, options) {
       await request(
         fetchImpl,
         "PUT",
-        `/api/variants/${encodeURIComponent(variant.id)}`,
+        `/api/variants/${encodeURIComponent(variant.id)}${unlockQuery(options)}`,
         variant
       );
     },
@@ -249,11 +260,11 @@ export function createApiClient(
         `/api/applications/${encodeURIComponent(id)}`
       );
     },
-    async deleteVariant(id) {
+    async deleteVariant(id, options) {
       await request(
         fetchImpl,
         "DELETE",
-        `/api/variants/${encodeURIComponent(id)}`
+        `/api/variants/${encodeURIComponent(id)}${unlockQuery(options)}`
       );
     },
   };

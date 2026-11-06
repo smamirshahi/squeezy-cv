@@ -9,8 +9,12 @@ import {
   deleteVariant,
   duplicateVariant,
   initialState,
+  relockVariants,
   renameVariant,
   setActiveVariant,
+  setLocks,
+  setPageLimit,
+  unlockVariant,
   setBulletOrders,
   setBulletSelection,
   setItemOrders,
@@ -189,5 +193,86 @@ describe("variants slice: bullet order", () => {
     expect(bullets?.a).toEqual({ isVisible: true, order: 1 });
     expect(bullets?.b).toEqual({ isVisible: true, order: 0 });
     expect(state.variants[0].selection.i).toBeUndefined();
+  });
+});
+
+describe("variant lock", () => {
+  const sent = {
+    byVariant: {
+      second: [
+        { applicationId: "a", company: "Acme", appliedAt: "2026-05-01" },
+      ],
+    },
+    hasUnreadable: false,
+  };
+
+  function locked(): VariantsState {
+    return variantsReducer(withTwo(), setLocks(sent));
+  }
+
+  it("ignores every change to a locked variant, even delete and rename", () => {
+    let state = locked();
+    state = variantsReducer(state, renameVariant({ id: "second", name: "X" }));
+    state = variantsReducer(
+      state,
+      setPageLimit({ id: "second", pageLimit: 99 })
+    );
+    state = variantsReducer(state, deleteVariant({ id: "second" }));
+    expect(state.variants.map((v) => v.name)).toEqual(["Default", "Second"]);
+    expect(state.variants[1].pageLimit).toBe(withTwo().variants[1].pageLimit);
+  });
+
+  it("still lets other variants change", () => {
+    const state = variantsReducer(
+      locked(),
+      renameVariant({ id: "default", name: "Main" })
+    );
+    expect(state.variants[0].name).toBe("Main");
+  });
+
+  it("allows edits after an approved unlock, and locks again", () => {
+    let state = variantsReducer(locked(), unlockVariant({ id: "second" }));
+    state = variantsReducer(
+      state,
+      renameVariant({ id: "second", name: "New" })
+    );
+    expect(state.variants[1].name).toBe("New");
+    state = variantsReducer(state, relockVariants({ ids: ["second"] }));
+    state = variantsReducer(state, renameVariant({ id: "second", name: "Z" }));
+    expect(state.variants[1].name).toBe("New");
+  });
+
+  it("drops an approval when the variant stops being locked", () => {
+    let state = variantsReducer(locked(), unlockVariant({ id: "second" }));
+    state = variantsReducer(
+      state,
+      setLocks({ byVariant: {}, hasUnreadable: false })
+    );
+    expect(state.unlockedIds).toEqual([]);
+  });
+
+  it("locks everything while an application file is damaged", () => {
+    const state = variantsReducer(
+      withTwo(),
+      setLocks({ byVariant: {}, hasUnreadable: true })
+    );
+    expect(
+      variantsReducer(state, renameVariant({ id: "default", name: "X" }))
+        .variants[0].name
+    ).toBe("Default");
+  });
+
+  it("lets new variants be created and loaded while others are locked", () => {
+    let state = variantsReducer(
+      locked(),
+      duplicateVariant({ sourceId: "second", id: "copy" })
+    );
+    expect(state.variants.map((v) => v.id)).toEqual([
+      "default",
+      "second",
+      "copy",
+    ]);
+    state = variantsReducer(state, setVariants([state.variants[2]]));
+    expect(state.variants).toHaveLength(1);
   });
 });

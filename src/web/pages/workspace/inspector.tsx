@@ -24,6 +24,7 @@ import {
 } from "@shared/vault/page-structure";
 import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
 import { FitPanel } from "@pages/workspace/fit-panel";
+import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   setSelectedBlock,
@@ -381,7 +382,9 @@ export function Inspector(): JSX.Element {
         p: 2,
       }}
     >
-      {block ? <BlockInspector /> : <PageInspector />}
+      <LockedFieldset>
+        {block ? <BlockInspector /> : <PageInspector />}
+      </LockedFieldset>
     </Box>
   );
 }

@@ -25,6 +25,7 @@ import {
   toIsoDay,
   updateApplication,
 } from "@shared/application/application-utils";
+import { isVariantLocked } from "@shared/variant/variant-lock";
 import { BackupService } from "@server/backup/backup-service";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
@@ -41,6 +42,7 @@ const ID_SUFFIX_BYTES = 3;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
+const HTTP_CONFLICT = 409;
 const HTTP_SERVER_ERROR = 500;
 const HTTP_NOT_IMPLEMENTED = 501;
 const HTTP_UNPROCESSABLE = 422;
@@ -308,7 +310,29 @@ export function buildServer({
     storage.loadVariant(request.params.id)
   );
 
-  app.put<{ Params: { id: string } }>(
+  // A variant that was sent (an application with status "applied") is read-only unless the
+  // request says ?unlock=true, so a stale tab or a script cannot change it by accident.
+  async function refuseIfLocked(
+    reply: FastifyReply,
+    variantId: string,
+    unlock: string | undefined
+  ): Promise<boolean> {
+    if (unlock === "true") {
+      return false;
+    }
+    if (isVariantLocked(variantId, await storage.listApplications())) {
+      await sendError(
+        reply,
+        HTTP_CONFLICT,
+        "locked",
+        "This variant was sent to an employer and is locked. Unlock it first, or create a new variant from it."
+      );
+      return true;
+    }
+    return false;
+  }
+
+  app.put<{ Params: { id: string }; Querystring: { unlock?: string } }>(
     "/api/variants/:id",
     async (request, reply) => {
       const variant = VariantSchema.check(request.body);
@@ -320,14 +344,22 @@ export function buildServer({
           "The id in the body must match the id in the URL."
         );
       }
+      if (await refuseIfLocked(reply, variant.id, request.query.unlock)) {
+        return reply;
+      }
       await storage.saveVariant(variant);
       return { status: "saved" };
     }
   );
 
-  app.delete<{ Params: { id: string } }>(
+  app.delete<{ Params: { id: string }; Querystring: { unlock?: string } }>(
     "/api/variants/:id",
-    async (request) => {
+    async (request, reply) => {
+      if (
+        await refuseIfLocked(reply, request.params.id, request.query.unlock)
+      ) {
+        return reply;
+      }
       await storage.deleteVariant(request.params.id);
       return { status: "deleted" };
     }

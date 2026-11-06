@@ -180,6 +180,9 @@ export interface ApplicationSummary {
   status: ApplicationStatus;
   appliedAt: string;
 
+  /** The variant that was sent ("" for a damaged application, whose variant is unknown) */
+  variantId: string;
+
   /** Day of the latest status change */
   updatedAt: string;
   isCorrupt: boolean;

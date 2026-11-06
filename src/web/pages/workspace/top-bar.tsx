@@ -1,4 +1,14 @@
-import { Box, Button, Chip, MenuItem, Select, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  MenuItem,
+  Select,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
+import { useVariantLockText } from "@pages/workspace/variant-lock";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import CheckIcon from "@mui/icons-material/Check";
@@ -15,6 +25,30 @@ import {
   variantsSelector,
 } from "@store/variants/variants-slice";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+
+function VariantOption({
+  id,
+  name,
+}: {
+  id: string;
+  name: string;
+}): JSX.Element {
+  const lockText = useVariantLockText(id);
+  return (
+    <MenuItem value={id}>
+      {name}
+      {lockText && (
+        <Tooltip title={lockText}>
+          <LockIcon
+            fontSize="inherit"
+            aria-label={lockText}
+            sx={{ ml: 1, opacity: 0.7 }}
+          />
+        </Tooltip>
+      )}
+    </MenuItem>
+  );
+}
 
 /** The dark bar on top: variant, fit, save state and the main actions */
 export function TopBar(): JSX.Element {
@@ -65,9 +99,7 @@ export function TopBar(): JSX.Element {
         }}
       >
         {variants.map((v) => (
-          <MenuItem key={v.id} value={v.id}>
-            {v.name}
-          </MenuItem>
+          <VariantOption key={v.id} id={v.id} name={v.name} />
         ))}
       </Select>
       <Chip

@@ -24,6 +24,7 @@ function entry(
     role,
     status,
     appliedAt,
+    variantId: "v1",
     updatedAt: appliedAt,
     isCorrupt: false,
   };
@@ -35,6 +36,7 @@ const broken: ApplicationSummary = {
   role: "",
   status: "applied",
   appliedAt: "",
+  variantId: "",
   updatedAt: "",
   isCorrupt: true,
 };

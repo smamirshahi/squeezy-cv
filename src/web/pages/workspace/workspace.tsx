@@ -8,6 +8,7 @@ import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
 import { Outline } from "@pages/workspace/outline";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
+import { LockBanner } from "@pages/workspace/variant-lock";
 import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -61,6 +62,7 @@ export function Workspace(): JSX.Element {
     >
       <TopBar />
       <ConnectionBanner />
+      <LockBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {tool === "variants" && (
