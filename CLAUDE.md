@@ -82,4 +82,6 @@ Package manager is **pnpm**.
 
 **AI setup and request preview (#99).** `POST /api/ai/tailor/preview {jobAd, tone}` (`server/ai/preview.ts`, `previewTailorRequest`) runs the real `tailor()` with a recording client and returns the messages as they would leave the machine (after `scrub`); it needs no key and sends nothing. The Tailor page has "Preview the exact request" (`ai-page/request-preview.tsx`); the rail's "AI setup" (`workspace/ai-setup.tsx`) shows the provider (read from `GET /api/ai/status`; still chosen in `.env`) and what is sent / masked / never sent. Choosing the provider in the UI is #102.
 
+**Outline (#95).** `workspace/outline.tsx`: the "Outline (O)" button (or the O key) on the canvas opens a tree of the active variant's sections, items and bullets with eye, emphasis and up/down buttons (all keyboard-reachable), a live-region announcement of each move, and click-to-select on the page. It reuses the same reducers as the Variants editor (`setItemOrders`, `setBulletOrders`, ...) and `moveSection`. Drag-and-drop and indent levels from the design are not built; up/down buttons are the alternative.
+
 **Personal data:** the real CV goes in `data/` (git-ignored, as is `cv-export.json`); never commit it. `data.example/` shows the layout and `fixtures/` holds fake data for tests. Older real exports are handled by the migration.
