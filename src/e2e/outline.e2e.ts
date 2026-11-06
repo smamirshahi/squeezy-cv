@@ -52,4 +52,27 @@ describe("the outline", () => {
     expect(text.indexOf("education")).toBeLessThan(text.indexOf("experience"));
     await outline.getByText("Moved Education up.").waitFor();
   });
+
+  it("hides and moves the selected item with the keyboard", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+
+    await page
+      .locator("[data-cv-item]")
+      .filter({ hasText: "Sample Systems" })
+      .click();
+    await page.keyboard.press("Alt+ArrowUp");
+    const order = await page
+      .locator("[data-cv-item]")
+      .evaluateAll((nodes) => nodes.map((n) => n.textContent ?? ""));
+    expect(order[0]).toContain("Sample Systems");
+
+    await page.keyboard.press("h");
+    expect(
+      await page
+        .locator("[data-cv-item]")
+        .filter({ hasText: "Sample Systems" })
+        .count()
+    ).toBe(0);
+  });
 });

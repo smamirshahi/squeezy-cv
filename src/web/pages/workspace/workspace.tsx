@@ -4,6 +4,7 @@ import { AiSetup } from "@pages/workspace/ai-setup";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
+import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
 import { Outline } from "@pages/workspace/outline";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
@@ -22,6 +23,7 @@ import { useAppSelector } from "@store/store-helper";
 export function Workspace(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
   const tool = useAppSelector((s) => s.app.tool);
+  useCanvasShortcuts(tool === "variants");
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   // "O" opens and closes the outline, unless the user is typing
   useEffect(() => {
