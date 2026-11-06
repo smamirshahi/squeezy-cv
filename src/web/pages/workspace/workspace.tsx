@@ -5,6 +5,7 @@ import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
+import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
@@ -23,7 +24,9 @@ import { useAppSelector } from "@store/store-helper";
  */
 export function Workspace(): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLElement>(null);
   const tool = useAppSelector((s) => s.app.tool);
+  const zoom = useAppSelector((s) => s.app.canvasZoom);
   useCanvasShortcuts(tool === "variants");
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   // "O" opens and closes the outline, unless the user is typing
@@ -73,6 +76,7 @@ export function Workspace(): JSX.Element {
             <Box
               component="main"
               aria-label="Canvas"
+              ref={canvasRef}
               sx={{
                 flex: 1,
                 minWidth: 0,
@@ -93,7 +97,12 @@ export function Workspace(): JSX.Element {
               >
                 {isOutlineOpen ? "Hide outline" : "Outline (O)"}
               </Button>
-              <PreviewPage contentRef={contentRef} />
+              <ZoomControls
+                getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
+              />
+              <ZoomFrame zoom={zoom}>
+                <PreviewPage contentRef={contentRef} />
+              </ZoomFrame>
             </Box>
             <Inspector />
           </>

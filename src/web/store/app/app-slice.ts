@@ -40,6 +40,9 @@ interface AppState {
   /** The block selected on the canvas: a section, or one item of it */
   selectedBlock: SelectedBlock | null;
 
+  /** Canvas zoom, 1 = 100% (only how the page is shown, never what is printed) */
+  canvasZoom: number;
+
   /** What the preview measured, for the top bar and the overflow banner */
   fit: FitInfo;
 
@@ -69,6 +72,7 @@ export const initialState: AppState = {
   selectedSectionInEditorPage: "metaData",
   tool: "variants",
   selectedBlock: null,
+  canvasZoom: 1,
   fit: {
     pageCount: 1,
     usedPercent: 0,
@@ -80,6 +84,15 @@ export const initialState: AppState = {
   shouldDiscardChanges: false,
   shouldAddNewItem: false,
 };
+
+export const ZOOM_MIN = 0.5;
+export const ZOOM_MAX = 2;
+export const ZOOM_STEP = 0.1;
+
+/** Keeps a zoom within its limits, in steps of 1% */
+export function clampZoom(zoom: number): number {
+  return Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom)) * 100) / 100;
+}
 
 /** Slice to access state of app */
 const appSlice = createSlice({
@@ -103,6 +116,10 @@ const appSlice = createSlice({
 
     setTool(state, action: PayloadAction<WorkspaceTool>) {
       state.tool = action.payload;
+    },
+
+    setCanvasZoom(state, action: PayloadAction<number>) {
+      state.canvasZoom = clampZoom(action.payload);
     },
 
     setSelectedBlock(state, action: PayloadAction<SelectedBlock | null>) {
@@ -144,6 +161,7 @@ export const {
   setSelectedSectionInEditorPage,
   setTool,
   setSelectedBlock,
+  setCanvasZoom,
   setFit,
   setColumnWidth,
   resetAppState,

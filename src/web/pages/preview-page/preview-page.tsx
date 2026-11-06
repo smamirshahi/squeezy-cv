@@ -269,6 +269,13 @@ export function PreviewPage({
         }}
         elevation={3}
         style={paperVariables}
+        {...(isPrintView
+          ? {}
+          : {
+              "data-cv-paper": "",
+              tabIndex: 0,
+              "aria-label": "CV page. Tab moves to the next block.",
+            })}
         onClick={isPrintView ? undefined : handleSelect}
         sx={{
           position: "relative",
