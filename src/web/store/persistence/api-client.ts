@@ -1,4 +1,9 @@
 import {
+  ChatRequest,
+  ChatResponse,
+  ChatResponseSchema,
+} from "@custom-types/chat-types";
+import {
   AI_PROVIDER_INFO,
   AiChoice,
   AiProviderId,
@@ -156,6 +161,9 @@ export interface ApiClient {
   /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */
   importCv: (text: string) => Promise<ImportedCv>;
 
+  /** One chat turn: a reply and typed operations for the user to approve. Sends CV text (no name or contact details) to the chosen provider. */
+  chat: (request: ChatRequest) => Promise<ChatResponse>;
+
   /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
   suggestHide: (request: HideRequest) => Promise<HideResult>;
 
@@ -246,6 +254,11 @@ export function createApiClient(
         vault: VaultSchema.check(result.vault),
         warnings: result.warnings,
       };
+    },
+    async chat(body) {
+      return ChatResponseSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/chat", body)
+      );
     },
     async suggestHide(body) {
       return HideResultSchema.check(

@@ -35,6 +35,7 @@ describe("AiRegistry", () => {
       tailor: "claude",
       import: "claude",
       hide: "claude",
+      chat: "claude",
     });
     expect(registry.forTask("hide")).toEqual({
       client: claude,
@@ -63,6 +64,7 @@ describe("AiRegistry", () => {
       tailor: "claude",
       import: "ollama",
       hide: "claude",
+      chat: "claude",
     });
     expect(settings.saved?.import).toBe("ollama");
 
@@ -81,14 +83,19 @@ describe("AiRegistry", () => {
       AiChoiceError
     );
     await expect(
-      registry.choose({ chat: "ollama" } as never)
+      registry.choose({ gossip: "ollama" } as never)
     ).rejects.toBeInstanceOf(AiChoiceError);
     expect(registry.choice().tailor).toBe("ollama");
   });
 
   it("ignores a saved choice whose provider is no longer set up", async () => {
     const settings = new MemoryAiSettings();
-    settings.saved = { tailor: "claude", import: "claude", hide: "claude" };
+    settings.saved = {
+      tailor: "claude",
+      import: "claude",
+      hide: "claude",
+      chat: "claude",
+    };
     const registry = new AiRegistry({ ollama }, "ollama", settings);
     await registry.load();
     expect(registry.choice().tailor).toBe("ollama");
@@ -106,11 +113,17 @@ describe("FileAiSettings", () => {
     const file = path.join(dir, "sub", "settings.json");
     const store = new FileAiSettings(file);
     expect(await store.load()).toEqual({});
-    await store.save({ tailor: "claude", import: "ollama", hide: "claude" });
+    await store.save({
+      tailor: "claude",
+      import: "ollama",
+      hide: "claude",
+      chat: "claude",
+    });
     expect(await store.load()).toEqual({
       tailor: "claude",
       import: "ollama",
       hide: "claude",
+      chat: "claude",
     });
     expect(await readFile(file, "utf8")).not.toContain("KEY");
     await rm(file);
@@ -171,6 +184,7 @@ describe("the AI routes with a registry", () => {
       tailor: "claude",
       import: "claude",
       hide: "claude",
+      chat: "claude",
     });
   });
 

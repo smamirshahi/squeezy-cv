@@ -3,13 +3,14 @@ export const AI_PROVIDER_IDS = ["claude", "gemini", "groq", "ollama"] as const;
 export type AiProviderId = (typeof AI_PROVIDER_IDS)[number];
 
 /** What the AI is used for; the user picks a provider for each */
-export const AI_TASKS = ["tailor", "import", "hide"] as const;
+export const AI_TASKS = ["tailor", "import", "hide", "chat"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
 export const AI_TASK_LABELS: Record<AiTask, string> = {
   tailor: "Tailor to a job ad",
   import: "Sort pasted CV text",
   hide: "Pick what to hide",
+  chat: "Chat edits",
 };
 
 export type AiChoice = Record<AiTask, AiProviderId>;
