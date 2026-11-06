@@ -84,4 +84,6 @@ Package manager is **pnpm**.
 
 **Outline (#95).** `workspace/outline.tsx`: the "Outline (O)" button (or the O key) on the canvas opens a tree of the active variant's sections, items and bullets with eye, emphasis and up/down buttons (all keyboard-reachable), a live-region announcement of each move, and click-to-select on the page. It reuses the same reducers as the Variants editor (`setItemOrders`, `setBulletOrders`, ...) and `moveSection`. Drag-and-drop and indent levels from the design are not built; up/down buttons are the alternative.
 
+**Applications side panel (#98).** In the list (`?applications`) a row click opens that application in a side panel (`ApplicationView isEmbedded`, same component as the full page `?application=<id>`, which the company link still opens); the list keeps its search and filters. Not built: the status tiles row and the dark top bar on this page.
+
 **Personal data:** the real CV goes in `data/` (git-ignored, as is `cv-export.json`); never commit it. `data.example/` shows the layout and `fixtures/` holds fake data for tests. Older real exports are handled by the migration.

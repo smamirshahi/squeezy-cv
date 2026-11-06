@@ -136,8 +136,16 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByText("No application matches this search.").waitFor();
     await page.getByLabel("Search company or role").fill("acme");
 
-    // click the row to open it
+    // click the row: the application opens in the side panel, the list stays
     await page.getByRole("row").filter({ hasText: "Acme Ltd" }).click();
+    await page
+      .getByRole("complementary", { name: "Application detail" })
+      .getByRole("heading", { name: "Acme Ltd" })
+      .waitFor();
+    await page.getByRole("row").filter({ hasText: "Acme Ltd" }).waitFor();
+
+    // the company link opens the full page
+    await page.getByRole("link", { name: "Acme Ltd" }).click();
     await page.getByRole("heading", { name: "Acme Ltd" }).waitFor();
 
     // back keeps the search
