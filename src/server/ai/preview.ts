@@ -22,7 +22,8 @@ class StopPreview extends Error {}
  */
 export async function previewTailorRequest(
   vault: Vault,
-  input: TailorInput
+  input: TailorInput,
+  options: { isMaskingOrganisations?: boolean } = {}
 ): Promise<PreviewedCall[]> {
   const calls: PreviewedCall[] = [];
   const recorder: AiClient = {
@@ -48,7 +49,7 @@ export async function previewTailorRequest(
     },
   };
   try {
-    await tailor(recorder, vault, input);
+    await tailor(recorder, vault, input, options);
   } catch (error) {
     if (!(error instanceof StopPreview)) {
       throw error;

@@ -13,6 +13,7 @@ import { Vault } from "@custom-types/vault-types";
 import { AiClient } from "@server/ai/ai-types";
 import { checkRewrite, describeFlags } from "@shared/ai/guardrails";
 import { isGapCoveredByCv } from "@shared/ai/gap-coverage";
+import { personalOf } from "@shared/ai/redact-personal";
 import { getItemLabel } from "@shared/variant/item-label";
 
 /** How much of a bullet is quoted in a warning */
@@ -357,9 +358,10 @@ export interface TailorInput {
 export async function tailor(
   ai: AiClient,
   vault: Vault,
-  input: TailorInput
+  input: TailorInput,
+  options: { isMaskingOrganisations?: boolean } = {}
 ): Promise<TailorResult> {
-  const personal = { profile: vault.profile, links: vault.links };
+  const personal = personalOf(vault, options.isMaskingOrganisations === true);
   const aiWarnings: string[] = [];
   function onWarning(message: string): void {
     aiWarnings.push(message);

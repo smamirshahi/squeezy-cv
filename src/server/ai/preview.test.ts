@@ -22,4 +22,28 @@ describe("previewTailorRequest", () => {
     // the CV text itself is what the model gets
     expect(calls[1].input).toContain("React");
   });
+
+  it("also masks employer and school names when that option is on, and not otherwise", async () => {
+    const input = {
+      jobAd: "We need a React developer.",
+      tone: "neutral",
+    } as const;
+    const off = await previewTailorRequest(vault, input);
+    expect(off[1].input).toContain("Example Ltd");
+
+    const on = await previewTailorRequest(vault, input, {
+      isMaskingOrganisations: true,
+    });
+    const everything = on.map((c) => c.system + c.input).join("\n");
+    for (const name of [
+      "Example Ltd",
+      "Sample Systems",
+      "Demo Co",
+      "University of Example",
+    ]) {
+      expect(everything).not.toContain(name);
+    }
+    expect(everything).toContain("[Company 1]");
+    expect(everything).toContain("[School 1]");
+  });
 });

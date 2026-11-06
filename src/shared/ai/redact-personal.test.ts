@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { PersonalData, restore, scrub } from "@shared/ai/redact-personal";
+import {
+  PersonalData,
+  organisationsOf,
+  personalOf,
+  restore,
+  scrub,
+} from "@shared/ai/redact-personal";
+import sample from "@fixtures/sample-cv.json";
+import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 const person: PersonalData = {
   profile: {
@@ -116,5 +124,76 @@ describe("restore", () => {
 
   it("does not report ordinary brackets", () => {
     expect(restore("see [1] and [WCAG]", map).unresolved).toEqual([]);
+  });
+});
+
+describe("masking employers and schools (#133)", () => {
+  const withOrgs: PersonalData = {
+    ...person,
+    organisations: {
+      companies: ["Example Ltd", "Example Labs"],
+      schools: ["University of Example"],
+    },
+  };
+
+  it("is off unless the organisations are given", () => {
+    const { text } = scrub("I worked at Example Ltd.", person);
+    expect(text).toBe("I worked at Example Ltd.");
+  });
+
+  it("replaces each name with its own numbered placeholder, in any case", () => {
+    const { text } = scrub(
+      "Built things at EXAMPLE LTD, then example labs. Studied at the University of Example.",
+      withOrgs
+    );
+    expect(text).toBe(
+      "Built things at [Company 1], then [Company 2]. Studied at the [School 1]."
+    );
+  });
+
+  it("also finds a name without its Ltd or Inc ending, longest names first", () => {
+    const { text } = scrub("Joined Example, left Example Labs.", withOrgs);
+    expect(text).toBe("Joined [Company 1], left [Company 2].");
+  });
+
+  it("does not replace inside a longer word", () => {
+    expect(scrub("Counterexample Ltdx", withOrgs).text).toBe(
+      "Counterexample Ltdx"
+    );
+  });
+
+  it("round-trips: restore puts the full names back", () => {
+    const { text, map } = scrub(
+      "Worked at Example Ltd and studied at University of Example",
+      withOrgs
+    );
+    expect(restore(text, map).text).toBe(
+      "Worked at Example Ltd and studied at University of Example"
+    );
+  });
+
+  it("reports a company placeholder the model invented or mangled", () => {
+    const { map } = scrub("", withOrgs);
+    const { text, unresolved } = restore(
+      "Led [Company 1] and [Company 9], taught at [school 1]",
+      map
+    );
+    expect(text).toBe(
+      "Led Example Ltd and [Company 9], taught at University of Example"
+    );
+    expect(unresolved).toEqual(["[Company 9]"]);
+  });
+
+  it("takes employers from experience and schools from education, once each", () => {
+    const { vault } = migrateCvFile(sample);
+    const found = organisationsOf(vault.sections);
+    expect(found.companies).toEqual([
+      "Example Ltd",
+      "Sample Systems",
+      "Demo Co",
+    ]);
+    expect(found.schools).toEqual(["University of Example"]);
+    expect(personalOf(vault, false).organisations).toBeUndefined();
+    expect(personalOf(vault, true).organisations).toEqual(found);
   });
 });

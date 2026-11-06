@@ -254,7 +254,23 @@ export function buildServer({
       provider: tailoring.provider,
       providers: registry.providers(),
       choice: registry.choice(),
+      maskOrganisations: registry.isMaskingOrganisations(),
     };
+  });
+
+  // Also hide employer and school names (as [Company 1], [School 1]) in what is sent to a model
+  app.put("/api/ai/privacy", async (request, reply) => {
+    const body = request.body as { maskOrganisations?: unknown } | null;
+    if (typeof body?.maskOrganisations !== "boolean") {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        "maskOrganisations must be true or false."
+      );
+    }
+    await registry.setMaskOrganisations(body.maskOrganisations);
+    return { maskOrganisations: registry.isMaskingOrganisations() };
   });
 
   // Which provider each task uses. Keys stay in .env; only the choice is stored.
@@ -296,7 +312,12 @@ export function buildServer({
       );
     }
     const { vault } = await storage.loadVault();
-    return tailor(ai, vault, { jobAd, tone: body.tone });
+    return tailor(
+      ai,
+      vault,
+      { jobAd, tone: body.tone },
+      { isMaskingOrganisations: registry.isMaskingOrganisations() }
+    );
   });
 
   // One chat turn: a reply and typed operations for the user to approve (nothing is changed here)
@@ -321,11 +342,16 @@ export function buildServer({
       );
     }
     const { vault } = await storage.loadVault();
-    return chat(ai, vault, {
-      ...body,
-      message,
-      history: (body.history ?? []).slice(-MAX_CHAT_HISTORY),
-    });
+    return chat(
+      ai,
+      vault,
+      {
+        ...body,
+        message,
+        history: (body.history ?? []).slice(-MAX_CHAT_HISTORY),
+      },
+      { isMaskingOrganisations: registry.isMaskingOrganisations() }
+    );
   });
 
   // Which items to hide so the CV fits (the user confirms; nothing is changed here)
@@ -393,7 +419,11 @@ export function buildServer({
     const { vault } = await storage.loadVault();
     return {
       provider: registry.forTask("tailor").provider,
-      calls: await previewTailorRequest(vault, { jobAd, tone: body.tone }),
+      calls: await previewTailorRequest(
+        vault,
+        { jobAd, tone: body.tone },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      ),
     };
   });
 
