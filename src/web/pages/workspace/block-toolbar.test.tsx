@@ -82,7 +82,7 @@ describe("floating block toolbar", () => {
     ).toBe("high");
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole<HTMLButtonElement>("button", {
         name: "Move block up",
       }).disabled
     ).toBe(true);
