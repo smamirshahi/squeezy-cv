@@ -11,6 +11,7 @@ import {
   initialState,
   renameVariant,
   setActiveVariant,
+  setBulletOrders,
   setBulletSelection,
   setItemOrders,
   setItemSelection,
@@ -171,5 +172,22 @@ describe("variants slice: bullets, order and appearance", () => {
     expect(state.variants[1].layout).toEqual(layout);
     expect(state.variants[1].style.paperMargin).toBe("narrow");
     expect(state.variants[0].layout).not.toEqual(layout);
+  });
+});
+
+describe("variants slice: bullet order", () => {
+  it("sets the order of several bullets in one variant only", () => {
+    const state = variantsReducer(
+      withTwo(),
+      setBulletOrders({
+        variantId: "second",
+        itemId: "i",
+        orders: { a: 1, b: 0 },
+      })
+    );
+    const bullets = state.variants[1].selection.i.bullets;
+    expect(bullets?.a).toEqual({ isVisible: true, order: 1 });
+    expect(bullets?.b).toEqual({ isVisible: true, order: 0 });
+    expect(state.variants[0].selection.i).toBeUndefined();
   });
 });

@@ -2,17 +2,20 @@ import { useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   DragEndEvent,
   DragOverEvent,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { SortableColumn } from "@pages/editor-page/section-placement/sortable-column";
-import { findItemSideById } from "@pages/editor-page/section-placement/section-placement-utils";
+import {
+  moveBetweenColumns,
+  reorderInColumn,
+} from "@pages/editor-page/section-placement/section-placement-utils";
 import { Box } from "@mui/material";
-import { Side } from "@custom-types/styles-types";
 import { PageStructure } from "@store/app/app-slice-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
@@ -30,96 +33,31 @@ export function SectionPlacement(): JSX.Element {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
-    })
+    }),
+    // Keyboard: focus a part, Space to pick it up, arrows to move, Space to drop
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // While dragging, a part already moves into the column it is over
+  function handleDragOver(event: DragOverEvent): void {
+    const { active, over } = event;
+    if (over) {
+      setPageStructure((current) =>
+        moveBetweenColumns(current, active.id, over.id)
+      );
+    }
+  }
+
+  // On drop, settle the order inside the column and save it
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
     if (!over) {
+      setPageStructure(structure);
       return;
     }
-
-    const fromContainer = findItemSideById(pageStructure, active.id);
-    const toContainer = findItemSideById(pageStructure, over.id);
-
-    if (!fromContainer || !toContainer) {
-      return;
-    }
-
-    const fromItems = [...pageStructure[fromContainer]];
-    const toItems = [...pageStructure[toContainer]];
-
-    const oldIndex = fromItems.findIndex((id) => id === active.id);
-    const newIndex = fromItems.findIndex((id) => id === over.id);
-
-    if (fromContainer === toContainer) {
-      // Reorder within the same container
-      const newItems = arrayMove(fromItems, oldIndex, newIndex);
-      setPageStructure((prev) => ({ ...prev, [fromContainer]: newItems }));
-    } else {
-      // Move between containers
-      const movingItem = oldIndex !== -1 ? fromItems[oldIndex] : undefined;
-      if (!movingItem) {
-        return;
-      }
-
-      const newFromItems = fromItems.filter((id) => id !== active.id);
-      const newToItems = [movingItem, ...toItems];
-
-      setPageStructure((prev) => ({ ...prev, [fromContainer]: newFromItems }));
-      setPageStructure((prev) => ({ ...prev, [toContainer]: newToItems }));
-    }
-    dispatch(updatePageStructure(pageStructure));
-  }
-
-  function handleDragOver(event: DragOverEvent): void {
-    const { active, over } = event;
-    if (!over) {
-      return;
-    }
-
-    const fromContainer = findItemSideById(pageStructure, active.id);
-    const possibleSide = over.id as Side;
-    const isContainer = ["fullWidth", "left", "right"].includes(possibleSide);
-    const toContainer = isContainer
-      ? possibleSide
-      : findItemSideById(pageStructure, over.id);
-
-    if (!fromContainer || !toContainer) {
-      return;
-    }
-
-    if (fromContainer === toContainer) {
-      const items = pageStructure[fromContainer];
-      const oldIndex = items.findIndex((id) => id === active.id);
-      const newIndex = items.findIndex((id) => id === over.id);
-      if (oldIndex !== newIndex && newIndex !== -1) {
-        setPageStructure((prev) => ({
-          ...prev,
-          [fromContainer]: arrayMove(prev[fromContainer], oldIndex, newIndex),
-        }));
-      }
-      return;
-    }
-
-    setPageStructure((prev) => {
-      const fromItems = [...prev[fromContainer]];
-      const toItems = [...prev[toContainer]];
-      const activeIndex = fromItems.findIndex((id) => id === active.id);
-      if (activeIndex === -1) {
-        return prev;
-      }
-      const [movingItem] = fromItems.splice(activeIndex, 1);
-      const overIndex = toItems.findIndex((id) => id === over.id);
-      const insertIndex = overIndex === -1 ? toItems.length : overIndex;
-      toItems.splice(insertIndex, 0, movingItem);
-
-      return {
-        ...prev,
-        [fromContainer]: fromItems,
-        [toContainer]: toItems,
-      };
-    });
+    const next = reorderInColumn(pageStructure, active.id, over.id);
+    setPageStructure(next);
+    dispatch(updatePageStructure(next));
   }
 
   return (

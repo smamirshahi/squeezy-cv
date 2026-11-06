@@ -38,6 +38,9 @@ export const BulletSelectionSchema = Object({
   isVisible: Boolean,
 
   wording: WordingSchema.optional(),
+
+  /** Position within its item. Bullets without one keep their vault position after those with one. */
+  order: Number.optional(),
 });
 
 export const ItemSelectionSchema = Object({
