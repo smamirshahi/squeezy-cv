@@ -9,6 +9,7 @@ import { CvFileSchema } from "@custom-types/vault-types";
 import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
+import { previewTailorRequest } from "@server/ai/preview";
 import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
@@ -245,6 +246,25 @@ export function buildServer({
     }
     const { vault } = await storage.loadVault();
     return tailor(ai, vault, { jobAd, tone: body.tone });
+  });
+
+  // What tailoring would send, without sending it (works without a key)
+  app.post("/api/ai/tailor/preview", async (request, reply) => {
+    const body = TailorRequestSchema.check(request.body);
+    const jobAd = body.jobAd.trim();
+    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
+      );
+    }
+    const { vault } = await storage.loadVault();
+    return {
+      provider: aiProvider,
+      calls: await previewTailorRequest(vault, { jobAd, tone: body.tone }),
+    };
   });
 
   app.get("/api/vault", () => storage.loadVault());

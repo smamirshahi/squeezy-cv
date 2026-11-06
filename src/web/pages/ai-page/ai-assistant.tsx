@@ -26,6 +26,7 @@ import {
   describeItemChange,
 } from "@shared/ai/apply-proposal";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
+import { RequestPreview } from "@pages/ai-page/request-preview";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";
 import { render } from "@shared/variant/render";
 import { canAutoAccept } from "@shared/ai/guardrails";
@@ -94,6 +95,7 @@ export function AiAssistant(): JSX.Element {
   const [result, setResult] = useState<TailorResult | null>(null);
   const [decisions, setDecisions] = useState<Decisions | null>(null);
   const [created, setCreated] = useState<string>("");
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   useEffect(() => {
     api
@@ -282,6 +284,13 @@ export function AiAssistant(): JSX.Element {
           >
             Analyse
           </Button>
+          <Button
+            size="small"
+            disabled={jobAd.trim().length === 0}
+            onClick={() => setIsPreviewOpen(true)}
+          >
+            Preview the exact request
+          </Button>
           {isBusy && <CircularProgress size={22} />}
           {isBusy && provider === "ollama" && (
             <Typography variant="body2">
@@ -296,6 +305,11 @@ export function AiAssistant(): JSX.Element {
           </Alert>
         )}
 
+        <RequestPreview
+          isOpen={isPreviewOpen}
+          request={{ jobAd, tone }}
+          onClose={() => setIsPreviewOpen(false)}
+        />
         {result && <Analysis result={result} />}
       </Box>
       <Box
