@@ -32,7 +32,7 @@ function createStore(): AppStore {
 function renderEditor(store: AppStore): void {
   render(
     <Provider store={store}>
-      <EditorPage contentRef={{ current: null }} />
+      <EditorPage />
     </Provider>
   );
 }

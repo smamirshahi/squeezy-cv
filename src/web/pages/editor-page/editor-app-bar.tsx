@@ -4,12 +4,7 @@ import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { metaDataSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 
-interface Props {
-  /** The reference to the content */
-  contentRef: React.RefObject<HTMLDivElement | null>;
-}
-
-export function EditorAppBar({ contentRef }: Props): JSX.Element {
+export function EditorAppBar(): JSX.Element {
   const metaData = useAppSelector(metaDataSelector);
 
   return (
@@ -25,7 +20,7 @@ export function EditorAppBar({ contentRef }: Props): JSX.Element {
           Applications
         </Button>
         <SaveStatus />
-        <EditorPageButtons printReference={contentRef} />
+        <EditorPageButtons />
       </Toolbar>
     </AppBar>
   );
