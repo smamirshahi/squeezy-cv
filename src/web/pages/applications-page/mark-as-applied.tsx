@@ -19,6 +19,7 @@ import { useStore } from "react-redux";
 import { Application } from "@custom-types/application-types";
 import { toIsoDay } from "@shared/application/application-utils";
 import { saveActiveVariant } from "@hooks/save-active-variant";
+import { refreshLocks } from "@store/persistence/persistence-actions";
 import { createApiClient } from "@store/persistence/api-client";
 import { RootState } from "@store/store-helper";
 
@@ -84,6 +85,7 @@ export function MarkAsApplied(): JSX.Element {
         jobDescription: form.jobDescription,
         notes: form.notes,
       });
+      await refreshLocks(api, store.dispatch);
       setIsOpen(false);
       setCreated(application);
     } catch (caught) {

@@ -19,7 +19,12 @@ import {
   setStorageStatus,
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
-import { setVariants } from "@store/variants/variants-slice";
+import { computeVariantLocks } from "@shared/variant/variant-lock";
+import {
+  relockVariants,
+  setLocks,
+  setVariants,
+} from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 
 /** Puts a CV file and its variants into the store and shows the first variant */
@@ -35,6 +40,21 @@ export function loadCvFileIntoStore(
   dispatch(setMetaData(file.metaData));
   dispatch(setVariants(list));
   activateVariant(dispatch, list[0]);
+}
+
+/**
+ * Reads which variants were sent (applications with status "applied") and locks them. If the
+ * applications cannot be read the previous lock state stays, it is never dropped.
+ */
+export async function refreshLocks(
+  api: ApiClient,
+  dispatch: AppDispatch
+): Promise<void> {
+  try {
+    dispatch(setLocks(computeVariantLocks(await api.listApplications())));
+  } catch {
+    // keep what is known; saving a locked variant is still refused by the server
+  }
 }
 
 function errorText(error: unknown): string {
@@ -99,6 +119,7 @@ export async function loadFromServer(
       })
     );
     dispatch(setStorageStatus({ status: "ready" }));
+    await refreshLocks(api, dispatch);
   } catch (error) {
     if (error instanceof ApiError && error.code === "not_found") {
       await showFallback();
@@ -152,12 +173,16 @@ export async function saveToServer(
     for (const id of plan.variantsToSave) {
       const variant = state.variants.variants.find((v) => v.id === id);
       if (variant) {
-        await api.saveVariant(variant);
+        await api.saveVariant(variant, {
+          isUnlocked: state.variants.unlockedIds.includes(id),
+        });
       }
     }
     for (const id of plan.variantsToDelete) {
       try {
-        await api.deleteVariant(id);
+        await api.deleteVariant(id, {
+          isUnlocked: state.variants.unlockedIds.includes(id),
+        });
       } catch (error) {
         if (!(error instanceof ApiError && error.code === "not_found")) {
           throw error;
@@ -165,6 +190,8 @@ export async function saveToServer(
       }
     }
     dispatch(setSavedState(current));
+    // saved: a variant that was unlocked for this edit is locked again
+    dispatch(relockVariants({ ids: state.variants.unlockedIds }));
   } catch (error) {
     dispatch(setSaveError(errorText(error)));
   } finally {

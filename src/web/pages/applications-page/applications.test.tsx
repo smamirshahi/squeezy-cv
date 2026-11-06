@@ -108,8 +108,9 @@ describe("Mark as applied", () => {
     fireEvent.click(submit);
 
     await screen.findByText(/Saved: Acme Ltd, Senior Dev/);
-    // Nothing was unsaved, so the only call is the one that creates the application
-    expect(calls).toHaveLength(1);
+    // Nothing was unsaved, so the only writes are the application and then a re-read of the locks
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toMatchObject({ method: "GET", url: "/api/applications" });
     expect(calls[0]).toMatchObject({
       method: "POST",
       url: "/api/applications",

@@ -1,3 +1,4 @@
+import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { useState } from "react";
 import {
   Box,
@@ -64,7 +65,7 @@ export function EditorVariants(): JSX.Element {
   }
 
   return (
-    <>
+    <LockedFieldset>
       <Typography variant="h6" sx={{ mb: 1 }}>
         Variants
       </Typography>
@@ -197,6 +198,6 @@ export function EditorVariants(): JSX.Element {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </LockedFieldset>
   );
 }

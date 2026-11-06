@@ -16,6 +16,7 @@ import {
   computeItemOrders,
 } from "@shared/variant/variant-utils";
 import { moveSection } from "@pages/workspace/inspector";
+import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -190,131 +191,135 @@ export function Outline({ onClose }: Props): JSX.Element {
         </IconButton>
       </Box>
       <Box sx={{ flex: 1, overflow: "auto", py: 0.5 }}>
-        {ordered.map((section, sectionIndex) => {
-          const items = sortItemsByVariant(section.items, variant.selection);
-          return (
-            <Box key={section.id}>
-              <Row
-                level={0}
-                isBold
-                label={section.title}
-                isFirst={sectionIndex === 0}
-                isLast={sectionIndex === ordered.length - 1}
-                onMove={(delta) =>
-                  moveSectionBy(section.id, section.title, delta)
-                }
-              />
-              {items.map((item, itemIndex) => {
-                const choice = variant.selection[item.id];
-                const isHidden = choice?.isVisible === false;
-                const label = getItemLabel(item);
-                const bullets = sortBulletsByVariant(item, variant.selection);
-                return (
-                  <Box key={item.id}>
-                    <Row
-                      level={1}
-                      label={label}
-                      isHidden={isHidden}
-                      isEmphasised={choice?.emphasis === "high"}
-                      isSelected={selected?.itemId === item.id}
-                      isFirst={itemIndex === 0}
-                      isLast={itemIndex === items.length - 1}
-                      onSelect={() =>
-                        dispatch(
-                          setSelectedBlock({
-                            sectionId: section.id,
-                            itemId: item.id,
-                          })
-                        )
-                      }
-                      onEye={() =>
-                        dispatch(
-                          setItemSelection({
-                            variantId: variant.id,
-                            itemId: item.id,
-                            change: { isVisible: isHidden },
-                          })
-                        )
-                      }
-                      onEmphasis={() =>
-                        dispatch(
-                          setItemSelection({
-                            variantId: variant.id,
-                            itemId: item.id,
-                            change: {
-                              emphasis:
-                                choice?.emphasis === "high" ? "normal" : "high",
-                            },
-                          })
-                        )
-                      }
-                      onMove={(delta) => {
-                        dispatch(
-                          setItemOrders({
-                            variantId: variant.id,
-                            orders: computeItemOrders(
-                              section.items,
-                              variant,
-                              item.id,
-                              itemIndex + delta
-                            ),
-                          })
-                        );
-                        setAnnouncement(
-                          `Moved ${label} to position ${itemIndex + delta + 1} of ${items.length}.`
-                        );
-                      }}
-                    />
-                    {section.type !== "skills" &&
-                      bullets.map((bullet, bulletIndex) => {
-                        const bulletChoice = choice?.bullets?.[bullet.id];
-                        const isBulletHidden =
-                          bulletChoice?.isVisible === false;
-                        const bulletLabel = shorten(bullet.text, 38);
-                        return (
-                          <Row
-                            key={bullet.id}
-                            level={2}
-                            label={bulletLabel}
-                            isHidden={isHidden || isBulletHidden}
-                            isFirst={bulletIndex === 0}
-                            isLast={bulletIndex === bullets.length - 1}
-                            onEye={() =>
-                              dispatch(
-                                setBulletSelection({
-                                  variantId: variant.id,
-                                  itemId: item.id,
-                                  bulletId: bullet.id,
-                                  change: { isVisible: isBulletHidden },
-                                })
-                              )
-                            }
-                            onMove={(delta) => {
-                              dispatch(
-                                setBulletOrders({
-                                  variantId: variant.id,
-                                  itemId: item.id,
-                                  orders: computeBulletOrders(
-                                    item,
-                                    variant,
-                                    bullet.id,
-                                    bulletIndex + delta
-                                  ),
-                                })
-                              );
-                              setAnnouncement(
-                                `Moved a bullet of ${label} to position ${bulletIndex + delta + 1} of ${bullets.length}.`
-                              );
-                            }}
-                          />
-                        );
-                      })}
-                  </Box>
-                );
-              })}
-            </Box>
-          );
-        })}
+        <LockedFieldset>
+          {ordered.map((section, sectionIndex) => {
+            const items = sortItemsByVariant(section.items, variant.selection);
+            return (
+              <Box key={section.id}>
+                <Row
+                  level={0}
+                  isBold
+                  label={section.title}
+                  isFirst={sectionIndex === 0}
+                  isLast={sectionIndex === ordered.length - 1}
+                  onMove={(delta) =>
+                    moveSectionBy(section.id, section.title, delta)
+                  }
+                />
+                {items.map((item, itemIndex) => {
+                  const choice = variant.selection[item.id];
+                  const isHidden = choice?.isVisible === false;
+                  const label = getItemLabel(item);
+                  const bullets = sortBulletsByVariant(item, variant.selection);
+                  return (
+                    <Box key={item.id}>
+                      <Row
+                        level={1}
+                        label={label}
+                        isHidden={isHidden}
+                        isEmphasised={choice?.emphasis === "high"}
+                        isSelected={selected?.itemId === item.id}
+                        isFirst={itemIndex === 0}
+                        isLast={itemIndex === items.length - 1}
+                        onSelect={() =>
+                          dispatch(
+                            setSelectedBlock({
+                              sectionId: section.id,
+                              itemId: item.id,
+                            })
+                          )
+                        }
+                        onEye={() =>
+                          dispatch(
+                            setItemSelection({
+                              variantId: variant.id,
+                              itemId: item.id,
+                              change: { isVisible: isHidden },
+                            })
+                          )
+                        }
+                        onEmphasis={() =>
+                          dispatch(
+                            setItemSelection({
+                              variantId: variant.id,
+                              itemId: item.id,
+                              change: {
+                                emphasis:
+                                  choice?.emphasis === "high"
+                                    ? "normal"
+                                    : "high",
+                              },
+                            })
+                          )
+                        }
+                        onMove={(delta) => {
+                          dispatch(
+                            setItemOrders({
+                              variantId: variant.id,
+                              orders: computeItemOrders(
+                                section.items,
+                                variant,
+                                item.id,
+                                itemIndex + delta
+                              ),
+                            })
+                          );
+                          setAnnouncement(
+                            `Moved ${label} to position ${itemIndex + delta + 1} of ${items.length}.`
+                          );
+                        }}
+                      />
+                      {section.type !== "skills" &&
+                        bullets.map((bullet, bulletIndex) => {
+                          const bulletChoice = choice?.bullets?.[bullet.id];
+                          const isBulletHidden =
+                            bulletChoice?.isVisible === false;
+                          const bulletLabel = shorten(bullet.text, 38);
+                          return (
+                            <Row
+                              key={bullet.id}
+                              level={2}
+                              label={bulletLabel}
+                              isHidden={isHidden || isBulletHidden}
+                              isFirst={bulletIndex === 0}
+                              isLast={bulletIndex === bullets.length - 1}
+                              onEye={() =>
+                                dispatch(
+                                  setBulletSelection({
+                                    variantId: variant.id,
+                                    itemId: item.id,
+                                    bulletId: bullet.id,
+                                    change: { isVisible: isBulletHidden },
+                                  })
+                                )
+                              }
+                              onMove={(delta) => {
+                                dispatch(
+                                  setBulletOrders({
+                                    variantId: variant.id,
+                                    itemId: item.id,
+                                    orders: computeBulletOrders(
+                                      item,
+                                      variant,
+                                      bullet.id,
+                                      bulletIndex + delta
+                                    ),
+                                  })
+                                );
+                                setAnnouncement(
+                                  `Moved a bullet of ${label} to position ${bulletIndex + delta + 1} of ${bullets.length}.`
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                    </Box>
+                  );
+                })}
+              </Box>
+            );
+          })}
+        </LockedFieldset>
       </Box>
       <Box
         role="status"

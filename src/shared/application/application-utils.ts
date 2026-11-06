@@ -253,6 +253,7 @@ export function summariseApplication(
     role: application.role,
     status: application.status,
     appliedAt: application.appliedAt,
+    variantId: application.submitted.variant.id,
     updatedAt: lastUpdateDay(application),
     isCorrupt: false,
   };

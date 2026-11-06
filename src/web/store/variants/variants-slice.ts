@@ -16,6 +16,7 @@ import {
   updateBulletSelection,
   updateItemSelection as changeItemSelection,
 } from "@shared/variant/variant-utils";
+import { NO_LOCKS, VariantLocks } from "@shared/variant/variant-lock";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
 
@@ -23,6 +24,12 @@ import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice"
 export interface VariantsState {
   variants: Variant[];
   activeId: string;
+
+  /** Which variants were sent (derived from the applications, see `computeVariantLocks`) */
+  locks: VariantLocks;
+
+  /** Locked variants the user approved editing in this session. Cleared when they are saved or re-locked. */
+  unlockedIds: string[];
 }
 
 const DEFAULT_VARIANT_ID = "default";
@@ -34,7 +41,12 @@ function createInitialState(): VariantsState {
     DEFAULT_VARIANT_ID,
     "Default"
   );
-  return { variants: [variant], activeId: variant.id };
+  return {
+    variants: [variant],
+    activeId: variant.id,
+    locks: NO_LOCKS,
+    unlockedIds: [],
+  };
 }
 
 export const initialState: VariantsState = createInitialState();
@@ -126,6 +138,28 @@ const variantsSlice = createSlice({
       if (state.activeId === action.payload.id) {
         state.activeId = state.variants[0].id;
       }
+    },
+
+    /** The lock state from the applications. An approved unlock is dropped when the variant is no longer locked. */
+    setLocks(state, action: PayloadAction<VariantLocks>) {
+      state.locks = action.payload;
+      state.unlockedIds = state.unlockedIds.filter((id) =>
+        isLockedIn(state, id)
+      );
+    },
+
+    /** The user approved editing a locked variant (the sent copy is not changed) */
+    unlockVariant(state, action: PayloadAction<{ id: string }>) {
+      if (!state.unlockedIds.includes(action.payload.id)) {
+        state.unlockedIds.push(action.payload.id);
+      }
+    },
+
+    /** Locks again, e.g. after saving */
+    relockVariants(state, action: PayloadAction<{ ids: string[] }>) {
+      state.unlockedIds = state.unlockedIds.filter(
+        (id) => !action.payload.ids.includes(id)
+      );
     },
 
     setActiveVariant(state, action: PayloadAction<{ id: string }>) {
@@ -290,10 +324,69 @@ const variantsSlice = createSlice({
   },
 });
 
-export const variantsReducer = variantsSlice.reducer;
+/** Whether the variant is locked by its applications, whatever was approved */
+function isLockedIn(state: Pick<VariantsState, "locks">, id: string): boolean {
+  return (
+    state.locks.hasUnreadable || (state.locks.byVariant[id]?.length ?? 0) > 0
+  );
+}
+
+/** Whether the variant cannot be changed right now: locked, and no unlock approved */
+export function isVariantReadOnly(state: VariantsState, id: string): boolean {
+  return isLockedIn(state, id) && !state.unlockedIds.includes(id);
+}
+
+const LOCK_ACTIONS: string[] = [
+  "variants/setVariants",
+  "variants/setLocks",
+  "variants/unlockVariant",
+  "variants/relockVariants",
+  "variants/setActiveVariant",
+];
+
+/**
+ * The slice reducer, plus the lock: whatever an action did to a read-only variant (edit,
+ * rename, delete) is undone here, so no screen, shortcut or write-back can change a variant
+ * that was sent. Loading (`setVariants`) and the lock actions themselves pass through.
+ */
+export function variantsReducer(
+  state: VariantsState | undefined,
+  action: { type: string }
+): VariantsState {
+  const next = variantsSlice.reducer(state, action);
+  if (!state || next === state || LOCK_ACTIONS.includes(action.type)) {
+    return next;
+  }
+  const readOnly = state.variants.filter((v) => isVariantReadOnly(state, v.id));
+  if (readOnly.length === 0) {
+    return next;
+  }
+  let variants = next.variants;
+  for (const before of readOnly) {
+    const index = variants.findIndex((v) => v.id === before.id);
+    if (index === -1) {
+      variants = [
+        ...variants.slice(0, state.variants.indexOf(before)),
+        before,
+        ...variants.slice(state.variants.indexOf(before)),
+      ];
+    } else if (variants[index] !== before) {
+      variants = variants.map((v, i) => (i === index ? before : v));
+    }
+  }
+  const activeId = variants.some((v) => v.id === next.activeId)
+    ? next.activeId
+    : state.activeId;
+  return variants === next.variants && activeId === next.activeId
+    ? next
+    : { ...next, variants, activeId };
+}
 
 export const {
   setVariants,
+  setLocks,
+  unlockVariant,
+  relockVariants,
   createVariant: addVariant,
   insertVariant,
   duplicateVariant,
@@ -310,6 +403,13 @@ export const {
   setFitLimits,
   setTuning,
 } = variantsSlice.actions;
+
+/** The active variant is locked (sent) and no unlock was approved */
+export function isActiveVariantReadOnlySelector(state: {
+  variants: VariantsState;
+}): boolean {
+  return isVariantReadOnly(state.variants, state.variants.activeId);
+}
 
 export function variantsSelector(state: {
   variants: VariantsState;
