@@ -214,3 +214,68 @@ describe("prompts", () => {
     expect(() => loadPrompt("a/b")).toThrow();
   });
 });
+
+describe("personal data never reaches the model", () => {
+  const personal = {
+    profile: {
+      fullName: "Mohammad Amirshahi",
+      email: "mo@example.com",
+      phone: "07700 900123",
+    },
+    links: [],
+  };
+  const schema = { check: (v: unknown) => v as { greeting: string } };
+
+  it("sends placeholders only, in every attempt, and restores the answer", async () => {
+    const sent: string[] = [];
+    let call = 0;
+    const send: MessageSender = (system, messages) => {
+      sent.push(system, ...messages.map((m) => m.content));
+      call += 1;
+      return Promise.resolve({
+        text:
+          call === 1
+            ? "not json for Mohammad Amirshahi"
+            : '{"greeting":"Dear [Candidate Name], write to [Email]"}',
+        stopReason: "end_turn",
+      });
+    };
+    const result = await new ClaudeAiClient(send).generate({
+      promptName: "json-only",
+      input: "Mohammad Amirshahi, mo@example.com, 07700900123",
+      schema,
+      personal,
+    });
+    expect(result.greeting).toBe(
+      "Dear Mohammad Amirshahi, write to mo@example.com"
+    );
+    expect(call).toBe(2);
+    const body = sent.join("\n");
+    for (const secret of [
+      "Mohammad",
+      "Amirshahi",
+      "mo@example.com",
+      "900123",
+    ]) {
+      expect(body).not.toContain(secret);
+    }
+  });
+
+  it("warns, and does not fail, when the model invents a placeholder", async () => {
+    const warnings: string[] = [];
+    const send: MessageSender = () =>
+      Promise.resolve({
+        text: '{"greeting":"Hi [Candidate Name] [Phone Numbr]"}',
+        stopReason: "end_turn",
+      });
+    const result = await new ClaudeAiClient(send).generate({
+      promptName: "json-only",
+      input: "x",
+      schema,
+      personal,
+      onWarning: (m) => warnings.push(m),
+    });
+    expect(result.greeting).toBe("Hi Mohammad Amirshahi [Phone Numbr]");
+    expect(warnings).toHaveLength(1);
+  });
+});

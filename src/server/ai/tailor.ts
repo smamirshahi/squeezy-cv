@@ -356,11 +356,18 @@ export async function tailor(
   vault: Vault,
   input: TailorInput
 ): Promise<TailorResult> {
+  const personal = { profile: vault.profile, links: vault.links };
+  const aiWarnings: string[] = [];
+  function onWarning(message: string): void {
+    aiWarnings.push(message);
+  }
   const requirements: Requirements = cleanRequirements(
     await ai.generate({
       promptName: "extract-requirements",
       input: input.jobAd,
       schema: RequirementsSchema,
+      personal,
+      onWarning,
     })
   );
 
@@ -373,8 +380,10 @@ export async function tailor(
       cv: describeCv(vault, refs),
     }),
     schema: RawProposalSchema,
+    personal,
+    onWarning,
   });
 
   const { proposal, warnings } = sanitiseProposal(vault, toProposal(refs, raw));
-  return { requirements, proposal, warnings };
+  return { requirements, proposal, warnings: [...aiWarnings, ...warnings] };
 }
