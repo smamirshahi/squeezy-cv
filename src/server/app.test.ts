@@ -5,6 +5,7 @@ import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { createVariant } from "@shared/variant/variant-utils";
 import { buildServer } from "@server/app";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { readConfig } from "@server/config";
@@ -23,7 +24,10 @@ afterEach(async () => {
 });
 
 const cvFile = migrateCvFile(sample);
-const variant = { id: "acme", version: 1, name: "Acme", tags: ["x"] };
+const variant = {
+  ...createVariant(cvFile.vault, cvFile.style, "acme", "Acme"),
+  tags: ["x"],
+};
 
 describe("health", () => {
   it("answers", async () => {

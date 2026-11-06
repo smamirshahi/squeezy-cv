@@ -1,5 +1,5 @@
 import { CvFile } from "@custom-types/vault-types";
-import { StoredVariant } from "@custom-types/stored-variant-types";
+import { Variant } from "@custom-types/variant-types";
 
 export type StorageErrorCode = "not_found" | "corrupt" | "invalid_id";
 
@@ -32,8 +32,8 @@ export interface CvStorage {
   saveVault(file: CvFile): Promise<void>;
 
   listVariants(): Promise<VariantSummary[]>;
-  loadVariant(id: string): Promise<StoredVariant>;
-  saveVariant(variant: StoredVariant): Promise<void>;
+  loadVariant(id: string): Promise<Variant>;
+  saveVariant(variant: Variant): Promise<void>;
 
   /** Throws StorageError "not_found" if there is no such variant */
   deleteVariant(id: string): Promise<void>;
