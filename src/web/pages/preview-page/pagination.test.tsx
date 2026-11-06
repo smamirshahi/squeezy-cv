@@ -51,6 +51,17 @@ describe("measuring", () => {
     ]);
   });
 
+  it("does not count rounding as another page: a CV that exactly fills A4 is one page", () => {
+    const paper = document.createElement("div");
+    setRect(paper, 0, 0);
+    // A4 is 1122.52 px high; browsers report the scroll height as a whole number: 1123
+    fakeLayout(paper, 1123);
+    expect(measurePagination(paper, 10).pageCount).toBe(1);
+    // a real overflow still counts
+    fakeLayout(paper, 1123 + 40);
+    expect(measurePagination(paper, 10).pageCount).toBe(2);
+  });
+
   it("counts the pages of a paper from its measured height", () => {
     const paper = document.createElement("div");
     setRect(paper, 0, 0);

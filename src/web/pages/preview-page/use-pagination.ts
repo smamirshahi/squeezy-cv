@@ -6,6 +6,9 @@ import { Block, Pagination, paginate } from "@shared/layout/paginate";
 const PX_PER_MM = 96 / 25.4;
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
+/** `scrollHeight` is a whole number of px; a CV that exactly fills the page must still be one page */
+const ROUNDING_PX = 1;
+
 /** Where the blocks (`data-cv-block`) inside `root` are, in px from `originTop` */
 export function measureBlocks(root: HTMLElement, originTop: number): Block[] {
   return Array.from(root.querySelectorAll<HTMLElement>("[data-cv-block]")).map(
@@ -28,7 +31,8 @@ export function measurePagination(
   const marginPx = marginMm * PX_PER_MM;
   const origin = paper.getBoundingClientRect().top + marginPx;
   const pageHeight = (A4_DIMENSION_MM.height - 2 * marginMm) * PX_PER_MM;
-  const contentHeight = paper.scrollHeight - 2 * marginPx;
+  // scrollHeight is rounded up to whole pixels: do not count that as another page
+  const contentHeight = paper.scrollHeight - 2 * marginPx - ROUNDING_PX;
   return paginate(measureBlocks(paper, origin), contentHeight, pageHeight);
 }
 

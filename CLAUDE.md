@@ -21,13 +21,14 @@ Package manager is **pnpm**.
 - `pnpm dev` — web (Vite, :5173) and server (:3001) together; Vite proxies `/api` to the server. `pnpm dev:web` / `pnpm dev:server` run one of them; `pnpm server` runs the server once, without watching. `PORT`, `DATA_DIR` (default `./data`) and `WEB_URL` (default `http://localhost:5173`, must be this machine) configure the server. PDF export needs Chromium once: `pnpm exec playwright install chromium` (downloads ~110 MB to the Playwright cache, not the repo) and the web app running at `WEB_URL`.
 - `pnpm build` — `tsc -b && vite build`
 - `pnpm test` — Vitest (once); `pnpm test:watch`. Single file: `pnpm exec vitest run src/path/file.test.ts`. Tests live next to the code as `*.test.ts(x)`. Default environment is node; component tests start with `// @vitest-environment jsdom` and use Testing Library (see `pages/editor-page/editors.test.tsx`). jsdom is pinned to v26 because newer versions need a newer Node than some machines here have.
+- `pnpm test:e2e` — real-browser tests in `src/e2e/*.e2e.ts` (separate Vitest config, not part of `pnpm test`): they start the API on a temp data folder, Vite and Chromium; `pdf.e2e.ts` checks PDFs (page count, A4, text layer via `unpdf`, hidden/ordered content) and `editor.e2e.ts` drives the UI (hide an item, keyboard-reorder a section, save, export PDF, reload). Needs `pnpm exec playwright install chromium` once; CI does it. Use these for anything about real layout, which jsdom cannot show (they already caught a page-count rounding bug).
 - `pnpm lint:check` — ESLint on `src`, no changes (what CI runs); `pnpm lint` does the same with `--fix`
 - CI (`.github/workflows/ci.yml`) runs build, lint:check, format-check and test on every PR.
 - `pnpm format-check` / `pnpm format-fix` — Prettier (`.prettierrc`: `trailingComma: es5`; keep that style)
 
 ## Architecture
 
-**Path aliases are mandatory.** ESLint (`no-restricted-imports`) forbids relative imports (`./`, `../`). Use `@components/*`, `@custom-styles/*`, `@hooks/*`, `@pages/*`, `@store/*` (all under `src/web`), `@shared/*`, `@custom-types/*` (`src/shared/custom-types`), `@server/*`, `@fixtures/*` (defined in `tsconfig.json`, resolved by `vite-tsconfig-paths`). The only exceptions are `src/web/main.tsx` (`./index.css`, `./App`), which carry eslint-disable comments. Also use `useAppDispatch`/`useAppSelector` from `@store/store-helper`, never raw `useDispatch`/`useSelector`.
+**Path aliases are mandatory.** ESLint (`no-restricted-imports`) forbids relative imports (`./`, `../`). Use `@components/*`, `@custom-styles/*`, `@hooks/*`, `@pages/*`, `@store/*` (all under `src/web`), `@shared/*`, `@custom-types/*` (`src/shared/custom-types`), `@server/*`, `@fixtures/*`, `@e2e/*` (`src/e2e`) (defined in `tsconfig.json`, resolved by `vite-tsconfig-paths`). The only exceptions are `src/web/main.tsx` (`./index.css`, `./App`), which carry eslint-disable comments. Also use `useAppDispatch`/`useAppSelector` from `@store/store-helper`, never raw `useDispatch`/`useSelector`.
 
 **State (three Redux slices, `src/store/`):**
 
