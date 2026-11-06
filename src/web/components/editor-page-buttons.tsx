@@ -75,7 +75,7 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
         onClick={() => handleExport(fileName)}
         startIcon={<SaveIcon />}
       >
-        Save
+        Export JSON
       </Button>
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}

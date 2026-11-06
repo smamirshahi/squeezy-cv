@@ -27,6 +27,7 @@
 
     "paths": {
       "@fixtures/*": ["fixtures/*"],
+      "@e2e/*": ["src/e2e/*"],
       "@shared/*": ["src/shared/*"],
       "@server/*": ["src/server/*"],
       "@custom-types/*": ["src/shared/custom-types/*"],
@@ -37,5 +38,5 @@
       "@store/*": ["src/web/store/*"],
     }
   },
-  "include": ["src", "fixtures", "vite.config.ts"]
+  "include": ["src", "fixtures", "vite.config.ts", "vitest.e2e.config.ts"]
 }

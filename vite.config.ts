@@ -14,5 +14,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.{ts,tsx}"],
+    // Real-browser tests: `pnpm test:e2e`
+    exclude: ["**/node_modules/**", "src/e2e/**"],
   },
 });

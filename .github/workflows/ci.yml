@@ -20,3 +20,6 @@ jobs:
       - run: pnpm lint:check
       - run: pnpm format-check
       - run: pnpm test
+      # Real browser: the PDF and the editor end to end (see src/e2e)
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
