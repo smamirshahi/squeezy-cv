@@ -1,6 +1,6 @@
 import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
-import { createAiClient } from "@server/ai/claude-client";
+import { createConfiguredAi } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
 import { PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
@@ -17,7 +17,8 @@ const aiConfig = readAiConfig(process.env);
 const app = buildServer({
   storage: new FileCvStorage(config.dataDir),
   pdf: new PlaywrightPdfRenderer(config.webUrl),
-  ai: aiConfig.apiKey ? createAiClient(aiConfig) : undefined,
+  ai: createConfiguredAi(aiConfig),
+  aiProvider: aiConfig.provider,
   isLoggingEnabled: true,
 });
 

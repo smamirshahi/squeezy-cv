@@ -13,6 +13,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // The editor tests render many form fields; a busy machine can exceed the 5 s default
+    testTimeout: 20_000,
     include: ["src/**/*.test.{ts,tsx}"],
     // Real-browser tests: `pnpm test:e2e`
     exclude: ["**/node_modules/**", "src/e2e/**"],

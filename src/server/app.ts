@@ -91,6 +91,9 @@ export interface ServerOptions {
 
   /** The AI client. Without it (no key set), the AI routes answer 503. */
   ai?: AiClient;
+
+  /** Which provider `ai` is, for the page to say where the CV goes */
+  aiProvider?: "claude" | "ollama";
   isLoggingEnabled?: boolean;
 }
 
@@ -99,6 +102,7 @@ export function buildServer({
   storage,
   pdf,
   ai,
+  aiProvider = "claude",
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const app = Fastify({
@@ -160,7 +164,10 @@ export function buildServer({
 
   app.get("/api/health", () => ({ status: "ok" }));
 
-  app.get("/api/ai/status", () => ({ isConfigured: ai !== undefined }));
+  app.get("/api/ai/status", () => ({
+    isConfigured: ai !== undefined,
+    provider: aiProvider,
+  }));
 
   app.post("/api/ai/tailor", async (request, reply) => {
     if (!ai) {
@@ -168,7 +175,7 @@ export function buildServer({
         reply,
         HTTP_UNAVAILABLE,
         "ai_not_configured",
-        "No API key. Set ANTHROPIC_API_KEY in .env (see .env.example)."
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
       );
     }
     const body = TailorRequestSchema.check(request.body);

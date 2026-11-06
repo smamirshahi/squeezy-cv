@@ -80,6 +80,7 @@ export function AiAssistant(): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
 
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
+  const [provider, setProvider] = useState<"claude" | "ollama">("claude");
   const [jobAd, setJobAd] = useState<string>("");
   const [tone, setTone] = useState<Tone>("neutral");
   const [pageLimit, setPageLimit] = useState<number>(base.pageLimit);
@@ -92,7 +93,10 @@ export function AiAssistant(): JSX.Element {
   useEffect(() => {
     api
       .getAiStatus()
-      .then((status) => setIsConfigured(status.isConfigured))
+      .then((status) => {
+        setIsConfigured(status.isConfigured);
+        setProvider(status.provider);
+      })
       .catch(() => setIsConfigured(false));
   }, [api]);
 
@@ -160,8 +164,10 @@ export function AiAssistant(): JSX.Element {
 
       {isConfigured === false && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          No API key is set. Put <code>ANTHROPIC_API_KEY=...</code> in the{" "}
-          <code>.env</code> file and restart the server.
+          AI is not set up. Either put <code>ANTHROPIC_API_KEY=...</code> in the{" "}
+          <code>.env</code> file (paid, Claude), or use a free local model with{" "}
+          <code>AI_PROVIDER=ollama</code> (see <code>.env.example</code>), then
+          restart the server.
         </Alert>
       )}
       {!isSaved && (
@@ -170,8 +176,9 @@ export function AiAssistant(): JSX.Element {
         </Alert>
       )}
       <Alert severity="info" sx={{ mb: 2 }}>
-        When you press Analyse, your CV (without your name and contact details)
-        and the advert are sent to Anthropic&apos;s API.
+        {provider === "ollama"
+          ? "Using your local Ollama model: your CV and the advert stay on this computer."
+          : "When you press Analyse, your CV (without your name and contact details) and the advert are sent to Anthropic's API."}
       </Alert>
 
       <TextField
