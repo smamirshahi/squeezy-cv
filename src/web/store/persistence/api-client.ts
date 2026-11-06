@@ -1,4 +1,11 @@
 import {
+  Application,
+  ApplicationPatch,
+  ApplicationSchema,
+  ApplicationSummary,
+  NewApplication,
+} from "@custom-types/application-types";
+import {
   TailorRequest,
   TailorResult,
   TailorResultSchema,
@@ -91,6 +98,22 @@ export interface ApiClient {
 
   /** The PDF of a saved variant, made by the server */
   createPdf: (variantId: string) => Promise<Blob>;
+
+  listApplications: () => Promise<ApplicationSummary[]>;
+  loadApplication: (id: string) => Promise<Application>;
+
+  /** Freezes the saved variant (data and PDF) as an application. Save the variant first. */
+  createApplication: (input: NewApplication) => Promise<Application>;
+  updateApplication: (
+    id: string,
+    patch: ApplicationPatch
+  ) => Promise<Application>;
+  deleteApplication: (id: string) => Promise<void>;
+}
+
+/** Where the browser can show or download the PDF that was sent with an application */
+export function applicationPdfUrl(id: string): string {
+  return `/api/applications/${encodeURIComponent(id)}/pdf`;
 }
 
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
@@ -147,6 +170,44 @@ export function createApiClient(
         { variantId },
         "blob"
       )) as Blob;
+    },
+    async listApplications() {
+      return (await request(
+        fetchImpl,
+        "GET",
+        "/api/applications"
+      )) as ApplicationSummary[];
+    },
+    async loadApplication(id) {
+      return ApplicationSchema.check(
+        await request(
+          fetchImpl,
+          "GET",
+          `/api/applications/${encodeURIComponent(id)}`
+        )
+      );
+    },
+    async createApplication(input) {
+      return ApplicationSchema.check(
+        await request(fetchImpl, "POST", "/api/applications", input)
+      );
+    },
+    async updateApplication(id, patch) {
+      return ApplicationSchema.check(
+        await request(
+          fetchImpl,
+          "PATCH",
+          `/api/applications/${encodeURIComponent(id)}`,
+          patch
+        )
+      );
+    },
+    async deleteApplication(id) {
+      await request(
+        fetchImpl,
+        "DELETE",
+        `/api/applications/${encodeURIComponent(id)}`
+      );
     },
     async deleteVariant(id) {
       await request(

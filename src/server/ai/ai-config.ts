@@ -23,6 +23,8 @@ export interface AiConfig {
 
 const DEFAULT_MODEL = "claude-opus-5-5";
 const DEFAULT_TIMEOUT_MS = 120_000;
+// A model on an ordinary computer's CPU can need many minutes for a CV
+const DEFAULT_OLLAMA_TIMEOUT_MS = 900_000;
 const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434";
 const DEFAULT_OLLAMA_MODEL = "llama3.1";
 const DEFAULT_NUM_CTX = 16_384;
@@ -77,7 +79,7 @@ export function readAiConfig(
     model: env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
     timeoutMs: positiveInteger(
       env.AI_TIMEOUT_MS,
-      DEFAULT_TIMEOUT_MS,
+      provider === "ollama" ? DEFAULT_OLLAMA_TIMEOUT_MS : DEFAULT_TIMEOUT_MS,
       "AI_TIMEOUT_MS"
     ),
     ollama: {

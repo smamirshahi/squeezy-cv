@@ -5,6 +5,7 @@ import { styled } from "@mui/material/styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
 import { useDownloadPdf } from "@hooks/use-download-pdf";
 import { useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
@@ -86,6 +87,7 @@ export function EditorPageButtons({ printReference }: Props): JSX.Element {
       >
         PDF
       </Button>
+      <MarkAsApplied />
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
         color="inherit"

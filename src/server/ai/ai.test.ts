@@ -188,6 +188,16 @@ describe("configuration", () => {
     );
   });
 
+  it("gives a local model much longer than Claude by default, unless told otherwise", () => {
+    expect(
+      readAiConfig({ AI_PROVIDER: "ollama" }).timeoutMs
+    ).toBeGreaterThanOrEqual(600000);
+    expect(
+      readAiConfig({ AI_PROVIDER: "ollama", AI_TIMEOUT_MS: "5000" }).timeoutMs
+    ).toBe(5000);
+    expect(readAiConfig({}).timeoutMs).toBe(120000);
+  });
+
   it("refuses to make a client without a key", () => {
     expect(() => createAiClient(readAiConfig({}))).toThrow(AiError);
     expect(() => createAiClient(readAiConfig({}))).toThrow(/ANTHROPIC_API_KEY/);

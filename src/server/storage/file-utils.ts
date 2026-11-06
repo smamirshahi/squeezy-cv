@@ -94,3 +94,27 @@ export async function writeJsonAtomic(
     throw error;
   }
 }
+
+/** Saves binary data (e.g. a PDF) with the same temp-file-and-rename safety as `writeJsonAtomic` */
+export async function writeBytesAtomic(
+  filePath: string,
+  bytes: Uint8Array
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  const tempPath = `${filePath}.${randomBytes(TEMP_NAME_BYTES).toString("hex")}.tmp`;
+  try {
+    const handle = await fs.open(tempPath, "w");
+    try {
+      await handle.writeFile(bytes);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    await fs.rename(tempPath, filePath);
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
+    await fs.rm(tempPath, { force: true });
+    throw error;
+  }
+}
