@@ -274,3 +274,120 @@ describe("POST /api/ai/tailor", () => {
     expect(response.statusCode).toBe(403);
   });
 });
+
+describe("guardrails in the proposal", () => {
+  const bullet = firstItem.bullets[0];
+  function withRewrite(text: string, extra: object = {}): Proposal {
+    return {
+      ...PROPOSAL,
+      bullets: [
+        {
+          ...PROPOSAL.bullets[0],
+          rewrite: { wording: "short", text },
+          ...extra,
+        },
+      ],
+    };
+  }
+
+  it("passes a harmless rewrite with no flags", async () => {
+    const result = await tailor(
+      fakeAi(withRewrite(bullet.text.toLowerCase())),
+      vault,
+      {
+        jobAd: "x",
+        tone: "neutral",
+      }
+    );
+    expect(result.proposal.bullets[0].flags).toEqual([]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("flags an invented number, tool or employer, and says so in the warnings", async () => {
+    const result = await tailor(
+      fakeAi(
+        withRewrite(`${bullet.text} using Kubernetes at Acme, saving 47%`)
+      ),
+      vault,
+      { jobAd: "x", tone: "neutral" }
+    );
+    const flags = result.proposal.bullets[0].flags ?? [];
+    expect(flags.join(" ")).toContain("Kubernetes");
+    expect(flags.join(" ")).toContain("Acme");
+    expect(flags.join(" ")).toContain("47%");
+    expect(result.warnings[0]).toContain("needs your check");
+  });
+
+  it("does not trust flags that the model sends itself", async () => {
+    const lying = withRewrite(`${bullet.text} and Kubernetes`, { flags: [] });
+    const result = await tailor(fakeAi(lying), vault, {
+      jobAd: "x",
+      tone: "neutral",
+    });
+    expect((result.proposal.bullets[0].flags ?? []).length).toBeGreaterThan(0);
+
+    const honestButWrong = withRewrite(bullet.text, { flags: ["bogus"] });
+    const second = await tailor(fakeAi(honestButWrong), vault, {
+      jobAd: "x",
+      tone: "neutral",
+    });
+    expect(second.proposal.bullets[0].flags).toEqual([]);
+  });
+
+  it("checks the draft statement against the whole CV", async () => {
+    const result = await tailor(
+      fakeAi({
+        ...PROPOSAL,
+        statement: "Engineer with 20 years of Rust and a PhD.",
+      }),
+      vault,
+      { jobAd: "x", tone: "neutral" }
+    );
+    const flags = (result.proposal.statementFlags ?? []).join(" ");
+    expect(flags).toContain("20");
+    expect(flags).toContain("Rust");
+    expect(result.warnings.some((w) => w.includes("statement"))).toBe(true);
+  });
+
+  it("accepts a statement built from the CV", async () => {
+    const result = await tailor(fakeAi(), vault, {
+      jobAd: "x",
+      tone: "neutral",
+    });
+    expect(result.proposal.statementFlags).toEqual([]);
+  });
+});
+
+describe("expected shape on the fixture adverts", () => {
+  it.each([
+    "job-ad-senior-frontend.txt",
+    "job-ad-data-analyst.txt",
+    "job-ad-injection.txt",
+  ])(
+    "%s gives a well-formed result that only talks about this CV",
+    async (name) => {
+      const advert = await readFile(path.join("fixtures", name), "utf8");
+      const result = await tailor(fakeAi(), vault, {
+        jobAd: advert,
+        tone: "neutral",
+      });
+
+      const itemIds = new Set(
+        vault.sections.flatMap((s) => s.items.map((i) => i.id))
+      );
+      expect(Object.keys(result).sort()).toEqual([
+        "proposal",
+        "requirements",
+        "warnings",
+      ]);
+      expect(result.requirements.keywords.length).toBeGreaterThan(0);
+      expect(result.proposal.items.every((i) => itemIds.has(i.itemId))).toBe(
+        true
+      );
+      expect(
+        result.proposal.items.every((i) => i.relevance >= 0 && i.relevance <= 1)
+      ).toBe(true);
+      expect(Array.isArray(result.proposal.gaps)).toBe(true);
+    }
+  );
+});
