@@ -9,6 +9,7 @@ import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
 import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
 import { ChatPanel } from "@pages/workspace/chat-panel";
+import { BlockToolbar } from "@pages/workspace/block-toolbar";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { LockBanner } from "@pages/workspace/variant-lock";
@@ -106,6 +107,7 @@ export function Workspace(): JSX.Element {
               <ZoomFrame zoom={zoom}>
                 <PreviewPage contentRef={contentRef} />
               </ZoomFrame>
+              <BlockToolbar canvasRef={canvasRef} />
             </Box>
             {tool === "chat" ? <ChatPanel /> : <Inspector />}
           </>

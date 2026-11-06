@@ -106,4 +106,35 @@ describe("canvas zoom and Tab between blocks (real browser)", () => {
       )
     ).toBe(false);
   });
+
+  it("the block toolbar floats beside the selected item and follows the zoom", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+    const toolbar = page.getByRole("toolbar", { name: "Selected block" });
+    expect(await toolbar.count()).toBe(0);
+
+    await page.locator("[data-cv-paper]").focus();
+    await page.keyboard.press("Tab");
+    await toolbar.waitFor();
+    const paper = (await page.locator("[data-cv-paper]").boundingBox())!;
+    const item = (await page
+      .locator("[data-cv-paper] [data-cv-item]")
+      .first()
+      .boundingBox())!;
+    const box = (await toolbar.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(paper.x + paper.width);
+    expect(Math.abs(box.y - item.y)).toBeLessThan(2);
+
+    // zooming out keeps it beside the paper
+    await page.getByRole("button", { name: "Zoom out" }).click();
+    await page.waitForTimeout(200);
+    const paper2 = (await page.locator("[data-cv-paper]").boundingBox())!;
+    const box2 = (await toolbar.boundingBox())!;
+    expect(box2.x).toBeGreaterThanOrEqual(paper2.x + paper2.width);
+    await page.keyboard.press("0");
+
+    // the button does what H does
+    await toolbar.getByRole("button", { name: "Hide block" }).click();
+    await toolbar.getByRole("button", { name: "Show block" }).waitFor();
+  });
 });
