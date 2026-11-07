@@ -21,6 +21,11 @@ import {
   HideResultSchema,
 } from "@custom-types/hide-types";
 import {
+  PlaceRequest,
+  PlaceResult,
+  PlaceResultSchema,
+} from "@custom-types/place-types";
+import {
   Application,
   ApplicationPatch,
   ApplicationSchema,
@@ -192,6 +197,9 @@ export interface ApiClient {
   /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
   suggestHide: (request: HideRequest) => Promise<HideResult>;
 
+  /** Asks the AI which section each unsorted item belongs in. Sends item words and section names. Nothing is moved. */
+  suggestPlacement: (request: PlaceRequest) => Promise<PlaceResult>;
+
   /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
   previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
 
@@ -330,6 +338,11 @@ export function createApiClient(
     async suggestHide(body) {
       return HideResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/hide", body)
+      );
+    },
+    async suggestPlacement(body) {
+      return PlaceResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/place", body)
       );
     },
     async previewTailor(body) {

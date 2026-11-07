@@ -36,6 +36,7 @@ describe("AiRegistry", () => {
       import: "claude",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     });
     expect(registry.forTask("hide")).toEqual({
       client: claude,
@@ -65,6 +66,7 @@ describe("AiRegistry", () => {
       import: "ollama",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     });
     expect(settings.saved?.import).toBe("ollama");
 
@@ -111,6 +113,7 @@ describe("AiRegistry", () => {
       import: "claude",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     };
     const registry = new AiRegistry({ ollama }, "ollama", settings);
     await registry.load();
@@ -134,12 +137,14 @@ describe("FileAiSettings", () => {
       import: "ollama",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     });
     expect(await store.load()).toEqual({
       tailor: "claude",
       import: "ollama",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     });
     expect(await readFile(file, "utf8")).not.toContain("KEY");
     await rm(file);
@@ -201,6 +206,7 @@ describe("the AI routes with a registry", () => {
       import: "claude",
       hide: "claude",
       chat: "claude",
+      place: "claude",
     });
   });
 

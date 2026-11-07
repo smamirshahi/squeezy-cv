@@ -11,9 +11,13 @@ export const SECTION_TYPE_LABELS: Record<SectionType, string> = {
   publications: "Publications",
   volunteering: "Volunteering",
   custom: "Custom",
+  unsorted: "Unsorted",
 };
 
-export const SECTION_TYPES = Object.keys(SECTION_TYPE_LABELS) as SectionType[];
+/** Types the user can pick when adding a section (Unsorted is built in) */
+export const SECTION_TYPES = (
+  Object.keys(SECTION_TYPE_LABELS) as SectionType[]
+).filter((type) => type !== "unsorted");
 
 /** Types that have their own editor and preview; all others use the generic item layout */
 export const SPECIAL_SECTION_TYPES: SectionType[] = [

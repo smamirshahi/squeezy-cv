@@ -15,6 +15,9 @@ import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
+import { placeItems } from "@server/ai/place-items";
+import { personalOf } from "@shared/ai/redact-personal";
+import { MAX_PLACE_ITEMS, PlaceRequestSchema } from "@custom-types/place-types";
 import { chat } from "@server/ai/chat";
 import {
   ChatRequestSchema,
@@ -418,6 +421,38 @@ export function buildServer({
       );
     }
     return pickHide(ai, body);
+  });
+
+  // Where items in the Unsorted section belong (the user confirms; nothing is moved here)
+  app.post("/api/ai/place", async (request, reply) => {
+    const { client: ai } = registry.forTask("place");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
+      );
+    }
+    const body = PlaceRequestSchema.check(request.body);
+    if (
+      body.items.length === 0 ||
+      body.items.length > MAX_PLACE_ITEMS ||
+      body.sections.length === 0
+    ) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `Send 1 to ${MAX_PLACE_ITEMS} items and at least one section.`
+      );
+    }
+    const { vault } = await storage.loadVault();
+    return placeItems(
+      ai,
+      body,
+      personalOf(vault, registry.isMaskingOrganisations())
+    );
   });
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
