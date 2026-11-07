@@ -62,7 +62,7 @@ function goBackToList(event: React.MouseEvent): void {
   const isFromList =
     document.referrer !== "" &&
     new URL(document.referrer).origin === window.location.origin &&
-    new URL(document.referrer).searchParams.has("applications");
+    new URL(document.referrer).pathname === "/applications";
   if (isFromList && window.history.length > 1) {
     event.preventDefault();
     window.history.back();
@@ -149,7 +149,7 @@ export function ApplicationView({
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="error">{state.message}</Alert>
-        <Link href="/?applications">All applications</Link>
+        <Link href="/applications">All applications</Link>
       </Box>
     );
   }
@@ -217,7 +217,7 @@ export function ApplicationView({
   async function remove(): Promise<void> {
     try {
       await api.deleteApplication(applicationId);
-      window.location.assign("/?applications");
+      window.location.assign("/applications");
     } catch (caught) {
       setIsDeleting(false);
       setError(messageOf(caught));
@@ -236,7 +236,7 @@ export function ApplicationView({
       }}
     >
       {!isEmbedded && (
-        <Link href="/?applications" underline="hover" onClick={goBackToList}>
+        <Link href="/applications" underline="hover" onClick={goBackToList}>
           ← All applications
         </Link>
       )}

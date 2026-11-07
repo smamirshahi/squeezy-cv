@@ -172,8 +172,8 @@ describe("the list state in the address", () => {
   });
 
   it("is short for the default view and ignores nonsense", () => {
-    expect(viewToQuery(DEFAULT_LIST_VIEW)).toBe("?applications");
-    expect(queryToView("?applications&status=hired&sort=x&dir=up")).toEqual(
+    expect(viewToQuery(DEFAULT_LIST_VIEW)).toBe("");
+    expect(queryToView("?status=hired&sort=x&dir=up")).toEqual(
       DEFAULT_LIST_VIEW
     );
   });

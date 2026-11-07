@@ -25,11 +25,9 @@ describe("editing an item in the vault (inline editor)", () => {
   it("edits a job and a bullet, sees them on the page, saves and keeps them after a reload", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
-    await page.getByRole("button", { name: "Vault" }).click();
+    await page.getByRole("link", { name: "Vault" }).click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
-    await tree
-      .getByRole("button", { name: "Senior Software Developer" })
-      .click();
+    await tree.getByRole("link", { name: "Senior Software Developer" }).click();
     await page.getByLabel("Edit item").waitFor();
 
     await page.getByLabel("Job title").fill("Principal Engineer");
@@ -41,7 +39,7 @@ describe("editing an item in the vault (inline editor)", () => {
     // the page shows the vault's new facts
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Jobs" })
+      .getByRole("link", { name: "Jobs" })
       .click();
     await page
       .locator("[data-cv-item]")

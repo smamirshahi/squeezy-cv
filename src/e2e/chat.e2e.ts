@@ -84,7 +84,7 @@ describe("chat edits (the AI's answers are stubbed)", () => {
 
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Chat" })
+      .getByRole("link", { name: "Chat" })
       .click();
     await page
       .getByLabel("Message")

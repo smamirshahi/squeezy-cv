@@ -18,7 +18,7 @@ import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
 import { useState } from "react";
 import { ExportDialog } from "@pages/workspace/export-dialog";
 import { JobSwitcher } from "@pages/workspace/job-switcher";
-import { setTool } from "@store/app/app-slice";
+import { navigate } from "@hooks/navigation";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -90,7 +90,6 @@ function UndoRedo(): JSX.Element {
 
 /** The dark bar on top: job and template, fit, save state and the main actions */
 export function TopBar(): JSX.Element {
-  const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const { pageCount, usedPercent, linesOver } = useAppSelector(
     (s) => s.app.fit
@@ -142,7 +141,7 @@ export function TopBar(): JSX.Element {
         size="small"
         variant="contained"
         startIcon={<AutoAwesomeIcon />}
-        onClick={() => dispatch(setTool("tailor"))}
+        onClick={() => navigate({ kind: "tailor" })}
         sx={{
           bgcolor: WORKSPACE_COLORS.ai,
           color: WORKSPACE_COLORS.aiContrast,

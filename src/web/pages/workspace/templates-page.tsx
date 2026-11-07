@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { MouseEvent, useState } from "react";
 import {
   Box,
   Button,
@@ -14,6 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Template } from "@custom-types/template-types";
+import { onAppLinkClick, useRoute } from "@hooks/navigation";
+import { TemplatesTab, formatRoute } from "@shared/routing/routes";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { StyleUsagePanel } from "@pages/editor-page/sections/editor-style-settings/style-usage-panel";
@@ -53,7 +55,7 @@ export function deleteBlockReason(
   return "";
 }
 
-type TemplateTab = "templates" | "layout" | "style";
+type TemplateTab = TemplatesTab;
 
 /** One dialog for the two name questions: rename and delete confirmation share the shell */
 type Asking =
@@ -68,13 +70,7 @@ const TEMPLATE_TABS: { id: TemplateTab; label: string }[] = [
 ];
 
 /** Left: the three parts of the Templates area, like the sections list in the vault */
-function TemplatesNav({
-  tab,
-  onChange,
-}: {
-  tab: TemplateTab;
-  onChange: (tab: TemplateTab) => void;
-}): JSX.Element {
+function TemplatesNav({ tab }: { tab: TemplateTab }): JSX.Element {
   return (
     <ResizableAside side="left" label="the template menu" defaultWidth={220}>
       <Box
@@ -93,8 +89,12 @@ function TemplatesNav({
           {TEMPLATE_TABS.map((entry) => (
             <ListItemButton
               key={entry.id}
+              component="a"
+              href={formatRoute({ kind: "templates", tab: entry.id })}
               selected={tab === entry.id}
-              onClick={() => onChange(entry.id)}
+              onClick={(event: MouseEvent<HTMLElement>) =>
+                onAppLinkClick(event, { kind: "templates", tab: entry.id })
+              }
             >
               <ListItemText primary={entry.label} />
             </ListItemButton>
@@ -119,7 +119,8 @@ export function TemplatesPage(): JSX.Element {
   const [newName, setNewName] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
-  const [tab, setTab] = useState<TemplateTab>("templates");
+  const route = useRoute();
+  const tab: TemplateTab = route.kind === "templates" ? route.tab : "templates";
 
   function create(): void {
     const name = newName.trim() || nextTemplateName(templates);
@@ -129,7 +130,7 @@ export function TemplatesPage(): JSX.Element {
 
   return (
     <>
-      <TemplatesNav tab={tab} onChange={setTab} />
+      <TemplatesNav tab={tab} />
       <Box
         component="main"
         aria-label="Templates"

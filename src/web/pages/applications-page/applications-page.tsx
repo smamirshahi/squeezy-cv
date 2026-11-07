@@ -140,7 +140,7 @@ export function ApplicationsPage(): JSX.Element {
 
   // The address keeps the search and filters, so "back" from an application finds them again
   useEffect(() => {
-    window.history.replaceState(null, "", viewToQuery(view));
+    window.history.replaceState(null, "", `/applications${viewToQuery(view)}`);
   }, [view]);
 
   function sortBy(key: SortKey): void {
@@ -452,7 +452,7 @@ function ApplicationsTable({
                 >
                   <TableCell>
                     <Link
-                      href={`/?application=${encodeURIComponent(application.id)}`}
+                      href={`/applications/${encodeURIComponent(application.id)}`}
                       underline="hover"
                       onClick={(event) => event.stopPropagation()}
                     >

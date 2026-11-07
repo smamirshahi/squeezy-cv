@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   act,
   cleanup,
@@ -19,6 +19,7 @@ import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { addSection, removeSection, setVault } from "@store/vault/vault-slice";
 
+beforeEach(() => window.history.replaceState(null, "", "/vault"));
 afterEach(cleanup);
 
 function createStore(): AppStore {
@@ -56,22 +57,22 @@ describe("VaultPage", () => {
     renderEditor(store);
     expect(screen.queryByText("Add new experience")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Work Experience/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     expect(store.getState().app.selectedSectionInEditorPage).toBe("experience");
     expect(screen.getAllByLabelText("Job Title")).toHaveLength(3);
     expect(screen.getByText("Add new experience")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Skills/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^Skills/ }));
     expect(screen.getByText("Add new skill category")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Main Info" }));
+    fireEvent.click(screen.getByRole("link", { name: "Main Info" }));
     expect(screen.getByText("Add new link")).toBeTruthy();
   });
 
   it("the footer buttons add an item and apply it end to end", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: /^Work Experience/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     fireEvent.click(screen.getByText("Add new experience"));
     expect(screen.getAllByLabelText("Job Title")).toHaveLength(4);
     fireEvent.click(screen.getByText("Apply"));
@@ -90,7 +91,7 @@ describe("VaultPage", () => {
   it("falls back to the first page when the selected section is deleted", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: /^Education/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^Education/ }));
     expect(screen.getAllByLabelText("Degree").length).toBe(1);
     act(() => {
       store.dispatch(removeSection({ id: "education" }));
@@ -107,7 +108,7 @@ describe("VaultPage", () => {
         addSection({ id: "proj", type: "projects", title: "Projects" })
       );
     });
-    fireEvent.click(screen.getByRole("button", { name: /^Projects/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^Projects/ }));
     expect(screen.getByText("Add new item")).toBeTruthy();
     fireEvent.click(screen.getByText("Add new item"));
     expect(screen.getAllByLabelText("Title")).toHaveLength(1);
@@ -118,7 +119,7 @@ describe("VaultPage", () => {
     renderEditor(store);
     expect(screen.getByText("SECTIONS")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Sections" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /Education/ }));
+    fireEvent.click(screen.getByRole("link", { name: /Education/ }));
     expect(screen.getByLabelText("Section title")).toBeTruthy();
   });
 });

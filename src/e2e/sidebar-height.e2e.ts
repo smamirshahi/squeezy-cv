@@ -24,7 +24,7 @@ afterAll(async () => {
 async function openTool(name: string): Promise<void> {
   await page
     .getByRole("navigation", { name: "Tools" })
-    .getByRole("button", { name })
+    .getByRole("link", { name })
     .click();
 }
 

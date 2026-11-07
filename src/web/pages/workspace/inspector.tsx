@@ -30,13 +30,9 @@ import { FitPanel } from "@pages/workspace/fit-panel";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
-import {
-  setSelectedBlock,
-  setSelectedSectionInEditorPage,
-  setTool,
-  updatePageStructure,
-} from "@store/app/app-slice";
+import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
 import { PageStructure } from "@store/app/app-slice-types";
+import { navigate } from "@hooks/navigation";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
@@ -516,8 +512,7 @@ function BlockInspector(): JSX.Element | null {
           <Button
             variant="outlined"
             onClick={() => {
-              dispatch(setSelectedSectionInEditorPage(section.id));
-              dispatch(setTool("vault"));
+              navigate({ kind: "vault", sectionId: section.id });
             }}
           >
             Edit “{section.title}” in the vault

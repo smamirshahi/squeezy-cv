@@ -40,8 +40,7 @@ export class PlaywrightPdfRenderer implements PdfRenderer {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
     try {
-      const url = new URL(this.webUrl);
-      url.searchParams.set("print", jobId);
+      const url = new URL(`/print/${encodeURIComponent(jobId)}`, this.webUrl);
       await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
       await page
         .locator(`${READY_SELECTOR}, ${ERROR_SELECTOR}`)

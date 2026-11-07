@@ -27,7 +27,7 @@ describe("PDF import", () => {
     await page.goto(app.webUrl);
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Vault" })
+      .getByRole("link", { name: "Vault" })
       .click();
     await page
       .getByRole("button", { name: "Paste CV text, AI sorts it" })

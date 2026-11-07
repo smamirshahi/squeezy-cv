@@ -1,6 +1,7 @@
 import { Dispatch, useEffect, useReducer, useRef } from "react";
 import { UnknownAction } from "@reduxjs/toolkit";
 import { setVault, vaultReducer, VaultState } from "@store/vault/vault-slice";
+import { useUnappliedDraft } from "@hooks/navigation";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
 interface ReturnProps {
@@ -37,6 +38,9 @@ export function useVaultDraft(
     }
     draftDispatch(setVault(source));
   }, [source]);
+
+  // Leaving through a link or Back asks first while the draft differs from the store
+  useUnappliedDraft(draft !== source);
 
   useEditorPage({
     onApplyChanges: () => apply(draft),

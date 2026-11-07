@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * The print-only route (`/?print=<jobId>`): just the CV, loaded from the server, with
+ * The print-only route (`/print/<jobId>`): just the CV, loaded from the server, with
  * no editor around it. The PDF renderer opens this page and waits for `data-cv-ready`
  * (or `data-cv-error`). The page's own margin is set here so every printed page has it.
  */

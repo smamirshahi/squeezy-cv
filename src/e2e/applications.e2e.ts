@@ -119,7 +119,7 @@ describe("an application is a frozen copy, nothing is locked", () => {
   });
 
   it("one click in the list opens the sent PDF, unchanged by later edits", async () => {
-    await page.goto(`${app.webUrl}/?applications`);
+    await page.goto(`${app.webUrl}/applications`);
     const view = page.getByRole("link", { name: /^View CV sent to Acme Ltd/ });
     await view.waitFor();
     const href = await view.getAttribute("href");
@@ -131,7 +131,7 @@ describe("an application is a frozen copy, nothing is locked", () => {
   });
 
   it("the list and the application page show job and template; Create new job from this", async () => {
-    await page.goto(`${app.webUrl}/?applications`);
+    await page.goto(`${app.webUrl}/applications`);
     await page.getByRole("columnheader", { name: "Template" }).waitFor();
     const application = await onlyApplication();
     await page
@@ -141,7 +141,7 @@ describe("an application is a frozen copy, nothing is locked", () => {
       .first()
       .waitFor();
 
-    await page.goto(`${app.webUrl}/?application=${application.id}`);
+    await page.goto(`${app.webUrl}/applications/${application.id}`);
     await page.getByText(/frozen copy; later edits/).waitFor();
     await page.getByTestId("application-sources").waitFor();
     await page

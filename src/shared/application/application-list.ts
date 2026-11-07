@@ -137,7 +137,7 @@ export function summariseApplications(
 
 /** The list's state as a query string, so the address keeps the search and filters */
 export function viewToQuery(view: ListView): string {
-  const params = new URLSearchParams({ applications: "" });
+  const params = new URLSearchParams();
   if (view.query.trim() !== "") {
     params.set("q", view.query.trim());
   }
@@ -151,7 +151,8 @@ export function viewToQuery(view: ListView): string {
     params.set("sort", view.sortKey);
     params.set("dir", view.sortDirection);
   }
-  return `?${params.toString().replace("applications=", "applications")}`;
+  const query = params.toString();
+  return query === "" ? "" : `?${query}`;
 }
 
 export function queryToView(search: string): ListView {

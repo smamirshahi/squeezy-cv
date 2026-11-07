@@ -64,7 +64,7 @@ describe("tailor review: pins, diff and section moves (AI answers stubbed)", () 
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
-    await page.getByRole("button", { name: "Tailor", exact: true }).click();
+    await page.getByRole("link", { name: "Tailor", exact: true }).click();
     await page.getByLabel("Job advert").fill("A job");
     await page.getByRole("button", { name: "Analyse" }).click();
     await page.getByRole("button", { name: "Change 1", exact: true }).waitFor();
