@@ -12,8 +12,6 @@ import {
   FormControlLabel,
   MenuItem,
   Switch,
-  Tab,
-  Tabs,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -22,7 +20,6 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-job";
-import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { ScoreItems } from "@pages/editor-page/sections/score-items";
 import { JobContent } from "@pages/editor-page/sections/job-content";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -45,9 +42,6 @@ import {
   variantsSelector,
 } from "@store/jobs/jobs-slice";
 
-type JobTab = "layout" | "content";
-
-const TAB_KEY = "cv-builder-jobs-tab";
 const INTRO_KEY = "cv-builder-jobs-intro";
 
 const LABEL_SX = {
@@ -56,12 +50,6 @@ const LABEL_SX = {
   letterSpacing: "0.06em",
   textTransform: "uppercase",
   color: WORKSPACE_COLORS.muted,
-} as const;
-
-const TAB_SX = {
-  alignItems: "flex-start",
-  textAlign: "left",
-  px: 2.5,
 } as const;
 
 /** A remembered choice of this browser; the page works without it */
@@ -79,17 +67,6 @@ function writeStored(key: string, value: string): void {
   } catch {
     // private window or blocked storage: the choice is just not remembered
   }
-}
-
-function TabLabel({ title, sub }: { title: string; sub: string }): JSX.Element {
-  return (
-    <Box sx={{ textTransform: "none" }}>
-      <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{title}</Typography>
-      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-        {sub}
-      </Typography>
-    </Box>
-  );
 }
 
 /** Whether the CV fits the page limit, from what the preview measured */
@@ -203,8 +180,9 @@ function JobsIntro({ onClose }: { onClose: () => void }): JSX.Element {
         />
       </Box>
       <Typography sx={{ mt: 1.5, fontSize: 12.5 }}>
-        Fonts and colours come from <b>Style Settings</b>. Need a different
-        structure? Make a new template, or move this job to another one.
+        Fonts, colours and layout come from the <b>Templates</b> tool. Need a
+        different structure? Make a new template, or move this job to another
+        one.
       </Typography>
     </Box>
   );
@@ -224,15 +202,9 @@ export function EditorJobs(): JSX.Element {
   const templates = useAppSelector(templatesSelector);
   const template = useAppSelector(activeTemplateSelector);
   const job = useAppSelector(activeJobSelector);
-  const [tab, setTab] = useState<JobTab>(readStored(TAB_KEY, "content"));
   const [isIntroShown, setIsIntroShown] = useState<boolean>(
     readStored(INTRO_KEY, "shown") === "shown"
   );
-
-  function changeTab(next: JobTab): void {
-    setTab(next);
-    writeStored(TAB_KEY, next);
-  }
 
   function changeIntro(isShown: boolean): void {
     setIsIntroShown(isShown);
@@ -419,42 +391,8 @@ export function EditorJobs(): JSX.Element {
         <TemplateScopeNote verb="Template, page limit and auto-fit: changes" />
       </Box>
 
-      <Tabs
-        value={tab}
-        onChange={(_event, value: JobTab) => changeTab(value)}
-        aria-label="Job sections"
-        sx={{ borderBottom: `1px solid ${WORKSPACE_COLORS.borderStrong}` }}
-      >
-        <Tab
-          value="layout"
-          sx={TAB_SX}
-          label={
-            <TabLabel
-              title="Sections & layout"
-              sub="Which sections, in what order, where"
-            />
-          }
-        />
-        <Tab
-          value="content"
-          sx={TAB_SX}
-          label={
-            <TabLabel
-              title="Content"
-              sub="Which entries show, and their wording"
-            />
-          }
-        />
-      </Tabs>
-
-      {tab === "layout" ? (
-        <EditorPageStructure />
-      ) : (
-        <>
-          <ScoreItems key={job.id} />
-          <JobContent />
-        </>
-      )}
+      <ScoreItems key={job.id} />
+      <JobContent />
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
         <DialogTitle>Delete job?</DialogTitle>

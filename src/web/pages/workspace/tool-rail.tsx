@@ -24,14 +24,14 @@ interface RailItem {
 const ITEMS: RailItem[] = [
   { label: "Vault", icon: <FolderOpenIcon fontSize="small" />, tool: "vault" },
   {
-    label: "Jobs",
-    icon: <WorkOutlineIcon fontSize="small" />,
-    tool: "jobs",
-  },
-  {
     label: "Templates",
     icon: <LayersIcon fontSize="small" />,
     tool: "templates",
+  },
+  {
+    label: "Jobs",
+    icon: <WorkOutlineIcon fontSize="small" />,
+    tool: "jobs",
   },
   {
     label: "Tailor",

@@ -12,6 +12,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 Version 0.2.0 (not released yet; the user tests first). The variant is split into a
 template and a job (#165-#172).
 
+### Changed
+
+- **Sidebar order and where settings live**: the rail is now Vault, Templates, Jobs. Vault holds only your data. Style settings and page layout moved to Templates (tabs "Templates", "Page layout", "Style settings"); Job data and the job's content moved to Jobs (view "Job settings", next to "CV page"). The "Sections & layout" tab of the Jobs page and the SETTINGS list in the Vault tree are gone.
+- **Templates page layout**: "Templates", "Page layout" and "Style settings" are now a list on the left (like the vault sections), and the sample CV moved to a right panel whose width you can drag; the page inside it scales to fit.
+
 ### Added
 
 - Links: choose the type (GitHub, LinkedIn, X, Instagram, ... about 30, or Other for a custom label) from a dropdown with its icon; a pasted address of a known site picks the type; existing links are matched by their label (#195).
