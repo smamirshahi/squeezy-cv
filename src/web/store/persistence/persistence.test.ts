@@ -27,7 +27,9 @@ import {
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import {
+  addTemplate,
   addVariant,
+  deleteTemplate,
   deleteVariant,
   setItemSelection,
   setPageLimit,
@@ -246,12 +248,15 @@ describe("load and save through the server", () => {
       Promise.resolve(file)
     );
     for (const id of ["a", "b"]) {
+      // each job on a template of its own, so a look change reaches one job's template only
+      store.dispatch(addTemplate({ name: id, id: `template-${id}` }));
       store.dispatch(
         addVariant({
           vault: store.getState().vault,
           style: store.getState().cvData.style,
           name: id,
           id,
+          templateId: `template-${id}`,
         })
       );
     }
@@ -291,18 +296,20 @@ describe("load and save through the server", () => {
     expect(writes).toEqual([]);
   });
 
-  it("a deleted job and its own template are removed on the next save", async () => {
+  it("a deleted job is removed on the next save and its template stays until it is deleted itself", async () => {
     const store = newStore();
     const api = clientFor(app);
     await loadFromServer(api, store.dispatch, store.getState, () =>
       Promise.resolve(file)
     );
+    store.dispatch(addTemplate({ name: "Extra", id: "template-extra" }));
     store.dispatch(
       addVariant({
         vault: store.getState().vault,
         style: store.getState().cvData.style,
         name: "Extra",
         id: "extra",
+        templateId: "template-extra",
       })
     );
     await saveToServer(api, store.dispatch, store.getState);
@@ -310,6 +317,14 @@ describe("load and save through the server", () => {
       "template-extra"
     );
     store.dispatch(deleteVariant({ id: "extra" }));
+    await saveToServer(api, store.dispatch, store.getState);
+    expect(store.getState().persistence.saveError).toBe("");
+    expect((await api.listJobs()).map((j) => j.id)).not.toContain("extra");
+    expect((await api.listTemplates()).map((t) => t.id)).toContain(
+      "template-extra"
+    );
+
+    store.dispatch(deleteTemplate({ id: "template-extra" }));
     await saveToServer(api, store.dispatch, store.getState);
     expect(store.getState().persistence.saveError).toBe("");
     expect((await api.listTemplates()).map((t) => t.id)).not.toContain(

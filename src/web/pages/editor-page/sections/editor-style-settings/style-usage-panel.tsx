@@ -32,18 +32,6 @@ export function StyleUsagePanel(): JSX.Element {
           </Box>
         ))}
       </Box>
-      <Typography
-        variant="body2"
-        sx={{
-          mt: 2,
-          p: 1.25,
-          borderRadius: 0.5,
-          bgcolor: WORKSPACE_COLORS.panelAlt,
-        }}
-      >
-        Changes here affect all variants. A variant can still override the page
-        limit and layout in its own inspector.
-      </Typography>
     </Box>
   );
 }

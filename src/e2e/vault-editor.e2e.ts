@@ -41,7 +41,7 @@ describe("editing an item in the vault (inline editor)", () => {
     // the page shows the vault's new facts
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Variants" })
+      .getByRole("button", { name: "Jobs" })
       .click();
     await page
       .locator("[data-cv-item]")

@@ -214,8 +214,8 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
           )}
           {isReadOnly && (
             <Alert severity="info">
-              This variant is locked because it was sent. Unlock it or make a
-              copy first.
+              This job is locked because it was sent. Unlock it or make a copy
+              first.
             </Alert>
           )}
           {target && (

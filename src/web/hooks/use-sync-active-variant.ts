@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
 import { setStyle, styleSelector } from "@store/cv-data/cv-data-slice";
@@ -22,6 +23,15 @@ export function activateVariant(dispatch: AppDispatch, variant: Variant): void {
   dispatch(setActiveVariant({ id: variant.id }));
   dispatch(updatePageStructure(variant.layout));
   dispatch(setStyle(variant.style));
+}
+
+/** Loads the look of a template into the editor (after the active job moved to it) */
+export function activateTemplateLook(
+  dispatch: AppDispatch,
+  template: Template
+): void {
+  dispatch(updatePageStructure(template.layout));
+  dispatch(setStyle(template.style));
 }
 
 /**

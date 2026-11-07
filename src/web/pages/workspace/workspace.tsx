@@ -13,6 +13,7 @@ import { BlockToolbar } from "@pages/workspace/block-toolbar";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { LockBanner } from "@pages/workspace/variant-lock";
+import { TemplatesPage } from "@pages/workspace/templates-page";
 import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -112,6 +113,7 @@ export function Workspace(): JSX.Element {
             {tool === "chat" ? <ChatPanel /> : <Inspector />}
           </>
         )}
+        {tool === "templates" && <TemplatesPage />}
         {tool === "vault" && <VaultPage />}
         {tool === "tailor" && <AiAssistant />}
         {tool === "ai" && <AiSetup />}

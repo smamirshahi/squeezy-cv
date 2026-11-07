@@ -6,6 +6,7 @@ import { DropdownMargin } from "@pages/editor-page/sections/editor-style-setting
 import { DropdownBulletPointIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-bullet-point-icon";
 import { TypographyTable } from "@pages/editor-page/sections/editor-style-settings/typography-table";
 import { StylePreview } from "@pages/editor-page/sections/editor-style-settings/style-preview";
+import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   setShouldShowRightToWork,
@@ -26,9 +27,11 @@ export function EditorTypography(): JSX.Element {
           Style settings
         </Typography>
         <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
-          Applies to every variant. The preview below updates as you change
-          things.
+          The preview below updates as you change things.
         </Typography>
+        <Box sx={{ mt: 1 }}>
+          <TemplateScopeNote />
+        </Box>
       </Box>
       <Box
         component="section"

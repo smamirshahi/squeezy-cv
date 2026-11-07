@@ -203,7 +203,7 @@ export function PreviewPage({
                 </>
               }
             >
-              This CV is {pageCount} pages long; this variant is set to{" "}
+              This CV is {pageCount} pages long; this job's template is set to{" "}
               {pageLimit}. Shorten it, hide items or change the limit.
               {linesOver > 0 && (
                 <>

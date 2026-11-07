@@ -3,7 +3,8 @@ import { AvailableFonts } from "@custom-types/styles-types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** The tools in the left rail of the workspace */
-export type WorkspaceTool = "variants" | "vault" | "tailor" | "chat" | "ai";
+export type WorkspaceTool =
+  "variants" | "templates" | "vault" | "tailor" | "chat" | "ai";
 
 export interface FitInfo {
   pageCount: number;

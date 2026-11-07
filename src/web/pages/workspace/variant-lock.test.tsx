@@ -80,11 +80,11 @@ describe("variant lock UI", () => {
     expect(store.getState().variants.unlockedIds).toEqual([]);
   });
 
-  it("offers a new variant as the safer way", () => {
+  it("offers a new job as the safer way", () => {
     const store = makeStore(true);
     screenFor(store);
     fireEvent.click(
-      screen.getByRole("button", { name: "Create new variant from this" })
+      screen.getByRole("button", { name: "Create new job from this" })
     );
     expect(variantsSelector(store.getState())).toHaveLength(2);
   });
