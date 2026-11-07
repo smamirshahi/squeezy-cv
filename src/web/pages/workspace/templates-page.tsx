@@ -139,7 +139,7 @@ export function TemplatesPage(): JSX.Element {
           minWidth: 0,
           overflow: "auto",
           p: 3,
-          bgcolor: WORKSPACE_COLORS.canvas,
+          bgcolor: WORKSPACE_COLORS.panel,
         }}
       >
         {tab === "layout" && (

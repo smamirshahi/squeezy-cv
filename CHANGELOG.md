@@ -17,6 +17,7 @@ template and a job (#165-#172).
 - **Every section has its own address (#198)**: `/vault`, `/vault/<section>/<item>`, `/jobs/<job>` (`?view=settings`), `/templates` (`/templates/layout`, `/templates/style`), `/tailor`, `/chat/<job>`, `/ai`, `/applications` (search and filters stay in the address) and `/applications/<id>`. Reload keeps the place, Back and Forward move between sections, the rail and the lists are real links (middle click, new tab), an unknown job, section or item says "Not found" with a way back, and the page title follows the section. Leaving an editor with unapplied changes (link or Back) asks first. The old `/?applications`, `/?application=<id>` and `/?print=<id>` addresses redirect; the PDF print page is now `/print/<jobId>`.
 - **Sidebar order and where settings live**: the rail is now Vault, Templates, Jobs. Vault holds only your data. Style settings and page layout moved to Templates (tabs "Templates", "Page layout", "Style settings"); Job data and the job's content moved to Jobs (view "Job settings", next to "CV page"). The "Sections & layout" tab of the Jobs page and the SETTINGS list in the Vault tree are gone.
 - **Templates page layout**: "Templates", "Page layout" and "Style settings" are now a list on the left (like the vault sections), and the sample CV moved to a right panel whose width you can drag; the page inside it scales to fit.
+- **Templates page background**: the middle area of the Templates page is white like the left and right panels.
 
 ### Fixed
 
