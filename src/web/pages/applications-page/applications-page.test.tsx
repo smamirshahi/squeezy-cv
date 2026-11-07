@@ -77,6 +77,24 @@ describe("Applications page", () => {
     ).toBe("/?application=b");
   });
 
+  it("has a View CV and a download button per row that open the sent PDF without opening the side panel", async () => {
+    stubList(list);
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const view = screen.getByRole("link", {
+      name: "View CV sent to Beta Labs",
+    });
+    expect(view.getAttribute("href")).toBe("/api/applications/b/pdf");
+    expect(view.getAttribute("target")).toBe("_blank");
+    const download = screen.getByRole("link", {
+      name: "Download CV sent to Beta Labs",
+    });
+    expect(download.getAttribute("href")).toBe("/api/applications/b/pdf");
+    expect(download.hasAttribute("download")).toBe(true);
+    fireEvent.click(view);
+    expect(screen.queryByTitle("The CV you sent")).toBeNull();
+  });
+
   it("shows the job and template each application was sent with, and searches them", async () => {
     stubList([
       {

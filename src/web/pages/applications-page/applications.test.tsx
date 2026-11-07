@@ -163,6 +163,37 @@ describe("Application page", () => {
     expect(screen.getByText("The CV you sent")).toBeTruthy();
   });
 
+  it("labels the PDF with the day it was sent and shows it before the timeline", async () => {
+    stubServer(() => application);
+    const { container } = render(
+      <ApplicationView applicationId={application.id} />
+    );
+    await screen.findByText(/CV as sent on 6 Nov 2026/);
+    const frame = container.querySelector("iframe") as Element;
+    const timeline = screen.getByText("Timeline");
+    expect(
+      frame.compareDocumentPosition(timeline) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("says so when the stored PDF is missing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init?: RequestInit) =>
+        Promise.resolve(
+          init?.method === "HEAD"
+            ? new Response("", { status: 404 })
+            : new Response(JSON.stringify(application), { status: 200 })
+        )
+      )
+    );
+    const { container } = render(
+      <ApplicationView applicationId={application.id} />
+    );
+    await screen.findByText(/PDF of this application is missing/);
+    expect(container.querySelector("iframe")).toBeNull();
+  });
+
   it("names the job and template it was sent with, and says the sent CV is a frozen copy", async () => {
     const named = {
       ...application,
