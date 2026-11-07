@@ -41,7 +41,7 @@ describe("exportChecks", () => {
       exportChecks({ ...input, hiddenItemCount: 1 }).find(
         (c) => c.id === "hidden"
       )?.title
-    ).toBe("1 item hidden in this variant");
+    ).toBe("1 item hidden in this job");
   });
 });
 

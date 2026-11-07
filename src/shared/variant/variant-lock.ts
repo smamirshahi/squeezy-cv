@@ -57,7 +57,7 @@ export function describeLock(locks: VariantLocks, variantId: string): string {
   const reasons = locks.byVariant[variantId] ?? [];
   if (reasons.length === 0) {
     return locks.hasUnreadable
-      ? "An application file is damaged, so it is not known whether this variant was sent. Locked."
+      ? "An application file is damaged, so it is not known whether this job was sent. Locked."
       : "";
   }
   if (reasons.length === 1) {

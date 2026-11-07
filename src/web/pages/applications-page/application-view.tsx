@@ -167,9 +167,7 @@ export function ApplicationView({
       const { template, job } = splitVariant(copy, templateIdFor(copy.id));
       await api.saveTemplate(template);
       await api.saveJob(job);
-      setMessage(
-        "A copy was added to your variants. Open the editor to use it."
-      );
+      setMessage("A copy was added to your jobs. Open the editor to use it.");
     } catch (caught) {
       setError(messageOf(caught));
     }
@@ -303,7 +301,7 @@ export function ApplicationView({
               Download PDF
             </Button>
             <Button onClick={() => void createVariantFromThis()}>
-              Create new variant from this
+              Create new job from this
             </Button>
           </Box>
         </Box>

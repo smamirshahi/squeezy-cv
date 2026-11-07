@@ -248,7 +248,7 @@ describe("AiAssistant: the review", () => {
     ).toBe(before);
   });
 
-  it("creates a new variant from what was accepted and leaves the old one alone", async () => {
+  it("creates a new job from what was accepted and leaves the old one alone", async () => {
     stubServer({});
     const store = makeStore();
     await analyse(store);
@@ -256,7 +256,7 @@ describe("AiAssistant: the review", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Create variant from the accepted changes/,
+        name: /Create job from the accepted changes/,
       })
     );
 
@@ -278,7 +278,7 @@ describe("AiAssistant: the review", () => {
     expect(bullets[1].alt?.formal).toBeUndefined();
     // and the original text is untouched
     expect(bullets[0].text).toBe(job1.bullets[0].text);
-    await screen.findByText(/Created the variant/);
+    await screen.findByText(/Created the job/);
   });
 
   it("applies a flagged rewording only if you tick it yourself", async () => {
@@ -288,7 +288,7 @@ describe("AiAssistant: the review", () => {
     fireEvent.click(screen.getAllByLabelText("Use this wording")[1]);
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Create variant from the accepted changes/,
+        name: /Create job from the accepted changes/,
       })
     );
     const bullets = store
@@ -315,7 +315,7 @@ describe("AiAssistant: the review", () => {
     fireEvent.click(itemBoxes[0]);
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Create variant from the accepted changes/,
+        name: /Create job from the accepted changes/,
       })
     );
     expect(

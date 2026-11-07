@@ -77,19 +77,19 @@ export function UnlockDialog({
       <DialogContent>
         {reasons.length > 0 ? (
           <Typography sx={{ mb: 1 }}>
-            This variant was sent to{" "}
+            This job was sent to{" "}
             {reasons.map((r) => `${r.company} (${r.appliedAt})`).join(" and ")}.
           </Typography>
         ) : (
           <Typography sx={{ mb: 1 }}>
-            An application file is damaged, so it is not known which variant it
+            An application file is damaged, so it is not known which job it
             sent.
           </Typography>
         )}
         <Typography sx={{ mb: 1 }}>
-          Unlocking lets you change this variant. The copy that was sent (the
-          saved snapshot and its PDF) is <strong>not</strong> changed, but this
-          variant will no longer match it.
+          Unlocking lets you change this job. The copy that was sent (the saved
+          snapshot and its PDF) is <strong>not</strong> changed, but this job
+          will no longer match it.
         </Typography>
         <Typography
           variant="body2"
@@ -97,8 +97,8 @@ export function UnlockDialog({
             color: "text.secondary",
           }}
         >
-          Safer: create a new variant from this one and edit that instead. It
-          locks again when you save.
+          Safer: create a new job from this one and edit that instead. It locks
+          again when you save.
         </Typography>
       </DialogContent>
       <DialogActions>
@@ -119,7 +119,7 @@ export function UnlockDialog({
             onClose();
           }}
         >
-          Create new variant from this
+          Create new job from this
         </Button>
       </DialogActions>
     </Dialog>
@@ -152,7 +152,7 @@ export function LockBanner(): JSX.Element | null {
                   dispatch(duplicateVariant({ sourceId: variant.id }))
                 }
               >
-                Create new variant from this
+                Create new job from this
               </Button>
               <Button
                 size="small"
@@ -174,7 +174,7 @@ export function LockBanner(): JSX.Element | null {
         }
       >
         {lock.isReadOnly
-          ? `This variant is locked because it was sent. ${lock.text} The vault is shared, so changes there still show here.`
+          ? `This job is locked because it was sent. ${lock.text} The vault is shared, so changes there still show here.`
           : "Unlocked for editing. It no longer matches what was sent; it locks again when you save."}
       </Alert>
       <UnlockDialog

@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
@@ -8,11 +14,7 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { setVault } from "@store/vault/vault-slice";
-import {
-  setJobTemplate,
-  setVariants,
-  variantsSelector,
-} from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
@@ -48,20 +50,34 @@ function show(store: AppStore): void {
   );
 }
 
+/** Uses the "New job" dialog; the job shares the current template unless `hasNewTemplate` */
+async function createJob(name: string, hasNewTemplate = false): Promise<void> {
+  fireEvent.click(screen.getByRole("button", { name: "New job" }));
+  fireEvent.change(screen.getByLabelText("New job name"), {
+    target: { value: name },
+  });
+  if (hasNewTemplate) {
+    fireEvent.mouseDown(screen.getByLabelText("Template"));
+    fireEvent.click(screen.getByRole("option", { name: "New template…" }));
+  }
+  fireEvent.click(screen.getByRole("button", { name: "Create job" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+}
+
 describe("EditorVariants", () => {
-  it("creates, duplicates, switches and renames variants", () => {
+  it("creates, duplicates, switches and renames jobs", async () => {
     const store = makeStore();
     show(store);
 
-    fireEvent.click(screen.getByRole("button", { name: "New" }));
+    await createJob("Second");
     expect(variantsSelector(store.getState())).toHaveLength(2);
 
-    fireEvent.change(screen.getByLabelText("Variant name"), {
+    fireEvent.change(screen.getByLabelText("Job name"), {
       target: { value: "Acme" },
     });
     expect(variantsSelector(store.getState())[1].name).toBe("Acme");
 
-    fireEvent.click(screen.getByRole("button", { name: "Duplicate" }));
+    fireEvent.click(screen.getByRole("button", { name: "Duplicate job" }));
     const variants = variantsSelector(store.getState());
     const activeId = store.getState().variants.activeJobId;
     expect(variants).toHaveLength(3);
@@ -69,15 +85,17 @@ describe("EditorVariants", () => {
     expect(activeId).toBe(variants[2].id);
   });
 
-  it("deletes only after confirming, and never the last variant", () => {
+  it("deletes only after confirming, and never the last job", async () => {
     const store = makeStore();
     show(store);
     expect(
-      screen.getByRole("button", { name: "Delete" }).hasAttribute("disabled")
+      screen
+        .getByRole("button", { name: "Delete job" })
+        .hasAttribute("disabled")
     ).toBe(true);
 
-    fireEvent.click(screen.getByRole("button", { name: "New" }));
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await createJob("Second");
+    fireEvent.click(screen.getByRole("button", { name: "Delete job" }));
     expect(variantsSelector(store.getState())).toHaveLength(2);
 
     fireEvent.click(screen.getAllByRole("button", { name: "Delete" }).pop()!);
@@ -100,17 +118,12 @@ describe("EditorVariants", () => {
     expect(JSON.stringify(store.getState().vault)).toBe(vaultBefore);
   });
 
-  it("writes layout and style edits to the template of the active job, which other jobs on it share", () => {
+  it("writes layout and style edits to the template of the active job, which other jobs on it share", async () => {
     const store = makeStore();
     show(store);
-    fireEvent.click(screen.getByRole("button", { name: "New" }));
-    const { templates, jobs } = store.getState().variants;
-    // the new job moves onto the first job's template
-    act(() => {
-      store.dispatch(
-        setJobTemplate({ jobId: jobs[1].id, templateId: templates[0].id })
-      );
-    });
+    // a new job shares the template of the current one by default
+    await createJob("Second");
+    expect(store.getState().variants.templates).toHaveLength(1);
     const style = {
       ...store.getState().cvData.style,
       paperMargin: "narrow" as const,
@@ -128,7 +141,7 @@ describe("EditorVariants", () => {
     ).toEqual(["narrow", "narrow"]);
   });
 
-  it("keeps the page layout per variant", () => {
+  it("keeps the page layout per template: a job on a new template has its own", async () => {
     const store = makeStore();
     show(store);
     const custom = { fullWidth: ["personalInfo"], left: [], right: [] };
@@ -138,7 +151,8 @@ describe("EditorVariants", () => {
     });
     expect(variantsSelector(store.getState())[0].layout).toEqual(custom);
 
-    fireEvent.click(screen.getByRole("button", { name: "New" }));
+    await createJob("Second", true);
+    expect(store.getState().variants.templates).toHaveLength(2);
     act(() => {
       store.dispatch(
         updatePageStructure({
@@ -152,7 +166,7 @@ describe("EditorVariants", () => {
     expect(variantsSelector(store.getState())[0].layout).toEqual(custom);
 
     // switching back loads it into the editor
-    fireEvent.mouseDown(screen.getByLabelText("Active variant"));
+    fireEvent.mouseDown(screen.getByLabelText("Active job"));
     fireEvent.click(screen.getAllByRole("option")[0]);
     expect(store.getState().app.structure).toEqual(custom);
   });

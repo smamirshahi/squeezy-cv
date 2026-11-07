@@ -552,10 +552,10 @@ export function VaultItemEditor({
       <Alert severity="warning">
         You are editing a <b>vault fact</b>.{" "}
         {shownIn === 0
-          ? "No variant shows this item right now."
-          : `Changes apply to ${shownIn === variants.length ? "all " : ""}${shownIn} ${shownIn === 1 ? "variant" : "variants"} that use it.`}{" "}
-        To change only one variant, edit it on the page instead. Changes are
-        saved to the vault as you type; use Save to write them to disk.
+          ? "No job shows this item right now."
+          : `Changes apply to ${shownIn === variants.length ? "all " : ""}${shownIn} ${shownIn === 1 ? "job" : "jobs"} that use it.`}{" "}
+        To change only one job, edit it on the page instead. Changes are saved
+        to the vault as you type; use Save to write them to disk.
       </Alert>
 
       <Box
@@ -604,8 +604,8 @@ export function VaultItemEditor({
         <>
           <Alert severity="warning" sx={{ py: 0 }}>
             You are editing vault facts. Levels and years are stored here, and
-            each variant decides whether and how to show them. The AI never
-            changes a level.
+            each job decides whether and how to show them. The AI never changes
+            a level.
           </Alert>
           <FormControlLabel
             control={
@@ -663,7 +663,7 @@ export function VaultItemEditor({
         <DialogTitle>Remove “{getItemLabel(item)}”?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            It is removed from the vault and from every variant. Until you press
+            It is removed from the vault and from every job. Until you press
             Save you can still reload the page to get it back.
           </DialogContentText>
         </DialogContent>

@@ -185,7 +185,7 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
   );
 }
 
-/** Right: in which variants an item is shown; the eye hides it there only */
+/** Right: in which jobs an item is shown; the eye hides it there only */
 function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
   const dispatch = useAppDispatch();
   const variants = useAppSelector(variantsSelector);
@@ -249,13 +249,13 @@ function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
             <Typography
               sx={{ mt: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
             >
-              The eye hides this item in that variant. The fact stays in the
-              vault and in every other variant.
+              The eye hides this item in that job. The fact stays in the vault
+              and in every other job.
             </Typography>
           </>
         ) : (
           <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
-            Pick an item in the tree to see which variants show it.
+            Pick an item in the tree to see which jobs show it.
           </Typography>
         )}
       </Box>
@@ -318,9 +318,8 @@ export function VaultPage(): JSX.Element {
         {!hasInlineEditor && isFact && (
           <Alert severity="warning">
             You are editing a <b>vault fact</b>. Changes apply to all{" "}
-            {variants.length} {variants.length === 1 ? "variant" : "variants"}{" "}
-            that use it. To change only one variant, edit it on the page
-            instead.
+            {variants.length} {variants.length === 1 ? "job" : "jobs"} that use
+            it. To change only one job, edit it on the page instead.
           </Alert>
         )}
         {isStylePage && page.content}

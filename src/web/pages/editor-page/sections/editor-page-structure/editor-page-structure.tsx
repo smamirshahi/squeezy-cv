@@ -1,4 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
+import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";
 import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
 import { updatePageStructure } from "@store/app/app-slice";
@@ -16,9 +17,12 @@ export function EditorPageStructure(): JSX.Element {
 
   return (
     <>
+      <Box sx={{ mb: 1 }}>
+        <TemplateScopeNote />
+      </Box>
       <Typography variant="body2" sx={{ mb: 1 }}>
-        Start from a template, then drag parts to fine-tune. This belongs to the
-        active variant.
+        Start from a layout, then drag parts to fine-tune. This belongs to the
+        template of the job you are editing, so every job on it follows.
       </Typography>
       <Box
         sx={{

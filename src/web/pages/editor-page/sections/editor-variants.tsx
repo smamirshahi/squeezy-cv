@@ -17,11 +17,18 @@ import {
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-variant";
 import { VariantSectionItems } from "@pages/editor-page/sections/variant-section-items";
-import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { NewJobDialog } from "@pages/workspace/new-job-dialog";
+import {
+  TemplateScopeNote,
+  moveJobToTemplate,
+} from "@pages/workspace/template-scope";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
-  addVariant,
+  isActiveVariantReadOnlySelector,
+  templatesSelector,
+  activeJobSelector,
+  activeTemplateSelector,
   deleteVariant,
   duplicateVariant,
   renameVariant,
@@ -29,21 +36,24 @@ import {
   setPageLimit,
   variantsSelector,
 } from "@store/variants/variants-slice";
-import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
+import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
- * Creates, switches, renames and deletes variants, and chooses per variant which items
+ * Creates, switches, renames and deletes jobs, and chooses per job which items
  * and bullets are shown, in which order and wording. Changes apply at once and never
  * change the vault.
  */
 export function EditorVariants(): JSX.Element {
   const dispatch = useAppDispatch();
-  const vault = useAppSelector(vaultSelector);
   const sections = useAppSelector(sectionsSelector);
   const variants = useAppSelector(variantsSelector);
   const variant = useAppSelector(activeVariantSelector);
-  const style = useAppSelector(styleSelector);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isNewOpen, setIsNewOpen] = useState<boolean>(false);
+  const templates = useAppSelector(templatesSelector);
+  const template = useAppSelector(activeTemplateSelector);
+  const job = useAppSelector(activeJobSelector);
+  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
 
   function handleSwitch(id: string): void {
     const next = variants.find((v) => v.id === id);
@@ -52,27 +62,20 @@ export function EditorVariants(): JSX.Element {
     }
   }
 
-  function handleNew(): void {
-    // The new variant starts from the layout and style the editor shows now
-    dispatch(
-      addVariant({ vault, style, name: `Variant ${variants.length + 1}` })
-    );
-  }
-
   function handleDuplicate(): void {
-    // The copy has the same layout and style, so the editor already shows them
+    // The copy shares the template, so the editor already shows its look
     dispatch(duplicateVariant({ sourceId: variant.id }));
   }
 
   return (
     <LockedFieldset>
       <Typography variant="h6" sx={{ mb: 1 }}>
-        Variants
+        Jobs
       </Typography>
       <Typography variant="body2" sx={{ mb: 2 }}>
-        A variant is one version of your CV for one purpose. Hiding or
-        reordering here only changes the variant, never your data. Changes apply
-        at once.
+        A job is one target for your CV, such as a company and role. Hiding or
+        reordering here only changes the job, never your data. Changes apply at
+        once. How the CV looks is set by the job&apos;s template.
       </Typography>
 
       <Box
@@ -85,7 +88,7 @@ export function EditorVariants(): JSX.Element {
       >
         <TextField
           select
-          label="Active variant"
+          label="Active job"
           value={variant.id}
           onChange={(event) => handleSwitch(event.target.value)}
           sx={{ minWidth: 220 }}
@@ -97,7 +100,7 @@ export function EditorVariants(): JSX.Element {
           ))}
         </TextField>
         <TextField
-          label="Variant name"
+          label="Job name"
           value={variant.name}
           onChange={(event) =>
             dispatch(
@@ -106,18 +109,38 @@ export function EditorVariants(): JSX.Element {
           }
           sx={{ flexGrow: 1 }}
         />
-        <Button onClick={handleNew}>New</Button>
-        <Button onClick={handleDuplicate}>Duplicate</Button>
+        <Button onClick={() => setIsNewOpen(true)}>New job</Button>
+        <Button onClick={handleDuplicate}>Duplicate job</Button>
         <Button
           color="error"
           disabled={variants.length <= 1}
           onClick={() => setIsDeleting(true)}
         >
-          Delete
+          Delete job
         </Button>
       </Box>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+        <TemplateScopeNote verb="The template and the two settings below: changes" />
+        <TextField
+          select
+          label="Template of this job"
+          value={template.id}
+          disabled={isReadOnly}
+          onChange={(event) => {
+            const next = templates.find((t) => t.id === event.target.value);
+            if (next) {
+              moveJobToTemplate(dispatch, job, next, true);
+            }
+          }}
+          sx={{ minWidth: 220 }}
+        >
+          {templates.map((t) => (
+            <MenuItem key={t.id} value={t.id}>
+              {t.name}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
           select
           label="Page limit"
@@ -188,11 +211,11 @@ export function EditorVariants(): JSX.Element {
       ))}
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
-        <DialogTitle>Delete variant?</DialogTitle>
+        <DialogTitle>Delete job?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            &quot;{variant.name}&quot; will be deleted. Your data (the vault) is
-            not affected.
+            &quot;{variant.name}&quot; will be deleted. Its template and your
+            data (the vault) are not affected.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -212,6 +235,7 @@ export function EditorVariants(): JSX.Element {
           </Button>
         </DialogActions>
       </Dialog>
+      <NewJobDialog isOpen={isNewOpen} onClose={() => setIsNewOpen(false)} />
     </LockedFieldset>
   );
 }

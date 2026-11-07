@@ -1,6 +1,7 @@
 import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
@@ -23,9 +24,14 @@ interface RailItem {
 const ITEMS: RailItem[] = [
   { label: "Vault", icon: <FolderOpenIcon fontSize="small" />, tool: "vault" },
   {
-    label: "Variants",
-    icon: <LayersIcon fontSize="small" />,
+    label: "Jobs",
+    icon: <WorkOutlineIcon fontSize="small" />,
     tool: "variants",
+  },
+  {
+    label: "Templates",
+    icon: <LayersIcon fontSize="small" />,
+    tool: "templates",
   },
   {
     label: "Tailor",

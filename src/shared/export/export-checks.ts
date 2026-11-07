@@ -98,7 +98,7 @@ export function exportChecks(input: ExportCheckInput): ExportCheck[] {
     checks.push({
       id: "hidden",
       level: "ok",
-      title: `${input.hiddenItemCount} ${input.hiddenItemCount === 1 ? "item" : "items"} hidden in this variant`,
+      title: `${input.hiddenItemCount} ${input.hiddenItemCount === 1 ? "item" : "items"} hidden in this job`,
       detail: "Left out of the PDF, still in your vault.",
     });
   }

@@ -273,8 +273,8 @@ export function AiAssistant(): JSX.Element {
           Paste a job advert. The AI suggests which items to show, what to
           highlight, rewordings and what your CV is missing. It may only select,
           highlight and rephrase what you already wrote. You review everything;
-          nothing changes until you create a variant, and your current variant
-          stays as it is.
+          nothing changes until you create a job, and your current job stays as
+          it is.
         </Typography>
 
         {isConfigured === false && (
@@ -411,7 +411,7 @@ export function AiAssistant(): JSX.Element {
             {isDiffEmpty(diff) && (
               <Alert severity="info" sx={{ mb: 2 }}>
                 The accepted changes do not change anything compared with the
-                current variant.
+                current job.
               </Alert>
             )}
             <DiffView diff={diff} />
@@ -496,8 +496,8 @@ export function AiAssistant(): JSX.Element {
         )}
         {created && (
           <Alert severity="success" sx={{ mt: 2 }}>
-            Created the variant &quot;{created}&quot; and switched to it. Save
-            to keep it.
+            Created the job &quot;{created}&quot; and switched to it. Save to
+            keep it.
           </Alert>
         )}
       </Box>
@@ -912,7 +912,7 @@ function Changes({
       })}
 
       <Button variant="contained" sx={{ mt: 3 }} onClick={onCreate}>
-        Create variant from the accepted changes
+        Create job from the accepted changes
       </Button>
     </Box>
   );

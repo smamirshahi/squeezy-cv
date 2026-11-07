@@ -146,8 +146,7 @@ export function FitPanel(): JSX.Element | null {
         />
       </Box>
       <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-        Least relevant first. Tick to hide in this variant; it stays in your
-        vault.
+        Least relevant first. Tick to hide in this job; it stays in your vault.
       </Typography>
       {listed.map((candidate) => {
         const lines = measureLines(candidate.itemId, lineHeightPx);

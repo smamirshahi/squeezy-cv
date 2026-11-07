@@ -47,7 +47,7 @@ export function useEditorPages(): EditorPageSection {
       label: "Page Structure",
       content: <EditorPageStructure />,
     },
-    { id: "variants", label: "Variants", content: <EditorVariants /> },
+    { id: "variants", label: "Jobs", content: <EditorVariants /> },
     { id: "ai", label: "AI assistant", content: <AiAssistant /> },
     { id: "sections", label: "Sections", content: <EditorSections /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },

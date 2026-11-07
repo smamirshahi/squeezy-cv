@@ -26,6 +26,7 @@ import {
 import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
+import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -161,6 +162,7 @@ function PageInspector(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <TemplateScopeNote />
       <FitPanel />
       <Heading>Page limit</Heading>
       <ToggleButtonGroup
@@ -295,7 +297,7 @@ interface SkillStyleProps {
   section: Section;
 }
 
-/** How this variant shows the levels of a skills section (the levels live in the vault) */
+/** How this job's template shows the levels of a skills section (the levels live in the vault) */
 function SkillStyleControls({
   variant,
   section,
@@ -309,6 +311,7 @@ function SkillStyleControls({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <TemplateScopeNote verb="Skill display changes" />
       <Heading>Show levels as</Heading>
       {!hasLevels && (
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
@@ -399,13 +402,13 @@ function SkillStyleControls({
   );
 }
 
-/** One selected item (or section): what it does in this variant, and a way to the vault */
+/** One selected item (or section): what it does in this job, and a way to the vault */
 function BlockInspector(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sections = useAppSelector(sectionsSelector);
   const block = useAppSelector((s) => s.app.selectedBlock);
-  const [tab, setTab] = useState<"variant" | "vault">("variant");
+  const [tab, setTab] = useState<"job" | "vault">("job");
 
   const section = sections.find((s) => s.id === block?.sectionId);
   const item = section?.items.find((i) => i.id === block?.itemId);
@@ -427,10 +430,10 @@ function BlockInspector(): JSX.Element | null {
         </Typography>
       </Box>
       <Tabs value={tab} onChange={(_event, value) => setTab(value)}>
-        <Tab value="variant" label="This variant" />
+        <Tab value="job" label="This job" />
         <Tab value="vault" label="In vault" />
       </Tabs>
-      {tab === "variant" && (
+      {tab === "job" && (
         <>
           <Typography
             sx={{
@@ -441,7 +444,7 @@ function BlockInspector(): JSX.Element | null {
               color: WORKSPACE_COLORS.accentText,
             }}
           >
-            Changes here affect only “{variant.name}”.
+            Item controls change only the job “{variant.name}”.
           </Typography>
           {section.type === "skills" && (
             <SkillStyleControls variant={variant} section={section} />
@@ -501,8 +504,8 @@ function BlockInspector(): JSX.Element | null {
       {tab === "vault" && (
         <>
           <Typography sx={{ fontSize: 13 }}>
-            Editing the vault changes the fact itself, in every variant that
-            uses it.
+            Editing the vault changes the fact itself, in every job that uses
+            it.
           </Typography>
           <Button
             variant="outlined"
