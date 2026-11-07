@@ -31,7 +31,7 @@ import { sectionsSelector } from "@store/vault/vault-slice";
 const HiddenInput = styled("input")({ display: "none" });
 
 /** Pages that are about the vault's facts; the rest (style, layout, variants) are settings */
-const FACT_PAGES = new Set(["mainInfo", "sections"]);
+const FACT_PAGES = new Set(["mainInfo"]);
 const SETTING_PAGES = new Set(["metaData", "styleSettings", "variants"]);
 
 interface TreeProps {
@@ -79,6 +79,19 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
                 <ListItemText primary={page.label} />
               </ListItemButton>
             ))}
+          </List>
+          <Divider sx={{ my: 1 }} />
+          <Typography
+            sx={{
+              px: 1,
+              fontSize: 11,
+              fontWeight: 700,
+              color: "text.secondary",
+            }}
+          >
+            SECTIONS
+          </Typography>
+          <List dense disablePadding>
             {sections.map((section) => (
               <Box key={section.id}>
                 <ListItemButton
