@@ -3,9 +3,16 @@ import {
   ApplicationSummary,
 } from "@custom-types/application-types";
 import { CvFile } from "@custom-types/vault-types";
+import { Job } from "@custom-types/job-types";
+import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { BackupService } from "@server/backup/backup-service";
-import { CvStorage, VariantSummary } from "@server/storage/cv-storage";
+import {
+  CvStorage,
+  JobSummary,
+  TemplateSummary,
+  VariantSummary,
+} from "@server/storage/cv-storage";
 
 /** Wraps a storage and commits the data folder after every successful change */
 export class VersionedCvStorage implements CvStorage {
@@ -39,6 +46,42 @@ export class VersionedCvStorage implements CvStorage {
   async deleteVariant(id: string): Promise<void> {
     await this.inner.deleteVariant(id);
     await this.backup.commit(`Delete: variant ${id}`);
+  }
+
+  listTemplates(): Promise<TemplateSummary[]> {
+    return this.inner.listTemplates();
+  }
+
+  loadTemplate(id: string): Promise<Template> {
+    return this.inner.loadTemplate(id);
+  }
+
+  async saveTemplate(template: Template): Promise<void> {
+    await this.inner.saveTemplate(template);
+    await this.backup.commit(`Save: template ${template.id}`);
+  }
+
+  async deleteTemplate(id: string): Promise<void> {
+    await this.inner.deleteTemplate(id);
+    await this.backup.commit(`Delete: template ${id}`);
+  }
+
+  listJobs(): Promise<JobSummary[]> {
+    return this.inner.listJobs();
+  }
+
+  loadJob(id: string): Promise<Job> {
+    return this.inner.loadJob(id);
+  }
+
+  async saveJob(job: Job): Promise<void> {
+    await this.inner.saveJob(job);
+    await this.backup.commit(`Save: job ${job.id}`);
+  }
+
+  async deleteJob(id: string): Promise<void> {
+    await this.inner.deleteJob(id);
+    await this.backup.commit(`Delete: job ${id}`);
   }
 
   listApplications(): Promise<ApplicationSummary[]> {
