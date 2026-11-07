@@ -114,8 +114,8 @@ describe("templates and jobs in the browser", () => {
       .waitFor();
 
     // Change a style in the template (Style Settings): both jobs follow
-    await openTool("Vault");
-    await page.getByText("Style Settings", { exact: true }).click();
+    await openTool("Templates");
+    await page.getByText("Style settings", { exact: true }).click();
     await page
       .getByText("Changes template “Template Two”, used by 2 jobs.")
       .waitFor();
