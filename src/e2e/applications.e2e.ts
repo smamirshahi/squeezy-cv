@@ -118,6 +118,18 @@ describe("an application is a frozen copy, nothing is locked", () => {
     expect((await readPdf(pdfAfter)).text).toContain("Sample Systems");
   });
 
+  it("one click in the list opens the sent PDF, unchanged by later edits", async () => {
+    await page.goto(`${app.webUrl}/?applications`);
+    const view = page.getByRole("link", { name: /^View CV sent to Acme Ltd/ });
+    await view.waitFor();
+    const href = await view.getAttribute("href");
+    expect(href).toMatch(/^\/api\/applications\/.+\/pdf$/);
+    const response = await page.request.get(`${app.webUrl}${href}`);
+    expect(response.status()).toBe(200);
+    const sent = await readPdf(Buffer.from(await response.body()));
+    expect(sent.text).toContain("Sample Systems");
+  });
+
   it("the list and the application page show job and template; Create new job from this", async () => {
     await page.goto(`${app.webUrl}/?applications`);
     await page.getByRole("columnheader", { name: "Template" }).waitFor();

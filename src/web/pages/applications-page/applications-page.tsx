@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Chip,
+  IconButton,
   InputAdornment,
   Link,
   Paper,
@@ -16,7 +17,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/DownloadOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import VisibilityIcon from "@mui/icons-material/VisibilityOutlined";
 import { useEffect, useMemo, useState } from "react";
 import {
   APPLICATION_STATUSES,
@@ -44,7 +47,10 @@ import {
   APPLICATIONS_TOP_BAR_HEIGHT,
   ApplicationsTopBar,
 } from "@pages/applications-page/applications-top-bar";
-import { createApiClient } from "@store/persistence/api-client";
+import {
+  applicationPdfUrl,
+  createApiClient,
+} from "@store/persistence/api-client";
 
 type LoadState =
   | { status: "loading" }
@@ -407,6 +413,7 @@ function ApplicationsTable({
               <TableCell>Job</TableCell>
               <TableCell>Template</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell align="right">Sent CV</TableCell>
               <TableCell
                 sortDirection={
                   view.sortKey === "appliedAt" ? view.sortDirection : false
@@ -428,7 +435,7 @@ function ApplicationsTable({
             {shown.map((application) =>
               application.isCorrupt ? (
                 <TableRow key={application.id}>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <Alert severity="warning" sx={{ py: 0 }}>
                       Cannot read the application “{application.id}”. Its files
                       were left untouched.
@@ -458,13 +465,38 @@ function ApplicationsTable({
                   <TableCell>
                     <StatusLabel application={application} today={today} />
                   </TableCell>
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                    <IconButton
+                      size="small"
+                      component="a"
+                      href={applicationPdfUrl(application.id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`View CV sent to ${application.company}`}
+                      title={`View CV as sent on ${formatDay(application.appliedAt)}`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      component="a"
+                      href={applicationPdfUrl(application.id)}
+                      download={`${application.id}.pdf`}
+                      aria-label={`Download CV sent to ${application.company}`}
+                      title="Download the sent PDF"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <DownloadIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
                   <TableCell>{formatDay(application.appliedAt)}</TableCell>
                 </TableRow>
               )
             )}
             {shown.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   No application matches this search.
                 </TableCell>
               </TableRow>
