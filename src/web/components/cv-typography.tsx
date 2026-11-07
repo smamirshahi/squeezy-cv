@@ -1,4 +1,3 @@
-import { SectionStyle } from "@custom-types/variant-types";
 import { AvailableFonts } from "@custom-types/styles-types";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { SxProps, Typography } from "@mui/material";
@@ -22,9 +21,6 @@ interface TypographyVariantProps {
    * "avoid-inside" for a paragraph that must not be split
    */
   pageBreak?: "keep-with-next" | "avoid-inside";
-
-  /** Section heading only: the template's style for this section */
-  sectionStyle?: SectionStyle;
 }
 
 /** Creates a new typography which is connected to store */
@@ -33,15 +29,10 @@ export function CvTypography({
   text,
   isEmphasised = false,
   pageBreak,
-  sectionStyle,
 }: TypographyVariantProps): JSX.Element {
-  const { typography } = useAppSelector(styleSelector);
+  const { typography, sectionSpacing, hasHeadingLine } =
+    useAppSelector(styleSelector);
   const { opacity } = useCvTypographyUtils();
-
-  const headingSize =
-    variant === "headingMd" && sectionStyle?.headingSize
-      ? `${sectionStyle.headingSize}pt`
-      : undefined;
 
   const additionalStyle: SxProps = useMemo(() => {
     switch (variant) {
@@ -49,10 +40,9 @@ export function CvTypography({
         return {};
       case "headingMd":
         return {
-          borderBottom:
-            sectionStyle?.showDivider === false ? "none" : "2px solid black",
+          borderBottom: hasHeadingLine === false ? "none" : "2px solid black",
           width: "100%",
-          mt: spaced(sectionStyle?.spaceAbove ?? GAP_PX.sectionTop),
+          mt: spaced(sectionSpacing ?? GAP_PX.sectionTop),
         };
       case "headingSm":
         return {};
@@ -67,7 +57,7 @@ export function CvTypography({
       case "icon":
         return {};
     }
-  }, [variant, sectionStyle]);
+  }, [variant, sectionSpacing, hasHeadingLine]);
 
   return (
     <Typography
@@ -77,11 +67,8 @@ export function CvTypography({
         m: "0px",
         opacity: opacity(variant),
         // Auto-fit can scale all text through the paper's --cv-font-scale
-        fontSize: `calc(${headingSize ?? typography[variant].fontSize} * var(--cv-font-scale, 1))`,
+        fontSize: `calc(${typography[variant].fontSize} * var(--cv-font-scale, 1))`,
         ...additionalStyle,
-        ...(variant === "headingMd" && sectionStyle?.headingColor
-          ? { color: sectionStyle.headingColor }
-          : {}),
         ...(isEmphasised ? { fontWeight: 700 } : {}),
         ...(pageBreak ? { breakInside: "avoid" } : {}),
         ...(pageBreak === "keep-with-next" ? { breakAfter: "avoid" } : {}),

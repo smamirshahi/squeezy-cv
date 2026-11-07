@@ -1,4 +1,9 @@
+import { useCallback, useRef, useState } from "react";
 import { Box, Checkbox, FormControlLabel, Typography } from "@mui/material";
+import { GAP_PX } from "@custom-styles/custom-styles";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
+import { ZoomFrame } from "@pages/workspace/canvas-zoom";
+import { useStyleHover } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
@@ -72,28 +77,59 @@ function symbolFor(
   return "";
 }
 
-interface Props {
-  isShowingNames: boolean;
-  onShowingNamesChange: (isShowing: boolean) => void;
-}
+const PAPER_WIDTH_PX = 620;
+const DIMMED = 0.22;
 
-/** A small sheet with demo text drawn with the current styles; updates as they change */
-export function StylePreview({
-  isShowingNames,
-  onShowingNamesChange,
-}: Props): JSX.Element {
-  const { typography, bulletPointIcon, ratingIcon } =
-    useAppSelector(styleSelector);
+/**
+ * Right panel of the Style settings page: a small sheet with demo text drawn with the current
+ * styles. When the pointer is on a style in the table, only that style stays clear.
+ */
+export function StylePreviewPanel(): JSX.Element {
+  const {
+    typography,
+    bulletPointIcon,
+    ratingIcon,
+    sectionSpacing,
+    hasHeadingLine,
+  } = useAppSelector(styleSelector);
+  const { hovered } = useStyleHover();
+  const [isShowingNames, setIsShowingNames] = useState<boolean>(true);
+  const [available, setAvailable] = useState<number>(0);
+  const observer = useRef<ResizeObserver | null>(null);
+
+  const measure = useCallback((node: HTMLDivElement | null): void => {
+    observer.current?.disconnect();
+    observer.current = null;
+    if (node === null || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    setAvailable(node.clientWidth);
+    observer.current = new ResizeObserver(() => setAvailable(node.clientWidth));
+    observer.current.observe(node);
+  }, []);
+
+  const zoom = available > 0 ? Math.min(1, available / PAPER_WIDTH_PX) : 0.5;
 
   return (
-    <Box component="section" aria-label="Live preview">
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
+    <ResizableAside side="right" label="the live preview" defaultWidth={420}>
+      <Box
+        component="aside"
+        aria-label="Live preview"
+        sx={{
+          width: "100%",
+          flex: "none",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          p: 2,
+          overflow: "auto",
+        }}
+      >
         <Typography sx={{ fontWeight: 700 }}>Live preview</Typography>
         <Typography
           variant="body2"
-          sx={{ flex: 1, color: WORKSPACE_COLORS.muted }}
+          sx={{ color: WORKSPACE_COLORS.muted, mb: 0.5 }}
         >
-          Demo text, not your data
+          Demo text, not your data. Point at a style to see where it is used.
         </Typography>
         <FormControlLabel
           label="Show style names"
@@ -101,93 +137,118 @@ export function StylePreview({
             <Checkbox
               size="small"
               checked={isShowingNames}
-              onChange={(event) => onShowingNamesChange(event.target.checked)}
+              onChange={(event) => setIsShowingNames(event.target.checked)}
             />
           }
         />
-      </Box>
-      <Box
-        sx={{
-          bgcolor: WORKSPACE_COLORS.canvas,
-          border: `1px solid ${WORKSPACE_COLORS.border}`,
-          borderRadius: 0.5,
-          p: 2.5,
-          display: "flex",
-          justifyContent: "center",
-          overflow: "auto",
-        }}
-      >
-        <Box
-          data-testid="style-preview-paper"
-          sx={{
-            width: 620,
-            flex: "none",
-            bgcolor: "#fff",
-            color: "#000",
-            px: "38px",
-            pt: "30px",
-            pb: "34px",
-            boxShadow: "0 1px 8px rgba(0,0,0,.18)",
-            fontFamily: "Calibri, sans-serif",
-          }}
-        >
-          {DEMO_LINES.map((line, index) => {
-            const style = typography[line.variant];
-            const symbol = symbolFor(line.icon, bulletPointIcon, ratingIcon);
-            return (
-              <Box
-                key={index}
-                data-style-line={line.variant}
-                sx={{
-                  position: "relative",
-                  fontSize: style.fontSize,
-                  fontWeight: style.fontWeight,
-                  color: style.color,
-                  lineHeight: 1.35,
-                  mb: `${line.gapAfter ?? 2}px`,
-                  ...(line.isHeadingRule && {
-                    borderBottom: "1px solid #000",
-                    pb: "2px",
-                  }),
-                }}
-              >
-                {isShowingNames && (
+        <Box ref={measure} sx={{ width: "100%" }}>
+          <ZoomFrame zoom={zoom}>
+            <Box
+              data-testid="style-preview-paper"
+              sx={{
+                width: PAPER_WIDTH_PX,
+                bgcolor: "#fff",
+                color: "#000",
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                pl: "84px",
+                pr: "38px",
+                pt: "30px",
+                pb: "34px",
+                fontFamily: "Calibri, sans-serif",
+                boxSizing: "border-box",
+              }}
+            >
+              {DEMO_LINES.map((line, index) => {
+                const style = typography[line.variant];
+                const symbol = symbolFor(
+                  line.icon,
+                  bulletPointIcon,
+                  ratingIcon
+                );
+                const isIconFocus = hovered === "icon";
+                // With an icon style picked, the symbols stay clear and their text fades
+                const isLineDimmed =
+                  hovered !== null &&
+                  (isIconFocus ? symbol === "" : hovered !== line.variant);
+                const isTextDimmed =
+                  isIconFocus && symbol !== "" && hovered !== line.variant;
+                return (
                   <Box
-                    component="span"
-                    aria-hidden="true"
+                    key={index}
+                    data-style-line={line.variant}
                     sx={{
-                      position: "absolute",
-                      right: "100%",
-                      mr: "8px",
-                      top: 2,
-                      font: "600 9px/1 sans-serif",
-                      color: WORKSPACE_COLORS.accent,
-                      whiteSpace: "nowrap",
+                      position: "relative",
+                      fontSize: style.fontSize,
+                      fontWeight: style.fontWeight,
+                      color: style.color,
+                      lineHeight: 1.35,
+                      mb: `${line.gapAfter ?? 2}px`,
+                      opacity: isLineDimmed ? DIMMED : 1,
+                      transition: "opacity .12s",
+                      ...(line.isHeadingRule && {
+                        borderBottom:
+                          hasHeadingLine === false ? "none" : "1px solid #000",
+                        pb: "2px",
+                        mt: `${sectionSpacing ?? GAP_PX.sectionTop}px`,
+                      }),
                     }}
                   >
-                    {line.variant}
+                    {isShowingNames && (
+                      // zero-width, on the text baseline, hanging into the left margin
+                      <Box
+                        component="span"
+                        aria-hidden="true"
+                        sx={{
+                          display: "inline-block",
+                          width: 0,
+                          verticalAlign: "baseline",
+                        }}
+                      >
+                        <Box
+                          component="span"
+                          sx={{
+                            display: "inline-block",
+                            transform: "translateX(-100%)",
+                            ml: "-8px",
+                            font: "600 9px/1 sans-serif",
+                            color: WORKSPACE_COLORS.accent,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {line.variant}
+                        </Box>
+                      </Box>
+                    )}
+                    {symbol !== "" && (
+                      <Box
+                        component="span"
+                        aria-hidden="true"
+                        sx={{
+                          mr: "6px",
+                          color: typography.icon.color,
+                          fontSize: typography.icon.fontSize,
+                          fontWeight: typography.icon.fontWeight,
+                        }}
+                      >
+                        {symbol}
+                      </Box>
+                    )}
+                    <Box
+                      component="span"
+                      sx={{
+                        opacity: isTextDimmed ? DIMMED : 1,
+                        transition: "opacity .12s",
+                      }}
+                    >
+                      {line.text}
+                    </Box>
                   </Box>
-                )}
-                {symbol !== "" && (
-                  <Box
-                    component="span"
-                    aria-hidden="true"
-                    sx={{
-                      mr: "6px",
-                      color: typography.icon.color,
-                      fontSize: typography.icon.fontSize,
-                      fontWeight: typography.icon.fontWeight,
-                    }}
-                  >
-                    {symbol}
-                  </Box>
-                )}
-                {line.text}
-              </Box>
-            );
-          })}
+                );
+              })}
+            </Box>
+          </ZoomFrame>
         </Box>
       </Box>
-    </Box>
+    </ResizableAside>
   );
 }

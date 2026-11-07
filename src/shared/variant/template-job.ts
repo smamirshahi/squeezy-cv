@@ -17,7 +17,6 @@ const TEMPLATE_KEYS = [
   "skillGroupBy",
   "skillColumns",
   "skillMinLevel",
-  "sectionStyles",
 ] as const;
 
 /** Optional fields of a job that are copied only when set */

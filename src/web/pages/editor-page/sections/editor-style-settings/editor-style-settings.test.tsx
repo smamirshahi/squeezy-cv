@@ -6,6 +6,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
+import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
+import { StyleHoverProvider } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import { TypographyVariant } from "@custom-styles/custom-styles";
 
 afterEach(cleanup);
@@ -14,7 +16,10 @@ function setup(): AppStore {
   const store = configureStore({ reducer: rootReducer });
   render(
     <Provider store={store}>
-      <EditorTypography />
+      <StyleHoverProvider>
+        <EditorTypography />
+        <StylePreviewPanel />
+      </StyleHoverProvider>
     </Provider>
   );
   return store;
@@ -85,5 +90,49 @@ describe("Style settings page", () => {
     expect(getComputedStyle(line as Element).fontSize).toBe("26.6667px"); // 20pt
     fireEvent.click(screen.getByText("Reset to defaults"));
     expect(typographyOf(store)).toEqual(TypographyVariant);
+  });
+
+  it("fades every line except the style the pointer is on", () => {
+    setup();
+    const line = (variant: string): HTMLElement =>
+      document.querySelector(`[data-style-line=${variant}]`) as HTMLElement;
+    expect(getComputedStyle(line("headingLg")).opacity).toBe("1");
+    fireEvent.mouseEnter(document.querySelector("[data-style-row=headingMd]")!);
+    expect(getComputedStyle(line("headingMd")).opacity).toBe("1");
+    expect(getComputedStyle(line("headingLg")).opacity).not.toBe("1");
+    fireEvent.mouseLeave(document.querySelector("[data-style-row=headingMd]")!);
+    expect(getComputedStyle(line("headingLg")).opacity).toBe("1");
+  });
+
+  it("tells where a style is used in a tooltip next to it", () => {
+    setup();
+    expect(screen.getByLabelText("Where headingLg is used")).toBeTruthy();
+  });
+
+  it("sets the space between sections and the line under titles for the whole template", () => {
+    const store = setup();
+    fireEvent.change(screen.getByLabelText("Space between sections (px)"), {
+      target: { value: "20" },
+    });
+    expect(store.getState().cvData.style.sectionSpacing).toBe(20);
+    fireEvent.change(screen.getByLabelText("Space between sections (px)"), {
+      target: { value: "99" },
+    });
+    expect(store.getState().cvData.style.sectionSpacing).toBe(40);
+    fireEvent.click(screen.getByLabelText("Line under section titles"));
+    expect(store.getState().cvData.style.hasHeadingLine).toBe(false);
+  });
+
+  it("draws the section title line and spacing in the preview", () => {
+    setup();
+    const title = (): HTMLElement =>
+      document.querySelector("[data-style-line=headingMd]") as HTMLElement;
+    expect(getComputedStyle(title()).borderBottomStyle).toBe("solid");
+    fireEvent.click(screen.getByLabelText("Line under section titles"));
+    expect(getComputedStyle(title()).borderBottomStyle).toBe("none");
+    fireEvent.change(screen.getByLabelText("Space between sections (px)"), {
+      target: { value: "20" },
+    });
+    expect(getComputedStyle(title()).marginTop).toBe("20px");
   });
 });

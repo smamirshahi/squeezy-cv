@@ -1,7 +1,6 @@
 import { Side } from "@custom-types/styles-types";
 import {
   Emphasis,
-  SectionStyle,
   SkillDisplay,
   Tone,
   Variant,
@@ -43,8 +42,6 @@ export type RenderedPart =
       items: RenderedItem[];
       /** Skills sections only: how to draw the levels and lay the list out */
       skillStyle?: { display?: SkillDisplay; columns: 1 | 2 };
-      /** The template's style for this section; missing = the global style */
-      sectionStyle?: SectionStyle;
     };
 
 export type RenderedSection = Extract<RenderedPart, { kind: "section" }>;
@@ -171,10 +168,6 @@ function flattenSkills(items: RenderedItem[]): RenderedItem[] {
       ];
 }
 
-function hasSectionStyle(style: SectionStyle | undefined): boolean {
-  return style !== undefined && Object.keys(style).length > 0;
-}
-
 /**
  * Resolves a vault and a variant into the document to draw. Pure: same input, same output.
  * The layout is reconciled with the vault, so a section added later still appears and a
@@ -222,9 +215,6 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
             type: section.type,
             title: section.title,
             items,
-            ...(hasSectionStyle(variant.sectionStyles?.[id])
-              ? { sectionStyle: { ...variant.sectionStyles?.[id] } }
-              : {}),
             ...(isSkills
               ? {
                   skillStyle: {

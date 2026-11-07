@@ -1,32 +1,20 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  FormControlLabel,
-  MenuItem,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box } from "@mui/material";
 import { Job, CURRENT_JOB_VERSION } from "@custom-types/job-types";
-import { SECTION_STYLE_RANGES } from "@custom-types/variant-types";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";
-import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { render } from "@shared/variant/render";
 import { resolveVariant } from "@shared/variant/template-job";
-import { isValidHex } from "@shared/style/typography-utils";
 import { appSelector } from "@store/app/app-slice";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
-  activeJobSelector,
   activeTemplateSelector,
-  setSectionStyle,
+  templatesSelector,
 } from "@store/jobs/jobs-slice";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
+import { useAppSelector } from "@store/store-helper";
+import { vaultSelector } from "@store/vault/vault-slice";
 
 /** Scale of the sample page before its panel has been measured */
 const SAMPLE_ZOOM = 0.55;
@@ -48,147 +36,28 @@ function sampleJob(templateId: string): Job {
   };
 }
 
-/** Style per section of the active job's template */
-export function TemplateSectionStyles(): JSX.Element {
-  const dispatch = useAppDispatch();
-  const template = useAppSelector(activeTemplateSelector);
-  const activeJob = useAppSelector(activeJobSelector);
-  const sections = useAppSelector(sectionsSelector);
-  const [pickedId, setPickedId] = useState<string>("");
-  const sectionId = sections.some((s) => s.id === pickedId)
-    ? pickedId
-    : (sections[0]?.id ?? "");
-  const current = template.sectionStyles?.[sectionId] ?? {};
-  const [colorText, setColorText] = useState<string | null>(null);
-  const colorShown = colorText ?? current.headingColor ?? "";
-
-  function change(
-    patch: Parameters<typeof setSectionStyle>[0]["change"]
-  ): void {
-    dispatch(setSectionStyle({ id: activeJob.id, sectionId, change: patch }));
-  }
-
-  function numberField(
-    key: "headingSize" | "spaceAbove",
-    label: string,
-    unit: string
-  ): JSX.Element {
-    const range = SECTION_STYLE_RANGES[key];
-    return (
-      <TextField
-        size="small"
-        type="number"
-        label={`${label} (${unit})`}
-        placeholder="Global"
-        value={current[key] ?? ""}
-        slotProps={{ htmlInput: { min: range.min, max: range.max } }}
-        onChange={(event) =>
-          change({
-            [key]:
-              event.target.value === "" ? null : Number(event.target.value),
-          })
-        }
-        sx={{ width: 160 }}
-      />
-    );
-  }
-
-  const hasStyle = Object.keys(current).length > 0;
-  const isColorInvalid = colorShown !== "" && !isValidHex(colorShown);
-
-  return (
-    <Box
-      component="section"
-      aria-label="Section styles"
-      sx={{
-        display: "grid",
-        gap: 1.5,
-        maxWidth: 560,
-      }}
-    >
-      <Box sx={{ display: "grid", gap: 1.5 }}>
-        <TemplateScopeNote />
-        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          Pick a section and give its heading its own look. Empty fields follow
-          the global style. The sample shows your vault with everything shown.
-        </Typography>
-        <TextField
-          select
-          size="small"
-          label="Section"
-          value={sectionId}
-          onChange={(event) => {
-            setPickedId(event.target.value);
-            setColorText(null);
-          }}
-        >
-          {sections.map((section) => (
-            <MenuItem key={section.id} value={section.id}>
-              {section.title}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-          {numberField("headingSize", "Heading size", "pt")}
-          {numberField("spaceAbove", "Space above", "px")}
-        </Box>
-        <TextField
-          size="small"
-          label="Heading colour"
-          placeholder="Global, e.g. #1a3c6e"
-          value={colorShown}
-          error={isColorInvalid}
-          helperText={isColorInvalid ? "Use a colour like #1a3c6e" : undefined}
-          onChange={(event) => {
-            setColorText(event.target.value);
-            if (event.target.value === "" || isValidHex(event.target.value)) {
-              change({ headingColor: event.target.value || null });
-            }
-          }}
-          onBlur={() => setColorText(null)}
-          sx={{ width: 240 }}
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={current.showDivider !== false}
-              onChange={(event) =>
-                change({ showDivider: event.target.checked ? null : false })
-              }
-            />
-          }
-          label="Line under the heading"
-        />
-        <Box>
-          <Button
-            size="small"
-            disabled={!hasStyle}
-            onClick={() => {
-              setColorText(null);
-              change({
-                headingSize: null,
-                headingColor: null,
-                spaceAbove: null,
-                showDivider: null,
-              });
-            }}
-          >
-            Use the global style for this section
-          </Button>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
 /**
  * Sample CV built from the vault (everything shown, cut after two pages) so the look can be
  * judged. It fills the width of the panel it sits in, so resizing the panel resizes the page.
  */
-export function TemplateSample(): JSX.Element {
-  const template = useAppSelector(activeTemplateSelector);
-  const style = useAppSelector(styleSelector);
-  const { columnWidth, structure } = useAppSelector(appSelector);
+export function TemplateSample({
+  templateId,
+}: {
+  /** The template to draw; missing = the template of the active job */
+  templateId?: string;
+}): JSX.Element {
+  const activeTemplate = useAppSelector(activeTemplateSelector);
+  const templates = useAppSelector(templatesSelector);
+  const template =
+    templates.find((entry) => entry.id === templateId) ?? activeTemplate;
+  const liveStyle = useAppSelector(styleSelector);
+  const app = useAppSelector(appSelector);
+  const { columnWidth } = app;
+  // The active template is being edited: draw the editor's live layout and style.
+  // Any other template is drawn as it is saved.
+  const isActive = template.id === activeTemplate.id;
+  const structure = isActive ? app.structure : template.layout;
+  const style = isActive ? liveStyle : template.style;
   const vault = useAppSelector(vaultSelector);
   const [available, setAvailable] = useState<number>(0);
   const observer = useRef<ResizeObserver | null>(null);

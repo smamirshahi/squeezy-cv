@@ -43,6 +43,18 @@ const cvDataSlice = createSlice({
       state.style.shouldShowRightToWork = action.payload;
     },
 
+    setSectionSpacing(state, action: PayloadAction<number | undefined>) {
+      if (action.payload === undefined) {
+        delete state.style.sectionSpacing;
+      } else {
+        state.style.sectionSpacing = action.payload;
+      }
+    },
+
+    setHasHeadingLine(state, action: PayloadAction<boolean>) {
+      state.style.hasHeadingLine = action.payload;
+    },
+
     setDateFormat(state, action: PayloadAction<Style["dateFormat"]>) {
       state.style.dateFormat = action.payload;
     },
@@ -89,6 +101,8 @@ export const {
   setStyle,
   setDateFormat,
   setShouldShowRightToWork,
+  setSectionSpacing,
+  setHasHeadingLine,
   setPaperMargin,
   setTypography,
   resetTypography,

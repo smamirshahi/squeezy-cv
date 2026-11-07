@@ -1,4 +1,3 @@
-import { cssVar } from "@custom-styles/theme";
 import { MouseEvent, useEffect, useState } from "react";
 import {
   Alert,
@@ -20,7 +19,10 @@ import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
-import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import {
+  MIDDLE_AREA_SX,
+  WORKSPACE_COLORS,
+} from "@pages/workspace/workspace-tokens";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
@@ -329,7 +331,8 @@ export function VaultPage(): JSX.Element {
           flex: 1,
           minWidth: 0,
           overflow: "auto",
-          bgcolor: cssVar("bg"),
+          ...MIDDLE_AREA_SX,
+          mx: 1,
           p: 3,
           display: "flex",
           flexDirection: "column",
@@ -354,7 +357,12 @@ export function VaultPage(): JSX.Element {
         {!hasInlineEditor && (
           <>
             <Box
-              sx={{ bgcolor: WORKSPACE_COLORS.panel, borderRadius: 1, p: 2 }}
+              sx={{
+                bgcolor: WORKSPACE_COLORS.panel,
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                borderRadius: "6px",
+                p: 2,
+              }}
             >
               {page.content}
             </Box>

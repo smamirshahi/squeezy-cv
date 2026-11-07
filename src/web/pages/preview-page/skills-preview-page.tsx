@@ -82,7 +82,6 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
         variant="headingMd"
         pageBreak="keep-with-next"
         text={section.title}
-        sectionStyle={section.sectionStyle}
       />
       {section.items.map((group) => (
         <React.Fragment key={group.id}>
