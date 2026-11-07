@@ -13,6 +13,7 @@ import {
   deleteVariant,
   duplicateVariant,
   initialState,
+  insertTailoredJob,
   relockVariants,
   renameTemplate,
   renameVariant,
@@ -618,5 +619,42 @@ describe("loading templates and jobs", () => {
       })
     );
     expect(kept.activeJobId).toBe("second");
+  });
+});
+
+describe("insertTailoredJob", () => {
+  const first = initialState.jobs[0];
+
+  it("adds a job on an existing template, makes it active and changes nothing else", () => {
+    const job = { ...first, id: "tailored", templateId: first.templateId };
+    const next = variantsReducer(initialState, insertTailoredJob({ job }));
+    expect(next.jobs.map((j) => j.id)).toEqual([first.id, "tailored"]);
+    expect(next.activeJobId).toBe("tailored");
+    expect(next.templates).toBe(initialState.templates);
+  });
+
+  it("adds the template copy together with the job", () => {
+    const template = {
+      ...initialState.templates[0],
+      id: "copy",
+      name: "T (tailored)",
+    };
+    const job = { ...first, id: "tailored", templateId: "copy" };
+    const next = variantsReducer(
+      initialState,
+      insertTailoredJob({ job, template })
+    );
+    expect(next.templates.map((t) => t.id)).toEqual([
+      initialState.templates[0].id,
+      "copy",
+    ]);
+    expect(next.jobs[1].templateId).toBe("copy");
+  });
+
+  it("ignores a job whose template does not exist", () => {
+    const job = { ...first, id: "x", templateId: "nope" };
+    expect(
+      variantsReducer(initialState, insertTailoredJob({ job })).jobs
+    ).toHaveLength(1);
   });
 });

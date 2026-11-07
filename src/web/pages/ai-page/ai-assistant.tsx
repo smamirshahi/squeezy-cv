@@ -31,6 +31,7 @@ import {
   ItemChange,
   applyProposal,
   buildTailorRecord,
+  createTailoredJob,
   defaultDecisions,
   describeItemChange,
   describeSectionMoves,
@@ -54,9 +55,13 @@ import {
 } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
+  activeJobSelector,
+  activeTemplateSelector,
   activeVariantSelector,
-  insertVariant,
+  insertTailoredJob,
+  templatesSelector,
 } from "@store/variants/variants-slice";
+import { resolveVariant } from "@shared/variant/template-job";
 import { setBulletAlt, vaultSelector } from "@store/vault/vault-slice";
 
 /** "show, highlight" or "no change" */
@@ -95,14 +100,31 @@ function findItem(
 
 /**
  * Tailors the CV to a job advert with AI and lets the user review the result: what would
- * change versus the current variant, what was flagged, what is missing. Nothing is applied until
- * "Create variant", which makes a new variant and leaves the current one alone.
+ * change versus the current job, what was flagged, what is missing. Nothing is applied until
+ * "Create job", which makes a new job (sharing a chosen template; a template copy only when the
+ * accepted section order or the page limit differ from it) and leaves the current one alone.
  */
 export function AiAssistant(): JSX.Element {
   const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
-  const base = useAppSelector(activeVariantSelector);
+  const activeVariant = useAppSelector(activeVariantSelector);
+  const activeJob = useAppSelector(activeJobSelector);
+  const activeTemplate = useAppSelector(activeTemplateSelector);
+  const templates = useAppSelector(templatesSelector);
   const isSaved = useAppSelector((s) => s.persistence.saved !== null);
+  const [templateChoice, setTemplateChoice] = useState<string>("");
+  const template =
+    templates.find((t) => t.id === templateChoice) ?? activeTemplate;
+  // what the active job shows, drawn with the template picked here
+  const base = useMemo(
+    () =>
+      template.id === activeTemplate.id
+        ? activeVariant
+        : resolveVariant(template, activeJob),
+    [template, activeTemplate, activeVariant, activeJob]
+  );
+  const [jobName, setJobName] = useState<string>("");
+  const [isJobNameEdited, setIsJobNameEdited] = useState<boolean>(false);
   const api = useMemo(() => createApiClient(), []);
 
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
@@ -111,7 +133,7 @@ export function AiAssistant(): JSX.Element {
   );
   const [jobAd, setJobAd] = useState<string>("");
   const [tone, setTone] = useState<Tone>("neutral");
-  const [pageLimit, setPageLimit] = useState<number>(base.pageLimit);
+  const [pageLimit, setPageLimit] = useState<number>(template.pageLimit);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [result, setResult] = useState<TailorResult | null>(null);
@@ -130,6 +152,11 @@ export function AiAssistant(): JSX.Element {
       .catch(() => setIsConfigured(false));
   }, [api]);
 
+  // the page limit starts from the chosen template's own
+  useEffect(() => {
+    setPageLimit(template.pageLimit);
+  }, [template.id, template.pageLimit]);
+
   async function analyse(): Promise<void> {
     setIsBusy(true);
     setError("");
@@ -137,6 +164,9 @@ export function AiAssistant(): JSX.Element {
     try {
       const next = await api.tailor({ jobAd, tone });
       setResult(next);
+      if (!isJobNameEdited) {
+        setJobName(next.requirements.jobTitle);
+      }
       setDecisions(defaultDecisions(next.proposal));
     } catch (caught) {
       setResult(null);
@@ -154,13 +184,32 @@ export function AiAssistant(): JSX.Element {
     if (!result || !decisions) {
       return;
     }
-    const name = `${result.requirements.jobTitle || "Tailored"} (AI)`;
-    const { variant, altUpdates } = applyProposal(
+    const name =
+      jobName.trim() || `${result.requirements.jobTitle || "Tailored"} (AI)`;
+    const {
+      job,
+      template: copy,
+      altUpdates,
+    } = createTailoredJob(
       vault,
-      base,
+      template,
+      activeJob,
       result.proposal,
       decisions,
-      { id: nanoid(), name }
+      {
+        id: nanoid(),
+        name,
+        copyTemplateId: nanoid(),
+        tone,
+        pageLimit,
+        role: result.requirements.jobTitle || undefined,
+        tailor: buildTailorRecord(
+          result.requirements,
+          result.proposal,
+          decisions,
+          toIsoDay(new Date())
+        ),
+      }
     );
     // alternative wordings are added to the CV's own data; the original text is never changed
     for (const update of altUpdates) {
@@ -174,18 +223,8 @@ export function AiAssistant(): JSX.Element {
         })
       );
     }
-    const tailored = {
-      ...variant,
-      pageLimit,
-      tailor: buildTailorRecord(
-        result.requirements,
-        result.proposal,
-        decisions,
-        toIsoDay(new Date())
-      ),
-    };
-    dispatch(insertVariant(tailored));
-    activateVariant(dispatch, tailored);
+    dispatch(insertTailoredJob({ job, template: copy }));
+    activateVariant(dispatch, resolveVariant(copy ?? template, job));
     setCreated(name);
   }
 
@@ -217,15 +256,32 @@ export function AiAssistant(): JSX.Element {
         bullet.alt = { ...bullet.alt, [update.wording]: update.text };
       }
     }
+    // the editor's layout mirrors the active template; another template draws its own
+    const ownLayout =
+      template.id === activeTemplate.id ? structure : base.layout;
     const layout =
       result.proposal.sectionOrder && decisions.isSectionOrderAccepted
-        ? reorderLayoutSections(structure, result.proposal.sectionOrder)
-        : structure;
-    return render(previewVault, { ...variant, layout });
-  }, [result, decisions, vault, base, structure]);
+        ? reorderLayoutSections(ownLayout, result.proposal.sectionOrder)
+        : ownLayout;
+    return render(previewVault, { ...variant, layout, tone, pageLimit });
+  }, [
+    result,
+    decisions,
+    vault,
+    base,
+    structure,
+    template.id,
+    activeTemplate.id,
+    tone,
+    pageLimit,
+  ]);
   const current = useMemo(
-    () => render(vault, { ...base, layout: structure }),
-    [vault, base, structure]
+    () =>
+      render(vault, {
+        ...base,
+        layout: template.id === activeTemplate.id ? structure : base.layout,
+      }),
+    [vault, base, structure, template.id, activeTemplate.id]
   );
   const shown = view === "proposed" && proposed ? proposed : current;
   const diff = useMemo(
@@ -331,6 +387,20 @@ export function AiAssistant(): JSX.Element {
           <TextField
             select
             size="small"
+            label="Template"
+            value={template.id}
+            onChange={(event) => setTemplateChoice(event.target.value)}
+            sx={{ minWidth: 180 }}
+          >
+            {templates.map((t) => (
+              <MenuItem key={t.id} value={t.id}>
+                {t.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            size="small"
             label="Page limit"
             value={pageLimit}
             onChange={(event) => setPageLimit(Number(event.target.value))}
@@ -339,6 +409,17 @@ export function AiAssistant(): JSX.Element {
             <MenuItem value={1}>1 page</MenuItem>
             <MenuItem value={2}>2 pages</MenuItem>
           </TextField>
+          <TextField
+            size="small"
+            label="Job name"
+            value={jobName}
+            placeholder="Filled from the advert"
+            onChange={(event) => {
+              setJobName(event.target.value);
+              setIsJobNameEdited(true);
+            }}
+            sx={{ minWidth: 200 }}
+          />
           <Button
             variant="contained"
             disabled={
