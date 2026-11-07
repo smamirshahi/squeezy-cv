@@ -23,6 +23,7 @@ import {
   singleColumnLayout,
   twoColumnLayout,
 } from "@shared/vault/page-structure";
+import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
@@ -427,6 +428,7 @@ function BlockInspector(): JSX.Element | null {
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>
           {item ? getItemLabel(item) : section.title}
         </Typography>
+        {item && <RelevanceBadge relevance={choice?.relevance} />}
       </Box>
       <Tabs value={tab} onChange={(_event, value) => setTab(value)}>
         <Tab value="job" label="This job" />

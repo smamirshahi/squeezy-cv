@@ -31,6 +31,11 @@ import {
   MAX_HIDE_CANDIDATES,
 } from "@custom-types/hide-types";
 import {
+  MAX_REWRITE_REQUIREMENTS,
+  RewriteRequestSchema,
+} from "@custom-types/rewrite-types";
+import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
+import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
 } from "@custom-types/tailor-types";
@@ -359,6 +364,37 @@ export function buildServer({
       },
       { isMaskingOrganisations: registry.isMaskingOrganisations() }
     );
+  });
+
+  // One bullet made shorter, longer or more formal (the user accepts it; nothing is changed here)
+  app.post("/api/ai/rewrite", async (request, reply) => {
+    const { client: ai } = registry.forTask("chat");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = RewriteRequestSchema.check(request.body);
+    const requirements = (body.requirements ?? [])
+      .slice(0, MAX_REWRITE_REQUIREMENTS)
+      .map((text) => text.slice(0, 200));
+    const { vault } = await storage.loadVault();
+    try {
+      return await rewriteBullet(
+        ai,
+        vault,
+        { ...body, requirements },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      );
+    } catch (error) {
+      if (error instanceof BulletNotFoundError) {
+        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
+      }
+      throw error;
+    }
   });
 
   // Which items to hide so the CV fits (the user confirms; nothing is changed here)
