@@ -7,11 +7,14 @@ import { initialState as cvDataState } from "@store/cv-data/cv-data-slice";
 import {
   VariantsState,
   activeVariantSelector,
+  addTemplate,
   addVariant,
+  deleteTemplate,
   deleteVariant,
   duplicateVariant,
   initialState,
   relockVariants,
+  renameTemplate,
   renameVariant,
   setActiveVariant,
   setLocks,
@@ -39,10 +42,21 @@ function all(state: VariantsState): Variant[] {
 const vault = createDefaultVault();
 const style = cvDataState.style;
 
+/** Two jobs; the second is on a template of its own ("template-second"), made on purpose */
 function withTwo(): VariantsState {
-  return variantsReducer(
+  const withTemplate = variantsReducer(
     initialState,
-    addVariant({ vault, style, name: "Second", id: "second" })
+    addTemplate({ name: "Second", id: "template-second" })
+  );
+  return variantsReducer(
+    withTemplate,
+    addVariant({
+      vault,
+      style,
+      name: "Second",
+      id: "second",
+      templateId: "template-second",
+    })
   );
 }
 
@@ -383,7 +397,7 @@ describe("templates and jobs: who owns what", () => {
     ).toBe(state);
   });
 
-  it("deleting a job removes its template only when no other job uses it", () => {
+  it("deleting a job keeps its template: templates are reusable and deleted on their own", () => {
     const shared = variantsReducer(
       withTwo(),
       setJobTemplate({
@@ -399,24 +413,93 @@ describe("templates and jobs: who owns what", () => {
       initialState.templates[0].id
     );
     const own = variantsReducer(withTwo(), deleteVariant({ id: "second" }));
-    expect(own.templates).toHaveLength(1);
+    expect(own.templates.map((t) => t.id)).toContain("template-second");
   });
 
-  it("a copy of a job gets a template of its own, so editing it leaves the source look alone", () => {
+  it("a copy of a job shares the template of the source, so a style change reaches both", () => {
     const state = variantsReducer(
       withTwo(),
       duplicateVariant({ sourceId: "second", id: "copy" })
     );
     const copy = state.jobs.find((j) => j.id === "copy")!;
     const source = state.jobs.find((j) => j.id === "second")!;
-    expect(copy.templateId).not.toBe(source.templateId);
+    expect(copy.templateId).toBe(source.templateId);
+    expect(state.templates).toHaveLength(2);
     const edited = variantsReducer(
       state,
       setPageLimit({ id: "copy", pageLimit: 1 })
     );
-    expect(all(edited).find((v) => v.id === "second")?.pageLimit).toBe(
-      all(state).find((v) => v.id === "second")?.pageLimit
+    expect(all(edited).find((v) => v.id === "second")?.pageLimit).toBe(1);
+    expect(all(edited).find((v) => v.id === "copy")?.pageLimit).toBe(1);
+  });
+
+  it("a new job shares the template of the active job unless another is chosen", () => {
+    const state = variantsReducer(
+      withTwo(),
+      addVariant({ vault, style, name: "Third", id: "third" })
     );
+    expect(state.templates).toHaveLength(2);
+    expect(state.jobs.find((j) => j.id === "third")?.templateId).toBe(
+      "template-second"
+    );
+    const chosen = variantsReducer(
+      withTwo(),
+      addVariant({
+        vault,
+        style,
+        name: "Third",
+        id: "third",
+        templateId: initialState.templates[0].id,
+      })
+    );
+    expect(chosen.jobs.find((j) => j.id === "third")?.templateId).toBe(
+      initialState.templates[0].id
+    );
+  });
+
+  it("adds a template that is a copy of the active job's, without moving any job", () => {
+    const state = variantsReducer(
+      withTwo(),
+      addTemplate({ name: "Template 3", id: "t3" })
+    );
+    const added = state.templates.find((t) => t.id === "t3")!;
+    expect(added.name).toBe("Template 3");
+    expect(added.layout).toEqual(state.templates[1].layout);
+    expect(state.jobs.map((j) => j.templateId)).toEqual(
+      withTwo().jobs.map((j) => j.templateId)
+    );
+  });
+
+  it("renames a template", () => {
+    const state = variantsReducer(
+      withTwo(),
+      renameTemplate({ id: "template-second", name: "Compact" })
+    );
+    expect(state.templates[1].name).toBe("Compact");
+    expect(state.jobs.map((j) => j.name)).toEqual(["Default", "Second"]);
+  });
+
+  it("refuses to delete a template a job uses, or the last template", () => {
+    const used = withTwo();
+    expect(
+      variantsReducer(used, deleteTemplate({ id: "template-second" }))
+    ).toBe(used);
+    expect(
+      variantsReducer(
+        initialState,
+        deleteTemplate({ id: initialState.templates[0].id })
+      )
+    ).toBe(initialState);
+  });
+
+  it("deletes a template no job uses", () => {
+    const state = variantsReducer(
+      withTwo(),
+      addTemplate({ name: "Spare", id: "spare" })
+    );
+    const after = variantsReducer(state, deleteTemplate({ id: "spare" }));
+    expect(after.templates.map((t) => t.id)).not.toContain("spare");
+    expect(after.templates).toHaveLength(2);
   });
 
   it("a sent job freezes the template it uses, for every job on it", () => {

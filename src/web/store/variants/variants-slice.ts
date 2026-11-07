@@ -29,6 +29,7 @@ import {
 import {
   duplicateJob,
   duplicateTemplate,
+  jobsUsingTemplate,
   resolveVariant,
   splitVariant,
 } from "@shared/variant/template-job";
@@ -70,7 +71,7 @@ function createInitialState(): VariantsState {
   );
   const { template, job } = splitVariant(variant, templateIdFor(variant.id));
   return {
-    templates: [template],
+    templates: [{ ...template, name: "Template 1" }],
     jobs: [job],
     activeJobId: job.id,
     locks: NO_LOCKS,
@@ -190,10 +191,25 @@ const variantsSlice = createSlice({
       );
     },
 
+    /**
+     * A new job. It shares a template instead of getting a copy: the one given by `templateId`,
+     * else the template of the active job, so a change of that template reaches the new job too.
+     * Make a template first with `addTemplate` for a job that needs its own look.
+     */
     createVariant: {
-      reducer(state, action: PayloadAction<{ template: Template; job: Job }>) {
-        state.templates.push(action.payload.template);
-        state.jobs.push(action.payload.job);
+      reducer(
+        state,
+        action: PayloadAction<{
+          job: Job;
+          templateId?: string;
+        }>
+      ) {
+        const wanted = action.payload.templateId;
+        const templateId = state.templates.some((t) => t.id === wanted)
+          ? (wanted as string)
+          : templateOf(state, jobOf(state, state.activeJobId) ?? state.jobs[0])
+              .id;
+        state.jobs.push({ ...action.payload.job, templateId });
         state.activeJobId = action.payload.job.id;
       },
       prepare(input: {
@@ -201,15 +217,61 @@ const variantsSlice = createSlice({
         style: Style;
         name: string;
         id?: string;
+        templateId?: string;
       }) {
         const id = input.id ?? nanoid();
-        return {
-          payload: splitVariant(
-            createVariant(input.vault, input.style, id, input.name),
-            templateIdFor(id)
-          ),
-        };
+        const { job } = splitVariant(
+          createVariant(input.vault, input.style, id, input.name),
+          templateIdFor(id)
+        );
+        return { payload: { job, templateId: input.templateId } };
       },
+    },
+
+    /** A new template with the look of `sourceId` (default: the template of the active job). No job moves to it. */
+    addTemplate: {
+      reducer(
+        state,
+        action: PayloadAction<{
+          id: string;
+          name: string;
+          sourceId?: string;
+        }>
+      ) {
+        const source =
+          state.templates.find((t) => t.id === action.payload.sourceId) ??
+          templateOf(state, jobOf(state, state.activeJobId) ?? state.jobs[0]);
+        state.templates.push(
+          duplicateTemplate(
+            current(source),
+            action.payload.id,
+            action.payload.name
+          )
+        );
+      },
+      prepare(input: { name: string; id?: string; sourceId?: string }) {
+        return { payload: { ...input, id: input.id ?? nanoid() } };
+      },
+    },
+
+    renameTemplate(state, action: PayloadAction<{ id: string; name: string }>) {
+      const template = state.templates.find((t) => t.id === action.payload.id);
+      if (template) {
+        template.name = action.payload.name;
+      }
+    },
+
+    /** Deleting a template a job uses is refused (move the jobs first), and so is deleting the last one */
+    deleteTemplate(state, action: PayloadAction<{ id: string }>) {
+      if (
+        state.templates.length <= 1 ||
+        jobsUsingTemplate(state.jobs, action.payload.id).length > 0
+      ) {
+        return;
+      }
+      state.templates = state.templates.filter(
+        (t) => t.id !== action.payload.id
+      );
     },
 
     /** Adds a finished variant (e.g. one made from an AI proposal) as a job with its own new template, and makes it the active one */
@@ -223,7 +285,7 @@ const variantsSlice = createSlice({
       state.activeJobId = job.id;
     },
 
-    /** A new job on a template of its own (a copy of the source's), so the source is untouched */
+    /** A new job that shows what the source shows and shares its template (changing the look changes both) */
     duplicateVariant: {
       reducer(
         state,
@@ -235,19 +297,11 @@ const variantsSlice = createSlice({
         }
         const source = current(draft);
         const name = action.payload.name ?? `${source.name} (copy)`;
-        const template = duplicateTemplate(
-          current(templateOf(state, source)),
-          templateIdFor(action.payload.id),
-          name
-        );
         const copy = {
-          ...duplicateJob(source, action.payload.id, name, {
-            templateId: template.id,
-          }),
+          ...duplicateJob(source, action.payload.id, name),
           // a copy keeps the record of the proposal it came from, as variants always did
           ...(source.tailor ? { tailor: structuredClone(source.tailor) } : {}),
         };
-        state.templates.push(template);
         state.jobs.push(copy);
         state.activeJobId = copy.id;
       },
@@ -262,18 +316,13 @@ const variantsSlice = createSlice({
       });
     },
 
-    /** The last job cannot be deleted, so there is always one to show. Its template goes too when no other job uses it. */
+    /** The last job cannot be deleted, so there is always one to show. Its template stays: templates are reusable and are deleted on their own. */
     deleteVariant(state, action: PayloadAction<{ id: string }>) {
       const job = jobOf(state, action.payload.id);
       if (!job || state.jobs.length <= 1) {
         return;
       }
       state.jobs = state.jobs.filter((j) => j.id !== job.id);
-      if (!state.jobs.some((j) => j.templateId === job.templateId)) {
-        state.templates = state.templates.filter(
-          (t) => t.id !== job.templateId
-        );
-      }
       if (state.activeJobId === job.id) {
         state.activeJobId = state.jobs[0].id;
       }
@@ -618,6 +667,9 @@ export const {
   duplicateVariant,
   renameVariant,
   deleteVariant,
+  addTemplate,
+  renameTemplate,
+  deleteTemplate,
   setJobTemplate,
   setActiveVariant,
   setItemSelection,
@@ -684,6 +736,11 @@ export function activeTemplateSelector(state: SliceRoot): Template {
 
 export function templatesSelector(state: SliceRoot): Template[] {
   return state.variants.templates;
+}
+
+/** The jobs that use a template */
+export function jobsOfTemplate(state: SliceRoot, templateId: string): Job[] {
+  return jobsUsingTemplate(state.variants.jobs, templateId);
 }
 
 export function jobsSelector(state: SliceRoot): Job[] {
