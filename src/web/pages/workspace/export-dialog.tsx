@@ -35,7 +35,7 @@ interface Props {
 }
 
 /**
- * Export PDF: saves the variant, asks the server for the real PDF and shows it before it
+ * Export PDF: saves the job, asks the server for the real PDF and shows it before it
  * is downloaded, with the checks that matter for sending a CV.
  */
 export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
@@ -118,7 +118,7 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
     }
     onClose();
     if (isMarkAfter) {
-      // the PDF was saved from the saved variant, so the application records exactly this CV
+      // the PDF was saved from the saved job, so the application records exactly this CV
       setIsMarkOpen(true);
     }
   }

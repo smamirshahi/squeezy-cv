@@ -43,7 +43,7 @@ function isFlagged(op: Operation): boolean {
  */
 export function ChatPanel(): JSX.Element {
   const jobId = useAppSelector(activeVariantSelector).id;
-  // each variant has its own conversation
+  // each job has its own conversation
   return <ChatConversation key={jobId} jobId={jobId} />;
 }
 
@@ -72,7 +72,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
       .catch(() => setStatus(null));
   }, [api]);
 
-  // the conversation is kept in this browser (not in the data folder), one per variant
+  // the conversation is kept in this browser (not in the data folder), one per job
   useEffect(() => {
     saveChat(jobId, turns);
   }, [jobId, turns]);

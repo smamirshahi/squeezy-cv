@@ -26,7 +26,7 @@ const ITEMS: RailItem[] = [
   {
     label: "Jobs",
     icon: <WorkOutlineIcon fontSize="small" />,
-    tool: "variants",
+    tool: "jobs",
   },
   {
     label: "Templates",

@@ -1,6 +1,6 @@
 # CV Builder
 
-A personal CV builder. You keep all your facts once (the **vault**), then make **variants** of your CV for different jobs, check them on a live A4 preview and export a PDF. Optional AI can help tailor a variant to a job advert.
+A personal CV builder. You keep all your facts once (the **vault**), then make a **job** for each application. A job picks a **template** (the look: layout, fonts, page limit) and decides what to show. Check it on a live A4 preview and export a PDF. Optional AI can help tailor a job to an advert.
 
 - **Web app:** React 19, TypeScript, Vite, MUI, Redux Toolkit.
 - **Local server:** Fastify. It stores your data as JSON files on your computer and makes the PDF with headless Chromium.
@@ -67,7 +67,7 @@ CI runs build, lint, format check and tests on every pull request.
 
 ## 3. Optional: AI setup
 
-The AI helps with tailoring a variant to a job advert, pasting CV text, choosing what to hide to fit the page limit, and the chat panel. **The app works fully without it.** Every change the AI suggests is shown first and only applied when you approve it.
+The AI helps with tailoring a job to an advert, pasting CV text, choosing what to hide to fit the page limit, and the chat panel. **The app works fully without it.** Every change the AI suggests is shown first and only applied when you approve it.
 
 Copy the example settings file and edit it. `.env` is git-ignored, and only the server reads it. Keys are never sent to the browser.
 
@@ -112,17 +112,19 @@ Your real data lives in **`data/`** inside the project (or in `DATA_DIR`). It is
 data/
   vault.json                       all your facts: profile, links, sections, items, bullets
   vault.json.bak                   the previous readable version
-  variants/<id>.json               one file per CV variant (layout, style, which items are shown)
+  templates/<id>.json              a look: layout, style, page limit, skill display
+  jobs/<id>.json                   one target: its template, which items are shown, order, wording
   applications/<id>/
-    application.json               one job application: company, role, status, timeline
+    application.json               one application: company, role, status, timeline, the CV as sent
     cv.pdf                         the exact PDF that was sent
 ```
 
+- **Old data (before 0.2):** `variants/<id>.json` files are still read. Each one shows up as a template plus a job with the same name, and is written out to `templates/` and `jobs/` the first time you save. The old files are never deleted.
 - **Nothing is saved automatically.** The **Save** button writes what changed. If you close the tab with unsaved changes, the browser warns you.
 - Writes are atomic (temporary file, then rename). The last good version is kept as `.bak`. A file that cannot be read is moved to `.corrupt-<time>` and is never treated as empty, and saving is blocked while the data cannot be read, so the empty default CV never overwrites a file.
 - Export and import: **Export PDF** downloads a PDF (optionally also JSON). The Settings pages import and export a JSON file. Older export formats are migrated automatically.
 - `data.example/` shows the layout with a fake CV. To start from it: copy that folder to `data/`.
-- Other local files, all git-ignored: `.env` (settings and keys), `.ai-settings.json` (which provider you chose per task, no secrets), and the chat history per variant, kept in your browser's `localStorage`.
+- Other local files, all git-ignored: `.env` (settings and keys), `.ai-settings.json` (which provider you chose per task, no secrets), and the chat history per job, kept in your browser's `localStorage`.
 
 ### Backup with git (optional)
 
@@ -145,7 +147,7 @@ src/
     custom-styles/  theme, fonts, colours
     hooks/       React hooks
     pages/       workspace, editors, preview, tailor (AI), applications, print view
-    store/       Redux slices: vault, cvData, app, variants, persistence, history
+    store/       Redux slices: vault, cvData, app, variants (holds the templates and jobs), persistence, history
   server/   the local API (Fastify; entry: main.ts)
     storage/     reading and writing the JSON files
     pdf/         PDF export with Playwright and Chromium
@@ -165,7 +167,7 @@ Tests sit next to the code as `*.test.ts(x)`.
 
 Imports must use path aliases, not relative paths (ESLint enforces it): `@components/*`, `@hooks/*`, `@pages/*`, `@store/*`, `@custom-styles/*`, `@shared/*`, `@custom-types/*`, `@server/*`, `@fixtures/*`, `@e2e/*`.
 
-More detail on the architecture (state, variants, pagination, PDF, AI, locking and so on) is in [CLAUDE.md](CLAUDE.md).
+More detail on the architecture (templates and jobs, state, pagination, PDF, AI and so on) is in [CLAUDE.md](CLAUDE.md).
 
 ## Versions
 

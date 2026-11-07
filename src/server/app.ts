@@ -490,7 +490,7 @@ export function buildServer({
     storage.loadJob(request.params.id)
   );
 
-  // The variant a job shows with its template: what the print page and the preview draw
+  // The resolved variant: the job drawn with its template: what the print page and the preview draw
   app.get<{ Params: { id: string } }>(
     "/api/jobs/:id/resolved",
     async (request) => {

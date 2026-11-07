@@ -97,7 +97,7 @@ function restore<S extends Undoable>(state: S, snapshot: Snapshot): S {
 }
 
 /**
- * Undo and redo for everything that changes the vault or a variant, manual edits and chat
+ * Undo and redo for everything that changes the vault or a template or job, manual edits and chat
  * operations alike. A change is any action after which `vault`, the templates or the jobs are a
  * different object; locks, saving and UI state are not steps. Typing is coalesced.
  */

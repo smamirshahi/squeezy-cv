@@ -30,7 +30,7 @@ export function Workspace(): JSX.Element {
   const canvasRef = useRef<HTMLElement>(null);
   const tool = useAppSelector((s) => s.app.tool);
   const zoom = useAppSelector((s) => s.app.canvasZoom);
-  useCanvasShortcuts(tool === "variants");
+  useCanvasShortcuts(tool === "jobs");
   useUndoShortcuts();
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   // "O" opens and closes the outline, unless the user is typing
@@ -71,7 +71,7 @@ export function Workspace(): JSX.Element {
       <ConnectionBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
-        {(tool === "variants" || tool === "chat") && (
+        {(tool === "jobs" || tool === "chat") && (
           <>
             {isOutlineOpen && (
               <Outline onClose={() => setIsOutlineOpen(false)} />

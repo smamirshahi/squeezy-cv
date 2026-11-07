@@ -92,7 +92,7 @@ export class FileCvStorage implements CvStorage {
     if (!VARIANT_ID_PATTERN.test(id)) {
       throw new StorageError(
         "invalid_id",
-        "A variant id may only contain letters, digits, - and _ (at most 64)."
+        "An old variant id may only contain letters, digits, - and _ (at most 64)."
       );
     }
     return path.join(this.dataDir, VARIANTS_DIR, `${id}.json`);

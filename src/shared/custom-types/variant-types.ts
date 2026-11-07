@@ -12,10 +12,10 @@ import {
 import { RequirementsSchema } from "@custom-types/requirements-types";
 import { StyleSchema } from "@custom-types/styles-types";
 
-/** The current version of the variant format. Bump it together with a migration. */
+/** The current version of the resolved variant format (also of old variant files) */
 export const CURRENT_VARIANT_VERSION = 1;
 
-/** Variant ids become file names, so only these characters are allowed */
+/** Old variant ids were file names, so only these characters are allowed */
 export const VARIANT_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 export const ToneSchema = Union(
@@ -119,8 +119,14 @@ export const TailorRecordSchema = Object({
   ),
 });
 
+/**
+ * The resolved view: a job drawn with its template (`resolveVariant`). This is not stored
+ * as such any more (templates and jobs are); it is the one shape that `render`, pagination,
+ * auto-fit, the PDF and the application snapshot consume. Old `variants/*.json` files have
+ * this shape and are read by splitting them into a template and a job. Its `id` is the job id.
+ */
 export const VariantSchema = Object({
-  /** Stable id, also the file name */
+  /** Stable id: the job id (for an old variant file, also its file name) */
   id: String,
 
   /** Format version of the variant */

@@ -39,10 +39,10 @@ interface ReturnProps {
   moveItem: (fromIndex: number, toIndex: number) => void;
 
   /** Shows or hides an item. The store is updated at once so the preview follows. */
-  /** Whether the item is shown in the active variant */
+  /** Whether the item is shown in the active job */
   isVisible: (itemId: string) => boolean;
 
-  /** Shows or hides the item in the active variant, at once */
+  /** Shows or hides the item in the active job, at once */
   setVisibility: (itemId: string, shouldShow: boolean) => void;
 
   /** The draft's dispatch, for edits that are specific to one section type */
@@ -103,7 +103,7 @@ export function useSectionDraft(
     },
     isVisible: (itemId) => variant.selection[itemId]?.isVisible !== false,
     setVisibility: (itemId, shouldShow) => {
-      // Visibility belongs to the active variant; the vault item stays as it is
+      // Visibility belongs to the active job; the vault item stays as it is
       dispatch(
         setItemSelection({
           jobId: variant.id,

@@ -82,8 +82,8 @@ export const ItemSchema = Object({
   tags: Array(String),
 
   /**
-   * Whether the item is shown. Transitional: moves into the variant selection
-   * when variants exist.
+   * Not used any more: whether an item is shown is decided per job (`Job.selection`).
+   * Kept so old files still read.
    */
   shouldShow: Boolean,
 });

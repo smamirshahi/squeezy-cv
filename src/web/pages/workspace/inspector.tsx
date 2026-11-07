@@ -303,7 +303,7 @@ function SkillStyleControls({
 }: SkillStyleProps): JSX.Element {
   const dispatch = useAppDispatch();
   const hasLevels = tracksLevels(section);
-  // a variant without a choice keeps the earlier look, which is stars
+  // a template without a choice keeps the earlier look, which is stars
   const display = variant.skillDisplay ?? "stars";
   const columns = variant.skillColumns ?? 1;
   const minLevel = variant.skillMinLevel ?? 0;

@@ -175,7 +175,7 @@ interface Props {
 }
 
 /**
- * The outline (design B3): every section, item and bullet of the active variant with what
+ * The outline (design B3): every section, item and bullet of the active job with what
  * shows, in what order. Everything is a button, so it works from the keyboard; changes
  * are announced in a live region. Clicking an item selects it on the page.
  */
