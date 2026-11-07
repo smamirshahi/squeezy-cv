@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Templates and jobs (#165, in progress): pure model for splitting a variant into a template (look) and a job (what is shown), with `resolveVariant` and `splitVariant` (#166). Not used by the app yet.
+
 ## [0.1.0] - 2026-11-07
 
 The baseline: everything built before the move to templates and jobs. Issue numbers
