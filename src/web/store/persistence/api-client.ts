@@ -186,6 +186,9 @@ export interface ApiClient {
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
 
+  /** The text layer of a PDF, read by the local server (the file is not stored). Nothing is sent to an AI here. */
+  extractPdfText: (file: Blob) => Promise<{ text: string; pages: number }>;
+
   /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */
   importCv: (text: string) => Promise<ImportedCv>;
 
@@ -319,6 +322,32 @@ export function createApiClient(
       return TailorResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/tailor", body)
       );
+    },
+    async extractPdfText(file) {
+      let response: Response;
+      try {
+        response = await fetchImpl("/api/import/pdf", {
+          method: "POST",
+          // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+          headers: { "Content-Type": "application/pdf" },
+          body: file,
+        });
+      } catch {
+        throw new ApiError(
+          "unreachable",
+          "The local server cannot be reached."
+        );
+      }
+      const payload = (await response.json().catch(() => undefined)) as
+        | { code?: string; message?: string; text?: string; pages?: number }
+        | undefined;
+      if (!response.ok || typeof payload?.text !== "string") {
+        throw new ApiError(
+          payload?.code ?? "unknown",
+          payload?.message ?? `The server answered ${response.status}.`
+        );
+      }
+      return { text: payload.text, pages: payload.pages ?? 0 };
     },
     async importCv(text) {
       const result = (await request(fetchImpl, "POST", "/api/ai/import", {

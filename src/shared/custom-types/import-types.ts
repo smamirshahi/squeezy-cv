@@ -33,4 +33,10 @@ export type RawImport = Static<typeof RawImportSchema>;
 /** The longest text accepted for import, in characters */
 export const MAX_IMPORT_LENGTH = 30_000;
 
+/** The largest PDF accepted for import, in bytes */
+export const MAX_IMPORT_PDF_BYTES = 5 * 1024 * 1024;
+
+/** The most pages read from an imported PDF */
+export const MAX_IMPORT_PDF_PAGES = 20;
+
 export const ImportRequestSchema = Object({ text: String });

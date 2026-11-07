@@ -16,6 +16,7 @@ import { scoreItems } from "@server/ai/score-items";
 import { ScoreRequestSchema } from "@custom-types/score-types";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
+import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
 import { pickHide } from "@server/ai/pick-hide";
 import { placeItems } from "@server/ai/place-items";
 import { personalOf } from "@shared/ai/redact-personal";
@@ -44,6 +45,7 @@ import {
 import {
   ImportRequestSchema,
   MAX_IMPORT_LENGTH,
+  MAX_IMPORT_PDF_BYTES,
 } from "@custom-types/import-types";
 import {
   ApplicationInputError,
@@ -69,6 +71,8 @@ const ID_SUFFIX_BYTES = 3;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
+const HTTP_PAYLOAD_TOO_LARGE = 413;
+const HTTP_UNSUPPORTED_MEDIA = 415;
 const HTTP_CONFLICT = 409;
 const HTTP_SERVER_ERROR = 500;
 const HTTP_NOT_IMPLEMENTED = 501;
@@ -203,6 +207,14 @@ export function buildServer({
         error.message
       );
     }
+    if (error instanceof PdfTextError) {
+      return sendError(
+        reply,
+        error.code === "too_large" ? HTTP_PAYLOAD_TOO_LARGE : HTTP_BAD_REQUEST,
+        error.code,
+        error.message
+      );
+    }
     if (error instanceof ApplicationInputError) {
       return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
     }
@@ -210,6 +222,17 @@ export function buildServer({
       return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
     }
     const status = (error as { statusCode?: number }).statusCode;
+    if (status === HTTP_PAYLOAD_TOO_LARGE) {
+      return sendError(
+        reply,
+        status,
+        "too_large",
+        "The file is too large to import."
+      );
+    }
+    if (status === HTTP_UNSUPPORTED_MEDIA) {
+      return sendError(reply, status, "not_pdf", "This file is not a PDF.");
+    }
     if (
       typeof status === "number" &&
       status >= HTTP_BAD_REQUEST &&
@@ -482,6 +505,19 @@ export function buildServer({
       personalOf(vault, registry.isMaskingOrganisations())
     );
   });
+
+  // Reads the text out of an uploaded PDF (in memory; the file is never stored).
+  // The text goes back to the browser to be checked and edited before it is sorted.
+  app.addContentTypeParser(
+    "application/pdf",
+    { parseAs: "buffer", bodyLimit: MAX_IMPORT_PDF_BYTES + 1024 },
+    (_request, body, done) => done(null, body)
+  );
+  app.post("/api/import/pdf", async (request) =>
+    extractPdfText(
+      Buffer.isBuffer(request.body) ? request.body : new Uint8Array()
+    )
+  );
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
   app.post("/api/ai/import", async (request, reply) => {

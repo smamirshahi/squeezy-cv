@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -11,7 +11,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { MAX_IMPORT_LENGTH } from "@custom-types/import-types";
+import {
+  MAX_IMPORT_LENGTH,
+  MAX_IMPORT_PDF_BYTES,
+} from "@custom-types/import-types";
 import { mergeIntoVault } from "@shared/vault/import-from-text";
 import {
   AiStatus,
@@ -42,6 +45,10 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
   const [error, setError] = useState<string>("");
   const [result, setResult] = useState<ImportedCv | null>(null);
   const [status, setStatus] = useState<AiStatus | null>(null);
+  const [isReadingPdf, setIsReadingPdf] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [pdfNote, setPdfNote] = useState<string>("");
+  const fileInput = useRef<HTMLInputElement>(null);
   const target = status ? taskProvider(status, "import") : null;
 
   useEffect(() => {
@@ -52,6 +59,44 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
         .catch(() => setStatus(null));
     }
   }, [isOpen, api]);
+
+  /** Reads the PDF's text on the local server and puts it in the (editable) text box */
+  async function readPdf(file: File): Promise<void> {
+    setError("");
+    setPdfNote("");
+    setResult(null);
+    if (file.size > MAX_IMPORT_PDF_BYTES) {
+      setError(
+        `The PDF is larger than ${MAX_IMPORT_PDF_BYTES / (1024 * 1024)} MB.`
+      );
+      return;
+    }
+    setIsReadingPdf(true);
+    try {
+      const read = await api.extractPdfText(file);
+      setText(read.text);
+      setPdfNote(
+        `Text taken from ${file.name} (${read.pages} ${read.pages === 1 ? "page" : "pages"}). Check it below before sorting.`
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError || caught instanceof Error
+          ? caught.message
+          : "The PDF could not be read."
+      );
+    } finally {
+      setIsReadingPdf(false);
+    }
+  }
+
+  function onDrop(event: DragEvent): void {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      void readPdf(file);
+    }
+  }
 
   async function analyse(): Promise<void> {
     setIsBusy(true);
@@ -86,7 +131,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
         <Alert severity={target && !target.info.isOnline ? "info" : "warning"}>
           {target && !target.info.isOnline
             ? `Using ${target.info.label} on this computer: the text stays here.`
-            : `The whole text you paste, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in AI setup if you do not want that.`}
+            : `The whole text you paste or take from a PDF, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in AI setup if you do not want that.`}
         </Alert>
         {target && !target.isConfigured && (
           <Alert severity="info">
@@ -95,6 +140,51 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
             restart the server.
           </Alert>
         )}
+        <Box
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={onDrop}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            p: 1.5,
+            border: "1px dashed",
+            borderColor: isDragging ? "primary.main" : "divider",
+            borderRadius: 1,
+          }}
+        >
+          <Button
+            variant="outlined"
+            disabled={isReadingPdf}
+            onClick={() => fileInput.current?.click()}
+          >
+            Choose PDF
+          </Button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/pdf,.pdf"
+            hidden
+            aria-label="PDF file"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) {
+                void readPdf(file);
+              }
+            }}
+          />
+          <Typography variant="body2">
+            or drop a PDF here. Its text is read on this computer and put in the
+            box below for you to check; scanned PDFs (images) are not supported.
+          </Typography>
+          {isReadingPdf && <CircularProgress size={20} />}
+        </Box>
+        {pdfNote && <Alert severity="success">{pdfNote}</Alert>}
         <TextField
           label="Your CV text"
           multiline
@@ -102,7 +192,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           maxRows={14}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          helperText={`${text.length} / ${MAX_IMPORT_LENGTH} characters. Copy it from a document or PDF; messy is fine.`}
+          helperText={`${text.length} / ${MAX_IMPORT_LENGTH} characters. Paste it or choose a PDF; messy is fine.`}
         />
         {error && <Alert severity="error">{error}</Alert>}
         {result && (
