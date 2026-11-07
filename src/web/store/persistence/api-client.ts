@@ -10,6 +10,7 @@ import {
   AiProviderInfo,
   AiTask,
 } from "@shared/ai/providers";
+import { ScoreResult, ScoreResultSchema } from "@custom-types/score-types";
 import {
   RewriteRequest,
   RewriteResult,
@@ -194,6 +195,9 @@ export interface ApiClient {
   /** One bullet made shorter, longer or more formal. Sends that item's CV text (no name or contact details) to the chosen provider. Nothing is changed. */
   rewriteBullet: (request: RewriteRequest) => Promise<RewriteResult>;
 
+  /** Scores every item of the saved CV against an advert. Sends item text and tags (no name or contact details) to the chosen provider. Nothing is changed. */
+  scoreItems: (jobAd: string) => Promise<ScoreResult>;
+
   /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
   suggestHide: (request: HideRequest) => Promise<HideResult>;
 
@@ -333,6 +337,11 @@ export function createApiClient(
     async rewriteBullet(body) {
       return RewriteResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/rewrite", body)
+      );
+    },
+    async scoreItems(jobAd) {
+      return ScoreResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/score", { jobAd })
       );
     },
     async suggestHide(body) {

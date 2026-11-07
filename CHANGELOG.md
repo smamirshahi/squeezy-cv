@@ -14,6 +14,7 @@ template and a job (#165-#172).
 
 ### Added
 
+- Jobs: "Score items" (Content tab). Paste the job advert (kept on the job) and the AI gives every entry of the saved CV a relevance score (0-100) and a one-line reason (`POST /api/ai/score`, uses the Tailor provider choice; only entry text and tags are sent, scrubbed like tailoring). The badge is coloured by band (related, maybe, unrelated) and shows the reason as a tooltip; only scores are stored, as one undo step, and nothing is hidden. "Hide to fit" uses the scores (#193).
 - Jobs: each item shows its relevance score (or "Not scored"), and each bullet has Shorten, Extend and Rephrase buttons (`POST /api/ai/rewrite`). The proposal is checked for numbers and names that are not in the CV (flagged ones need a tick); "Use this wording" stores it as an alternative wording and selects it for the job in one undo step; the bullet's own text never changes (#186).
 
 - **Templates: style per section (#185)**: heading size, colour, space above and the line under the heading can be set per section in a template (Templates page), with a live sample CV built from the vault beside the controls; preview and PDF follow, and older templates load unchanged.

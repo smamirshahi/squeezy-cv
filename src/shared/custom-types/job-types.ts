@@ -49,6 +49,9 @@ export const JobSchema = Object({
 
   /** Set when the job was made from a tailoring proposal */
   tailor: TailorRecordSchema.optional(),
+
+  /** The advert last used for "Score items", so it need not be pasted again */
+  jobAd: String.optional(),
 });
 
 export type Job = Static<typeof JobSchema>;
