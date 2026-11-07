@@ -123,6 +123,16 @@ export const ApplicationSchema = Object({
   role: String,
   jobUrl: String.optional(),
 
+  /**
+   * The job and template it was sent from, and their names at that time. Only references and
+   * labels: the CV itself is `submitted`. Missing in files made before jobs existed (then the
+   * job id is `submitted.variant.id`, see `summariseApplication`).
+   */
+  jobId: String.optional(),
+  templateId: String.optional(),
+  jobName: String.optional(),
+  templateName: String.optional(),
+
   /** Day applied, "YYYY-MM-DD" */
   appliedAt: String,
 
@@ -145,8 +155,8 @@ export type Application = Static<typeof ApplicationSchema>;
 
 /** The fields of an application that the user types in. Everything else is derived. */
 export const NewApplicationSchema = Object({
-  /** The saved variant to freeze and send */
-  variantId: String,
+  /** The saved job to freeze and send (an older variant id also works) */
+  jobId: String,
   company: String,
   role: String,
   jobUrl: String.optional(),
@@ -180,8 +190,15 @@ export interface ApplicationSummary {
   status: ApplicationStatus;
   appliedAt: string;
 
-  /** The variant that was sent ("" for a damaged application, whose variant is unknown) */
-  variantId: string;
+  /** The job that was sent ("" for a damaged application, whose job is unknown) */
+  jobId: string;
+
+  /** The template of that job when it was sent ("" when unknown, e.g. older applications) */
+  templateId: string;
+
+  /** Names of the job and template when it was sent ("" when unknown) */
+  jobName: string;
+  templateName: string;
 
   /** Day of the latest status change */
   updatedAt: string;

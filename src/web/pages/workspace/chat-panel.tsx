@@ -27,7 +27,6 @@ import {
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
-  isActiveVariantReadOnlySelector,
 } from "@store/variants/variants-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import { useStore } from "react-redux";
@@ -57,7 +56,6 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
   const structure = useAppSelector((s) => s.app.structure);
-  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
   const isSaved = useAppSelector((s) => s.persistence.saved !== null);
   const steps = useAppSelector((s) => s.history.past.length);
 
@@ -151,7 +149,7 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
     );
   }
 
-  const canAsk = Boolean(target?.isConfigured) && isSaved && !isReadOnly;
+  const canAsk = Boolean(target?.isConfigured) && isSaved;
   return (
     <ResizableAside side="right" label="the chat panel" defaultWidth={360}>
       <Box
@@ -210,12 +208,6 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
           {!isSaved && (
             <Alert severity="warning">
               The AI works on the saved CV. Save your changes first.
-            </Alert>
-          )}
-          {isReadOnly && (
-            <Alert severity="info">
-              This job is locked because it was sent. Unlock it or make a copy
-              first.
             </Alert>
           )}
           {target && (
@@ -294,7 +286,7 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
                     <Button
                       size="small"
                       variant="contained"
-                      disabled={isReadOnly || !turn.selected?.some(Boolean)}
+                      disabled={!turn.selected?.some(Boolean)}
                       onClick={() => apply(turn)}
                     >
                       Apply {turn.selected?.filter(Boolean).length ?? 0}{" "}

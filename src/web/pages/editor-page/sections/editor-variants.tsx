@@ -1,4 +1,3 @@
-import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { useState } from "react";
 import {
   Box,
@@ -25,7 +24,6 @@ import {
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
-  isActiveVariantReadOnlySelector,
   templatesSelector,
   activeJobSelector,
   activeTemplateSelector,
@@ -53,7 +51,6 @@ export function EditorVariants(): JSX.Element {
   const templates = useAppSelector(templatesSelector);
   const template = useAppSelector(activeTemplateSelector);
   const job = useAppSelector(activeJobSelector);
-  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
 
   function handleSwitch(id: string): void {
     const next = variants.find((v) => v.id === id);
@@ -68,7 +65,7 @@ export function EditorVariants(): JSX.Element {
   }
 
   return (
-    <LockedFieldset>
+    <>
       <Typography variant="h6" sx={{ mb: 1 }}>
         Jobs
       </Typography>
@@ -126,7 +123,6 @@ export function EditorVariants(): JSX.Element {
           select
           label="Template of this job"
           value={template.id}
-          disabled={isReadOnly}
           onChange={(event) => {
             const next = templates.find((t) => t.id === event.target.value);
             if (next) {
@@ -236,6 +232,6 @@ export function EditorVariants(): JSX.Element {
         </DialogActions>
       </Dialog>
       <NewJobDialog isOpen={isNewOpen} onClose={() => setIsNewOpen(false)} />
-    </LockedFieldset>
+    </>
   );
 }

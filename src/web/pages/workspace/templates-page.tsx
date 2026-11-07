@@ -16,7 +16,6 @@ import {
   moveJobToTemplate,
   nextTemplateName,
 } from "@pages/workspace/template-scope";
-import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -82,7 +81,7 @@ export function TemplatesPage(): JSX.Element {
         bgcolor: WORKSPACE_COLORS.canvas,
       }}
     >
-      <LockedFieldset>
+      <>
         <Box sx={{ maxWidth: 760, mx: "auto" }}>
           <Typography component="h1" sx={{ fontSize: 18, fontWeight: 700 }}>
             Templates
@@ -219,7 +218,7 @@ export function TemplatesPage(): JSX.Element {
             })}
           </Box>
         </Box>
-      </LockedFieldset>
+      </>
 
       <Dialog
         open={asking?.kind === "rename"}

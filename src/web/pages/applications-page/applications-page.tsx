@@ -404,6 +404,8 @@ function ApplicationsTable({
                 </TableSortLabel>
               </TableCell>
               <TableCell>Role</TableCell>
+              <TableCell>Job</TableCell>
+              <TableCell>Template</TableCell>
               <TableCell>Status</TableCell>
               <TableCell
                 sortDirection={
@@ -426,7 +428,7 @@ function ApplicationsTable({
             {shown.map((application) =>
               application.isCorrupt ? (
                 <TableRow key={application.id}>
-                  <TableCell colSpan={4}>
+                  <TableCell colSpan={6}>
                     <Alert severity="warning" sx={{ py: 0 }}>
                       Cannot read the application “{application.id}”. Its files
                       were left untouched.
@@ -451,6 +453,8 @@ function ApplicationsTable({
                     </Link>
                   </TableCell>
                   <TableCell>{application.role}</TableCell>
+                  <TableCell>{application.jobName || "-"}</TableCell>
+                  <TableCell>{application.templateName || "-"}</TableCell>
                   <TableCell>
                     <StatusLabel application={application} today={today} />
                   </TableCell>
@@ -460,7 +464,7 @@ function ApplicationsTable({
             )}
             {shown.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={6}>
                   No application matches this search.
                 </TableCell>
               </TableRow>

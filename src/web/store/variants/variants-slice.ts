@@ -33,7 +33,6 @@ import {
   resolveVariant,
   splitVariant,
 } from "@shared/variant/template-job";
-import { NO_LOCKS, VariantLocks } from "@shared/variant/variant-lock";
 import { clampFitLimits } from "@shared/layout/fit";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
@@ -47,12 +46,6 @@ export interface VariantsState {
   templates: Template[];
   jobs: Job[];
   activeJobId: string;
-
-  /** Which jobs were sent (derived from the applications, see `computeVariantLocks`) */
-  locks: VariantLocks;
-
-  /** Locked jobs the user approved editing in this session. Cleared when they are saved or re-locked. */
-  unlockedIds: string[];
 }
 
 const DEFAULT_VARIANT_ID = "default";
@@ -74,8 +67,6 @@ function createInitialState(): VariantsState {
     templates: [{ ...template, name: "Template 1" }],
     jobs: [job],
     activeJobId: job.id,
-    locks: NO_LOCKS,
-    unlockedIds: [],
   };
 }
 
@@ -164,7 +155,7 @@ const variantsSlice = createSlice({
      */
     setVariants(state, action: PayloadAction<Variant[]>) {
       if (action.payload.length === 0) {
-        return { ...createInitialState(), locks: state.locks };
+        return createInitialState();
       }
       const pairs = action.payload.map((variant) =>
         splitVariant(variant, templateIdFor(variant.id))
@@ -358,28 +349,6 @@ const variantsSlice = createSlice({
       editJob(state, jobId, (job) => {
         job.templateId = templateId;
       });
-    },
-
-    /** The lock state from the applications. An approved unlock is dropped when the job is no longer locked. */
-    setLocks(state, action: PayloadAction<VariantLocks>) {
-      state.locks = action.payload;
-      state.unlockedIds = state.unlockedIds.filter((id) =>
-        isLockedIn(state, id)
-      );
-    },
-
-    /** The user approved editing a locked job (the sent copy is not changed) */
-    unlockVariant(state, action: PayloadAction<{ id: string }>) {
-      if (!state.unlockedIds.includes(action.payload.id)) {
-        state.unlockedIds.push(action.payload.id);
-      }
-    },
-
-    /** Locks again, e.g. after saving */
-    relockVariants(state, action: PayloadAction<{ ids: string[] }>) {
-      state.unlockedIds = state.unlockedIds.filter(
-        (id) => !action.payload.ids.includes(id)
-      );
     },
 
     setActiveVariant(state, action: PayloadAction<{ id: string }>) {
@@ -582,104 +551,11 @@ const variantsSlice = createSlice({
   },
 });
 
-/** Whether the job is locked by its applications, whatever was approved */
-function isLockedIn(state: Pick<VariantsState, "locks">, id: string): boolean {
-  return (
-    state.locks.hasUnreadable || (state.locks.byVariant[id]?.length ?? 0) > 0
-  );
-}
-
-/** Whether the job cannot be changed right now: locked, and no unlock approved */
-export function isVariantReadOnly(state: VariantsState, id: string): boolean {
-  return isLockedIn(state, id) && !state.unlockedIds.includes(id);
-}
-
-/** Whether a template cannot be changed right now: a job on it is read-only, so its look is frozen too */
-export function isTemplateReadOnly(
-  state: VariantsState,
-  templateId: string
-): boolean {
-  return state.jobs.some(
-    (job) => job.templateId === templateId && isVariantReadOnly(state, job.id)
-  );
-}
-
-const LOCK_ACTIONS: string[] = [
-  "variants/setVariants",
-  "variants/setTemplatesAndJobs",
-  "variants/setLocks",
-  "variants/unlockVariant",
-  "variants/relockVariants",
-  "variants/setActiveVariant",
-];
-
-function sameEntries<T>(a: T[], b: T[]): boolean {
-  return a.length === b.length && a.every((entry, index) => entry === b[index]);
-}
-
-/**
- * The slice reducer, plus the lock: whatever an action did to a read-only job (edit,
- * rename, delete) or to a template such a job uses is undone here, so no screen, shortcut
- * or write-back can change a CV that was sent. Loading and the lock actions pass through.
- */
-export function variantsReducer(
-  state: VariantsState | undefined,
-  action: { type: string }
-): VariantsState {
-  const next = variantsSlice.reducer(state, action);
-  if (!state || next === state || LOCK_ACTIONS.includes(action.type)) {
-    return next;
-  }
-  const readOnlyJobs = state.jobs.filter((j) => isVariantReadOnly(state, j.id));
-  if (readOnlyJobs.length === 0) {
-    return next;
-  }
-  let jobs = next.jobs;
-  for (const before of readOnlyJobs) {
-    const index = jobs.findIndex((j) => j.id === before.id);
-    if (index === -1) {
-      const at = state.jobs.indexOf(before);
-      jobs = [...jobs.slice(0, at), before, ...jobs.slice(at)];
-    } else if (jobs[index] !== before) {
-      jobs = jobs.map((j, i) => (i === index ? before : j));
-    }
-  }
-  let templates = next.templates;
-  const frozenIds = new Set(readOnlyJobs.map((j) => j.templateId));
-  for (const id of frozenIds) {
-    const before = state.templates.find((t) => t.id === id);
-    if (!before) {
-      continue;
-    }
-    const index = templates.findIndex((t) => t.id === id);
-    if (index === -1) {
-      const at = state.templates.indexOf(before);
-      templates = [...templates.slice(0, at), before, ...templates.slice(at)];
-    } else if (templates[index] !== before) {
-      templates = templates.map((t, i) => (i === index ? before : t));
-    }
-  }
-  // everything undone: keep the very same arrays, so no change (or undo step) is seen
-  jobs = sameEntries(jobs, state.jobs) ? state.jobs : jobs;
-  templates = sameEntries(templates, state.templates)
-    ? state.templates
-    : templates;
-  const activeJobId = jobs.some((j) => j.id === next.activeJobId)
-    ? next.activeJobId
-    : state.activeJobId;
-  return jobs === next.jobs &&
-    templates === next.templates &&
-    activeJobId === next.activeJobId
-    ? next
-    : { ...next, jobs, templates, activeJobId };
-}
+export const variantsReducer = variantsSlice.reducer;
 
 export const {
   setVariants,
   setTemplatesAndJobs,
-  setLocks,
-  unlockVariant,
-  relockVariants,
   createVariant: addVariant,
   insertVariant,
   insertTailoredJob,
@@ -703,24 +579,6 @@ export const {
   setFitLimits,
   setTuning,
 } = variantsSlice.actions;
-
-/** The active job is locked (sent) and no unlock was approved */
-export function isActiveVariantReadOnlySelector(state: {
-  variants: VariantsState;
-}): boolean {
-  return isVariantReadOnly(state.variants, state.variants.activeJobId);
-}
-
-/** The active job or its template is frozen by a sent job: look and content cannot be edited */
-export function isActiveAppearanceReadOnlySelector(state: {
-  variants: VariantsState;
-}): boolean {
-  const job = activeJobSelector(state);
-  return (
-    isVariantReadOnly(state.variants, job.id) ||
-    isTemplateReadOnly(state.variants, job.templateId)
-  );
-}
 
 /** `resolveVariant` that returns the same object for the same template and job objects */
 const resolvedCache = new WeakMap<Template, WeakMap<Job, Variant>>();

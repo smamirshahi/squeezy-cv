@@ -124,6 +124,14 @@ export function createApplicationId(
   return parts.join("-").slice(0, MAX_ID_LENGTH);
 }
 
+/** Which job and template the CV came from (labels only; the CV is copied in full) */
+export interface ApplicationSource {
+  jobId?: string;
+  templateId?: string;
+  jobName?: string;
+  templateName?: string;
+}
+
 /**
  * Freezes the saved CV into an application: the rendered document plus the variant as it is
  * now. Nothing here points back at the vault, so later edits cannot change it.
@@ -133,7 +141,8 @@ export function createApplication(
   vault: Vault,
   variant: Variant,
   today: string,
-  idSuffix: string
+  idSuffix: string,
+  source: ApplicationSource = {}
 ): Application {
   const company = requireText(input.company, "Company");
   const role = requireText(input.role, "Role");
@@ -154,6 +163,10 @@ export function createApplication(
     company,
     role,
     ...(jobUrl ? { jobUrl } : {}),
+    jobId: source.jobId ?? variant.id,
+    ...(source.templateId ? { templateId: source.templateId } : {}),
+    ...(source.jobName ? { jobName: source.jobName } : {}),
+    ...(source.templateName ? { templateName: source.templateName } : {}),
     appliedAt,
     status: "applied",
     history: [{ status: "applied", at: appliedAt }],
@@ -253,7 +266,11 @@ export function summariseApplication(
     role: application.role,
     status: application.status,
     appliedAt: application.appliedAt,
-    variantId: application.submitted.variant.id,
+    // Files from before jobs only know the variant they were sent from: that is the job
+    jobId: application.jobId ?? application.submitted.variant.id,
+    templateId: application.templateId ?? "",
+    jobName: application.jobName ?? application.submitted.variant.name,
+    templateName: application.templateName ?? "",
     updatedAt: lastUpdateDay(application),
     isCorrupt: false,
   };

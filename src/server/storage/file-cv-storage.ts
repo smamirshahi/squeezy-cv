@@ -493,7 +493,10 @@ export class FileCvStorage implements CvStorage {
           role: "",
           status: "applied",
           appliedAt: "",
-          variantId: "",
+          jobId: "",
+          templateId: "",
+          jobName: "",
+          templateName: "",
           updatedAt: "",
           isCorrupt: true,
         });

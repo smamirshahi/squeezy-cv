@@ -12,7 +12,6 @@ import { ChatPanel } from "@pages/workspace/chat-panel";
 import { BlockToolbar } from "@pages/workspace/block-toolbar";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
-import { LockBanner } from "@pages/workspace/variant-lock";
 import { TemplatesPage } from "@pages/workspace/templates-page";
 import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
@@ -70,7 +69,6 @@ export function Workspace(): JSX.Element {
     >
       <TopBar />
       <ConnectionBanner />
-      <LockBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {(tool === "variants" || tool === "chat") && (

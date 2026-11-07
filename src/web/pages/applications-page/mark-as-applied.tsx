@@ -19,9 +19,12 @@ import { useStore } from "react-redux";
 import { Application } from "@custom-types/application-types";
 import { toIsoDay } from "@shared/application/application-utils";
 import { saveActiveVariant } from "@hooks/save-active-variant";
-import { refreshLocks } from "@store/persistence/persistence-actions";
 import { createApiClient } from "@store/persistence/api-client";
-import { RootState } from "@store/store-helper";
+import { RootState, useAppSelector } from "@store/store-helper";
+import {
+  activeJobSelector,
+  activeTemplateSelector,
+} from "@store/variants/variants-slice";
 
 interface Form {
   company: string;
@@ -80,6 +83,8 @@ export function MarkAsAppliedDialog({
 }: DialogProps): JSX.Element {
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
+  const job = useAppSelector(activeJobSelector);
+  const template = useAppSelector(activeTemplateSelector);
   const [form, setForm] = useState<Form>(emptyForm);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -96,7 +101,11 @@ export function MarkAsAppliedDialog({
   // A fresh form each time the dialog opens
   useEffect(() => {
     if (isOpen) {
-      setForm({ ...emptyForm(), role: initialRole });
+      setForm({
+        ...emptyForm(),
+        company: job.company ?? "",
+        role: initialRole || (job.role ?? ""),
+      });
       setError("");
       setAreMoreOpen(false);
     }
@@ -110,7 +119,7 @@ export function MarkAsAppliedDialog({
     try {
       const variant = await saveActiveVariant(store, api);
       const application = await api.createApplication({
-        variantId: variant.id,
+        jobId: variant.id,
         company: form.company,
         role: form.role,
         appliedAt: form.appliedAt,
@@ -118,7 +127,6 @@ export function MarkAsAppliedDialog({
         jobDescription: form.jobDescription,
         notes: form.notes,
       });
-      await refreshLocks(api, store.dispatch);
       onClose();
       setCreated(application);
     } catch (caught) {
@@ -153,7 +161,12 @@ export function MarkAsAppliedDialog({
             }}
           >
             Saves the CV exactly as it is now (with its PDF), so you can always
-            see what you sent.
+            see what you sent. Later edits to the template or job do not change
+            it.
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Job: <strong>{job.name}</strong> · Template:{" "}
+            <strong>{template.name}</strong>
           </Typography>
           <Box
             sx={{

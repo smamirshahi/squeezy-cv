@@ -28,7 +28,6 @@ import {
   computeItemOrders,
 } from "@shared/variant/variant-utils";
 import { moveSection } from "@pages/workspace/inspector";
-import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -281,7 +280,7 @@ export function Outline({ onClose }: Props): JSX.Element {
         </IconButton>
       </Box>
       <Box sx={{ flex: 1, overflow: "auto", py: 0.5 }}>
-        <LockedFieldset>
+        <>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -521,7 +520,7 @@ export function Outline({ onClose }: Props): JSX.Element {
               })}
             </SortableContext>
           </DndContext>
-        </LockedFieldset>
+        </>
       </Box>
       <Box
         role="status"
