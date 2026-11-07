@@ -10,6 +10,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { WorkspaceTool, setTool } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
+import { APP_VERSION } from "@shared/version";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 interface RailItem {
@@ -136,6 +137,12 @@ export function ToolRail(): JSX.Element {
           </ButtonBase>
         );
       })}
+      <Typography
+        aria-label={`Version ${APP_VERSION}`}
+        sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
+      >
+        v{APP_VERSION}
+      </Typography>
     </Box>
   );
 }

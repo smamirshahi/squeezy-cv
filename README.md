@@ -167,6 +167,10 @@ Imports must use path aliases, not relative paths (ESLint enforces it): `@compon
 
 More detail on the architecture (state, variants, pagination, PDF, AI, locking and so on) is in [CLAUDE.md](CLAUDE.md).
 
+## Versions
+
+The current version is shown at the bottom of the tool rail and in `GET /api/health`. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+
 ## 6. Troubleshooting
 
 - **PDF export fails:** run `pnpm exec playwright install chromium` and make sure the web app is running at `WEB_URL`.

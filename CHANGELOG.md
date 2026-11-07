@@ -1,0 +1,59 @@
+# Changelog
+
+All notable changes to CV Builder are written here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the version numbers
+follow [Semantic Versioning](https://semver.org/) (while the major number is 0,
+a minor bump may change the saved data format; the migration chain reads old files).
+
+How to release: see "Versioning" in `CLAUDE.md`.
+
+## [Unreleased]
+
+## [0.1.0] - 2026-11-07
+
+The baseline: everything built before the move to templates and jobs. Issue numbers
+refer to GitHub issues.
+
+### Added
+
+- **Vault and editor** (#31-#35, #96, #140, #145, #159): one vault of facts with dynamic
+  sections, generic items, bullets with Short/Long/Formal wordings, tags, ordered links,
+  skills with levels and years, private notes and an opinion per item, inline item editor,
+  resizable side panels. Saved files carry a version and are migrated on load.
+- **Variants** (#37, #38, #94): a variant decides layout, section order, which items and
+  bullets show, emphasis, wording, tone, page limit and style; the pure
+  `render(vault, variant)` draws it. The vault is never changed by hiding.
+- **Template, preview and pagination** (#39-#42, #88-#90, #93, #95, #146, #149):
+  single-column UK default and a two-column layout, a live A4 preview with page markers,
+  1 or 2 page limit, fit numbers, auto-fit and fill, hide-to-fit, drag and drop and
+  keyboard reordering, outline, zoom, block toolbar and shortcuts, skill display options.
+- **PDF export** (#43, #44, #91, #138): a real PDF from headless Chromium, an export dialog
+  with checks, optional "mark as applied" afterwards.
+- **Local server and data** (#36, #73): Fastify API, atomic JSON files with backups,
+  optional private git repo for the data folder.
+- **Applications** (#74, #75, #87, #98, #137): a frozen copy of the CV as sent plus status
+  timeline, an applications list with search and filters, a variant lock while a CV is
+  "Applied".
+- **AI** (#45-#48, #76, #81, #85, #99, #101, #102, #133): tailoring to a job advert with
+  guardrails and a diff review, import from pasted text, hide-to-fit suggestions, a chat
+  panel with typed edits, providers Claude, Ollama (local), Gemini and Groq chosen per task,
+  personal data replaced by placeholders before anything is sent, and a preview of the exact
+  request.
+- **Undo and redo** (#49) for all vault and variant edits.
+- **Style settings** (#157): typography table with live preview.
+- **Workspace design B** (#92-#100, #116): top bar, tool rail, light and dark theme,
+  first-run and offline states.
+- **Versioning** (#162): this changelog, the version in `package.json`,
+  `GET /api/health` and the tool rail.
+
+### Changed
+
+- All packages updated (#154); Node 24 is the supported runtime.
+
+### Known gaps
+
+- Chat: streaming replies (#136) and compound requests (#135) are open.
+- Gemini and Groq have not been tried against the real services (#134).
+
+[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/smamirshahi/CV-Builder/releases/tag/v0.1.0

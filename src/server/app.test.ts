@@ -1,3 +1,4 @@
+import { APP_VERSION } from "@shared/version";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -34,7 +35,7 @@ describe("health", () => {
   it("answers", async () => {
     const response = await app.inject({ method: "GET", url: "/api/health" });
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: "ok" });
+    expect(response.json()).toEqual({ status: "ok", version: APP_VERSION });
   });
 });
 
