@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import {
   Bullet,
+  ItemOpinion,
   LinkItem,
   Profile,
   Section,
@@ -187,6 +188,41 @@ const vaultSlice = createSlice({
       );
       if (item) {
         item.tags = normalizeTags(action.payload.tags);
+      }
+    },
+
+    /** Sets the private notes of an item (empty removes them) */
+    setItemNotes(state, action: PayloadAction<ItemRef & { notes: string }>) {
+      const item = findItem(
+        state,
+        action.payload.sectionId,
+        action.payload.itemId
+      );
+      if (item) {
+        if (action.payload.notes) {
+          item.notes = action.payload.notes;
+        } else {
+          delete item.notes;
+        }
+      }
+    },
+
+    /** Sets how the user feels about an item (undefined = not set) */
+    setItemOpinion(
+      state,
+      action: PayloadAction<ItemRef & { opinion?: ItemOpinion }>
+    ) {
+      const item = findItem(
+        state,
+        action.payload.sectionId,
+        action.payload.itemId
+      );
+      if (item) {
+        if (action.payload.opinion) {
+          item.opinion = action.payload.opinion;
+        } else {
+          delete item.opinion;
+        }
       }
     },
 
@@ -402,6 +438,8 @@ export const {
   moveItem,
   setItemVisibility,
   setItemTags,
+  setItemNotes,
+  setItemOpinion,
   addBullet,
   setItemBullets,
   updateBullet,
