@@ -1,3 +1,4 @@
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   RefObject,
@@ -310,153 +311,156 @@ export function AiAssistant(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flex: 1, minWidth: 0, minHeight: 0 }}>
-      <Box
-        component="aside"
-        aria-label="Job ad and analysis"
-        sx={{
-          width: 360,
-          flex: "none",
-          overflow: "auto",
-          p: 2,
-          bgcolor: WORKSPACE_COLORS.panel,
-          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
-        }}
-      >
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          AI assistant
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          Paste a job advert. The AI suggests which items to show, what to
-          highlight, rewordings and what your CV is missing. It may only select,
-          highlight and rephrase what you already wrote. You review everything;
-          nothing changes until you create a job, and your current job stays as
-          it is.
-        </Typography>
-
-        {isConfigured === false && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            AI is not set up. Either put <code>ANTHROPIC_API_KEY=...</code> in
-            the <code>.env</code> file (paid, Claude), or use a free local model
-            with <code>AI_PROVIDER=ollama</code> (see <code>.env.example</code>
-            ), then restart the server.
-          </Alert>
-        )}
-        {!isSaved && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            The AI works on the saved CV. Save your changes first.
-          </Alert>
-        )}
-        <Alert severity="info" sx={{ mb: 2 }}>
-          {provider.isOnline
-            ? `When you press Analyse, your CV (without your name and contact details) and the advert are sent to ${provider.recipient}.`
-            : `Using ${provider.label} on this computer: your CV and the advert stay on this computer.`}
-        </Alert>
-
-        <TextField
-          label="Job advert"
-          multiline
-          minRows={6}
-          fullWidth
-          value={jobAd}
-          onChange={(event) => setJobAd(event.target.value)}
-          helperText={`${jobAd.length} / ${MAX_JOB_AD_LENGTH} characters`}
-        />
+      <ResizableAside side="left" label="the job ad panel" defaultWidth={360}>
         <Box
+          component="aside"
+          aria-label="Job ad and analysis"
           sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
-            alignItems: "center",
-            mt: 1,
+            width: "100%",
+            flex: "none",
+            overflow: "auto",
+            p: 2,
+            bgcolor: WORKSPACE_COLORS.panel,
+            borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <TextField
-            select
-            size="small"
-            label="Tone"
-            value={tone}
-            onChange={(event) => setTone(event.target.value as Tone)}
-            sx={{ minWidth: 160 }}
-          >
-            {TONES.map((t) => (
-              <MenuItem key={t.value} value={t.value}>
-                {t.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            select
-            size="small"
-            label="Template"
-            value={template.id}
-            onChange={(event) => setTemplateChoice(event.target.value)}
-            sx={{ minWidth: 180 }}
-          >
-            {templates.map((t) => (
-              <MenuItem key={t.id} value={t.id}>
-                {t.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            select
-            size="small"
-            label="Page limit"
-            value={pageLimit}
-            onChange={(event) => setPageLimit(Number(event.target.value))}
-            sx={{ minWidth: 120 }}
-          >
-            <MenuItem value={1}>1 page</MenuItem>
-            <MenuItem value={2}>2 pages</MenuItem>
-          </TextField>
-          <TextField
-            size="small"
-            label="Job name"
-            value={jobName}
-            placeholder="Filled from the advert"
-            onChange={(event) => {
-              setJobName(event.target.value);
-              setIsJobNameEdited(true);
-            }}
-            sx={{ minWidth: 200 }}
-          />
-          <Button
-            variant="contained"
-            disabled={
-              isBusy || !isConfigured || !isSaved || jobAd.trim().length === 0
-            }
-            onClick={() => void analyse()}
-          >
-            Analyse
-          </Button>
-          <Button
-            size="small"
-            disabled={jobAd.trim().length === 0}
-            onClick={() => setIsPreviewOpen(true)}
-          >
-            Preview the exact request
-          </Button>
-          {isBusy && <CircularProgress size={22} />}
-          {isBusy && !provider.isOnline && (
-            <Typography variant="body2">
-              A local model can take several minutes. Keep this page open.
-            </Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            AI assistant
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Paste a job advert. The AI suggests which items to show, what to
+            highlight, rewordings and what your CV is missing. It may only
+            select, highlight and rephrase what you already wrote. You review
+            everything; nothing changes until you create a job, and your current
+            job stays as it is.
+          </Typography>
+
+          {isConfigured === false && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              AI is not set up. Either put <code>ANTHROPIC_API_KEY=...</code> in
+              the <code>.env</code> file (paid, Claude), or use a free local
+              model with <code>AI_PROVIDER=ollama</code> (see{" "}
+              <code>.env.example</code>
+              ), then restart the server.
+            </Alert>
           )}
-        </Box>
-
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
+          {!isSaved && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              The AI works on the saved CV. Save your changes first.
+            </Alert>
+          )}
+          <Alert severity="info" sx={{ mb: 2 }}>
+            {provider.isOnline
+              ? `When you press Analyse, your CV (without your name and contact details) and the advert are sent to ${provider.recipient}.`
+              : `Using ${provider.label} on this computer: your CV and the advert stay on this computer.`}
           </Alert>
-        )}
 
-        <RequestPreview
-          isOpen={isPreviewOpen}
-          request={{ jobAd, tone }}
-          onClose={() => setIsPreviewOpen(false)}
-        />
-        {result && <Analysis result={result} />}
-      </Box>
+          <TextField
+            label="Job advert"
+            multiline
+            minRows={6}
+            fullWidth
+            value={jobAd}
+            onChange={(event) => setJobAd(event.target.value)}
+            helperText={`${jobAd.length} / ${MAX_JOB_AD_LENGTH} characters`}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              alignItems: "center",
+              mt: 1,
+            }}
+          >
+            <TextField
+              select
+              size="small"
+              label="Tone"
+              value={tone}
+              onChange={(event) => setTone(event.target.value as Tone)}
+              sx={{ minWidth: 160 }}
+            >
+              {TONES.map((t) => (
+                <MenuItem key={t.value} value={t.value}>
+                  {t.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              label="Template"
+              value={template.id}
+              onChange={(event) => setTemplateChoice(event.target.value)}
+              sx={{ minWidth: 180 }}
+            >
+              {templates.map((t) => (
+                <MenuItem key={t.id} value={t.id}>
+                  {t.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              label="Page limit"
+              value={pageLimit}
+              onChange={(event) => setPageLimit(Number(event.target.value))}
+              sx={{ minWidth: 120 }}
+            >
+              <MenuItem value={1}>1 page</MenuItem>
+              <MenuItem value={2}>2 pages</MenuItem>
+            </TextField>
+            <TextField
+              size="small"
+              label="Job name"
+              value={jobName}
+              placeholder="Filled from the advert"
+              onChange={(event) => {
+                setJobName(event.target.value);
+                setIsJobNameEdited(true);
+              }}
+              sx={{ minWidth: 200 }}
+            />
+            <Button
+              variant="contained"
+              disabled={
+                isBusy || !isConfigured || !isSaved || jobAd.trim().length === 0
+              }
+              onClick={() => void analyse()}
+            >
+              Analyse
+            </Button>
+            <Button
+              size="small"
+              disabled={jobAd.trim().length === 0}
+              onClick={() => setIsPreviewOpen(true)}
+            >
+              Preview the exact request
+            </Button>
+            {isBusy && <CircularProgress size={22} />}
+            {isBusy && !provider.isOnline && (
+              <Typography variant="body2">
+                A local model can take several minutes. Keep this page open.
+              </Typography>
+            )}
+          </Box>
+
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <RequestPreview
+            isOpen={isPreviewOpen}
+            request={{ jobAd, tone }}
+            onClose={() => setIsPreviewOpen(false)}
+          />
+          {result && <Analysis result={result} />}
+        </Box>
+      </ResizableAside>
       <Box
         component="main"
         aria-label="Proposed CV"
@@ -540,48 +544,50 @@ export function AiAssistant(): JSX.Element {
           </Box>
         </Box>
       </Box>
-      <Box
-        component="aside"
-        aria-label="Review"
-        sx={{
-          width: 400,
-          flex: "none",
-          overflow: "auto",
-          p: 2,
-          bgcolor: WORKSPACE_COLORS.panel,
-          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-        }}
-      >
-        <Typography
-          variant="subtitle1"
+      <ResizableAside side="right" label="the review panel" defaultWidth={400}>
+        <Box
+          component="aside"
+          aria-label="Review"
           sx={{
-            fontWeight: "bold",
+            width: "100%",
+            flex: "none",
+            overflow: "auto",
+            p: 2,
+            bgcolor: WORKSPACE_COLORS.panel,
+            borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          Review
-        </Typography>
-        {result && decisions ? (
-          <Changes
-            result={result}
-            decisions={decisions}
-            setDecisions={setDecisions}
-            onCreate={create}
-            numbers={numbers}
-            focusedItemId={focusedItemId}
-            onFocusItem={(itemId) => focusItem(itemId, "list")}
-          />
-        ) : (
-          <Typography variant="body2">
-            Analyse a job advert to see the proposed changes here.
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: "bold",
+            }}
+          >
+            Review
           </Typography>
-        )}
-        {created && (
-          <Alert severity="success" sx={{ mt: 2 }}>
-            Created the job &quot;{created}&quot; and switched to it. Save to
-            keep it.
-          </Alert>
-        )}
-      </Box>
+          {result && decisions ? (
+            <Changes
+              result={result}
+              decisions={decisions}
+              setDecisions={setDecisions}
+              onCreate={create}
+              numbers={numbers}
+              focusedItemId={focusedItemId}
+              onFocusItem={(itemId) => focusItem(itemId, "list")}
+            />
+          ) : (
+            <Typography variant="body2">
+              Analyse a job advert to see the proposed changes here.
+            </Typography>
+          )}
+          {created && (
+            <Alert severity="success" sx={{ mt: 2 }}>
+              Created the job &quot;{created}&quot; and switched to it. Save to
+              keep it.
+            </Alert>
+          )}
+        </Box>
+      </ResizableAside>
     </Box>
   );
 }

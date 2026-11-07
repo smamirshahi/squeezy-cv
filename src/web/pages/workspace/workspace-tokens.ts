@@ -29,3 +29,27 @@ export const WORKSPACE_COLORS = {
   errBg: "#5A2420",
   errText: "#FFCFC9",
 } as const;
+
+/**
+ * The middle area of a page (vault, templates, job settings): a grey page with white cards,
+ * white inputs with a clearly visible border, and an amber warning. Spread it into the `sx`
+ * of the area, so only what is inside it changes.
+ */
+export const MIDDLE_AREA_SX = {
+  bgcolor: cssVar("bg"),
+  "& .MuiPaper-root:not(.MuiAlert-root)": {
+    bgcolor: cssVar("pn"),
+    border: `1px solid ${cssVar("bd")}`,
+    boxShadow: "none",
+    borderRadius: "6px",
+  },
+  "& .MuiOutlinedInput-root": {
+    bgcolor: cssVar("pn"),
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: cssVar("ib") },
+  },
+  "& .MuiAlert-standardWarning": {
+    bgcolor: cssVar("wrs"),
+    color: cssVar("wrt"),
+    "& .MuiAlert-icon": { color: cssVar("wr") },
+  },
+} as const;

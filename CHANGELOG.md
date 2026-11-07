@@ -14,6 +14,12 @@ template and a job (#165-#172).
 
 ### Changed
 
+- **Grey page, white cards (#205)**: the middle area of Vault, Templates and Job settings is a grey page with white bordered cards, white inputs with a visible border and an amber "vault fact" warning.
+- **Wider rail and resizable panels (#206)**: the left tool rail is wider, and the style preview, the Tailor panels and the application panel can be resized like the vault panels.
+- **Tags (#207)**: an "Add tag" button and an (i) explaining tags replace the "+ tag" box.
+- **Style settings (#208)**: the live preview is the right panel; "where this style is used" is an (i) tooltip per style; pointing at a style keeps only that style clear in the preview; names sit on the text baseline.
+- **Section spacing and title line (#209)**: "Space between sections" and "Line under section titles" are in the Page card of Style settings and apply to the whole template. Per-section styles (#185) are gone.
+- **Preview a template (#210)**: click a template card to highlight it and see it in the sample on the right.
 - **Every section has its own address (#198)**: `/vault`, `/vault/<section>/<item>`, `/jobs/<job>` (`?view=settings`), `/templates` (`/templates/layout`, `/templates/style`), `/tailor`, `/chat/<job>`, `/ai`, `/applications` (search and filters stay in the address) and `/applications/<id>`. Reload keeps the place, Back and Forward move between sections, the rail and the lists are real links (middle click, new tab), an unknown job, section or item says "Not found" with a way back, and the page title follows the section. Leaving an editor with unapplied changes (link or Back) asks first. The old `/?applications`, `/?application=<id>` and `/?print=<id>` addresses redirect; the PDF print page is now `/print/<jobId>`.
 - **Sidebar order and where settings live**: the rail is now Vault, Templates, Jobs. Vault holds only your data. Style settings and page layout moved to Templates (tabs "Templates", "Page layout", "Style settings"); Job data and the job's content moved to Jobs (view "Job settings", next to "CV page"). The "Sections & layout" tab of the Jobs page and the SETTINGS list in the Vault tree are gone.
 - **Templates page layout**: "Templates", "Page layout" and "Style settings" are now a list on the left (like the vault sections), and the sample CV moved to a right panel whose width you can drag; the page inside it scales to fit.
@@ -30,7 +36,7 @@ template and a job (#165-#172).
 - Jobs: "Score items" (Content tab). Paste the job advert (kept on the job) and the AI gives every entry of the saved CV a relevance score (0-100) and a one-line reason (`POST /api/ai/score`, uses the Tailor provider choice; only entry text and tags are sent, scrubbed like tailoring). The badge is coloured by band (related, maybe, unrelated) and shows the reason as a tooltip; only scores are stored, as one undo step, and nothing is hidden. "Hide to fit" uses the scores (#193).
 - Jobs: each item shows its relevance score (or "Not scored"), and each bullet has Shorten, Extend and Rephrase buttons (`POST /api/ai/rewrite`). The proposal is checked for numbers and names that are not in the CV (flagged ones need a tick); "Use this wording" stores it as an alternative wording and selects it for the job in one undo step; the bullet's own text never changes (#186).
 
-- **Templates: style per section (#185)**: heading size, colour, space above and the line under the heading can be set per section in a template (Templates page), with a live sample CV built from the vault beside the controls; preview and PDF follow, and older templates load unchanged.
+- **Templates: style per section (#185)**: removed again in #209 (see below).
 - **Open the CV that was sent from the applications table (#187)**: every row has a View
   CV button (opens the sent PDF) and a download button; the side panel shows the PDF
   first, labelled "CV as sent on <date>", and says so when the stored PDF is missing.

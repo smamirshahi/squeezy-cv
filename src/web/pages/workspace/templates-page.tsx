@@ -5,6 +5,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  ButtonBase,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,18 +19,19 @@ import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { TemplatesTab, formatRoute } from "@shared/routing/routes";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
-import { StyleUsagePanel } from "@pages/editor-page/sections/editor-style-settings/style-usage-panel";
+import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
+import { StyleHoverProvider } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import {
   jobCountText,
   moveJobToTemplate,
   nextTemplateName,
 } from "@pages/workspace/template-scope";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
+import { TemplateSample } from "@pages/workspace/template-section-styles";
 import {
-  TemplateSample,
-  TemplateSectionStyles,
-} from "@pages/workspace/template-section-styles";
-import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+  MIDDLE_AREA_SX,
+  WORKSPACE_COLORS,
+} from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeJobSelector,
@@ -122,14 +124,23 @@ export function TemplatesPage(): JSX.Element {
   const route = useRoute();
   const tab: TemplateTab = route.kind === "templates" ? route.tab : "templates";
 
+  // The template the sample shows; missing or deleted = the active job's template
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const shownTemplate =
+    templates.find((t) => t.id === pickedId) ??
+    templates.find((t) => t.id === activeJob.templateId);
+  const shownId = shownTemplate?.id ?? activeJob.templateId;
+
   function create(): void {
     const name = newName.trim() || nextTemplateName(templates);
-    dispatch(addTemplate({ id: nanoid(), name }));
+    const id = nanoid();
+    dispatch(addTemplate({ id, name }));
+    setPickedId(id);
     setNewName("");
   }
 
   return (
-    <>
+    <StyleHoverProvider>
       <TemplatesNav tab={tab} />
       <Box
         component="main"
@@ -139,7 +150,8 @@ export function TemplatesPage(): JSX.Element {
           minWidth: 0,
           overflow: "auto",
           p: 3,
-          bgcolor: WORKSPACE_COLORS.panel,
+          mx: 1,
+          ...MIDDLE_AREA_SX,
         }}
       >
         {tab === "layout" && (
@@ -165,16 +177,13 @@ export function TemplatesPage(): JSX.Element {
                 template changes all of its jobs. What each job shows is set per
                 job.
               </Typography>
-              <Typography
-                component="h2"
-                sx={{ fontSize: 15, fontWeight: 700, mb: 1 }}
-              >
-                Style per section
-              </Typography>
-              <TemplateSectionStyles />
-              <Box sx={{ mb: 3 }} />
               <Box
-                sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  mb: 2,
+                  alignItems: "flex-start",
+                }}
               >
                 <TextField
                   size="small"
@@ -190,7 +199,11 @@ export function TemplatesPage(): JSX.Element {
                   helperText="Starts as a copy of the look you are editing now."
                   sx={{ minWidth: 260 }}
                 />
-                <Button variant="contained" onClick={create}>
+                <Button
+                  variant="contained"
+                  onClick={create}
+                  sx={{ height: 40 }}
+                >
                   Create template
                 </Button>
               </Box>
@@ -202,7 +215,7 @@ export function TemplatesPage(): JSX.Element {
                   m: 0,
                   p: 0,
                   display: "grid",
-                  gap: 1.5,
+                  gap: 2,
                 }}
               >
                 {templates.map((template) => {
@@ -214,24 +227,44 @@ export function TemplatesPage(): JSX.Element {
                     templates.length
                   );
                   const isActive = template.id === activeJob.templateId;
+                  const isShown = template.id === shownId;
                   const reasonId = `delete-reason-${template.id}`;
                   return (
                     <Box
                       component="li"
                       key={template.id}
+                      data-selected={isShown}
+                      onClick={() => setPickedId(template.id)}
                       sx={{
-                        border: `1px solid ${WORKSPACE_COLORS.border}`,
-                        borderRadius: 1,
-                        bgcolor: WORKSPACE_COLORS.panel,
+                        border: `1px solid ${
+                          isShown
+                            ? WORKSPACE_COLORS.accent
+                            : WORKSPACE_COLORS.border
+                        }`,
+                        boxShadow: isShown
+                          ? `0 0 0 1px ${WORKSPACE_COLORS.accent}`
+                          : "none",
+                        borderRadius: "6px",
+                        bgcolor: isShown
+                          ? WORKSPACE_COLORS.accentSoft
+                          : WORKSPACE_COLORS.panel,
+                        cursor: "pointer",
                         p: 1.75,
                       }}
                     >
                       <Box
                         sx={{ display: "flex", alignItems: "baseline", gap: 1 }}
                       >
-                        <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
-                          {template.name}
-                        </Typography>
+                        <ButtonBase
+                          aria-pressed={isShown}
+                          aria-label={`Show a sample of ${template.name}`}
+                          onClick={() => setPickedId(template.id)}
+                          sx={{ textAlign: "left", borderRadius: 0.5 }}
+                        >
+                          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+                            {template.name}
+                          </Typography>
+                        </ButtonBase>
                         <Typography
                           sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
                         >
@@ -280,15 +313,17 @@ export function TemplatesPage(): JSX.Element {
                         <Button
                           size="small"
                           aria-label={`Duplicate template ${template.name}`}
-                          onClick={() =>
+                          onClick={() => {
+                            const id = nanoid();
                             dispatch(
                               addTemplate({
-                                id: nanoid(),
+                                id,
                                 name: `${template.name} (copy)`,
                                 sourceId: template.id,
                               })
-                            )
-                          }
+                            );
+                            setPickedId(id);
+                          }}
                         >
                           Duplicate
                         </Button>
@@ -392,7 +427,7 @@ export function TemplatesPage(): JSX.Element {
         </Dialog>
       </Box>
       {tab === "style" ? (
-        <StyleUsagePanel />
+        <StylePreviewPanel />
       ) : (
         <ResizableAside side="right" label="the sample CV" defaultWidth={380}>
           <Box
@@ -407,17 +442,27 @@ export function TemplatesPage(): JSX.Element {
               overflow: "auto",
             }}
           >
-            <Typography sx={{ fontWeight: 700, mb: 0.5 }}>Sample</Typography>
+            <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
+              Sample
+              {tab === "templates" && shownTemplate
+                ? `: ${shownTemplate.name}`
+                : ""}
+            </Typography>
             <Typography
               sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mb: 1.5 }}
             >
-              Your vault with everything shown, in this template. Drag the edge
-              to make it larger.
+              Your vault with everything shown, in this template.
+              {tab === "templates"
+                ? " Click a template to preview it."
+                : ""}{" "}
+              Drag the edge to make it larger.
             </Typography>
-            <TemplateSample />
+            <TemplateSample
+              templateId={tab === "templates" ? shownId : undefined}
+            />
           </Box>
         </ResizableAside>
       )}
-    </>
+    </StyleHoverProvider>
   );
 }

@@ -40,7 +40,6 @@ export function GenericSectionPreviewPage({
         variant="headingMd"
         pageBreak="keep-with-next"
         text={section.title}
-        sectionStyle={section.sectionStyle}
       />
       {visibleItems.map((item) => (
         <Grid

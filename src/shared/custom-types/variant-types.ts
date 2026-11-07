@@ -81,24 +81,6 @@ export const VariantLayoutSchema = Object({
   right: Array(String),
 });
 
-/**
- * How one section looks in a template; a missing value uses the global style. Heading size is
- * in pt, space above in px (both limited by `SECTION_STYLE_RANGES`).
- */
-export const SectionStyleSchema = Object({
-  headingSize: Number.optional(),
-  headingColor: String.optional(),
-  spaceAbove: Number.optional(),
-  /** The line under the heading; missing = shown */
-  showDivider: Boolean.optional(),
-});
-
-/** Allowed ranges of the numeric section style options */
-export const SECTION_STYLE_RANGES = {
-  headingSize: { min: 8, max: 24 },
-  spaceAbove: { min: 0, max: 40 },
-} as const;
-
 /** What auto-fit changed to make the CV fit. 1 means "as the style says". */
 export const FitTuningSchema = Object({
   spacing: Number,
@@ -194,14 +176,10 @@ export const VariantSchema = Object({
   /** Skills with a level below this (1-5) are not shown in this variant. Unrated skills count as 0. */
   skillMinLevel: Number.optional(),
 
-  /** Style per section id; a section without an entry follows the global style */
-  sectionStyles: Record(String, SectionStyleSchema).optional(),
-
   /** Set when the variant was made from a tailoring proposal */
   tailor: TailorRecordSchema.optional(),
 });
 
-export type SectionStyle = Static<typeof SectionStyleSchema>;
 export type TailorRecord = Static<typeof TailorRecordSchema>;
 export type FitTuning = Static<typeof FitTuningSchema>;
 export type FitLimitsValue = Static<typeof FitLimitsSchema>;

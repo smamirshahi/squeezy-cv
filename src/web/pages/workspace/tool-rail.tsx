@@ -88,7 +88,7 @@ export function ToolRail(): JSX.Element {
       component="nav"
       aria-label="Tools"
       sx={{
-        width: 56,
+        width: 72,
         flex: "none",
         bgcolor: WORKSPACE_COLORS.panel,
         borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
@@ -114,7 +114,7 @@ export function ToolRail(): JSX.Element {
                   : "Switch to dark theme"
               }
               sx={{
-                width: 44,
+                width: 60,
                 py: 0.9,
                 borderRadius: 1,
                 flexDirection: "column",
@@ -150,7 +150,7 @@ export function ToolRail(): JSX.Element {
                 : undefined
             }
             sx={{
-              width: 44,
+              width: 60,
               py: 0.9,
               borderRadius: 1,
               flexDirection: "column",

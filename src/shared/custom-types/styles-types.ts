@@ -1,4 +1,12 @@
-import { Object, String, Static, Union, Literal, Boolean } from "runtypes";
+import {
+  Object,
+  String,
+  Static,
+  Union,
+  Literal,
+  Boolean,
+  Number,
+} from "runtypes";
 
 const SideSchema = Union(
   Literal("fullWidth"),
@@ -60,6 +68,12 @@ export const StyleSchema = Object({
 
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
+
+  /** Space above each section title in px (0-40); missing = the default */
+  sectionSpacing: Number.optional(),
+
+  /** The line under each section title; missing = shown */
+  hasHeadingLine: Boolean.optional(),
 
   /** The rating icon */
   ratingIcon: Union(Literal("star"), Literal("circle")),

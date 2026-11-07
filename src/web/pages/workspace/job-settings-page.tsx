@@ -3,7 +3,10 @@ import { Box, Divider } from "@mui/material";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
-import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import {
+  MIDDLE_AREA_SX,
+  WORKSPACE_COLORS,
+} from "@pages/workspace/workspace-tokens";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { useAppDispatch } from "@store/store-helper";
 
@@ -24,7 +27,8 @@ export function JobSettingsPage(): JSX.Element {
         minWidth: 0,
         overflow: "auto",
         p: 3,
-        bgcolor: WORKSPACE_COLORS.canvas,
+        mx: 1,
+        ...MIDDLE_AREA_SX,
       }}
     >
       <Box sx={{ maxWidth: 1000, mx: "auto", display: "grid", gap: 2 }}>

@@ -16,10 +16,12 @@ import {
   MenuItem,
   Rating,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
@@ -89,8 +91,7 @@ function TagEditor({ tags, label, onChange }: TagsProps): JSX.Element {
       ))}
       <TextField
         size="small"
-        variant="standard"
-        placeholder="+ tag"
+        placeholder="Tag name"
         value={text}
         onChange={(event) => setText(event.target.value)}
         onKeyDown={(event) => {
@@ -99,10 +100,26 @@ function TagEditor({ tags, label, onChange }: TagsProps): JSX.Element {
             add();
           }
         }}
-        onBlur={add}
         slotProps={{ htmlInput: { "aria-label": label } }}
-        sx={{ width: 90 }}
+        sx={{
+          width: 140,
+          "& .MuiOutlinedInput-root": { borderRadius: 999 },
+        }}
       />
+      <Button
+        size="small"
+        variant="contained"
+        onClick={add}
+        disabled={text.trim() === ""}
+        sx={{ borderRadius: 999, textTransform: "none" }}
+      >
+        Add tag
+      </Button>
+      <Tooltip title="Tags are short keywords (for example React or leadership). They help rank this item when you tailor a CV to a job advert. They are never printed on the CV.">
+        <IconButton size="small" aria-label="What are tags?">
+          <InfoOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }

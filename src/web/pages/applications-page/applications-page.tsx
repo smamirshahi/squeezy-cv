@@ -1,3 +1,4 @@
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
@@ -213,25 +214,31 @@ export function ApplicationsPage(): JSX.Element {
           )}
         </Box>
         {selectedId && (
-          <Box
-            component="aside"
-            aria-label="Application detail"
-            sx={{
-              width: 560,
-              flex: "none",
-              minHeight: `calc(100vh - ${APPLICATIONS_TOP_BAR_HEIGHT}px)`,
-              borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-              boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
-              bgcolor: WORKSPACE_COLORS.panel,
-              color: WORKSPACE_COLORS.text,
-            }}
+          <ResizableAside
+            side="right"
+            label="the application panel"
+            defaultWidth={560}
           >
-            <ApplicationView
-              key={selectedId}
-              applicationId={selectedId}
-              isEmbedded
-            />
-          </Box>
+            <Box
+              component="aside"
+              aria-label="Application detail"
+              sx={{
+                width: "100%",
+                flex: "none",
+                minHeight: `calc(100vh - ${APPLICATIONS_TOP_BAR_HEIGHT}px)`,
+                borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+                boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
+                bgcolor: WORKSPACE_COLORS.panel,
+                color: WORKSPACE_COLORS.text,
+              }}
+            >
+              <ApplicationView
+                key={selectedId}
+                applicationId={selectedId}
+                isEmbedded
+              />
+            </Box>
+          </ResizableAside>
         )}
       </Box>
     </Box>

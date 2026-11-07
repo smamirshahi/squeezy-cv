@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Box,
   Button,
   IconButton,
   TextField,
+  Tooltip,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import AddOutlined from "@mui/icons-material/AddOutlined";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import RemoveOutlined from "@mui/icons-material/RemoveOutlined";
+import { useStyleHover } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   COLOR_PRESETS,
@@ -29,7 +32,7 @@ import {
   stepFontSize,
 } from "@shared/style/typography-utils";
 
-const COLUMNS = "150px minmax(0, 1fr) 150px 190px 330px";
+const COLUMNS = "150px minmax(300px, 1fr) 120px 180px 320px";
 
 interface ColorFieldProps {
   variant: AvailableFonts;
@@ -121,6 +124,7 @@ function ColorField({
 export function TypographyTable(): JSX.Element {
   const dispatch = useAppDispatch();
   const { typography } = useAppSelector(styleSelector);
+  const { setHovered } = useStyleHover();
 
   return (
     <Box
@@ -156,7 +160,7 @@ export function TypographyTable(): JSX.Element {
           gap: 1.25,
           px: 1.75,
           py: 0.75,
-          minWidth: 960,
+          minWidth: 1070,
           bgcolor: WORKSPACE_COLORS.panelAlt,
           borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           fontSize: 11,
@@ -172,128 +176,144 @@ export function TypographyTable(): JSX.Element {
         <span>Weight</span>
         <span>Colour</span>
       </Box>
-      {STYLE_TOKENS.map(({ variant, use, sample }) => {
+      {STYLE_TOKENS.map(({ variant, use, where, sample }) => {
         const style = typography[variant];
         return (
-          <Box
-            key={variant}
-            role="row"
-            data-style-row={variant}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: COLUMNS,
-              gap: 1.25,
-              alignItems: "center",
-              px: 1.75,
-              py: 1,
-              minWidth: 960,
-              borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-            }}
-          >
-            <Box>
-              <Typography sx={{ fontWeight: 600, fontSize: 13 }}>
-                {variant}
-              </Typography>
-              <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-                {use}
-              </Typography>
-            </Box>
+          <Fragment key={variant}>
             <Box
-              data-testid={`sample-${variant}`}
+              role="row"
+              data-style-row={variant}
+              onMouseEnter={() => setHovered(variant)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => setHovered(variant)}
+              onBlur={() => setHovered(null)}
               sx={{
-                bgcolor: "#fff",
-                border: `1px solid ${WORKSPACE_COLORS.border}`,
-                borderRadius: 0.5,
-                px: 1.25,
-                py: 0.5,
-                minHeight: 34,
-                display: "flex",
+                display: "grid",
+                gridTemplateColumns: COLUMNS,
+                gap: 1.25,
                 alignItems: "center",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                fontFamily: "Calibri, sans-serif",
-                fontSize: style.fontSize,
-                fontWeight: style.fontWeight,
-                color: style.color,
+                px: 1.75,
+                py: 1,
+                minWidth: 1070,
+                borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
               }}
             >
-              {sample}
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <IconButton
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Typography sx={{ fontWeight: 600, fontSize: 13 }}>
+                    {variant}
+                  </Typography>
+                  <Tooltip title={`Used for: ${where}`} placement="right">
+                    <InfoOutlined
+                      tabIndex={0}
+                      aria-label={`Where ${variant} is used`}
+                      sx={{ fontSize: 15, color: WORKSPACE_COLORS.muted }}
+                    />
+                  </Tooltip>
+                </Box>
+                <Typography
+                  sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+                >
+                  {use}
+                </Typography>
+              </Box>
+              <Box
+                data-testid={`sample-${variant}`}
+                sx={{
+                  bgcolor: "#fff",
+                  border: `1px solid ${WORKSPACE_COLORS.border}`,
+                  borderRadius: 0.5,
+                  px: 1.25,
+                  py: 0.5,
+                  minHeight: 34,
+                  display: "flex",
+                  alignItems: "center",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  fontFamily: "Calibri, sans-serif",
+                  fontSize: style.fontSize,
+                  fontWeight: style.fontWeight,
+                  color: style.color,
+                }}
+              >
+                {sample}
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <IconButton
+                  size="small"
+                  aria-label={`Decrease ${variant} size`}
+                  onClick={() =>
+                    dispatch(
+                      setTypography({
+                        variant,
+                        fontStyle: {
+                          ...style,
+                          fontSize: stepFontSize(style.fontSize, -1),
+                        },
+                      })
+                    )
+                  }
+                >
+                  <RemoveOutlined fontSize="small" />
+                </IconButton>
+                <Typography
+                  aria-label={`${variant} size`}
+                  sx={{ minWidth: 36, textAlign: "center", fontWeight: 600 }}
+                >
+                  {style.fontSize}
+                </Typography>
+                <IconButton
+                  size="small"
+                  aria-label={`Increase ${variant} size`}
+                  onClick={() =>
+                    dispatch(
+                      setTypography({
+                        variant,
+                        fontStyle: {
+                          ...style,
+                          fontSize: stepFontSize(style.fontSize, 1),
+                        },
+                      })
+                    )
+                  }
+                >
+                  <AddOutlined fontSize="small" />
+                </IconButton>
+              </Box>
+              <ToggleButtonGroup
+                exclusive
                 size="small"
-                aria-label={`Decrease ${variant} size`}
-                onClick={() =>
+                aria-label={`${variant} weight`}
+                value={style.fontWeight}
+                onChange={(_event, weight: FontWeight | null) => {
+                  if (weight !== null) {
+                    dispatch(
+                      setTypography({
+                        variant,
+                        fontStyle: { ...style, fontWeight: weight },
+                      })
+                    );
+                  }
+                }}
+              >
+                <ToggleButton value="400" sx={{ textTransform: "none" }}>
+                  Regular
+                </ToggleButton>
+                <ToggleButton value="700" sx={{ textTransform: "none" }}>
+                  Bold
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <ColorField
+                variant={variant}
+                color={style.color}
+                onChange={(color) =>
                   dispatch(
-                    setTypography({
-                      variant,
-                      fontStyle: {
-                        ...style,
-                        fontSize: stepFontSize(style.fontSize, -1),
-                      },
-                    })
+                    setTypography({ variant, fontStyle: { ...style, color } })
                   )
                 }
-              >
-                <RemoveOutlined fontSize="small" />
-              </IconButton>
-              <Typography
-                aria-label={`${variant} size`}
-                sx={{ minWidth: 44, textAlign: "center", fontWeight: 600 }}
-              >
-                {style.fontSize}
-              </Typography>
-              <IconButton
-                size="small"
-                aria-label={`Increase ${variant} size`}
-                onClick={() =>
-                  dispatch(
-                    setTypography({
-                      variant,
-                      fontStyle: {
-                        ...style,
-                        fontSize: stepFontSize(style.fontSize, 1),
-                      },
-                    })
-                  )
-                }
-              >
-                <AddOutlined fontSize="small" />
-              </IconButton>
+              />
             </Box>
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              aria-label={`${variant} weight`}
-              value={style.fontWeight}
-              onChange={(_event, weight: FontWeight | null) => {
-                if (weight !== null) {
-                  dispatch(
-                    setTypography({
-                      variant,
-                      fontStyle: { ...style, fontWeight: weight },
-                    })
-                  );
-                }
-              }}
-            >
-              <ToggleButton value="400" sx={{ textTransform: "none" }}>
-                Regular
-              </ToggleButton>
-              <ToggleButton value="700" sx={{ textTransform: "none" }}>
-                Bold
-              </ToggleButton>
-            </ToggleButtonGroup>
-            <ColorField
-              variant={variant}
-              color={style.color}
-              onChange={(color) =>
-                dispatch(
-                  setTypography({ variant, fontStyle: { ...style, color } })
-                )
-              }
-            />
-          </Box>
+          </Fragment>
         );
       })}
       <Typography

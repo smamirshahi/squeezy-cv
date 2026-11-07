@@ -20,7 +20,6 @@ import {
   setJobTemplate,
   setPageLimit,
   setSectionShown,
-  setSectionStyle,
   setSkillStyle,
   setTuning,
   setBulletOrders,
@@ -264,16 +263,6 @@ describe("templates and jobs: who owns what", () => {
     expect(afterTemplate.jobs).toBe(before.jobs);
     expect(afterTemplate.templates[1].pageLimit).toBe(1);
     expect(afterTemplate.templates[1].skillDisplay).toBe("dots");
-    expect(
-      jobsReducer(
-        before,
-        setSectionStyle({
-          id: "second",
-          sectionId: "s",
-          change: { spaceAbove: 12 },
-        })
-      ).jobs
-    ).toBe(before.jobs);
 
     const afterJob = [
       setTuning({
@@ -283,51 +272,6 @@ describe("templates and jobs: who owns what", () => {
     ].reduce(jobsReducer, before);
     expect(afterJob.templates).toBe(before.templates);
     expect(afterJob.jobs[1].tuning?.marginMm).toBe(15);
-  });
-
-  it("a section style goes to the template, reaches its jobs, drops tuning and cleans up", () => {
-    let state = jobsReducer(
-      withTwo(),
-      createJob({
-        vault,
-        style,
-        name: "Third",
-        id: "third",
-        templateId: "template-second",
-      })
-    );
-    state = jobsReducer(
-      state,
-      setTuning({
-        id: "third",
-        tuning: { spacing: 0.5, marginMm: 15, fontScale: 1 },
-      })
-    );
-    state = jobsReducer(
-      state,
-      setSectionStyle({
-        id: "second",
-        sectionId: "sec",
-        change: { headingSize: 16, showDivider: false },
-      })
-    );
-    const [first, second, third] = all(state);
-    expect(second.sectionStyles).toEqual({
-      sec: { headingSize: 16, showDivider: false },
-    });
-    expect(third.sectionStyles).toEqual(second.sectionStyles);
-    expect(first.sectionStyles).toBeUndefined();
-    expect(state.jobs[2].tuning).toBeUndefined();
-
-    state = jobsReducer(
-      state,
-      setSectionStyle({
-        id: "second",
-        sectionId: "sec",
-        change: { headingSize: null, showDivider: null },
-      })
-    );
-    expect(state.templates[1].sectionStyles).toBeUndefined();
   });
 
   it("two jobs on one template see the same style change", () => {
