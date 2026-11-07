@@ -17,6 +17,10 @@ template and a job (#165-#172).
 - **Sidebar order and where settings live**: the rail is now Vault, Templates, Jobs. Vault holds only your data. Style settings and page layout moved to Templates (tabs "Templates", "Page layout", "Style settings"); Job data and the job's content moved to Jobs (view "Job settings", next to "CV page"). The "Sections & layout" tab of the Jobs page and the SETTINGS list in the Vault tree are gone.
 - **Templates page layout**: "Templates", "Page layout" and "Style settings" are now a list on the left (like the vault sections), and the sample CV moved to a right panel whose width you can drag; the page inside it scales to fit.
 
+### Fixed
+
+- **Sidebars fill the window height (#199)**: the vault tree, the right panels (item panel, style usage, inspector, chat, template sample) and their resize handles now always reach from the top bar to the bottom of the window, also when empty; long content scrolls inside the panel.
+
 ### Added
 
 - **Import from a PDF (#197)**: the "Paste CV text, AI sorts it" dialog has a "Choose PDF" button and a drop area. The local server reads the PDF's text layer (`POST /api/import/pdf`, max 5 MB and 20 pages, checked by content; the file is never stored) and the text appears in the editable box before you sort it. Scanned, password-protected, too big or too long PDFs get a plain message. The privacy notice now says the PDF text goes to the chosen provider.

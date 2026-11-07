@@ -76,6 +76,7 @@ export function ResizableAside({
       onDoubleClick={() => change(defaultWidth)}
       sx={{
         flex: "none",
+        alignSelf: "stretch",
         width: 6,
         cursor: "col-resize",
         touchAction: "none",
@@ -93,7 +94,12 @@ export function ResizableAside({
           flex: "none",
           display: "flex",
           flexDirection: "column",
+          alignSelf: "stretch",
           minHeight: 0,
+          // The panel inside always fills the full height, however short its content is;
+          // long content scrolls inside it (it sets its own overflow). `&&` outranks the
+          // panels' own `flex: none`.
+          "&& > *": { flex: "1 1 0", minHeight: 0 },
         }}
       >
         {children}
