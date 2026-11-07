@@ -30,7 +30,9 @@ import {
   lastUpdateDay,
   toIsoDay,
 } from "@shared/application/application-utils";
+import { splitVariant } from "@shared/variant/template-job";
 import { duplicateVariant } from "@shared/variant/variant-utils";
+import { templateIdFor } from "@store/variants/variants-slice";
 import {
   applicationPdfUrl,
   createApiClient,
@@ -161,7 +163,10 @@ export function ApplicationView({
         nanoid(),
         `${application.company} - ${application.role} (copy)`
       );
-      await api.saveVariant(copy);
+      // a copy of what was sent becomes a job with a template of its own
+      const { template, job } = splitVariant(copy, templateIdFor(copy.id));
+      await api.saveTemplate(template);
+      await api.saveJob(job);
       setMessage(
         "A copy was added to your variants. Open the editor to use it."
       );

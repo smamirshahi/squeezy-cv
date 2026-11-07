@@ -27,6 +27,8 @@ import {
   TailorResult,
   TailorResultSchema,
 } from "@custom-types/tailor-types";
+import { Job, JobSchema } from "@custom-types/job-types";
+import { Template, TemplateSchema } from "@custom-types/template-types";
 import { Variant, VariantSchema } from "@custom-types/variant-types";
 import {
   CvFile,
@@ -39,6 +41,22 @@ import {
 export interface VariantSummary {
   id: string;
   name: string;
+  isCorrupt: boolean;
+}
+
+/** What the server lists for a saved template */
+export interface TemplateSummary {
+  id: string;
+  name: string;
+  isCorrupt: boolean;
+}
+
+/** What the server lists for a saved job */
+export interface JobSummary {
+  id: string;
+  name: string;
+  templateId: string;
+  createdAt: string;
   isCorrupt: boolean;
 }
 
@@ -152,6 +170,18 @@ export interface ApiClient {
     options?: { isUnlocked?: boolean }
   ) => Promise<void>;
 
+  listTemplates: () => Promise<TemplateSummary[]>;
+  loadTemplate: (id: string) => Promise<Template>;
+  saveTemplate: (template: Template) => Promise<void>;
+  deleteTemplate: (id: string) => Promise<void>;
+  listJobs: () => Promise<JobSummary[]>;
+  loadJob: (id: string) => Promise<Job>;
+  saveJob: (job: Job) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
+
+  /** The variant a saved job shows with its template: what the print page draws */
+  loadResolvedJob: (id: string) => Promise<Variant>;
+
   /** Which AI providers are set up and which one each task uses (never a key) */
   getAiStatus: () => Promise<AiStatus>;
 
@@ -176,8 +206,8 @@ export interface ApiClient {
   /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
   previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
 
-  /** The PDF of a saved variant, made by the server */
-  createPdf: (variantId: string) => Promise<Blob>;
+  /** The PDF of a saved job (its id is also a variant id), made by the server */
+  createPdf: (jobId: string) => Promise<Blob>;
 
   listApplications: () => Promise<ApplicationSummary[]>;
   loadApplication: (id: string) => Promise<Application>;
@@ -235,6 +265,65 @@ export function createApiClient(
         variant
       );
     },
+    async listTemplates() {
+      return (await request(
+        fetchImpl,
+        "GET",
+        "/api/templates"
+      )) as TemplateSummary[];
+    },
+    async loadTemplate(id) {
+      return TemplateSchema.check(
+        await request(
+          fetchImpl,
+          "GET",
+          `/api/templates/${encodeURIComponent(id)}`
+        )
+      );
+    },
+    async saveTemplate(template) {
+      await request(
+        fetchImpl,
+        "PUT",
+        `/api/templates/${encodeURIComponent(template.id)}`,
+        template
+      );
+    },
+    async deleteTemplate(id) {
+      await request(
+        fetchImpl,
+        "DELETE",
+        `/api/templates/${encodeURIComponent(id)}`
+      );
+    },
+    async listJobs() {
+      return (await request(fetchImpl, "GET", "/api/jobs")) as JobSummary[];
+    },
+    async loadJob(id) {
+      return JobSchema.check(
+        await request(fetchImpl, "GET", `/api/jobs/${encodeURIComponent(id)}`)
+      );
+    },
+    async saveJob(job) {
+      await request(
+        fetchImpl,
+        "PUT",
+        `/api/jobs/${encodeURIComponent(job.id)}`,
+        job
+      );
+    },
+    async deleteJob(id) {
+      await request(fetchImpl, "DELETE", `/api/jobs/${encodeURIComponent(id)}`);
+    },
+    async loadResolvedJob(id) {
+      return VariantSchema.check(
+        await request(
+          fetchImpl,
+          "GET",
+          `/api/jobs/${encodeURIComponent(id)}/resolved`
+        )
+      );
+    },
     async getAiStatus() {
       return (await request(fetchImpl, "GET", "/api/ai/status")) as AiStatus;
     },
@@ -285,12 +374,12 @@ export function createApiClient(
         body
       )) as TailorPreview;
     },
-    async createPdf(variantId) {
+    async createPdf(jobId) {
       return (await request(
         fetchImpl,
         "POST",
         "/api/pdf",
-        { variantId },
+        { jobId },
         "blob"
       )) as Blob;
     },

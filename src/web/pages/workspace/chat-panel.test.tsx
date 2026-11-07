@@ -101,7 +101,8 @@ function setup(isSaved = true): ReturnType<typeof makeStore> {
           s.vault,
           s.cvData.metaData,
           s.cvData.style,
-          s.variants.variants
+          s.variants.templates,
+          s.variants.jobs
         )
       )
     );
@@ -241,7 +242,8 @@ describe("ChatPanel", () => {
           s.vault,
           s.cvData.metaData,
           s.cvData.style,
-          s.variants.variants
+          s.variants.templates,
+          s.variants.jobs
         )
       )
     );

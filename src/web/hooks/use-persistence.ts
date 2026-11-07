@@ -24,11 +24,12 @@ export function useHasUnsavedChanges(): boolean {
   const vault = useAppSelector((s) => s.vault);
   const metaData = useAppSelector((s) => s.cvData.metaData);
   const style = useAppSelector((s) => s.cvData.style);
-  const variants = useAppSelector((s) => s.variants.variants);
+  const templates = useAppSelector((s) => s.variants.templates);
+  const jobs = useAppSelector((s) => s.variants.jobs);
   const saved = useAppSelector((s) => s.persistence.saved);
   return useMemo(
-    () => isDirty(saved, toSavedState(vault, metaData, style, variants)),
-    [vault, metaData, style, variants, saved]
+    () => isDirty(saved, toSavedState(vault, metaData, style, templates, jobs)),
+    [vault, metaData, style, templates, jobs, saved]
   );
 }
 

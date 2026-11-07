@@ -14,6 +14,11 @@ import { singleColumnLayout } from "@shared/vault/page-structure";
 
 const DEFAULT_PAGE_LIMIT = 2;
 
+/** Anything with per-item choices: a variant or a job */
+interface HasSelection {
+  selection: Variant["selection"];
+}
+
 /** Items hidden in the vault (`shouldShow: false`) are hidden in the variant too */
 function selectionFromVault(vault: Vault): Variant["selection"] {
   const selection: Variant["selection"] = {};
@@ -74,11 +79,11 @@ export function duplicateVariant(
 }
 
 /** Changes one item's selection (merged with what is there) and returns a new variant */
-export function updateItemSelection(
-  variant: Variant,
+export function updateItemSelection<T extends HasSelection>(
+  variant: T,
   itemId: string,
   change: Partial<ItemSelection>
-): Variant {
+): T {
   const current = variant.selection[itemId] ?? { isVisible: true };
   return {
     ...variant,
@@ -134,12 +139,12 @@ export function computeBulletOrders(
 }
 
 /** Changes one bullet's selection (merged with what is there) and returns a new variant */
-export function updateBulletSelection(
-  variant: Variant,
+export function updateBulletSelection<T extends HasSelection>(
+  variant: T,
   itemId: string,
   bulletId: string,
   change: Partial<BulletSelection>
-): Variant {
+): T {
   const item = variant.selection[itemId] ?? { isVisible: true };
   const current = item.bullets?.[bulletId] ?? { isVisible: true };
   return updateItemSelection(variant, itemId, {

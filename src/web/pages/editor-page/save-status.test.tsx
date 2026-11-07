@@ -36,7 +36,8 @@ function markSaved(store: AppStore): void {
         s.vault,
         s.cvData.metaData,
         s.cvData.style,
-        s.variants.variants
+        s.variants.templates,
+        s.variants.jobs
       )
     )
   );

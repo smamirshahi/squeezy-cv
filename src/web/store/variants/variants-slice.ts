@@ -1,5 +1,13 @@
-import { PayloadAction, createSlice, current, nanoid } from "@reduxjs/toolkit";
+import {
+  PayloadAction,
+  createSelector,
+  current,
+  createSlice,
+  nanoid,
+} from "@reduxjs/toolkit";
+import { Job } from "@custom-types/job-types";
 import { Style } from "@custom-types/styles-types";
+import { Template } from "@custom-types/template-types";
 import {
   BulletSelection,
   FitLimitsValue,
@@ -15,28 +23,43 @@ import {
 import { Vault } from "@custom-types/vault-types";
 import {
   createVariant,
-  duplicateVariant as copyVariant,
   updateBulletSelection,
   updateItemSelection as changeItemSelection,
 } from "@shared/variant/variant-utils";
+import {
+  duplicateJob,
+  duplicateTemplate,
+  resolveVariant,
+  splitVariant,
+} from "@shared/variant/template-job";
 import { NO_LOCKS, VariantLocks } from "@shared/variant/variant-lock";
 import { clampFitLimits } from "@shared/layout/fit";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
 
-/** State of the variants slice: the saved ways of showing the vault */
+/**
+ * State of the variants slice: the templates (how a CV looks) and the jobs (what each one
+ * shows, with the template it uses). The "variant" the rest of the app draws is
+ * `resolveVariant(template, job)`, see `activeVariantSelector`. A variant id is a job id.
+ */
 export interface VariantsState {
-  variants: Variant[];
-  activeId: string;
+  templates: Template[];
+  jobs: Job[];
+  activeJobId: string;
 
-  /** Which variants were sent (derived from the applications, see `computeVariantLocks`) */
+  /** Which jobs were sent (derived from the applications, see `computeVariantLocks`) */
   locks: VariantLocks;
 
-  /** Locked variants the user approved editing in this session. Cleared when they are saved or re-locked. */
+  /** Locked jobs the user approved editing in this session. Cleared when they are saved or re-locked. */
   unlockedIds: string[];
 }
 
 const DEFAULT_VARIANT_ID = "default";
+
+/** Id of the template made for a variant/job id (same rule as the server's legacy templates) */
+export function templateIdFor(jobId: string): string {
+  return `template-${jobId}`.slice(0, 64);
+}
 
 function createInitialState(): VariantsState {
   const variant = createVariant(
@@ -45,9 +68,11 @@ function createInitialState(): VariantsState {
     DEFAULT_VARIANT_ID,
     "Default"
   );
+  const { template, job } = splitVariant(variant, templateIdFor(variant.id));
   return {
-    variants: [variant],
-    activeId: variant.id,
+    templates: [template],
+    jobs: [job],
+    activeJobId: job.id,
     locks: NO_LOCKS,
     unlockedIds: [],
   };
@@ -55,26 +80,121 @@ function createInitialState(): VariantsState {
 
 export const initialState: VariantsState = createInitialState();
 
-/** Slice to access the variants. Removing or hiding things here never touches the vault. */
+/**
+ * Makes loaded templates and jobs usable: a job whose template is missing moves to the first
+ * template, and no templates / no jobs gives the default ones. The active job stays if it exists.
+ */
+function normalise(
+  templates: Template[],
+  jobs: Job[],
+  activeJobId: string
+): Pick<VariantsState, "templates" | "jobs" | "activeJobId"> {
+  const fallback = createInitialState();
+  const usableTemplates = templates.length ? templates : fallback.templates;
+  const ids = new Set(usableTemplates.map((t) => t.id));
+  const first = usableTemplates[0].id;
+  const finalJobs = (jobs.length ? jobs : fallback.jobs).map((job) =>
+    ids.has(job.templateId) ? job : { ...job, templateId: first }
+  );
+  return {
+    templates: usableTemplates,
+    jobs: finalJobs,
+    activeJobId: finalJobs.some((j) => j.id === activeJobId)
+      ? activeJobId
+      : finalJobs[0].id,
+  };
+}
+
+function jobOf(state: VariantsState, jobId: string): Job | undefined {
+  return state.jobs.find((j) => j.id === jobId);
+}
+
+/** The template a job is drawn with (the first one if the job's is missing) */
+function templateOf(state: VariantsState, job: Job): Template {
+  return (
+    state.templates.find((t) => t.id === job.templateId) ?? state.templates[0]
+  );
+}
+
+/** Changes the template of job `jobId`; also drops the stored auto-fit result of the jobs on it when asked */
+function editTemplate(
+  state: VariantsState,
+  jobId: string,
+  change: (template: Template) => void,
+  options: { shouldDropTuning?: boolean } = {}
+): void {
+  const job = jobOf(state, jobId);
+  if (!job) {
+    return;
+  }
+  const template = state.templates.find((t) => t.id === job.templateId);
+  if (!template) {
+    return;
+  }
+  change(template);
+  if (options.shouldDropTuning) {
+    for (const other of state.jobs) {
+      if (other.templateId === template.id) {
+        delete other.tuning;
+      }
+    }
+  }
+}
+
+function editJob(
+  state: VariantsState,
+  jobId: string,
+  change: (job: Job) => void
+): void {
+  const job = jobOf(state, jobId);
+  if (job) {
+    change(job);
+  }
+}
+
+/** Slice to access templates and jobs. Removing or hiding things here never touches the vault. */
 const variantsSlice = createSlice({
   name: "variants",
   initialState,
   reducers: {
-    /** Replaces everything, e.g. after loading from disk. An empty list becomes one default variant. */
+    /**
+     * Replaces everything with these variants, each split into its own template and job.
+     * An empty list becomes the default template and job.
+     */
     setVariants(state, action: PayloadAction<Variant[]>) {
       if (action.payload.length === 0) {
-        return createInitialState();
+        return { ...createInitialState(), locks: state.locks };
       }
-      state.variants = action.payload;
-      if (!action.payload.some((v) => v.id === state.activeId)) {
-        state.activeId = action.payload[0].id;
+      const pairs = action.payload.map((variant) =>
+        splitVariant(variant, templateIdFor(variant.id))
+      );
+      state.templates = pairs.map((pair) => pair.template);
+      state.jobs = pairs.map((pair) => pair.job);
+      if (!state.jobs.some((j) => j.id === state.activeJobId)) {
+        state.activeJobId = state.jobs[0].id;
       }
     },
 
+    /** Replaces everything, e.g. after loading templates and jobs from disk */
+    setTemplatesAndJobs(
+      state,
+      action: PayloadAction<{ templates: Template[]; jobs: Job[] }>
+    ) {
+      Object.assign(
+        state,
+        normalise(
+          action.payload.templates,
+          action.payload.jobs,
+          state.activeJobId
+        )
+      );
+    },
+
     createVariant: {
-      reducer(state, action: PayloadAction<Variant>) {
-        state.variants.push(action.payload);
-        state.activeId = action.payload.id;
+      reducer(state, action: PayloadAction<{ template: Template; job: Job }>) {
+        state.templates.push(action.payload.template);
+        state.jobs.push(action.payload.job);
+        state.activeJobId = action.payload.job.id;
       },
       prepare(input: {
         vault: Vault;
@@ -82,41 +202,54 @@ const variantsSlice = createSlice({
         name: string;
         id?: string;
       }) {
+        const id = input.id ?? nanoid();
         return {
-          payload: createVariant(
-            input.vault,
-            input.style,
-            input.id ?? nanoid(),
-            input.name
+          payload: splitVariant(
+            createVariant(input.vault, input.style, id, input.name),
+            templateIdFor(id)
           ),
         };
       },
     },
 
-    /** Adds a finished variant (e.g. one made from an AI proposal) and makes it the active one */
+    /** Adds a finished variant (e.g. one made from an AI proposal) as a job with its own new template, and makes it the active one */
     insertVariant(state, action: PayloadAction<Variant>) {
-      state.variants.push(action.payload);
-      state.activeId = action.payload.id;
+      const { template, job } = splitVariant(
+        action.payload,
+        templateIdFor(action.payload.id)
+      );
+      state.templates.push(template);
+      state.jobs.push(job);
+      state.activeJobId = job.id;
     },
 
+    /** A new job on a template of its own (a copy of the source's), so the source is untouched */
     duplicateVariant: {
       reducer(
         state,
         action: PayloadAction<{ sourceId: string; id: string; name?: string }>
       ) {
-        const source = state.variants.find(
-          (v) => v.id === action.payload.sourceId
-        );
-        if (!source) {
+        const draft = jobOf(state, action.payload.sourceId);
+        if (!draft) {
           return;
         }
-        const copy = copyVariant(
-          current(source),
-          action.payload.id,
-          action.payload.name ?? `${source.name} (copy)`
+        const source = current(draft);
+        const name = action.payload.name ?? `${source.name} (copy)`;
+        const template = duplicateTemplate(
+          current(templateOf(state, source)),
+          templateIdFor(action.payload.id),
+          name
         );
-        state.variants.push(copy);
-        state.activeId = copy.id;
+        const copy = {
+          ...duplicateJob(source, action.payload.id, name, {
+            templateId: template.id,
+          }),
+          // a copy keeps the record of the proposal it came from, as variants always did
+          ...(source.tailor ? { tailor: structuredClone(source.tailor) } : {}),
+        };
+        state.templates.push(template);
+        state.jobs.push(copy);
+        state.activeJobId = copy.id;
       },
       prepare(input: { sourceId: string; name?: string; id?: string }) {
         return { payload: { ...input, id: input.id ?? nanoid() } };
@@ -124,27 +257,43 @@ const variantsSlice = createSlice({
     },
 
     renameVariant(state, action: PayloadAction<{ id: string; name: string }>) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (variant) {
-        variant.name = action.payload.name;
-      }
+      editJob(state, action.payload.id, (job) => {
+        job.name = action.payload.name;
+      });
     },
 
-    /** The last variant cannot be deleted, so there is always one to show */
+    /** The last job cannot be deleted, so there is always one to show. Its template goes too when no other job uses it. */
     deleteVariant(state, action: PayloadAction<{ id: string }>) {
-      if (
-        state.variants.length <= 1 ||
-        !state.variants.some((v) => v.id === action.payload.id)
-      ) {
+      const job = jobOf(state, action.payload.id);
+      if (!job || state.jobs.length <= 1) {
         return;
       }
-      state.variants = state.variants.filter((v) => v.id !== action.payload.id);
-      if (state.activeId === action.payload.id) {
-        state.activeId = state.variants[0].id;
+      state.jobs = state.jobs.filter((j) => j.id !== job.id);
+      if (!state.jobs.some((j) => j.templateId === job.templateId)) {
+        state.templates = state.templates.filter(
+          (t) => t.id !== job.templateId
+        );
+      }
+      if (state.activeJobId === job.id) {
+        state.activeJobId = state.jobs[0].id;
       }
     },
 
-    /** The lock state from the applications. An approved unlock is dropped when the variant is no longer locked. */
+    /** Moves a job to another existing template. Its own choices are kept. */
+    setJobTemplate(
+      state,
+      action: PayloadAction<{ jobId: string; templateId: string }>
+    ) {
+      const { jobId, templateId } = action.payload;
+      if (!state.templates.some((t) => t.id === templateId)) {
+        return;
+      }
+      editJob(state, jobId, (job) => {
+        job.templateId = templateId;
+      });
+    },
+
+    /** The lock state from the applications. An approved unlock is dropped when the job is no longer locked. */
     setLocks(state, action: PayloadAction<VariantLocks>) {
       state.locks = action.payload;
       state.unlockedIds = state.unlockedIds.filter((id) =>
@@ -152,7 +301,7 @@ const variantsSlice = createSlice({
       );
     },
 
-    /** The user approved editing a locked variant (the sent copy is not changed) */
+    /** The user approved editing a locked job (the sent copy is not changed) */
     unlockVariant(state, action: PayloadAction<{ id: string }>) {
       if (!state.unlockedIds.includes(action.payload.id)) {
         state.unlockedIds.push(action.payload.id);
@@ -167,11 +316,12 @@ const variantsSlice = createSlice({
     },
 
     setActiveVariant(state, action: PayloadAction<{ id: string }>) {
-      if (state.variants.some((v) => v.id === action.payload.id)) {
-        state.activeId = action.payload.id;
+      if (state.jobs.some((j) => j.id === action.payload.id)) {
+        state.activeJobId = action.payload.id;
       }
     },
 
+    /** What one item shows in a job. `variantId` is the job's id. */
     setItemSelection(
       state,
       action: PayloadAction<{
@@ -180,14 +330,13 @@ const variantsSlice = createSlice({
         change: Partial<ItemSelection>;
       }>
     ) {
-      const index = state.variants.findIndex(
-        (v) => v.id === action.payload.variantId
-      );
+      const { variantId, itemId, change } = action.payload;
+      const index = state.jobs.findIndex((j) => j.id === variantId);
       if (index >= 0) {
-        state.variants[index] = changeItemSelection(
-          current(state.variants[index]),
-          action.payload.itemId,
-          action.payload.change
+        state.jobs[index] = changeItemSelection(
+          state.jobs[index],
+          itemId,
+          change
         );
       }
     },
@@ -202,10 +351,10 @@ const variantsSlice = createSlice({
       }>
     ) {
       const { variantId, itemId, bulletId, change } = action.payload;
-      const index = state.variants.findIndex((v) => v.id === variantId);
+      const index = state.jobs.findIndex((j) => j.id === variantId);
       if (index >= 0) {
-        state.variants[index] = updateBulletSelection(
-          current(state.variants[index]),
+        state.jobs[index] = updateBulletSelection(
+          state.jobs[index],
           itemId,
           bulletId,
           change
@@ -221,17 +370,17 @@ const variantsSlice = createSlice({
         orders: Record<string, number>;
       }>
     ) {
-      const index = state.variants.findIndex(
-        (v) => v.id === action.payload.variantId
+      const index = state.jobs.findIndex(
+        (j) => j.id === action.payload.variantId
       );
       if (index < 0) {
         return;
       }
-      let variant = current(state.variants[index]);
+      let job = state.jobs[index];
       for (const [itemId, order] of Object.entries(action.payload.orders)) {
-        variant = changeItemSelection(variant, itemId, { order });
+        job = changeItemSelection(job, itemId, { order });
       }
-      state.variants[index] = variant;
+      state.jobs[index] = job;
     },
 
     /** Sets the position of several bullets of one item at once, see `computeBulletOrders` */
@@ -244,25 +393,24 @@ const variantsSlice = createSlice({
       }>
     ) {
       const { variantId, itemId, orders } = action.payload;
-      const index = state.variants.findIndex((v) => v.id === variantId);
+      const index = state.jobs.findIndex((j) => j.id === variantId);
       if (index < 0) {
         return;
       }
-      let variant = current(state.variants[index]);
+      let job = state.jobs[index];
       for (const [bulletId, order] of Object.entries(orders)) {
-        variant = updateBulletSelection(variant, itemId, bulletId, { order });
+        job = updateBulletSelection(job, itemId, bulletId, { order });
       }
-      state.variants[index] = variant;
+      state.jobs[index] = job;
     },
 
     setTone(state, action: PayloadAction<{ id: string; tone: Tone }>) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (variant) {
-        variant.tone = action.payload.tone;
-      }
+      editJob(state, action.payload.id, (job) => {
+        job.tone = action.payload.tone;
+      });
     },
 
-    /** How skills are shown in a variant: level style, columns, minimum level */
+    /** How skills are shown with the job's template: level style, columns, minimum level */
     setSkillStyle(
       state,
       action: PayloadAction<{
@@ -273,38 +421,35 @@ const variantsSlice = createSlice({
         groupBy?: SkillGroupBy;
       }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (!variant) {
-        return;
-      }
       const { display, columns, minLevel, groupBy } = action.payload;
-      if (groupBy !== undefined) {
-        variant.skillGroupBy = groupBy;
-      }
-      if (display !== undefined) {
-        variant.skillDisplay = display;
-      }
-      if (columns !== undefined) {
-        variant.skillColumns = columns;
-      }
-      if (minLevel !== undefined) {
-        const level = Math.round(minLevel);
-        if (level <= 0) {
-          delete variant.skillMinLevel;
-        } else {
-          variant.skillMinLevel = Math.min(level, 5);
+      editTemplate(state, action.payload.id, (template) => {
+        if (groupBy !== undefined) {
+          template.skillGroupBy = groupBy;
         }
-      }
+        if (display !== undefined) {
+          template.skillDisplay = display;
+        }
+        if (columns !== undefined) {
+          template.skillColumns = columns;
+        }
+        if (minLevel !== undefined) {
+          const level = Math.round(minLevel);
+          if (level <= 0) {
+            delete template.skillMinLevel;
+          } else {
+            template.skillMinLevel = Math.min(level, 5);
+          }
+        }
+      });
     },
 
     setPageLimit(
       state,
       action: PayloadAction<{ id: string; pageLimit: number }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (variant) {
-        variant.pageLimit = action.payload.pageLimit;
-      }
+      editTemplate(state, action.payload.id, (template) => {
+        template.pageLimit = action.payload.pageLimit;
+      });
     },
 
     setAutoFit(
@@ -315,75 +460,86 @@ const variantsSlice = createSlice({
         fitMode?: FitMode;
       }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (!variant) {
-        return;
-      }
-      variant.isAutoFit = action.payload.isAutoFit;
-      if (action.payload.fitMode) {
-        variant.fitMode = action.payload.fitMode;
-      }
-      if (!action.payload.isAutoFit) {
-        delete variant.tuning;
-      }
+      editTemplate(
+        state,
+        action.payload.id,
+        (template) => {
+          template.isAutoFit = action.payload.isAutoFit;
+          if (action.payload.fitMode) {
+            template.fitMode = action.payload.fitMode;
+          }
+        },
+        { shouldDropTuning: !action.payload.isAutoFit }
+      );
     },
 
     setFitLimits(
       state,
       action: PayloadAction<{ id: string; limits: FitLimitsValue }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (variant) {
-        variant.fitLimits = clampFitLimits(action.payload.limits);
+      editTemplate(
+        state,
+        action.payload.id,
+        (template) => {
+          template.fitLimits = clampFitLimits(action.payload.limits);
+        },
         // The old result no longer follows the limits
-        delete variant.tuning;
-      }
+        { shouldDropTuning: true }
+      );
     },
 
-    /** Stores the result of an auto-fit run (null clears it) */
+    /** Stores the result of an auto-fit run in the job (null clears it) */
     setTuning(
       state,
       action: PayloadAction<{ id: string; tuning: FitTuning | null }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (!variant) {
-        return;
-      }
-      if (action.payload.tuning) {
-        variant.tuning = action.payload.tuning;
-      } else {
-        delete variant.tuning;
-      }
+      editJob(state, action.payload.id, (job) => {
+        if (action.payload.tuning) {
+          job.tuning = action.payload.tuning;
+        } else {
+          delete job.tuning;
+        }
+      });
     },
 
-    /** Stores the page layout and style the editor currently shows into the variant */
+    /** Stores the page layout and style the editor currently shows into the job's template */
     setVariantAppearance(
       state,
       action: PayloadAction<{ id: string; layout: VariantLayout; style: Style }>
     ) {
-      const variant = state.variants.find((v) => v.id === action.payload.id);
-      if (variant) {
-        variant.layout = action.payload.layout;
-        variant.style = action.payload.style;
-      }
+      editTemplate(state, action.payload.id, (template) => {
+        template.layout = action.payload.layout;
+        template.style = action.payload.style;
+      });
     },
   },
 });
 
-/** Whether the variant is locked by its applications, whatever was approved */
+/** Whether the job is locked by its applications, whatever was approved */
 function isLockedIn(state: Pick<VariantsState, "locks">, id: string): boolean {
   return (
     state.locks.hasUnreadable || (state.locks.byVariant[id]?.length ?? 0) > 0
   );
 }
 
-/** Whether the variant cannot be changed right now: locked, and no unlock approved */
+/** Whether the job cannot be changed right now: locked, and no unlock approved */
 export function isVariantReadOnly(state: VariantsState, id: string): boolean {
   return isLockedIn(state, id) && !state.unlockedIds.includes(id);
 }
 
+/** Whether a template cannot be changed right now: a job on it is read-only, so its look is frozen too */
+export function isTemplateReadOnly(
+  state: VariantsState,
+  templateId: string
+): boolean {
+  return state.jobs.some(
+    (job) => job.templateId === templateId && isVariantReadOnly(state, job.id)
+  );
+}
+
 const LOCK_ACTIONS: string[] = [
   "variants/setVariants",
+  "variants/setTemplatesAndJobs",
   "variants/setLocks",
   "variants/unlockVariant",
   "variants/relockVariants",
@@ -391,9 +547,9 @@ const LOCK_ACTIONS: string[] = [
 ];
 
 /**
- * The slice reducer, plus the lock: whatever an action did to a read-only variant (edit,
- * rename, delete) is undone here, so no screen, shortcut or write-back can change a variant
- * that was sent. Loading (`setVariants`) and the lock actions themselves pass through.
+ * The slice reducer, plus the lock: whatever an action did to a read-only job (edit,
+ * rename, delete) or to a template such a job uses is undone here, so no screen, shortcut
+ * or write-back can change a CV that was sent. Loading and the lock actions pass through.
  */
 export function variantsReducer(
   state: VariantsState | undefined,
@@ -403,33 +559,48 @@ export function variantsReducer(
   if (!state || next === state || LOCK_ACTIONS.includes(action.type)) {
     return next;
   }
-  const readOnly = state.variants.filter((v) => isVariantReadOnly(state, v.id));
-  if (readOnly.length === 0) {
+  const readOnlyJobs = state.jobs.filter((j) => isVariantReadOnly(state, j.id));
+  if (readOnlyJobs.length === 0) {
     return next;
   }
-  let variants = next.variants;
-  for (const before of readOnly) {
-    const index = variants.findIndex((v) => v.id === before.id);
+  let jobs = next.jobs;
+  for (const before of readOnlyJobs) {
+    const index = jobs.findIndex((j) => j.id === before.id);
     if (index === -1) {
-      variants = [
-        ...variants.slice(0, state.variants.indexOf(before)),
-        before,
-        ...variants.slice(state.variants.indexOf(before)),
-      ];
-    } else if (variants[index] !== before) {
-      variants = variants.map((v, i) => (i === index ? before : v));
+      const at = state.jobs.indexOf(before);
+      jobs = [...jobs.slice(0, at), before, ...jobs.slice(at)];
+    } else if (jobs[index] !== before) {
+      jobs = jobs.map((j, i) => (i === index ? before : j));
     }
   }
-  const activeId = variants.some((v) => v.id === next.activeId)
-    ? next.activeId
-    : state.activeId;
-  return variants === next.variants && activeId === next.activeId
+  let templates = next.templates;
+  const frozenIds = new Set(readOnlyJobs.map((j) => j.templateId));
+  for (const id of frozenIds) {
+    const before = state.templates.find((t) => t.id === id);
+    if (!before) {
+      continue;
+    }
+    const index = templates.findIndex((t) => t.id === id);
+    if (index === -1) {
+      const at = state.templates.indexOf(before);
+      templates = [...templates.slice(0, at), before, ...templates.slice(at)];
+    } else if (templates[index] !== before) {
+      templates = templates.map((t, i) => (i === index ? before : t));
+    }
+  }
+  const activeJobId = jobs.some((j) => j.id === next.activeJobId)
+    ? next.activeJobId
+    : state.activeJobId;
+  return jobs === next.jobs &&
+    templates === next.templates &&
+    activeJobId === next.activeJobId
     ? next
-    : { ...next, variants, activeId };
+    : { ...next, jobs, templates, activeJobId };
 }
 
 export const {
   setVariants,
+  setTemplatesAndJobs,
   setLocks,
   unlockVariant,
   relockVariants,
@@ -438,6 +609,7 @@ export const {
   duplicateVariant,
   renameVariant,
   deleteVariant,
+  setJobTemplate,
   setActiveVariant,
   setItemSelection,
   setBulletSelection,
@@ -452,24 +624,86 @@ export const {
   setTuning,
 } = variantsSlice.actions;
 
-/** The active variant is locked (sent) and no unlock was approved */
+/** The active job is locked (sent) and no unlock was approved */
 export function isActiveVariantReadOnlySelector(state: {
   variants: VariantsState;
 }): boolean {
-  return isVariantReadOnly(state.variants, state.variants.activeId);
+  return isVariantReadOnly(state.variants, state.variants.activeJobId);
 }
 
-export function variantsSelector(state: {
+/** The active job or its template is frozen by a sent job: look and content cannot be edited */
+export function isActiveAppearanceReadOnlySelector(state: {
   variants: VariantsState;
-}): Variant[] {
-  return state.variants.variants;
-}
-
-export function activeVariantSelector(state: {
-  variants: VariantsState;
-}): Variant {
+}): boolean {
+  const job = activeJobSelector(state);
   return (
-    state.variants.variants.find((v) => v.id === state.variants.activeId) ??
-    state.variants.variants[0]
+    isVariantReadOnly(state.variants, job.id) ||
+    isTemplateReadOnly(state.variants, job.templateId)
   );
 }
+
+/** `resolveVariant` that returns the same object for the same template and job objects */
+const resolvedCache = new WeakMap<Template, WeakMap<Job, Variant>>();
+
+export function resolveCached(template: Template, job: Job): Variant {
+  let byJob = resolvedCache.get(template);
+  if (!byJob) {
+    byJob = new WeakMap();
+    resolvedCache.set(template, byJob);
+  }
+  let variant = byJob.get(job);
+  if (!variant) {
+    variant = resolveVariant(template, job);
+    byJob.set(job, variant);
+  }
+  return variant;
+}
+
+type SliceRoot = { variants: VariantsState };
+
+export function activeJobSelector(state: SliceRoot): Job {
+  const { jobs, activeJobId } = state.variants;
+  return jobs.find((j) => j.id === activeJobId) ?? jobs[0];
+}
+
+/** The template of the active job */
+export function activeTemplateSelector(state: SliceRoot): Template {
+  const { templates } = state.variants;
+  const job = activeJobSelector(state);
+  return templates.find((t) => t.id === job.templateId) ?? templates[0];
+}
+
+export function templatesSelector(state: SliceRoot): Template[] {
+  return state.variants.templates;
+}
+
+export function jobsSelector(state: SliceRoot): Job[] {
+  return state.variants.jobs;
+}
+
+/**
+ * Every job drawn with its template, as the variant the rest of the app uses. Memoised:
+ * the same array while templates and jobs are the same objects.
+ */
+export const variantsSelector: (state: SliceRoot) => Variant[] = createSelector(
+  [templatesSelector, jobsSelector],
+  (templates, jobs) =>
+    jobs.map((job) =>
+      resolveCached(
+        templates.find((t) => t.id === job.templateId) ?? templates[0],
+        job
+      )
+    )
+);
+
+/**
+ * The active variant = `resolveVariant(template of the active job, active job)`. Memoised:
+ * the same object until the job or its template changes (editing another job keeps it).
+ */
+export const activeVariantSelector: (state: SliceRoot) => Variant =
+  createSelector([activeTemplateSelector, activeJobSelector], (template, job) =>
+    resolveCached(template, job)
+  );
+
+/** Alias with the name the issue uses */
+export const selectActiveVariant = activeVariantSelector;

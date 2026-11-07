@@ -9,7 +9,11 @@ import {
 import { CvFileSchema } from "@custom-types/vault-types";
 import { JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
 import { TemplateSchema } from "@custom-types/template-types";
-import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
+import {
+  VARIANT_ID_PATTERN,
+  Variant,
+  VariantSchema,
+} from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
@@ -595,6 +599,20 @@ export function buildServer({
     return { status: "deleted" };
   });
 
+  // The variant of an application: a job drawn with its template (a job id is the variant id
+  // the page sends), or an older variant file that has no job
+  async function loadVariantOrJob(id: string): Promise<Variant> {
+    try {
+      const job = await storage.loadJob(id);
+      return resolveVariant(await storage.loadTemplate(job.templateId), job);
+    } catch (error) {
+      if (error instanceof StorageError && error.code === "not_found") {
+        return storage.loadVariant(id);
+      }
+      throw error;
+    }
+  }
+
   app.get("/api/applications", () => storage.listApplications());
 
   app.get<{ Params: { id: string } }>("/api/applications/:id", (request) =>
@@ -627,7 +645,7 @@ export function buildServer({
     }
     const input = NewApplicationSchema.check(request.body);
     const { vault } = await storage.loadVault();
-    const variant = await storage.loadVariant(input.variantId);
+    const variant = await loadVariantOrJob(input.variantId);
     const application = createApplication(
       input,
       vault,

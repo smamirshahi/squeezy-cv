@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Variant } from "@custom-types/variant-types";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { render } from "@shared/variant/render";
 import { initialState as cvDataState } from "@store/cv-data/cv-data-slice";
@@ -22,7 +23,13 @@ import {
   setVariantAppearance,
   setVariants,
   variantsReducer,
+  variantsSelector,
 } from "@store/variants/variants-slice";
+
+/** The variants (job drawn with its template) of a slice state */
+function all(state: VariantsState): Variant[] {
+  return variantsSelector({ variants: state });
+}
 
 const vault = createDefaultVault();
 const style = cvDataState.style;
@@ -36,8 +43,8 @@ function withTwo(): VariantsState {
 
 describe("variants slice", () => {
   it("starts with one default variant that is active", () => {
-    expect(initialState.variants).toHaveLength(1);
-    expect(initialState.activeId).toBe(initialState.variants[0].id);
+    expect(all(initialState)).toHaveLength(1);
+    expect(initialState.activeJobId).toBe(all(initialState)[0].id);
   });
 
   it("creates a variant, makes it active and gives it its own id", () => {
@@ -46,10 +53,10 @@ describe("variants slice", () => {
       addVariant({ vault, style, name: "Acme" })
     );
 
-    expect(state.variants).toHaveLength(2);
-    expect(state.variants[1].name).toBe("Acme");
-    expect(state.variants[1].id).not.toBe(state.variants[0].id);
-    expect(state.activeId).toBe(state.variants[1].id);
+    expect(all(state)).toHaveLength(2);
+    expect(all(state)[1].name).toBe("Acme");
+    expect(all(state)[1].id).not.toBe(all(state)[0].id);
+    expect(state.activeJobId).toBe(all(state)[1].id);
   });
 
   it("duplicates with new id and a default name, same render, independent data", () => {
@@ -57,13 +64,13 @@ describe("variants slice", () => {
       withTwo(),
       duplicateVariant({ sourceId: "second" })
     );
-    const [, original, copy] = state.variants;
+    const [, original, copy] = all(state);
 
     expect(copy.id).not.toBe(original.id);
     expect(copy.name).toBe("Second (copy)");
     expect(render(vault, copy)).toEqual(render(vault, original));
     expect(copy.selection).not.toBe(original.selection);
-    expect(state.activeId).toBe(copy.id);
+    expect(state.activeJobId).toBe(copy.id);
   });
 
   it("ignores duplicating an unknown variant", () => {
@@ -71,7 +78,7 @@ describe("variants slice", () => {
       initialState,
       duplicateVariant({ sourceId: "nope" })
     );
-    expect(state.variants).toHaveLength(1);
+    expect(all(state)).toHaveLength(1);
   });
 
   it("renames a variant", () => {
@@ -79,33 +86,31 @@ describe("variants slice", () => {
       withTwo(),
       renameVariant({ id: "second", name: "Renamed" })
     );
-    expect(state.variants[1].name).toBe("Renamed");
+    expect(all(state)[1].name).toBe("Renamed");
   });
 
   it("deletes a variant and moves the active one", () => {
     const state = variantsReducer(withTwo(), deleteVariant({ id: "second" }));
-    expect(state.variants.map((v) => v.id)).toEqual([
-      initialState.variants[0].id,
-    ]);
-    expect(state.activeId).toBe(initialState.variants[0].id);
+    expect(all(state).map((v) => v.id)).toEqual([all(initialState)[0].id]);
+    expect(state.activeJobId).toBe(all(initialState)[0].id);
   });
 
   it("never deletes the last variant", () => {
     const state = variantsReducer(
       initialState,
-      deleteVariant({ id: initialState.variants[0].id })
+      deleteVariant({ id: all(initialState)[0].id })
     );
-    expect(state.variants).toHaveLength(1);
+    expect(all(state)).toHaveLength(1);
   });
 
   it("only activates variants that exist", () => {
     const state = withTwo();
-    const other = initialState.variants[0].id;
+    const other = all(initialState)[0].id;
     expect(
-      variantsReducer(state, setActiveVariant({ id: other })).activeId
+      variantsReducer(state, setActiveVariant({ id: other })).activeJobId
     ).toBe(other);
     expect(
-      variantsReducer(state, setActiveVariant({ id: "nope" })).activeId
+      variantsReducer(state, setActiveVariant({ id: "nope" })).activeJobId
     ).toBe("second");
   });
 
@@ -118,18 +123,18 @@ describe("variants slice", () => {
         change: { isVisible: false },
       })
     );
-    expect(state.variants[1].selection["item-1"]).toEqual({ isVisible: false });
-    expect(state.variants[0].selection["item-1"]).toBeUndefined();
+    expect(all(state)[1].selection["item-1"]).toEqual({ isVisible: false });
+    expect(all(state)[0].selection["item-1"]).toBeUndefined();
   });
 
   it("replaces all variants and keeps the active one valid", () => {
-    const loaded = withTwo().variants;
+    const loaded = all(withTwo());
     const state = variantsReducer(
-      { ...initialState, activeId: "gone" },
+      { ...initialState, activeJobId: "gone" },
       setVariants(loaded)
     );
-    expect(state.activeId).toBe(loaded[0].id);
-    expect(variantsReducer(state, setVariants([])).variants).toHaveLength(1);
+    expect(state.activeJobId).toBe(loaded[0].id);
+    expect(all(variantsReducer(state, setVariants([])))).toHaveLength(1);
   });
 
   it("selects the active variant", () => {
@@ -149,8 +154,8 @@ describe("variants slice: bullets, order and appearance", () => {
         change: { isVisible: false },
       })
     );
-    expect(state.variants[1].selection.i.bullets?.b.isVisible).toBe(false);
-    expect(state.variants[0].selection.i).toBeUndefined();
+    expect(all(state)[1].selection.i.bullets?.b.isVisible).toBe(false);
+    expect(all(state)[0].selection.i).toBeUndefined();
   });
 
   it("sets several item orders at once", () => {
@@ -158,9 +163,9 @@ describe("variants slice: bullets, order and appearance", () => {
       withTwo(),
       setItemOrders({ variantId: "second", orders: { a: 1, b: 0 } })
     );
-    expect(state.variants[1].selection.a.order).toBe(1);
-    expect(state.variants[1].selection.b.order).toBe(0);
-    expect(state.variants[1].selection.a.isVisible).toBe(true);
+    expect(all(state)[1].selection.a.order).toBe(1);
+    expect(all(state)[1].selection.b.order).toBe(0);
+    expect(all(state)[1].selection.a.isVisible).toBe(true);
   });
 
   it("stores layout and style in the variant", () => {
@@ -173,9 +178,9 @@ describe("variants slice: bullets, order and appearance", () => {
         style: { ...style, paperMargin: "narrow" },
       })
     );
-    expect(state.variants[1].layout).toEqual(layout);
-    expect(state.variants[1].style.paperMargin).toBe("narrow");
-    expect(state.variants[0].layout).not.toEqual(layout);
+    expect(all(state)[1].layout).toEqual(layout);
+    expect(all(state)[1].style.paperMargin).toBe("narrow");
+    expect(all(state)[0].layout).not.toEqual(layout);
   });
 });
 
@@ -189,10 +194,10 @@ describe("variants slice: bullet order", () => {
         orders: { a: 1, b: 0 },
       })
     );
-    const bullets = state.variants[1].selection.i.bullets;
+    const bullets = all(state)[1].selection.i.bullets;
     expect(bullets?.a).toEqual({ isVisible: true, order: 1 });
     expect(bullets?.b).toEqual({ isVisible: true, order: 0 });
-    expect(state.variants[0].selection.i).toBeUndefined();
+    expect(all(state)[0].selection.i).toBeUndefined();
   });
 });
 
@@ -218,8 +223,8 @@ describe("variant lock", () => {
       setPageLimit({ id: "second", pageLimit: 99 })
     );
     state = variantsReducer(state, deleteVariant({ id: "second" }));
-    expect(state.variants.map((v) => v.name)).toEqual(["Default", "Second"]);
-    expect(state.variants[1].pageLimit).toBe(withTwo().variants[1].pageLimit);
+    expect(all(state).map((v) => v.name)).toEqual(["Default", "Second"]);
+    expect(all(state)[1].pageLimit).toBe(all(withTwo())[1].pageLimit);
   });
 
   it("still lets other variants change", () => {
@@ -227,7 +232,7 @@ describe("variant lock", () => {
       locked(),
       renameVariant({ id: "default", name: "Main" })
     );
-    expect(state.variants[0].name).toBe("Main");
+    expect(all(state)[0].name).toBe("Main");
   });
 
   it("allows edits after an approved unlock, and locks again", () => {
@@ -236,10 +241,10 @@ describe("variant lock", () => {
       state,
       renameVariant({ id: "second", name: "New" })
     );
-    expect(state.variants[1].name).toBe("New");
+    expect(all(state)[1].name).toBe("New");
     state = variantsReducer(state, relockVariants({ ids: ["second"] }));
     state = variantsReducer(state, renameVariant({ id: "second", name: "Z" }));
-    expect(state.variants[1].name).toBe("New");
+    expect(all(state)[1].name).toBe("New");
   });
 
   it("drops an approval when the variant stops being locked", () => {
@@ -257,8 +262,9 @@ describe("variant lock", () => {
       setLocks({ byVariant: {}, hasUnreadable: true })
     );
     expect(
-      variantsReducer(state, renameVariant({ id: "default", name: "X" }))
-        .variants[0].name
+      all(
+        variantsReducer(state, renameVariant({ id: "default", name: "X" }))
+      )[0].name
     ).toBe("Default");
   });
 
@@ -267,12 +273,8 @@ describe("variant lock", () => {
       locked(),
       duplicateVariant({ sourceId: "second", id: "copy" })
     );
-    expect(state.variants.map((v) => v.id)).toEqual([
-      "default",
-      "second",
-      "copy",
-    ]);
-    state = variantsReducer(state, setVariants([state.variants[2]]));
-    expect(state.variants).toHaveLength(1);
+    expect(all(state).map((v) => v.id)).toEqual(["default", "second", "copy"]);
+    state = variantsReducer(state, setVariants([all(state)[2]]));
+    expect(all(state)).toHaveLength(1);
   });
 });

@@ -19,7 +19,7 @@ import {
 } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { setVariants } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/variants/variants-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
@@ -198,7 +198,7 @@ describe("EditorExperience", () => {
 
     // visibility belongs to the active variant; the vault item is untouched
     expect(
-      store.getState().variants.variants[0].selection["exp-3"]?.isVisible
+      variantsSelector(store.getState())[0].selection["exp-3"]?.isVisible
     ).toBe(true);
     expect(storedSection(store, "experience").items[2].shouldShow).toBe(false);
     expect(input("Company").value).toBe("Edited Co");
@@ -210,7 +210,7 @@ describe("EditorExperience", () => {
     const items = storedSection(store, "experience").items;
     expect(items[0].fields.company).toBe("Edited Co");
     expect(
-      store.getState().variants.variants[0].selection["exp-3"]?.isVisible
+      variantsSelector(store.getState())[0].selection["exp-3"]?.isVisible
     ).toBe(true);
   });
 

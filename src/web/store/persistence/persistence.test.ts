@@ -29,6 +29,7 @@ import {
   addVariant,
   deleteVariant,
   setItemSelection,
+  variantsSelector,
 } from "@store/variants/variants-slice";
 import { updateProfile } from "@store/vault/vault-slice";
 
@@ -65,24 +66,30 @@ function newStore(): AppStore {
 const file = migrateCvFile(sample);
 
 describe("planSave / isDirty", () => {
-  const current = toSavedState(file.vault, file.metaData, file.style, []);
+  const current = toSavedState(file.vault, file.metaData, file.style, [], []);
 
   it("plans everything when nothing is saved yet", () => {
     expect(planSave(null, current).shouldSaveVault).toBe(true);
     expect(isDirty(null, current)).toBe(true);
   });
 
-  it("is clean when equal, and lists changed, new and removed variants", () => {
-    const saved = { vault: current.vault, variants: { a: "1", b: "2" } };
-    expect(isDirty(saved, { ...current, variants: { a: "1", b: "2" } })).toBe(
+  it("is clean when equal, and lists changed, new and removed jobs", () => {
+    const saved = {
+      vault: current.vault,
+      templates: {},
+      jobs: { a: "1", b: "2" },
+    };
+    expect(isDirty(saved, { ...current, jobs: { a: "1", b: "2" } })).toBe(
       false
     );
     expect(
-      planSave(saved, { ...current, variants: { a: "changed", c: "3" } })
+      planSave(saved, { ...current, jobs: { a: "changed", c: "3" } })
     ).toEqual({
       shouldSaveVault: false,
-      variantsToSave: ["a", "c"],
-      variantsToDelete: ["b"],
+      templatesToSave: [],
+      templatesToDelete: [],
+      jobsToSave: ["a", "c"],
+      jobsToDelete: ["b"],
     });
   });
 });
@@ -148,7 +155,7 @@ describe("load and save through the server", () => {
     const state = second.getState();
     expect(state.persistence.status).toBe("ready");
     expect(state.vault.profile.fullName).toBe("Changed Name");
-    const acme = state.variants.variants.find((v) => v.id === "acme");
+    const acme = variantsSelector(state).find((v) => v.id === "acme");
     expect(acme?.selection["exp-1"]?.isVisible).toBe(false);
     // loaded state is clean: nothing to save
     expect(
@@ -158,7 +165,8 @@ describe("load and save through the server", () => {
           state.vault,
           state.cvData.metaData,
           state.cvData.style,
-          state.variants.variants
+          state.variants.templates,
+          state.variants.jobs
         )
       )
     ).toBe(false);
@@ -179,11 +187,11 @@ describe("load and save through the server", () => {
       })
     );
     await saveToServer(api, store.dispatch, store.getState);
-    expect((await api.listVariants()).map((v) => v.id)).toContain("extra");
+    expect((await api.listJobs()).map((v) => v.id)).toContain("extra");
 
     store.dispatch(deleteVariant({ id: "extra" }));
     await saveToServer(api, store.dispatch, store.getState);
-    expect((await api.listVariants()).map((v) => v.id)).not.toContain("extra");
+    expect((await api.listJobs()).map((v) => v.id)).not.toContain("extra");
   });
 
   it("blocks saving and does not overwrite when the saved vault cannot be read", async () => {
@@ -205,12 +213,12 @@ describe("load and save through the server", () => {
     );
   });
 
-  it("blocks saving when a saved variant cannot be read", async () => {
+  it("blocks saving when a saved job cannot be read", async () => {
     const api = clientFor(app);
     await api.saveVault(file);
     const { writeFile, mkdir } = await import("node:fs/promises");
-    await mkdir(path.join(dir, "variants"), { recursive: true });
-    await writeFile(path.join(dir, "variants", "bad.json"), "{{{");
+    await mkdir(path.join(dir, "jobs"), { recursive: true });
+    await writeFile(path.join(dir, "jobs", "bad.json"), "{{{");
 
     const store = newStore();
     await loadFromServer(api, store.dispatch, store.getState);
@@ -262,9 +270,9 @@ describe("load and save through the server", () => {
   it("loads an imported file as one default variant", () => {
     const store = newStore();
     loadCvFileIntoStore(store.dispatch, file);
-    expect(store.getState().variants.variants).toHaveLength(1);
-    expect(store.getState().variants.activeId).toBe(
-      store.getState().variants.variants[0].id
+    expect(variantsSelector(store.getState())).toHaveLength(1);
+    expect(store.getState().variants.activeJobId).toBe(
+      variantsSelector(store.getState())[0].id
     );
   });
 });

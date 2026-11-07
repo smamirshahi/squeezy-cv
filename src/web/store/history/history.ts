@@ -1,14 +1,16 @@
 import { Reducer, UnknownAction, createAction } from "@reduxjs/toolkit";
-import { Variant } from "@custom-types/variant-types";
+import { Job } from "@custom-types/job-types";
+import { Template } from "@custom-types/template-types";
 import { Vault } from "@custom-types/vault-types";
 import { PageStructure } from "@store/app/app-slice-types";
 import { Style } from "@custom-types/styles-types";
 
-/** What an undo step restores: the CV's facts and every variant (the things the user edits and saves) */
+/** What an undo step restores: the CV's facts, every template and every job (the things the user edits and saves) */
 export interface Snapshot {
   vault: Vault;
-  variants: Variant[];
-  activeId: string;
+  templates: Template[];
+  jobs: Job[];
+  activeJobId: string;
 
   /** The action that made the change, and when: edits of the same kind in quick succession are one step */
   type: string;
@@ -54,7 +56,7 @@ export function historyReducer(
 /** The slices `withUndo` looks at */
 interface Undoable {
   vault: Vault;
-  variants: { variants: Variant[]; activeId: string };
+  variants: { templates: Template[]; jobs: Job[]; activeJobId: string };
   app: { structure: PageStructure };
   cvData: { style: Style };
   history: HistoryState;
@@ -63,35 +65,40 @@ interface Undoable {
 function snapshotOf(state: Undoable, type: string, at: number): Snapshot {
   return {
     vault: state.vault,
-    variants: state.variants.variants,
-    activeId: state.variants.activeId,
+    templates: state.variants.templates,
+    jobs: state.variants.jobs,
+    activeJobId: state.variants.activeJobId,
     type,
     at,
   };
 }
 
-/** The state with a snapshot put back. The editor's mirror of the active variant (layout, style) follows. */
+/** The state with a snapshot put back. The editor's mirror of the active job's template (layout, style) follows. */
 function restore<S extends Undoable>(state: S, snapshot: Snapshot): S {
   const active =
-    snapshot.variants.find((v) => v.id === snapshot.activeId) ??
-    snapshot.variants.find((v) => v.id === state.variants.activeId) ??
-    snapshot.variants[0];
+    snapshot.jobs.find((j) => j.id === snapshot.activeJobId) ??
+    snapshot.jobs.find((j) => j.id === state.variants.activeJobId) ??
+    snapshot.jobs[0];
+  const template =
+    snapshot.templates.find((t) => t.id === active.templateId) ??
+    snapshot.templates[0];
   return {
     ...state,
     vault: snapshot.vault,
     variants: {
       ...state.variants,
-      variants: snapshot.variants,
-      activeId: active.id,
+      templates: snapshot.templates,
+      jobs: snapshot.jobs,
+      activeJobId: active.id,
     },
-    app: { ...state.app, structure: active.layout },
-    cvData: { ...state.cvData, style: active.style },
+    app: { ...state.app, structure: template.layout },
+    cvData: { ...state.cvData, style: template.style },
   };
 }
 
 /**
  * Undo and redo for everything that changes the vault or a variant, manual edits and chat
- * operations alike. A change is any action after which `vault` or the list of variants is a
+ * operations alike. A change is any action after which `vault`, the templates or the jobs are a
  * different object; locks, saving and UI state are not steps. Typing is coalesced.
  */
 export function withUndo<S extends Undoable>(
@@ -155,7 +162,8 @@ export function withUndo<S extends Undoable>(
 
     const isEdit =
       next.vault !== state.vault ||
-      next.variants.variants !== state.variants.variants;
+      next.variants.templates !== state.variants.templates ||
+      next.variants.jobs !== state.variants.jobs;
     if (!isEdit) {
       return next;
     }

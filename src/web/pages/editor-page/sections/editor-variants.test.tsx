@@ -8,7 +8,7 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { setVault } from "@store/vault/vault-slice";
-import { setVariants } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
@@ -50,15 +50,16 @@ describe("EditorVariants", () => {
     show(store);
 
     fireEvent.click(screen.getByRole("button", { name: "New" }));
-    expect(store.getState().variants.variants).toHaveLength(2);
+    expect(variantsSelector(store.getState())).toHaveLength(2);
 
     fireEvent.change(screen.getByLabelText("Variant name"), {
       target: { value: "Acme" },
     });
-    expect(store.getState().variants.variants[1].name).toBe("Acme");
+    expect(variantsSelector(store.getState())[1].name).toBe("Acme");
 
     fireEvent.click(screen.getByRole("button", { name: "Duplicate" }));
-    const { variants, activeId } = store.getState().variants;
+    const variants = variantsSelector(store.getState());
+    const activeId = store.getState().variants.activeJobId;
     expect(variants).toHaveLength(3);
     expect(variants[2].name).toBe("Acme (copy)");
     expect(activeId).toBe(variants[2].id);
@@ -73,11 +74,11 @@ describe("EditorVariants", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "New" }));
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(store.getState().variants.variants).toHaveLength(2);
+    expect(variantsSelector(store.getState())).toHaveLength(2);
 
     fireEvent.click(screen.getAllByRole("button", { name: "Delete" }).pop()!);
-    expect(store.getState().variants.variants).toHaveLength(1);
-    expect(store.getState().variants.activeId).toBe("v1");
+    expect(variantsSelector(store.getState())).toHaveLength(1);
+    expect(store.getState().variants.activeJobId).toBe("v1");
   });
 
   it("hides an item in the active variant only, without touching the vault", () => {
@@ -88,7 +89,7 @@ describe("EditorVariants", () => {
 
     fireEvent.click(boxes[0]);
 
-    const selection = store.getState().variants.variants[0].selection;
+    const selection = variantsSelector(store.getState())[0].selection;
     expect(Object.values(selection).some((s) => s.isVisible === false)).toBe(
       true
     );
@@ -103,7 +104,7 @@ describe("EditorVariants", () => {
     act(() => {
       store.dispatch(updatePageStructure(custom));
     });
-    expect(store.getState().variants.variants[0].layout).toEqual(custom);
+    expect(variantsSelector(store.getState())[0].layout).toEqual(custom);
 
     fireEvent.click(screen.getByRole("button", { name: "New" }));
     act(() => {
@@ -116,7 +117,7 @@ describe("EditorVariants", () => {
       );
     });
     // the first variant kept its own layout
-    expect(store.getState().variants.variants[0].layout).toEqual(custom);
+    expect(variantsSelector(store.getState())[0].layout).toEqual(custom);
 
     // switching back loads it into the editor
     fireEvent.mouseDown(screen.getByLabelText("Active variant"));
@@ -177,8 +178,8 @@ describe("reordering", () => {
     const down = row?.querySelector('[data-testid="ArrowDownwardIcon"]');
     fireEvent.click(down!.closest("button")!);
 
-    const orders =
-      store.getState().variants.variants[0].selection[item.id].bullets;
+    const orders = variantsSelector(store.getState())[0].selection[item.id]
+      .bullets;
     expect(orders?.[item.bullets[0].id].order).toBe(1);
     expect(orders?.[item.bullets[1].id].order).toBe(0);
   });
