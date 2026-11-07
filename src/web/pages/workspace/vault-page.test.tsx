@@ -43,7 +43,6 @@ describe("VaultPage", () => {
     for (const label of [
       "Job data",
       "Style Settings",
-      "Page Structure",
       "Main Info",
       "Professional Summary",
       "Work Experience",
@@ -86,7 +85,7 @@ describe("VaultPage", () => {
   it("hides Apply on pages that change no data", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: "Page Structure" }));
+    fireEvent.click(screen.getByRole("button", { name: "Jobs" }));
     expect(screen.queryByText("Apply")).toBeNull();
     // the placement boxes use the section titles
     expect(screen.getAllByText("Work Experience").length).toBeGreaterThan(1);

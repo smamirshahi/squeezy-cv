@@ -131,8 +131,7 @@ describe("page status in the preview", () => {
         <EditorJobs />
       </Provider>
     );
-    fireEvent.mouseDown(screen.getByLabelText("Page limit"));
-    fireEvent.click(screen.getByRole("option", { name: "1 page" }));
+    fireEvent.click(screen.getByRole("button", { name: "1 page" }));
     expect(variantsSelector(store.getState())[0].pageLimit).toBe(1);
   });
 });

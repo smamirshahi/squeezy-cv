@@ -14,6 +14,18 @@ template and a job (#165-#172).
 
 ### Added
 
+- **Sections page is only titles**: the vault's Sections page now just renames or deletes
+  sections. Ordering stays in Jobs > Sections & layout, where a new "Add section" button
+  (type and title) was added. Every section's editor page has a "Section title" field.
+- **Jobs page redesign** (new design, "Variants" board): a closable explainer (vault, job,
+  CV), one job bar (job, name, New/Duplicate/Delete, template, page limit as 1/2 page buttons,
+  auto-fit, and a status chip that says whether the CV fits), and two tabs. **Content**: one
+  table of sections and entries with a "Show section" switch per section, a tick, expand
+  for bullets, a wording menu and a Highlight button, drag handles and up/down buttons.
+  **Sections & layout**: two layout cards (Single column (UK) recommended, Two columns) and
+  the sections to tick, drag, place (Full width / Left / Right) and move with arrows. A job
+  can now leave a whole section out (`hiddenSections` in the job file; optional, old files
+  are unchanged). The separate "Page Structure" page is gone: it is this tab now.
 - **Templates**: a template is how a CV looks: page layout and section order, fonts,
   colours, margins, date format, page limit, skill display and the auto-fit policy. Many
   jobs can share one template, so changing the look once changes it for all of them. A

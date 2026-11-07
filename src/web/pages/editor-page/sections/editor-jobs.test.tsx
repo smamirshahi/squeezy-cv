@@ -19,14 +19,17 @@ import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { DragEndEvent } from "@dnd-kit/core";
-import { shorten } from "@shared/variant/item-label";
+import { getItemLabel, shorten } from "@shared/variant/item-label";
 import { getDropIndex } from "@pages/editor-page/sections/job-section-items";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { updatePageStructure } from "@store/app/app-slice";
 import { act } from "@testing-library/react";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+});
 
 function Page(): JSX.Element {
   useSyncActiveJob();
@@ -172,6 +175,70 @@ describe("EditorJobs", () => {
   });
 });
 
+describe("tabs, sections and the explainer", () => {
+  it("opens on Content and switches to Sections & layout", () => {
+    const store = makeStore();
+    show(store);
+    expect(screen.getByText("What appears on this CV")).toBeTruthy();
+    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
+    expect(screen.getByText("1 · Pick a page layout")).toBeTruthy();
+    expect(screen.queryByText("What appears on this CV")).toBeNull();
+  });
+
+  it("hides a whole section in this job from the Content tab, not in the vault", () => {
+    const store = makeStore();
+    show(store);
+    const vaultBefore = JSON.stringify(store.getState().vault);
+    fireEvent.click(
+      screen.getByRole("switch", { name: "Show section Work Experience" })
+    );
+    expect(variantsSelector(store.getState())[0].hiddenSections).toEqual([
+      "experience",
+    ]);
+    expect(screen.getByText("Hidden from this job")).toBeTruthy();
+    expect(JSON.stringify(store.getState().vault)).toBe(vaultBefore);
+  });
+
+  it("includes and excludes a section on the Sections & layout tab", () => {
+    const store = makeStore();
+    show(store);
+    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Include Education in this job" })
+    );
+    expect(variantsSelector(store.getState())[0].hiddenSections).toEqual([
+      "education",
+    ]);
+    expect(screen.getByText("Not included")).toBeTruthy();
+  });
+
+  it("moves a section down with its arrow button, which writes the template layout", () => {
+    const store = makeStore();
+    show(store);
+    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
+    const before = store.getState().app.structure.fullWidth;
+    const index = before.indexOf("experience");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Move Work Experience down" })
+    );
+    const after = store.getState().app.structure.fullWidth;
+    expect(after.indexOf("experience")).toBe(index + 1);
+    expect(variantsSelector(store.getState())[0].layout.fullWidth).toEqual(
+      after
+    );
+  });
+
+  it("can close the explainer and bring it back", () => {
+    const store = makeStore();
+    show(store);
+    expect(screen.getByText("How jobs work")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+    expect(screen.queryByText("How jobs work")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "What is a job?" }));
+    expect(screen.getByText("How jobs work")).toBeTruthy();
+  });
+});
+
 describe("layout templates", () => {
   it("switches between the single-column and two-column template", () => {
     const store = makeStore();
@@ -181,10 +248,10 @@ describe("layout templates", () => {
       </Provider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Two columns" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Two columns/ }));
     expect(store.getState().app.structure.left).toEqual(["experience"]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Single column (UK)" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Single column/ }));
     const { fullWidth, left, right } = store.getState().app.structure;
     expect(left).toEqual([]);
     expect(right).toEqual([]);
@@ -214,6 +281,12 @@ describe("reordering", () => {
     if (!item) {
       throw new Error("fixture needs an item with two bullets");
     }
+    // bullets are listed once their item is expanded
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`^Expand ${getItemLabel(item).slice(0, 20)}`),
+      })
+    );
     // the first bullet's "down" arrow: bullets come after their item's own arrows
     const label = shorten(item.bullets[0].text);
     // go up from the bullet's text to the row that holds its arrows
@@ -248,16 +321,18 @@ describe("reordering", () => {
   it("has a drag handle for every item and bullet", () => {
     const store = makeStore();
     show(store);
-    const total = store.getState().vault.sections.reduce(
-      (sum, s) =>
-        sum +
-        s.items.reduce(
-          // the bullets of a hidden item are not listed
-          (n, i) => n + 1 + (i.shouldShow ? i.bullets.length : 0),
-          0
-        ),
-      0
-    );
+    // bullets are listed once their item is expanded
+    for (const button of screen.queryAllByRole("button", {
+      name: /^Expand /,
+    })) {
+      fireEvent.click(button);
+    }
+    const total = store
+      .getState()
+      .vault.sections.reduce(
+        (sum, s) => sum + s.items.reduce((n, i) => n + 1 + i.bullets.length, 0),
+        0
+      );
     expect(screen.getAllByLabelText("Drag to reorder")).toHaveLength(total);
   });
 });

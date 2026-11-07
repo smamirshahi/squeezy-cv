@@ -2,7 +2,6 @@ import { PageStructure } from "@store/app/app-slice-types";
 import { Side } from "@custom-types/styles-types";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { CSS, Transform } from "@dnd-kit/utilities";
 
 const SIDES: Side[] = ["fullWidth", "left", "right"];
 
@@ -78,33 +77,40 @@ export function findItemSideById(
   return null;
 }
 
-/** Style used for each sortable column. Mirrors the look from the dnd-kit example */
-export const columnStyle: React.CSSProperties = {
-  background: "#f9f9f9",
-  padding: "8px",
-  border: "2px dashed #ccc",
-  borderRadius: "4px",
-  minHeight: "120px",
-  width: "200px",
-};
-
 /**
- * Returns the style for individual sortable items. The transform and
- * transition are provided by dnd-kit.
+ * Moves a part one place up (-1) or down (+1) inside its column. Returns the same object
+ * when it is already at that end or unknown.
  */
-export function getItemStyle(
-  transform: Transform | null,
-  transition: string | undefined,
-  isDragging: boolean
-): React.CSSProperties {
+export function moveWithinColumn(
+  structure: PageStructure,
+  id: string,
+  delta: -1 | 1
+): PageStructure {
+  const side = findItemSideById(structure, id);
+  if (!side) {
+    return structure;
+  }
+  const from = structure[side].indexOf(id);
+  const to = from + delta;
+  if (to < 0 || to >= structure[side].length) {
+    return structure;
+  }
+  return { ...structure, [side]: arrayMove(structure[side], from, to) };
+}
+
+/** Moves a part to the end of another column. Returns the same object when nothing changes. */
+export function moveToColumn(
+  structure: PageStructure,
+  id: string,
+  side: Side
+): PageStructure {
+  const from = findItemSideById(structure, id);
+  if (!from || from === side) {
+    return structure;
+  }
   return {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    padding: "8px",
-    margin: "4px 0",
-    background: isDragging ? "#cce5ff" : "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "grab",
+    ...structure,
+    [from]: structure[from].filter((x) => x !== id),
+    [side]: [...structure[side], id],
   };
 }

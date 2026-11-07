@@ -20,6 +20,7 @@ import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { addItem, addSection, setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
+import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
@@ -49,10 +50,6 @@ function apply(store: AppStore): void {
 
 function section(store: AppStore, id: string): Section {
   return store.getState().vault.sections.find((s) => s.id === id)!;
-}
-
-function titles(store: AppStore): string[] {
-  return store.getState().vault.sections.map((s) => s.title);
 }
 
 /** Opens the collapsed "Tags ..." panel of the item with the given index */
@@ -99,46 +96,34 @@ describe("EditorSections (manage sections)", () => {
     expect(section(store, "education").title).toBe("Studies");
   });
 
-  it("reorders sections", () => {
-    const store = createStore();
-    renderWith(store, <EditorSections />);
-    fireEvent.click(
-      screen.getAllByTestId("ArrowDownwardIcon")[0].closest("button")!
-    );
-    expect(titles(store)).toEqual([
-      "Work Experience",
-      "Professional Summary",
-      "Education",
-      "Skills",
-    ]);
+  it("has no ordering or add controls (they are in Sections & layout)", () => {
+    renderWith(createStore(), <EditorSections />);
+    expect(screen.queryByTestId("ArrowDownwardIcon")).toBeNull();
+    expect(screen.queryByText("Add section")).toBeNull();
   });
 
   it("adds a section with the chosen type and title", () => {
     const store = createStore();
-    renderWith(store, <EditorSections />);
+    renderWith(store, <AddSectionButton />);
+    fireEvent.click(screen.getByText("Add section"));
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Type" }));
     fireEvent.click(screen.getByRole("option", { name: "Publications" }));
     fireEvent.change(screen.getByLabelText("New section title"), {
       target: { value: "My papers" },
     });
-    fireEvent.click(screen.getByText("Add section"));
-
-    const added = store.getState().vault.sections.at(-1)!;
-    expect(added).toMatchObject({
+    fireEvent.click(screen.getByText("Add"));
+    expect(store.getState().vault.sections.at(-1)).toMatchObject({
       type: "publications",
       title: "My papers",
       items: [],
     });
-    expect(added.id).toBeTruthy();
-    expect(
-      screen.getByLabelText<HTMLInputElement>("New section title").value
-    ).toBe("");
   });
 
   it("uses the default title when none is typed", () => {
     const store = createStore();
-    renderWith(store, <EditorSections />);
+    renderWith(store, <AddSectionButton />);
     fireEvent.click(screen.getByText("Add section"));
+    fireEvent.click(screen.getByText("Add"));
     expect(store.getState().vault.sections.at(-1)).toMatchObject({
       type: "projects",
       title: "Projects",

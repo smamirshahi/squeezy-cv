@@ -2,20 +2,29 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
   FormControlLabel,
   MenuItem,
   Switch,
+  Tab,
+  Tabs,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-job";
-import { JobSectionItems } from "@pages/editor-page/sections/job-section-items";
+import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
+import { JobContent } from "@pages/editor-page/sections/job-content";
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
   TemplateScopeNote,
@@ -34,7 +43,171 @@ import {
   setPageLimit,
   variantsSelector,
 } from "@store/jobs/jobs-slice";
-import { sectionsSelector } from "@store/vault/vault-slice";
+
+type JobTab = "layout" | "content";
+
+const TAB_KEY = "cv-builder-jobs-tab";
+const INTRO_KEY = "cv-builder-jobs-intro";
+
+const LABEL_SX = {
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: WORKSPACE_COLORS.muted,
+} as const;
+
+const TAB_SX = {
+  alignItems: "flex-start",
+  textAlign: "left",
+  px: 2.5,
+} as const;
+
+/** A remembered choice of this browser; the page works without it */
+function readStored<T extends string>(key: string, fallback: T): T {
+  try {
+    return (window.localStorage.getItem(key) as T | null) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStored(key: string, value: string): void {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // private window or blocked storage: the choice is just not remembered
+  }
+}
+
+function TabLabel({ title, sub }: { title: string; sub: string }): JSX.Element {
+  return (
+    <Box sx={{ textTransform: "none" }}>
+      <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{title}</Typography>
+      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+        {sub}
+      </Typography>
+    </Box>
+  );
+}
+
+/** Whether the CV fits the page limit, from what the preview measured */
+function FitStatus(): JSX.Element {
+  const variant = useAppSelector(activeVariantSelector);
+  const { pageCount, linesOver } = useAppSelector((s) => s.app.fit);
+  const isFitting = pageCount <= variant.pageLimit && linesOver === 0;
+  const limit = `${variant.pageLimit} ${variant.pageLimit === 1 ? "page" : "pages"}`;
+  return (
+    <Chip
+      role="status"
+      color={isFitting ? "success" : variant.isAutoFit ? "error" : "warning"}
+      label={
+        isFitting
+          ? `Uses ${pageCount} of ${limit}`
+          : `Over the limit by about ${linesOver} ${linesOver === 1 ? "line" : "lines"}`
+      }
+    />
+  );
+}
+
+function IntroStep({
+  label,
+  title,
+  text,
+  isHere,
+}: {
+  label: string;
+  title: string;
+  text: string;
+  isHere?: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        p: isHere ? "11px 13px" : "12px 14px",
+        borderRadius: 1.5,
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: isHere
+          ? `2px solid ${WORKSPACE_COLORS.accent}`
+          : `1px solid ${WORKSPACE_COLORS.border}`,
+      }}
+    >
+      <Typography
+        sx={{
+          ...LABEL_SX,
+          color: isHere ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.muted,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography sx={{ fontWeight: 600, my: 0.25 }}>{title}</Typography>
+      <Typography sx={{ fontSize: 12.5 }}>{text}</Typography>
+    </Box>
+  );
+}
+
+/** The short explanation of vault, job and CV, which can be closed */
+function JobsIntro({ onClose }: { onClose: () => void }): JSX.Element {
+  const arrow = (
+    <Box
+      aria-hidden="true"
+      sx={{
+        display: "grid",
+        placeItems: "center",
+        color: WORKSPACE_COLORS.accentText,
+      }}
+    >
+      <ArrowForwardIcon fontSize="small" />
+    </Box>
+  );
+  return (
+    <Box
+      component="section"
+      aria-label="How jobs work"
+      sx={{
+        p: 2.25,
+        borderRadius: 1.5,
+        border: `1px solid ${WORKSPACE_COLORS.border}`,
+        bgcolor: WORKSPACE_COLORS.accentSoft,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
+        <Typography sx={{ fontWeight: 600, fontSize: 15, flex: 1 }}>
+          How jobs work
+        </Typography>
+        <Button size="small" onClick={onClose}>
+          Got it
+        </Button>
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "stretch", gap: 1.25 }}>
+        <IntroStep
+          label="1 · Vault"
+          title="All your facts, written once"
+          text="Jobs, skills, education. Edit them any time and every job picks up the change."
+        />
+        {arrow}
+        <IntroStep
+          isHere
+          label="2 · Job (you are here)"
+          title="One target, with its own choices"
+          text="Decides which entries show, their order and wording. Its template decides sections, order and layout, and can be shared by many jobs."
+        />
+        {arrow}
+        <IntroStep
+          label="3 · Your CV"
+          title="What the employer reads"
+          text="The PDF matches the live preview."
+        />
+      </Box>
+      <Typography sx={{ mt: 1.5, fontSize: 12.5 }}>
+        Fonts and colours come from <b>Style Settings</b>. Need a different
+        structure? Make a new template, or move this job to another one.
+      </Typography>
+    </Box>
+  );
+}
 
 /**
  * Creates, switches, renames and deletes jobs, and chooses per job which items
@@ -43,7 +216,6 @@ import { sectionsSelector } from "@store/vault/vault-slice";
  */
 export function EditorJobs(): JSX.Element {
   const dispatch = useAppDispatch();
-  const sections = useAppSelector(sectionsSelector);
   const variants = useAppSelector(variantsSelector);
   const variant = useAppSelector(activeVariantSelector);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -51,6 +223,20 @@ export function EditorJobs(): JSX.Element {
   const templates = useAppSelector(templatesSelector);
   const template = useAppSelector(activeTemplateSelector);
   const job = useAppSelector(activeJobSelector);
+  const [tab, setTab] = useState<JobTab>(readStored(TAB_KEY, "content"));
+  const [isIntroShown, setIsIntroShown] = useState<boolean>(
+    readStored(INTRO_KEY, "shown") === "shown"
+  );
+
+  function changeTab(next: JobTab): void {
+    setTab(next);
+    writeStored(TAB_KEY, next);
+  }
+
+  function changeIntro(isShown: boolean): void {
+    setIsIntroShown(isShown);
+    writeStored(INTRO_KEY, isShown ? "shown" : "hidden");
+  }
 
   function handleSwitch(id: string): void {
     const next = variants.find((v) => v.id === id);
@@ -65,144 +251,202 @@ export function EditorJobs(): JSX.Element {
   }
 
   return (
-    <>
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        Jobs
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        A job is one target for your CV, such as a company and role. Hiding or
-        reordering here only changes the job, never your data. Changes apply at
-        once. How the CV looks is set by the job&apos;s template.
-      </Typography>
-
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1,
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <TextField
-          select
-          label="Active job"
-          value={variant.id}
-          onChange={(event) => handleSwitch(event.target.value)}
-          sx={{ minWidth: 220 }}
-        >
-          {variants.map((v) => (
-            <MenuItem key={v.id} value={v.id}>
-              {v.name || "(unnamed)"}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          label="Job name"
-          value={variant.name}
-          onChange={(event) =>
-            dispatch(renameJob({ id: variant.id, name: event.target.value }))
-          }
-          sx={{ flexGrow: 1 }}
-        />
-        <Button onClick={() => setIsNewOpen(true)}>New job</Button>
-        <Button onClick={handleDuplicate}>Duplicate job</Button>
-        <Button
-          color="error"
-          disabled={variants.length <= 1}
-          onClick={() => setIsDeleting(true)}
-        >
-          Delete job
-        </Button>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-end", gap: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h6">Jobs</Typography>
+          <Typography variant="body2" sx={{ color: WORKSPACE_COLORS.muted }}>
+            A job is one target for your CV, such as a company and role. It
+            decides which entries show; its template decides how the CV looks.
+            Changes apply at once and never change your vault.
+          </Typography>
+        </Box>
+        {!isIntroShown && (
+          <Button onClick={() => changeIntro(true)}>What is a job?</Button>
+        )}
       </Box>
 
-      <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-        <TemplateScopeNote verb="The template and the two settings below: changes" />
-        <TextField
-          select
-          label="Template of this job"
-          value={template.id}
-          onChange={(event) => {
-            const next = templates.find((t) => t.id === event.target.value);
-            if (next) {
-              moveJobToTemplate(dispatch, job, next, true);
-            }
-          }}
-          sx={{ minWidth: 220 }}
-        >
-          {templates.map((t) => (
-            <MenuItem key={t.id} value={t.id}>
-              {t.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          select
-          label="Page limit"
-          value={variant.pageLimit}
-          onChange={(event) =>
-            dispatch(
-              setPageLimit({
-                id: variant.id,
-                pageLimit: Number(event.target.value),
-              })
-            )
-          }
-          sx={{ minWidth: 160 }}
-        >
-          <MenuItem value={1}>1 page</MenuItem>
-          <MenuItem value={2}>2 pages</MenuItem>
-        </TextField>
-      </Box>
+      {isIntroShown && <JobsIntro onClose={() => changeIntro(false)} />}
 
       <Box
+        component="section"
         sx={{
+          p: 2.5,
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           gap: 2,
-          mt: 1,
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderRadius: 1.5,
+          bgcolor: WORKSPACE_COLORS.panel,
         }}
       >
-        <FormControlLabel
-          label="Auto-fit to the page limit"
-          control={
-            <Switch
-              checked={variant.isAutoFit ?? false}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <TextField
+            select
+            label="Active job"
+            value={variant.id}
+            onChange={(event) => handleSwitch(event.target.value)}
+            sx={{ minWidth: 220 }}
+          >
+            {variants.map((v) => (
+              <MenuItem key={v.id} value={v.id}>
+                {v.name || "(unnamed)"}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Job name"
+            value={variant.name}
+            onChange={(event) =>
+              dispatch(renameJob({ id: variant.id, name: event.target.value }))
+            }
+            sx={{ flexGrow: 1, minWidth: 180 }}
+          />
+          <Button variant="outlined" onClick={() => setIsNewOpen(true)}>
+            New job
+          </Button>
+          <Button onClick={handleDuplicate}>Duplicate job</Button>
+          <Button
+            color="error"
+            disabled={variants.length <= 1}
+            onClick={() => setIsDeleting(true)}
+          >
+            Delete job
+          </Button>
+        </Box>
+
+        <Divider />
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2.5,
+            flexWrap: "wrap",
+          }}
+        >
+          <TextField
+            select
+            size="small"
+            label="Template of this job"
+            value={template.id}
+            onChange={(event) => {
+              const next = templates.find((t) => t.id === event.target.value);
+              if (next) {
+                moveJobToTemplate(dispatch, job, next, true);
+              }
+            }}
+            sx={{ minWidth: 220 }}
+          >
+            {templates.map((t) => (
+              <MenuItem key={t.id} value={t.id}>
+                {t.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+            <Typography id="page-limit-label" sx={LABEL_SX}>
+              Page limit
+            </Typography>
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              aria-labelledby="page-limit-label"
+              value={variant.pageLimit}
+              onChange={(_event, value: number | null) => {
+                if (value) {
+                  dispatch(setPageLimit({ id: variant.id, pageLimit: value }));
+                }
+              }}
+            >
+              <ToggleButton value={1} sx={{ px: 2 }}>
+                1 page
+              </ToggleButton>
+              <ToggleButton value={2} sx={{ px: 2 }}>
+                2 pages
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <FormControlLabel
+              label="Auto-fit to the page limit"
+              control={
+                <Switch
+                  checked={variant.isAutoFit ?? false}
+                  onChange={(event) =>
+                    dispatch(
+                      setAutoFit({
+                        id: variant.id,
+                        isAutoFit: event.target.checked,
+                      })
+                    )
+                  }
+                />
+              }
+            />
+            <TextField
+              select
+              size="small"
+              label="Auto-fit mode"
+              disabled={!variant.isAutoFit}
+              value={variant.fitMode ?? "fit"}
               onChange={(event) =>
                 dispatch(
                   setAutoFit({
                     id: variant.id,
-                    isAutoFit: event.target.checked,
+                    isAutoFit: true,
+                    fitMode: event.target.value as FitMode,
                   })
                 )
               }
+              sx={{ minWidth: 170 }}
+            >
+              <MenuItem value="fit">Shrink to fit</MenuItem>
+              <MenuItem value="fill">Fill the page</MenuItem>
+            </TextField>
+          </Box>
+          <Box sx={{ flex: 1 }} />
+          <FitStatus />
+        </Box>
+        <TemplateScopeNote verb="Template, page limit and auto-fit: changes" />
+      </Box>
+
+      <Tabs
+        value={tab}
+        onChange={(_event, value: JobTab) => changeTab(value)}
+        aria-label="Job sections"
+        sx={{ borderBottom: `1px solid ${WORKSPACE_COLORS.borderStrong}` }}
+      >
+        <Tab
+          value="layout"
+          sx={TAB_SX}
+          label={
+            <TabLabel
+              title="Sections & layout"
+              sub="Which sections, in what order, where"
             />
           }
         />
-        <TextField
-          select
-          size="small"
-          label="Auto-fit mode"
-          disabled={!variant.isAutoFit}
-          value={variant.fitMode ?? "fit"}
-          onChange={(event) =>
-            dispatch(
-              setAutoFit({
-                id: variant.id,
-                isAutoFit: true,
-                fitMode: event.target.value as FitMode,
-              })
-            )
+        <Tab
+          value="content"
+          sx={TAB_SX}
+          label={
+            <TabLabel
+              title="Content"
+              sub="Which entries show, and their wording"
+            />
           }
-          sx={{ minWidth: 200 }}
-        >
-          <MenuItem value="fit">Shrink to fit</MenuItem>
-          <MenuItem value="fill">Fill the page</MenuItem>
-        </TextField>
-      </Box>
+        />
+      </Tabs>
 
-      {sections.map((section) => (
-        <JobSectionItems key={section.id} section={section} />
-      ))}
+      {tab === "layout" ? <EditorPageStructure /> : <JobContent />}
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
         <DialogTitle>Delete job?</DialogTitle>
@@ -230,6 +474,6 @@ export function EditorJobs(): JSX.Element {
         </DialogActions>
       </Dialog>
       <NewJobDialog isOpen={isNewOpen} onClose={() => setIsNewOpen(false)} />
-    </>
+    </Box>
   );
 }
