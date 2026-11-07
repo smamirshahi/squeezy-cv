@@ -6,6 +6,7 @@ import {
   Decisions,
   applyProposal,
   buildTailorRecord,
+  createTailoredJob,
   defaultDecisions,
   describeItemChange,
   describeSectionMoves,
@@ -13,6 +14,9 @@ import {
   reorderLayoutSections,
 } from "@shared/ai/apply-proposal";
 import { render } from "@shared/variant/render";
+import { exportChecks } from "@shared/export/export-checks";
+import { documentText } from "@shared/variant/document-text";
+import { splitVariant, resolveVariant } from "@shared/variant/template-job";
 import {
   createVariant,
   updateItemSelection,
@@ -362,5 +366,145 @@ describe("buildTailorRecord", () => {
       buildTailorRecord(requirements, clean, defaultDecisions(clean), "x")
         .acceptedFlagged
     ).toEqual([]);
+  });
+});
+
+describe("createTailoredJob", () => {
+  const { template, job: baseJob } = splitVariant(base, "t1", "2026-01-01");
+  const record = buildTailorRecord(
+    {
+      jobTitle: "Dev",
+      seniority: "",
+      mustHave: ["React"],
+      niceToHave: [],
+      keywords: [],
+    },
+    proposal(),
+    defaultDecisions(proposal()),
+    "2026-02-02"
+  );
+  const input = {
+    id: "j2",
+    name: "Dev at Acme",
+    copyTemplateId: "t2",
+    tailor: record,
+    createdAt: "2026-02-02",
+  };
+  function tailored(
+    p: Proposal,
+    d: Decisions,
+    extra: Partial<typeof input & { pageLimit: number; tone: "formal" }> = {}
+  ): ReturnType<typeof createTailoredJob> {
+    return createTailoredJob(vault, template, baseJob, p, d, {
+      ...input,
+      ...extra,
+    });
+  }
+
+  it("makes a job that shares the template and carries selection, relevance and the tailor record", () => {
+    const before = structuredClone({ template, baseJob, vault });
+    const result = tailored(proposal(), defaultDecisions(proposal()), {
+      pageLimit: template.pageLimit,
+      tone: "formal",
+    });
+    expect(result.template).toBeUndefined();
+    expect(result.job.templateId).toBe("t1");
+    expect(result.job.id).toBe("j2");
+    expect(result.job.name).toBe("Dev at Acme");
+    expect(result.job.tone).toBe("formal");
+    expect(result.job.selection[job2.id].emphasis).toBe("high");
+    expect(result.job.selection[job2.id].relevance).toBe(0.9);
+    expect(result.job.selection[job3.id].isVisible).toBe(false);
+    expect(result.job.tailor).toEqual(record);
+    expect(result.job.createdAt).toBe("2026-02-02");
+    expect({ template, baseJob, vault }).toEqual(before);
+  });
+
+  it("puts an accepted section order on a copy of the template and leaves the source alone", () => {
+    // the sections in the reverse of the layout's order, so the layout really changes
+    const ids = [
+      ...template.layout.fullWidth,
+      ...template.layout.left,
+      ...template.layout.right,
+    ]
+      .filter((id) => vault.sections.some((x) => x.id === id))
+      .reverse();
+    const reordered = proposal({ sectionOrder: ids });
+    const before = structuredClone(template);
+    const result = tailored(reordered, defaultDecisions(reordered));
+    expect(result.template?.id).toBe("t2");
+    expect(result.template?.name).toBe(`${template.name} (tailored)`);
+    expect(result.job.templateId).toBe("t2");
+    expect(result.template?.layout).not.toEqual(template.layout);
+    expect(result.template?.style).toEqual(template.style);
+    expect(template).toEqual(before);
+  });
+
+  it("does not copy the template when the section order is not accepted", () => {
+    const ids = [
+      ...template.layout.fullWidth,
+      ...template.layout.left,
+      ...template.layout.right,
+    ]
+      .filter((id) => vault.sections.some((x) => x.id === id))
+      .reverse();
+    const reordered = proposal({ sectionOrder: ids });
+    const decisions = {
+      ...defaultDecisions(reordered),
+      isSectionOrderAccepted: false,
+    };
+    const result = tailored(reordered, decisions);
+    expect(result.template).toBeUndefined();
+    expect(result.job.templateId).toBe("t1");
+  });
+
+  it("copies the template for a page limit that differs, and only then", () => {
+    const d = defaultDecisions(proposal());
+    expect(
+      tailored(proposal(), d, { pageLimit: template.pageLimit }).template
+    ).toBeUndefined();
+    const other = template.pageLimit === 1 ? 2 : 1;
+    const result = tailored(proposal(), d, { pageLimit: other });
+    expect(result.template?.pageLimit).toBe(other);
+    expect(result.job.templateId).toBe("t2");
+    expect(template.pageLimit).not.toBe(other);
+  });
+
+  it("returns the alternative wordings for the vault and the export checks still use the tailor record", () => {
+    const p = proposal();
+    const d = defaultDecisions(p);
+    const result = tailored(p, d);
+    expect(result.altUpdates.map((u) => u.text)).toContain(
+      "Led a React dashboard"
+    );
+    const variant = resolveVariant(template, result.job);
+    expect(variant.tailor).toEqual(record);
+    const checks = exportChecks({
+      profile: vault.profile,
+      pageCount: 1,
+      pageLimit: variant.pageLimit,
+      usedPercent: 50,
+      linesOver: 0,
+      hiddenItemCount: 0,
+      tailor: variant.tailor,
+      cvText: documentText(render(vault, variant)),
+    });
+    // "React" (the record's must-have) is looked up in the CV, so the tailor check is present
+    expect(checks.length).toBeGreaterThan(0);
+    expect(
+      exportChecks({
+        profile: vault.profile,
+        pageCount: 1,
+        pageLimit: 1,
+        usedPercent: 50,
+        linesOver: 0,
+        hiddenItemCount: 0,
+        tailor: {
+          ...record,
+          requirements: { ...record.requirements, mustHave: ["Zzyzx"] },
+        },
+        cvText: documentText(render(vault, variant)),
+      }).some((c) => /Zzyzx|must-have/i.test(c.title + c.detail))
+    ).toBe(true);
   });
 });

@@ -7,8 +7,12 @@ import { operationsToActions } from "@store/chat/operations-to-actions";
 import { batch, clearHistory, undo } from "@store/history/history";
 import { setVault } from "@store/vault/vault-slice";
 import {
+  activeJobSelector,
+  activeTemplateSelector,
   activeVariantSelector,
+  duplicateVariant,
   setVariants,
+  variantsSelector,
 } from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -162,5 +166,34 @@ describe("operationsToActions", () => {
     expect(
       activeVariantSelector(store.getState()).selection[job1.id]
     ).toBeUndefined();
+  });
+
+  it("writes tone and item choices to the job, and page limit and layout to the template", () => {
+    const store = setup();
+    // a second job that shares the template
+    store.dispatch(duplicateVariant({ sourceId: "main", id: "other" }));
+    store.dispatch({
+      type: "variants/setActiveVariant",
+      payload: { id: "main" },
+    });
+    const templateBefore = activeTemplateSelector(store.getState());
+    const sectionId = experience.id;
+    run(store, [
+      { op: "hideItem", itemId: job1.id, isHidden: true },
+      { op: "setTone", tone: "formal" },
+      { op: "setPageLimit", pages: templateBefore.pageLimit === 1 ? 2 : 1 },
+      { op: "moveSection", sectionId, position: 99 },
+    ]);
+    const state = store.getState();
+    const [main, other] = variantsSelector(state);
+    expect(main.selection[job1.id].isVisible).toBe(false);
+    expect(main.tone).toBe("formal");
+    // the other job only sees the template's changes
+    expect(other.selection[job1.id]).toBeUndefined();
+    expect(other.tone).not.toBe("formal");
+    expect(activeJobSelector(state).templateId).toBe(templateBefore.id);
+    expect(other.pageLimit).toBe(activeTemplateSelector(state).pageLimit);
+    expect(other.pageLimit).not.toBe(templateBefore.pageLimit);
+    expect(other.layout).toEqual(main.layout);
   });
 });

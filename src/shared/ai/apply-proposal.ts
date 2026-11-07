@@ -2,10 +2,19 @@ import { Proposal } from "@custom-types/tailor-types";
 import { Requirements } from "@custom-types/requirements-types";
 import {
   TailorRecord,
+  Tone,
   Variant,
   VariantLayout,
 } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
+import { Job } from "@custom-types/job-types";
+import { Template } from "@custom-types/template-types";
+import {
+  duplicateTemplate,
+  resolveVariant,
+  splitVariant,
+  today,
+} from "@shared/variant/template-job";
 import { canAutoAccept } from "@shared/ai/guardrails";
 
 /** What the user has decided about the proposal. Nothing is applied that was not accepted. */
@@ -223,6 +232,91 @@ export function applyProposal(
   }
 
   return { variant, altUpdates };
+}
+
+export interface TailoredJobInput {
+  /** Id and name of the new job */
+  id: string;
+  name: string;
+
+  /** Id for the template copy, used only when one is needed */
+  copyTemplateId: string;
+  tailor: TailorRecord;
+
+  /** The page limit chosen in the Tailor page; applied (via a template copy) only if it differs */
+  pageLimit?: number;
+
+  /** The tone chosen in the Tailor page; written to the job */
+  tone?: Tone;
+  company?: string;
+  role?: string;
+
+  /** "YYYY-MM-DD", default today */
+  createdAt?: string;
+}
+
+export interface TailoredJob {
+  /** The new job. It uses `template` when given, else the source template. */
+  job: Job;
+
+  /** A copy of the source template ("<name> (tailored)"), only when the accepted section order or the page limit differ from it */
+  template?: Template;
+  altUpdates: AltUpdate[];
+}
+
+/**
+ * Makes the new job for the accepted part of the proposal: selection, relevance, tone and the
+ * tailor record belong to the job. The layout (section order) and the page limit belong to the
+ * template, so they only change on a NEW copy of `template` that the job then uses; the source
+ * template, the base job and the vault are never changed.
+ */
+export function createTailoredJob(
+  vault: Vault,
+  template: Template,
+  baseJob: Job,
+  proposal: Proposal,
+  decisions: Decisions,
+  input: TailoredJobInput
+): TailoredJob {
+  const base = resolveVariant(template, baseJob);
+  const { variant, altUpdates } = applyProposal(
+    vault,
+    base,
+    proposal,
+    decisions,
+    { id: input.id, name: input.name }
+  );
+  const isLayoutChanged =
+    JSON.stringify(variant.layout) !== JSON.stringify(template.layout);
+  const isPageLimitChanged =
+    input.pageLimit !== undefined && input.pageLimit !== template.pageLimit;
+  const copy =
+    isLayoutChanged || isPageLimitChanged
+      ? {
+          ...duplicateTemplate(
+            template,
+            input.copyTemplateId,
+            `${template.name} (tailored)`
+          ),
+          layout: variant.layout,
+          pageLimit: input.pageLimit ?? template.pageLimit,
+        }
+      : undefined;
+  const target = copy ?? template;
+  const { job } = splitVariant(
+    { ...variant, tone: input.tone ?? variant.tone, tailor: input.tailor },
+    target.id,
+    input.createdAt ?? today()
+  );
+  return {
+    job: {
+      ...job,
+      ...(input.company ? { company: input.company } : {}),
+      ...(input.role ? { role: input.role } : {}),
+    },
+    ...(copy ? { template: copy } : {}),
+    altUpdates,
+  };
 }
 
 /**

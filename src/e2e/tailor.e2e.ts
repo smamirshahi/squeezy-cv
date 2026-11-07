@@ -100,4 +100,23 @@ describe("tailor review: pins, diff and section moves (AI answers stubbed)", () 
       .uncheck();
     await diff.getByText("moved").first().waitFor({ state: "detached" });
   });
+
+  it("creates a job; an accepted section order goes on a tailored copy of the template", async () => {
+    // continues from the page above: the reorder is un-ticked, so the job shares the template
+    await page.getByRole("button", { name: "Proposed" }).click();
+    await page
+      .getByRole("button", { name: /Create job from the accepted changes/ })
+      .click();
+    await page.getByText(/Created the job "Dev"/).waitFor();
+    const select = page.getByLabel("Template of this job");
+    expect(await select.textContent()).not.toContain("(tailored)");
+
+    // tick the reorder again and create a second job: now a copy exists and is used
+    await page.getByRole("checkbox", { name: /Reorder the sections/ }).check();
+    await page
+      .getByRole("button", { name: /Create job from the accepted changes/ })
+      .click();
+    await select.getByText(/\(tailored\)/).waitFor();
+    expect(await select.textContent()).toContain("(tailored)");
+  });
 });

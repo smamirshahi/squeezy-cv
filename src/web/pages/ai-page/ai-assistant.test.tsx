@@ -16,7 +16,11 @@ import { AppStore } from "@store/store-helper";
 import { setSavedState } from "@store/persistence/persistence-slice";
 import { toSavedState } from "@store/persistence/persistence-logic";
 import { setStyle } from "@store/cv-data/cv-data-slice";
-import { setVariants, variantsSelector } from "@store/variants/variants-slice";
+import {
+  addTemplate,
+  setVariants,
+  variantsSelector,
+} from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -265,7 +269,7 @@ describe("AiAssistant: the review", () => {
     expect(variants).toHaveLength(2);
     expect(JSON.stringify(variants[0])).toBe(baseBefore);
     const created = variants[1];
-    expect(created.name).toBe("Senior Front-End Developer (AI)");
+    expect(created.name).toBe("Senior Front-End Developer");
     expect(activeId).toBe(created.id);
     expect(created.selection[job2.id].emphasis).toBe("high");
 
@@ -279,6 +283,63 @@ describe("AiAssistant: the review", () => {
     // and the original text is untouched
     expect(bullets[0].text).toBe(job1.bullets[0].text);
     await screen.findByText(/Created the job/);
+  });
+
+  it("shares the chosen template, never modifies it, and fills the job name from the advert", async () => {
+    stubServer({});
+    const store = makeStore();
+    store.dispatch(addTemplate({ id: "tpl-b", name: "Template B" }));
+    await analyse(store);
+    expect(screen.getByLabelText<HTMLInputElement>("Job name").value).toBe(
+      "Senior Front-End Developer"
+    );
+    fireEvent.change(screen.getByLabelText("Job name"), {
+      target: { value: "Acme - Senior" },
+    });
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Template" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Template B" }));
+    const templatesBefore = JSON.stringify(store.getState().variants.templates);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Create job from the accepted changes/,
+      })
+    );
+    const { jobs, templates, activeJobId } = store.getState().variants;
+    const created = jobs.find((j) => j.id === activeJobId)!;
+    expect(created.name).toBe("Acme - Senior");
+    expect(created.templateId).toBe("tpl-b");
+    // tone is written to the job; the tailor record is on it too
+    expect(created.tailor?.jobTitle).toBe("Senior Front-End Developer");
+    expect(templates).toHaveLength(2);
+    expect(JSON.stringify(templates)).toBe(templatesBefore);
+  });
+
+  it("makes a tailored template copy only when the page limit differs from the template", async () => {
+    stubServer({});
+    const store = makeStore();
+    await analyse(store);
+    const templateBefore = JSON.stringify(
+      store.getState().variants.templates[0]
+    );
+    const limit = store.getState().variants.templates[0].pageLimit;
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Page limit" }));
+    fireEvent.click(
+      await screen.findByRole("option", {
+        name: limit === 1 ? "2 pages" : "1 page",
+      })
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Create job from the accepted changes/,
+      })
+    );
+    const { jobs, templates, activeJobId } = store.getState().variants;
+    const created = jobs.find((j) => j.id === activeJobId)!;
+    expect(templates).toHaveLength(2);
+    const copy = templates.find((t) => t.id === created.templateId)!;
+    expect(copy.name).toMatch(/\(tailored\)$/);
+    expect(copy.pageLimit).not.toBe(limit);
+    expect(JSON.stringify(templates[0])).toBe(templateBefore);
   });
 
   it("applies a flagged rewording only if you tick it yourself", async () => {
