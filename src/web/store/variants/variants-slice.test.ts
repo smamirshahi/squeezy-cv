@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Variant } from "@custom-types/variant-types";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { render } from "@shared/variant/render";
+import { resolveVariant } from "@shared/variant/template-job";
 import { initialState as cvDataState } from "@store/cv-data/cv-data-slice";
 import {
   VariantsState,
@@ -14,7 +15,10 @@ import {
   renameVariant,
   setActiveVariant,
   setLocks,
+  setJobTemplate,
   setPageLimit,
+  setSkillStyle,
+  setTuning,
   unlockVariant,
   setBulletOrders,
   setBulletSelection,
@@ -23,6 +27,7 @@ import {
   setVariantAppearance,
   setVariants,
   variantsReducer,
+  setTemplatesAndJobs,
   variantsSelector,
 } from "@store/variants/variants-slice";
 
@@ -276,5 +281,259 @@ describe("variant lock", () => {
     expect(all(state).map((v) => v.id)).toEqual(["default", "second", "copy"]);
     state = variantsReducer(state, setVariants([all(state)[2]]));
     expect(all(state)).toHaveLength(1);
+  });
+});
+
+describe("templates and jobs: who owns what", () => {
+  it("starts with one default template and one default job on it", () => {
+    expect(initialState.templates).toHaveLength(1);
+    expect(initialState.jobs).toHaveLength(1);
+    expect(initialState.jobs[0].templateId).toBe(initialState.templates[0].id);
+  });
+
+  it("hiding an item changes only the job", () => {
+    const before = withTwo();
+    const after = variantsReducer(
+      before,
+      setItemSelection({
+        variantId: "second",
+        itemId: "item-1",
+        change: { isVisible: false },
+      })
+    );
+    expect(after.templates).toBe(before.templates);
+    expect(after.jobs[1].selection["item-1"]).toEqual({ isVisible: false });
+    expect(after.jobs[0]).toBe(before.jobs[0]);
+  });
+
+  it("changing a font (style) changes only the template", () => {
+    const before = withTwo();
+    const after = variantsReducer(
+      before,
+      setVariantAppearance({
+        id: "second",
+        layout: before.templates[1].layout,
+        style: {
+          ...before.templates[1].style,
+          paperMargin: "narrow",
+        },
+      })
+    );
+    expect(after.jobs).toBe(before.jobs);
+    expect(after.templates[1].style.paperMargin).toBe("narrow");
+    expect(after.templates[0]).toBe(before.templates[0]);
+  });
+
+  it("page limit and skill style go to the template, tone and tuning to the job", () => {
+    const before = withTwo();
+    const templateEdits = [
+      setPageLimit({ id: "second", pageLimit: 1 }),
+      setSkillStyle({ id: "second", display: "dots", columns: 2 }),
+    ];
+    const afterTemplate = templateEdits.reduce(variantsReducer, before);
+    expect(afterTemplate.jobs).toBe(before.jobs);
+    expect(afterTemplate.templates[1].pageLimit).toBe(1);
+    expect(afterTemplate.templates[1].skillDisplay).toBe("dots");
+
+    const afterJob = [
+      setTuning({
+        id: "second",
+        tuning: { spacing: 0.5, marginMm: 15, fontScale: 1 },
+      }),
+    ].reduce(variantsReducer, before);
+    expect(afterJob.templates).toBe(before.templates);
+    expect(afterJob.jobs[1].tuning?.marginMm).toBe(15);
+  });
+
+  it("two jobs on one template see the same style change", () => {
+    let state = variantsReducer(
+      withTwo(),
+      setJobTemplate({
+        jobId: "second",
+        templateId: initialState.templates[0].id,
+      })
+    );
+    state = variantsReducer(
+      state,
+      setPageLimit({ id: "default", pageLimit: 1 })
+    );
+    state = variantsReducer(
+      state,
+      setVariantAppearance({
+        id: "default",
+        layout: state.templates[0].layout,
+        style: { ...state.templates[0].style, paperMargin: "narrow" },
+      })
+    );
+    const [first, second] = all(state);
+    expect(second.pageLimit).toBe(1);
+    expect(first.style).toEqual(second.style);
+    expect(second.style.paperMargin).toBe("narrow");
+    // still different jobs
+    expect(first.id).not.toBe(second.id);
+  });
+
+  it("ignores a move to a template that does not exist", () => {
+    const state = withTwo();
+    expect(
+      variantsReducer(
+        state,
+        setJobTemplate({ jobId: "second", templateId: "x" })
+      )
+    ).toBe(state);
+  });
+
+  it("deleting a job removes its template only when no other job uses it", () => {
+    const shared = variantsReducer(
+      withTwo(),
+      setJobTemplate({
+        jobId: "second",
+        templateId: initialState.templates[0].id,
+      })
+    );
+    const afterShared = variantsReducer(
+      shared,
+      deleteVariant({ id: "second" })
+    );
+    expect(afterShared.templates.map((t) => t.id)).toContain(
+      initialState.templates[0].id
+    );
+    const own = variantsReducer(withTwo(), deleteVariant({ id: "second" }));
+    expect(own.templates).toHaveLength(1);
+  });
+
+  it("a copy of a job gets a template of its own, so editing it leaves the source look alone", () => {
+    const state = variantsReducer(
+      withTwo(),
+      duplicateVariant({ sourceId: "second", id: "copy" })
+    );
+    const copy = state.jobs.find((j) => j.id === "copy")!;
+    const source = state.jobs.find((j) => j.id === "second")!;
+    expect(copy.templateId).not.toBe(source.templateId);
+    const edited = variantsReducer(
+      state,
+      setPageLimit({ id: "copy", pageLimit: 1 })
+    );
+    expect(all(edited).find((v) => v.id === "second")?.pageLimit).toBe(
+      all(state).find((v) => v.id === "second")?.pageLimit
+    );
+  });
+
+  it("a sent job freezes the template it uses, for every job on it", () => {
+    let state = variantsReducer(
+      withTwo(),
+      setJobTemplate({
+        jobId: "second",
+        templateId: initialState.templates[0].id,
+      })
+    );
+    state = variantsReducer(
+      state,
+      setLocks({
+        byVariant: {
+          second: [
+            { applicationId: "a", company: "Acme", appliedAt: "2026-01-01" },
+          ],
+        },
+        hasUnreadable: false,
+      })
+    );
+    const after = variantsReducer(
+      state,
+      setPageLimit({ id: "default", pageLimit: 1 })
+    );
+    expect(after.templates).toBe(state.templates);
+    // the unlocked job's own choices can still change
+    const hidden = variantsReducer(
+      state,
+      setItemSelection({
+        variantId: "default",
+        itemId: "i",
+        change: { isVisible: false },
+      })
+    );
+    expect(hidden.jobs[0].selection.i).toEqual({ isVisible: false });
+  });
+});
+
+describe("selectors", () => {
+  it("the active variant is the active job drawn with its template", () => {
+    const state = withTwo();
+    const active = activeVariantSelector({ variants: state });
+    expect(active).toEqual(resolveVariant(state.templates[1], state.jobs[1]));
+  });
+
+  it("is memoised: the same object until the job or its template changes", () => {
+    const state = withTwo();
+    const first = activeVariantSelector({ variants: state });
+    expect(activeVariantSelector({ variants: { ...state } })).toBe(first);
+
+    // editing another job keeps the active variant's identity
+    const otherEdited = variantsReducer(
+      state,
+      setItemSelection({
+        variantId: "default",
+        itemId: "i",
+        change: { isVisible: false },
+      })
+    );
+    expect(activeVariantSelector({ variants: otherEdited })).toBe(first);
+
+    // editing the active job or its template gives a new one
+    const jobEdited = variantsReducer(
+      state,
+      setItemSelection({
+        variantId: "second",
+        itemId: "i",
+        change: { isVisible: false },
+      })
+    );
+    expect(activeVariantSelector({ variants: jobEdited })).not.toBe(first);
+    const templateEdited = variantsReducer(
+      state,
+      setPageLimit({ id: "second", pageLimit: 1 })
+    );
+    expect(activeVariantSelector({ variants: templateEdited })).not.toBe(first);
+  });
+
+  it("the list of variants is memoised too", () => {
+    const state = withTwo();
+    const list = variantsSelector({ variants: state });
+    expect(variantsSelector({ variants: { ...state } })).toBe(list);
+    expect(
+      variantsSelector({
+        variants: variantsReducer(state, setActiveVariant({ id: "default" })),
+      })
+    ).toBe(list);
+  });
+});
+
+describe("loading templates and jobs", () => {
+  it("moves a job whose template is missing to the first template", () => {
+    const state = variantsReducer(
+      initialState,
+      setTemplatesAndJobs({
+        templates: initialState.templates,
+        jobs: [{ ...initialState.jobs[0], templateId: "gone" }],
+      })
+    );
+    expect(state.jobs[0].templateId).toBe(initialState.templates[0].id);
+  });
+
+  it("gives the defaults for an empty load and keeps a valid active job", () => {
+    const empty = variantsReducer(
+      withTwo(),
+      setTemplatesAndJobs({ templates: [], jobs: [] })
+    );
+    expect(empty.templates).toHaveLength(1);
+    expect(empty.jobs).toHaveLength(1);
+    const kept = variantsReducer(
+      withTwo(),
+      setTemplatesAndJobs({
+        templates: withTwo().templates,
+        jobs: withTwo().jobs,
+      })
+    );
+    expect(kept.activeJobId).toBe("second");
   });
 });

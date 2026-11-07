@@ -6,6 +6,8 @@ import { createServer } from "vite";
 import { buildServer } from "@server/app";
 import { PdfRenderer, PlaywrightPdfRenderer } from "@server/pdf/pdf-renderer";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
+import { Job } from "@custom-types/job-types";
+import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { CvFile } from "@custom-types/vault-types";
 
@@ -18,6 +20,12 @@ export interface RunningApp {
 
   /** Saves a CV file and variants the way the app would */
   seed: (file: CvFile, variants: Variant[]) => Promise<void>;
+
+  /** Saves a CV file, templates and jobs (the current format) */
+  seedJobs: (file: CvFile, templates: Template[], jobs: Job[]) => Promise<void>;
+
+  /** Asks the API for the PDF of a saved job (POST /api/pdf {jobId}) */
+  pdfOfJob: (jobId: string) => Promise<Buffer>;
 
   /** A PDF of a saved variant, made by the real renderer */
   pdf: (variantId: string) => Promise<Buffer>;
@@ -82,6 +90,27 @@ export async function startApp(): Promise<RunningApp> {
       for (const variant of variants) {
         await put(`/api/variants/${variant.id}`, variant);
       }
+    },
+    seedJobs: async (file, templates, jobs) => {
+      await put("/api/vault", file);
+      for (const template of templates) {
+        await put(`/api/templates/${template.id}`, template);
+      }
+      for (const job of jobs) {
+        await put(`/api/jobs/${job.id}`, job);
+      }
+    },
+    pdfOfJob: async (jobId) => {
+      const response = await fetch(`${apiUrl}/api/pdf`, {
+        method: "POST",
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+      if (!response.ok) {
+        throw new Error(`PDF of job ${jobId} failed: ${response.status}`);
+      }
+      return Buffer.from(await response.arrayBuffer());
     },
     pdf: (variantId) => pdfRenderer.render(variantId),
     close: async () => {

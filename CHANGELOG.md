@@ -13,6 +13,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 - Templates and jobs (#165, in progress): pure model for splitting a variant into a template (look) and a job (what is shown), with `resolveVariant` and `splitVariant` (#166). Not used by the app yet.
 - Server storage and API for templates and jobs (#167): `templates/<id>.json` and `jobs/<id>.json` (validated, atomic, `.bak`, versioned git commits), `GET/PUT/DELETE /api/templates` and `/api/jobs` (409 `in_use` for a template that a job uses), `GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`. Old `variants/*.json` are read as one template + one job each when no jobs exist yet. `/api/variants` is unchanged.
+- Web store with templates and jobs (#168): the editor now holds `templates[]`, `jobs[]` and `activeJobId`; the active variant is `resolveVariant(template, job)` (memoised `activeVariantSelector`). Hiding, order, tone and the auto-fit result are saved in the job; layout, style, page limit, auto-fit policy and skill style in the job's template, so jobs on one template share a look. Saving writes only the changed templates and jobs (`/api/templates`, `/api/jobs`); the print page and PDF use the job (`GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`); applications can be made from a job. The UI looks the same: every job still has a template of its own until the templates page (#169).
 
 ## [0.1.0] - 2026-11-07
 

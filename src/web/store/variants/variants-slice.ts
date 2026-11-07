@@ -546,6 +546,10 @@ const LOCK_ACTIONS: string[] = [
   "variants/setActiveVariant",
 ];
 
+function sameEntries<T>(a: T[], b: T[]): boolean {
+  return a.length === b.length && a.every((entry, index) => entry === b[index]);
+}
+
 /**
  * The slice reducer, plus the lock: whatever an action did to a read-only job (edit,
  * rename, delete) or to a template such a job uses is undone here, so no screen, shortcut
@@ -588,6 +592,11 @@ export function variantsReducer(
       templates = templates.map((t, i) => (i === index ? before : t));
     }
   }
+  // everything undone: keep the very same arrays, so no change (or undo step) is seen
+  jobs = sameEntries(jobs, state.jobs) ? state.jobs : jobs;
+  templates = sameEntries(templates, state.templates)
+    ? state.templates
+    : templates;
   const activeJobId = jobs.some((j) => j.id === next.activeJobId)
     ? next.activeJobId
     : state.activeJobId;

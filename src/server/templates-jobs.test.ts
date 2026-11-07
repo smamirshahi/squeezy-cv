@@ -5,7 +5,7 @@ import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { createVariant } from "@shared/variant/variant-utils";
-import { splitVariant } from "@shared/variant/template-job";
+import { resolveVariant, splitVariant } from "@shared/variant/template-job";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { buildServer } from "@server/app";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
@@ -193,6 +193,35 @@ describe("legacy variants over the API", () => {
     expect(
       (await call("DELETE", "/api/templates/template-old")).statusCode
     ).toBe(409);
+  });
+});
+
+describe("applications from a job", () => {
+  it("freezes the job drawn with its template when the id is a job id", async () => {
+    await call("PUT", "/api/vault", file);
+    await seed();
+    const response = await call("POST", "/api/applications", {
+      variantId: "acme",
+      company: "Acme Ltd",
+      role: "Dev",
+    });
+    expect(response.statusCode).toBe(200);
+    const application = response.json();
+    expect(application.submitted.variant.id).toBe("acme");
+    expect(application.submitted.variant).toEqual(
+      resolveVariant(template, job)
+    );
+    expect(pdf.requested).toEqual(["acme"]);
+  });
+
+  it("answers 404 when neither a job nor a variant has that id", async () => {
+    await call("PUT", "/api/vault", file);
+    const response = await call("POST", "/api/applications", {
+      variantId: "nope",
+      company: "A",
+      role: "B",
+    });
+    expect(response.statusCode).toBe(404);
   });
 });
 

@@ -8,7 +8,11 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { setVault } from "@store/vault/vault-slice";
-import { setVariants, variantsSelector } from "@store/variants/variants-slice";
+import {
+  setJobTemplate,
+  setVariants,
+  variantsSelector,
+} from "@store/variants/variants-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
@@ -94,6 +98,34 @@ describe("EditorVariants", () => {
       true
     );
     expect(JSON.stringify(store.getState().vault)).toBe(vaultBefore);
+  });
+
+  it("writes layout and style edits to the template of the active job, which other jobs on it share", () => {
+    const store = makeStore();
+    show(store);
+    fireEvent.click(screen.getByRole("button", { name: "New" }));
+    const { templates, jobs } = store.getState().variants;
+    // the new job moves onto the first job's template
+    act(() => {
+      store.dispatch(
+        setJobTemplate({ jobId: jobs[1].id, templateId: templates[0].id })
+      );
+    });
+    const style = {
+      ...store.getState().cvData.style,
+      paperMargin: "narrow" as const,
+    };
+    const jobsBefore = store.getState().variants.jobs;
+    act(() => {
+      store.dispatch(setStyle(style));
+    });
+    const after = store.getState().variants;
+    expect(after.templates[0].style.paperMargin).toBe("narrow");
+    // only the template changed: the jobs are the same objects
+    expect(after.jobs).toBe(jobsBefore);
+    expect(
+      variantsSelector(store.getState()).map((v) => v.style.paperMargin)
+    ).toEqual(["narrow", "narrow"]);
   });
 
   it("keeps the page layout per variant", () => {
