@@ -6,6 +6,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
@@ -331,7 +332,9 @@ describe("EditorMainInfo", () => {
 
     fireEvent.click(screen.getByLabelText("Add link"));
     expect(screen.getAllByLabelText("URL")).toHaveLength(3);
-    fireEvent.change(input("Label", 2), { target: { value: "Portfolio" } });
+    // a new link is "Other", so it is the only one with a free label field
+    expect(screen.getAllByLabelText("Label")).toHaveLength(1);
+    fireEvent.change(input("Label"), { target: { value: "My blog 2" } });
     fireEvent.change(input("URL", 2), {
       target: { value: "https://jane.example.com" },
     });
@@ -343,16 +346,80 @@ describe("EditorMainInfo", () => {
     fireEvent.click(
       screen.getAllByTestId("ArrowUpwardIcon")[1].closest("button")!
     );
-    expect(input("Label", 0).value).toBe("Portfolio");
+    expect(input("Label").value).toBe("My blog 2");
 
     // remove GitHub (now last)
     fireEvent.click(screen.getAllByLabelText("Remove link")[2]);
     click(setShouldApplyChanges, store);
 
     expect(store.getState().vault.links.map((l) => l.label)).toEqual([
-      "Portfolio",
+      "My blog 2",
       "LinkedIn",
     ]);
+  });
+
+  it("shows the type and icon of saved links", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    const labels = createStore()
+      .getState()
+      .vault.links.map((l) => l.label);
+    expect(labels).toEqual(["LinkedIn", "GitHub"]);
+    expect(screen.getByTestId("link-icon-linkedin")).toBeTruthy();
+    expect(screen.getByTestId("link-icon-github")).toBeTruthy();
+    // known types have no free label field
+    expect(screen.queryAllByLabelText("Label")).toHaveLength(0);
+  });
+
+  it("lists the link types with icons and an Other option", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    const options = within(screen.getByRole("listbox")).getAllByRole("option");
+    const names = options.map((option) => option.textContent);
+    expect(names).toEqual(
+      expect.arrayContaining(["GitHub", "X", "LinkedIn", "Instagram", "Other"])
+    );
+    expect(names.at(-1)).toBe("Other");
+    // every option carries its icon
+    for (const option of options) {
+      expect(
+        option.querySelector('[data-testid^="link-icon-"]')
+      ).not.toBeNull();
+    }
+  });
+
+  it("choosing a type writes its name; Other brings the label field", () => {
+    const store = createStore();
+    renderWith(store, <EditorMainInfo />);
+
+    // LinkedIn -> Instagram
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.click(screen.getByRole("option", { name: "Instagram" }));
+    expect(screen.getAllByTestId("link-icon-instagram").length).toBeGreaterThan(
+      0
+    );
+
+    // GitHub -> Other, then a custom label
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.click(screen.getByRole("option", { name: "Other" }));
+    fireEvent.change(input("Label"), { target: { value: "My site" } });
+
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.links.map((l) => l.label)).toEqual([
+      "Instagram",
+      "My site",
+    ]);
+  });
+
+  it("picks the type from a pasted address on a new link", () => {
+    const store = createStore();
+    renderWith(store, <EditorMainInfo />);
+    fireEvent.click(screen.getByLabelText("Add link"));
+    fireEvent.change(input("URL", 2), {
+      target: { value: "https://github.com/jane" },
+    });
+    expect(screen.queryAllByLabelText("Label")).toHaveLength(0);
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.links[2].label).toBe("GitHub");
   });
 
   it("adds a link through the footer flag", () => {
