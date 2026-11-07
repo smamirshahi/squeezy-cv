@@ -5,7 +5,6 @@ import {
 import { CvFile } from "@custom-types/vault-types";
 import { Job } from "@custom-types/job-types";
 import { Template } from "@custom-types/template-types";
-import { Variant } from "@custom-types/variant-types";
 
 export type StorageErrorCode = "not_found" | "corrupt" | "invalid_id";
 
@@ -18,14 +17,6 @@ export class StorageError extends Error {
     this.name = "StorageError";
     this.code = code;
   }
-}
-
-export interface VariantSummary {
-  id: string;
-  name: string;
-
-  /** The file exists but cannot be read */
-  isCorrupt: boolean;
 }
 
 export interface TemplateSummary {
@@ -52,13 +43,6 @@ export interface CvStorage {
   /** Throws StorageError "not_found" if nothing was saved yet, "corrupt" if it cannot be read */
   loadVault(): Promise<CvFile>;
   saveVault(file: CvFile): Promise<void>;
-
-  listVariants(): Promise<VariantSummary[]>;
-  loadVariant(id: string): Promise<Variant>;
-  saveVariant(variant: Variant): Promise<void>;
-
-  /** Throws StorageError "not_found" if there is no such variant */
-  deleteVariant(id: string): Promise<void>;
 
   /**
    * Templates and jobs. While there are no job files but `variants/*.json` exist, each variant

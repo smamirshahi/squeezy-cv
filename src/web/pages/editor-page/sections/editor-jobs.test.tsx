@@ -20,8 +20,8 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { DragEndEvent } from "@dnd-kit/core";
 import { shorten } from "@shared/variant/item-label";
-import { getDropIndex } from "@pages/editor-page/sections/variant-section-items";
-import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
+import { getDropIndex } from "@pages/editor-page/sections/job-section-items";
+import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
 import { updatePageStructure } from "@store/app/app-slice";
 import { act } from "@testing-library/react";
@@ -30,7 +30,7 @@ afterEach(cleanup);
 
 function Page(): JSX.Element {
   useSyncActiveVariant();
-  return <EditorVariants />;
+  return <EditorJobs />;
 }
 
 function makeStore(): AppStore {
@@ -64,7 +64,7 @@ async function createJob(name: string, hasNewTemplate = false): Promise<void> {
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 }
 
-describe("EditorVariants", () => {
+describe("EditorJobs", () => {
   it("creates, duplicates, switches and renames jobs", async () => {
     const store = makeStore();
     show(store);

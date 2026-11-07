@@ -21,8 +21,8 @@ export const MAX_REMEMBERED_TURNS = 40;
 
 const KEY_PREFIX = "cv-builder-chat:";
 
-function keyOf(variantId: string): string {
-  return `${KEY_PREFIX}${variantId}`;
+function keyOf(jobId: string): string {
+  return `${KEY_PREFIX}${jobId}`;
 }
 
 function isTurn(value: unknown): value is Turn {
@@ -55,11 +55,11 @@ function cleanTurn(turn: Turn): Turn {
 
 /** The chat of a variant from this browser, or nothing if there is none or it cannot be read */
 export function loadChat(
-  variantId: string,
+  jobId: string,
   storage: Pick<Storage, "getItem"> = localStorage
 ): Turn[] {
   try {
-    const parsed: unknown = JSON.parse(storage.getItem(keyOf(variantId)) ?? "");
+    const parsed: unknown = JSON.parse(storage.getItem(keyOf(jobId)) ?? "");
     return Array.isArray(parsed) ? parsed.filter(isTurn).map(cleanTurn) : [];
   } catch {
     return [];
@@ -68,17 +68,17 @@ export function loadChat(
 
 /** Remembers the chat of a variant in this browser only (never in the data folder). An empty chat is forgotten. */
 export function saveChat(
-  variantId: string,
+  jobId: string,
   turns: Turn[],
   storage: Pick<Storage, "setItem" | "removeItem"> = localStorage
 ): void {
   try {
     if (turns.length === 0) {
-      storage.removeItem(keyOf(variantId));
+      storage.removeItem(keyOf(jobId));
       return;
     }
     storage.setItem(
-      keyOf(variantId),
+      keyOf(jobId),
       JSON.stringify(turns.slice(-MAX_REMEMBERED_TURNS))
     );
   } catch {

@@ -83,7 +83,7 @@ describe("PreviewPage (rendered from the vault)", () => {
     const store = makeStore();
     store.dispatch(
       setItemSelection({
-        variantId: "v1",
+        jobId: "v1",
         itemId: "exp-3",
         change: { isVisible: true },
       })
@@ -242,7 +242,7 @@ describe("UK single-column template", () => {
     const plain = render(store);
     store.dispatch(
       setItemSelection({
-        variantId: "v1",
+        jobId: "v1",
         itemId: "exp-1",
         change: { emphasis: "high" },
       })

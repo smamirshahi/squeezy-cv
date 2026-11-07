@@ -42,12 +42,12 @@ function isFlagged(op: Operation): boolean {
  * undoable step through the same reducers as a manual edit. Flagged rewordings start unticked.
  */
 export function ChatPanel(): JSX.Element {
-  const variantId = useAppSelector(activeVariantSelector).id;
+  const jobId = useAppSelector(activeVariantSelector).id;
   // each variant has its own conversation
-  return <ChatConversation key={variantId} variantId={variantId} />;
+  return <ChatConversation key={jobId} jobId={jobId} />;
 }
 
-function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
+function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
@@ -58,7 +58,7 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
   const steps = useAppSelector((s) => s.history.past.length);
 
   const [status, setStatus] = useState<AiStatus | null>(null);
-  const [turns, setTurns] = useState<Turn[]>(() => loadChat(variantId));
+  const [turns, setTurns] = useState<Turn[]>(() => loadChat(jobId));
   const [text, setText] = useState<string>("");
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -74,8 +74,8 @@ function ChatConversation({ variantId }: { variantId: string }): JSX.Element {
 
   // the conversation is kept in this browser (not in the data folder), one per variant
   useEffect(() => {
-    saveChat(variantId, turns);
-  }, [variantId, turns]);
+    saveChat(jobId, turns);
+  }, [jobId, turns]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: "end" });

@@ -230,7 +230,7 @@ function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
                     onClick={() =>
                       dispatch(
                         setItemSelection({
-                          variantId: variant.id,
+                          jobId: variant.id,
                           itemId,
                           change: { isVisible: !isShown },
                         })

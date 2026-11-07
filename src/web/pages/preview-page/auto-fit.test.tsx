@@ -12,7 +12,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { PreviewPage } from "@pages/preview-page/preview-page";
-import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
+import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
@@ -172,7 +172,7 @@ describe("auto-fit in the preview", () => {
     const store = makeStore();
     render(
       <Provider store={store}>
-        <EditorVariants />
+        <EditorJobs />
       </Provider>
     );
     fireEvent.click(screen.getByLabelText("Auto-fit to the page limit"));

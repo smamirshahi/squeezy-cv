@@ -66,7 +66,7 @@ describe("undo and redo: templates and jobs", () => {
     const before = store.getState().variants;
     store.dispatch(
       setItemSelection({
-        variantId: id,
+        jobId: id,
         itemId: item.id,
         change: { isVisible: false },
       })
@@ -124,7 +124,7 @@ describe("undo and redo", () => {
     const id = activeVariantSelector(store.getState()).id;
     store.dispatch(
       setItemSelection({
-        variantId: id,
+        jobId: id,
         itemId: item.id,
         change: { isVisible: false },
       })

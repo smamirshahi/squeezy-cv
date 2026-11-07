@@ -26,7 +26,6 @@ import {
   JobSummary,
   StorageError,
   TemplateSummary,
-  VariantSummary,
 } from "@server/storage/cv-storage";
 import {
   KeyedQueue,
@@ -54,10 +53,6 @@ function isReadableVault(raw: unknown): boolean {
   }
 }
 
-function isReadableVariant(raw: unknown): boolean {
-  return VariantSchema.guard(raw);
-}
-
 function isReadableTemplate(raw: unknown): boolean {
   return TemplateSchema.guard(raw);
 }
@@ -83,7 +78,7 @@ function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Keeps everything as JSON files in one folder: `vault.json`, `variants/`, `applications/<id>/` */
+/** Keeps everything as JSON files in one folder: `vault.json`, `templates/`, `jobs/`, `applications/<id>/` (and old `variants/`, read-only) */
 export class FileCvStorage implements CvStorage {
   private readonly queue = new KeyedQueue();
 
@@ -134,38 +129,8 @@ export class FileCvStorage implements CvStorage {
     );
   }
 
-  async listVariants(): Promise<VariantSummary[]> {
-    const dir = path.join(this.dataDir, VARIANTS_DIR);
-    let names: string[];
-    try {
-      names = await fs.readdir(dir);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return [];
-      }
-      throw error;
-    }
-
-    const result: VariantSummary[] = [];
-    for (const fileName of names.sort()) {
-      if (!fileName.endsWith(".json")) {
-        continue;
-      }
-      const id = fileName.slice(0, -".json".length);
-      if (!VARIANT_ID_PATTERN.test(id)) {
-        continue;
-      }
-      try {
-        const variant = await this.loadVariant(id);
-        result.push({ id, name: variant.name, isCorrupt: false });
-      } catch {
-        result.push({ id, name: "", isCorrupt: true });
-      }
-    }
-    return result;
-  }
-
-  async loadVariant(id: string): Promise<Variant> {
+  /** Reads an old `variants/<id>.json` (only used to split it into a template and a job) */
+  private async loadVariant(id: string): Promise<Variant> {
     const filePath = this.variantPath(id);
     let raw: unknown;
     try {
@@ -188,24 +153,6 @@ export class FileCvStorage implements CvStorage {
     return raw;
   }
 
-  async saveVariant(variant: Variant): Promise<void> {
-    const filePath = this.variantPath(variant.id);
-    await this.queue.run(filePath, () =>
-      writeJsonAtomic(filePath, variant, isReadableVariant)
-    );
-  }
-
-  async deleteVariant(id: string): Promise<void> {
-    const filePath = this.variantPath(id);
-    await this.queue.run(filePath, async () => {
-      if (!(await fileExists(filePath))) {
-        throw new StorageError("not_found", `There is no variant ${id}.`);
-      }
-      // Keep a backup instead of destroying the data for good
-      await fs.copyFile(filePath, `${filePath}.deleted`);
-      await fs.rm(filePath);
-    });
-  }
   private templatePath(id: string): string {
     if (!TEMPLATE_ID_PATTERN.test(id)) {
       throw new StorageError(
@@ -257,7 +204,7 @@ export class FileCvStorage implements CvStorage {
 
   /**
    * Old data: variant files and no job files yet. Each readable variant is split into a
-   * template and a job; a damaged variant is skipped (it stays listed under /api/variants).
+   * template and a job; a damaged variant is skipped and left untouched.
    */
   private async legacyPairs(): Promise<{ template: Template; job: Job }[]> {
     // Once either folder has anything (even a `.deleted` copy), the new files are the truth

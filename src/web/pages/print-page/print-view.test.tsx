@@ -33,11 +33,11 @@ function stubServer(
   );
 }
 
-function show(variantId: string): HTMLElement {
+function show(jobId: string): HTMLElement {
   const store = configureStore({ reducer: rootReducer });
   const { container } = render(
     <Provider store={store}>
-      <PrintView variantId={variantId} />
+      <PrintView jobId={jobId} />
     </Provider>
   );
   return container;

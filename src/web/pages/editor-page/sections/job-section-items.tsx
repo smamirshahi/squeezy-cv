@@ -163,7 +163,7 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
   function moveBullet(bulletId: string, toIndex: number): void {
     dispatch(
       setBulletOrders({
-        variantId: variant.id,
+        jobId: variant.id,
         itemId: item.id,
         orders: computeBulletOrders(item, variant, bulletId, toIndex),
       })
@@ -216,7 +216,7 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                         onClick={() =>
                           dispatch(
                             setBulletSelection({
-                              variantId: variant.id,
+                              jobId: variant.id,
                               itemId: item.id,
                               bulletId: bullet.id,
                               change: { isVisible: !isShown },
@@ -272,7 +272,7 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                           if (value) {
                             dispatch(
                               setBulletSelection({
-                                variantId: variant.id,
+                                jobId: variant.id,
                                 itemId: item.id,
                                 bulletId: bullet.id,
                                 change: { wording: value },
@@ -330,7 +330,7 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                         onChange={(event) =>
                           dispatch(
                             setBulletSelection({
-                              variantId: variant.id,
+                              jobId: variant.id,
                               itemId: item.id,
                               bulletId: bullet.id,
                               change: { isVisible: event.target.checked },
@@ -349,7 +349,7 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                       onChange={(event) =>
                         dispatch(
                           setBulletSelection({
-                            variantId: variant.id,
+                            jobId: variant.id,
                             itemId: item.id,
                             bulletId: bullet.id,
                             change: { wording: event.target.value as Wording },
@@ -394,7 +394,7 @@ export function VariantSectionItems({ section }: Props): JSX.Element | null {
   function moveItem(itemId: string, toIndex: number): void {
     dispatch(
       setItemOrders({
-        variantId: variant.id,
+        jobId: variant.id,
         orders: computeItemOrders(section.items, variant, itemId, toIndex),
       })
     );
@@ -451,7 +451,7 @@ export function VariantSectionItems({ section }: Props): JSX.Element | null {
                             onChange={(event) =>
                               dispatch(
                                 setItemSelection({
-                                  variantId: variant.id,
+                                  jobId: variant.id,
                                   itemId: item.id,
                                   change: { isVisible: event.target.checked },
                                 })
@@ -469,7 +469,7 @@ export function VariantSectionItems({ section }: Props): JSX.Element | null {
                             onChange={(event) =>
                               dispatch(
                                 setItemSelection({
-                                  variantId: variant.id,
+                                  jobId: variant.id,
                                   itemId: item.id,
                                   change: {
                                     emphasis: event.target.checked

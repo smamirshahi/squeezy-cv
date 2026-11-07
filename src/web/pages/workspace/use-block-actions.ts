@@ -46,7 +46,7 @@ export function useBlockActions(): BlockActions {
       if (itemId) {
         dispatch(
           setItemSelection({
-            variantId: variant.id,
+            jobId: variant.id,
             itemId,
             change: { isVisible: choice?.isVisible === false },
           })
@@ -57,7 +57,7 @@ export function useBlockActions(): BlockActions {
       if (itemId) {
         dispatch(
           setItemSelection({
-            variantId: variant.id,
+            jobId: variant.id,
             itemId,
             change: {
               emphasis: choice?.emphasis === "high" ? "normal" : "high",
@@ -77,7 +77,7 @@ export function useBlockActions(): BlockActions {
       ) {
         dispatch(
           setItemOrders({
-            variantId: variant.id,
+            jobId: variant.id,
             orders: computeItemOrders(section.items, variant, itemId, toIndex),
           })
         );

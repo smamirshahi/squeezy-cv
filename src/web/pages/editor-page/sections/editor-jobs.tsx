@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-variant";
-import { VariantSectionItems } from "@pages/editor-page/sections/variant-section-items";
+import { VariantSectionItems } from "@pages/editor-page/sections/job-section-items";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
   TemplateScopeNote,
@@ -41,7 +41,7 @@ import { sectionsSelector } from "@store/vault/vault-slice";
  * and bullets are shown, in which order and wording. Changes apply at once and never
  * change the vault.
  */
-export function EditorVariants(): JSX.Element {
+export function EditorJobs(): JSX.Element {
   const dispatch = useAppDispatch();
   const sections = useAppSelector(sectionsSelector);
   const variants = useAppSelector(variantsSelector);

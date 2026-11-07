@@ -71,7 +71,7 @@ export function FitPanel(): JSX.Element | null {
   function setHidden(itemId: string, isHidden: boolean): void {
     dispatch(
       setItemSelection({
-        variantId: variant.id,
+        jobId: variant.id,
         itemId,
         change: { isVisible: !isHidden },
       })

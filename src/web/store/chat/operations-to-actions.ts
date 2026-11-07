@@ -34,7 +34,7 @@ export type OperationState = Pick<
 
 function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
   const variant = activeVariantSelector(state);
-  const variantId = variant.id;
+  const jobId = variant.id;
   const sections = state.vault.sections;
   const section = (itemId: string): (typeof sections)[number] | undefined =>
     sections.find((s) => s.items.some((i) => i.id === itemId));
@@ -44,7 +44,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       return section(op.itemId)
         ? [
             setItemSelection({
-              variantId,
+              jobId,
               itemId: op.itemId,
               change: { isVisible: !op.isHidden },
             }),
@@ -54,7 +54,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       return section(op.itemId)
         ? [
             setItemSelection({
-              variantId,
+              jobId,
               itemId: op.itemId,
               change: { emphasis: op.isEmphasised ? "high" : "normal" },
             }),
@@ -69,7 +69,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       const toIndex = Math.min(count - 1, Math.max(0, op.position - 1));
       return [
         setItemOrders({
-          variantId,
+          jobId,
           orders: computeItemOrders(home.items, variant, op.itemId, toIndex),
         }),
       ];
@@ -96,7 +96,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
         updatePageStructure(layout),
         // the variant's own copy is written in the same step (the sync hook would do it one step later)
         setVariantAppearance({
-          id: variantId,
+          id: jobId,
           layout,
           style: state.cvData.style,
         }),
@@ -106,7 +106,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       return section(op.itemId)
         ? [
             setBulletSelection({
-              variantId,
+              jobId,
               itemId: op.itemId,
               bulletId: op.bulletId,
               change: { isVisible: !op.isHidden },
@@ -117,7 +117,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       return section(op.itemId)
         ? [
             setBulletSelection({
-              variantId,
+              jobId,
               itemId: op.itemId,
               bulletId: op.bulletId,
               change: { wording: op.wording },
@@ -136,7 +136,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
               text: op.text,
             }),
             setBulletSelection({
-              variantId,
+              jobId,
               itemId: op.itemId,
               bulletId: op.bulletId,
               change: { wording: op.wording },
@@ -145,9 +145,9 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
         : [];
     }
     case "setTone":
-      return [setTone({ id: variantId, tone: op.tone })];
+      return [setTone({ id: jobId, tone: op.tone })];
     case "setPageLimit":
-      return [setPageLimit({ id: variantId, pageLimit: op.pages })];
+      return [setPageLimit({ id: jobId, pageLimit: op.pages })];
   }
 }
 

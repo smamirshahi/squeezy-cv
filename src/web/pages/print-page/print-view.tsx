@@ -14,15 +14,15 @@ type LoadState =
 
 interface Props {
   /** The id of the saved job to show (a job id is also the id of its variant) */
-  variantId: string;
+  jobId: string;
 }
 
 /**
- * The print-only route (`/?print=<variantId>`): just the CV, loaded from the server, with
+ * The print-only route (`/?print=<jobId>`): just the CV, loaded from the server, with
  * no editor around it. The PDF renderer opens this page and waits for `data-cv-ready`
  * (or `data-cv-error`). The page's own margin is set here so every printed page has it.
  */
-export function PrintView({ variantId }: Props): JSX.Element | null {
+export function PrintView({ jobId }: Props): JSX.Element | null {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -35,7 +35,7 @@ export function PrintView({ variantId }: Props): JSX.Element | null {
       try {
         const [file, saved] = await Promise.all([
           api.loadVault(),
-          api.loadResolvedJob(variantId),
+          api.loadResolvedJob(jobId),
         ]);
         loadCvFileIntoStore(dispatch, file, [saved]);
         activateVariant(dispatch, saved);
@@ -57,7 +57,7 @@ export function PrintView({ variantId }: Props): JSX.Element | null {
     return () => {
       isCancelled = true;
     };
-  }, [api, dispatch, variantId]);
+  }, [api, dispatch, jobId]);
 
   if (state.status === "error") {
     return <div data-cv-error="">{state.message}</div>;

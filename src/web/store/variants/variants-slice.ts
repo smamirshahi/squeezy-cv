@@ -265,17 +265,6 @@ const variantsSlice = createSlice({
       );
     },
 
-    /** Adds a finished variant (e.g. one made from an AI proposal) as a job with its own new template, and makes it the active one */
-    insertVariant(state, action: PayloadAction<Variant>) {
-      const { template, job } = splitVariant(
-        action.payload,
-        templateIdFor(action.payload.id)
-      );
-      state.templates.push(template);
-      state.jobs.push(job);
-      state.activeJobId = job.id;
-    },
-
     /**
      * A job made by tailoring (#170): it uses an existing template, or the template copy that
      * comes with it. Nothing existing is changed. The job becomes the active one.
@@ -357,17 +346,17 @@ const variantsSlice = createSlice({
       }
     },
 
-    /** What one item shows in a job. `variantId` is the job's id. */
+    /** What one item shows in a job. `jobId` is the job's id. */
     setItemSelection(
       state,
       action: PayloadAction<{
-        variantId: string;
+        jobId: string;
         itemId: string;
         change: Partial<ItemSelection>;
       }>
     ) {
-      const { variantId, itemId, change } = action.payload;
-      const index = state.jobs.findIndex((j) => j.id === variantId);
+      const { jobId, itemId, change } = action.payload;
+      const index = state.jobs.findIndex((j) => j.id === jobId);
       if (index >= 0) {
         state.jobs[index] = changeItemSelection(
           state.jobs[index],
@@ -380,14 +369,14 @@ const variantsSlice = createSlice({
     setBulletSelection(
       state,
       action: PayloadAction<{
-        variantId: string;
+        jobId: string;
         itemId: string;
         bulletId: string;
         change: Partial<BulletSelection>;
       }>
     ) {
-      const { variantId, itemId, bulletId, change } = action.payload;
-      const index = state.jobs.findIndex((j) => j.id === variantId);
+      const { jobId, itemId, bulletId, change } = action.payload;
+      const index = state.jobs.findIndex((j) => j.id === jobId);
       if (index >= 0) {
         state.jobs[index] = updateBulletSelection(
           state.jobs[index],
@@ -402,13 +391,11 @@ const variantsSlice = createSlice({
     setItemOrders(
       state,
       action: PayloadAction<{
-        variantId: string;
+        jobId: string;
         orders: Record<string, number>;
       }>
     ) {
-      const index = state.jobs.findIndex(
-        (j) => j.id === action.payload.variantId
-      );
+      const index = state.jobs.findIndex((j) => j.id === action.payload.jobId);
       if (index < 0) {
         return;
       }
@@ -423,13 +410,13 @@ const variantsSlice = createSlice({
     setBulletOrders(
       state,
       action: PayloadAction<{
-        variantId: string;
+        jobId: string;
         itemId: string;
         orders: Record<string, number>;
       }>
     ) {
-      const { variantId, itemId, orders } = action.payload;
-      const index = state.jobs.findIndex((j) => j.id === variantId);
+      const { jobId, itemId, orders } = action.payload;
+      const index = state.jobs.findIndex((j) => j.id === jobId);
       if (index < 0) {
         return;
       }
@@ -557,7 +544,6 @@ export const {
   setVariants,
   setTemplatesAndJobs,
   createVariant: addVariant,
-  insertVariant,
   insertTailoredJob,
   duplicateVariant,
   renameVariant,

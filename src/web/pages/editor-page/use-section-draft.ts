@@ -106,7 +106,7 @@ export function useSectionDraft(
       // Visibility belongs to the active variant; the vault item stays as it is
       dispatch(
         setItemSelection({
-          variantId: variant.id,
+          jobId: variant.id,
           itemId,
           change: { isVisible: shouldShow },
         })
