@@ -541,9 +541,7 @@ export function Inspector(): JSX.Element {
           p: 2,
         }}
       >
-        <>
-          {block ? <BlockInspector /> : <PageInspector />}
-        </>
+        <>{block ? <BlockInspector /> : <PageInspector />}</>
       </Box>
     </ResizableAside>
   );

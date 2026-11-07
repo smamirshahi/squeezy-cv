@@ -14,7 +14,6 @@ import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
 import {
   activeVariantSelector,
   setItemSelection,
-  setLocks,
   setPageLimit,
   setVariantAppearance,
   setVariants,
@@ -173,10 +172,9 @@ describe("undo and redo", () => {
     expect(store.getState().history.past).toHaveLength(2);
   });
 
-  it("does not make steps out of selection, locks or other UI changes", () => {
+  it("does not make steps out of selection or other UI changes", () => {
     const { store } = setup();
     store.dispatch(setSelectedBlock({ sectionId: job.id, itemId: item.id }));
-    store.dispatch(setLocks({ byVariant: {}, hasUnreadable: false }));
     expect(store.getState().history.past).toHaveLength(0);
   });
 

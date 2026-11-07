@@ -589,7 +589,10 @@ export function buildServer({
     } catch (error) {
       if (error instanceof StorageError && error.code === "not_found") {
         const variant = await storage.loadVariant(id);
-        return { variant, source: { jobId: variant.id, jobName: variant.name } };
+        return {
+          variant,
+          source: { jobId: variant.id, jobName: variant.name },
+        };
       }
       throw error;
     }

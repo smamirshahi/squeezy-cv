@@ -53,12 +53,5 @@ export function useSyncActiveVariant(): void {
         setVariantAppearance({ id: variant.id, layout: structure, style })
       );
     }
-  }, [
-    dispatch,
-    variant.id,
-    variant.layout,
-    variant.style,
-    structure,
-    style,
-  ]);
+  }, [dispatch, variant.id, variant.layout, variant.style, structure, style]);
 }

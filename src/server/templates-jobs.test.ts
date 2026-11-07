@@ -201,7 +201,7 @@ describe("applications from a job", () => {
     await call("PUT", "/api/vault", file);
     await seed();
     const response = await call("POST", "/api/applications", {
-      variantId: "acme",
+      jobId: "acme",
       company: "Acme Ltd",
       role: "Dev",
     });
@@ -217,7 +217,7 @@ describe("applications from a job", () => {
   it("answers 404 when neither a job nor a variant has that id", async () => {
     await call("PUT", "/api/vault", file);
     const response = await call("POST", "/api/applications", {
-      variantId: "nope",
+      jobId: "nope",
       company: "A",
       role: "B",
     });

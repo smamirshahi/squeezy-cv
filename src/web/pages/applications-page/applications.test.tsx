@@ -32,7 +32,7 @@ afterEach(() => {
 const file = migrateCvFile(sample);
 const variant = createDefaultVariant(file, "v1");
 const application = createApplication(
-  { variantId: "v1", company: "Acme Ltd", role: "Senior Dev" },
+  { jobId: "v1", company: "Acme Ltd", role: "Senior Dev" },
   file.vault,
   variant,
   "2026-11-06",
@@ -109,13 +109,12 @@ describe("Mark as applied", () => {
     fireEvent.click(submit);
 
     await screen.findByText(/Saved: Acme Ltd, Senior Dev/);
-    // Nothing was unsaved, so the only writes are the application and then a re-read of the locks
-    expect(calls).toHaveLength(2);
-    expect(calls[1]).toMatchObject({ method: "GET", url: "/api/applications" });
+    // Nothing was unsaved, so the only write is the application
+    expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({
       method: "POST",
       url: "/api/applications",
-      body: { variantId: "v1", company: "Acme Ltd", role: "Senior Dev" },
+      body: { jobId: "v1", company: "Acme Ltd", role: "Senior Dev" },
     });
   });
 

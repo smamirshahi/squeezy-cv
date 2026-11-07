@@ -30,7 +30,6 @@ import {
   addTemplate,
   addVariant,
   setJobTemplate,
-  setLocks,
   setPageLimit,
   variantsSelector,
 } from "@store/variants/variants-slice";
@@ -158,25 +157,6 @@ describe("job switcher", () => {
     expect(
       within(screen.getByRole("listbox")).getByText("2 jobs")
     ).toBeTruthy();
-  });
-
-  it("cannot change the template of a job that was sent", () => {
-    const store = setup(<JobSwitcher />);
-    act(() => {
-      store.dispatch(
-        setLocks({
-          hasUnreadable: false,
-          byVariant: {
-            default: [{ id: "a", company: "Acme", role: "Dev" }],
-          },
-        } as never)
-      );
-    });
-    expect(
-      screen
-        .getByLabelText("Template of this job")
-        .getAttribute("aria-disabled")
-    ).toBe("true");
   });
 });
 

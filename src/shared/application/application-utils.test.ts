@@ -21,7 +21,7 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 const file = migrateCvFile(sample);
 const variant = createVariant(file.vault, file.style, "v1", "Acme");
-const input = { variantId: "v1", company: " Acme Ltd ", role: "Senior Dev" };
+const input = { jobId: "v1", company: " Acme Ltd ", role: "Senior Dev" };
 
 function make(overrides = {}): Application {
   return createApplication(

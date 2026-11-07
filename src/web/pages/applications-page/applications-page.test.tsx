@@ -32,7 +32,10 @@ function entry(
     role,
     status,
     appliedAt,
-    variantId: "v1",
+    jobId: "v1",
+    templateId: "t1",
+    jobName: "Main job",
+    templateName: "Template 1",
     updatedAt: appliedAt,
     isCorrupt: false,
   };

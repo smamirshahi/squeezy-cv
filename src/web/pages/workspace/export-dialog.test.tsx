@@ -26,7 +26,7 @@ import { AppStore } from "@store/store-helper";
 const file = migrateCvFile(sample);
 const variant = createDefaultVariant(file, "v1");
 const application = createApplication(
-  { variantId: "v1", company: "Acme Ltd", role: "Senior Dev" },
+  { jobId: "v1", company: "Acme Ltd", role: "Senior Dev" },
   file.vault,
   variant,
   "2026-11-06",
