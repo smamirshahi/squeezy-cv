@@ -27,6 +27,7 @@ import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
 import { LockedFieldset } from "@pages/workspace/variant-lock";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   setSelectedBlock,
@@ -525,21 +526,23 @@ function BlockInspector(): JSX.Element | null {
 export function Inspector(): JSX.Element {
   const block = useAppSelector((s) => s.app.selectedBlock);
   return (
-    <Box
-      component="aside"
-      aria-label="Inspector"
-      sx={{
-        width: 340,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.panel,
-        borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-        overflow: "auto",
-        p: 2,
-      }}
-    >
-      <LockedFieldset>
-        {block ? <BlockInspector /> : <PageInspector />}
-      </LockedFieldset>
-    </Box>
+    <ResizableAside side="right" label="the inspector" defaultWidth={340}>
+      <Box
+        component="aside"
+        aria-label="Inspector"
+        sx={{
+          width: "100%",
+          flex: "none",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          overflow: "auto",
+          p: 2,
+        }}
+      >
+        <LockedFieldset>
+          {block ? <BlockInspector /> : <PageInspector />}
+        </LockedFieldset>
+      </Box>
+    </ResizableAside>
   );
 }

@@ -20,6 +20,7 @@ import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { StyleUsagePanel } from "@pages/editor-page/sections/editor-style-settings/style-usage-panel";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
@@ -59,117 +60,128 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
   const settingPages = pages.filter((page) => SETTING_PAGES.has(page.id));
 
   return (
-    <Box
-      component="aside"
-      aria-label="Vault tree"
-      sx={{
-        width: 290,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.panel,
-        borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-      }}
-    >
-      <Box sx={{ flex: 1, overflow: "auto", p: 1 }}>
-        <List dense disablePadding>
-          {factPages.map((page) => (
-            <ListItemButton
-              key={page.id}
-              selected={selectedPage === page.id}
-              onClick={() => dispatch(setSelectedSectionInEditorPage(page.id))}
-            >
-              <ListItemText primary={page.label} />
-            </ListItemButton>
-          ))}
-          {sections.map((section) => (
-            <Box key={section.id}>
-              <ListItemButton
-                selected={selectedPage === section.id && !selectedItemId}
-                onClick={() => {
-                  dispatch(setSelectedSectionInEditorPage(section.id));
-                  onSelectItem("");
-                }}
-              >
-                <ListItemText
-                  primary={section.title}
-                  slotProps={{
-                    primary: { sx: { fontWeight: 600 } },
-                  }}
-                />
-                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                  {section.items.length}
-                </Typography>
-              </ListItemButton>
-              {section.type !== "summary" &&
-                section.items.map((item) => (
-                  <ListItemButton
-                    key={item.id}
-                    sx={{ pl: 4 }}
-                    selected={selectedItemId === item.id}
-                    onClick={() => {
-                      dispatch(setSelectedSectionInEditorPage(section.id));
-                      onSelectItem(item.id);
-                    }}
-                  >
-                    <ListItemText primary={getItemLabel(item)} />
-                  </ListItemButton>
-                ))}
-            </Box>
-          ))}
-        </List>
-        <Divider sx={{ my: 1 }} />
-        <Typography
-          sx={{ px: 1, fontSize: 11, fontWeight: 700, color: "text.secondary" }}
-        >
-          SETTINGS
-        </Typography>
-        <List dense disablePadding>
-          {settingPages.map((page) => (
-            <ListItemButton
-              key={page.id}
-              selected={selectedPage === page.id}
-              onClick={() => dispatch(setSelectedSectionInEditorPage(page.id))}
-            >
-              <ListItemText primary={page.label} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Box>
+    <ResizableAside side="left" label="the vault tree" defaultWidth={290}>
       <Box
+        component="aside"
+        aria-label="Vault tree"
         sx={{
-          p: 1,
+          width: "100%",
+          flex: "none",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
           display: "flex",
-          gap: 1,
-          borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-          flexWrap: "wrap",
+          flexDirection: "column",
+          minHeight: 0,
         }}
       >
-        <Button
-          size="small"
-          variant="contained"
-          onClick={() => setIsImportOpen(true)}
+        <Box sx={{ flex: 1, overflow: "auto", p: 1 }}>
+          <List dense disablePadding>
+            {factPages.map((page) => (
+              <ListItemButton
+                key={page.id}
+                selected={selectedPage === page.id}
+                onClick={() =>
+                  dispatch(setSelectedSectionInEditorPage(page.id))
+                }
+              >
+                <ListItemText primary={page.label} />
+              </ListItemButton>
+            ))}
+            {sections.map((section) => (
+              <Box key={section.id}>
+                <ListItemButton
+                  selected={selectedPage === section.id && !selectedItemId}
+                  onClick={() => {
+                    dispatch(setSelectedSectionInEditorPage(section.id));
+                    onSelectItem("");
+                  }}
+                >
+                  <ListItemText
+                    primary={section.title}
+                    slotProps={{
+                      primary: { sx: { fontWeight: 600 } },
+                    }}
+                  />
+                  <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                    {section.items.length}
+                  </Typography>
+                </ListItemButton>
+                {section.type !== "summary" &&
+                  section.items.map((item) => (
+                    <ListItemButton
+                      key={item.id}
+                      sx={{ pl: 4 }}
+                      selected={selectedItemId === item.id}
+                      onClick={() => {
+                        dispatch(setSelectedSectionInEditorPage(section.id));
+                        onSelectItem(item.id);
+                      }}
+                    >
+                      <ListItemText primary={getItemLabel(item)} />
+                    </ListItemButton>
+                  ))}
+              </Box>
+            ))}
+          </List>
+          <Divider sx={{ my: 1 }} />
+          <Typography
+            sx={{
+              px: 1,
+              fontSize: 11,
+              fontWeight: 700,
+              color: "text.secondary",
+            }}
+          >
+            SETTINGS
+          </Typography>
+          <List dense disablePadding>
+            {settingPages.map((page) => (
+              <ListItemButton
+                key={page.id}
+                selected={selectedPage === page.id}
+                onClick={() =>
+                  dispatch(setSelectedSectionInEditorPage(page.id))
+                }
+              >
+                <ListItemText primary={page.label} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
+        <Box
+          sx={{
+            p: 1,
+            display: "flex",
+            gap: 1,
+            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+            flexWrap: "wrap",
+          }}
         >
-          Paste CV text, AI sorts it
-        </Button>
-        <ImportCvDialog
-          isOpen={isImportOpen}
-          onClose={() => setIsImportOpen(false)}
-        />
-        <Button component="label" size="small" variant="outlined">
-          Import JSON
-          <HiddenInput type="file" accept=".json" onChange={handleImport} />
-        </Button>
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => handleExport("cv-export")}
-        >
-          Export JSON
-        </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => setIsImportOpen(true)}
+          >
+            Paste CV text, AI sorts it
+          </Button>
+          <ImportCvDialog
+            isOpen={isImportOpen}
+            onClose={() => setIsImportOpen(false)}
+          />
+          <Button component="label" size="small" variant="outlined">
+            Import JSON
+            <HiddenInput type="file" accept=".json" onChange={handleImport} />
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => handleExport("cv-export")}
+          >
+            Export JSON
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </ResizableAside>
   );
 }
 
@@ -178,74 +190,76 @@ function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
   const dispatch = useAppDispatch();
   const variants = useAppSelector(variantsSelector);
   return (
-    <Box
-      component="aside"
-      aria-label="Appears in"
-      sx={{
-        width: 300,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.panel,
-        borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-        p: 2,
-        overflow: "auto",
-      }}
-    >
-      <Typography sx={{ fontWeight: 700, mb: 1 }}>
-        Where this item appears
-      </Typography>
-      {itemId ? (
-        <>
-          {variants.map((variant) => {
-            const isShown = variant.selection[itemId]?.isVisible !== false;
-            return (
-              <Box
-                key={variant.id}
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <Typography
-                  sx={{
-                    flex: 1,
-                    fontSize: 13,
-                    opacity: isShown ? 1 : 0.5,
-                  }}
-                >
-                  {variant.name}
-                </Typography>
-                <IconButton
-                  size="small"
-                  aria-label={`${isShown ? "Hide in" : "Show in"} ${variant.name}`}
-                  onClick={() =>
-                    dispatch(
-                      setItemSelection({
-                        variantId: variant.id,
-                        itemId,
-                        change: { isVisible: !isShown },
-                      })
-                    )
-                  }
-                >
-                  {isShown ? (
-                    <VisibilityIcon fontSize="small" />
-                  ) : (
-                    <VisibilityOffIcon fontSize="small" />
-                  )}
-                </IconButton>
-              </Box>
-            );
-          })}
-          <Typography
-            sx={{ mt: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
-          >
-            The eye hides this item in that variant. The fact stays in the vault
-            and in every other variant.
-          </Typography>
-        </>
-      ) : (
-        <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
-          Pick an item in the tree to see which variants show it.
+    <ResizableAside side="right" label="the item panel" defaultWidth={300}>
+      <Box
+        component="aside"
+        aria-label="Appears in"
+        sx={{
+          width: "100%",
+          flex: "none",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          p: 2,
+          overflow: "auto",
+        }}
+      >
+        <Typography sx={{ fontWeight: 700, mb: 1 }}>
+          Where this item appears
         </Typography>
-      )}
-    </Box>
+        {itemId ? (
+          <>
+            {variants.map((variant) => {
+              const isShown = variant.selection[itemId]?.isVisible !== false;
+              return (
+                <Box
+                  key={variant.id}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <Typography
+                    sx={{
+                      flex: 1,
+                      fontSize: 13,
+                      opacity: isShown ? 1 : 0.5,
+                    }}
+                  >
+                    {variant.name}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    aria-label={`${isShown ? "Hide in" : "Show in"} ${variant.name}`}
+                    onClick={() =>
+                      dispatch(
+                        setItemSelection({
+                          variantId: variant.id,
+                          itemId,
+                          change: { isVisible: !isShown },
+                        })
+                      )
+                    }
+                  >
+                    {isShown ? (
+                      <VisibilityIcon fontSize="small" />
+                    ) : (
+                      <VisibilityOffIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Box>
+              );
+            })}
+            <Typography
+              sx={{ mt: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
+            >
+              The eye hides this item in that variant. The fact stays in the
+              vault and in every other variant.
+            </Typography>
+          </>
+        ) : (
+          <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
+            Pick an item in the tree to see which variants show it.
+          </Typography>
+        )}
+      </Box>
+    </ResizableAside>
   );
 }
 
