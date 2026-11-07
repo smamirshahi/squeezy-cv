@@ -3,12 +3,8 @@ import { EditorEducation } from "@pages/editor-page/sections/editor-education/ed
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { UnsortedPlacement } from "@pages/workspace/unsorted-placement";
-import { AiAssistant } from "@pages/ai-page/ai-assistant";
-import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
-import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
-import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 import { EditorPageSection } from "@pages/editor-page/editor-types";
 import { Section } from "@custom-types/vault-types";
@@ -52,14 +48,6 @@ export function useEditorPages(): EditorPageSection {
   const sections = useAppSelector(sectionsSelector);
 
   return [
-    { id: "metaData", label: "Job data", content: <EditorMetaData /> },
-    {
-      id: "styleSettings",
-      label: "Style Settings",
-      content: <EditorTypography />,
-    },
-    { id: "variants", label: "Jobs", content: <EditorJobs /> },
-    { id: "ai", label: "AI assistant", content: <AiAssistant /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },
     ...sections.map((section) => ({
       id: section.id,

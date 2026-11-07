@@ -41,8 +41,6 @@ describe("VaultPage", () => {
   it("lists the fixed pages and one page per vault section", () => {
     renderEditor(createStore());
     for (const label of [
-      "Job data",
-      "Style Settings",
       "Main Info",
       "Professional Summary",
       "Work Experience",
@@ -82,13 +80,11 @@ describe("VaultPage", () => {
     ).toHaveLength(4);
   });
 
-  it("hides Apply on pages that change no data", () => {
-    const store = createStore();
-    renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: "Jobs" }));
-    expect(screen.queryByText("Apply")).toBeNull();
-    // the placement boxes use the section titles
-    expect(screen.getAllByText("Work Experience").length).toBeGreaterThan(1);
+  it("holds only the user's data: no job data, style or layout pages", () => {
+    renderEditor(createStore());
+    for (const label of ["Job data", "Style Settings", "Jobs", "SETTINGS"]) {
+      expect(screen.queryByText(label), label).toBeNull();
+    }
   });
 
   it("falls back to the first page when the selected section is deleted", () => {
@@ -100,7 +96,7 @@ describe("VaultPage", () => {
       store.dispatch(removeSection({ id: "education" }));
     });
     expect(screen.queryAllByLabelText("Degree")).toHaveLength(0);
-    expect(screen.getByText(/does not affect the CV page/)).toBeTruthy();
+    expect(screen.getByLabelText("Full Name")).toBeTruthy();
   });
 
   it("opens the generic editor for sections without a special layout", () => {

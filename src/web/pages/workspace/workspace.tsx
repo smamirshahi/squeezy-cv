@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AiSetup } from "@pages/workspace/ai-setup";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
@@ -12,6 +12,7 @@ import { ChatPanel } from "@pages/workspace/chat-panel";
 import { BlockToolbar } from "@pages/workspace/block-toolbar";
 import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
+import { JobSettingsPage } from "@pages/workspace/job-settings-page";
 import { TemplatesPage } from "@pages/workspace/templates-page";
 import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
@@ -32,6 +33,7 @@ export function Workspace(): JSX.Element {
   const zoom = useAppSelector((s) => s.app.canvasZoom);
   useCanvasShortcuts(tool === "jobs");
   useUndoShortcuts();
+  const [jobsView, setJobsView] = useState<"page" | "settings">("page");
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   // "O" opens and closes the outline, unless the user is typing
   useEffect(() => {
@@ -71,7 +73,36 @@ export function Workspace(): JSX.Element {
       <ConnectionBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
-        {(tool === "jobs" || tool === "chat") && (
+        {tool === "jobs" && (
+          <Box
+            sx={{
+              flex: "none",
+              display: "flex",
+              flexDirection: "column",
+              borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+              bgcolor: WORKSPACE_COLORS.panel,
+              p: 0.75,
+            }}
+          >
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              orientation="vertical"
+              aria-label="Job view"
+              value={jobsView}
+              onChange={(_event, value: "page" | "settings" | null) => {
+                if (value) {
+                  setJobsView(value);
+                }
+              }}
+            >
+              <ToggleButton value="page">CV page</ToggleButton>
+              <ToggleButton value="settings">Job settings</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        )}
+        {tool === "jobs" && jobsView === "settings" && <JobSettingsPage />}
+        {((tool === "jobs" && jobsView === "page") || tool === "chat") && (
           <>
             {isOutlineOpen && (
               <Outline onClose={() => setIsOutlineOpen(false)} />

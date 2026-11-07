@@ -19,7 +19,6 @@ import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
-import { StyleUsagePanel } from "@pages/editor-page/sections/editor-style-settings/style-usage-panel";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useImportExportJson } from "@hooks/use-import-export-json";
@@ -34,9 +33,8 @@ import {
 
 const HiddenInput = styled("input")({ display: "none" });
 
-/** Pages that are about the vault's facts; the rest (style, layout, variants) are settings */
+/** Pages that are about the vault's facts. Style and layout live in Templates, job data in Jobs. */
 const FACT_PAGES = new Set(["mainInfo"]);
-const SETTING_PAGES = new Set(["metaData", "styleSettings", "variants"]);
 
 interface TreeProps {
   selectedItemId: string;
@@ -53,7 +51,6 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
   const factPages = pages.filter((page) => FACT_PAGES.has(page.id));
-  const settingPages = pages.filter((page) => SETTING_PAGES.has(page.id));
 
   return (
     <ResizableAside side="left" label="the vault tree" defaultWidth={290}>
@@ -153,30 +150,6 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
                 </Typography>
               </ListItemButton>
             )}
-          </List>
-          <Divider sx={{ my: 1 }} />
-          <Typography
-            sx={{
-              px: 1,
-              fontSize: 11,
-              fontWeight: 700,
-              color: "text.secondary",
-            }}
-          >
-            SETTINGS
-          </Typography>
-          <List dense disablePadding>
-            {settingPages.map((page) => (
-              <ListItemButton
-                key={page.id}
-                selected={selectedPage === page.id}
-                onClick={() =>
-                  dispatch(setSelectedSectionInEditorPage(page.id))
-                }
-              >
-                <ListItemText primary={page.label} />
-              </ListItemButton>
-            ))}
           </List>
         </Box>
         <Box
@@ -315,8 +288,6 @@ export function VaultPage(): JSX.Element {
     selectedSection !== undefined &&
     selectedItem !== undefined &&
     selectedSection.type !== "summary";
-  const isStylePage = page.id === "styleSettings" && !hasInlineEditor;
-  const isFact = !SETTING_PAGES.has(page.id) && page.id !== "ai";
 
   return (
     <>
@@ -346,15 +317,14 @@ export function VaultPage(): JSX.Element {
             onSelectItem={setSelectedItemId}
           />
         )}
-        {!hasInlineEditor && isFact && (
+        {!hasInlineEditor && (
           <Alert severity="warning">
             You are editing a <b>vault fact</b>. Changes apply to all{" "}
             {variants.length} {variants.length === 1 ? "job" : "jobs"} that use
             it. To change only one job, edit it on the page instead.
           </Alert>
         )}
-        {isStylePage && page.content}
-        {!hasInlineEditor && !isStylePage && (
+        {!hasInlineEditor && (
           <>
             <Box
               sx={{ bgcolor: WORKSPACE_COLORS.panel, borderRadius: 1, p: 2 }}
@@ -365,11 +335,7 @@ export function VaultPage(): JSX.Element {
           </>
         )}
       </Box>
-      {isStylePage ? (
-        <StyleUsagePanel />
-      ) : (
-        <AppearsIn itemId={selectedItemId} />
-      )}
+      <AppearsIn itemId={selectedItemId} />
     </>
   );
 }

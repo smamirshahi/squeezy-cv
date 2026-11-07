@@ -53,6 +53,19 @@ function show(store: AppStore): void {
   );
 }
 
+function showLayout(store: AppStore): void {
+  render(
+    <Provider store={store}>
+      <LayoutPage />
+    </Provider>
+  );
+}
+
+function LayoutPage(): JSX.Element {
+  useSyncActiveJob();
+  return <EditorPageStructure />;
+}
+
 /** Uses the "New job" dialog; the job shares the current template unless `hasNewTemplate` */
 async function createJob(name: string, hasNewTemplate = false): Promise<void> {
   fireEvent.click(screen.getByRole("button", { name: "New job" }));
@@ -176,13 +189,12 @@ describe("EditorJobs", () => {
 });
 
 describe("tabs, sections and the explainer", () => {
-  it("opens on Content and switches to Sections & layout", () => {
+  it("shows the content and leaves layout to the Templates tool", () => {
     const store = makeStore();
     show(store);
     expect(screen.getByText("What appears on this CV")).toBeTruthy();
-    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
-    expect(screen.getByText("1 · Pick a page layout")).toBeTruthy();
-    expect(screen.queryByText("What appears on this CV")).toBeNull();
+    expect(screen.queryByRole("tab", { name: /Sections & layout/ })).toBeNull();
+    expect(screen.queryByText("1 · Pick a page layout")).toBeNull();
   });
 
   it("hides a whole section in this job from the Content tab, not in the vault", () => {
@@ -201,8 +213,7 @@ describe("tabs, sections and the explainer", () => {
 
   it("includes and excludes a section on the Sections & layout tab", () => {
     const store = makeStore();
-    show(store);
-    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
+    showLayout(store);
     fireEvent.click(
       screen.getByRole("checkbox", { name: "Include Education in this job" })
     );
@@ -214,8 +225,7 @@ describe("tabs, sections and the explainer", () => {
 
   it("moves a section down with its arrow button, which writes the template layout", () => {
     const store = makeStore();
-    show(store);
-    fireEvent.click(screen.getByRole("tab", { name: /Sections & layout/ }));
+    showLayout(store);
     const before = store.getState().app.structure.fullWidth;
     const index = before.indexOf("experience");
     fireEvent.click(
