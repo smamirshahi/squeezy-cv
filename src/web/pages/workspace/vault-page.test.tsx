@@ -117,12 +117,13 @@ describe("VaultPage", () => {
     expect(screen.getAllByLabelText("Title")).toHaveLength(1);
   });
 
-  it("has a Sections page without Apply that manages sections", () => {
+  it("shows Sections only as a heading, and a section page has a title field", () => {
     const store = createStore();
     renderEditor(store);
-    fireEvent.click(screen.getByRole("button", { name: "Sections" }));
-    expect(screen.queryByText("Apply")).toBeNull();
-    expect(screen.getAllByLabelText("Section title")).toHaveLength(4);
+    expect(screen.getByText("SECTIONS")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Sections" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /Education/ }));
+    expect(screen.getByLabelText("Section title")).toBeTruthy();
   });
 });
 

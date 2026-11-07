@@ -4,16 +4,15 @@ import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-s
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
-import { EditorSections } from "@pages/editor-page/sections/editor-sections";
+import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 import { EditorPageSection } from "@pages/editor-page/editor-types";
 import { Section } from "@custom-types/vault-types";
-import { renameSection, sectionsSelector } from "@store/vault/vault-slice";
-import { TextField } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { sectionsSelector } from "@store/vault/vault-slice";
+import { useAppSelector } from "@store/store-helper";
 
 /** The editor for one vault section, chosen by the type of the section */
 function renderSectionEditor(section: Section): JSX.Element {
@@ -22,22 +21,6 @@ function renderSectionEditor(section: Section): JSX.Element {
       <SectionTitleField key={`title-${section.id}`} section={section} />
       {renderTypedEditor(section)}
     </>
-  );
-}
-
-/** The title of a section, renamed at once (the name shown in the tree and on the CV) */
-function SectionTitleField({ section }: { section: Section }): JSX.Element {
-  const dispatch = useAppDispatch();
-  return (
-    <TextField
-      label="Section title"
-      size="small"
-      value={section.title}
-      onChange={(event) =>
-        dispatch(renameSection({ id: section.id, title: event.target.value }))
-      }
-      sx={{ mb: 2, minWidth: 280 }}
-    />
   );
 }
 
@@ -69,7 +52,6 @@ export function useEditorPages(): EditorPageSection {
     },
     { id: "variants", label: "Jobs", content: <EditorJobs /> },
     { id: "ai", label: "AI assistant", content: <AiAssistant /> },
-    { id: "sections", label: "Sections", content: <EditorSections /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },
     ...sections.map((section) => ({
       id: section.id,

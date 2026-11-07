@@ -21,7 +21,7 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { addItem, addSection, setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
-import { EditorSections } from "@pages/editor-page/sections/editor-sections";
+import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
@@ -75,31 +75,17 @@ function wording(label: string): HTMLElement {
   return field;
 }
 
-describe("EditorSections (manage sections)", () => {
-  it("lists all sections with their type", () => {
-    renderWith(createStore(), <EditorSections />);
-    const fields = screen.getAllByLabelText<HTMLInputElement>("Section title");
-    expect(fields.map((f) => f.value)).toEqual([
-      "Professional Summary",
-      "Work Experience",
-      "Education",
-      "Skills",
-    ]);
-  });
-
+describe("SectionTitleField and AddSectionButton", () => {
   it("renames a section at once", () => {
     const store = createStore();
-    renderWith(store, <EditorSections />);
-    fireEvent.change(screen.getAllByLabelText("Section title")[2], {
+    renderWith(
+      store,
+      <SectionTitleField section={section(store, "education")} />
+    );
+    fireEvent.change(screen.getByLabelText("Section title"), {
       target: { value: "Studies" },
     });
     expect(section(store, "education").title).toBe("Studies");
-  });
-
-  it("has no ordering or add controls (they are in Sections & layout)", () => {
-    renderWith(createStore(), <EditorSections />);
-    expect(screen.queryByTestId("ArrowDownwardIcon")).toBeNull();
-    expect(screen.queryByText("Add section")).toBeNull();
   });
 
   it("adds a section with the chosen type and title", () => {
@@ -132,7 +118,10 @@ describe("EditorSections (manage sections)", () => {
 
   it("asks before deleting and can be cancelled", () => {
     const store = createStore();
-    renderWith(store, <EditorSections />);
+    renderWith(
+      store,
+      <SectionTitleField section={section(store, "education")} />
+    );
     fireEvent.click(screen.getByLabelText("Delete section Education"));
     const dialog = screen.getByRole("dialog");
     expect(
@@ -145,7 +134,10 @@ describe("EditorSections (manage sections)", () => {
 
   it("deletes a section with its items after confirming", () => {
     const store = createStore();
-    renderWith(store, <EditorSections />);
+    renderWith(
+      store,
+      <SectionTitleField section={section(store, "education")} />
+    );
     fireEvent.click(screen.getByLabelText("Delete section Education"));
     fireEvent.click(within(screen.getByRole("dialog")).getByText("Delete"));
     expect(store.getState().vault.sections.map((s) => s.id)).toEqual([
