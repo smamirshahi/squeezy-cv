@@ -17,6 +17,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { Variant, Wording } from "@custom-types/variant-types";
 import { Item, Section } from "@custom-types/vault-types";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
@@ -420,6 +421,9 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                                 {subtitle}
                               </Typography>
                             )}
+                          </Box>
+                          <Box sx={{ ml: 1 }}>
+                            <RelevanceBadge relevance={selection?.relevance} />
                           </Box>
                           {item.bullets.length > 0 && (
                             <Typography

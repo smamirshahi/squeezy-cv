@@ -11,6 +11,11 @@ import {
   AiTask,
 } from "@shared/ai/providers";
 import {
+  RewriteRequest,
+  RewriteResult,
+  RewriteResultSchema,
+} from "@custom-types/rewrite-types";
+import {
   HideRequest,
   HideResult,
   HideResultSchema,
@@ -181,6 +186,9 @@ export interface ApiClient {
   /** One chat turn: a reply and typed operations for the user to approve. Sends CV text (no name or contact details) to the chosen provider. */
   chat: (request: ChatRequest) => Promise<ChatResponse>;
 
+  /** One bullet made shorter, longer or more formal. Sends that item's CV text (no name or contact details) to the chosen provider. Nothing is changed. */
+  rewriteBullet: (request: RewriteRequest) => Promise<RewriteResult>;
+
   /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
   suggestHide: (request: HideRequest) => Promise<HideResult>;
 
@@ -312,6 +320,11 @@ export function createApiClient(
     async chat(body) {
       return ChatResponseSchema.check(
         await request(fetchImpl, "POST", "/api/ai/chat", body)
+      );
+    },
+    async rewriteBullet(body) {
+      return RewriteResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/rewrite", body)
       );
     },
     async suggestHide(body) {

@@ -35,6 +35,7 @@ import { Item } from "@custom-types/vault-types";
 import { shorten } from "@shared/variant/item-label";
 import { sortBulletsByVariant } from "@shared/variant/render";
 import { computeBulletOrders } from "@shared/variant/variant-utils";
+import { BulletAiActions } from "@pages/workspace/bullet-ai-actions";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -288,6 +289,9 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                         ))}
                       </ToggleButtonGroup>
                     </Box>
+                    <Box sx={{ px: 1, pb: 1, pl: 6 }}>
+                      <BulletAiActions item={item} bullet={bullet} />
+                    </Box>
                   </Box>
                 )}
               </SortableRow>
@@ -296,68 +300,75 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
           return (
             <SortableRow key={bullet.id} id={bullet.id}>
               {(handle) => (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    pl: 6,
-                  }}
-                >
-                  {handle}
-                  <SortingIcons
-                    index={index}
-                    swapFunction={(_from, toIndex) =>
-                      moveBullet(bullet.id, toIndex)
-                    }
-                    isLastEntity={index === bullets.length - 1}
-                  />
-                  <FormControlLabel
-                    sx={{ flexGrow: 1 }}
-                    label={shorten(bullet.text)}
-                    control={
-                      <Checkbox
+                <>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      pl: 6,
+                    }}
+                  >
+                    {handle}
+                    <SortingIcons
+                      index={index}
+                      swapFunction={(_from, toIndex) =>
+                        moveBullet(bullet.id, toIndex)
+                      }
+                      isLastEntity={index === bullets.length - 1}
+                    />
+                    <FormControlLabel
+                      sx={{ flexGrow: 1 }}
+                      label={shorten(bullet.text)}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={choice?.isVisible !== false}
+                          onChange={(event) =>
+                            dispatch(
+                              setBulletSelection({
+                                jobId: variant.id,
+                                itemId: item.id,
+                                bulletId: bullet.id,
+                                change: { isVisible: event.target.checked },
+                              })
+                            )
+                          }
+                        />
+                      }
+                    />
+                    {wordings.length > 1 && (
+                      <TextField
+                        select
                         size="small"
-                        checked={choice?.isVisible !== false}
+                        label="Wording"
+                        value={choice?.wording ?? "text"}
                         onChange={(event) =>
                           dispatch(
                             setBulletSelection({
                               jobId: variant.id,
                               itemId: item.id,
                               bulletId: bullet.id,
-                              change: { isVisible: event.target.checked },
+                              change: {
+                                wording: event.target.value as Wording,
+                              },
                             })
                           )
                         }
-                      />
-                    }
-                  />
-                  {wordings.length > 1 && (
-                    <TextField
-                      select
-                      size="small"
-                      label="Wording"
-                      value={choice?.wording ?? "text"}
-                      onChange={(event) =>
-                        dispatch(
-                          setBulletSelection({
-                            jobId: variant.id,
-                            itemId: item.id,
-                            bulletId: bullet.id,
-                            change: { wording: event.target.value as Wording },
-                          })
-                        )
-                      }
-                      sx={{ minWidth: 120 }}
-                    >
-                      {wordings.map((w) => (
-                        <MenuItem key={w} value={w}>
-                          {WORDING_LABELS[w]}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                </Box>
+                        sx={{ minWidth: 120 }}
+                      >
+                        {wordings.map((w) => (
+                          <MenuItem key={w} value={w}>
+                            {WORDING_LABELS[w]}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  </Box>
+                  <Box sx={{ pl: 12, pb: 0.5 }}>
+                    <BulletAiActions item={item} bullet={bullet} />
+                  </Box>
+                </>
               )}
             </SortableRow>
           );

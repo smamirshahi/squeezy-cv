@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Added
 
+- Jobs: each item shows its relevance score (or "Not scored"), and each bullet has Shorten, Extend and Rephrase buttons (`POST /api/ai/rewrite`). The proposal is checked for numbers and names that are not in the CV (flagged ones need a tick); "Use this wording" stores it as an alternative wording and selects it for the job in one undo step; the bullet's own text never changes (#186).
+
 - **Templates: style per section (#185)**: heading size, colour, space above and the line under the heading can be set per section in a template (Templates page), with a live sample CV built from the vault beside the controls; preview and PDF follow, and older templates load unchanged.
 - **Open the CV that was sent from the applications table (#187)**: every row has a View
   CV button (opens the sent PDF) and a download button; the side panel shows the PDF
