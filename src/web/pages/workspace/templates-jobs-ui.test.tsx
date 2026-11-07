@@ -257,6 +257,33 @@ describe("new job", () => {
     expect(jobs(store)[0].templateId).toBe(templates(store)[0].id);
   });
 
+  it("starts again from the job being edited each time it opens", async () => {
+    const store = setup(<JobSwitcher />);
+    await fill("First");
+    fireEvent.mouseDown(screen.getByLabelText("Template"));
+    fireEvent.click(screen.getByRole("option", { name: "New template…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create job" }));
+    await closed();
+    expect(templates(store)).toHaveLength(2);
+
+    // the second job shares the template of the first one (the job being edited now)
+    await fill("Second");
+    expect(screen.getByLabelText("New job name")).toHaveProperty(
+      "value",
+      "Second"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Create job" }));
+    await closed();
+    expect(templates(store)).toHaveLength(2);
+    expect(jobs(store).find((j) => j.name === "Second")?.templateId).toBe(
+      templates(store)[1].id
+    );
+
+    // and the name of the earlier job is not left in the field
+    fireEvent.click(screen.getByRole("button", { name: "New job" }));
+    expect(screen.getByLabelText("New job name")).toHaveProperty("value", "");
+  });
+
   it("makes nothing when cancelled", async () => {
     const store = setup(<JobSwitcher />);
     await fill("Acme");

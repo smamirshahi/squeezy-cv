@@ -110,7 +110,11 @@ export function TopBar(): JSX.Element {
         px: 1.5,
         bgcolor: WORKSPACE_COLORS.bar,
         color: WORKSPACE_COLORS.barText,
-        "& .MuiButton-root": { color: WORKSPACE_COLORS.barText },
+        "& .MuiButton-root": {
+          color: WORKSPACE_COLORS.barText,
+          whiteSpace: "nowrap",
+          flex: "none",
+        },
       }}
     >
       <Typography sx={{ fontWeight: 700, fontSize: 14, mr: 0.5 }}>

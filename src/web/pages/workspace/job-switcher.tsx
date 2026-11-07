@@ -71,7 +71,7 @@ export function JobSwitcher(): JSX.Element {
             activateVariant(dispatch, next);
           }
         }}
-        sx={{ ...SELECT_SX, minWidth: 180 }}
+        sx={{ ...SELECT_SX, minWidth: 150 }}
       >
         {jobs.map((j) => (
           <MenuItem key={j.id} value={j.id}>
@@ -103,7 +103,7 @@ export function JobSwitcher(): JSX.Element {
           }
         }}
         renderValue={() => template.name}
-        sx={{ ...SELECT_SX, minWidth: 130 }}
+        sx={{ ...SELECT_SX, minWidth: 110 }}
       >
         {templates.map((t) => (
           <MenuItem key={t.id} value={t.id}>

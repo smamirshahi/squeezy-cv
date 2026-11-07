@@ -33,12 +33,8 @@ interface Props {
   onClose: () => void;
 }
 
-/**
- * Asks for the name of a new job (company / role) and the template it uses. By default the
- * job shares the template of the job being edited, so a change of the look reaches both;
- * "New template" makes a template of its own (a copy of the current look) for it.
- */
-export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
+/** The form of the dialog; its state starts fresh each time the dialog opens */
+function NewJobForm({ onClose }: { onClose: () => void }): JSX.Element {
   const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
   const style = useAppSelector(styleSelector);
@@ -56,9 +52,6 @@ export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
     name.trim() !== "" && (!isNew || templateName.trim() !== "");
 
   function handleClose(): void {
-    setName("");
-    setChoice(activeTemplate.id);
-    setTemplateName("");
     onClose();
   }
 
@@ -75,13 +68,7 @@ export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
   }
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="xs"
-      aria-labelledby="new-job-title"
-    >
+    <>
       <DialogTitle id="new-job-title">New job</DialogTitle>
       <DialogContent
         sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
@@ -142,6 +129,26 @@ export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
           Create job
         </Button>
       </DialogActions>
+    </>
+  );
+}
+
+/**
+ * Asks for the name of a new job (company / role) and the template it uses. By default the
+ * job shares the template of the job being edited, so a change of the look reaches both;
+ * "New template" makes a template of its own (a copy of the current look) for it. The form
+ * is mounted only while open, so it always starts from the job being edited now.
+ */
+export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      aria-labelledby="new-job-title"
+    >
+      <NewJobForm onClose={onClose} />
     </Dialog>
   );
 }
