@@ -28,6 +28,7 @@ export function SummaryPreviewPage({ section }: Props): JSX.Element | null {
         variant="headingMd"
         pageBreak="keep-with-next"
         text={section.title}
+        sectionStyle={section.sectionStyle}
       />
       <CvTypography variant="bulletText" pageBreak="avoid-inside" text={text} />
     </Grid>

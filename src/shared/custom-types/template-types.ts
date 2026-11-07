@@ -3,6 +3,7 @@ import {
   Literal,
   Number,
   Object,
+  Record,
   Static,
   String,
   Union,
@@ -12,6 +13,7 @@ import {
   FitLimitsSchema,
   FitModeSchema,
   SkillDisplaySchema,
+  SectionStyleSchema,
   SkillGroupBySchema,
   VariantLayoutSchema,
 } from "@custom-types/variant-types";
@@ -61,6 +63,9 @@ export const TemplateSchema = Object({
 
   /** Skills with a level below this (1-5) are not shown. Unrated skills count as 0. */
   skillMinLevel: Number.optional(),
+
+  /** Style per vault section id; missing = the global style. Older templates have none. */
+  sectionStyles: Record(String, SectionStyleSchema).optional(),
 });
 
 export type Template = Static<typeof TemplateSchema>;

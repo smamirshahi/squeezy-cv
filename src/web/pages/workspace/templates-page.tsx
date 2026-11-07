@@ -16,6 +16,7 @@ import {
   moveJobToTemplate,
   nextTemplateName,
 } from "@pages/workspace/template-scope";
+import { TemplateSectionStyles } from "@pages/workspace/template-section-styles";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -82,7 +83,7 @@ export function TemplatesPage(): JSX.Element {
       }}
     >
       <>
-        <Box sx={{ maxWidth: 760, mx: "auto" }}>
+        <Box sx={{ maxWidth: 1000, mx: "auto" }}>
           <Typography component="h1" sx={{ fontSize: 18, fontWeight: 700 }}>
             Templates
           </Typography>
@@ -92,6 +93,7 @@ export function TemplatesPage(): JSX.Element {
             template always look the same, so changing a template changes all of
             its jobs. What each job shows is set per job.
           </Typography>
+          <TemplateSectionStyles />
           <Box sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}>
             <TextField
               size="small"

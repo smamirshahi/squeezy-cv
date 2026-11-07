@@ -39,6 +39,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
         variant="headingMd"
         pageBreak="keep-with-next"
         text={section.title}
+        sectionStyle={section.sectionStyle}
       />
       {section.items.map((item) => (
         <Grid

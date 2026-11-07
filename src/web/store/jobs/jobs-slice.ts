@@ -5,6 +5,10 @@ import {
   createSlice,
   nanoid,
 } from "@reduxjs/toolkit";
+import {
+  changeSectionStyle,
+  SectionStyleChange,
+} from "@shared/variant/section-style";
 import { Job } from "@custom-types/job-types";
 import { Style } from "@custom-types/styles-types";
 import { Template } from "@custom-types/template-types";
@@ -458,6 +462,40 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** Style of one section in the job's template; a null value goes back to the global style */
+    setSectionStyle(
+      state,
+      action: PayloadAction<{
+        id: string;
+        sectionId: string;
+        change: SectionStyleChange;
+      }>
+    ) {
+      const { sectionId, change } = action.payload;
+      editTemplate(
+        state,
+        action.payload.id,
+        (template) => {
+          const next = changeSectionStyle(
+            template.sectionStyles?.[sectionId],
+            change
+          );
+          const styles = { ...template.sectionStyles };
+          if (next) {
+            styles[sectionId] = next;
+          } else {
+            delete styles[sectionId];
+          }
+          if (Object.keys(styles).length === 0) {
+            delete template.sectionStyles;
+          } else {
+            template.sectionStyles = styles;
+          }
+        },
+        { shouldDropTuning: true }
+      );
+    },
+
     /** How skills are shown with the job's template: level style, columns, minimum level */
     setSkillStyle(
       state,
@@ -587,6 +625,7 @@ export const {
   setSectionShown,
   setPageLimit,
   setSkillStyle,
+  setSectionStyle,
   setAutoFit,
   setFitLimits,
   setTuning,
