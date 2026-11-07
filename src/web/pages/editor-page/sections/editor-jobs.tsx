@@ -23,6 +23,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-job";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
+import { ScoreItems } from "@pages/editor-page/sections/score-items";
 import { JobContent } from "@pages/editor-page/sections/job-content";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
@@ -446,7 +447,14 @@ export function EditorJobs(): JSX.Element {
         />
       </Tabs>
 
-      {tab === "layout" ? <EditorPageStructure /> : <JobContent />}
+      {tab === "layout" ? (
+        <EditorPageStructure />
+      ) : (
+        <>
+          <ScoreItems key={job.id} />
+          <JobContent />
+        </>
+      )}
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
         <DialogTitle>Delete job?</DialogTitle>

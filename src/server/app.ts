@@ -12,6 +12,8 @@ import { TemplateSchema } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
+import { scoreItems } from "@server/ai/score-items";
+import { ScoreRequestSchema } from "@custom-types/score-types";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
@@ -330,6 +332,32 @@ export function buildServer({
       { jobAd, tone: body.tone },
       { isMaskingOrganisations: registry.isMaskingOrganisations() }
     );
+  });
+
+  // A relevance score and reason for every item against a job advert (the user applies it; nothing is changed here)
+  app.post("/api/ai/score", async (request, reply) => {
+    const { client: ai } = registry.forTask("tailor");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
+      );
+    }
+    const jobAd = ScoreRequestSchema.check(request.body).jobAd.trim();
+    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
+      );
+    }
+    const { vault } = await storage.loadVault();
+    return scoreItems(ai, vault, jobAd, {
+      isMaskingOrganisations: registry.isMaskingOrganisations(),
+    });
   });
 
   // One chat turn: a reply and typed operations for the user to approve (nothing is changed here)

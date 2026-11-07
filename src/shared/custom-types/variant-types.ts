@@ -64,6 +64,9 @@ export const ItemSelectionSchema = Object({
   /** How relevant the item is to this variant's target (0-100), set by tailoring. Used to pick what to hide first when it does not fit. */
   relevance: Number.optional(),
 
+  /** One sentence on why it got that relevance (from "Score items") */
+  relevanceReason: String.optional(),
+
   /** Position within its section. Items without one keep their vault position after those with one. */
   order: Number.optional(),
 

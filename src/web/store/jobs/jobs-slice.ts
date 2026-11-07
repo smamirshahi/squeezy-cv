@@ -574,6 +574,31 @@ const jobsSlice = createSlice({
       );
     },
 
+    /**
+     * Puts AI relevance scores (0-100, with a reason) on items and remembers the advert. Only
+     * relevance, its reason and the advert change: nothing is shown, hidden or moved. One action,
+     * so one undo step.
+     */
+    setItemScores(
+      state,
+      action: PayloadAction<{
+        jobId: string;
+        jobAd: string;
+        scores: { itemId: string; relevance: number; reason: string }[];
+      }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        let next = job;
+        for (const score of action.payload.scores) {
+          next = changeItemSelection(next, score.itemId, {
+            relevance: score.relevance,
+            relevanceReason: score.reason,
+          });
+        }
+        Object.assign(job, next, { jobAd: action.payload.jobAd });
+      });
+    },
+
     /** Stores the result of an auto-fit run in the job (null clears it) */
     setTuning(
       state,
@@ -622,6 +647,7 @@ export const {
   setItemOrders,
   setTemplateAppearance,
   setTone,
+  setItemScores,
   setSectionShown,
   setPageLimit,
   setSkillStyle,

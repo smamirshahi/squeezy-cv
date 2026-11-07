@@ -428,7 +428,12 @@ function BlockInspector(): JSX.Element | null {
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>
           {item ? getItemLabel(item) : section.title}
         </Typography>
-        {item && <RelevanceBadge relevance={choice?.relevance} />}
+        {item && (
+          <RelevanceBadge
+            relevance={choice?.relevance}
+            reason={choice?.relevanceReason}
+          />
+        )}
       </Box>
       <Tabs value={tab} onChange={(_event, value) => setTab(value)}>
         <Tab value="job" label="This job" />

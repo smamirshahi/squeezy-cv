@@ -423,7 +423,10 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                             )}
                           </Box>
                           <Box sx={{ ml: 1 }}>
-                            <RelevanceBadge relevance={selection?.relevance} />
+                            <RelevanceBadge
+                              relevance={selection?.relevance}
+                              reason={selection?.relevanceReason}
+                            />
                           </Box>
                           {item.bullets.length > 0 && (
                             <Typography
