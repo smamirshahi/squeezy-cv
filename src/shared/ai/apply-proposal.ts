@@ -30,7 +30,7 @@ export interface Decisions {
 }
 
 /** An alternative wording to add to a bullet in the vault. The original text is never changed. */
-export interface AltUpdate {
+interface AltUpdate {
   sectionId: string;
   itemId: string;
   bulletId: string;

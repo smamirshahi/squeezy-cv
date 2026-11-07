@@ -12,7 +12,7 @@ import { Vault } from "@custom-types/vault-types";
 import { render } from "@shared/variant/render";
 
 /** An Applied application with no news for this many days is shown as "No reply" */
-export const NO_REPLY_DAYS = 30;
+const NO_REPLY_DAYS = 30;
 
 const HOURS_PER_DAY = 24;
 const MINUTES_PER_HOUR = 60;

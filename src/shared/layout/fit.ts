@@ -17,7 +17,7 @@ export interface FitTuning {
   fontScale: number;
 }
 
-export type FitMode = "fit" | "fill";
+type FitMode = "fit" | "fill";
 
 export interface FitInput {
   mode: FitMode;
@@ -38,9 +38,9 @@ export interface FitInput {
   hideCandidates: string[];
 }
 
-export type FitPhase = "spacing" | "margin" | "font" | "hide";
+type FitPhase = "spacing" | "margin" | "font" | "hide";
 
-export type FitStatus =
+type FitStatus =
   /** More measuring is needed */
   | "running"
   /** It fits the page limit */
@@ -64,7 +64,7 @@ export interface FitState {
 }
 
 /** How much one step changes a value */
-export const FIT_STEPS = {
+const FIT_STEPS = {
   spacing: 0.1,
   marginMm: 1,
   fontScale: 0.02,

@@ -5,7 +5,7 @@ import {
   RenderedSection,
 } from "@shared/variant/render";
 
-export type DiffStatus = "same" | "added" | "removed" | "changed";
+type DiffStatus = "same" | "added" | "removed" | "changed";
 
 /** A piece of a line: unchanged, inserted or deleted words */
 export interface DiffPart {

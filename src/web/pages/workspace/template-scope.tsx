@@ -26,7 +26,7 @@ export function nextTemplateName(templates: Template[]): string {
 }
 
 /** The template the active job uses and how many jobs share it */
-export function useTemplateScope(): { template: Template; jobCount: number } {
+function useTemplateScope(): { template: Template; jobCount: number } {
   const template = useAppSelector(activeTemplateSelector);
   const jobs = useAppSelector(jobsSelector);
   return {

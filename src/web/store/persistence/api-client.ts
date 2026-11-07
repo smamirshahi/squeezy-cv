@@ -38,14 +38,14 @@ import {
 } from "@custom-types/vault-types";
 
 /** What the server lists for a saved template */
-export interface TemplateSummary {
+interface TemplateSummary {
   id: string;
   name: string;
   isCorrupt: boolean;
 }
 
 /** What the server lists for a saved job */
-export interface JobSummary {
+interface JobSummary {
   id: string;
   name: string;
   templateId: string;

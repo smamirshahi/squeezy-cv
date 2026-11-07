@@ -2,7 +2,7 @@ import { isAiProviderId } from "@shared/ai/providers";
 
 export type AiProvider = "claude" | "gemini" | "groq" | "ollama";
 
-export interface OllamaConfig {
+interface OllamaConfig {
   /** Where Ollama runs. Must be this machine, so the CV never leaves it. */
   url: string;
   model: string;

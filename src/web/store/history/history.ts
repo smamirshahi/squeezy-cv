@@ -6,7 +6,7 @@ import { PageStructure } from "@store/app/app-slice-types";
 import { Style } from "@custom-types/styles-types";
 
 /** What an undo step restores: the CV's facts, every template and every job (the things the user edits and saves) */
-export interface Snapshot {
+interface Snapshot {
   vault: Vault;
   templates: Template[];
   jobs: Job[];

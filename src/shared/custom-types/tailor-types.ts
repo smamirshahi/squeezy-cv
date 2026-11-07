@@ -14,14 +14,14 @@ import { ToneSchema } from "@custom-types/variant-types";
 
 export { RequirementsSchema };
 
-export const RewriteWordingSchema = Union(
+const RewriteWordingSchema = Union(
   Literal("short"),
   Literal("long"),
   Literal("formal")
 );
 
 /** How relevant an item is to the job, and whether to show and highlight it */
-export const ItemProposalSchema = Object({
+const ItemProposalSchema = Object({
   itemId: String,
 
   /** 0 (irrelevant) to 1 (central to the job) */
@@ -34,7 +34,7 @@ export const ItemProposalSchema = Object({
   reason: String,
 });
 
-export const BulletProposalSchema = Object({
+const BulletProposalSchema = Object({
   itemId: String,
   bulletId: String,
   isIncluded: Boolean,
@@ -55,7 +55,7 @@ export const BulletProposalSchema = Object({
 });
 
 /** The model's proposal (step 2 of tailoring) */
-export const ProposalSchema = Object({
+const ProposalSchema = Object({
   items: Array(ItemProposalSchema),
   bullets: Array(BulletProposalSchema),
 

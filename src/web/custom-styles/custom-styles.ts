@@ -1,15 +1,4 @@
-import {
-  AvailableFonts,
-  FontSize,
-  FontStyle,
-  FontWeight,
-} from "@custom-types/styles-types";
-
-/** Size of grid in px */
-export const GRID_SIZE_PX = 20;
-
-/** Distance between every two sections in px */
-export const DISTANCE_BETWEEN_SECTIONS_PX = GRID_SIZE_PX;
+import { AvailableFonts, FontStyle } from "@custom-types/styles-types";
 
 /** Space between the edge of the paper and the text, in mm, for each margin setting */
 export const PAPER_MARGIN_MM = {
@@ -36,32 +25,6 @@ export const A4_DIMENSION_MM = {
   width: 210,
   height: 297,
 };
-
-export const WORD_FONT_SIZE_OPTIONS: FontSize[] = [
-  "8pt",
-  "9pt",
-  "10pt",
-  "11pt",
-  "12pt",
-  "13pt",
-  "14pt",
-  "16pt",
-  "18pt",
-  "20pt",
-];
-
-export const WORD_FONT_WEIGHT_OPTIONS: FontWeight[] = ["400", "700"];
-
-export const AVAILABLE_FONT_OPTIONS: AvailableFonts[] = [
-  "headingLg",
-  "headingMd",
-  "headingSm",
-  "bodyLg",
-  "bodyMd",
-  "bodySm",
-  "bulletText",
-  "icon",
-];
 
 export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   headingLg: {

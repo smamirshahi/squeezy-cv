@@ -1,7 +1,7 @@
 import { CURRENT_VAULT_VERSION, Vault } from "@custom-types/vault-types";
 
 /** Ids of the four sections every new CV starts with. Imported CVs keep their own ids. */
-export const DEFAULT_SECTION_IDS = {
+const DEFAULT_SECTION_IDS = {
   summary: "summary",
   experience: "experience",
   education: "education",

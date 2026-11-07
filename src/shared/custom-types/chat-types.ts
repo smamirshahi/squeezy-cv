@@ -80,7 +80,7 @@ export const RawChatAnswerSchema = Object({
 export type RawChatAnswer = Static<typeof RawChatAnswerSchema>;
 
 /** The active variant as the model needs to know it (ids are the real ones) */
-export const ChatContextSchema = Object({
+const ChatContextSchema = Object({
   tone: ToneSchema,
   pageLimit: Number,
   hiddenItemIds: Array(String),
@@ -90,7 +90,7 @@ export const ChatContextSchema = Object({
   sectionOrder: Array(String),
 });
 
-export const ChatMessageSchema = Object({
+const ChatMessageSchema = Object({
   role: Union(Literal("user"), Literal("assistant")),
   content: String,
 });

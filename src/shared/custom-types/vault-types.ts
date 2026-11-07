@@ -29,7 +29,7 @@ export const LinkItemSchema = Object({
   tags: Array(String),
 });
 
-export const BulletSchema = Object({
+const BulletSchema = Object({
   /** Stable id */
   id: String,
 
@@ -65,7 +65,7 @@ export const SectionTypeSchema = Union(
   Literal("custom")
 );
 
-export const ItemSchema = Object({
+const ItemSchema = Object({
   /** Stable id */
   id: String,
 
@@ -88,7 +88,7 @@ export const ItemSchema = Object({
   shouldShow: Boolean,
 });
 
-export const SectionSchema = Object({
+const SectionSchema = Object({
   /** Stable id */
   id: String,
 

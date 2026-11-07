@@ -5,7 +5,7 @@
  * network: it does not trust the model's own claim that it kept to the facts.
  */
 
-export type FlagKind = "number" | "name";
+type FlagKind = "number" | "name";
 
 export interface Flag {
   kind: FlagKind;

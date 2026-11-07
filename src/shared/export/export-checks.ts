@@ -2,7 +2,7 @@ import { TailorRecord } from "@custom-types/variant-types";
 import { Profile } from "@custom-types/vault-types";
 import { isGapCoveredByCv } from "@shared/ai/gap-coverage";
 
-export type CheckLevel = "ok" | "warning";
+type CheckLevel = "ok" | "warning";
 
 export interface ExportCheck {
   id: string;

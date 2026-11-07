@@ -110,7 +110,7 @@ const DEFAULT_RELEVANCE = 0.5;
  * and anything missing gets a harmless default. Entries about things that do not exist are
  * kept as they are so that `sanitiseProposal` can drop them and say so.
  */
-export function toProposal(refs: CvRefs, raw: RawProposal): Proposal {
+function toProposal(refs: CvRefs, raw: RawProposal): Proposal {
   const bulletsByText = new Map(
     [...refs.bullets.values()].map((value) => [
       value.text.trim().toLowerCase(),
@@ -217,7 +217,7 @@ export function cleanRequirementList(list: string[]): string[] {
     );
 }
 
-export function cleanRequirements(requirements: Requirements): Requirements {
+function cleanRequirements(requirements: Requirements): Requirements {
   return {
     ...requirements,
     mustHave: cleanRequirementList(requirements.mustHave),
@@ -230,7 +230,7 @@ export function cleanRequirements(requirements: Requirements): Requirements {
  * The suggested section order made safe: unknown ids and repeats are dropped, sections the model
  * forgot keep their place at the end in the CV's own order. Undefined when nothing would move.
  */
-export function sanitiseSectionOrder(
+function sanitiseSectionOrder(
   vault: Vault,
   order: string[] | undefined
 ): string[] | undefined {

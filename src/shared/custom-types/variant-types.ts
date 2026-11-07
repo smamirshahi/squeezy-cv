@@ -25,7 +25,7 @@ export const ToneSchema = Union(
 );
 
 /** Which wording of a bullet to show. Falls back to the canonical `text` if missing. */
-export const WordingSchema = Union(
+const WordingSchema = Union(
   Literal("text"),
   Literal("short"),
   Literal("long"),
@@ -43,9 +43,9 @@ export const SkillDisplaySchema = Union(
 /** Skills by their vault groups, or one flat list with the highest level first */
 export const SkillGroupBySchema = Union(Literal("group"), Literal("level"));
 
-export const EmphasisSchema = Union(Literal("normal"), Literal("high"));
+const EmphasisSchema = Union(Literal("normal"), Literal("high"));
 
-export const BulletSelectionSchema = Object({
+const BulletSelectionSchema = Object({
   /** Hiding a bullet in a variant never removes it from the vault */
   isVisible: Boolean,
 

@@ -45,6 +45,4 @@ export const SkillCategorySchema = Object({
   // /** Whether to hide this specific row or now */
   shouldShow: Boolean,
 });
-
-export type SkillCategory = Static<typeof SkillCategorySchema>;
 export type SkillItem = Static<typeof SkillItemSchema>;

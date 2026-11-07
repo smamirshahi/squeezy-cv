@@ -3,7 +3,7 @@ import { Vault } from "@custom-types/vault-types";
 import { getItemLabel } from "@shared/variant/item-label";
 
 /** Relevance assumed for an item that tailoring has not scored */
-export const UNKNOWN_RELEVANCE = 50;
+const UNKNOWN_RELEVANCE = 50;
 
 export interface HideCandidate {
   itemId: string;

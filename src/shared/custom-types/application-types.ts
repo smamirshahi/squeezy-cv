@@ -38,7 +38,7 @@ export const APPLICATION_STATUSES = [
   "withdrawn",
 ] as const;
 
-export const ApplicationStatusSchema = Union(
+const ApplicationStatusSchema = Union(
   Literal("applied"),
   Literal("interview"),
   Literal("offer"),
@@ -47,7 +47,7 @@ export const ApplicationStatusSchema = Union(
   Literal("withdrawn")
 );
 
-export const StatusChangeSchema = Object({
+const StatusChangeSchema = Object({
   status: ApplicationStatusSchema,
 
   /** Day of the change, "YYYY-MM-DD" */
@@ -91,7 +91,7 @@ const RenderedPartSchema = Union(
 );
 
 /** What `render(vault, variant)` produced: the CV as it was drawn */
-export const RenderedDocumentSchema = Object({
+const RenderedDocumentSchema = Object({
   tone: ToneSchema,
   pageLimit: Number,
   style: StyleSchema,
@@ -103,7 +103,7 @@ export const RenderedDocumentSchema = Object({
 });
 
 /** The CV exactly as it was when submitted. Never changes afterwards. */
-export const SubmittedCvSchema = Object({
+const SubmittedCvSchema = Object({
   document: RenderedDocumentSchema,
 
   /** The variant at that moment, so a copy can be made later */
@@ -148,9 +148,6 @@ export const ApplicationSchema = Object({
 });
 
 export type ApplicationStatus = Static<typeof ApplicationStatusSchema>;
-export type StatusChange = Static<typeof StatusChangeSchema>;
-export type RenderedDocumentData = Static<typeof RenderedDocumentSchema>;
-export type SubmittedCv = Static<typeof SubmittedCvSchema>;
 export type Application = Static<typeof ApplicationSchema>;
 
 /** The fields of an application that the user types in. Everything else is derived. */

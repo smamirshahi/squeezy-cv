@@ -569,7 +569,7 @@ export const {
 /** `resolveVariant` that returns the same object for the same template and job objects */
 const resolvedCache = new WeakMap<Template, WeakMap<Job, Variant>>();
 
-export function resolveCached(template: Template, job: Job): Variant {
+function resolveCached(template: Template, job: Job): Variant {
   let byJob = resolvedCache.get(template);
   if (!byJob) {
     byJob = new WeakMap();
@@ -601,11 +601,6 @@ export function templatesSelector(state: SliceRoot): Template[] {
   return state.jobs.templates;
 }
 
-/** The jobs that use a template */
-export function jobsOfTemplate(state: SliceRoot, templateId: string): Job[] {
-  return jobsUsingTemplate(state.jobs.jobs, templateId);
-}
-
 export function jobsSelector(state: SliceRoot): Job[] {
   return state.jobs.jobs;
 }
@@ -633,6 +628,3 @@ export const activeVariantSelector: (state: SliceRoot) => Variant =
   createSelector([activeTemplateSelector, activeJobSelector], (template, job) =>
     resolveCached(template, job)
   );
-
-/** Alias with the name the issue uses */
-export const selectActiveVariant = activeVariantSelector;

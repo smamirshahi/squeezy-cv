@@ -1,12 +1,12 @@
 import { Object, String, Static, Union, Literal, Boolean } from "runtypes";
 
-export const SideSchema = Union(
+const SideSchema = Union(
   Literal("fullWidth"),
   Literal("left"),
   Literal("right")
 );
 
-export const FontSizeSchema = Union(
+const FontSizeSchema = Union(
   Literal("8pt"),
   Literal("9pt"),
   Literal("10pt"),
@@ -19,11 +19,11 @@ export const FontSizeSchema = Union(
   Literal("20pt")
 );
 
-export const FontWeightSchema = Union(Literal("400"), Literal("700"));
+const FontWeightSchema = Union(Literal("400"), Literal("700"));
 
-export const PaperMarginSchema = Union(Literal("normal"), Literal("narrow"));
+const PaperMarginSchema = Union(Literal("normal"), Literal("narrow"));
 
-export const FontStyleSchema = Object({
+const FontStyleSchema = Object({
   fontSize: FontSizeSchema,
 
   fontWeight: FontWeightSchema,
@@ -32,7 +32,7 @@ export const FontStyleSchema = Object({
 });
 
 /** All the available fonts */
-export const AvailableFontsSchema = Union(
+const AvailableFontsSchema = Union(
   Literal("headingLg"),
   Literal("headingMd"),
   Literal("headingSm"),
@@ -43,7 +43,7 @@ export const AvailableFontsSchema = Union(
   Literal("icon")
 );
 
-export const TypographyVariantSchema = Object({
+const TypographyVariantSchema = Object({
   headingLg: FontStyleSchema,
   headingMd: FontStyleSchema,
   headingSm: FontStyleSchema,
@@ -92,6 +92,5 @@ export type FontSize = Static<typeof FontSizeSchema>;
 export type FontWeight = Static<typeof FontWeightSchema>;
 export type AvailableFonts = Static<typeof AvailableFontsSchema>;
 export type FontStyle = Static<typeof FontStyleSchema>;
-export type PaperMargin = Static<typeof PaperMarginSchema>;
 export type Style = Static<typeof StyleSchema>;
 export type Side = Static<typeof SideSchema>;

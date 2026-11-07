@@ -17,7 +17,7 @@ import { HEADER_IDS } from "@shared/vault/default-vault";
 import { reconcileStructure } from "@shared/vault/page-structure";
 import { tracksLevels } from "@shared/vault/vault-utils";
 
-export interface RenderedBullet {
+interface RenderedBullet {
   id: string;
   /** The wording chosen by the variant */
   text: string;

@@ -77,7 +77,7 @@ export type IdGenerator = () => string;
 export type VaultMigration = (raw: Record<string, unknown>) => unknown;
 
 /** Key N migrates the vault from version N to N+1. Empty while version 1 is current. */
-export const VAULT_MIGRATIONS: Record<number, VaultMigration> = {};
+const VAULT_MIGRATIONS: Record<number, VaultMigration> = {};
 
 const LINKEDIN_BASE_URL = "https://www.linkedin.com/in/";
 const GITHUB_BASE_URL = "https://github.com/";
