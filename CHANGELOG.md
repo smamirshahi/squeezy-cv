@@ -17,10 +17,16 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - Templates and jobs in the UI (#169): the top bar chooses a **job** and shows its **template** next to it with a dropdown to change it, plus a "New job" dialog (name, template; new jobs share the chosen template, "New template…" makes a separate one). A new rail tool "Templates" lists templates with their jobs and counts: create, duplicate, rename, delete (disabled while a job uses it, with the reason). With an item selected the inspector edits the job; with nothing selected, and on the Style Settings and Page Structure pages, it edits the template and says so ("Changes template 'Template 1', used by 3 jobs"). "Variant" is now "Job" or "Template" in the interface.
 - Tailoring creates a job (#170): "Create job from the accepted changes" makes a new job that shares a template chosen in the Tailor page (default: the active job's template). The job gets the selection, relevance, tone and the tailor record; its name defaults to the job title found in the advert and can be edited. A section-order proposal (when accepted) and a page limit that differs from the template go on a new copy "<template> (tailored)" that the job uses, so the source template is never changed. Alternative wordings still go to the vault bullets.
 
+- Applications reference the job (#171): an application records the job and template it was sent from (`jobId`, `templateId` and their names at that time). "Mark as applied" and the Export dialog show the active job and template; the Applications list has Job and Template columns (and searches them); the application page shows "Job: X · Template: Y" and says the sent CV is a frozen copy, so later edits to the template or job do not change it. "Create new variant from this" is now "Create new job from this": a new job with the sent selection on the template it was sent with (or on a template of its own if that was deleted). Application files from before jobs still load (the variant they were sent from counts as the job).
+
 ### Changed
 
 - The job made by tailoring is named after the job title (no more " (AI)" suffix) (#170).
 - New and duplicated jobs share the template of their source instead of getting a copy of it, so a change of the look reaches all of them (#169). Deleting a job keeps its template (delete templates on the Templates page). The rail item "Variants" is now "Jobs"; the first template is called "Template 1".
+
+### Removed
+
+- The variant lock (#171): `variant-lock.ts`, the reducer guard, `?unlock=true` and the 409 `locked` answer, `refreshLocks`, `LockBanner`/`UnlockDialog`/`LockedFieldset`, the lock icon and the template freeze. Nothing is locked after sending; the application keeps its own frozen copy and PDF, so editing or deleting the template or job afterwards is free.
 
 ## [0.1.0] - 2026-11-07
 
