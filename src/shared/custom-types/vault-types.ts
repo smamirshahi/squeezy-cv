@@ -65,15 +65,6 @@ export const SectionTypeSchema = Union(
   Literal("custom")
 );
 
-export const ITEM_OPINIONS = ["love", "like", "neutral", "dislike"] as const;
-
-export const ItemOpinionSchema = Union(
-  Literal("love"),
-  Literal("like"),
-  Literal("neutral"),
-  Literal("dislike")
-);
-
 export const ItemSchema = Object({
   /** Stable id */
   id: String,
@@ -89,12 +80,6 @@ export const ItemSchema = Object({
 
   /** Free tags, used later for tailoring */
   tags: Array(String),
-
-  /** Private notes of the user. Never drawn on the CV and never sent to an AI. */
-  notes: String.optional(),
-
-  /** How the user feels about this item. Private, like `notes`. */
-  opinion: ItemOpinionSchema.optional(),
 
   /**
    * Whether the item is shown. Transitional: moves into the variant selection
@@ -154,7 +139,6 @@ export type LinkItem = Static<typeof LinkItemSchema>;
 export type Bullet = Static<typeof BulletSchema>;
 export type SectionType = Static<typeof SectionTypeSchema>;
 export type Item = Static<typeof ItemSchema>;
-export type ItemOpinion = Static<typeof ItemOpinionSchema>;
 export type Section = Static<typeof SectionSchema>;
 export type Profile = Static<typeof ProfileSchema>;
 export type Vault = Static<typeof VaultSchema>;

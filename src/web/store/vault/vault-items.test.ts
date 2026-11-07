@@ -10,8 +10,6 @@ import {
   removeBullet,
   removeItem,
   setBulletAlt,
-  setItemNotes,
-  setItemOpinion,
   setItemTags,
   setItemVisibility,
   updateBullet,
@@ -129,20 +127,6 @@ describe("items", () => {
       setItemTags({ ...ref, tags: [" react ", "React", "", "leadership"] })
     );
     expect(exp(state).tags).toEqual(["react", "leadership"]);
-  });
-
-  it("sets and clears private notes and opinion", () => {
-    let state = vaultReducer(
-      freshVault(),
-      setItemNotes({ ...ref, notes: "hm" })
-    );
-    state = vaultReducer(state, setItemOpinion({ ...ref, opinion: "love" }));
-    expect(exp(state).notes).toBe("hm");
-    expect(exp(state).opinion).toBe("love");
-    state = vaultReducer(state, setItemNotes({ ...ref, notes: "" }));
-    state = vaultReducer(state, setItemOpinion({ ...ref }));
-    expect(exp(state)).not.toHaveProperty("notes");
-    expect(exp(state)).not.toHaveProperty("opinion");
   });
 
   it("ignores unknown section or item ids", () => {

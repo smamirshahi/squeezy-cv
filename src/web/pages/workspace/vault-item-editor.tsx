@@ -13,7 +13,6 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
-  MenuItem,
   Rating,
   TextField,
   Typography,
@@ -21,13 +20,7 @@ import {
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import {
-  Bullet,
-  ITEM_OPINIONS,
-  Item,
-  ItemOpinion,
-  Section,
-} from "@custom-types/vault-types";
+import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
 import {
@@ -50,20 +43,11 @@ import {
   removeBullet,
   removeItem,
   setBulletAlt,
-  setItemNotes,
-  setItemOpinion,
   setItemTags,
   setSectionTracksLevel,
   updateBullet,
   updateItemFields,
 } from "@store/vault/vault-slice";
-
-const OPINION_LABELS: Record<ItemOpinion, string> = {
-  love: "I love it",
-  like: "I like it",
-  neutral: "Neutral",
-  dislike: "I don't like it",
-};
 
 const ALT_KINDS = [
   { kind: "short", label: "Short" },
@@ -612,52 +596,6 @@ export function VaultItemEditor({
             tags={item.tags}
             label="Add a tag to this item"
             onChange={(tags) => dispatch(setItemTags({ ...ref, tags }))}
-          />
-        </Box>
-        <Box sx={{ gridColumn: "span 3" }}>
-          <Typography
-            sx={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: WORKSPACE_COLORS.muted,
-              mb: 0.5,
-            }}
-          >
-            PRIVATE: never on the CV, never sent to AI
-          </Typography>
-          <TextField
-            select
-            size="small"
-            label="My opinion"
-            value={item.opinion ?? ""}
-            onChange={(event) =>
-              dispatch(
-                setItemOpinion({
-                  ...ref,
-                  opinion: (event.target.value || undefined) as
-                    ItemOpinion | undefined,
-                })
-              )
-            }
-            sx={{ minWidth: 220, mb: 1 }}
-          >
-            <MenuItem value="">Not set</MenuItem>
-            {ITEM_OPINIONS.map((opinion) => (
-              <MenuItem key={opinion} value={opinion}>
-                {OPINION_LABELS[opinion]}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            multiline
-            minRows={2}
-            size="small"
-            label="Additional notes"
-            value={item.notes ?? ""}
-            onChange={(event) =>
-              dispatch(setItemNotes({ ...ref, notes: event.target.value }))
-            }
           />
         </Box>
       </Box>
