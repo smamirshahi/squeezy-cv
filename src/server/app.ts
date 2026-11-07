@@ -1,3 +1,4 @@
+import { APP_VERSION } from "@shared/version";
 import { randomBytes } from "node:crypto";
 import Fastify, { FastifyInstance, FastifyReply } from "fastify";
 import { ValidationError } from "runtypes";
@@ -212,7 +213,7 @@ export function buildServer({
     );
   });
 
-  app.get("/api/health", () => ({ status: "ok" }));
+  app.get("/api/health", () => ({ status: "ok", version: APP_VERSION }));
 
   app.get(
     "/api/backup",

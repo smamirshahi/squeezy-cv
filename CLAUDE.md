@@ -26,6 +26,10 @@ Package manager is **pnpm**.
 - CI (`.github/workflows/ci.yml`) runs build, lint:check, format-check and test on every PR.
 - `pnpm format-check` / `pnpm format-fix` — Prettier (`.prettierrc`: `trailingComma: es5`; keep that style)
 
+## Versioning
+
+SemVer, history in `CHANGELOG.md` (Keep a Changelog). The version lives in three places that must be equal: `package.json`, `src/shared/version.ts` (`APP_VERSION`, shown in `GET /api/health` and the tool rail) and the newest released heading in `CHANGELOG.md`; `version.test.ts` fails otherwise. Every user-visible change adds a line under `## [Unreleased]` in the same PR. **Release:** rename Unreleased to `## [x.y.z] - date` (add a fresh empty Unreleased and update the compare links), bump the three places, merge, then `git tag vx.y.z && git push origin vx.y.z` and `gh release create vx.y.z --notes-file` with that section. While the major number is 0 a minor bump may change the saved data format (the migration chain still reads old files).
+
 ## Architecture
 
 **Path aliases are mandatory.** ESLint (`no-restricted-imports`) forbids relative imports (`./`, `../`). Use `@components/*`, `@custom-styles/*`, `@hooks/*`, `@pages/*`, `@store/*` (all under `src/web`), `@shared/*`, `@custom-types/*` (`src/shared/custom-types`), `@server/*`, `@fixtures/*`, `@e2e/*` (`src/e2e`) (defined in `tsconfig.json`, resolved by `vite-tsconfig-paths`). The only exceptions are `src/web/main.tsx` (`./index.css`, `./App`), which carry eslint-disable comments. Also use `useAppDispatch`/`useAppSelector` from `@store/store-helper`, never raw `useDispatch`/`useSelector`.
