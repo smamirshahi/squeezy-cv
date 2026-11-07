@@ -64,7 +64,7 @@ afterAll(async () => {
   await app?.close();
 });
 
-describe("PDF of a variant (real Chromium)", () => {
+describe("PDF of a job (real Chromium)", () => {
   it("is one A4 page with a text layer when the content fits", async () => {
     const pdf = await readPdf(await app.pdf("short"));
 
@@ -88,7 +88,7 @@ describe("PDF of a variant (real Chromium)", () => {
     }
   });
 
-  it("leaves out what the variant hides", async () => {
+  it("leaves out what the job hides", async () => {
     const pdf = await readPdf(await app.pdf("short"));
 
     // exp-3 is hidden in the sample, and the extra jobs are hidden in this variant
@@ -107,7 +107,7 @@ describe("PDF of a variant (real Chromium)", () => {
     expect(pdf.text).toContain("University of Example");
   });
 
-  it("follows the variant's order, wording and hidden bullets", async () => {
+  it("follows the job's order, wording and hidden bullets", async () => {
     const { text } = await readPdf(await app.pdf("tailored"));
 
     expect(text.indexOf("Engineer Number 2")).toBeGreaterThan(-1);
@@ -119,7 +119,7 @@ describe("PDF of a variant (real Chromium)", () => {
     expect(text).toContain("Delivered result 2 of job 2");
   });
 
-  it("refuses a variant that is not saved", async () => {
+  it("refuses a job that is not saved", async () => {
     await expect(app.pdf("nope")).rejects.toThrow();
   });
 });

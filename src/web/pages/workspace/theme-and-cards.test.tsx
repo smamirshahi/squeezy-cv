@@ -9,7 +9,7 @@ import {
   THEME_TOKENS,
   useThemeMode,
 } from "@custom-styles/theme";
-import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
+import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { rootReducer } from "@store/store";
 import { setVault } from "@store/vault/vault-slice";

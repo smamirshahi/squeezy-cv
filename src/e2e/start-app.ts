@@ -9,6 +9,7 @@ import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { Job } from "@custom-types/job-types";
 import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
+import { splitVariant } from "@shared/variant/template-job";
 import { CvFile } from "@custom-types/vault-types";
 
 export interface RunningApp {
@@ -18,7 +19,7 @@ export interface RunningApp {
   /** The API, e.g. http://127.0.0.1:41233 */
   apiUrl: string;
 
-  /** Saves a CV file and variants the way the app would */
+  /** Saves a CV file and, for each resolved variant, a template (`template-<id>`) and a job (`<id>`) */
   seed: (file: CvFile, variants: Variant[]) => Promise<void>;
 
   /** Saves a CV file, templates and jobs (the current format) */
@@ -27,8 +28,8 @@ export interface RunningApp {
   /** Asks the API for the PDF of a saved job (POST /api/pdf {jobId}) */
   pdfOfJob: (jobId: string) => Promise<Buffer>;
 
-  /** A PDF of a saved variant, made by the real renderer */
-  pdf: (variantId: string) => Promise<Buffer>;
+  /** A PDF of a saved job, made by the real renderer */
+  pdf: (jobId: string) => Promise<Buffer>;
 
   close: () => Promise<void>;
 }
@@ -86,9 +87,19 @@ export async function startApp(): Promise<RunningApp> {
     webUrl,
     apiUrl,
     seed: async (file, variants) => {
+      const pairs = variants.map((variant) =>
+        splitVariant(
+          variant,
+          `template-${variant.id}`.slice(0, 64),
+          new Date().toISOString().slice(0, 10)
+        )
+      );
       await put("/api/vault", file);
-      for (const variant of variants) {
-        await put(`/api/variants/${variant.id}`, variant);
+      for (const { template } of pairs) {
+        await put(`/api/templates/${template.id}`, template);
+      }
+      for (const { job } of pairs) {
+        await put(`/api/jobs/${job.id}`, job);
       }
     },
     seedJobs: async (file, templates, jobs) => {
@@ -112,7 +123,7 @@ export async function startApp(): Promise<RunningApp> {
       }
       return Buffer.from(await response.arrayBuffer());
     },
-    pdf: (variantId) => pdfRenderer.render(variantId),
+    pdf: (jobId) => pdfRenderer.render(jobId),
     close: async () => {
       await web.close();
       await api.close();

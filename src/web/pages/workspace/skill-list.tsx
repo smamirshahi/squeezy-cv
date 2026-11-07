@@ -20,7 +20,7 @@ import {
   getDropIndex,
   SortableRow,
   useReorderSensors,
-} from "@pages/editor-page/sections/variant-section-items";
+} from "@pages/editor-page/sections/job-section-items";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch } from "@store/store-helper";
 import {
@@ -49,7 +49,7 @@ function SkillGroup({
   function move(bulletId: string, toIndex: number): void {
     dispatch(
       setBulletOrders({
-        variantId: variant.id,
+        jobId: variant.id,
         itemId: item.id,
         orders: computeBulletOrders(item, variant, bulletId, toIndex),
       })
@@ -100,7 +100,7 @@ function SkillGroup({
                       onClick={() =>
                         dispatch(
                           setBulletSelection({
-                            variantId: variant.id,
+                            jobId: variant.id,
                             itemId: item.id,
                             bulletId: bullet.id,
                             change: { isVisible: !isShown },

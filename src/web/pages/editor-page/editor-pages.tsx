@@ -3,7 +3,7 @@ import { EditorEducation } from "@pages/editor-page/sections/editor-education/ed
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
-import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
+import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
@@ -47,7 +47,7 @@ export function useEditorPages(): EditorPageSection {
       label: "Page Structure",
       content: <EditorPageStructure />,
     },
-    { id: "variants", label: "Jobs", content: <EditorVariants /> },
+    { id: "variants", label: "Jobs", content: <EditorJobs /> },
     { id: "ai", label: "AI assistant", content: <AiAssistant /> },
     { id: "sections", label: "Sections", content: <EditorSections /> },
     { id: "mainInfo", label: "Main Info", content: <EditorMainInfo /> },

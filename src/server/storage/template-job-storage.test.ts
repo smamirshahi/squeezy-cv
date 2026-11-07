@@ -191,7 +191,10 @@ describe("jobs", () => {
 describe("legacy variants", () => {
   async function writeVariant(id: string, name: string): Promise<void> {
     await mkdir(path.join(dir, "variants"), { recursive: true });
-    await storage.saveVariant(createVariant(file.vault, file.style, id, name));
+    await writeFile(
+      path.join(dir, "variants", `${id}.json`),
+      JSON.stringify(createVariant(file.vault, file.style, id, name))
+    );
   }
 
   it("are read as one template and one job each", async () => {

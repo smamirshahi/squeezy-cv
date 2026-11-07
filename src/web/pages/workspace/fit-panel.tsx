@@ -40,7 +40,7 @@ function measureLines(itemId: string, lineHeightPx: number): number {
 
 /**
  * "Hide to gain lines": the least relevant items, with what each would save. Ticking one
- * hides it in this variant at once, so the page shows the result; nothing leaves the vault.
+ * hides it in this job at once, so the page shows the result; nothing leaves the vault.
  */
 export function FitPanel(): JSX.Element | null {
   const dispatch = useAppDispatch();
@@ -71,7 +71,7 @@ export function FitPanel(): JSX.Element | null {
   function setHidden(itemId: string, isHidden: boolean): void {
     dispatch(
       setItemSelection({
-        variantId: variant.id,
+        jobId: variant.id,
         itemId,
         change: { isVisible: !isHidden },
       })

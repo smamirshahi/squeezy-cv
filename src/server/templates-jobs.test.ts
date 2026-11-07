@@ -180,12 +180,20 @@ describe("jobs API", () => {
   });
 });
 
+async function writeOldVariant(
+  variant: ReturnType<typeof createVariant>
+): Promise<void> {
+  await mkdir(path.join(dir, "variants"), { recursive: true });
+  await writeFile(
+    path.join(dir, "variants", `${variant.id}.json`),
+    JSON.stringify(variant)
+  );
+}
+
 describe("legacy variants over the API", () => {
-  it("appear as a template and a job, and the old routes still work", async () => {
+  it("appear as a template and a job", async () => {
     const variant = createVariant(file.vault, file.style, "old", "Old");
-    expect((await call("PUT", "/api/variants/old", variant)).statusCode).toBe(
-      200
-    );
+    await writeOldVariant(variant);
     expect(
       (await call("GET", "/api/jobs")).json().map((j: { id: string }) => j.id)
     ).toEqual(["old"]);
@@ -195,7 +203,8 @@ describe("legacy variants over the API", () => {
     expect((await call("GET", "/api/jobs/old/resolved")).json()).toEqual(
       variant
     );
-    expect((await call("GET", "/api/variants/old")).json()).toEqual(variant);
+    // the old variant routes are gone
+    expect((await call("GET", "/api/variants/old")).statusCode).toBe(404);
     // a used legacy template cannot be deleted either
     expect(
       (await call("DELETE", "/api/templates/template-old")).statusCode
@@ -270,16 +279,20 @@ describe("PDF of a job", () => {
     expect(response.json().code).toBe("pdf_failed");
   });
 
-  it("still renders by variantId", async () => {
-    await call(
-      "PUT",
-      "/api/variants/old",
-      createVariant(file.vault, file.style, "old", "Old")
+  it("renders an old variant file by its id, now a job", async () => {
+    await writeOldVariant(createVariant(file.vault, file.style, "old", "Old"));
+    expect((await call("POST", "/api/pdf", { jobId: "old" })).statusCode).toBe(
+      200
     );
-    expect(
-      (await call("POST", "/api/pdf", { variantId: "old" })).statusCode
-    ).toBe(200);
     expect(pdf.requested).toEqual(["old"]);
+  });
+
+  it("refuses the old variantId body", async () => {
+    await seed();
+    expect(
+      (await call("POST", "/api/pdf", { variantId: "acme" })).statusCode
+    ).toBe(400);
+    expect(pdf.requested).toEqual([]);
   });
 });
 
@@ -358,10 +371,9 @@ describe("applications are frozen copies", () => {
     expect(download.rawPayload).toEqual(PDF);
   });
 
-  it("the old variant routes are not locked either", async () => {
+  it("an application from an old variant file is not locked either", async () => {
     await call("PUT", "/api/vault", file);
-    const variant = createVariant(file.vault, file.style, "old", "Old");
-    await call("PUT", "/api/variants/old", variant);
+    await writeOldVariant(createVariant(file.vault, file.style, "old", "Old"));
     const { id } = (
       await call("POST", "/api/applications", {
         jobId: "old",
@@ -370,11 +382,7 @@ describe("applications are frozen copies", () => {
       })
     ).json();
     expect(id).toBeTruthy();
-    expect(
-      (await call("PUT", "/api/variants/old", { ...variant, name: "New" }))
-        .statusCode
-    ).toBe(200);
-    expect((await call("DELETE", "/api/variants/old")).statusCode).toBe(200);
+    expect((await call("DELETE", "/api/jobs/old")).statusCode).toBe(200);
   });
 
   it("still reads an application file that has only the variant it was sent from", async () => {

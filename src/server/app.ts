@@ -9,11 +9,7 @@ import {
 import { CvFileSchema } from "@custom-types/vault-types";
 import { JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
 import { TemplateSchema } from "@custom-types/template-types";
-import {
-  VARIANT_ID_PATTERN,
-  Variant,
-  VariantSchema,
-} from "@custom-types/variant-types";
+import { Variant } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
 import { previewTailorRequest } from "@server/ai/preview";
@@ -442,37 +438,6 @@ export function buildServer({
     return { status: "saved" };
   });
 
-  app.get("/api/variants", () => storage.listVariants());
-
-  app.get<{ Params: { id: string } }>("/api/variants/:id", (request) =>
-    storage.loadVariant(request.params.id)
-  );
-
-  app.put<{ Params: { id: string } }>(
-    "/api/variants/:id",
-    async (request, reply) => {
-      const variant = VariantSchema.check(request.body);
-      if (variant.id !== request.params.id) {
-        return sendError(
-          reply,
-          HTTP_BAD_REQUEST,
-          "invalid",
-          "The id in the body must match the id in the URL."
-        );
-      }
-      await storage.saveVariant(variant);
-      return { status: "saved" };
-    }
-  );
-
-  app.delete<{ Params: { id: string } }>(
-    "/api/variants/:id",
-    async (request) => {
-      await storage.deleteVariant(request.params.id);
-      return { status: "deleted" };
-    }
-  );
-
   app.get("/api/templates", () => storage.listTemplates());
 
   app.get<{ Params: { id: string } }>("/api/templates/:id", (request) =>
@@ -525,7 +490,7 @@ export function buildServer({
     storage.loadJob(request.params.id)
   );
 
-  // The variant a job shows with its template: what the print page and the preview draw
+  // The resolved variant: the job drawn with its template: what the print page and the preview draw
   app.get<{ Params: { id: string } }>(
     "/api/jobs/:id/resolved",
     async (request) => {
@@ -569,33 +534,22 @@ export function buildServer({
     return { status: "deleted" };
   });
 
-  // What an application is made from: a job drawn with its template (a job id is the id the
-  // page sends), or an older variant file that has no job
+  // What an application is made from: a job drawn with its template. Old variant files are
+  // already read as jobs by the storage, so their id works here too.
   async function loadSource(
     id: string
   ): Promise<{ variant: Variant; source: ApplicationSource }> {
-    try {
-      const job = await storage.loadJob(id);
-      const template = await storage.loadTemplate(job.templateId);
-      return {
-        variant: resolveVariant(template, job),
-        source: {
-          jobId: job.id,
-          templateId: template.id,
-          jobName: job.name,
-          templateName: template.name,
-        },
-      };
-    } catch (error) {
-      if (error instanceof StorageError && error.code === "not_found") {
-        const variant = await storage.loadVariant(id);
-        return {
-          variant,
-          source: { jobId: variant.id, jobName: variant.name },
-        };
-      }
-      throw error;
-    }
+    const job = await storage.loadJob(id);
+    const template = await storage.loadTemplate(job.templateId);
+    return {
+      variant: resolveVariant(template, job),
+      source: {
+        jobId: job.id,
+        templateId: template.id,
+        jobName: job.name,
+        templateName: template.name,
+      },
+    };
   }
 
   app.get("/api/applications", () => storage.listApplications());
@@ -675,7 +629,7 @@ export function buildServer({
     }
   );
 
-  /** Renders the saved variant or job `id` and sends the PDF, or a readable error */
+  /** Renders the saved job `id` and sends the PDF, or a readable error */
   async function sendPdf(
     reply: FastifyReply,
     id: string
@@ -699,7 +653,7 @@ export function buildServer({
       .send(bytes);
   }
 
-  app.post<{ Body: { variantId?: unknown; jobId?: unknown } }>(
+  app.post<{ Body: { jobId?: unknown } }>(
     "/api/pdf",
     async (request, reply) => {
       if (!pdf) {
@@ -711,35 +665,18 @@ export function buildServer({
         );
       }
       const jobId = request.body?.jobId;
-      if (jobId !== undefined) {
-        if (typeof jobId !== "string" || !JOB_ID_PATTERN.test(jobId)) {
-          return sendError(
-            reply,
-            HTTP_BAD_REQUEST,
-            "invalid",
-            "jobId is not valid."
-          );
-        }
-        // The job and its template must exist and be readable before a browser is started
-        const job = await storage.loadJob(jobId);
-        await storage.loadTemplate(job.templateId);
-        return sendPdf(reply, jobId);
-      }
-      const variantId = request.body?.variantId;
-      if (
-        typeof variantId !== "string" ||
-        !VARIANT_ID_PATTERN.test(variantId)
-      ) {
+      if (typeof jobId !== "string" || !JOB_ID_PATTERN.test(jobId)) {
         return sendError(
           reply,
           HTTP_BAD_REQUEST,
           "invalid",
-          "variantId is missing or not valid."
+          "jobId is missing or not valid."
         );
       }
-      // The page that gets printed loads the variant from here, so it must exist and be readable
-      await storage.loadVariant(variantId);
-      return sendPdf(reply, variantId);
+      // The job and its template must exist and be readable before a browser is started
+      const job = await storage.loadJob(jobId);
+      await storage.loadTemplate(job.templateId);
+      return sendPdf(reply, jobId);
     }
   );
 

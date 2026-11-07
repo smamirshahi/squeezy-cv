@@ -6,6 +6,7 @@ import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { splitVariant } from "@shared/variant/template-job";
 import { createVariant } from "@shared/variant/variant-utils";
 import { buildServer } from "@server/app";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
@@ -130,75 +131,19 @@ describe("/api/vault", () => {
   });
 });
 
-describe("/api/variants", () => {
-  it("lists, saves, loads and deletes", async () => {
-    expect(
-      (await app.inject({ method: "GET", url: "/api/variants" })).json()
-    ).toEqual([]);
-
-    const put = await app.inject({
-      method: "PUT",
-      url: "/api/variants/acme",
-      payload: variant,
+describe("the old variant API", () => {
+  it.each([
+    ["GET", "/api/variants"],
+    ["GET", "/api/variants/acme"],
+    ["PUT", "/api/variants/acme"],
+    ["DELETE", "/api/variants/acme"],
+  ])("is gone: %s %s", async (method, url) => {
+    const response = await app.inject({
+      method: method as "GET",
+      url,
+      payload: method === "PUT" ? { id: "acme" } : undefined,
     });
-    expect(put.statusCode).toBe(200);
-
-    expect(
-      (await app.inject({ method: "GET", url: "/api/variants" })).json()
-    ).toEqual([{ id: "acme", name: "Acme", isCorrupt: false }]);
-    expect(
-      (await app.inject({ method: "GET", url: "/api/variants/acme" })).json()
-    ).toEqual(variant);
-
-    const del = await app.inject({
-      method: "DELETE",
-      url: "/api/variants/acme",
-    });
-    expect(del.json()).toEqual({ status: "deleted" });
-    expect(
-      (await app.inject({ method: "GET", url: "/api/variants/acme" }))
-        .statusCode
-    ).toBe(404);
-    expect(
-      (await app.inject({ method: "DELETE", url: "/api/variants/acme" }))
-        .statusCode
-    ).toBe(404);
-  });
-
-  it("rejects a body whose id differs from the URL", async () => {
-    const put = await app.inject({
-      method: "PUT",
-      url: "/api/variants/other",
-      payload: variant,
-    });
-    expect(put.statusCode).toBe(400);
-    expect(
-      (await app.inject({ method: "GET", url: "/api/variants" })).json()
-    ).toEqual([]);
-  });
-
-  it("rejects an invalid body", async () => {
-    const put = await app.inject({
-      method: "PUT",
-      url: "/api/variants/acme",
-      payload: { id: "acme" },
-    });
-    expect(put.statusCode).toBe(400);
-  });
-
-  it("rejects unsafe ids", async () => {
-    const get = await app.inject({
-      method: "GET",
-      url: "/api/variants/..%2Fvault",
-    });
-    expect(get.statusCode).toBe(400);
-    expect(get.json().code).toBe("invalid_id");
-    const put = await app.inject({
-      method: "PUT",
-      url: "/api/variants/bad.id",
-      payload: { ...variant, id: "bad.id" },
-    });
-    expect(put.statusCode).toBe(400);
+    expect(response.statusCode).toBe(404);
   });
 });
 
@@ -319,8 +264,8 @@ describe("POST /api/pdf", () => {
     shouldFail = false;
     isClosed = false;
 
-    render(variantId: string): Promise<Buffer> {
-      this.requested.push(variantId);
+    render(jobId: string): Promise<Buffer> {
+      this.requested.push(jobId);
       return this.shouldFail
         ? Promise.reject(new Error("Chromium is missing"))
         : Promise.resolve(PDF_BYTES);
@@ -338,11 +283,13 @@ describe("POST /api/pdf", () => {
     await app.close();
     pdf = new FakePdf();
     app = buildServer({ storage: new FileCvStorage(dir), pdf });
+    const { template, job } = splitVariant(variant, "tpl", "2026-11-07");
     await app.inject({
       method: "PUT",
-      url: "/api/variants/acme",
-      payload: variant,
+      url: "/api/templates/tpl",
+      payload: template,
     });
+    await app.inject({ method: "PUT", url: "/api/jobs/acme", payload: job });
   });
 
   type Injected = Awaited<ReturnType<FastifyInstance["inject"]>>;
@@ -355,8 +302,8 @@ describe("POST /api/pdf", () => {
     });
   }
 
-  it("returns the PDF for a saved variant", async () => {
-    const response = await post({ variantId: "acme" });
+  it("returns the PDF for a saved job", async () => {
+    const response = await post({ jobId: "acme" });
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toBe("application/pdf");
     expect(response.headers["content-disposition"]).toContain("acme.pdf");
@@ -364,26 +311,24 @@ describe("POST /api/pdf", () => {
     expect(pdf.requested).toEqual(["acme"]);
   });
 
-  it.each([
-    {},
-    { variantId: 5 },
-    { variantId: "../vault" },
-    { variantId: "a b" },
-  ])("refuses a bad variant id %j without rendering", async (body) => {
-    const response = await post(body);
-    expect(response.statusCode).toBe(400);
-    expect(pdf.requested).toEqual([]);
-  });
+  it.each([{}, { jobId: 5 }, { jobId: "../vault" }, { jobId: "a b" }])(
+    "refuses a bad job id %j without rendering",
+    async (body) => {
+      const response = await post(body);
+      expect(response.statusCode).toBe(400);
+      expect(pdf.requested).toEqual([]);
+    }
+  );
 
-  it("answers 404 for a variant that is not saved, without rendering", async () => {
-    const response = await post({ variantId: "nope" });
+  it("answers 404 for a job that is not saved, without rendering", async () => {
+    const response = await post({ jobId: "nope" });
     expect(response.statusCode).toBe(404);
     expect(pdf.requested).toEqual([]);
   });
 
   it("explains a failed render", async () => {
     pdf.shouldFail = true;
-    const response = await post({ variantId: "acme" });
+    const response = await post({ jobId: "acme" });
     expect(response.statusCode).toBe(500);
     expect(response.json().code).toBe("pdf_failed");
     expect(response.json().message).toContain("Chromium is missing");
@@ -392,7 +337,7 @@ describe("POST /api/pdf", () => {
   it("answers 501 when the server has no PDF renderer", async () => {
     await app.close();
     app = buildServer({ storage: new FileCvStorage(dir) });
-    expect((await post({ variantId: "acme" })).statusCode).toBe(501);
+    expect((await post({ jobId: "acme" })).statusCode).toBe(501);
   });
 
   it("is refused for non-local requests like every other route", async () => {
@@ -400,7 +345,7 @@ describe("POST /api/pdf", () => {
       method: "POST",
       url: "/api/pdf",
       headers: { host: "evil.example.com" },
-      payload: { variantId: "acme" },
+      payload: { jobId: "acme" },
     });
     expect(response.statusCode).toBe(403);
   });

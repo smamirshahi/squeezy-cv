@@ -36,7 +36,7 @@ export function PreviewPage({
   const { structure, columnWidth } = useAppSelector(appSelector);
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
-  // What the active variant shows, in its order and wording. The layout is the one the
+  // What the active job shows, in its order and wording. The layout is the one the
   // editor currently has, so changes to it show at once.
   const rendered = useMemo(
     () => render(vault, { ...variant, layout: structure }),

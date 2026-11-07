@@ -9,24 +9,65 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+Version 0.2.0 (not released yet; the user tests first). The variant is split into a
+template and a job (#165-#172).
+
 ### Added
 
-- Templates and jobs (#165, in progress): pure model for splitting a variant into a template (look) and a job (what is shown), with `resolveVariant` and `splitVariant` (#166). Not used by the app yet.
-- Server storage and API for templates and jobs (#167): `templates/<id>.json` and `jobs/<id>.json` (validated, atomic, `.bak`, versioned git commits), `GET/PUT/DELETE /api/templates` and `/api/jobs` (409 `in_use` for a template that a job uses), `GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`. Old `variants/*.json` are read as one template + one job each when no jobs exist yet. `/api/variants` is unchanged.
-- Web store with templates and jobs (#168): the editor now holds `templates[]`, `jobs[]` and `activeJobId`; the active variant is `resolveVariant(template, job)` (memoised `activeVariantSelector`). Hiding, order, tone and the auto-fit result are saved in the job; layout, style, page limit, auto-fit policy and skill style in the job's template, so jobs on one template share a look. Saving writes only the changed templates and jobs (`/api/templates`, `/api/jobs`); the print page and PDF use the job (`GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`); applications can be made from a job. The UI looks the same: every job still has a template of its own until the templates page (#169).
-- Templates and jobs in the UI (#169): the top bar chooses a **job** and shows its **template** next to it with a dropdown to change it, plus a "New job" dialog (name, template; new jobs share the chosen template, "New template…" makes a separate one). A new rail tool "Templates" lists templates with their jobs and counts: create, duplicate, rename, delete (disabled while a job uses it, with the reason). With an item selected the inspector edits the job; with nothing selected, and on the Style Settings and Page Structure pages, it edits the template and says so ("Changes template 'Template 1', used by 3 jobs"). "Variant" is now "Job" or "Template" in the interface.
-- Tailoring creates a job (#170): "Create job from the accepted changes" makes a new job that shares a template chosen in the Tailor page (default: the active job's template). The job gets the selection, relevance, tone and the tailor record; its name defaults to the job title found in the advert and can be edited. A section-order proposal (when accepted) and a page limit that differs from the template go on a new copy "<template> (tailored)" that the job uses, so the source template is never changed. Alternative wordings still go to the vault bullets.
-
-- Applications reference the job (#171): an application records the job and template it was sent from (`jobId`, `templateId` and their names at that time). "Mark as applied" and the Export dialog show the active job and template; the Applications list has Job and Template columns (and searches them); the application page shows "Job: X · Template: Y" and says the sent CV is a frozen copy, so later edits to the template or job do not change it. "Create new variant from this" is now "Create new job from this": a new job with the sent selection on the template it was sent with (or on a template of its own if that was deleted). Application files from before jobs still load (the variant they were sent from counts as the job).
+- **Templates**: a template is how a CV looks: page layout and section order, fonts,
+  colours, margins, date format, page limit, skill display and the auto-fit policy. Many
+  jobs can share one template, so changing the look once changes it for all of them. A
+  new rail tool "Templates" lists every template with the jobs that use it: create,
+  duplicate, rename, delete (not while a job uses it, with the reason shown).
+- **Jobs**: a job is one target (a company and role). It uses one template and decides
+  what to show: hidden items and bullets, order, emphasis, wording per bullet, tone, the
+  tailoring record and the result of the last auto-fit. It exists before any PDF does.
+  The top bar switches jobs, shows and changes the job's template, and has "New job"
+  (name and template; a new job shares the chosen template, or "New template…" makes a
+  copy of the current look).
+- The inspector says what an edit changes: with nothing selected and on the Style
+  Settings and Page Structure pages it edits the template ("Changes template 'X', used
+  by 3 jobs"); with an item selected it edits only the job.
+- **Tailoring creates a job**: "Create job from the accepted changes" makes a new job on a
+  template you choose (default: the active job's), named after the job title in the
+  advert. An accepted section order or a different page limit goes on a copy
+  "<template> (tailored)"; the source template and the vault wording are never changed.
+- **Applications remember their job and template** (ids and names at the time). The
+  applications list has Job and Template columns and searches them; the application page
+  shows "Job: X · Template: Y". "Create new job from this" makes a job with the sent
+  selection on the template it was sent with.
+- Server: `templates/<id>.json` and `jobs/<id>.json` (validated, atomic, `.bak`, committed
+  to the data repo), `GET/PUT/DELETE /api/templates` and `/api/jobs` (409 `in_use` for a
+  template a job uses), `GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`.
 
 ### Changed
 
-- The job made by tailoring is named after the job title (no more " (AI)" suffix) (#170).
-- New and duplicated jobs share the template of their source instead of getting a copy of it, so a change of the look reaches all of them (#169). Deleting a job keeps its template (delete templates on the Templates page). The rail item "Variants" is now "Jobs"; the first template is called "Template 1".
+- "Variant" is now "Job" (what to show) or "Template" (the look) everywhere in the
+  interface; the rail item "Variants" is "Jobs". Internally, `Variant` is only the
+  resolved view (`resolveVariant(template, job)`) that the preview, pagination, PDF and
+  application snapshot use.
+- Deleting a job keeps its template. Duplicated and tailored jobs share their source's
+  template instead of getting a copy.
+- The job made by tailoring is named after the job title (no more " (AI)" suffix).
+- Saving writes only the changed templates and jobs. The print page and the PDF use the
+  job.
 
 ### Removed
 
-- The variant lock (#171): `variant-lock.ts`, the reducer guard, `?unlock=true` and the 409 `locked` answer, `refreshLocks`, `LockBanner`/`UnlockDialog`/`LockedFieldset`, the lock icon and the template freeze. Nothing is locked after sending; the application keeps its own frozen copy and PDF, so editing or deleting the template or job afterwards is free.
+- **The variant lock.** Nothing is locked after "Mark as applied": an application keeps
+  its own frozen copy and PDF, so editing or deleting the template or job later changes
+  nothing that was sent. `?unlock=true`, the 409 `locked` answer, the lock banner and
+  dialogs are gone.
+- **The `/api/variants` routes**, `POST /api/pdf {variantId}` and the unused
+  `insertVariant` action.
+
+### Reading old data
+
+- Old `variants/*.json` files are still read: while there are no template or job files,
+  each variant appears as one template (`template-<id>`) and one job (`<id>`), and both are
+  written to `templates/` and `jobs/` the first time you save. `variants/` is never
+  changed or deleted. Application files from before jobs still load (the variant they
+  were sent from counts as the job). Saved CV files in older formats are migrated as before.
 
 ## [0.1.0] - 2026-11-07
 

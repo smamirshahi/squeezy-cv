@@ -5,16 +5,16 @@ import { ApplicationView } from "@pages/applications-page/application-view";
 import { PrintView } from "@pages/print-page/print-view";
 
 /**
- * Which page to show, from the address: `?print=<variantId>` is the print-only page,
+ * Which page to show, from the address: `?print=<jobId>` is the print-only page,
  * `?applications` the list of applications, `?application=<id>` one of them, anything
  * else the editor.
  */
 export function App(): JSX.Element {
   const params = new URLSearchParams(window.location.search);
-  const printVariantId = params.get("print");
+  const printJobId = params.get("print");
   const applicationId = params.get("application");
-  if (printVariantId) {
-    return <PrintView variantId={printVariantId} />;
+  if (printJobId) {
+    return <PrintView jobId={printJobId} />;
   }
   // The print page has no theme: the PDF is always the light default
   return (

@@ -4,7 +4,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 /** The tools in the left rail of the workspace */
 export type WorkspaceTool =
-  "variants" | "templates" | "vault" | "tailor" | "chat" | "ai";
+  "jobs" | "templates" | "vault" | "tailor" | "chat" | "ai";
 
 export interface FitInfo {
   pageCount: number;
@@ -71,7 +71,7 @@ export const initialState: AppState = {
     right: 50,
   },
   selectedSectionInEditorPage: "metaData",
-  tool: "variants",
+  tool: "jobs",
   selectedBlock: null,
   canvasZoom: 1,
   fit: {

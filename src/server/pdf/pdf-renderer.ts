@@ -1,8 +1,8 @@
 import type { Browser } from "playwright";
 
-/** Makes a PDF of a saved variant. Behind an interface so the routes can be tested without a browser. */
+/** Makes a PDF of a saved job. Behind an interface so the routes can be tested without a browser. */
 export interface PdfRenderer {
-  render(variantId: string): Promise<Buffer>;
+  render(jobId: string): Promise<Buffer>;
   close(): Promise<void>;
 }
 
@@ -36,12 +36,12 @@ export class PlaywrightPdfRenderer implements PdfRenderer {
     return this.browser;
   }
 
-  async render(variantId: string): Promise<Buffer> {
+  async render(jobId: string): Promise<Buffer> {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
     try {
       const url = new URL(this.webUrl);
-      url.searchParams.set("print", variantId);
+      url.searchParams.set("print", jobId);
       await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
       await page
         .locator(`${READY_SELECTOR}, ${ERROR_SELECTOR}`)

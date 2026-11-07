@@ -90,10 +90,11 @@ describe("VersionedCvStorage", () => {
     const backup = new BackupService(new GitDataRepo(dir));
     const storage = new VersionedCvStorage(new FileCvStorage(dir), backup);
     await storage.saveVault(cvFile);
-    await storage.saveVariant(variant);
-    await storage.deleteVariant("acme");
+    const { template } = splitVariant(variant, "tpl1", "2026-11-07");
+    await storage.saveTemplate(template);
+    await storage.deleteTemplate("tpl1");
     expect(git(dir, "log", "--format=%s")).toBe(
-      ["Delete: variant acme", "Save: variant acme", "Save: vault"].join("\n")
+      ["Delete: template tpl1", "Save: template tpl1", "Save: vault"].join("\n")
     );
   });
 

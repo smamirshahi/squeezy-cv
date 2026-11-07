@@ -342,7 +342,7 @@ describe("generic sections", () => {
     );
     store.dispatch(
       setItemSelection({
-        variantId: store.getState().variants.activeJobId,
+        jobId: store.getState().variants.activeJobId,
         itemId: "p2",
         change: { isVisible: false },
       })
@@ -364,7 +364,7 @@ describe("generic sections", () => {
 
     store.dispatch(
       setItemSelection({
-        variantId: store.getState().variants.activeJobId,
+        jobId: store.getState().variants.activeJobId,
         itemId: "p2",
         change: { isVisible: true },
       })

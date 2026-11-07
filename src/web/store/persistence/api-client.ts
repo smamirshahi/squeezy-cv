@@ -37,13 +37,6 @@ import {
   VaultSchema,
 } from "@custom-types/vault-types";
 
-/** What the server lists for a saved variant */
-export interface VariantSummary {
-  id: string;
-  name: string;
-  isCorrupt: boolean;
-}
-
 /** What the server lists for a saved template */
 export interface TemplateSummary {
   id: string;
@@ -158,11 +151,6 @@ export function taskProvider(
 export interface ApiClient {
   loadVault: () => Promise<CvFile>;
   saveVault: (file: CvFile) => Promise<void>;
-  listVariants: () => Promise<VariantSummary[]>;
-  loadVariant: (id: string) => Promise<Variant>;
-  saveVariant: (variant: Variant) => Promise<void>;
-  deleteVariant: (id: string) => Promise<void>;
-
   listTemplates: () => Promise<TemplateSummary[]>;
   loadTemplate: (id: string) => Promise<Template>;
   saveTemplate: (template: Template) => Promise<void>;
@@ -229,30 +217,6 @@ export function createApiClient(
     },
     async saveVault(file) {
       await request(fetchImpl, "PUT", "/api/vault", file);
-    },
-    async listVariants() {
-      return (await request(
-        fetchImpl,
-        "GET",
-        "/api/variants"
-      )) as VariantSummary[];
-    },
-    async loadVariant(id) {
-      return VariantSchema.check(
-        await request(
-          fetchImpl,
-          "GET",
-          `/api/variants/${encodeURIComponent(id)}`
-        )
-      );
-    },
-    async saveVariant(variant) {
-      await request(
-        fetchImpl,
-        "PUT",
-        `/api/variants/${encodeURIComponent(variant.id)}`,
-        variant
-      );
     },
     async listTemplates() {
       return (await request(
@@ -408,13 +372,6 @@ export function createApiClient(
         fetchImpl,
         "DELETE",
         `/api/applications/${encodeURIComponent(id)}`
-      );
-    },
-    async deleteVariant(id) {
-      await request(
-        fetchImpl,
-        "DELETE",
-        `/api/variants/${encodeURIComponent(id)}`
       );
     },
   };

@@ -152,56 +152,27 @@ describe("vault", () => {
   });
 });
 
-describe("variants", () => {
-  const variant = {
-    ...makeVariant("acme-react", "Acme - Senior React Dev"),
-    extra: { keep: true },
-  };
+describe("old variant files", () => {
+  const variant = makeVariant("acme-react", "Acme - Senior React Dev");
 
-  it("starts empty", async () => {
-    expect(await storage.listVariants()).toEqual([]);
+  async function writeVariantFile(id: string, text: string): Promise<void> {
+    await mkdir(path.join(dir, "variants"), { recursive: true });
+    await writeFile(path.join(dir, "variants", `${id}.json`), text);
+  }
+
+  it("starts with no templates or jobs", async () => {
+    expect(await storage.listJobs()).toEqual([]);
+    expect(await storage.listTemplates()).toEqual([]);
   });
 
-  it("saves, loads and lists variants, keeping extra fields", async () => {
-    await storage.saveVariant(variant);
-    await storage.saveVariant(makeVariant("b_2", "Second"));
-    expect(await storage.loadVariant("acme-react")).toEqual(variant);
-    expect(await storage.listVariants()).toEqual([
-      { id: "acme-react", name: "Acme - Senior React Dev", isCorrupt: false },
-      { id: "b_2", name: "Second", isCorrupt: false },
-    ]);
-  });
-
-  it("reports unknown variants", async () => {
-    await expectCode(storage.loadVariant("nope"), "not_found");
-    await expectCode(storage.deleteVariant("nope"), "not_found");
-  });
-
-  it("deletes a variant but keeps a copy", async () => {
-    await storage.saveVariant(variant);
-    await storage.deleteVariant("acme-react");
-    await expectCode(storage.loadVariant("acme-react"), "not_found");
-    expect(await storage.listVariants()).toEqual([]);
-    expect(await readdir(path.join(dir, "variants"))).toContain(
-      "acme-react.json.deleted"
-    );
-  });
-
-  it("lists a broken variant file as corrupt instead of failing, and leaves it", async () => {
-    await storage.saveVariant(variant);
-    await writeFile(path.join(dir, "variants", "broken.json"), "{{{");
-    await writeFile(
-      path.join(dir, "variants", "wrong-id.json"),
+  it("skips a broken variant file and leaves it as it is", async () => {
+    await writeVariantFile("acme-react", JSON.stringify(variant));
+    await writeVariantFile("broken", "{{{");
+    await writeVariantFile(
+      "wrong-id",
       JSON.stringify({ id: "other", version: 1, name: "X" })
     );
-    const list = await storage.listVariants();
-    expect(list.find((v) => v.id === "broken")).toEqual({
-      id: "broken",
-      name: "",
-      isCorrupt: true,
-    });
-    expect(list.find((v) => v.id === "wrong-id")?.isCorrupt).toBe(true);
-    expect(list.find((v) => v.id === "acme-react")?.isCorrupt).toBe(false);
+    expect((await storage.listJobs()).map((j) => j.id)).toEqual(["acme-react"]);
     expect(
       await readFile(path.join(dir, "variants", "broken.json"), "utf8")
     ).toBe("{{{");
@@ -211,30 +182,12 @@ describe("variants", () => {
     await mkdir(path.join(dir, "variants"), { recursive: true });
     await writeFile(path.join(dir, "variants", "notes.txt"), "hi");
     await writeFile(path.join(dir, "variants", "x.json.bak"), "{}");
-    expect(await storage.listVariants()).toEqual([]);
+    expect(await storage.listJobs()).toEqual([]);
   });
 
-  it.each([
-    "../escape",
-    "a/b",
-    "a\\b",
-    "",
-    "x".repeat(65),
-    "with space",
-    ".hidden",
-    "a.b",
-  ])("rejects the unsafe id %j", async (id) => {
-    await expectCode(storage.loadVariant(id), "invalid_id");
-    await expectCode(storage.saveVariant(makeVariant(id, "n")), "invalid_id");
-    await expectCode(storage.deleteVariant(id), "invalid_id");
-  });
-
-  it("never writes outside the data folder", async () => {
-    await expectCode(
-      storage.saveVariant(makeVariant("../../evil", "n")),
-      "invalid_id"
-    );
-    expect(await readdir(path.dirname(dir))).not.toContain("evil.json");
+  it("never reads a variant file with an unsafe name", async () => {
+    await writeVariantFile("a.b", JSON.stringify(variant));
+    expect(await storage.listJobs()).toEqual([]);
   });
 });
 

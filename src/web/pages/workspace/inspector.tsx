@@ -23,7 +23,7 @@ import {
   singleColumnLayout,
   twoColumnLayout,
 } from "@shared/vault/page-structure";
-import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
+import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
@@ -303,7 +303,7 @@ function SkillStyleControls({
 }: SkillStyleProps): JSX.Element {
   const dispatch = useAppDispatch();
   const hasLevels = tracksLevels(section);
-  // a variant without a choice keeps the earlier look, which is stars
+  // a template without a choice keeps the earlier look, which is stars
   const display = variant.skillDisplay ?? "stars";
   const columns = variant.skillColumns ?? 1;
   const minLevel = variant.skillMinLevel ?? 0;
@@ -461,7 +461,7 @@ function BlockInspector(): JSX.Element | null {
                   onClick={() =>
                     dispatch(
                       setItemSelection({
-                        variantId: variant.id,
+                        jobId: variant.id,
                         itemId: item.id,
                         change: { isVisible: !isShown },
                       })
@@ -478,7 +478,7 @@ function BlockInspector(): JSX.Element | null {
                   onClick={() =>
                     dispatch(
                       setItemSelection({
-                        variantId: variant.id,
+                        jobId: variant.id,
                         itemId: item.id,
                         change: {
                           emphasis: isEmphasised ? "normal" : "high",

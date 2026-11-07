@@ -15,7 +15,7 @@ import {
   SortableRow,
   getDropIndex,
   useReorderSensors,
-} from "@pages/editor-page/sections/variant-section-items";
+} from "@pages/editor-page/sections/job-section-items";
 import { PageStructure } from "@store/app/app-slice-types";
 import { Item, Section } from "@custom-types/vault-types";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
@@ -175,7 +175,7 @@ interface Props {
 }
 
 /**
- * The outline (design B3): every section, item and bullet of the active variant with what
+ * The outline (design B3): every section, item and bullet of the active job with what
  * shows, in what order. Everything is a button, so it works from the keyboard; changes
  * are announced in a live region. Clicking an item selects it on the page.
  */
@@ -223,7 +223,7 @@ export function Outline({ onClose }: Props): JSX.Element {
   function moveItemTo(section: Section, itemId: string, toIndex: number): void {
     dispatch(
       setItemOrders({
-        variantId: variant.id,
+        jobId: variant.id,
         orders: computeItemOrders(section.items, variant, itemId, toIndex),
       })
     );
@@ -236,7 +236,7 @@ export function Outline({ onClose }: Props): JSX.Element {
   function moveBulletTo(item: Item, bulletId: string, toIndex: number): void {
     dispatch(
       setBulletOrders({
-        variantId: variant.id,
+        jobId: variant.id,
         itemId: item.id,
         orders: computeBulletOrders(item, variant, bulletId, toIndex),
       })
@@ -367,7 +367,7 @@ export function Outline({ onClose }: Props): JSX.Element {
                                         onEye={() =>
                                           dispatch(
                                             setItemSelection({
-                                              variantId: variant.id,
+                                              jobId: variant.id,
                                               itemId: item.id,
                                               change: { isVisible: isHidden },
                                             })
@@ -376,7 +376,7 @@ export function Outline({ onClose }: Props): JSX.Element {
                                         onEmphasis={() =>
                                           dispatch(
                                             setItemSelection({
-                                              variantId: variant.id,
+                                              jobId: variant.id,
                                               itemId: item.id,
                                               change: {
                                                 emphasis:
@@ -390,7 +390,7 @@ export function Outline({ onClose }: Props): JSX.Element {
                                         onMove={(delta) => {
                                           dispatch(
                                             setItemOrders({
-                                              variantId: variant.id,
+                                              jobId: variant.id,
                                               orders: computeItemOrders(
                                                 section.items,
                                                 variant,
@@ -465,8 +465,7 @@ export function Outline({ onClose }: Props): JSX.Element {
                                                         onEye={() =>
                                                           dispatch(
                                                             setBulletSelection({
-                                                              variantId:
-                                                                variant.id,
+                                                              jobId: variant.id,
                                                               itemId: item.id,
                                                               bulletId:
                                                                 bullet.id,
@@ -480,8 +479,7 @@ export function Outline({ onClose }: Props): JSX.Element {
                                                         onMove={(delta) => {
                                                           dispatch(
                                                             setBulletOrders({
-                                                              variantId:
-                                                                variant.id,
+                                                              jobId: variant.id,
                                                               itemId: item.id,
                                                               orders:
                                                                 computeBulletOrders(

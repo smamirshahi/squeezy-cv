@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { configureStore } from "@reduxjs/toolkit";
@@ -167,7 +167,7 @@ describe("load and save through the server", () => {
     );
     first.dispatch(
       setItemSelection({
-        variantId: "acme",
+        jobId: "acme",
         itemId: "exp-1",
         change: { isVisible: false },
       })
@@ -276,7 +276,7 @@ describe("load and save through the server", () => {
     // hiding an item touches job "a" only
     store.dispatch(
       setItemSelection({
-        variantId: "a",
+        jobId: "a",
         itemId: "exp-1",
         change: { isVisible: false },
       })
@@ -335,7 +335,11 @@ describe("load and save through the server", () => {
   it("reads old variant files as template + job, and saving keeps them", async () => {
     const api = clientFor(app);
     await api.saveVault(file);
-    await api.saveVariant(createDefaultVariant(file, "old"));
+    await mkdir(path.join(dir, "variants"), { recursive: true });
+    await writeFile(
+      path.join(dir, "variants", "old.json"),
+      JSON.stringify(createDefaultVariant(file, "old"))
+    );
     const store = newStore();
     await loadFromServer(api, store.dispatch, store.getState);
     expect(store.getState().variants.jobs.map((j) => j.id)).toEqual(["old"]);
@@ -349,7 +353,6 @@ describe("load and save through the server", () => {
   it("blocks saving and does not overwrite when the saved vault cannot be read", async () => {
     const api = clientFor(app);
     await api.saveVault(file);
-    const { writeFile } = await import("node:fs/promises");
     await writeFile(path.join(dir, "vault.json"), "{{{ broken");
 
     const store = newStore();
@@ -368,7 +371,7 @@ describe("load and save through the server", () => {
   it("blocks saving when a saved job cannot be read", async () => {
     const api = clientFor(app);
     await api.saveVault(file);
-    const { writeFile, mkdir } = await import("node:fs/promises");
+
     await mkdir(path.join(dir, "jobs"), { recursive: true });
     await writeFile(path.join(dir, "jobs", "bad.json"), "{{{");
 

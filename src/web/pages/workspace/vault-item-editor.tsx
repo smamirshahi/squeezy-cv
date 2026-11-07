@@ -460,7 +460,7 @@ interface Props {
 /**
  * The vault item editor (design B2): the fields of one item and its bullets with tags and
  * wordings, saved to the vault as you type (no Apply step). `[` and `]` go to the previous
- * and next item. It is a fact: it changes in every variant that shows the item.
+ * and next item. It is a fact: it changes in every job that shows the item.
  */
 export function VaultItemEditor({
   section,

@@ -4,6 +4,7 @@ import path from "node:path";
 import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
+import { splitVariant } from "@shared/variant/template-job";
 import { createVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { buildServer } from "@server/app";
@@ -18,8 +19,8 @@ class FakePdf implements PdfRenderer {
   requested: string[] = [];
   shouldFail = false;
 
-  render(variantId: string): Promise<Buffer> {
-    this.requested.push(variantId);
+  render(jobId: string): Promise<Buffer> {
+    this.requested.push(jobId);
     return this.shouldFail
       ? Promise.reject(new Error("Chromium is missing"))
       : Promise.resolve(PDF);
@@ -43,11 +44,13 @@ beforeEach(async () => {
     now: () => new Date(2026, 10, 6),
   });
   await app.inject({ method: "PUT", url: "/api/vault", payload: file });
+  const { template, job } = splitVariant(variant, "tpl", "2026-11-07");
   await app.inject({
     method: "PUT",
-    url: "/api/variants/acme",
-    payload: variant,
+    url: "/api/templates/tpl",
+    payload: template,
   });
+  await app.inject({ method: "PUT", url: "/api/jobs/acme", payload: job });
 });
 
 afterEach(async () => {
