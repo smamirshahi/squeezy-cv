@@ -48,7 +48,7 @@ describe("PrintView", () => {
     const variant = createDefaultVariant(file, "main");
     stubServer({
       "/api/vault": { status: 200, body: file },
-      "/api/variants/main": { status: 200, body: variant },
+      "/api/jobs/main/resolved": { status: 200, body: variant },
     });
     const container = show("main");
 
@@ -75,7 +75,7 @@ describe("PrintView", () => {
     };
     stubServer({
       "/api/vault": { status: 200, body: file },
-      "/api/variants/main": { status: 200, body: variant },
+      "/api/jobs/main/resolved": { status: 200, body: variant },
     });
     const container = show("main");
     await waitFor(() =>
@@ -92,7 +92,7 @@ describe("PrintView", () => {
   it("reports a variant that cannot be loaded, for the renderer to see", async () => {
     stubServer({
       "/api/vault": { status: 200, body: file },
-      "/api/variants/nope": {
+      "/api/jobs/nope/resolved": {
         status: 404,
         body: { code: "not_found", message: "No such variant." },
       },
@@ -107,7 +107,7 @@ describe("PrintView", () => {
 });
 
 describe("api client: createPdf", () => {
-  it("posts the variant id and returns the bytes", async () => {
+  it("posts the job id and returns the bytes", async () => {
     const fetchMock = vi.fn(() =>
       Promise.resolve(new Response("%PDF-1.7", { status: 200 }))
     );
@@ -117,7 +117,7 @@ describe("api client: createPdf", () => {
       "/api/pdf",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ variantId: "main" }),
+        body: JSON.stringify({ jobId: "main" }),
       })
     );
     expect(blob.size).toBe("%PDF-1.7".length);

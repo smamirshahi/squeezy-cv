@@ -1,7 +1,10 @@
 import { nanoid } from "@reduxjs/toolkit";
+import { Job } from "@custom-types/job-types";
+import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { CvFile } from "@custom-types/vault-types";
 import { activateVariant } from "@hooks/use-sync-active-variant";
+import { resolveVariant } from "@shared/variant/template-job";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { createCvFile } from "@shared/vault/cv-file";
 import { initialState as initialAppState } from "@store/app/app-slice";
@@ -24,23 +27,39 @@ import { computeVariantLocks } from "@shared/variant/variant-lock";
 import {
   relockVariants,
   setLocks,
+  setTemplatesAndJobs,
   setVariants,
 } from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 
-/** Puts a CV file and its variants into the store and shows the first variant */
+/** The templates and jobs of a CV, or variants that are split into one template and one job each */
+export type LoadedVariants = Variant[] | { templates: Template[]; jobs: Job[] };
+
+/** Puts a CV file and its templates and jobs into the store and shows the first job */
 export function loadCvFileIntoStore(
   dispatch: AppDispatch,
   file: CvFile,
-  variants?: Variant[]
+  loaded?: LoadedVariants
 ): void {
-  const list = variants?.length
-    ? variants
-    : [createDefaultVariant(file, nanoid(), initialAppState.structure)];
   dispatch(setVault(file.vault));
   dispatch(setMetaData(file.metaData));
-  dispatch(setVariants(list));
-  activateVariant(dispatch, list[0]);
+  let first: Variant;
+  if (Array.isArray(loaded) && loaded.length > 0) {
+    dispatch(setVariants(loaded));
+    first = loaded[0];
+  } else if (!Array.isArray(loaded) && loaded && loaded.jobs.length > 0) {
+    dispatch(setTemplatesAndJobs(loaded));
+    const job = loaded.jobs[0];
+    first = resolveVariant(
+      loaded.templates.find((t) => t.id === job.templateId) ??
+        loaded.templates[0],
+      job
+    );
+  } else {
+    first = createDefaultVariant(file, nanoid(), initialAppState.structure);
+    dispatch(setVariants([first]));
+  }
+  activateVariant(dispatch, first);
   // a loaded file starts a new history: undo never goes back to the file before it
   dispatch(clearHistory());
 }
@@ -86,38 +105,56 @@ export async function loadFromServer(
   dispatch(setStorageStatus({ status: "loading" }));
   try {
     const file = await api.loadVault();
-    const summaries = await api.listVariants();
-    const broken = summaries.filter((summary) => summary.isCorrupt);
+    const [templateSummaries, jobSummaries] = await Promise.all([
+      api.listTemplates(),
+      api.listJobs(),
+    ]);
+    const broken = [
+      ...templateSummaries.filter((summary) => summary.isCorrupt),
+      ...jobSummaries.filter((summary) => summary.isCorrupt),
+    ];
     if (broken.length > 0) {
       dispatch(
         setStorageStatus({
           status: "error",
-          message: `These saved variants cannot be read: ${broken
+          message: `These saved templates or jobs cannot be read: ${broken
             .map((b) => b.id)
             .join(", ")}. Saving is off so nothing is overwritten.`,
         })
       );
       return;
     }
-    const variants = await Promise.all(
-      summaries.map((summary) => api.loadVariant(summary.id))
-    );
-    loadCvFileIntoStore(dispatch, file, variants);
+    const [templates, jobs] = await Promise.all([
+      Promise.all(
+        templateSummaries.map((summary) => api.loadTemplate(summary.id))
+      ),
+      Promise.all(jobSummaries.map((summary) => api.loadJob(summary.id))),
+    ]);
+    loadCvFileIntoStore(dispatch, file, { templates, jobs });
 
     const state = getState();
     const current = toSavedState(
       state.vault,
       state.cvData.metaData,
       state.cvData.style,
-      state.variants.variants
+      state.variants.templates,
+      state.variants.jobs
     );
-    // Variants that were not on disk (a default made for an old file) stay unsaved
-    const onDisk = new Set(variants.map((v) => v.id));
+    // Templates and jobs that were not on disk (defaults made for an old file) stay unsaved
+    const onDisk = {
+      templates: new Set(templates.map((t) => t.id)),
+      jobs: new Set(jobs.map((j) => j.id)),
+    };
     dispatch(
       setSavedState({
         vault: current.vault,
-        variants: Object.fromEntries(
-          Object.entries(current.variants).filter(([id]) => onDisk.has(id))
+        templates: Object.fromEntries(
+          Object.entries(current.templates).filter(([id]) =>
+            onDisk.templates.has(id)
+          )
+        ),
+        jobs: Object.fromEntries(
+          Object.entries(current.jobs).filter(([id]) => onDisk.jobs.has(id))
         ),
       })
     );
@@ -148,6 +185,16 @@ export async function loadFromServer(
   }
 }
 
+async function ignoreNotFound(run: () => Promise<void>): Promise<void> {
+  try {
+    await run();
+  } catch (error) {
+    if (!(error instanceof ApiError && error.code === "not_found")) {
+      throw error;
+    }
+  }
+}
+
 /** Writes what changed since the last save. Does nothing unless the status is "ready". */
 export async function saveToServer(
   api: ApiClient,
@@ -162,7 +209,8 @@ export async function saveToServer(
     state.vault,
     state.cvData.metaData,
     state.cvData.style,
-    state.variants.variants
+    state.variants.templates,
+    state.variants.jobs
   );
   const plan = planSave(state.persistence.saved, current);
 
@@ -173,27 +221,27 @@ export async function saveToServer(
         createCvFile(state.vault, state.cvData.metaData, state.cvData.style)
       );
     }
-    for (const id of plan.variantsToSave) {
-      const variant = state.variants.variants.find((v) => v.id === id);
-      if (variant) {
-        await api.saveVariant(variant, {
-          isUnlocked: state.variants.unlockedIds.includes(id),
-        });
+    // templates first (a job needs its template), deletions last in the opposite order
+    for (const id of plan.templatesToSave) {
+      const template = state.variants.templates.find((t) => t.id === id);
+      if (template) {
+        await api.saveTemplate(template);
       }
     }
-    for (const id of plan.variantsToDelete) {
-      try {
-        await api.deleteVariant(id, {
-          isUnlocked: state.variants.unlockedIds.includes(id),
-        });
-      } catch (error) {
-        if (!(error instanceof ApiError && error.code === "not_found")) {
-          throw error;
-        }
+    for (const id of plan.jobsToSave) {
+      const job = state.variants.jobs.find((j) => j.id === id);
+      if (job) {
+        await api.saveJob(job);
       }
+    }
+    for (const id of plan.jobsToDelete) {
+      await ignoreNotFound(() => api.deleteJob(id));
+    }
+    for (const id of plan.templatesToDelete) {
+      await ignoreNotFound(() => api.deleteTemplate(id));
     }
     dispatch(setSavedState(current));
-    // saved: a variant that was unlocked for this edit is locked again
+    // saved: a job that was unlocked for this edit is locked again
     dispatch(relockVariants({ ids: state.variants.unlockedIds }));
   } catch (error) {
     dispatch(setSaveError(errorText(error)));

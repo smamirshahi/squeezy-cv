@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { Variant } from "@custom-types/variant-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   act,
@@ -20,6 +21,7 @@ import {
   setPageLimit,
   setTuning,
   setVariants,
+  variantsSelector,
 } from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
@@ -81,10 +83,8 @@ function show(store: AppStore): void {
   );
 }
 
-function variantOf(
-  store: AppStore
-): ReturnType<AppStore["getState"]>["variants"]["variants"][number] {
-  return store.getState().variants.variants[0];
+function variantOf(store: AppStore): Variant {
+  return variantsSelector(store.getState())[0];
 }
 
 describe("auto-fit in the preview", () => {

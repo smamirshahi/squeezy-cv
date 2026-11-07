@@ -5,6 +5,7 @@ import {
   updateBulletSelection,
   updateItemSelection,
 } from "@shared/variant/variant-utils";
+import { splitVariant } from "@shared/variant/template-job";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { readPdf } from "@e2e/read-pdf";
 import { longFile, makeExperience } from "@e2e/fixtures";
@@ -120,5 +121,28 @@ describe("PDF of a variant (real Chromium)", () => {
 
   it("refuses a variant that is not saved", async () => {
     await expect(app.pdf("nope")).rejects.toThrow();
+  });
+});
+
+describe("PDF of a job (real Chromium)", () => {
+  it("draws jobs saved as templates and jobs, two jobs on one template", async () => {
+    // one template, two jobs that show different things
+    const base = onlyJobs(blank("job-a", "Job A"), []);
+    const { template, job: jobA } = splitVariant(base, "tpl-shared");
+    const { job: jobB } = splitVariant(
+      onlyJobs(blank("job-b", "Job B"), ["long-1"]),
+      "tpl-shared"
+    );
+    await app.seedJobs(file, [template], [jobA, jobB]);
+
+    // the API route takes the job id and the print page loads the job with its template
+    const a = await readPdf(await app.pdfOfJob("job-a"));
+    const b = await readPdf(await app.pdfOfJob("job-b"));
+
+    expect(a.pageCount).toBe(1);
+    expect(a.text).toContain("Jane Doe");
+    expect(a.text).not.toContain("Engineer Number 1");
+    expect(b.text).toContain("Engineer Number 1");
+    expect(b.text).not.toContain("Engineer Number 2");
   });
 });

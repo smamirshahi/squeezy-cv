@@ -13,7 +13,7 @@ import { EditorVariants } from "@pages/editor-page/sections/editor-variants";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
-import { setVariants } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -133,6 +133,6 @@ describe("page status in the preview", () => {
     );
     fireEvent.mouseDown(screen.getByLabelText("Page limit"));
     fireEvent.click(screen.getByRole("option", { name: "1 page" }));
-    expect(store.getState().variants.variants[0].pageLimit).toBe(1);
+    expect(variantsSelector(store.getState())[0].pageLimit).toBe(1);
   });
 });

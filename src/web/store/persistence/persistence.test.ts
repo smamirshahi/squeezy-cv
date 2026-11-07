@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { buildServer } from "@server/app";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
+import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   ApiClient,
@@ -29,6 +30,8 @@ import {
   addVariant,
   deleteVariant,
   setItemSelection,
+  setPageLimit,
+  variantsSelector,
 } from "@store/variants/variants-slice";
 import { updateProfile } from "@store/vault/vault-slice";
 
@@ -65,24 +68,55 @@ function newStore(): AppStore {
 const file = migrateCvFile(sample);
 
 describe("planSave / isDirty", () => {
-  const current = toSavedState(file.vault, file.metaData, file.style, []);
+  const current = toSavedState(file.vault, file.metaData, file.style, [], []);
 
   it("plans everything when nothing is saved yet", () => {
     expect(planSave(null, current).shouldSaveVault).toBe(true);
     expect(isDirty(null, current)).toBe(true);
   });
 
-  it("is clean when equal, and lists changed, new and removed variants", () => {
-    const saved = { vault: current.vault, variants: { a: "1", b: "2" } };
-    expect(isDirty(saved, { ...current, variants: { a: "1", b: "2" } })).toBe(
+  it("is clean when equal, and lists changed, new and removed jobs", () => {
+    const saved = {
+      vault: current.vault,
+      templates: {},
+      jobs: { a: "1", b: "2" },
+    };
+    expect(isDirty(saved, { ...current, jobs: { a: "1", b: "2" } })).toBe(
       false
     );
     expect(
-      planSave(saved, { ...current, variants: { a: "changed", c: "3" } })
+      planSave(saved, { ...current, jobs: { a: "changed", c: "3" } })
     ).toEqual({
       shouldSaveVault: false,
-      variantsToSave: ["a", "c"],
-      variantsToDelete: ["b"],
+      templatesToSave: [],
+      templatesToDelete: [],
+      jobsToSave: ["a", "c"],
+      jobsToDelete: ["b"],
+    });
+  });
+});
+
+describe("planSave: templates", () => {
+  const current = toSavedState(file.vault, file.metaData, file.style, [], []);
+
+  it("lists changed, new and removed templates separately from jobs", () => {
+    const saved = {
+      vault: current.vault,
+      templates: { t1: "1", t2: "2" },
+      jobs: { j: "1" },
+    };
+    expect(
+      planSave(saved, {
+        ...current,
+        templates: { t1: "changed", t3: "3" },
+        jobs: { j: "1" },
+      })
+    ).toEqual({
+      shouldSaveVault: false,
+      templatesToSave: ["t1", "t3"],
+      templatesToDelete: ["t2"],
+      jobsToSave: [],
+      jobsToDelete: [],
     });
   });
 });
@@ -148,7 +182,7 @@ describe("load and save through the server", () => {
     const state = second.getState();
     expect(state.persistence.status).toBe("ready");
     expect(state.vault.profile.fullName).toBe("Changed Name");
-    const acme = state.variants.variants.find((v) => v.id === "acme");
+    const acme = variantsSelector(state).find((v) => v.id === "acme");
     expect(acme?.selection["exp-1"]?.isVisible).toBe(false);
     // loaded state is clean: nothing to save
     expect(
@@ -158,7 +192,8 @@ describe("load and save through the server", () => {
           state.vault,
           state.cvData.metaData,
           state.cvData.style,
-          state.variants.variants
+          state.variants.templates,
+          state.variants.jobs
         )
       )
     ).toBe(false);
@@ -179,11 +214,121 @@ describe("load and save through the server", () => {
       })
     );
     await saveToServer(api, store.dispatch, store.getState);
-    expect((await api.listVariants()).map((v) => v.id)).toContain("extra");
+    expect((await api.listJobs()).map((v) => v.id)).toContain("extra");
 
     store.dispatch(deleteVariant({ id: "extra" }));
     await saveToServer(api, store.dispatch, store.getState);
-    expect((await api.listVariants()).map((v) => v.id)).not.toContain("extra");
+    expect((await api.listJobs()).map((v) => v.id)).not.toContain("extra");
+  });
+
+  it("first start: one default template and one default job, saved with the first Save", async () => {
+    const store = newStore();
+    const api = clientFor(app);
+    await loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    const { templates, jobs } = store.getState().variants;
+    expect(templates).toHaveLength(1);
+    expect(jobs).toHaveLength(1);
+    expect(jobs[0].templateId).toBe(templates[0].id);
+
+    await saveToServer(api, store.dispatch, store.getState);
+    expect((await api.listTemplates()).map((t) => t.id)).toEqual([
+      templates[0].id,
+    ]);
+    expect((await api.listJobs()).map((j) => j.id)).toEqual([jobs[0].id]);
+  });
+
+  it("save writes only the changed templates and jobs", async () => {
+    const store = newStore();
+    const api = clientFor(app);
+    await loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    for (const id of ["a", "b"]) {
+      store.dispatch(
+        addVariant({
+          vault: store.getState().vault,
+          style: store.getState().cvData.style,
+          name: id,
+          id,
+        })
+      );
+    }
+    await saveToServer(api, store.dispatch, store.getState);
+
+    const writes: string[] = [];
+    const recording: ApiClient = {
+      ...api,
+      saveVault: (f) => (writes.push("vault"), api.saveVault(f)),
+      saveTemplate: (t) => (
+        writes.push(`template:${t.id}`),
+        api.saveTemplate(t)
+      ),
+      saveJob: (j) => (writes.push(`job:${j.id}`), api.saveJob(j)),
+    };
+
+    // hiding an item touches job "a" only
+    store.dispatch(
+      setItemSelection({
+        variantId: "a",
+        itemId: "exp-1",
+        change: { isVisible: false },
+      })
+    );
+    await saveToServer(recording, store.dispatch, store.getState);
+    expect(writes).toEqual(["job:a"]);
+
+    // a look change touches job b's template only
+    writes.length = 0;
+    store.dispatch(setPageLimit({ id: "b", pageLimit: 1 }));
+    await saveToServer(recording, store.dispatch, store.getState);
+    expect(writes).toEqual(["template:template-b"]);
+
+    // nothing changed: nothing is written
+    writes.length = 0;
+    await saveToServer(recording, store.dispatch, store.getState);
+    expect(writes).toEqual([]);
+  });
+
+  it("a deleted job and its own template are removed on the next save", async () => {
+    const store = newStore();
+    const api = clientFor(app);
+    await loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    store.dispatch(
+      addVariant({
+        vault: store.getState().vault,
+        style: store.getState().cvData.style,
+        name: "Extra",
+        id: "extra",
+      })
+    );
+    await saveToServer(api, store.dispatch, store.getState);
+    expect((await api.listTemplates()).map((t) => t.id)).toContain(
+      "template-extra"
+    );
+    store.dispatch(deleteVariant({ id: "extra" }));
+    await saveToServer(api, store.dispatch, store.getState);
+    expect(store.getState().persistence.saveError).toBe("");
+    expect((await api.listTemplates()).map((t) => t.id)).not.toContain(
+      "template-extra"
+    );
+  });
+
+  it("reads old variant files as template + job, and saving keeps them", async () => {
+    const api = clientFor(app);
+    await api.saveVault(file);
+    await api.saveVariant(createDefaultVariant(file, "old"));
+    const store = newStore();
+    await loadFromServer(api, store.dispatch, store.getState);
+    expect(store.getState().variants.jobs.map((j) => j.id)).toEqual(["old"]);
+    expect(store.getState().variants.templates[0].id).toBe("template-old");
+    store.dispatch(setPageLimit({ id: "old", pageLimit: 1 }));
+    await saveToServer(api, store.dispatch, store.getState);
+    expect(store.getState().persistence.saveError).toBe("");
+    expect((await api.loadTemplate("template-old")).pageLimit).toBe(1);
   });
 
   it("blocks saving and does not overwrite when the saved vault cannot be read", async () => {
@@ -205,12 +350,12 @@ describe("load and save through the server", () => {
     );
   });
 
-  it("blocks saving when a saved variant cannot be read", async () => {
+  it("blocks saving when a saved job cannot be read", async () => {
     const api = clientFor(app);
     await api.saveVault(file);
     const { writeFile, mkdir } = await import("node:fs/promises");
-    await mkdir(path.join(dir, "variants"), { recursive: true });
-    await writeFile(path.join(dir, "variants", "bad.json"), "{{{");
+    await mkdir(path.join(dir, "jobs"), { recursive: true });
+    await writeFile(path.join(dir, "jobs", "bad.json"), "{{{");
 
     const store = newStore();
     await loadFromServer(api, store.dispatch, store.getState);
@@ -262,9 +407,9 @@ describe("load and save through the server", () => {
   it("loads an imported file as one default variant", () => {
     const store = newStore();
     loadCvFileIntoStore(store.dispatch, file);
-    expect(store.getState().variants.variants).toHaveLength(1);
-    expect(store.getState().variants.activeId).toBe(
-      store.getState().variants.variants[0].id
+    expect(variantsSelector(store.getState())).toHaveLength(1);
+    expect(store.getState().variants.activeJobId).toBe(
+      variantsSelector(store.getState())[0].id
     );
   });
 });

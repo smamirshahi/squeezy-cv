@@ -60,6 +60,54 @@ function title(store: ReturnType<typeof setup>["store"]): string | undefined {
     ?.items.find((i) => i.id === item.id)?.fields.jobTitle;
 }
 
+describe("undo and redo: templates and jobs", () => {
+  it("a job edit and a template edit are one step each and undo/redo both", () => {
+    const { store, tick } = setup();
+    const id = activeVariantSelector(store.getState()).id;
+    const before = store.getState().variants;
+    store.dispatch(
+      setItemSelection({
+        variantId: id,
+        itemId: item.id,
+        change: { isVisible: false },
+      })
+    );
+    tick(COALESCE_MS + 1);
+    store.dispatch(setPageLimit({ id, pageLimit: 1 }));
+    expect(store.getState().history.past).toHaveLength(2);
+    const edited = store.getState().variants;
+    expect(edited.jobs).not.toBe(before.jobs);
+    expect(edited.templates).not.toBe(before.templates);
+
+    store.dispatch(undo());
+    expect(activeVariantSelector(store.getState()).pageLimit).toBe(
+      activeVariantSelector({ variants: before }).pageLimit
+    );
+    expect(
+      activeVariantSelector(store.getState()).selection[item.id]?.isVisible
+    ).toBe(false);
+    store.dispatch(undo());
+    expect(store.getState().variants.jobs).toBe(before.jobs);
+    expect(store.getState().variants.templates).toBe(before.templates);
+    store.dispatch(redo());
+    store.dispatch(redo());
+    expect(store.getState().variants.jobs).toBe(edited.jobs);
+    expect(store.getState().variants.templates).toBe(edited.templates);
+  });
+
+  it("undoing a template edit puts the editor's layout and style back too", () => {
+    const { store } = setup();
+    const id = activeVariantSelector(store.getState()).id;
+    const variant = activeVariantSelector(store.getState());
+    const style = { ...variant.style, paperMargin: "narrow" as const };
+    store.dispatch(setVariantAppearance({ id, layout: variant.layout, style }));
+    expect(store.getState().history.past).toHaveLength(1);
+    store.dispatch(undo());
+    expect(store.getState().cvData.style).toEqual(variant.style);
+    expect(store.getState().app.structure).toEqual(variant.layout);
+  });
+});
+
 describe("undo and redo", () => {
   it("undoes and redoes a vault edit", () => {
     const { store } = setup();

@@ -16,7 +16,7 @@ import { AppStore } from "@store/store-helper";
 import { setSavedState } from "@store/persistence/persistence-slice";
 import { toSavedState } from "@store/persistence/persistence-logic";
 import { setStyle } from "@store/cv-data/cv-data-slice";
-import { setVariants } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -123,7 +123,8 @@ function makeStore({ isSaved = true } = {}): AppStore {
           s.vault,
           s.cvData.metaData,
           s.cvData.style,
-          s.variants.variants
+          s.variants.templates,
+          s.variants.jobs
         )
       )
     );
@@ -251,7 +252,7 @@ describe("AiAssistant: the review", () => {
     stubServer({});
     const store = makeStore();
     await analyse(store);
-    const baseBefore = JSON.stringify(store.getState().variants.variants[0]);
+    const baseBefore = JSON.stringify(variantsSelector(store.getState())[0]);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -259,7 +260,8 @@ describe("AiAssistant: the review", () => {
       })
     );
 
-    const { variants, activeId } = store.getState().variants;
+    const variants = variantsSelector(store.getState());
+    const activeId = store.getState().variants.activeJobId;
     expect(variants).toHaveLength(2);
     expect(JSON.stringify(variants[0])).toBe(baseBefore);
     const created = variants[1];
@@ -295,7 +297,7 @@ describe("AiAssistant: the review", () => {
       .items.find((i) => i.id === job1.id)!.bullets;
     expect(bullets[1].alt?.formal).toBe("Used Kubernetes for state");
     // the flagged wording that was ticked by hand is remembered on the variant for the export check
-    const record = store.getState().variants.variants[1].tailor;
+    const record = variantsSelector(store.getState())[1].tailor;
     expect(record?.jobTitle).toBe("Senior Front-End Developer");
     expect(record?.acceptedFlagged.map((f) => f.text)).toEqual([
       "Used Kubernetes for state",
@@ -317,7 +319,7 @@ describe("AiAssistant: the review", () => {
       })
     );
     expect(
-      store.getState().variants.variants[1].selection[job2.id]?.emphasis
+      variantsSelector(store.getState())[1].selection[job2.id]?.emphasis
     ).not.toBe("high");
   });
 

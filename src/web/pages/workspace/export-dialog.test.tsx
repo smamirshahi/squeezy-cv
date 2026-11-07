@@ -82,7 +82,8 @@ function readyStore(): AppStore {
         s.vault,
         s.cvData.metaData,
         s.cvData.style,
-        s.variants.variants
+        s.variants.templates,
+        s.variants.jobs
       )
     )
   );
@@ -103,6 +104,17 @@ async function openDialog(): Promise<void> {
     ).toBe(false)
   );
 }
+
+describe("export dialog: PDF of a job", () => {
+  it("asks the server for the PDF of the active job by its job id", async () => {
+    await openDialog();
+    const pdfCall = (
+      vi.mocked(fetch).mock.calls as unknown as [string, RequestInit][]
+    ).find(([url]) => url === "/api/pdf");
+    expect(pdfCall?.[1].method).toBe("POST");
+    expect(JSON.parse(pdfCall?.[1].body as string)).toEqual({ jobId: "v1" });
+  });
+});
 
 describe("export dialog: mark as applied after export", () => {
   it("downloads and does nothing else when the option is off", async () => {

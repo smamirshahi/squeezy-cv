@@ -9,7 +9,7 @@ import {
 } from "@store/store-helper";
 import {
   activeVariantSelector,
-  isActiveVariantReadOnlySelector,
+  isActiveAppearanceReadOnlySelector,
   setActiveVariant,
   setVariantAppearance,
 } from "@store/variants/variants-slice";
@@ -25,15 +25,16 @@ export function activateVariant(dispatch: AppDispatch, variant: Variant): void {
 }
 
 /**
- * Keeps the active variant's layout and style equal to what the editor shows, so changes
- * on the Page Structure and Style Settings pages belong to the variant. Mount it once.
+ * Keeps the layout and style of the active job's template equal to what the editor shows, so
+ * changes on the Page Structure and Style Settings pages belong to the template (and every
+ * job that uses it). Mount it once.
  */
 export function useSyncActiveVariant(): void {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const { structure } = useAppSelector(appSelector);
   const style = useAppSelector(styleSelector);
-  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
+  const isReadOnly = useAppSelector(isActiveAppearanceReadOnlySelector);
 
   useEffect(() => {
     if (
@@ -41,7 +42,7 @@ export function useSyncActiveVariant(): void {
       JSON.stringify(variant.style) !== JSON.stringify(style)
     ) {
       if (isReadOnly) {
-        // a sent variant cannot change: put the editor back to what it says
+        // a sent job (or a template it uses) cannot change: put the editor back to what it says
         dispatch(updatePageStructure(variant.layout));
         dispatch(setStyle(variant.style));
         return;

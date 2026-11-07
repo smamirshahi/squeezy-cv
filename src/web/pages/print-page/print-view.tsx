@@ -13,7 +13,7 @@ type LoadState =
   | { status: "error"; message: string };
 
 interface Props {
-  /** The id of the saved variant to show */
+  /** The id of the saved job to show (a job id is also the id of its variant) */
   variantId: string;
 }
 
@@ -35,7 +35,7 @@ export function PrintView({ variantId }: Props): JSX.Element | null {
       try {
         const [file, saved] = await Promise.all([
           api.loadVault(),
-          api.loadVariant(variantId),
+          api.loadResolvedJob(variantId),
         ]);
         loadCvFileIntoStore(dispatch, file, [saved]);
         activateVariant(dispatch, saved);

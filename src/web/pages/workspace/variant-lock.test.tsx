@@ -7,14 +7,14 @@ import { Button } from "@mui/material";
 import { LockBanner, LockedFieldset } from "@pages/workspace/variant-lock";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { setLocks } from "@store/variants/variants-slice";
+import { setLocks, variantsSelector } from "@store/variants/variants-slice";
 
 afterEach(cleanup);
 
 function makeStore(isSent: boolean): AppStore {
   const store: AppStore = configureStore({ reducer: rootReducer });
   if (isSent) {
-    const id = store.getState().variants.activeId;
+    const id = store.getState().variants.activeJobId;
     store.dispatch(
       setLocks({
         byVariant: {
@@ -86,6 +86,6 @@ describe("variant lock UI", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Create new variant from this" })
     );
-    expect(store.getState().variants.variants).toHaveLength(2);
+    expect(variantsSelector(store.getState())).toHaveLength(2);
   });
 });
