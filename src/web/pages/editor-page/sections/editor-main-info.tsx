@@ -25,6 +25,13 @@ import {
   vaultSelector,
 } from "@store/vault/vault-slice";
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
+import { LinkTypeSelect } from "@pages/editor-page/link-type/link-type-select";
+import {
+  guessLinkTypeFromUrl,
+  linkTypeById,
+  linkTypeOfLabel,
+  OTHER_LINK_TYPE_ID,
+} from "@shared/vault/link-types";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 /** Edits the name, headline, contact details and the list of links */
@@ -182,27 +189,54 @@ export function EditorMainInfo(): JSX.Element | null {
             }
             isLastEntity={index === draft.links.length - 1}
           />
-          <TextField
-            label="Label"
-            value={link.label}
-            onChange={(event) =>
+          <LinkTypeSelect
+            value={linkTypeOfLabel(link.label).id}
+            onChange={(typeId) =>
               draftDispatch(
                 updateLink({
                   id: link.id,
-                  update: { label: event.target.value },
+                  update: {
+                    // Other keeps a typed label; a known type writes its name
+                    label:
+                      typeId === OTHER_LINK_TYPE_ID
+                        ? ""
+                        : linkTypeById(typeId).label,
+                  },
                 })
               )
             }
-            sx={{ width: "30%" }}
           />
+          {linkTypeOfLabel(link.label).id === OTHER_LINK_TYPE_ID && (
+            <TextField
+              label="Label"
+              value={link.label}
+              onChange={(event) =>
+                draftDispatch(
+                  updateLink({
+                    id: link.id,
+                    update: { label: event.target.value },
+                  })
+                )
+              }
+              sx={{ width: "25%" }}
+            />
+          )}
           <TextField
             label="URL"
+            placeholder={linkTypeOfLabel(link.label).urlHint}
             value={link.url}
-            onChange={(event) =>
-              draftDispatch(
-                updateLink({ id: link.id, update: { url: event.target.value } })
-              )
-            }
+            onChange={(event) => {
+              const url = event.target.value;
+              const update: { url: string; label?: string } = { url };
+              // A pasted address of a known site picks the type if none is chosen yet
+              if (link.label.trim() === "" && link.url.trim() === "") {
+                const guess = guessLinkTypeFromUrl(url);
+                if (guess.id !== OTHER_LINK_TYPE_ID) {
+                  update.label = guess.label;
+                }
+              }
+              draftDispatch(updateLink({ id: link.id, update }));
+            }}
             fullWidth
           />
           <IconButton
