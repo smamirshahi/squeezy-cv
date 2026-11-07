@@ -145,7 +145,7 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByRole("row").filter({ hasText: "Acme Ltd" }).waitFor();
 
     // the company link opens the full page
-    await page.getByRole("link", { name: "Acme Ltd" }).click();
+    await page.getByRole("link", { name: "Acme Ltd", exact: true }).click();
     await page.getByRole("heading", { name: "Acme Ltd" }).waitFor();
 
     // back keeps the search
