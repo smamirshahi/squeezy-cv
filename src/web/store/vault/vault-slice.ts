@@ -7,6 +7,7 @@ import {
   SectionType,
   Vault,
 } from "@custom-types/vault-types";
+import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import {
   findBullet,
@@ -75,6 +76,10 @@ const vaultSlice = createSlice({
     },
 
     removeSection(state, action: PayloadAction<{ id: string }>) {
+      // The Unsorted section is built in and cannot be deleted
+      if (findSection(state, action.payload.id)?.type === "unsorted") {
+        return;
+      }
       state.sections = state.sections.filter((s) => s.id !== action.payload.id);
     },
 
@@ -128,6 +133,34 @@ const vaultSlice = createSlice({
           },
         };
       },
+    },
+
+    /** Adds the Unsorted section (last) when the vault has none, so old files load unchanged */
+    ensureUnsortedSection(state) {
+      if (!state.sections.some((s) => s.type === "unsorted")) {
+        state.sections.push({
+          id: UNSORTED_SECTION_ID,
+          type: "unsorted",
+          title: "Unsorted",
+          items: [],
+        });
+      }
+    },
+
+    /** Moves an item (with its bullets, tags and wordings) to the end of another section */
+    moveItemToSection(
+      state,
+      action: PayloadAction<ItemRef & { toSectionId: string }>
+    ) {
+      const { sectionId, itemId, toSectionId } = action.payload;
+      const from = findSection(state, sectionId);
+      const to = findSection(state, toSectionId);
+      const item = from?.items.find((i) => i.id === itemId);
+      if (!from || !to || !item || from.id === to.id) {
+        return;
+      }
+      from.items = from.items.filter((i) => i.id !== itemId);
+      to.items.push(item);
     },
 
     removeItem(state, action: PayloadAction<ItemRef>) {
@@ -394,6 +427,8 @@ export const {
   addSection,
   removeSection,
   renameSection,
+  ensureUnsortedSection,
+  moveItemToSection,
   setSectionTracksLevel,
   moveSection,
   addItem,

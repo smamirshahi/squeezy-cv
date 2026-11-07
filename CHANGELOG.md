@@ -18,6 +18,7 @@ template and a job (#165-#172).
 - **Open the CV that was sent from the applications table (#187)**: every row has a View
   CV button (opens the sent PDF) and a download button; the side panel shows the PDF
   first, labelled "CV as sent on <date>", and says so when the stored PDF is missing.
+- Vault: an Unsorted section (built in, created when first used, always last, cannot be deleted) for items you have not placed yet. Move an item to another section with "Move to section", or use "Ask AI where these belong" (new AI task "Place unsorted items"; sends item text and section names, scrubbed like other tasks) and accept each suggestion; nothing moves before that (#184).
 - **Sections page is only titles**: the vault's Sections page now just renames or deletes
   sections. Ordering stays in Jobs > Sections & layout, where a new "Add section" button
   (type and title) was added. Every section's editor page has a "Section title" field.

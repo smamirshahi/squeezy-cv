@@ -13,6 +13,7 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
+  MenuItem,
   Rating,
   TextField,
   Typography,
@@ -34,6 +35,7 @@ import {
   fromMonthValue,
   toMonthValue,
 } from "@shared/vault/item-fields";
+import { moveTargets as sectionTargets } from "@shared/vault/unsorted";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { variantsSelector } from "@store/jobs/jobs-slice";
@@ -41,7 +43,9 @@ import {
   addBullet,
   moveBullet,
   removeBullet,
+  moveItemToSection,
   removeItem,
+  sectionsSelector,
   setBulletAlt,
   setItemTags,
   setSectionTracksLevel,
@@ -477,6 +481,8 @@ export function VaultItemEditor({
   ).length;
   const ref = { sectionId: section.id, itemId: item.id };
   const isSkills = section.type === "skills";
+  const vaultSections = useAppSelector(sectionsSelector);
+  const moveTargets = sectionTargets({ sections: vaultSections }, section.id);
 
   useEffect(() => {
     if (!focusBulletId) {
@@ -531,6 +537,30 @@ export function VaultItemEditor({
             {getItemLabel(item)}
           </Typography>
         </Box>
+        {moveTargets.length > 0 && (
+          <TextField
+            select
+            size="small"
+            label="Move to section"
+            value=""
+            onChange={(event) =>
+              dispatch(
+                moveItemToSection({
+                  ...ref,
+                  toSectionId: event.target.value,
+                })
+              )
+            }
+            sx={{ minWidth: 180 }}
+            slotProps={{ select: { displayEmpty: true } }}
+          >
+            {moveTargets.map((target) => (
+              <MenuItem key={target.id} value={target.id}>
+                {target.title}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
         <Button
           size="small"
           variant="outlined"

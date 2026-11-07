@@ -2,6 +2,7 @@ import { EditorExperience } from "@pages/editor-page/sections/editor-experience/
 import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
 import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
+import { UnsortedPlacement } from "@pages/workspace/unsorted-placement";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
@@ -34,6 +35,13 @@ function renderTypedEditor(section: Section): JSX.Element {
       return <EditorEducation key={section.id} sectionId={section.id} />;
     case "skills":
       return <EditorSkills key={section.id} sectionId={section.id} />;
+    case "unsorted":
+      return (
+        <>
+          <UnsortedPlacement key={`place-${section.id}`} section={section} />
+          <EditorGenericSection key={section.id} sectionId={section.id} />
+        </>
+      );
     default:
       return <EditorGenericSection key={section.id} sectionId={section.id} />;
   }

@@ -62,7 +62,8 @@ export const SectionTypeSchema = Union(
   Literal("certifications"),
   Literal("publications"),
   Literal("volunteering"),
-  Literal("custom")
+  Literal("custom"),
+  Literal("unsorted")
 );
 
 const ItemSchema = Object({

@@ -35,12 +35,14 @@ export function SectionTitleField({
         }
         sx={{ minWidth: 280 }}
       />
-      <IconButton
-        aria-label={`Delete section ${section.title}`}
-        onClick={() => setIsAsking(true)}
-      >
-        <DeleteIcon />
-      </IconButton>
+      {section.type !== "unsorted" && (
+        <IconButton
+          aria-label={`Delete section ${section.title}`}
+          onClick={() => setIsAsking(true)}
+        >
+          <DeleteIcon />
+        </IconButton>
+      )}
       <Dialog open={isAsking} onClose={() => setIsAsking(false)}>
         <DialogTitle>Delete section?</DialogTitle>
         <DialogContent>

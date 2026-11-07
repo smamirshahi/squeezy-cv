@@ -12,6 +12,7 @@ const ADD_LABELS: Partial<Record<Section["type"], string>> = {
   publications: "Add new item",
   volunteering: "Add new item",
   custom: "Add new item",
+  unsorted: "Add new item",
 };
 
 /** What the editor footer shows for the selected editor page */

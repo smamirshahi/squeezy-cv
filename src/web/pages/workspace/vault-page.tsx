@@ -26,7 +26,11 @@ import { useImportExportJson } from "@hooks/use-import-export-json";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { setItemSelection, variantsSelector } from "@store/jobs/jobs-slice";
-import { sectionsSelector } from "@store/vault/vault-slice";
+import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
+import {
+  ensureUnsortedSection,
+  sectionsSelector,
+} from "@store/vault/vault-slice";
 
 const HiddenInput = styled("input")({ display: "none" });
 
@@ -92,41 +96,63 @@ function VaultTree({ selectedItemId, onSelectItem }: TreeProps): JSX.Element {
             SECTIONS
           </Typography>
           <List dense disablePadding>
-            {sections.map((section) => (
-              <Box key={section.id}>
-                <ListItemButton
-                  selected={selectedPage === section.id && !selectedItemId}
-                  onClick={() => {
-                    dispatch(setSelectedSectionInEditorPage(section.id));
-                    onSelectItem("");
-                  }}
-                >
-                  <ListItemText
-                    primary={section.title}
-                    slotProps={{
-                      primary: { sx: { fontWeight: 600 } },
+            {[...sections]
+              .sort(
+                (a, b) =>
+                  Number(a.type === "unsorted") - Number(b.type === "unsorted")
+              )
+              .map((section) => (
+                <Box key={section.id}>
+                  <ListItemButton
+                    selected={selectedPage === section.id && !selectedItemId}
+                    onClick={() => {
+                      dispatch(setSelectedSectionInEditorPage(section.id));
+                      onSelectItem("");
                     }}
-                  />
-                  <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                    {section.items.length}
-                  </Typography>
-                </ListItemButton>
-                {section.type !== "summary" &&
-                  section.items.map((item) => (
-                    <ListItemButton
-                      key={item.id}
-                      sx={{ pl: 4 }}
-                      selected={selectedItemId === item.id}
-                      onClick={() => {
-                        dispatch(setSelectedSectionInEditorPage(section.id));
-                        onSelectItem(item.id);
+                  >
+                    <ListItemText
+                      primary={section.title}
+                      slotProps={{
+                        primary: { sx: { fontWeight: 600 } },
                       }}
-                    >
-                      <ListItemText primary={getItemLabel(item)} />
-                    </ListItemButton>
-                  ))}
-              </Box>
-            ))}
+                    />
+                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                      {section.items.length}
+                    </Typography>
+                  </ListItemButton>
+                  {section.type !== "summary" &&
+                    section.items.map((item) => (
+                      <ListItemButton
+                        key={item.id}
+                        sx={{ pl: 4 }}
+                        selected={selectedItemId === item.id}
+                        onClick={() => {
+                          dispatch(setSelectedSectionInEditorPage(section.id));
+                          onSelectItem(item.id);
+                        }}
+                      >
+                        <ListItemText primary={getItemLabel(item)} />
+                      </ListItemButton>
+                    ))}
+                </Box>
+              ))}
+            {!sections.some((section) => section.type === "unsorted") && (
+              <ListItemButton
+                onClick={() => {
+                  dispatch(ensureUnsortedSection());
+                  dispatch(setSelectedSectionInEditorPage(UNSORTED_SECTION_ID));
+                  onSelectItem("");
+                }}
+              >
+                <ListItemText
+                  primary="Unsorted"
+                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                />
+                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                  0
+                </Typography>
+              </ListItemButton>
+            )}
           </List>
           <Divider sx={{ my: 1 }} />
           <Typography
