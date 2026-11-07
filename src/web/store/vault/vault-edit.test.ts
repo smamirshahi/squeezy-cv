@@ -201,9 +201,6 @@ describe("labels", () => {
     expect(
       getAddButtonLabel("styleSettings", sections).shouldShowApplyButton
     ).toBe(false);
-    expect(
-      getAddButtonLabel("pageStructure", sections).shouldShowApplyButton
-    ).toBe(false);
     expect(getAddButtonLabel("mainInfo", sections).addNewItemButtonLabel).toBe(
       "Add new link"
     );

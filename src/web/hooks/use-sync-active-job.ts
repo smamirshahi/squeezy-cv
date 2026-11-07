@@ -35,7 +35,7 @@ export function activateTemplateLook(
 
 /**
  * Keeps the layout and style of the active job's template equal to what the editor shows, so
- * changes on the Page Structure and Style Settings pages belong to the template (and every
+ * changes on the Jobs page (Sections & layout) and Style Settings belong to the template (and every
  * job that uses it). Mount it once.
  */
 export function useSyncActiveJob(): void {

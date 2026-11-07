@@ -19,6 +19,7 @@ import {
   setActiveJob,
   setJobTemplate,
   setPageLimit,
+  setSectionShown,
   setSkillStyle,
   setTuning,
   setBulletOrders,
@@ -524,5 +525,38 @@ describe("insertTailoredJob", () => {
     expect(
       jobsReducer(initialState, insertTailoredJob({ job })).jobs
     ).toHaveLength(1);
+  });
+});
+
+describe("setSectionShown", () => {
+  it("hides a section in one job only, and shows it again", () => {
+    const base = withTwo();
+    const hidden = jobsReducer(
+      base,
+      setSectionShown({
+        jobId: "second",
+        sectionId: "experience",
+        isShown: false,
+      })
+    );
+    expect(hidden.jobs.find((j) => j.id === "second")?.hiddenSections).toEqual([
+      "experience",
+    ]);
+    // the other job and the templates are the same objects
+    expect(hidden.jobs[0]).toBe(base.jobs[0]);
+    expect(hidden.templates).toEqual(base.templates);
+
+    const shown = jobsReducer(
+      hidden,
+      setSectionShown({
+        jobId: "second",
+        sectionId: "experience",
+        isShown: true,
+      })
+    );
+    // no empty list is kept
+    expect(shown.jobs.find((j) => j.id === "second")?.hiddenSections).toBe(
+      undefined
+    );
   });
 });

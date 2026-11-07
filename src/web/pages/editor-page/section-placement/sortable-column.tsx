@@ -7,7 +7,6 @@ import {
 } from "@dnd-kit/sortable";
 import { Box, Typography } from "@mui/material";
 import { SortableItem } from "@pages/editor-page/section-placement/sortable-item";
-import { columnStyle } from "@pages/editor-page/section-placement/section-placement-utils";
 import { PreviewSectionId } from "@store/app/app-slice-types";
 
 interface Props {
@@ -18,24 +17,34 @@ interface Props {
 
   /** The items to display in the sortable column */
   itemIds: PreviewSectionId[];
+
+  /** Short note next to the title, e.g. "above the columns" */
+  hint?: string;
+
+  /** Whether the CV has more than one column */
+  hasColumns: boolean;
 }
 
 /** A column representing sortable items */
-export function SortableColumn({ title, side, itemIds }: Props): JSX.Element {
+export function SortableColumn({
+  title,
+  side,
+  itemIds,
+  hint,
+  hasColumns,
+}: Props): JSX.Element {
   const { setNodeRef, isOver } = useDroppable({ id: side });
 
   return (
-    <Box
-      sx={{
-        margin: "8px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <Typography sx={{ fontWeight: "bold", fontSize: "16px" }}>
-        {title}
-      </Typography>
+    <Box sx={{ flex: hasColumns ? "1 1 0" : "1 1 100%", minWidth: 0 }}>
+      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.75 }}>
+        <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{title}</Typography>
+        {hint && (
+          <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+            {hint}
+          </Typography>
+        )}
+      </Box>
       <SortableContext
         id={side}
         items={itemIds}
@@ -43,15 +52,37 @@ export function SortableColumn({ title, side, itemIds }: Props): JSX.Element {
       >
         <Box
           ref={setNodeRef}
+          role="list"
+          aria-label={title}
           sx={{
-            ...columnStyle,
-            background: isOver
+            minHeight: 96,
+            p: 1,
+            border: `1.5px dashed ${WORKSPACE_COLORS.borderStrong}`,
+            borderRadius: 1.5,
+            bgcolor: isOver
               ? WORKSPACE_COLORS.accentSoft
-              : columnStyle.background,
+              : WORKSPACE_COLORS.panelAlt,
           }}
         >
+          {itemIds.length === 0 && (
+            <Typography
+              sx={{
+                py: 3,
+                textAlign: "center",
+                fontSize: 12.5,
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              Drop a section here
+            </Typography>
+          )}
           {itemIds.map((id) => (
-            <SortableItem key={id} itemId={id} />
+            <SortableItem
+              key={id}
+              itemId={id}
+              side={side}
+              hasColumns={hasColumns}
+            />
           ))}
         </Box>
       </SortableContext>

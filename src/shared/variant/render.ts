@@ -191,7 +191,7 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
       ];
     }
     const section = sections.get(id);
-    if (!section) {
+    if (!section || variant.hiddenSections?.includes(id)) {
       return [];
     }
     const isSkills = section.type === "skills";

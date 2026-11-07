@@ -24,6 +24,7 @@ export function SectionPlacement(): JSX.Element {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector(appSelector);
   const [pageStructure, setPageStructure] = useState<PageStructure>(structure);
+  const hasColumns = structure.left.length > 0 || structure.right.length > 0;
 
   // Follow the store, e.g. when a section was added, deleted or imported
   useEffect(() => {
@@ -67,28 +68,40 @@ export function SectionPlacement(): JSX.Element {
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
     >
-      <Box
-        sx={{
-          gap: 2,
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <SortableColumn
-          title="Full Width"
-          side="fullWidth"
-          itemIds={pageStructure.fullWidth}
-        />
-        <SortableColumn
-          title="Left Side"
-          side="left"
-          itemIds={pageStructure.left}
-        />
-        <SortableColumn
-          title="Right Side"
-          side="right"
-          itemIds={pageStructure.right}
-        />
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+        {hasColumns ? (
+          <>
+            <Box sx={{ flex: "0 0 100%" }}>
+              <SortableColumn
+                title="Full width"
+                hint="above the columns"
+                side="fullWidth"
+                itemIds={pageStructure.fullWidth}
+                hasColumns
+              />
+            </Box>
+            <SortableColumn
+              title="Left column"
+              side="left"
+              itemIds={pageStructure.left}
+              hasColumns
+            />
+            <SortableColumn
+              title="Right column"
+              side="right"
+              itemIds={pageStructure.right}
+              hasColumns
+            />
+          </>
+        ) : (
+          <SortableColumn
+            title="Page"
+            hint="sections stack from top to bottom"
+            side="fullWidth"
+            itemIds={pageStructure.fullWidth}
+            hasColumns={false}
+          />
+        )}
       </Box>
     </DndContext>
   );

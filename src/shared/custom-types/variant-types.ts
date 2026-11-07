@@ -147,6 +147,9 @@ export const VariantSchema = Object({
 
   style: StyleSchema,
 
+  /** Ids of vault sections the job leaves out. Missing = every section is shown. */
+  hiddenSections: Array(String).optional(),
+
   /** Whether the preview shrinks (or fills) the CV to the page limit */
   isAutoFit: Boolean.optional(),
 

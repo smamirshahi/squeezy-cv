@@ -8,15 +8,40 @@ import { EditorSections } from "@pages/editor-page/sections/editor-sections";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
-import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 import { EditorPageSection } from "@pages/editor-page/editor-types";
 import { Section } from "@custom-types/vault-types";
-import { sectionsSelector } from "@store/vault/vault-slice";
-import { useAppSelector } from "@store/store-helper";
+import { renameSection, sectionsSelector } from "@store/vault/vault-slice";
+import { TextField } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 /** The editor for one vault section, chosen by the type of the section */
 function renderSectionEditor(section: Section): JSX.Element {
+  return (
+    <>
+      <SectionTitleField key={`title-${section.id}`} section={section} />
+      {renderTypedEditor(section)}
+    </>
+  );
+}
+
+/** The title of a section, renamed at once (the name shown in the tree and on the CV) */
+function SectionTitleField({ section }: { section: Section }): JSX.Element {
+  const dispatch = useAppDispatch();
+  return (
+    <TextField
+      label="Section title"
+      size="small"
+      value={section.title}
+      onChange={(event) =>
+        dispatch(renameSection({ id: section.id, title: event.target.value }))
+      }
+      sx={{ mb: 2, minWidth: 280 }}
+    />
+  );
+}
+
+function renderTypedEditor(section: Section): JSX.Element {
   switch (section.type) {
     case "summary":
       return <EditorSummary key={section.id} sectionId={section.id} />;
@@ -41,11 +66,6 @@ export function useEditorPages(): EditorPageSection {
       id: "styleSettings",
       label: "Style Settings",
       content: <EditorTypography />,
-    },
-    {
-      id: "pageStructure",
-      label: "Page Structure",
-      content: <EditorPageStructure />,
     },
     { id: "variants", label: "Jobs", content: <EditorJobs /> },
     { id: "ai", label: "AI assistant", content: <AiAssistant /> },

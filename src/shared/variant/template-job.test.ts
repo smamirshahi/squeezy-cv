@@ -207,3 +207,17 @@ describe("schemas", () => {
     ).toBe(false);
   });
 });
+
+describe("hidden sections", () => {
+  it("belong to the job: split and resolve keep them", () => {
+    const variant: Variant = {
+      ...createVariant(vault, file.style, "job-h", "Hide"),
+      hiddenSections: ["education"],
+    };
+    const { template, job } = splitVariant(variant, "template-h");
+    expect(JobSchema.guard(job)).toBe(true);
+    expect(job.hiddenSections).toEqual(["education"]);
+    expect("hiddenSections" in template).toBe(false);
+    expect(resolveVariant(template, job).hiddenSections).toEqual(["education"]);
+  });
+});

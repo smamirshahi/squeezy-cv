@@ -32,12 +32,7 @@ const HiddenInput = styled("input")({ display: "none" });
 
 /** Pages that are about the vault's facts; the rest (style, layout, variants) are settings */
 const FACT_PAGES = new Set(["mainInfo", "sections"]);
-const SETTING_PAGES = new Set([
-  "metaData",
-  "styleSettings",
-  "pageStructure",
-  "variants",
-]);
+const SETTING_PAGES = new Set(["metaData", "styleSettings", "variants"]);
 
 interface TreeProps {
   selectedItemId: string;

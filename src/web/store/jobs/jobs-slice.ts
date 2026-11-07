@@ -433,6 +433,31 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** Shows or hides a whole vault section in one job (the vault and the template are not touched) */
+    setSectionShown(
+      state,
+      action: PayloadAction<{
+        jobId: string;
+        sectionId: string;
+        isShown: boolean;
+      }>
+    ) {
+      const { jobId, sectionId, isShown } = action.payload;
+      editJob(state, jobId, (job) => {
+        const hidden = new Set(job.hiddenSections ?? []);
+        if (isShown) {
+          hidden.delete(sectionId);
+        } else {
+          hidden.add(sectionId);
+        }
+        if (hidden.size === 0) {
+          delete job.hiddenSections;
+        } else {
+          job.hiddenSections = [...hidden];
+        }
+      });
+    },
+
     /** How skills are shown with the job's template: level style, columns, minimum level */
     setSkillStyle(
       state,
@@ -559,6 +584,7 @@ export const {
   setItemOrders,
   setTemplateAppearance,
   setTone,
+  setSectionShown,
   setPageLimit,
   setSkillStyle,
   setAutoFit,

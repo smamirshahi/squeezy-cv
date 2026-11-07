@@ -28,7 +28,7 @@ export function PageStructureSlider(): JSX.Element {
     <Stack
       spacing={2}
       direction="row"
-      sx={{ alignItems: "center", my: "20px", ml: "250px" }}
+      sx={{ alignItems: "center", maxWidth: 420 }}
     >
       <Typography>{columnWidth.left}%</Typography>
       <Slider

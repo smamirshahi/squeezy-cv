@@ -442,3 +442,23 @@ describe("skill display (variant)", () => {
     expect(normal.items.length).toBeGreaterThan(1);
   });
 });
+
+describe("hidden sections", () => {
+  it("leaves out the sections a job hides, and shows them again when it does not", () => {
+    const variant = createDefaultVariant(file, "hide");
+    const target = vault.sections.find((s) => s.id === "experience");
+    expect(target).toBeDefined();
+    expect(
+      allParts(render(vault, variant)).some((p) => p.id === "experience")
+    ).toBe(true);
+
+    const hidden = { ...variant, hiddenSections: ["experience"] };
+    const parts = allParts(render(vault, hidden));
+    expect(parts.some((p) => p.id === "experience")).toBe(false);
+    // the others and the header stay
+    expect(parts.some((p) => p.id === "personalInfo")).toBe(true);
+    expect(parts.some((p) => p.id === "education")).toBe(true);
+    // the vault is untouched
+    expect(vault.sections.some((s) => s.id === "experience")).toBe(true);
+  });
+});

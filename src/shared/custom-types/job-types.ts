@@ -1,4 +1,4 @@
-import { Number, Object, Record, Static, String } from "runtypes";
+import { Array, Number, Object, Record, Static, String } from "runtypes";
 import {
   FitTuningSchema,
   ItemSelectionSchema,
@@ -40,6 +40,9 @@ export const JobSchema = Object({
 
   /** Choices by item id. An item without an entry is shown. */
   selection: Record(String, ItemSelectionSchema),
+
+  /** Ids of vault sections this job leaves out of the CV. Missing = every section is shown. */
+  hiddenSections: Array(String).optional(),
 
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),

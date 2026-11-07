@@ -31,27 +31,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Wording } from "@custom-types/variant-types";
-import { Item, Section } from "@custom-types/vault-types";
-import { getItemLabel, shorten } from "@shared/variant/item-label";
-import {
-  sortBulletsByVariant,
-  sortItemsByVariant,
-} from "@shared/variant/render";
-import {
-  computeBulletOrders,
-  computeItemOrders,
-} from "@shared/variant/variant-utils";
+import { Item } from "@custom-types/vault-types";
+import { shorten } from "@shared/variant/item-label";
+import { sortBulletsByVariant } from "@shared/variant/render";
+import { computeBulletOrders } from "@shared/variant/variant-utils";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
   setBulletOrders,
   setBulletSelection,
-  setItemOrders,
-  setItemSelection,
 } from "@store/jobs/jobs-slice";
 
-const WORDING_LABELS: Record<Wording, string> = {
+export const WORDING_LABELS: Record<Wording, string> = {
   text: "Original",
   short: "Short",
   long: "Long",
@@ -61,7 +53,7 @@ const WORDING_LABELS: Record<Wording, string> = {
 const DRAG_START_DISTANCE_PX = 5;
 const DRAGGED_OPACITY = 0.6;
 
-function availableWordings(item: Item, bulletId: string): Wording[] {
+export function availableWordings(item: Item, bulletId: string): Wording[] {
   const alt = item.bullets.find((b) => b.id === bulletId)?.alt;
   return [
     "text",
@@ -372,125 +364,5 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
         })}
       </SortableContext>
     </DndContext>
-  );
-}
-
-interface Props {
-  section: Section;
-}
-
-/** The items of one section for the active variant: show/hide, highlight, order, and their bullets */
-export function JobSectionItems({ section }: Props): JSX.Element | null {
-  const dispatch = useAppDispatch();
-  const variant = useAppSelector(activeVariantSelector);
-  const sensors = useReorderSensors();
-  const items = sortItemsByVariant(section.items, variant.selection);
-  const ids = items.map((i) => i.id);
-
-  if (items.length === 0) {
-    return null;
-  }
-
-  function moveItem(itemId: string, toIndex: number): void {
-    dispatch(
-      setItemOrders({
-        jobId: variant.id,
-        orders: computeItemOrders(section.items, variant, itemId, toIndex),
-      })
-    );
-  }
-
-  return (
-    <Box sx={{ mt: 3 }}>
-      <Typography
-        variant="subtitle1"
-        sx={{
-          fontWeight: "bold",
-        }}
-      >
-        {section.title}
-      </Typography>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(event) => {
-          const index = getDropIndex(ids, event);
-          if (index !== null) {
-            moveItem(String(event.active.id), index);
-          }
-        }}
-      >
-        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-          {items.map((item, index) => {
-            const selection = variant.selection[item.id];
-            const isVisible = selection?.isVisible !== false;
-            return (
-              <SortableRow key={item.id} id={item.id}>
-                {(handle) => (
-                  <Box sx={{ mt: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      {handle}
-                      <SortingIcons
-                        index={index}
-                        swapFunction={(_from, toIndex) =>
-                          moveItem(item.id, toIndex)
-                        }
-                        isLastEntity={index === items.length - 1}
-                      />
-                      <FormControlLabel
-                        sx={{ flexGrow: 1 }}
-                        label={getItemLabel(item)}
-                        control={
-                          <Checkbox
-                            checked={isVisible}
-                            onChange={(event) =>
-                              dispatch(
-                                setItemSelection({
-                                  jobId: variant.id,
-                                  itemId: item.id,
-                                  change: { isVisible: event.target.checked },
-                                })
-                              )
-                            }
-                          />
-                        }
-                      />
-                      <FormControlLabel
-                        label="Highlight"
-                        control={
-                          <Checkbox
-                            size="small"
-                            checked={selection?.emphasis === "high"}
-                            onChange={(event) =>
-                              dispatch(
-                                setItemSelection({
-                                  jobId: variant.id,
-                                  itemId: item.id,
-                                  change: {
-                                    emphasis: event.target.checked
-                                      ? "high"
-                                      : "normal",
-                                  },
-                                })
-                              )
-                            }
-                          />
-                        }
-                      />
-                    </Box>
-                    {isVisible && <ItemBullets item={item} />}
-                  </Box>
-                )}
-              </SortableRow>
-            );
-          })}
-        </SortableContext>
-      </DndContext>
-    </Box>
   );
 }
