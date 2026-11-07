@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { setItemSelection } from "@store/variants/variants-slice";
+import { setItemSelection } from "@store/jobs/jobs-slice";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   act,
@@ -342,7 +342,7 @@ describe("generic sections", () => {
     );
     store.dispatch(
       setItemSelection({
-        jobId: store.getState().variants.activeJobId,
+        jobId: store.getState().jobs.activeJobId,
         itemId: "p2",
         change: { isVisible: false },
       })
@@ -364,7 +364,7 @@ describe("generic sections", () => {
 
     store.dispatch(
       setItemSelection({
-        jobId: store.getState().variants.activeJobId,
+        jobId: store.getState().jobs.activeJobId,
         itemId: "p2",
         change: { isVisible: true },
       })

@@ -8,7 +8,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useBlockActions } from "@pages/workspace/use-block-actions";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppSelector } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 const GAP_PX = 12;

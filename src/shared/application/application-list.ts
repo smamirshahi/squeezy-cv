@@ -6,7 +6,7 @@ import {
 import { isNoReply } from "@shared/application/application-utils";
 
 export type SortKey = "appliedAt" | "company";
-export type SortDirection = "asc" | "desc";
+type SortDirection = "asc" | "desc";
 
 export interface ListView {
   /** Matches company, role, job name or template name, ignoring case */

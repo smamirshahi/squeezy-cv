@@ -1,7 +1,7 @@
 import { PersonalData } from "@shared/ai/redact-personal";
 
 /** What a runtypes schema offers: throws if the value does not match */
-export interface Schema<T> {
+interface Schema<T> {
   check: (value: unknown) => T;
 }
 

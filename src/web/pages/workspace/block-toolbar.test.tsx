@@ -15,10 +15,7 @@ import { BlockToolbar } from "@pages/workspace/block-toolbar";
 import { setSelectedBlock } from "@store/app/app-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import {
-  activeVariantSelector,
-  setVariants,
-} from "@store/variants/variants-slice";
+import { activeVariantSelector, setVariants } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";

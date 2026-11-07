@@ -31,8 +31,8 @@ import {
   toIsoDay,
 } from "@shared/application/application-utils";
 import { splitVariant } from "@shared/variant/template-job";
-import { duplicateVariant } from "@shared/variant/variant-utils";
-import { templateIdFor } from "@store/variants/variants-slice";
+import { copyJob } from "@shared/variant/variant-utils";
+import { templateIdFor } from "@store/jobs/jobs-slice";
 import {
   applicationPdfUrl,
   createApiClient,
@@ -154,11 +154,11 @@ export function ApplicationView({
     }
   }
 
-  async function createVariantFromThis(): Promise<void> {
+  async function createJobFromThis(): Promise<void> {
     setError("");
     setMessage("");
     try {
-      const copy = duplicateVariant(
+      const copy = copyJob(
         application.submitted.variant,
         nanoid(),
         `${application.company} - ${application.role} (copy)`
@@ -328,7 +328,7 @@ export function ApplicationView({
             >
               Download PDF
             </Button>
-            <Button onClick={() => void createVariantFromThis()}>
+            <Button onClick={() => void createJobFromThis()}>
               Create new job from this
             </Button>
           </Box>

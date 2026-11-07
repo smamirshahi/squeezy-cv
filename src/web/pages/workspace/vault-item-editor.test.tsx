@@ -14,7 +14,7 @@ import { VaultPage } from "@pages/workspace/vault-page";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setVault } from "@store/vault/vault-slice";
-import { setVariants } from "@store/variants/variants-slice";
+import { setVariants } from "@store/jobs/jobs-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { Item } from "@custom-types/vault-types";

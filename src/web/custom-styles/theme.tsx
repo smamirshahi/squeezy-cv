@@ -93,7 +93,7 @@ export function cssVar(token: string): string {
 }
 
 const STORAGE_KEY = "cv-builder-theme";
-export const FONT_FAMILY =
+const FONT_FAMILY =
   '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
 const BORDER_RADIUS_PX = 4;
 
@@ -112,9 +112,7 @@ function initialMode(): ThemeMode {
 }
 
 /** The MUI theme for a mode, built from the design's tokens */
-export function createAppTheme(
-  mode: ThemeMode
-): ReturnType<typeof createTheme> {
+function createAppTheme(mode: ThemeMode): ReturnType<typeof createTheme> {
   const t = THEME_TOKENS[mode];
   return createTheme({
     palette: {

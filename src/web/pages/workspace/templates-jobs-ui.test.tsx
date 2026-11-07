@@ -21,18 +21,18 @@ import {
   jobCountText,
   nextTemplateName,
 } from "@pages/workspace/template-scope";
-import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
+import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import {
   activeVariantSelector,
   addTemplate,
-  addVariant,
+  createJob,
   setJobTemplate,
   setPageLimit,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { Template } from "@custom-types/template-types";
@@ -42,7 +42,7 @@ afterEach(cleanup);
 const file = migrateCvFile(sample);
 
 function Frame({ children }: { children: JSX.Element }): JSX.Element {
-  useSyncActiveVariant();
+  useSyncActiveJob();
   return children;
 }
 
@@ -69,7 +69,7 @@ function addJob(
       store.dispatch(addTemplate({ id: templateId, name: templateName }));
     }
     store.dispatch(
-      addVariant({
+      createJob({
         vault: store.getState().vault,
         style: store.getState().cvData.style,
         name: id,
@@ -80,8 +80,8 @@ function addJob(
   });
 }
 
-const jobs = (store: AppStore) => store.getState().variants.jobs;
-const templates = (store: AppStore) => store.getState().variants.templates;
+const jobs = (store: AppStore) => store.getState().jobs.jobs;
+const templates = (store: AppStore) => store.getState().jobs.templates;
 
 async function closed(): Promise<void> {
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
@@ -109,12 +109,12 @@ describe("job switcher", () => {
         })
       );
     });
-    expect(store.getState().variants.activeJobId).toBe("acme");
+    expect(store.getState().jobs.activeJobId).toBe("acme");
     expect(two.id).toBe("t2");
 
     fireEvent.mouseDown(screen.getByLabelText("Switch job"));
     fireEvent.click(screen.getByRole("option", { name: "Default" }));
-    expect(store.getState().variants.activeJobId).toBe("default");
+    expect(store.getState().jobs.activeJobId).toBe("default");
     // the template of "Default" kept its own layout
     expect(store.getState().app.structure).toEqual(templates(store)[0].layout);
     expect(screen.getByLabelText("Template of this job").textContent).toBe(
@@ -188,7 +188,7 @@ describe("new job", () => {
     const created = jobs(store)[1];
     expect(created.name).toBe("Acme, Frontend");
     expect(created.templateId).toBe(templates(store)[0].id);
-    expect(store.getState().variants.activeJobId).toBe(created.id);
+    expect(store.getState().jobs.activeJobId).toBe(created.id);
 
     // a style change in the template reaches both jobs
     act(() => {

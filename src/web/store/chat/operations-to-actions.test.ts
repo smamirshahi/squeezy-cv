@@ -10,10 +10,10 @@ import {
   activeJobSelector,
   activeTemplateSelector,
   activeVariantSelector,
-  duplicateVariant,
+  copyJob,
   setVariants,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
@@ -153,9 +153,9 @@ describe("operationsToActions", () => {
   it("writes tone and item choices to the job, and page limit and layout to the template", () => {
     const store = setup();
     // a second job that shares the template
-    store.dispatch(duplicateVariant({ sourceId: "main", id: "other" }));
+    store.dispatch(copyJob({ sourceId: "main", id: "other" }));
     store.dispatch({
-      type: "variants/setActiveVariant",
+      type: "jobs/setActiveJob",
       payload: { id: "main" },
     });
     const templateBefore = activeTemplateSelector(store.getState());

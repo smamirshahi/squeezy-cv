@@ -18,7 +18,7 @@ import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useSyncStructure } from "@hooks/use-sync-structure";
 import { usePersistence } from "@hooks/use-persistence";
-import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
+import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { useAppSelector } from "@store/store-helper";
 
 /**
@@ -54,7 +54,7 @@ export function Workspace(): JSX.Element {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   useSyncStructure();
-  useSyncActiveVariant();
+  useSyncActiveJob();
   usePersistence();
 
   return (

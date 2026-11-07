@@ -16,7 +16,7 @@ const ROUNDING_PX = 1;
  * How much the canvas zoom scales the paper on screen: the painted width over the layout
  * width. 1 when it is not scaled (and in tests, where both are 0).
  */
-export function screenScale(paper: HTMLElement): number {
+function screenScale(paper: HTMLElement): number {
   const layoutWidth = paper.offsetWidth;
   const paintedWidth = paper.getBoundingClientRect().width;
   return layoutWidth > 0 && paintedWidth > 0 ? paintedWidth / layoutWidth : 1;

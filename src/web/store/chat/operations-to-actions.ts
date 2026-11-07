@@ -12,15 +12,15 @@ import {
   setItemSelection,
   setPageLimit,
   setTone,
-  setVariantAppearance,
-  variantsReducer,
-} from "@store/variants/variants-slice";
+  setTemplateAppearance,
+  jobsReducer,
+} from "@store/jobs/jobs-slice";
 import { setBulletAlt, vaultReducer } from "@store/vault/vault-slice";
 
 const simulate = combineReducers({
   cvData: cvDataReducer,
   vault: vaultReducer,
-  variants: variantsReducer,
+  jobs: jobsReducer,
   app: appReducer,
 });
 
@@ -29,7 +29,7 @@ type Simulated = ReturnType<typeof simulate>;
 /** The slices the operations read; the real state has more */
 export type OperationState = Pick<
   Simulated,
-  "cvData" | "vault" | "variants" | "app"
+  "cvData" | "vault" | "jobs" | "app"
 >;
 
 function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
@@ -95,7 +95,7 @@ function actionsFor(state: Simulated, op: Operation): UnknownAction[] {
       return [
         updatePageStructure(layout),
         // the variant's own copy is written in the same step (the sync hook would do it one step later)
-        setVariantAppearance({
+        setTemplateAppearance({
           id: jobId,
           layout,
           style: state.cvData.style,
@@ -167,7 +167,7 @@ export function operationsToActions(
   let current: Simulated = {
     cvData: state.cvData,
     vault: state.vault,
-    variants: state.variants,
+    jobs: state.jobs,
     app: state.app,
   };
   for (const operation of operations) {

@@ -1,7 +1,7 @@
 export type PanelSide = "left" | "right";
 
-export const MIN_PANEL_WIDTH = 220;
-export const MAX_PANEL_WIDTH = 640;
+const MIN_PANEL_WIDTH = 220;
+const MAX_PANEL_WIDTH = 640;
 
 const STORAGE_PREFIX = "cv-builder-panel-width:";
 

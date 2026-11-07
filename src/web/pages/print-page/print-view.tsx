@@ -4,8 +4,8 @@ import { PreviewPage } from "@pages/preview-page/preview-page";
 import { createApiClient } from "@store/persistence/api-client";
 import { loadCvFileIntoStore } from "@store/persistence/persistence-actions";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
-import { activateVariant } from "@hooks/use-sync-active-variant";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
+import { activateVariant } from "@hooks/use-sync-active-job";
 
 type LoadState =
   | { status: "loading" }

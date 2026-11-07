@@ -6,7 +6,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 export type WorkspaceTool =
   "jobs" | "templates" | "vault" | "tailor" | "chat" | "ai";
 
-export interface FitInfo {
+interface FitInfo {
   pageCount: number;
   usedPercent: number;
   linesOver: number;
@@ -15,7 +15,7 @@ export interface FitInfo {
   overflowStartsWith: string;
 }
 
-export interface SelectedBlock {
+interface SelectedBlock {
   sectionId: string;
   itemId?: string;
 }
@@ -158,14 +158,14 @@ export const { appSelector } = appSlice.selectors;
 
 export const {
   updatePageStructure,
-  setSelectedTypography,
+
   setSelectedSectionInEditorPage,
   setTool,
   setSelectedBlock,
   setCanvasZoom,
   setFit,
   setColumnWidth,
-  resetAppState,
+
   setShouldApplyChanges,
   setShouldDiscardChanges,
   setShouldAddNewItem,

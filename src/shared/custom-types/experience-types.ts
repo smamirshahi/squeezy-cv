@@ -1,4 +1,4 @@
-import { Object, String, Array, Static, Boolean } from "runtypes";
+import { Object, String, Array, Boolean } from "runtypes";
 
 export const ExperienceSchema = Object({
   /** Specific ID for the experience */
@@ -25,5 +25,3 @@ export const ExperienceSchema = Object({
   /** Whether to hide this specific row or now */
   shouldShow: Boolean,
 });
-
-export type Experience = Static<typeof ExperienceSchema>;

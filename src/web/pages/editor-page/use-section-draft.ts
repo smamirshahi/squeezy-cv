@@ -16,7 +16,7 @@ import {
 import {
   activeVariantSelector,
   setItemSelection,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 import { useEffect } from "react";
 

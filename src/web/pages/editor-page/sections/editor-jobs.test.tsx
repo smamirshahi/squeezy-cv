@@ -14,7 +14,7 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { setVault } from "@store/vault/vault-slice";
-import { setVariants, variantsSelector } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/jobs/jobs-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
@@ -22,14 +22,14 @@ import { DragEndEvent } from "@dnd-kit/core";
 import { shorten } from "@shared/variant/item-label";
 import { getDropIndex } from "@pages/editor-page/sections/job-section-items";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
-import { useSyncActiveVariant } from "@hooks/use-sync-active-variant";
+import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { updatePageStructure } from "@store/app/app-slice";
 import { act } from "@testing-library/react";
 
 afterEach(cleanup);
 
 function Page(): JSX.Element {
-  useSyncActiveVariant();
+  useSyncActiveJob();
   return <EditorJobs />;
 }
 
@@ -79,7 +79,7 @@ describe("EditorJobs", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Duplicate job" }));
     const variants = variantsSelector(store.getState());
-    const activeId = store.getState().variants.activeJobId;
+    const activeId = store.getState().jobs.activeJobId;
     expect(variants).toHaveLength(3);
     expect(variants[2].name).toBe("Acme (copy)");
     expect(activeId).toBe(variants[2].id);
@@ -100,7 +100,7 @@ describe("EditorJobs", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Delete" }).pop()!);
     expect(variantsSelector(store.getState())).toHaveLength(1);
-    expect(store.getState().variants.activeJobId).toBe("v1");
+    expect(store.getState().jobs.activeJobId).toBe("v1");
   });
 
   it("hides an item in the active variant only, without touching the vault", () => {
@@ -123,16 +123,16 @@ describe("EditorJobs", () => {
     show(store);
     // a new job shares the template of the current one by default
     await createJob("Second");
-    expect(store.getState().variants.templates).toHaveLength(1);
+    expect(store.getState().jobs.templates).toHaveLength(1);
     const style = {
       ...store.getState().cvData.style,
       paperMargin: "narrow" as const,
     };
-    const jobsBefore = store.getState().variants.jobs;
+    const jobsBefore = store.getState().jobs.jobs;
     act(() => {
       store.dispatch(setStyle(style));
     });
-    const after = store.getState().variants;
+    const after = store.getState().jobs;
     expect(after.templates[0].style.paperMargin).toBe("narrow");
     // only the template changed: the jobs are the same objects
     expect(after.jobs).toBe(jobsBefore);
@@ -152,7 +152,7 @@ describe("EditorJobs", () => {
     expect(variantsSelector(store.getState())[0].layout).toEqual(custom);
 
     await createJob("Second", true);
-    expect(store.getState().variants.templates).toHaveLength(2);
+    expect(store.getState().jobs.templates).toHaveLength(2);
     act(() => {
       store.dispatch(
         updatePageStructure({

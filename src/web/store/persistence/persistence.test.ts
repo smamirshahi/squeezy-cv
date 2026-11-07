@@ -28,13 +28,13 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import {
   addTemplate,
-  addVariant,
+  createJob,
   deleteTemplate,
-  deleteVariant,
+  deleteJob,
   setItemSelection,
   setPageLimit,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { updateProfile } from "@store/vault/vault-slice";
 
 let dir: string;
@@ -158,7 +158,7 @@ describe("load and save through the server", () => {
     );
     first.dispatch(updateProfile({ fullName: "Changed Name" }));
     first.dispatch(
-      addVariant({
+      createJob({
         vault: first.getState().vault,
         style: first.getState().cvData.style,
         name: "Acme",
@@ -194,8 +194,8 @@ describe("load and save through the server", () => {
           state.vault,
           state.cvData.metaData,
           state.cvData.style,
-          state.variants.templates,
-          state.variants.jobs
+          state.jobs.templates,
+          state.jobs.jobs
         )
       )
     ).toBe(false);
@@ -208,7 +208,7 @@ describe("load and save through the server", () => {
       Promise.resolve(file)
     );
     store.dispatch(
-      addVariant({
+      createJob({
         vault: store.getState().vault,
         style: store.getState().cvData.style,
         name: "Extra",
@@ -218,7 +218,7 @@ describe("load and save through the server", () => {
     await saveToServer(api, store.dispatch, store.getState);
     expect((await api.listJobs()).map((v) => v.id)).toContain("extra");
 
-    store.dispatch(deleteVariant({ id: "extra" }));
+    store.dispatch(deleteJob({ id: "extra" }));
     await saveToServer(api, store.dispatch, store.getState);
     expect((await api.listJobs()).map((v) => v.id)).not.toContain("extra");
   });
@@ -229,7 +229,7 @@ describe("load and save through the server", () => {
     await loadFromServer(api, store.dispatch, store.getState, () =>
       Promise.resolve(file)
     );
-    const { templates, jobs } = store.getState().variants;
+    const { templates, jobs } = store.getState().jobs;
     expect(templates).toHaveLength(1);
     expect(jobs).toHaveLength(1);
     expect(jobs[0].templateId).toBe(templates[0].id);
@@ -251,7 +251,7 @@ describe("load and save through the server", () => {
       // each job on a template of its own, so a look change reaches one job's template only
       store.dispatch(addTemplate({ name: id, id: `template-${id}` }));
       store.dispatch(
-        addVariant({
+        createJob({
           vault: store.getState().vault,
           style: store.getState().cvData.style,
           name: id,
@@ -304,7 +304,7 @@ describe("load and save through the server", () => {
     );
     store.dispatch(addTemplate({ name: "Extra", id: "template-extra" }));
     store.dispatch(
-      addVariant({
+      createJob({
         vault: store.getState().vault,
         style: store.getState().cvData.style,
         name: "Extra",
@@ -316,7 +316,7 @@ describe("load and save through the server", () => {
     expect((await api.listTemplates()).map((t) => t.id)).toContain(
       "template-extra"
     );
-    store.dispatch(deleteVariant({ id: "extra" }));
+    store.dispatch(deleteJob({ id: "extra" }));
     await saveToServer(api, store.dispatch, store.getState);
     expect(store.getState().persistence.saveError).toBe("");
     expect((await api.listJobs()).map((j) => j.id)).not.toContain("extra");
@@ -342,8 +342,8 @@ describe("load and save through the server", () => {
     );
     const store = newStore();
     await loadFromServer(api, store.dispatch, store.getState);
-    expect(store.getState().variants.jobs.map((j) => j.id)).toEqual(["old"]);
-    expect(store.getState().variants.templates[0].id).toBe("template-old");
+    expect(store.getState().jobs.jobs.map((j) => j.id)).toEqual(["old"]);
+    expect(store.getState().jobs.templates[0].id).toBe("template-old");
     store.dispatch(setPageLimit({ id: "old", pageLimit: 1 }));
     await saveToServer(api, store.dispatch, store.getState);
     expect(store.getState().persistence.saveError).toBe("");
@@ -426,7 +426,7 @@ describe("load and save through the server", () => {
     const store = newStore();
     loadCvFileIntoStore(store.dispatch, file);
     expect(variantsSelector(store.getState())).toHaveLength(1);
-    expect(store.getState().variants.activeJobId).toBe(
+    expect(store.getState().jobs.activeJobId).toBe(
       variantsSelector(store.getState())[0].id
     );
   });

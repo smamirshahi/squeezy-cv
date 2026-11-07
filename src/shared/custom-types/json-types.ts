@@ -37,7 +37,7 @@ export const JOB_OPINIONS = [
 ] as const;
 
 /** How the user feels about the job they apply for */
-export const JobOpinionSchema = Union(
+const JobOpinionSchema = Union(
   Literal("wantIt"),
   Literal("goodMatch"),
   Literal("optimistic"),
@@ -76,5 +76,3 @@ export const CVJsonSchema = Object({
 
 export type JobOpinion = Static<typeof JobOpinionSchema>;
 export type MetaData = Static<typeof MetaDataSchema>;
-export type CVData = Static<typeof DataSchema>;
-export type CVJson = Static<typeof CVJsonSchema>;

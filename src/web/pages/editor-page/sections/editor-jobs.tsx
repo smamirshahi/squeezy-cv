@@ -14,8 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import { FitMode } from "@custom-types/variant-types";
-import { activateVariant } from "@hooks/use-sync-active-variant";
-import { VariantSectionItems } from "@pages/editor-page/sections/job-section-items";
+import { activateVariant } from "@hooks/use-sync-active-job";
+import { JobSectionItems } from "@pages/editor-page/sections/job-section-items";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
   TemplateScopeNote,
@@ -27,13 +27,13 @@ import {
   templatesSelector,
   activeJobSelector,
   activeTemplateSelector,
-  deleteVariant,
-  duplicateVariant,
-  renameVariant,
+  deleteJob,
+  copyJob,
+  renameJob,
   setAutoFit,
   setPageLimit,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
@@ -61,7 +61,7 @@ export function EditorJobs(): JSX.Element {
 
   function handleDuplicate(): void {
     // The copy shares the template, so the editor already shows its look
-    dispatch(duplicateVariant({ sourceId: variant.id }));
+    dispatch(copyJob({ sourceId: variant.id }));
   }
 
   return (
@@ -100,9 +100,7 @@ export function EditorJobs(): JSX.Element {
           label="Job name"
           value={variant.name}
           onChange={(event) =>
-            dispatch(
-              renameVariant({ id: variant.id, name: event.target.value })
-            )
+            dispatch(renameJob({ id: variant.id, name: event.target.value }))
           }
           sx={{ flexGrow: 1 }}
         />
@@ -203,7 +201,7 @@ export function EditorJobs(): JSX.Element {
       </Box>
 
       {sections.map((section) => (
-        <VariantSectionItems key={section.id} section={section} />
+        <JobSectionItems key={section.id} section={section} />
       ))}
 
       <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
@@ -220,7 +218,7 @@ export function EditorJobs(): JSX.Element {
             color="error"
             onClick={() => {
               const next = variants.find((v) => v.id !== variant.id);
-              dispatch(deleteVariant({ id: variant.id }));
+              dispatch(deleteJob({ id: variant.id }));
               if (next) {
                 activateVariant(dispatch, next);
               }

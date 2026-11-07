@@ -1,4 +1,4 @@
-import { Object, String, Static } from "runtypes";
+import { Object, String } from "runtypes";
 
 export const ContactInfoSchema = Object({
   /** The email of the applicant */
@@ -16,5 +16,3 @@ export const ContactInfoSchema = Object({
   /** The GitHub ID profile of the applicant */
   gitHubId: String,
 });
-
-export type ContactInfo = Static<typeof ContactInfoSchema>;

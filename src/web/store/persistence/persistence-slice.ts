@@ -7,9 +7,9 @@ import { SavedState } from "@store/persistence/persistence-logic";
  * - offline: the server cannot be reached; working locally, saving is blocked
  * - error: the saved data could not be read; saving is blocked so nothing is overwritten
  */
-export type StorageStatus = "loading" | "ready" | "offline" | "error";
+type StorageStatus = "loading" | "ready" | "offline" | "error";
 
-export interface PersistenceState {
+interface PersistenceState {
   status: StorageStatus;
 
   /** Explains `offline` and `error` */
@@ -24,7 +24,7 @@ export interface PersistenceState {
   saveError: string;
 }
 
-export const initialState: PersistenceState = {
+const initialState: PersistenceState = {
   status: "loading",
   message: "",
   saved: null,

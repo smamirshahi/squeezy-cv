@@ -1,7 +1,7 @@
 import { FontSize } from "@custom-types/styles-types";
 
 /** The sizes a style can take, smallest first */
-export const FONT_SIZES: readonly FontSize[] = [
+const FONT_SIZES: readonly FontSize[] = [
   "8pt",
   "9pt",
   "10pt",

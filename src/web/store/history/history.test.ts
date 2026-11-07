@@ -15,9 +15,9 @@ import {
   activeVariantSelector,
   setItemSelection,
   setPageLimit,
-  setVariantAppearance,
+  setTemplateAppearance,
   setVariants,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { setVault, updateItemFields } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -63,7 +63,7 @@ describe("undo and redo: templates and jobs", () => {
   it("a job edit and a template edit are one step each and undo/redo both", () => {
     const { store, tick } = setup();
     const id = activeVariantSelector(store.getState()).id;
-    const before = store.getState().variants;
+    const before = store.getState().jobs;
     store.dispatch(
       setItemSelection({
         jobId: id,
@@ -74,24 +74,24 @@ describe("undo and redo: templates and jobs", () => {
     tick(COALESCE_MS + 1);
     store.dispatch(setPageLimit({ id, pageLimit: 1 }));
     expect(store.getState().history.past).toHaveLength(2);
-    const edited = store.getState().variants;
+    const edited = store.getState().jobs;
     expect(edited.jobs).not.toBe(before.jobs);
     expect(edited.templates).not.toBe(before.templates);
 
     store.dispatch(undo());
     expect(activeVariantSelector(store.getState()).pageLimit).toBe(
-      activeVariantSelector({ variants: before }).pageLimit
+      activeVariantSelector({ jobs: before }).pageLimit
     );
     expect(
       activeVariantSelector(store.getState()).selection[item.id]?.isVisible
     ).toBe(false);
     store.dispatch(undo());
-    expect(store.getState().variants.jobs).toBe(before.jobs);
-    expect(store.getState().variants.templates).toBe(before.templates);
+    expect(store.getState().jobs.jobs).toBe(before.jobs);
+    expect(store.getState().jobs.templates).toBe(before.templates);
     store.dispatch(redo());
     store.dispatch(redo());
-    expect(store.getState().variants.jobs).toBe(edited.jobs);
-    expect(store.getState().variants.templates).toBe(edited.templates);
+    expect(store.getState().jobs.jobs).toBe(edited.jobs);
+    expect(store.getState().jobs.templates).toBe(edited.templates);
   });
 
   it("undoing a template edit puts the editor's layout and style back too", () => {
@@ -99,7 +99,9 @@ describe("undo and redo: templates and jobs", () => {
     const id = activeVariantSelector(store.getState()).id;
     const variant = activeVariantSelector(store.getState());
     const style = { ...variant.style, paperMargin: "narrow" as const };
-    store.dispatch(setVariantAppearance({ id, layout: variant.layout, style }));
+    store.dispatch(
+      setTemplateAppearance({ id, layout: variant.layout, style })
+    );
     expect(store.getState().history.past).toHaveLength(1);
     store.dispatch(undo());
     expect(store.getState().cvData.style).toEqual(variant.style);
@@ -198,10 +200,10 @@ describe("undo and redo", () => {
       ...original,
       fullWidth: [...original.fullWidth].reverse(),
     };
-    // what the page-structure screen and `useSyncActiveVariant` do
+    // what the page-structure screen and `useSyncActiveJob` do
     store.dispatch(updatePageStructure(changed));
     store.dispatch(
-      setVariantAppearance({
+      setTemplateAppearance({
         id: variant.id,
         layout: changed,
         style: variant.style,

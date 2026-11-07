@@ -25,7 +25,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeVariantSelector,
   setItemSelection,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 const MAX_LISTED = 8;

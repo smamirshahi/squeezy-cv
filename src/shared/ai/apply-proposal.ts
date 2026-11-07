@@ -30,7 +30,7 @@ export interface Decisions {
 }
 
 /** An alternative wording to add to a bullet in the vault. The original text is never changed. */
-export interface AltUpdate {
+interface AltUpdate {
   sectionId: string;
   itemId: string;
   bulletId: string;
@@ -164,12 +164,12 @@ export function applyProposal(
   base: Variant,
   proposal: Proposal,
   decisions: Decisions,
-  newVariant: { id: string; name: string }
+  newJob: { id: string; name: string }
 ): AppliedProposal {
   const variant: Variant = {
     ...structuredClone(base),
-    id: newVariant.id,
-    name: newVariant.name,
+    id: newJob.id,
+    name: newJob.name,
   };
   delete variant.tuning;
   if (proposal.sectionOrder && decisions.isSectionOrderAccepted) {
