@@ -23,10 +23,7 @@ import {
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
-import { computeVariantLocks } from "@shared/variant/variant-lock";
 import {
-  relockVariants,
-  setLocks,
   setTemplatesAndJobs,
   setVariants,
 } from "@store/variants/variants-slice";
@@ -62,21 +59,6 @@ export function loadCvFileIntoStore(
   activateVariant(dispatch, first);
   // a loaded file starts a new history: undo never goes back to the file before it
   dispatch(clearHistory());
-}
-
-/**
- * Reads which variants were sent (applications with status "applied") and locks them. If the
- * applications cannot be read the previous lock state stays, it is never dropped.
- */
-export async function refreshLocks(
-  api: ApiClient,
-  dispatch: AppDispatch
-): Promise<void> {
-  try {
-    dispatch(setLocks(computeVariantLocks(await api.listApplications())));
-  } catch {
-    // keep what is known; saving a locked variant is still refused by the server
-  }
 }
 
 function errorText(error: unknown): string {
@@ -159,7 +141,6 @@ export async function loadFromServer(
       })
     );
     dispatch(setStorageStatus({ status: "ready" }));
-    await refreshLocks(api, dispatch);
   } catch (error) {
     if (error instanceof ApiError && error.code === "not_found") {
       await showFallback();
@@ -241,8 +222,6 @@ export async function saveToServer(
       await ignoreNotFound(() => api.deleteTemplate(id));
     }
     dispatch(setSavedState(current));
-    // saved: a job that was unlocked for this edit is locked again
-    dispatch(relockVariants({ ids: state.variants.unlockedIds }));
   } catch (error) {
     dispatch(setSaveError(errorText(error)));
   } finally {

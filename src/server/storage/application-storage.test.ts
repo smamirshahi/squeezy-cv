@@ -22,7 +22,7 @@ const variant = createVariant(file.vault, file.style, "v1", "Acme");
 
 function make(company: string, suffix: string): Application {
   return createApplication(
-    { variantId: "v1", company, role: "Dev" },
+    { jobId: "v1", company, role: "Dev" },
     file.vault,
     variant,
     "2026-11-06",

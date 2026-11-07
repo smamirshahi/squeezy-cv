@@ -14,16 +14,13 @@ import {
   duplicateVariant,
   initialState,
   insertTailoredJob,
-  relockVariants,
   renameTemplate,
   renameVariant,
   setActiveVariant,
-  setLocks,
   setJobTemplate,
   setPageLimit,
   setSkillStyle,
   setTuning,
-  unlockVariant,
   setBulletOrders,
   setBulletSelection,
   setItemOrders,
@@ -218,84 +215,6 @@ describe("variants slice: bullet order", () => {
     expect(bullets?.a).toEqual({ isVisible: true, order: 1 });
     expect(bullets?.b).toEqual({ isVisible: true, order: 0 });
     expect(all(state)[0].selection.i).toBeUndefined();
-  });
-});
-
-describe("variant lock", () => {
-  const sent = {
-    byVariant: {
-      second: [
-        { applicationId: "a", company: "Acme", appliedAt: "2026-05-01" },
-      ],
-    },
-    hasUnreadable: false,
-  };
-
-  function locked(): VariantsState {
-    return variantsReducer(withTwo(), setLocks(sent));
-  }
-
-  it("ignores every change to a locked variant, even delete and rename", () => {
-    let state = locked();
-    state = variantsReducer(state, renameVariant({ id: "second", name: "X" }));
-    state = variantsReducer(
-      state,
-      setPageLimit({ id: "second", pageLimit: 99 })
-    );
-    state = variantsReducer(state, deleteVariant({ id: "second" }));
-    expect(all(state).map((v) => v.name)).toEqual(["Default", "Second"]);
-    expect(all(state)[1].pageLimit).toBe(all(withTwo())[1].pageLimit);
-  });
-
-  it("still lets other variants change", () => {
-    const state = variantsReducer(
-      locked(),
-      renameVariant({ id: "default", name: "Main" })
-    );
-    expect(all(state)[0].name).toBe("Main");
-  });
-
-  it("allows edits after an approved unlock, and locks again", () => {
-    let state = variantsReducer(locked(), unlockVariant({ id: "second" }));
-    state = variantsReducer(
-      state,
-      renameVariant({ id: "second", name: "New" })
-    );
-    expect(all(state)[1].name).toBe("New");
-    state = variantsReducer(state, relockVariants({ ids: ["second"] }));
-    state = variantsReducer(state, renameVariant({ id: "second", name: "Z" }));
-    expect(all(state)[1].name).toBe("New");
-  });
-
-  it("drops an approval when the variant stops being locked", () => {
-    let state = variantsReducer(locked(), unlockVariant({ id: "second" }));
-    state = variantsReducer(
-      state,
-      setLocks({ byVariant: {}, hasUnreadable: false })
-    );
-    expect(state.unlockedIds).toEqual([]);
-  });
-
-  it("locks everything while an application file is damaged", () => {
-    const state = variantsReducer(
-      withTwo(),
-      setLocks({ byVariant: {}, hasUnreadable: true })
-    );
-    expect(
-      all(
-        variantsReducer(state, renameVariant({ id: "default", name: "X" }))
-      )[0].name
-    ).toBe("Default");
-  });
-
-  it("lets new variants be created and loaded while others are locked", () => {
-    let state = variantsReducer(
-      locked(),
-      duplicateVariant({ sourceId: "second", id: "copy" })
-    );
-    expect(all(state).map((v) => v.id)).toEqual(["default", "second", "copy"]);
-    state = variantsReducer(state, setVariants([all(state)[2]]));
-    expect(all(state)).toHaveLength(1);
   });
 });
 
@@ -501,42 +420,6 @@ describe("templates and jobs: who owns what", () => {
     const after = variantsReducer(state, deleteTemplate({ id: "spare" }));
     expect(after.templates.map((t) => t.id)).not.toContain("spare");
     expect(after.templates).toHaveLength(2);
-  });
-
-  it("a sent job freezes the template it uses, for every job on it", () => {
-    let state = variantsReducer(
-      withTwo(),
-      setJobTemplate({
-        jobId: "second",
-        templateId: initialState.templates[0].id,
-      })
-    );
-    state = variantsReducer(
-      state,
-      setLocks({
-        byVariant: {
-          second: [
-            { applicationId: "a", company: "Acme", appliedAt: "2026-01-01" },
-          ],
-        },
-        hasUnreadable: false,
-      })
-    );
-    const after = variantsReducer(
-      state,
-      setPageLimit({ id: "default", pageLimit: 1 })
-    );
-    expect(after.templates).toBe(state.templates);
-    // the unlocked job's own choices can still change
-    const hidden = variantsReducer(
-      state,
-      setItemSelection({
-        variantId: "default",
-        itemId: "i",
-        change: { isVisible: false },
-      })
-    );
-    expect(hidden.jobs[0].selection.i).toEqual({ isVisible: false });
   });
 });
 

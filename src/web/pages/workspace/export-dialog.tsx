@@ -23,7 +23,10 @@ import { saveActiveVariant } from "@hooks/save-active-variant";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { createApiClient } from "@store/persistence/api-client";
 import { RootState, useAppSelector } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import {
+  activeTemplateSelector,
+  activeVariantSelector,
+} from "@store/variants/variants-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 interface Props {
@@ -40,6 +43,7 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
   const vault = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
+  const template = useAppSelector(activeTemplateSelector);
   const fit = useAppSelector((s) => s.app.fit);
   const { handleExport } = useImportExportJson();
 
@@ -122,7 +126,9 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>Export PDF · {variant.name}</DialogTitle>
+        <DialogTitle>
+          Export PDF · {variant.name} · {template.name}
+        </DialogTitle>
         <DialogContent sx={{ display: "flex", gap: 3 }}>
           <Box
             sx={{

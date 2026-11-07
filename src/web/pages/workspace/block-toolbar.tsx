@@ -5,7 +5,6 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useActiveVariantLock } from "@pages/workspace/variant-lock";
 import { useBlockActions } from "@pages/workspace/use-block-actions";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppSelector } from "@store/store-helper";
@@ -26,7 +25,6 @@ interface Props {
  */
 export function BlockToolbar({ canvasRef }: Props): JSX.Element | null {
   const actions = useBlockActions();
-  const { isReadOnly } = useActiveVariantLock();
   const zoom = useAppSelector((s) => s.app.canvasZoom);
   const variant = useAppSelector(activeVariantSelector);
   const sections = useAppSelector(sectionsSelector);
@@ -87,7 +85,6 @@ export function BlockToolbar({ canvasRef }: Props): JSX.Element | null {
         <span>
           <IconButton
             size="small"
-            disabled={isReadOnly}
             aria-label={actions.isShown ? "Hide block" : "Show block"}
             aria-pressed={actions.isShown}
             onClick={actions.toggleShown}
@@ -104,7 +101,6 @@ export function BlockToolbar({ canvasRef }: Props): JSX.Element | null {
         <span>
           <IconButton
             size="small"
-            disabled={isReadOnly}
             aria-label="Emphasis"
             aria-pressed={actions.isEmphasised}
             onClick={actions.toggleEmphasis}
@@ -125,7 +121,7 @@ export function BlockToolbar({ canvasRef }: Props): JSX.Element | null {
         <span>
           <IconButton
             size="small"
-            disabled={isReadOnly || !actions.canMoveUp}
+            disabled={!actions.canMoveUp}
             aria-label="Move block up"
             onClick={() => actions.move(-1)}
           >
@@ -137,7 +133,7 @@ export function BlockToolbar({ canvasRef }: Props): JSX.Element | null {
         <span>
           <IconButton
             size="small"
-            disabled={isReadOnly || !actions.canMoveDown}
+            disabled={!actions.canMoveDown}
             aria-label="Move block down"
             onClick={() => actions.move(1)}
           >

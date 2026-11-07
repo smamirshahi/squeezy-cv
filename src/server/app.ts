@@ -41,12 +41,12 @@ import {
 } from "@custom-types/import-types";
 import {
   ApplicationInputError,
+  ApplicationSource,
   createApplication,
   toIsoDay,
   updateApplication,
 } from "@shared/application/application-utils";
 import { resolveVariant } from "@shared/variant/template-job";
-import { isVariantLocked } from "@shared/variant/variant-lock";
 import { BackupService } from "@server/backup/backup-service";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
 import {
@@ -448,29 +448,7 @@ export function buildServer({
     storage.loadVariant(request.params.id)
   );
 
-  // A variant that was sent (an application with status "applied") is read-only unless the
-  // request says ?unlock=true, so a stale tab or a script cannot change it by accident.
-  async function refuseIfLocked(
-    reply: FastifyReply,
-    variantId: string,
-    unlock: string | undefined
-  ): Promise<boolean> {
-    if (unlock === "true") {
-      return false;
-    }
-    if (isVariantLocked(variantId, await storage.listApplications())) {
-      await sendError(
-        reply,
-        HTTP_CONFLICT,
-        "locked",
-        "This variant was sent to an employer and is locked. Unlock it first, or create a new variant from it."
-      );
-      return true;
-    }
-    return false;
-  }
-
-  app.put<{ Params: { id: string }; Querystring: { unlock?: string } }>(
+  app.put<{ Params: { id: string } }>(
     "/api/variants/:id",
     async (request, reply) => {
       const variant = VariantSchema.check(request.body);
@@ -482,22 +460,14 @@ export function buildServer({
           "The id in the body must match the id in the URL."
         );
       }
-      if (await refuseIfLocked(reply, variant.id, request.query.unlock)) {
-        return reply;
-      }
       await storage.saveVariant(variant);
       return { status: "saved" };
     }
   );
 
-  app.delete<{ Params: { id: string }; Querystring: { unlock?: string } }>(
+  app.delete<{ Params: { id: string } }>(
     "/api/variants/:id",
-    async (request, reply) => {
-      if (
-        await refuseIfLocked(reply, request.params.id, request.query.unlock)
-      ) {
-        return reply;
-      }
+    async (request) => {
       await storage.deleteVariant(request.params.id);
       return { status: "deleted" };
     }
@@ -599,15 +569,30 @@ export function buildServer({
     return { status: "deleted" };
   });
 
-  // The variant of an application: a job drawn with its template (a job id is the variant id
-  // the page sends), or an older variant file that has no job
-  async function loadVariantOrJob(id: string): Promise<Variant> {
+  // What an application is made from: a job drawn with its template (a job id is the id the
+  // page sends), or an older variant file that has no job
+  async function loadSource(
+    id: string
+  ): Promise<{ variant: Variant; source: ApplicationSource }> {
     try {
       const job = await storage.loadJob(id);
-      return resolveVariant(await storage.loadTemplate(job.templateId), job);
+      const template = await storage.loadTemplate(job.templateId);
+      return {
+        variant: resolveVariant(template, job),
+        source: {
+          jobId: job.id,
+          templateId: template.id,
+          jobName: job.name,
+          templateName: template.name,
+        },
+      };
     } catch (error) {
       if (error instanceof StorageError && error.code === "not_found") {
-        return storage.loadVariant(id);
+        const variant = await storage.loadVariant(id);
+        return {
+          variant,
+          source: { jobId: variant.id, jobName: variant.name },
+        };
       }
       throw error;
     }
@@ -645,13 +630,14 @@ export function buildServer({
     }
     const input = NewApplicationSchema.check(request.body);
     const { vault } = await storage.loadVault();
-    const variant = await loadVariantOrJob(input.variantId);
+    const { variant, source } = await loadSource(input.jobId);
     const application = createApplication(
       input,
       vault,
       variant,
       toIsoDay(now()),
-      randomBytes(ID_SUFFIX_BYTES).toString("hex")
+      randomBytes(ID_SUFFIX_BYTES).toString("hex"),
+      source
     );
     let bytes: Buffer;
     try {

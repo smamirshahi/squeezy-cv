@@ -27,7 +27,6 @@ import { ItemBullets } from "@pages/editor-page/sections/variant-section-items";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
-import { LockedFieldset } from "@pages/workspace/variant-lock";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -542,9 +541,7 @@ export function Inspector(): JSX.Element {
           p: 2,
         }}
       >
-        <LockedFieldset>
-          {block ? <BlockInspector /> : <PageInspector />}
-        </LockedFieldset>
+        <>{block ? <BlockInspector /> : <PageInspector />}</>
       </Box>
     </ResizableAside>
   );

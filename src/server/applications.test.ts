@@ -63,7 +63,7 @@ function apply(payload: object) {
 describe("/api/applications", () => {
   it("Mark as applied: freezes the CV, makes the PDF, starts as Applied today", async () => {
     const response = await apply({
-      variantId: "acme",
+      jobId: "acme",
       company: "Acme Ltd",
       role: "Dev",
       jobUrl: "https://acme.example/jobs/1",
@@ -89,7 +89,7 @@ describe("/api/applications", () => {
 
   it("keeps the sent CV when the vault changes afterwards", async () => {
     const { id } = (
-      await apply({ variantId: "acme", company: "A", role: "B" })
+      await apply({ jobId: "acme", company: "A", role: "B" })
     ).json();
     const changed = structuredClone(file);
     changed.vault.profile.fullName = "Someone Else";
@@ -106,7 +106,7 @@ describe("/api/applications", () => {
   it("stores nothing when the PDF cannot be made", async () => {
     pdf.shouldFail = true;
     const response = await apply({
-      variantId: "acme",
+      jobId: "acme",
       company: "A",
       role: "B",
     });
@@ -121,20 +121,20 @@ describe("/api/applications", () => {
     const response = await bare.inject({
       method: "POST",
       url: "/api/applications",
-      payload: { variantId: "acme", company: "A", role: "B" },
+      payload: { jobId: "acme", company: "A", role: "B" },
     });
     expect(response.statusCode).toBe(501);
     await bare.close();
   });
 
-  it("rejects missing company, bad dates and unknown variants", async () => {
+  it("rejects missing company, bad dates and unknown jobs", async () => {
     expect(
-      (await apply({ variantId: "acme", company: " ", role: "B" })).statusCode
+      (await apply({ jobId: "acme", company: " ", role: "B" })).statusCode
     ).toBe(400);
     expect(
       (
         await apply({
-          variantId: "acme",
+          jobId: "acme",
           company: "A",
           role: "B",
           appliedAt: "soon",
@@ -143,13 +143,13 @@ describe("/api/applications", () => {
     ).toBe(400);
     expect((await apply({ company: "A", role: "B" })).statusCode).toBe(400);
     expect(
-      (await apply({ variantId: "nope", company: "A", role: "B" })).statusCode
+      (await apply({ jobId: "nope", company: "A", role: "B" })).statusCode
     ).toBe(404);
   });
 
   it("records status changes on the timeline and lists them", async () => {
     const { id } = (
-      await apply({ variantId: "acme", company: "A", role: "B" })
+      await apply({ jobId: "acme", company: "A", role: "B" })
     ).json();
     const patch = await app.inject({
       method: "PATCH",
@@ -185,7 +185,7 @@ describe("/api/applications", () => {
 
   it("deletes and then answers 404", async () => {
     const { id } = (
-      await apply({ variantId: "acme", company: "A", role: "B" })
+      await apply({ jobId: "acme", company: "A", role: "B" })
     ).json();
     const del = await app.inject({
       method: "DELETE",

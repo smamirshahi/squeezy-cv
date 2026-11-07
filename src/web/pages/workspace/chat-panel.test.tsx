@@ -18,7 +18,6 @@ import { setSavedState } from "@store/persistence/persistence-slice";
 import { toSavedState } from "@store/persistence/persistence-logic";
 import {
   activeVariantSelector,
-  setLocks,
   setVariants,
 } from "@store/variants/variants-slice";
 import { setVault } from "@store/vault/vault-slice";
@@ -216,7 +215,7 @@ describe("ChatPanel", () => {
     expect(store.getState().history.past).toHaveLength(0);
   });
 
-  it("cannot be used without AI, with unsaved changes, or on a locked variant", async () => {
+  it("cannot be used without AI or with unsaved changes", async () => {
     stub({ isConfigured: false });
     setup();
     await screen.findByText(/No AI is set up for chat/);
@@ -228,40 +227,6 @@ describe("ChatPanel", () => {
     stub();
     setup(false);
     await screen.findByText(/Save your changes first/);
-    expect(screen.getByLabelText<HTMLInputElement>("Message").disabled).toBe(
-      true
-    );
-    cleanup();
-
-    stub();
-    const store = makeStore();
-    const s = store.getState();
-    store.dispatch(
-      setSavedState(
-        toSavedState(
-          s.vault,
-          s.cvData.metaData,
-          s.cvData.style,
-          s.variants.templates,
-          s.variants.jobs
-        )
-      )
-    );
-    const id = activeVariantSelector(store.getState()).id;
-    store.dispatch(
-      setLocks({
-        byVariant: {
-          [id]: [{ applicationId: "a", company: "A", appliedAt: "2026-01-01" }],
-        },
-        hasUnreadable: false,
-      })
-    );
-    render(
-      <Provider store={store}>
-        <ChatPanel />
-      </Provider>
-    );
-    await screen.findByText(/locked because it was sent/);
     expect(screen.getByLabelText<HTMLInputElement>("Message").disabled).toBe(
       true
     );

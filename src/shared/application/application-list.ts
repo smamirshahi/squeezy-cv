@@ -9,7 +9,7 @@ export type SortKey = "appliedAt" | "company";
 export type SortDirection = "asc" | "desc";
 
 export interface ListView {
-  /** Matches company or role, ignoring case */
+  /** Matches company, role, job name or template name, ignoring case */
   query: string;
 
   /** Only this status, only those with no reply ("noReply", needs `today`), or all */
@@ -60,7 +60,9 @@ export function arrangeApplications(
     return (
       query === "" ||
       application.company.toLowerCase().includes(query) ||
-      application.role.toLowerCase().includes(query)
+      application.role.toLowerCase().includes(query) ||
+      application.jobName.toLowerCase().includes(query) ||
+      application.templateName.toLowerCase().includes(query)
     );
   });
   const sign = view.sortDirection === "asc" ? 1 : -1;

@@ -32,7 +32,10 @@ function entry(
     role,
     status,
     appliedAt,
-    variantId: "v1",
+    jobId: "v1",
+    templateId: "t1",
+    jobName: "Main job",
+    templateName: "Template 1",
     updatedAt: appliedAt,
     isCorrupt: false,
   };
@@ -72,6 +75,36 @@ describe("Applications page", () => {
     expect(
       screen.getByRole("link", { name: "Beta Labs" }).getAttribute("href")
     ).toBe("/?application=b");
+  });
+
+  it("shows the job and template each application was sent with, and searches them", async () => {
+    stubList([
+      {
+        ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
+        jobName: "Acme - Dev",
+        templateName: "Classic",
+      },
+      {
+        ...entry("b", "Beta", "QA", "applied", "2026-11-02"),
+        jobName: "Beta - QA",
+        templateName: "Compact",
+      },
+      {
+        ...entry("c", "Old", "Ops", "applied", "2026-11-03"),
+        jobName: "",
+        templateName: "",
+      },
+    ]);
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta");
+    expect(screen.getByRole("columnheader", { name: "Job" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "Template" })).toBeTruthy();
+    expect(screen.getByText("Acme - Dev")).toBeTruthy();
+    expect(screen.getByText("Classic")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Search company or role"), {
+      target: { value: "compact" },
+    });
+    expect(companies()).toEqual(["Beta"]);
   });
 
   it("searches company and role", async () => {

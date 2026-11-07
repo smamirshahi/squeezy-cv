@@ -32,7 +32,7 @@ afterEach(() => {
 const file = migrateCvFile(sample);
 const variant = createDefaultVariant(file, "v1");
 const application = createApplication(
-  { variantId: "v1", company: "Acme Ltd", role: "Senior Dev" },
+  { jobId: "v1", company: "Acme Ltd", role: "Senior Dev" },
   file.vault,
   variant,
   "2026-11-06",
@@ -109,13 +109,12 @@ describe("Mark as applied", () => {
     fireEvent.click(submit);
 
     await screen.findByText(/Saved: Acme Ltd, Senior Dev/);
-    // Nothing was unsaved, so the only writes are the application and then a re-read of the locks
-    expect(calls).toHaveLength(2);
-    expect(calls[1]).toMatchObject({ method: "GET", url: "/api/applications" });
+    // Nothing was unsaved, so the only write is the application
+    expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({
       method: "POST",
       url: "/api/applications",
-      body: { variantId: "v1", company: "Acme Ltd", role: "Senior Dev" },
+      body: { jobId: "v1", company: "Acme Ltd", role: "Senior Dev" },
     });
   });
 
@@ -162,6 +161,99 @@ describe("Application page", () => {
       `/api/applications/${application.id}/pdf`
     );
     expect(screen.getByText("The CV you sent")).toBeTruthy();
+  });
+
+  it("names the job and template it was sent with, and says the sent CV is a frozen copy", async () => {
+    const named = {
+      ...application,
+      jobId: "v1",
+      templateId: "tpl1",
+      jobName: "Acme - Dev",
+      templateName: "Classic",
+    };
+    stubServer(() => named);
+    render(<ApplicationView applicationId={named.id} />);
+    await screen.findByText("Acme Ltd");
+    expect(screen.getByTestId("application-sources").textContent).toContain(
+      "Job: Acme - Dev"
+    );
+    expect(screen.getByTestId("application-sources").textContent).toContain(
+      "Template: Classic"
+    );
+    expect(
+      screen.getByText(
+        /frozen copy; later edits to the template or job do not change it/
+      )
+    ).toBeTruthy();
+  });
+
+  it("an application from before jobs shows the variant name as the job", async () => {
+    stubServer(() => application);
+    render(<ApplicationView applicationId={application.id} />);
+    await screen.findByText("Acme Ltd");
+    expect(screen.getByTestId("application-sources").textContent).toContain(
+      `Job: ${variant.name}`
+    );
+  });
+
+  describe("Create new job from this", () => {
+    const sent = {
+      ...application,
+      jobId: "v1",
+      templateId: "tpl1",
+      jobName: "Acme - Dev",
+      templateName: "Classic",
+    };
+
+    function stubWithTemplates(templateIds: string[]): Call[] {
+      return stubServer((call) => {
+        if (call.url === "/api/templates" && call.method === "GET") {
+          return templateIds.map((id) => ({
+            id,
+            name: id,
+            isCorrupt: false,
+          }));
+        }
+        if (call.method === "PUT") {
+          return { status: "saved" };
+        }
+        return sent;
+      });
+    }
+
+    it("makes a new job on the template it was sent with, with the sent choices", async () => {
+      const calls = stubWithTemplates(["tpl1"]);
+      render(<ApplicationView applicationId={sent.id} />);
+      await screen.findByText("Acme Ltd");
+      fireEvent.click(
+        screen.getByRole("button", { name: "Create new job from this" })
+      );
+      await screen.findByText(/A copy was added to your jobs/);
+      const puts = calls.filter((c) => c.method === "PUT");
+      expect(puts).toHaveLength(1);
+      expect(puts[0].url).toMatch(/^\/api\/jobs\//);
+      expect(puts[0].body).toMatchObject({
+        templateId: "tpl1",
+        company: "Acme Ltd",
+        role: "Senior Dev",
+        selection: sent.submitted.variant.selection,
+      });
+    });
+
+    it("keeps the look as a template of its own when the sent template is gone", async () => {
+      const calls = stubWithTemplates(["other"]);
+      render(<ApplicationView applicationId={sent.id} />);
+      await screen.findByText("Acme Ltd");
+      fireEvent.click(
+        screen.getByRole("button", { name: "Create new job from this" })
+      );
+      await screen.findByText(/A copy was added to your jobs/);
+      const puts = calls.filter((c) => c.method === "PUT");
+      expect(puts.map((c) => c.url.split("/")[2])).toEqual([
+        "templates",
+        "jobs",
+      ]);
+    });
   });
 
   it("changes the status with a date and records it", async () => {

@@ -160,15 +160,8 @@ export interface ApiClient {
   saveVault: (file: CvFile) => Promise<void>;
   listVariants: () => Promise<VariantSummary[]>;
   loadVariant: (id: string) => Promise<Variant>;
-  /** `isUnlocked`: the user approved changing a variant that was sent (otherwise the server answers 409 "locked") */
-  saveVariant: (
-    variant: Variant,
-    options?: { isUnlocked?: boolean }
-  ) => Promise<void>;
-  deleteVariant: (
-    id: string,
-    options?: { isUnlocked?: boolean }
-  ) => Promise<void>;
+  saveVariant: (variant: Variant) => Promise<void>;
+  deleteVariant: (id: string) => Promise<void>;
 
   listTemplates: () => Promise<TemplateSummary[]>;
   loadTemplate: (id: string) => Promise<Template>;
@@ -212,7 +205,7 @@ export interface ApiClient {
   listApplications: () => Promise<ApplicationSummary[]>;
   loadApplication: (id: string) => Promise<Application>;
 
-  /** Freezes the saved variant (data and PDF) as an application. Save the variant first. */
+  /** Freezes the saved job (data and PDF) as an application. Save the variant first. */
   createApplication: (input: NewApplication) => Promise<Application>;
   updateApplication: (
     id: string,
@@ -224,10 +217,6 @@ export interface ApiClient {
 /** Where the browser can show or download the PDF that was sent with an application */
 export function applicationPdfUrl(id: string): string {
   return `/api/applications/${encodeURIComponent(id)}/pdf`;
-}
-
-function unlockQuery(options?: { isUnlocked?: boolean }): string {
-  return options?.isUnlocked ? "?unlock=true" : "";
 }
 
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
@@ -257,11 +246,11 @@ export function createApiClient(
         )
       );
     },
-    async saveVariant(variant, options) {
+    async saveVariant(variant) {
       await request(
         fetchImpl,
         "PUT",
-        `/api/variants/${encodeURIComponent(variant.id)}${unlockQuery(options)}`,
+        `/api/variants/${encodeURIComponent(variant.id)}`,
         variant
       );
     },
@@ -421,11 +410,11 @@ export function createApiClient(
         `/api/applications/${encodeURIComponent(id)}`
       );
     },
-    async deleteVariant(id, options) {
+    async deleteVariant(id) {
       await request(
         fetchImpl,
         "DELETE",
-        `/api/variants/${encodeURIComponent(id)}${unlockQuery(options)}`
+        `/api/variants/${encodeURIComponent(id)}`
       );
     },
   };

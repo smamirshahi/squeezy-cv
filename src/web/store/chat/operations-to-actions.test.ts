@@ -150,24 +150,6 @@ describe("operationsToActions", () => {
     ).toBe(false);
   });
 
-  it("does nothing to a variant that was sent and is locked", () => {
-    const store = setup();
-    const id = activeVariantSelector(store.getState()).id;
-    store.dispatch({
-      type: "variants/setLocks",
-      payload: {
-        byVariant: {
-          [id]: [{ applicationId: "a", company: "A", appliedAt: "2026-01-01" }],
-        },
-        hasUnreadable: false,
-      },
-    });
-    run(store, [{ op: "hideItem", itemId: job1.id, isHidden: true }]);
-    expect(
-      activeVariantSelector(store.getState()).selection[job1.id]
-    ).toBeUndefined();
-  });
-
   it("writes tone and item choices to the job, and page limit and layout to the template", () => {
     const store = setup();
     // a second job that shares the template

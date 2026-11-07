@@ -1,15 +1,6 @@
 import { useState } from "react";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Select,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
+import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { describeLock } from "@shared/variant/variant-lock";
 import { activateVariant } from "@hooks/use-sync-active-variant";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
@@ -21,7 +12,6 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeJobSelector,
   activeTemplateSelector,
-  isActiveVariantReadOnlySelector,
   jobsSelector,
   templatesSelector,
   variantsSelector,
@@ -52,8 +42,6 @@ export function JobSwitcher(): JSX.Element {
   const jobs = useAppSelector(jobsSelector);
   const templates = useAppSelector(templatesSelector);
   const template = useAppSelector(activeTemplateSelector);
-  const locks = useAppSelector((s) => s.variants.locks);
-  const isReadOnly = useAppSelector(isActiveVariantReadOnlySelector);
   const [isNewOpen, setIsNewOpen] = useState<boolean>(false);
 
   return (
@@ -76,15 +64,6 @@ export function JobSwitcher(): JSX.Element {
         {jobs.map((j) => (
           <MenuItem key={j.id} value={j.id}>
             {j.name}
-            {describeLock(locks, j.id) && (
-              <Tooltip title={describeLock(locks, j.id)}>
-                <LockIcon
-                  fontSize="inherit"
-                  aria-label={describeLock(locks, j.id)}
-                  sx={{ ml: 1, opacity: 0.7 }}
-                />
-              </Tooltip>
-            )}
           </MenuItem>
         ))}
       </Select>
@@ -95,7 +74,6 @@ export function JobSwitcher(): JSX.Element {
         size="small"
         value={template.id}
         aria-label="Template of this job"
-        disabled={isReadOnly}
         onChange={(event) => {
           const next = templates.find((t) => t.id === event.target.value);
           if (next) {

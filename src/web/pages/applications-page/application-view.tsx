@@ -163,10 +163,30 @@ export function ApplicationView({
         nanoid(),
         `${application.company} - ${application.role} (copy)`
       );
-      // a copy of what was sent becomes a job with a template of its own
       const { template, job } = splitVariant(copy, templateIdFor(copy.id));
-      await api.saveTemplate(template);
-      await api.saveJob(job);
+      // a new job on the template it was sent with, if that still exists; otherwise the
+      // look it had is kept as a template of its own
+      const templates = await api.listTemplates();
+      const sentTemplate = templates.find(
+        (t) => t.id === application.templateId && !t.isCorrupt
+      );
+      if (sentTemplate) {
+        await api.saveJob({
+          ...job,
+          templateId: sentTemplate.id,
+          company: application.company,
+          role: application.role,
+          // the template may have changed since, so the stored fit result may not match
+          tuning: undefined,
+        });
+      } else {
+        await api.saveTemplate(template);
+        await api.saveJob({
+          ...job,
+          company: application.company,
+          role: application.role,
+        });
+      }
       setMessage("A copy was added to your jobs. Open the editor to use it.");
     } catch (caught) {
       setError(messageOf(caught));
@@ -220,6 +240,14 @@ export function ApplicationView({
             }}
           >
             {application.role}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary" }}
+            data-testid="application-sources"
+          >
+            Job: {application.jobName ?? application.submitted.variant.name} ·
+            Template: {application.templateName ?? "unknown"}
           </Typography>
           {application.jobUrl && (
             <Link href={application.jobUrl} target="_blank" rel="noreferrer">
@@ -312,7 +340,8 @@ export function ApplicationView({
             mb: 1,
           }}
         >
-          Saved on {formatDay(application.appliedAt)}. It cannot be changed.
+          Saved on {formatDay(application.appliedAt)}. The sent CV is a frozen
+          copy; later edits to the template or job do not change it.
         </Typography>
         <Box
           component="iframe"
