@@ -32,6 +32,7 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
   - `pnpm build`
   - `pnpm lint:check`
   - `pnpm format-check` (fix with `pnpm format-fix`)
+  - `pnpm knip` (dead code)
   - `pnpm test`
 - If anything fails, fix it and re-run. Never skip or weaken a test to get green. If something cannot be fixed, stop and report it.
 - Check each acceptance criterion against the result.
@@ -40,5 +41,6 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
 
 - Push the branch and open a PR to `main` with `gh pr create`. The title mentions the issue; the body summarises the change, lists how each acceptance criterion is met, notes the tests, and includes `Closes #<id>`.
 - Wait for CI (`gh pr checks --watch`). If it fails, fix and push.
+- **Always merge.** Whenever you create a branch (for an issue or any other task), once everything is green (local checks and CI) merge it to `main` and delete the branch, unless the user explicitly says not to. Never stop at an open PR: `Closes #<id>` only closes the issue when the PR is merged.
 - When green, merge to `main` (`gh pr merge --merge --delete-branch`, matching the repo's existing merge-commit history), then `git switch main && git pull`.
 - Finish by telling the user what was done, the PR link, and anything left out or worth a follow-up issue.
