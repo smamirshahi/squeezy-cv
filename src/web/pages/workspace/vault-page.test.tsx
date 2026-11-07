@@ -41,7 +41,7 @@ describe("VaultPage", () => {
   it("lists the fixed pages and one page per vault section", () => {
     renderEditor(createStore());
     for (const label of [
-      "Meta Data",
+      "Job data",
       "Style Settings",
       "Page Structure",
       "Main Info",

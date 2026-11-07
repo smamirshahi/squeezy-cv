@@ -36,7 +36,7 @@ export function useEditorPages(): EditorPageSection {
   const sections = useAppSelector(sectionsSelector);
 
   return [
-    { id: "metaData", label: "Meta Data", content: <EditorMetaData /> },
+    { id: "metaData", label: "Job data", content: <EditorMetaData /> },
     {
       id: "styleSettings",
       label: "Style Settings",

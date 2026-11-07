@@ -1,11 +1,21 @@
 import { InformationTooltip } from "@components/information-tooltip";
-import { MetaData } from "@custom-types/json-types";
-import { Box, TextField, Typography } from "@mui/material";
+import { JOB_OPINIONS, JobOpinion, MetaData } from "@custom-types/json-types";
+import { Box, MenuItem, TextField, Typography } from "@mui/material";
 import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";
 import { useEditorPage } from "@pages/editor-page/use-editor-page";
 
+const OPINION_LABELS: Record<JobOpinion, string> = {
+  wantIt: "I really want this job",
+  goodMatch: "Good match",
+  optimistic: "Optimistic",
+  neutral: "Neutral",
+  unsure: "Unsure",
+  longShot: "Long shot",
+};
+
+/** The "Job data" page: private details about the job being applied for */
 export function EditorMetaData(): JSX.Element {
   const dispatch = useAppDispatch();
   const metaData = useAppSelector(metaDataSelector);
@@ -73,6 +83,42 @@ export function EditorMetaData(): JSX.Element {
       >
         <TextField type="date" fullWidth />
         <InformationTooltip infoText="Enter the date in which you applied for the job. It will serve as a reference in your records." />
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "row", mb: "10px" }}>
+        <TextField
+          select
+          fullWidth
+          label="My opinion about this job"
+          value={newMetaData.opinion ?? ""}
+          onChange={(event) =>
+            setNewMetaData({
+              ...newMetaData,
+              opinion: (event.target.value || undefined) as
+                JobOpinion | undefined,
+            })
+          }
+        >
+          <MenuItem value="">Not set</MenuItem>
+          {JOB_OPINIONS.map((opinion) => (
+            <MenuItem key={opinion} value={opinion}>
+              {OPINION_LABELS[opinion]}
+            </MenuItem>
+          ))}
+        </TextField>
+        <InformationTooltip infoText="How you feel about this job, for example if you really want it or think it is a long shot. Only for you." />
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "row", mb: "10px" }}>
+        <TextField
+          fullWidth
+          multiline
+          minRows={3}
+          value={newMetaData.notes ?? ""}
+          onChange={(event) =>
+            setNewMetaData({ ...newMetaData, notes: event.target.value })
+          }
+          label="additional notes"
+        />
+        <InformationTooltip infoText="Anything else you want to remember about this job. Only for you." />
       </Box>
     </>
   );
