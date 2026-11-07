@@ -14,6 +14,9 @@ template and a job (#165-#172).
 
 ### Added
 
+- **Open the CV that was sent from the applications table (#187)**: every row has a View
+  CV button (opens the sent PDF) and a download button; the side panel shows the PDF
+  first, labelled "CV as sent on <date>", and says so when the stored PDF is missing.
 - **Sections page is only titles**: the vault's Sections page now just renames or deletes
   sections. Ordering stays in Jobs > Sections & layout, where a new "Add section" button
   (type and title) was added. Every section's editor page has a "Section title" field.

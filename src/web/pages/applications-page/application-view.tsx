@@ -83,6 +83,7 @@ export function ApplicationView({
   const [statusNote, setStatusNote] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>("");
+  const [isPdfMissing, setIsPdfMissing] = useState<boolean>(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -103,6 +104,26 @@ export function ApplicationView({
       isCancelled = true;
     };
   }, [api, applicationId]);
+
+  // the stored PDF may be gone (or never made): say so instead of an empty frame
+  useEffect(() => {
+    let isCancelled = false;
+    setIsPdfMissing(false);
+    fetch(applicationPdfUrl(applicationId), { method: "HEAD" })
+      .then((response) => {
+        if (!isCancelled && !response.ok) {
+          setIsPdfMissing(true);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setIsPdfMissing(true);
+        }
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, [applicationId]);
 
   const update = useCallback(
     async (
@@ -288,21 +309,6 @@ export function ApplicationView({
       {message && <Alert severity="success">{message}</Alert>}
 
       <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="h6" component="h2" gutterBottom>
-          Timeline
-        </Typography>
-        <Box component="ol" sx={{ m: 0, pl: 3 }}>
-          {application.history.map((change) => (
-            <li key={`${change.at}-${change.status}`}>
-              <strong>{formatDay(change.at)}</strong> -{" "}
-              {STATUS_LABELS[change.status]}
-              {change.note ? ` (${change.note})` : ""}
-            </li>
-          ))}
-        </Box>
-      </Paper>
-
-      <Paper variant="outlined" sx={{ p: 2 }}>
         <Box
           sx={{
             display: "flex",
@@ -325,6 +331,7 @@ export function ApplicationView({
             <Button
               href={applicationPdfUrl(application.id)}
               download={`${application.id}.pdf`}
+              disabled={isPdfMissing}
             >
               Download PDF
             </Button>
@@ -340,19 +347,41 @@ export function ApplicationView({
             mb: 1,
           }}
         >
-          Saved on {formatDay(application.appliedAt)}. The sent CV is a frozen
-          copy; later edits to the template or job do not change it.
+          CV as sent on {formatDay(application.appliedAt)}. The sent CV is a
+          frozen copy; later edits to the template or job do not change it.
         </Typography>
-        <Box
-          component="iframe"
-          title="The CV you sent"
-          src={applicationPdfUrl(application.id)}
-          sx={{
-            width: "100%",
-            height: 900,
-            border: `1px solid ${WORKSPACE_COLORS.border}`,
-          }}
-        />
+        {isPdfMissing ? (
+          <Alert severity="warning">
+            The PDF of this application is missing, so the CV that was sent
+            cannot be shown.
+          </Alert>
+        ) : (
+          <Box
+            component="iframe"
+            title="The CV you sent"
+            src={applicationPdfUrl(application.id)}
+            sx={{
+              width: "100%",
+              height: 900,
+              border: `1px solid ${WORKSPACE_COLORS.border}`,
+            }}
+          />
+        )}
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          Timeline
+        </Typography>
+        <Box component="ol" sx={{ m: 0, pl: 3 }}>
+          {application.history.map((change) => (
+            <li key={`${change.at}-${change.status}`}>
+              <strong>{formatDay(change.at)}</strong> -{" "}
+              {STATUS_LABELS[change.status]}
+              {change.note ? ` (${change.note})` : ""}
+            </li>
+          ))}
+        </Box>
       </Paper>
 
       {application.jobDescription && (
