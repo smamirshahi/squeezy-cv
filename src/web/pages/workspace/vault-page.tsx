@@ -19,6 +19,7 @@ import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
+import { StyleUsagePanel } from "@pages/editor-page/sections/editor-style-settings/style-usage-panel";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
@@ -269,6 +270,7 @@ export function VaultPage(): JSX.Element {
     selectedSection !== undefined &&
     selectedItem !== undefined &&
     selectedSection.type !== "summary";
+  const isStylePage = page.id === "styleSettings" && !hasInlineEditor;
   const isFact = !SETTING_PAGES.has(page.id) && page.id !== "ai";
 
   return (
@@ -307,7 +309,8 @@ export function VaultPage(): JSX.Element {
             instead.
           </Alert>
         )}
-        {!hasInlineEditor && (
+        {isStylePage && page.content}
+        {!hasInlineEditor && !isStylePage && (
           <>
             <Box
               sx={{ bgcolor: WORKSPACE_COLORS.panel, borderRadius: 1, p: 2 }}
@@ -318,7 +321,11 @@ export function VaultPage(): JSX.Element {
           </>
         )}
       </Box>
-      <AppearsIn itemId={selectedItemId} />
+      {isStylePage ? (
+        <StyleUsagePanel />
+      ) : (
+        <AppearsIn itemId={selectedItemId} />
+      )}
     </>
   );
 }

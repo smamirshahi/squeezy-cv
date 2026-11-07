@@ -61,6 +61,11 @@ const cvDataSlice = createSlice({
       state.style.typography[action.payload.variant] = action.payload.fontStyle;
     },
 
+    /** Puts every style back to its default size, weight and colour */
+    resetTypography(state) {
+      state.style.typography = structuredClone(TypographyVariant);
+    },
+
     setRatingIcon(state, action: PayloadAction<Style["ratingIcon"]>) {
       state.style.ratingIcon = action.payload;
     },
@@ -86,6 +91,7 @@ export const {
   setShouldShowRightToWork,
   setPaperMargin,
   setTypography,
+  resetTypography,
   setRatingIcon,
   setBulletPointIcon,
   resetCvDataState,

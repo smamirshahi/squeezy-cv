@@ -92,7 +92,7 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   bodySm: {
     fontSize: "9pt",
     fontWeight: "400",
-    color: "#777777",
+    color: "#767676",
   },
   bulletText: {
     fontSize: "9pt",
