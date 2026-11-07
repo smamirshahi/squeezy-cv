@@ -4,7 +4,10 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
-import { TemplateSectionStyles } from "@pages/workspace/template-section-styles";
+import {
+  TemplateSample,
+  TemplateSectionStyles,
+} from "@pages/workspace/template-section-styles";
 import { activeTemplateSelector } from "@store/jobs/jobs-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
@@ -21,6 +24,7 @@ function setup(): AppStore {
   render(
     <Provider store={store}>
       <TemplateSectionStyles />
+      <TemplateSample />
     </Provider>
   );
   return store;

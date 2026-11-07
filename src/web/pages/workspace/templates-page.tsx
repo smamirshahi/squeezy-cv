@@ -2,8 +2,9 @@ import { useState } from "react";
 import {
   Box,
   Button,
-  Tab,
-  Tabs,
+  List,
+  ListItemButton,
+  ListItemText,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,7 +22,11 @@ import {
   moveJobToTemplate,
   nextTemplateName,
 } from "@pages/workspace/template-scope";
-import { TemplateSectionStyles } from "@pages/workspace/template-section-styles";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
+import {
+  TemplateSample,
+  TemplateSectionStyles,
+} from "@pages/workspace/template-section-styles";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -56,6 +61,50 @@ type Asking =
   | { kind: "delete"; template: Template }
   | null;
 
+const TEMPLATE_TABS: { id: TemplateTab; label: string }[] = [
+  { id: "templates", label: "Templates" },
+  { id: "layout", label: "Page layout" },
+  { id: "style", label: "Style settings" },
+];
+
+/** Left: the three parts of the Templates area, like the sections list in the vault */
+function TemplatesNav({
+  tab,
+  onChange,
+}: {
+  tab: TemplateTab;
+  onChange: (tab: TemplateTab) => void;
+}): JSX.Element {
+  return (
+    <ResizableAside side="left" label="the template menu" defaultWidth={220}>
+      <Box
+        component="nav"
+        aria-label="Template sections"
+        sx={{
+          width: "100%",
+          flex: "none",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+          p: 1,
+          overflow: "auto",
+        }}
+      >
+        <List dense disablePadding>
+          {TEMPLATE_TABS.map((entry) => (
+            <ListItemButton
+              key={entry.id}
+              selected={tab === entry.id}
+              onClick={() => onChange(entry.id)}
+            >
+              <ListItemText primary={entry.label} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Box>
+    </ResizableAside>
+  );
+}
+
 /**
  * The Templates area: every template with the jobs that use it. A template is how a CV looks
  * (layout, fonts, colours, margins, page limit, skill display, auto-fit); a job only decides
@@ -80,6 +129,7 @@ export function TemplatesPage(): JSX.Element {
 
   return (
     <>
+      <TemplatesNav tab={tab} onChange={setTab} />
       <Box
         component="main"
         aria-label="Templates"
@@ -91,20 +141,16 @@ export function TemplatesPage(): JSX.Element {
           bgcolor: WORKSPACE_COLORS.canvas,
         }}
       >
-        <Box sx={{ maxWidth: 1000, mx: "auto" }}>
-          <Tabs
-            value={tab}
-            onChange={(_event, value: TemplateTab) => setTab(value)}
-            aria-label="Template sections"
-            sx={{ mb: 2, borderBottom: `1px solid ${WORKSPACE_COLORS.border}` }}
-          >
-            <Tab value="templates" label="Templates" />
-            <Tab value="layout" label="Page layout" />
-            <Tab value="style" label="Style settings" />
-          </Tabs>
-          {tab === "layout" && <EditorPageStructure />}
-          {tab === "style" && <EditorTypography />}
-        </Box>
+        {tab === "layout" && (
+          <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+            <EditorPageStructure />
+          </Box>
+        )}
+        {tab === "style" && (
+          <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+            <EditorTypography />
+          </Box>
+        )}
         {tab === "templates" && (
           <>
             <Box sx={{ maxWidth: 1000, mx: "auto" }}>
@@ -118,7 +164,14 @@ export function TemplatesPage(): JSX.Element {
                 template changes all of its jobs. What each job shows is set per
                 job.
               </Typography>
+              <Typography
+                component="h2"
+                sx={{ fontSize: 15, fontWeight: 700, mb: 1 }}
+              >
+                Style per section
+              </Typography>
               <TemplateSectionStyles />
+              <Box sx={{ mb: 3 }} />
               <Box
                 sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}
               >
@@ -337,7 +390,33 @@ export function TemplatesPage(): JSX.Element {
           </DialogActions>
         </Dialog>
       </Box>
-      {tab === "style" && <StyleUsagePanel />}
+      {tab === "style" ? (
+        <StyleUsagePanel />
+      ) : (
+        <ResizableAside side="right" label="the sample CV" defaultWidth={380}>
+          <Box
+            component="aside"
+            aria-label="Sample CV panel"
+            sx={{
+              width: "100%",
+              flex: "none",
+              bgcolor: WORKSPACE_COLORS.panel,
+              borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+              p: 2,
+              overflow: "auto",
+            }}
+          >
+            <Typography sx={{ fontWeight: 700, mb: 0.5 }}>Sample</Typography>
+            <Typography
+              sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mb: 1.5 }}
+            >
+              Your vault with everything shown, in this template. Drag the edge
+              to make it larger.
+            </Typography>
+            <TemplateSample />
+          </Box>
+        </ResizableAside>
+      )}
     </>
   );
 }

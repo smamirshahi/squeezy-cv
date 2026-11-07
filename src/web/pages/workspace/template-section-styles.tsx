@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -28,10 +28,12 @@ import {
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
 
-/** Scale of the sample page next to the controls */
+/** Scale of the sample page before its panel has been measured */
 const SAMPLE_ZOOM = 0.55;
 /** The sample is cut after this many pages */
 const SAMPLE_PAGES = 2;
+/** CSS pixels per millimetre */
+const MM_TO_PX = 96 / 25.4;
 
 /** A job that shows everything: the sample ignores what the active job hides */
 function sampleJob(templateId: string): Job {
@@ -46,18 +48,12 @@ function sampleJob(templateId: string): Job {
   };
 }
 
-/**
- * Style per section of the active job's template, with a sample CV built from the vault
- * (everything shown, cut after two pages) so the look can be judged.
- */
+/** Style per section of the active job's template */
 export function TemplateSectionStyles(): JSX.Element {
   const dispatch = useAppDispatch();
   const template = useAppSelector(activeTemplateSelector);
   const activeJob = useAppSelector(activeJobSelector);
   const sections = useAppSelector(sectionsSelector);
-  const style = useAppSelector(styleSelector);
-  const { columnWidth, structure } = useAppSelector(appSelector);
-  const vault = useAppSelector(vaultSelector);
   const [pickedId, setPickedId] = useState<string>("");
   const sectionId = sections.some((s) => s.id === pickedId)
     ? pickedId
@@ -65,16 +61,6 @@ export function TemplateSectionStyles(): JSX.Element {
   const current = template.sectionStyles?.[sectionId] ?? {};
   const [colorText, setColorText] = useState<string | null>(null);
   const colorShown = colorText ?? current.headingColor ?? "";
-
-  const rendered = useMemo(
-    () =>
-      render(vault, {
-        ...resolveVariant(template, sampleJob(template.id)),
-        layout: structure,
-        style,
-      }),
-    [vault, template, structure, style]
-  );
 
   function change(
     patch: Parameters<typeof setSectionStyle>[0]["change"]
@@ -109,24 +95,18 @@ export function TemplateSectionStyles(): JSX.Element {
 
   const hasStyle = Object.keys(current).length > 0;
   const isColorInvalid = colorShown !== "" && !isValidHex(colorShown);
-  const marginMm = PAPER_MARGIN_MM[style.paperMargin];
 
   return (
     <Box
       component="section"
       aria-label="Section styles"
       sx={{
-        display: "flex",
-        gap: 3,
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        mb: 3,
+        display: "grid",
+        gap: 1.5,
+        maxWidth: 560,
       }}
     >
-      <Box sx={{ flex: "1 1 280px", minWidth: 260, display: "grid", gap: 1.5 }}>
-        <Typography component="h2" sx={{ fontSize: 15, fontWeight: 700 }}>
-          Style per section
-        </Typography>
+      <Box sx={{ display: "grid", gap: 1.5 }}>
         <TemplateScopeNote />
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           Pick a section and give its heading its own look. Empty fields follow
@@ -197,6 +177,49 @@ export function TemplateSectionStyles(): JSX.Element {
           </Button>
         </Box>
       </Box>
+    </Box>
+  );
+}
+
+/**
+ * Sample CV built from the vault (everything shown, cut after two pages) so the look can be
+ * judged. It fills the width of the panel it sits in, so resizing the panel resizes the page.
+ */
+export function TemplateSample(): JSX.Element {
+  const template = useAppSelector(activeTemplateSelector);
+  const style = useAppSelector(styleSelector);
+  const { columnWidth, structure } = useAppSelector(appSelector);
+  const vault = useAppSelector(vaultSelector);
+  const [available, setAvailable] = useState<number>(0);
+  const observer = useRef<ResizeObserver | null>(null);
+  const rendered = useMemo(
+    () =>
+      render(vault, {
+        ...resolveVariant(template, sampleJob(template.id)),
+        layout: structure,
+        style,
+      }),
+    [vault, template, structure, style]
+  );
+
+  const marginMm = PAPER_MARGIN_MM[style.paperMargin];
+
+  const measure = useCallback((node: HTMLDivElement | null): void => {
+    observer.current?.disconnect();
+    observer.current = null;
+    if (node === null || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    setAvailable(node.clientWidth);
+    observer.current = new ResizeObserver(() => setAvailable(node.clientWidth));
+    observer.current.observe(node);
+  }, []);
+
+  const paperPx = A4_DIMENSION_MM.width * MM_TO_PX;
+  const zoom = available > 0 ? Math.min(1, available / paperPx) : SAMPLE_ZOOM;
+
+  return (
+    <Box ref={measure} sx={{ width: "100%" }}>
       <Box
         aria-label="Sample CV"
         role="img"
@@ -204,11 +227,11 @@ export function TemplateSectionStyles(): JSX.Element {
           flex: "0 0 auto",
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           overflow: "hidden",
-          width: `calc(${A4_DIMENSION_MM.width}mm * ${SAMPLE_ZOOM})`,
-          height: `calc(${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm * ${SAMPLE_ZOOM})`,
+          width: `calc(${A4_DIMENSION_MM.width}mm * ${zoom})`,
+          height: `calc(${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm * ${zoom})`,
         }}
       >
-        <ZoomFrame zoom={SAMPLE_ZOOM}>
+        <ZoomFrame zoom={zoom}>
           <Box
             data-testid="sample-cv"
             sx={{
