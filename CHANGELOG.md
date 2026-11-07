@@ -14,6 +14,7 @@ template and a job (#165-#172).
 
 ### Added
 
+- **Templates: style per section (#185)**: heading size, colour, space above and the line under the heading can be set per section in a template (Templates page), with a live sample CV built from the vault beside the controls; preview and PDF follow, and older templates load unchanged.
 - **Open the CV that was sent from the applications table (#187)**: every row has a View
   CV button (opens the sent PDF) and a download button; the side panel shows the PDF
   first, labelled "CV as sent on <date>", and says so when the stored PDF is missing.
