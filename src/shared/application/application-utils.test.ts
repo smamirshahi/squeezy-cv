@@ -230,3 +230,61 @@ describe("formatDay", () => {
     expect(formatDay("")).toBe("");
   });
 });
+
+describe("job and template of an application", () => {
+  const source = {
+    jobId: "job1",
+    templateId: "tpl1",
+    jobName: "Acme - Dev",
+    templateName: "Classic",
+  };
+
+  it("records the job and template ids and names, and lists them", () => {
+    const application = createApplication(
+      input,
+      file.vault,
+      variant,
+      "2026-11-06",
+      "x7k2",
+      source
+    );
+    expect(ApplicationSchema.guard(application)).toBe(true);
+    expect(application).toMatchObject(source);
+    expect(summariseApplication(application)).toMatchObject(source);
+  });
+
+  it("without a source the job id is the variant id", () => {
+    const application = make();
+    expect(application.jobId).toBe("v1");
+    expect(application.templateId).toBeUndefined();
+  });
+
+  it("an older file without jobId and names is still valid; its variant is the job", () => {
+    const old: Record<string, unknown> = structuredClone(make());
+    for (const key of ["jobId", "templateId", "jobName", "templateName"]) {
+      delete old[key];
+    }
+    expect(ApplicationSchema.guard(old)).toBe(true);
+    expect(summariseApplication(old as Application)).toMatchObject({
+      jobId: "v1",
+      jobName: variant.name,
+      templateId: "",
+      templateName: "",
+    });
+  });
+
+  it("the frozen CV does not change when the source names change later", () => {
+    const application = createApplication(
+      input,
+      file.vault,
+      variant,
+      "2026-11-06",
+      "x7k2",
+      source
+    );
+    const before = JSON.stringify(application);
+    source.jobName = "Renamed";
+    expect(JSON.stringify(application)).toBe(before);
+    source.jobName = "Acme - Dev";
+  });
+});

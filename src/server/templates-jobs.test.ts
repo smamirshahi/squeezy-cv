@@ -1,4 +1,11 @@
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { FastifyInstance } from "fastify";
@@ -273,5 +280,127 @@ describe("PDF of a job", () => {
       (await call("POST", "/api/pdf", { variantId: "old" })).statusCode
     ).toBe(200);
     expect(pdf.requested).toEqual(["old"]);
+  });
+});
+
+describe("applications are frozen copies", () => {
+  async function applyAcme(): Promise<{ id: string }> {
+    await call("PUT", "/api/vault", file);
+    await seed();
+    const response = await call("POST", "/api/applications", {
+      jobId: "acme",
+      company: "Acme Ltd",
+      role: "Dev",
+    });
+    expect(response.statusCode).toBe(200);
+    return response.json();
+  }
+
+  async function stored(id: string): Promise<{ json: string; pdf: Buffer }> {
+    const base = path.join(dir, "applications", id);
+    return {
+      json: await readFile(path.join(base, "application.json"), "utf8"),
+      pdf: await readFile(path.join(base, "cv.pdf")),
+    };
+  }
+
+  it("records the job and template (ids and names) and lists them", async () => {
+    const { id } = await applyAcme();
+    const application = (await call("GET", `/api/applications/${id}`)).json();
+    expect(application).toMatchObject({
+      jobId: "acme",
+      templateId: "tpl1",
+      jobName: job.name,
+      templateName: template.name,
+    });
+    expect((await call("GET", "/api/applications")).json()).toEqual([
+      expect.objectContaining({
+        id,
+        jobId: "acme",
+        templateId: "tpl1",
+        jobName: job.name,
+        templateName: template.name,
+      }),
+    ]);
+  });
+
+  it("editing, renaming or deleting the template and the job after Mark as applied changes neither the stored application nor its PDF", async () => {
+    const { id } = await applyAcme();
+    const before = await stored(id);
+
+    const editedTemplate = {
+      ...template,
+      name: "Renamed look",
+      pageLimit: template.pageLimit === 1 ? 2 : 1,
+    };
+    expect(
+      (await call("PUT", "/api/templates/tpl1", editedTemplate)).statusCode
+    ).toBe(200);
+    const editedJob = {
+      ...job,
+      name: "Renamed job",
+      selection: { anything: { isVisible: false } },
+    };
+    expect((await call("PUT", "/api/jobs/acme", editedJob)).statusCode).toBe(
+      200
+    );
+    const afterEdit = await stored(id);
+    expect(afterEdit.json).toBe(before.json);
+    expect(afterEdit.pdf.equals(before.pdf)).toBe(true);
+
+    // no lock: the job and then its template can even be deleted
+    expect((await call("DELETE", "/api/jobs/acme")).statusCode).toBe(200);
+    expect((await call("DELETE", "/api/templates/tpl1")).statusCode).toBe(200);
+    const afterDelete = await stored(id);
+    expect(afterDelete.json).toBe(before.json);
+    expect(afterDelete.pdf.equals(before.pdf)).toBe(true);
+    const download = await call("GET", `/api/applications/${id}/pdf`);
+    expect(download.rawPayload).toEqual(PDF);
+  });
+
+  it("the old variant routes are not locked either", async () => {
+    await call("PUT", "/api/vault", file);
+    const variant = createVariant(file.vault, file.style, "old", "Old");
+    await call("PUT", "/api/variants/old", variant);
+    const { id } = (
+      await call("POST", "/api/applications", {
+        jobId: "old",
+        company: "A",
+        role: "B",
+      })
+    ).json();
+    expect(id).toBeTruthy();
+    expect(
+      (await call("PUT", "/api/variants/old", { ...variant, name: "New" }))
+        .statusCode
+    ).toBe(200);
+    expect((await call("DELETE", "/api/variants/old")).statusCode).toBe(200);
+  });
+
+  it("still reads an application file that has only the variant it was sent from", async () => {
+    await call("PUT", "/api/vault", file);
+    await seed();
+    const { id } = await applyAcme();
+    const base = path.join(dir, "applications", id);
+    const raw = JSON.parse(
+      await readFile(path.join(base, "application.json"), "utf8")
+    );
+    for (const key of ["jobId", "templateId", "jobName", "templateName"]) {
+      delete raw[key];
+    }
+    await writeFile(path.join(base, "application.json"), JSON.stringify(raw));
+    await mkdir(base, { recursive: true });
+
+    const loaded = await call("GET", `/api/applications/${id}`);
+    expect(loaded.statusCode).toBe(200);
+    const [summary] = (await call("GET", "/api/applications")).json();
+    expect(summary).toMatchObject({
+      id,
+      isCorrupt: false,
+      jobId: "acme",
+      jobName: raw.submitted.variant.name,
+      templateId: "",
+      templateName: "",
+    });
   });
 });
