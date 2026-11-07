@@ -3,7 +3,7 @@ import { Job } from "@custom-types/job-types";
 import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { CvFile } from "@custom-types/vault-types";
-import { activateVariant } from "@hooks/use-sync-active-variant";
+import { activateVariant } from "@hooks/use-sync-active-job";
 import { resolveVariant } from "@shared/variant/template-job";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { createCvFile } from "@shared/vault/cv-file";
@@ -23,10 +23,7 @@ import {
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
-import {
-  setTemplatesAndJobs,
-  setVariants,
-} from "@store/variants/variants-slice";
+import { setTemplatesAndJobs, setVariants } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 
 /** The templates and jobs of a CV, or variants that are split into one template and one job each */
@@ -119,8 +116,8 @@ export async function loadFromServer(
       state.vault,
       state.cvData.metaData,
       state.cvData.style,
-      state.variants.templates,
-      state.variants.jobs
+      state.jobs.templates,
+      state.jobs.jobs
     );
     // Templates and jobs that were not on disk (defaults made for an old file) stay unsaved
     const onDisk = {
@@ -190,8 +187,8 @@ export async function saveToServer(
     state.vault,
     state.cvData.metaData,
     state.cvData.style,
-    state.variants.templates,
-    state.variants.jobs
+    state.jobs.templates,
+    state.jobs.jobs
   );
   const plan = planSave(state.persistence.saved, current);
 
@@ -204,13 +201,13 @@ export async function saveToServer(
     }
     // templates first (a job needs its template), deletions last in the opposite order
     for (const id of plan.templatesToSave) {
-      const template = state.variants.templates.find((t) => t.id === id);
+      const template = state.jobs.templates.find((t) => t.id === id);
       if (template) {
         await api.saveTemplate(template);
       }
     }
     for (const id of plan.jobsToSave) {
-      const job = state.variants.jobs.find((j) => j.id === id);
+      const job = state.jobs.jobs.find((j) => j.id === id);
       if (job) {
         await api.saveJob(job);
       }

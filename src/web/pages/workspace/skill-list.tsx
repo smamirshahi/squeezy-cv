@@ -23,10 +23,7 @@ import {
 } from "@pages/editor-page/sections/job-section-items";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch } from "@store/store-helper";
-import {
-  setBulletOrders,
-  setBulletSelection,
-} from "@store/variants/variants-slice";
+import { setBulletOrders, setBulletSelection } from "@store/jobs/jobs-slice";
 
 interface GroupProps {
   item: Item;

@@ -77,8 +77,8 @@ function readyStore(): AppStore {
         s.vault,
         s.cvData.metaData,
         s.cvData.style,
-        s.variants.templates,
-        s.variants.jobs
+        s.jobs.templates,
+        s.jobs.jobs
       )
     )
   );

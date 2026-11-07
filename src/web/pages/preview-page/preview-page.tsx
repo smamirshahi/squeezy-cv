@@ -11,7 +11,7 @@ import {
   setAutoFit,
   setPageLimit,
   setTuning,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { FitTuning } from "@custom-types/variant-types";
 import { useAutoFit } from "@pages/preview-page/use-auto-fit";
 import { computeFitMetrics } from "@shared/layout/fit-metrics";

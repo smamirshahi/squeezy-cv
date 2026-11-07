@@ -20,7 +20,7 @@ import {
   addTemplate,
   setVariants,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -127,8 +127,8 @@ function makeStore({ isSaved = true } = {}): AppStore {
           s.vault,
           s.cvData.metaData,
           s.cvData.style,
-          s.variants.templates,
-          s.variants.jobs
+          s.jobs.templates,
+          s.jobs.jobs
         )
       )
     );
@@ -244,11 +244,11 @@ describe("AiAssistant: the review", () => {
     const store = makeStore();
     const before = JSON.stringify([
       store.getState().vault,
-      store.getState().variants,
+      store.getState().jobs,
     ]);
     await analyse(store);
     expect(
-      JSON.stringify([store.getState().vault, store.getState().variants])
+      JSON.stringify([store.getState().vault, store.getState().jobs])
     ).toBe(before);
   });
 
@@ -265,7 +265,7 @@ describe("AiAssistant: the review", () => {
     );
 
     const variants = variantsSelector(store.getState());
-    const activeId = store.getState().variants.activeJobId;
+    const activeId = store.getState().jobs.activeJobId;
     expect(variants).toHaveLength(2);
     expect(JSON.stringify(variants[0])).toBe(baseBefore);
     const created = variants[1];
@@ -298,13 +298,13 @@ describe("AiAssistant: the review", () => {
     });
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Template" }));
     fireEvent.click(await screen.findByRole("option", { name: "Template B" }));
-    const templatesBefore = JSON.stringify(store.getState().variants.templates);
+    const templatesBefore = JSON.stringify(store.getState().jobs.templates);
     fireEvent.click(
       screen.getByRole("button", {
         name: /Create job from the accepted changes/,
       })
     );
-    const { jobs, templates, activeJobId } = store.getState().variants;
+    const { jobs, templates, activeJobId } = store.getState().jobs;
     const created = jobs.find((j) => j.id === activeJobId)!;
     expect(created.name).toBe("Acme - Senior");
     expect(created.templateId).toBe("tpl-b");
@@ -318,10 +318,8 @@ describe("AiAssistant: the review", () => {
     stubServer({});
     const store = makeStore();
     await analyse(store);
-    const templateBefore = JSON.stringify(
-      store.getState().variants.templates[0]
-    );
-    const limit = store.getState().variants.templates[0].pageLimit;
+    const templateBefore = JSON.stringify(store.getState().jobs.templates[0]);
+    const limit = store.getState().jobs.templates[0].pageLimit;
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Page limit" }));
     fireEvent.click(
       await screen.findByRole("option", {
@@ -333,7 +331,7 @@ describe("AiAssistant: the review", () => {
         name: /Create job from the accepted changes/,
       })
     );
-    const { jobs, templates, activeJobId } = store.getState().variants;
+    const { jobs, templates, activeJobId } = store.getState().jobs;
     const created = jobs.find((j) => j.id === activeJobId)!;
     expect(templates).toHaveLength(2);
     const copy = templates.find((t) => t.id === created.templateId)!;

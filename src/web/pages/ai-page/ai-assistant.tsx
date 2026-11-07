@@ -25,7 +25,7 @@ import {
 import { MAX_JOB_AD_LENGTH, TailorResult } from "@custom-types/tailor-types";
 import { Tone } from "@custom-types/variant-types";
 import { Item, Section, Vault } from "@custom-types/vault-types";
-import { activateVariant } from "@hooks/use-sync-active-variant";
+import { activateVariant } from "@hooks/use-sync-active-job";
 import {
   Decisions,
   ItemChange,
@@ -60,7 +60,7 @@ import {
   activeVariantSelector,
   insertTailoredJob,
   templatesSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { resolveVariant } from "@shared/variant/template-job";
 import { setBulletAlt, vaultSelector } from "@store/vault/vault-slice";
 

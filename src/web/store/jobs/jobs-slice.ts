@@ -38,11 +38,11 @@ import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
 
 /**
- * State of the variants slice: the templates (how a CV looks) and the jobs (what each one
+ * State of the jobs slice: the templates (how a CV looks) and the jobs (what each one
  * shows, with the template it uses). The "variant" the rest of the app draws is
  * `resolveVariant(template, job)`, see `activeVariantSelector`. A variant id is a job id.
  */
-export interface VariantsState {
+export interface JobsState {
   templates: Template[];
   jobs: Job[];
   activeJobId: string;
@@ -55,7 +55,7 @@ export function templateIdFor(jobId: string): string {
   return `template-${jobId}`.slice(0, 64);
 }
 
-function createInitialState(): VariantsState {
+function createInitialState(): JobsState {
   const variant = createVariant(
     createDefaultVault(),
     initialStyleState.style,
@@ -70,7 +70,7 @@ function createInitialState(): VariantsState {
   };
 }
 
-export const initialState: VariantsState = createInitialState();
+export const initialState: JobsState = createInitialState();
 
 /**
  * Makes loaded templates and jobs usable: a job whose template is missing moves to the first
@@ -80,7 +80,7 @@ function normalise(
   templates: Template[],
   jobs: Job[],
   activeJobId: string
-): Pick<VariantsState, "templates" | "jobs" | "activeJobId"> {
+): Pick<JobsState, "templates" | "jobs" | "activeJobId"> {
   const fallback = createInitialState();
   const usableTemplates = templates.length ? templates : fallback.templates;
   const ids = new Set(usableTemplates.map((t) => t.id));
@@ -97,12 +97,12 @@ function normalise(
   };
 }
 
-function jobOf(state: VariantsState, jobId: string): Job | undefined {
+function jobOf(state: JobsState, jobId: string): Job | undefined {
   return state.jobs.find((j) => j.id === jobId);
 }
 
 /** The template a job is drawn with (the first one if the job's is missing) */
-function templateOf(state: VariantsState, job: Job): Template {
+function templateOf(state: JobsState, job: Job): Template {
   return (
     state.templates.find((t) => t.id === job.templateId) ?? state.templates[0]
   );
@@ -110,7 +110,7 @@ function templateOf(state: VariantsState, job: Job): Template {
 
 /** Changes the template of job `jobId`; also drops the stored auto-fit result of the jobs on it when asked */
 function editTemplate(
-  state: VariantsState,
+  state: JobsState,
   jobId: string,
   change: (template: Template) => void,
   options: { shouldDropTuning?: boolean } = {}
@@ -134,7 +134,7 @@ function editTemplate(
 }
 
 function editJob(
-  state: VariantsState,
+  state: JobsState,
   jobId: string,
   change: (job: Job) => void
 ): void {
@@ -145,8 +145,8 @@ function editJob(
 }
 
 /** Slice to access templates and jobs. Removing or hiding things here never touches the vault. */
-const variantsSlice = createSlice({
-  name: "variants",
+const jobsSlice = createSlice({
+  name: "jobs",
   initialState,
   reducers: {
     /**
@@ -187,7 +187,7 @@ const variantsSlice = createSlice({
      * else the template of the active job, so a change of that template reaches the new job too.
      * Make a template first with `addTemplate` for a job that needs its own look.
      */
-    createVariant: {
+    createJob: {
       reducer(
         state,
         action: PayloadAction<{
@@ -284,7 +284,7 @@ const variantsSlice = createSlice({
     },
 
     /** A new job that shows what the source shows and shares its template (changing the look changes both) */
-    duplicateVariant: {
+    copyJob: {
       reducer(
         state,
         action: PayloadAction<{ sourceId: string; id: string; name?: string }>
@@ -308,14 +308,14 @@ const variantsSlice = createSlice({
       },
     },
 
-    renameVariant(state, action: PayloadAction<{ id: string; name: string }>) {
+    renameJob(state, action: PayloadAction<{ id: string; name: string }>) {
       editJob(state, action.payload.id, (job) => {
         job.name = action.payload.name;
       });
     },
 
     /** The last job cannot be deleted, so there is always one to show. Its template stays: templates are reusable and are deleted on their own. */
-    deleteVariant(state, action: PayloadAction<{ id: string }>) {
+    deleteJob(state, action: PayloadAction<{ id: string }>) {
       const job = jobOf(state, action.payload.id);
       if (!job || state.jobs.length <= 1) {
         return;
@@ -340,7 +340,7 @@ const variantsSlice = createSlice({
       });
     },
 
-    setActiveVariant(state, action: PayloadAction<{ id: string }>) {
+    setActiveJob(state, action: PayloadAction<{ id: string }>) {
       if (state.jobs.some((j) => j.id === action.payload.id)) {
         state.activeJobId = action.payload.id;
       }
@@ -526,7 +526,7 @@ const variantsSlice = createSlice({
     },
 
     /** Stores the page layout and style the editor currently shows into the job's template */
-    setVariantAppearance(
+    setTemplateAppearance(
       state,
       action: PayloadAction<{ id: string; layout: VariantLayout; style: Style }>
     ) {
@@ -538,33 +538,33 @@ const variantsSlice = createSlice({
   },
 });
 
-export const variantsReducer = variantsSlice.reducer;
+export const jobsReducer = jobsSlice.reducer;
 
 export const {
   setVariants,
   setTemplatesAndJobs,
-  createVariant: addVariant,
+  createJob,
   insertTailoredJob,
-  duplicateVariant,
-  renameVariant,
-  deleteVariant,
+  copyJob,
+  renameJob,
+  deleteJob,
   addTemplate,
   renameTemplate,
   deleteTemplate,
   setJobTemplate,
-  setActiveVariant,
+  setActiveJob,
   setItemSelection,
   setBulletSelection,
   setBulletOrders,
   setItemOrders,
-  setVariantAppearance,
+  setTemplateAppearance,
   setTone,
   setPageLimit,
   setSkillStyle,
   setAutoFit,
   setFitLimits,
   setTuning,
-} = variantsSlice.actions;
+} = jobsSlice.actions;
 
 /** `resolveVariant` that returns the same object for the same template and job objects */
 const resolvedCache = new WeakMap<Template, WeakMap<Job, Variant>>();
@@ -583,31 +583,31 @@ export function resolveCached(template: Template, job: Job): Variant {
   return variant;
 }
 
-type SliceRoot = { variants: VariantsState };
+type SliceRoot = { jobs: JobsState };
 
 export function activeJobSelector(state: SliceRoot): Job {
-  const { jobs, activeJobId } = state.variants;
+  const { jobs, activeJobId } = state.jobs;
   return jobs.find((j) => j.id === activeJobId) ?? jobs[0];
 }
 
 /** The template of the active job */
 export function activeTemplateSelector(state: SliceRoot): Template {
-  const { templates } = state.variants;
+  const { templates } = state.jobs;
   const job = activeJobSelector(state);
   return templates.find((t) => t.id === job.templateId) ?? templates[0];
 }
 
 export function templatesSelector(state: SliceRoot): Template[] {
-  return state.variants.templates;
+  return state.jobs.templates;
 }
 
 /** The jobs that use a template */
 export function jobsOfTemplate(state: SliceRoot, templateId: string): Job[] {
-  return jobsUsingTemplate(state.variants.jobs, templateId);
+  return jobsUsingTemplate(state.jobs.jobs, templateId);
 }
 
 export function jobsSelector(state: SliceRoot): Job[] {
-  return state.variants.jobs;
+  return state.jobs.jobs;
 }
 
 /**

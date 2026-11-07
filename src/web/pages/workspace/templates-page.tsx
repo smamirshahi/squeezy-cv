@@ -25,7 +25,7 @@ import {
   jobsSelector,
   renameTemplate,
   templatesSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { nanoid } from "@reduxjs/toolkit";
 
 /** Why a template cannot be deleted, or an empty text when it can */

@@ -10,16 +10,16 @@ import {
 } from "@store/store-helper";
 import {
   activeVariantSelector,
-  setActiveVariant,
-  setVariantAppearance,
-} from "@store/variants/variants-slice";
+  setActiveJob,
+  setTemplateAppearance,
+} from "@store/jobs/jobs-slice";
 
 /**
  * Makes a variant the one being edited and shown: its page layout and style are loaded
  * into the editor. Call it from event handlers (the dispatches are applied together).
  */
 export function activateVariant(dispatch: AppDispatch, variant: Variant): void {
-  dispatch(setActiveVariant({ id: variant.id }));
+  dispatch(setActiveJob({ id: variant.id }));
   dispatch(updatePageStructure(variant.layout));
   dispatch(setStyle(variant.style));
 }
@@ -38,7 +38,7 @@ export function activateTemplateLook(
  * changes on the Page Structure and Style Settings pages belong to the template (and every
  * job that uses it). Mount it once.
  */
-export function useSyncActiveVariant(): void {
+export function useSyncActiveJob(): void {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const { structure } = useAppSelector(appSelector);
@@ -50,7 +50,7 @@ export function useSyncActiveVariant(): void {
       JSON.stringify(variant.style) !== JSON.stringify(style)
     ) {
       dispatch(
-        setVariantAppearance({ id: variant.id, layout: structure, style })
+        setTemplateAppearance({ id: variant.id, layout: structure, style })
       );
     }
   }, [dispatch, variant.id, variant.layout, variant.style, structure, style]);

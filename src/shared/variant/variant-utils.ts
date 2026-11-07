@@ -70,11 +70,7 @@ export function createDefaultVariant(
 }
 
 /** A copy with a new id and name. Nothing is shared with the original. */
-export function duplicateVariant(
-  variant: Variant,
-  id: string,
-  name: string
-): Variant {
+export function copyJob(variant: Variant, id: string, name: string): Variant {
   return { ...structuredClone(variant), id, name };
 }
 

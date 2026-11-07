@@ -37,7 +37,7 @@ import {
   setBulletSelection,
   setItemOrders,
   setItemSelection,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 const INDENT_PX = 16;

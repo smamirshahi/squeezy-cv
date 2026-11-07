@@ -13,7 +13,7 @@ import {
   setShouldShowRightToWork,
 } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { setItemSelection, setVariants } from "@store/variants/variants-slice";
+import { setItemSelection, setVariants } from "@store/jobs/jobs-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   moveSection,

@@ -1,14 +1,14 @@
 import { Typography } from "@mui/material";
 import { Template } from "@custom-types/template-types";
 import { Job } from "@custom-types/job-types";
-import { activateTemplateLook } from "@hooks/use-sync-active-variant";
+import { activateTemplateLook } from "@hooks/use-sync-active-job";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { AppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeTemplateSelector,
   jobsSelector,
   setJobTemplate,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 
 /** "1 job" / "3 jobs" */
 export function jobCountText(count: number): string {

@@ -56,7 +56,7 @@ export function historyReducer(
 /** The slices `withUndo` looks at */
 interface Undoable {
   vault: Vault;
-  variants: { templates: Template[]; jobs: Job[]; activeJobId: string };
+  jobs: { templates: Template[]; jobs: Job[]; activeJobId: string };
   app: { structure: PageStructure };
   cvData: { style: Style };
   history: HistoryState;
@@ -65,9 +65,9 @@ interface Undoable {
 function snapshotOf(state: Undoable, type: string, at: number): Snapshot {
   return {
     vault: state.vault,
-    templates: state.variants.templates,
-    jobs: state.variants.jobs,
-    activeJobId: state.variants.activeJobId,
+    templates: state.jobs.templates,
+    jobs: state.jobs.jobs,
+    activeJobId: state.jobs.activeJobId,
     type,
     at,
   };
@@ -77,7 +77,7 @@ function snapshotOf(state: Undoable, type: string, at: number): Snapshot {
 function restore<S extends Undoable>(state: S, snapshot: Snapshot): S {
   const active =
     snapshot.jobs.find((j) => j.id === snapshot.activeJobId) ??
-    snapshot.jobs.find((j) => j.id === state.variants.activeJobId) ??
+    snapshot.jobs.find((j) => j.id === state.jobs.activeJobId) ??
     snapshot.jobs[0];
   const template =
     snapshot.templates.find((t) => t.id === active.templateId) ??
@@ -85,8 +85,8 @@ function restore<S extends Undoable>(state: S, snapshot: Snapshot): S {
   return {
     ...state,
     vault: snapshot.vault,
-    variants: {
-      ...state.variants,
+    jobs: {
+      ...state.jobs,
       templates: snapshot.templates,
       jobs: snapshot.jobs,
       activeJobId: active.id,
@@ -162,8 +162,8 @@ export function withUndo<S extends Undoable>(
 
     const isEdit =
       next.vault !== state.vault ||
-      next.variants.templates !== state.variants.templates ||
-      next.variants.jobs !== state.variants.jobs;
+      next.jobs.templates !== state.jobs.templates ||
+      next.jobs.jobs !== state.jobs.jobs;
     if (!isEdit) {
       return next;
     }

@@ -10,7 +10,7 @@ import {
   TextField,
 } from "@mui/material";
 import { nanoid } from "@reduxjs/toolkit";
-import { activateTemplateLook } from "@hooks/use-sync-active-variant";
+import { activateTemplateLook } from "@hooks/use-sync-active-job";
 import {
   jobCountText,
   nextTemplateName,
@@ -19,10 +19,10 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   activeTemplateSelector,
   addTemplate,
-  addVariant,
+  createJob,
   jobsSelector,
   templatesSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
@@ -61,7 +61,7 @@ function NewJobForm({ onClose }: { onClose: () => void }): JSX.Element {
       templateId = nanoid();
       dispatch(addTemplate({ id: templateId, name: templateName.trim() }));
     }
-    dispatch(addVariant({ vault, style, name: name.trim(), templateId }));
+    dispatch(createJob({ vault, style, name: name.trim(), templateId }));
     // the editor shows the look of the template the new job uses
     activateTemplateLook(dispatch, chosen ?? activeTemplate);
     handleClose();

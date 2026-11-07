@@ -44,7 +44,7 @@ import {
   setItemSelection,
   setPageLimit,
   setSkillStyle,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import {
   FIT_DEFAULTS,
   FIT_LIMIT_RANGES,

@@ -16,10 +16,7 @@ import { AppStore } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
 import { setSavedState } from "@store/persistence/persistence-slice";
 import { toSavedState } from "@store/persistence/persistence-logic";
-import {
-  activeVariantSelector,
-  setVariants,
-} from "@store/variants/variants-slice";
+import { activeVariantSelector, setVariants } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { AI_PROVIDER_INFO } from "@shared/ai/providers";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
@@ -100,8 +97,8 @@ function setup(isSaved = true): ReturnType<typeof makeStore> {
           s.vault,
           s.cvData.metaData,
           s.cvData.style,
-          s.variants.templates,
-          s.variants.jobs
+          s.jobs.templates,
+          s.jobs.jobs
         )
       )
     );

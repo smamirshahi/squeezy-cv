@@ -12,7 +12,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { Inspector } from "@pages/workspace/inspector";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { setSelectedBlock } from "@store/app/app-slice";
 import { setVault } from "@store/vault/vault-slice";
 import sample from "@fixtures/sample-cv.json";

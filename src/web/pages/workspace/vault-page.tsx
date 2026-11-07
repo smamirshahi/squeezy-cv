@@ -25,10 +25,7 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import {
-  setItemSelection,
-  variantsSelector,
-} from "@store/variants/variants-slice";
+import { setItemSelection, variantsSelector } from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 const HiddenInput = styled("input")({ display: "none" });

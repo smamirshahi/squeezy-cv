@@ -18,13 +18,13 @@ import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { useStore } from "react-redux";
 import { Application } from "@custom-types/application-types";
 import { toIsoDay } from "@shared/application/application-utils";
-import { saveActiveVariant } from "@hooks/save-active-variant";
+import { saveActiveJob } from "@hooks/save-active-job";
 import { createApiClient } from "@store/persistence/api-client";
 import { RootState, useAppSelector } from "@store/store-helper";
 import {
   activeJobSelector,
   activeTemplateSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 
 interface Form {
   company: string;
@@ -117,7 +117,7 @@ export function MarkAsAppliedDialog({
     setIsBusy(true);
     setError("");
     try {
-      const variant = await saveActiveVariant(store, api);
+      const variant = await saveActiveJob(store, api);
       const application = await api.createApplication({
         jobId: variant.id,
         company: form.company,

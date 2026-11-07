@@ -20,7 +20,7 @@ import { ExportDialog } from "@pages/workspace/export-dialog";
 import { JobSwitcher } from "@pages/workspace/job-switcher";
 import { setTool } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** Label of a history step for a tooltip: the action name without its slice prefix */

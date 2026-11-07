@@ -14,7 +14,7 @@ import {
   computeItemOrders,
   computeOrders,
   createVariant,
-  duplicateVariant,
+  copyJob,
   updateBulletSelection,
   updateItemSelection,
 } from "@shared/variant/variant-utils";
@@ -186,7 +186,7 @@ describe("render", () => {
       firstSectionWithItems(1).items[0].id,
       { isVisible: false }
     );
-    const copy = duplicateVariant(original, "v2", "Copy");
+    const copy = copyJob(original, "v2", "Copy");
 
     expect(copy.id).toBe("v2");
     expect(copy.name).toBe("Copy");

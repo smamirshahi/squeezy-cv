@@ -19,7 +19,7 @@ import {
 } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { setVariants, variantsSelector } from "@store/variants/variants-slice";
+import { setVariants, variantsSelector } from "@store/jobs/jobs-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";

@@ -12,11 +12,11 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import {
   activeVariantSelector,
-  addVariant,
-  deleteVariant,
-  renameVariant,
+  createJob,
+  deleteJob,
+  renameJob,
   setPageLimit,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
@@ -95,7 +95,7 @@ describe("a job that was sent is not locked", () => {
     const { store } = setup(<JobSwitcher />);
     const id = activeVariantSelector(store.getState()).id;
     act(() => {
-      store.dispatch(renameVariant({ id, name: "Renamed" }));
+      store.dispatch(renameJob({ id, name: "Renamed" }));
       store.dispatch(setPageLimit({ id, pageLimit: 1 }));
     });
     const variant = activeVariantSelector(store.getState());
@@ -103,15 +103,15 @@ describe("a job that was sent is not locked", () => {
     expect(variant.pageLimit).toBe(1);
     act(() => {
       store.dispatch(
-        addVariant({
+        createJob({
           vault: store.getState().vault,
           style: store.getState().cvData.style,
           name: "Other",
           id: "other",
         })
       );
-      store.dispatch(deleteVariant({ id }));
+      store.dispatch(deleteJob({ id }));
     });
-    expect(store.getState().variants.jobs.map((j) => j.id)).toEqual(["other"]);
+    expect(store.getState().jobs.jobs.map((j) => j.id)).toEqual(["other"]);
   });
 });

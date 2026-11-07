@@ -3,7 +3,7 @@ import { Variant } from "@custom-types/variant-types";
 import { ApiClient } from "@store/persistence/api-client";
 import { saveToServer } from "@store/persistence/persistence-actions";
 import { isDirty, toSavedState } from "@store/persistence/persistence-logic";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 
 /**
@@ -11,7 +11,7 @@ import { AppDispatch, RootState } from "@store/store-helper";
  * variant (the active job drawn with its template). The server makes PDFs and applications from the *saved* variant, so unsaved
  * changes are saved first. Throws with a readable message if that is not possible.
  */
-export async function saveActiveVariant(
+export async function saveActiveJob(
   store: Store<RootState>,
   api: ApiClient
 ): Promise<Variant> {
@@ -24,8 +24,8 @@ export async function saveActiveVariant(
     initial.vault,
     initial.cvData.metaData,
     initial.cvData.style,
-    initial.variants.templates,
-    initial.variants.jobs
+    initial.jobs.templates,
+    initial.jobs.jobs
   );
   if (isDirty(initial.persistence.saved, current)) {
     await saveToServer(api, dispatch, store.getState);

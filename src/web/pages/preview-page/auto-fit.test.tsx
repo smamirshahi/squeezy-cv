@@ -22,7 +22,7 @@ import {
   setTuning,
   setVariants,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";

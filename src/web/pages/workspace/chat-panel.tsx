@@ -25,7 +25,7 @@ import {
   taskProvider,
 } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { activeVariantSelector } from "@store/variants/variants-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import { useStore } from "react-redux";
 import { RootState } from "@store/store-helper";

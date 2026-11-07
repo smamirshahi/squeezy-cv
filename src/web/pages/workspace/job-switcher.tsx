@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { activateVariant } from "@hooks/use-sync-active-variant";
+import { activateVariant } from "@hooks/use-sync-active-job";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
   jobCountText,
@@ -15,7 +15,7 @@ import {
   jobsSelector,
   templatesSelector,
   variantsSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 
 const SELECT_SX = {
   color: WORKSPACE_COLORS.barText,

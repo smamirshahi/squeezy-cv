@@ -49,7 +49,7 @@ import {
   setBulletSelection,
   setItemOrders,
   setItemSelection,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 
 const WORDING_LABELS: Record<Wording, string> = {
   text: "Original",
@@ -380,7 +380,7 @@ interface Props {
 }
 
 /** The items of one section for the active variant: show/hide, highlight, order, and their bullets */
-export function VariantSectionItems({ section }: Props): JSX.Element | null {
+export function JobSectionItems({ section }: Props): JSX.Element | null {
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sensors = useReorderSensors();

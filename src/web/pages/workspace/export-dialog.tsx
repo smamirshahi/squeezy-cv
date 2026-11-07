@@ -19,14 +19,14 @@ import { documentText } from "@shared/variant/document-text";
 import { render } from "@shared/variant/render";
 import { exportChecks, suggestFileName } from "@shared/export/export-checks";
 import { MarkAsAppliedDialog } from "@pages/applications-page/mark-as-applied";
-import { saveActiveVariant } from "@hooks/save-active-variant";
+import { saveActiveJob } from "@hooks/save-active-job";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { createApiClient } from "@store/persistence/api-client";
 import { RootState, useAppSelector } from "@store/store-helper";
 import {
   activeTemplateSelector,
   activeVariantSelector,
-} from "@store/variants/variants-slice";
+} from "@store/jobs/jobs-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 interface Props {
@@ -67,7 +67,7 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
     setIsMarkAfter(false);
     void (async () => {
       try {
-        const saved = await saveActiveVariant(store, api);
+        const saved = await saveActiveJob(store, api);
         const blob = await api.createPdf(saved.id);
         url = URL.createObjectURL(blob);
         if (!isCancelled) {

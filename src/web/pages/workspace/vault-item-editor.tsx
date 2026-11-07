@@ -36,7 +36,7 @@ import {
 } from "@shared/vault/item-fields";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { variantsSelector } from "@store/variants/variants-slice";
+import { variantsSelector } from "@store/jobs/jobs-slice";
 import {
   addBullet,
   moveBullet,

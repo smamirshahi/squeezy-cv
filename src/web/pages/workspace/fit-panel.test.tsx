@@ -14,10 +14,7 @@ import { FitPanel } from "@pages/workspace/fit-panel";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setFit } from "@store/app/app-slice";
-import {
-  activeVariantSelector,
-  setVariants,
-} from "@store/variants/variants-slice";
+import { activeVariantSelector, setVariants } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
