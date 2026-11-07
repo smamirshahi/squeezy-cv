@@ -35,7 +35,7 @@ async function sectionTitleSize(): Promise<number> {
 async function openTool(name: "Vault" | "Jobs" | "Templates"): Promise<void> {
   await page
     .getByRole("navigation", { name: "Tools" })
-    .getByRole("button", { name })
+    .getByRole("link", { name })
     .click();
 }
 

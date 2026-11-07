@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   cleanup,
   fireEvent,
@@ -19,6 +19,7 @@ import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { Item } from "@custom-types/vault-types";
 
+beforeEach(() => window.history.replaceState(null, "", "/vault"));
 afterEach(cleanup);
 
 const file = migrateCvFile(sample);
@@ -45,7 +46,7 @@ function stored(store: AppStore, label: string): Item {
 /** Open an item of the tree in the inline editor */
 function open(title: string): void {
   const tree = screen.getByRole("complementary", { name: "Vault tree" });
-  fireEvent.click(within(tree).getByRole("button", { name: title }));
+  fireEvent.click(within(tree).getByRole("link", { name: title }));
 }
 
 describe("inline vault item editor", () => {

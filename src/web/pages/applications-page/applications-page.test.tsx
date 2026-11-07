@@ -11,7 +11,7 @@ import { ApplicationSummary } from "@custom-types/application-types";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
 
 beforeEach(() => {
-  window.history.replaceState(null, "", "/?applications");
+  window.history.replaceState(null, "", "/applications");
 });
 
 afterEach(() => {
@@ -74,7 +74,7 @@ describe("Applications page", () => {
     // the company is a link to the application
     expect(
       screen.getByRole("link", { name: "Beta Labs" }).getAttribute("href")
-    ).toBe("/?application=b");
+    ).toBe("/applications/b");
   });
 
   it("has a View CV and a download button per row that open the sent PDF without opening the side panel", async () => {
@@ -147,7 +147,7 @@ describe("Applications page", () => {
     await screen.findByText("Beta Labs");
     fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
     expect(companies()).toEqual(["Acme Ltd"]);
-    expect(window.location.search).toBe("?applications&status=rejected");
+    expect(window.location.search).toBe("?status=rejected");
     fireEvent.click(screen.getByRole("button", { name: /^All/ }));
     expect(companies()).toHaveLength(3);
   });
@@ -174,11 +174,11 @@ describe("Applications page", () => {
     fireEvent.click(tile(/^No reply/));
     expect(companies()).toEqual(["Old Co"]);
     expect(tile(/^No reply/).getAttribute("aria-pressed")).toBe("true");
-    expect(window.location.search).toBe("?applications&status=noReply");
+    expect(window.location.search).toBe("?status=noReply");
   });
 
   it("starts from the filters in the address (coming back from an application)", async () => {
-    window.history.replaceState(null, "", "/?applications&status=applied&q=co");
+    window.history.replaceState(null, "", "/applications?status=applied&q=co");
     stubList(list);
     render(<ApplicationsPage />);
     await screen.findByText("Core");

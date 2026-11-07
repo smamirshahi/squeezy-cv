@@ -270,7 +270,7 @@ export function MarkAsAppliedDialog({
               <Button
                 color="inherit"
                 size="small"
-                href={`/?application=${encodeURIComponent(created.id)}`}
+                href={`/applications/${encodeURIComponent(created.id)}`}
               >
                 View
               </Button>

@@ -6,8 +6,8 @@ import { isVaultEmpty } from "@shared/vault/is-vault-empty";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { useHasUnsavedChanges, useSaveActions } from "@hooks/use-persistence";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
-import { setSelectedSectionInEditorPage, setTool } from "@store/app/app-slice";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { navigate } from "@hooks/navigation";
+import { useAppSelector } from "@store/store-helper";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 const HiddenInput = styled("input")({ display: "none" });
@@ -58,7 +58,6 @@ export function ConnectionBanner(): JSX.Element | null {
 
 /** Shown on the canvas when there is nothing in the vault yet */
 export function FirstRun(): JSX.Element | null {
-  const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
   const { handleImport } = useImportExportJson();
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
@@ -110,8 +109,7 @@ export function FirstRun(): JSX.Element | null {
         <Button
           variant="outlined"
           onClick={() => {
-            dispatch(setSelectedSectionInEditorPage("mainInfo"));
-            dispatch(setTool("vault"));
+            navigate({ kind: "vault", sectionId: "mainInfo" });
           }}
         >
           Add your details by hand

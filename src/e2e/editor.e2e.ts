@@ -123,7 +123,7 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
   });
 
   it("lists the applications, opens one, and goes back to the same search", async () => {
-    await page.goto(`${app.webUrl}/?applications`);
+    await page.goto(`${app.webUrl}/applications`);
     await page.getByRole("heading", { name: "Applications" }).waitFor();
     await page.getByText("1 application: 1 interview").waitFor();
     const row = page.getByRole("row").filter({ hasText: "Acme Ltd" });

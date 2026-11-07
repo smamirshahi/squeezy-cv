@@ -56,7 +56,7 @@ describe("style per section", () => {
 
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Templates" })
+      .getByRole("link", { name: "Templates" })
       .click();
     await page
       .getByRole("region", { name: "Section styles" })
@@ -74,7 +74,7 @@ describe("style per section", () => {
     // the CV page follows
     await page
       .getByRole("navigation", { name: "Tools" })
-      .getByRole("button", { name: "Jobs" })
+      .getByRole("link", { name: "Jobs" })
       .click();
     const styled = await paperHeadingSize(/Work Experience/i);
     expect(Math.abs(styled - STYLED_PT * PX_PER_PT)).toBeLessThan(TOLERANCE);

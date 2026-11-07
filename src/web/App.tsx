@@ -1,31 +1,66 @@
+import { useEffect } from "react";
 import { AppThemeProvider } from "@custom-styles/theme";
 import { Workspace } from "@pages/workspace/workspace";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { PrintView } from "@pages/print-page/print-view";
+import { NotFound } from "@pages/workspace/not-found";
+import { navigate, useRoute } from "@hooks/navigation";
+import { isWorkspaceRoute, legacyRedirect } from "@shared/routing/routes";
 
 /**
- * Which page to show, from the address: `?print=<jobId>` is the print-only page,
- * `?applications` the list of applications, `?application=<id>` one of them, anything
- * else the editor.
+ * Which page to show, from the address (see `shared/routing/routes.ts`): the workspace
+ * tools (`/vault`, `/jobs/<id>`, `/templates`, `/tailor`, `/chat/<id>`, `/ai`), the
+ * applications list and one application, and the print-only page `/print/<id>`. The old
+ * query addresses (`/?applications`, `/?application=<id>`, `/?print=<id>`) and `/` are
+ * redirected to the new ones.
  */
 export function App(): JSX.Element {
-  const params = new URLSearchParams(window.location.search);
-  const printJobId = params.get("print");
-  const applicationId = params.get("application");
-  if (printJobId) {
-    return <PrintView jobId={printJobId} />;
+  const route = useRoute();
+  const redirect = legacyRedirect(
+    window.location.pathname,
+    window.location.search
+  );
+  useEffect(() => {
+    if (redirect) {
+      navigate(redirect, { replace: true });
+    }
+  }, [redirect]);
+
+  // The first render after a redirect is skipped: the address is about to change
+  if (redirect) {
+    return <></>;
+  }
+  if (route.kind === "print") {
+    return <PrintView jobId={route.jobId} />;
   }
   // The print page has no theme: the PDF is always the light default
   return (
     <AppThemeProvider>
-      {params.has("applications") ? (
+      {isWorkspaceRoute(route) ? (
+        <Workspace route={route} />
+      ) : route.kind === "applications" ? (
         <ApplicationsPage />
-      ) : applicationId ? (
-        <ApplicationView applicationId={applicationId} />
+      ) : route.kind === "application" ? (
+        <ApplicationView applicationId={route.id} />
       ) : (
-        <Workspace />
+        <NotFoundPage />
       )}
     </AppThemeProvider>
+  );
+}
+
+/** An address that is not one of the app's */
+function NotFoundPage(): JSX.Element {
+  useEffect(() => {
+    document.title = "Not found · CV Builder";
+  }, []);
+  return (
+    <div style={{ display: "flex", height: "100vh" }}>
+      <NotFound
+        what="page"
+        backTo={{ href: "/jobs", label: "Back to the editor" }}
+      />
+    </div>
   );
 }

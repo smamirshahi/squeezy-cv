@@ -1,3 +1,4 @@
+import { MouseEvent } from "react";
 import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -8,8 +9,9 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import { WorkspaceTool, setTool } from "@store/app/app-slice";
-import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { onAppLinkClick, useRoute } from "@hooks/navigation";
+import { Route, formatRoute } from "@shared/routing/routes";
+import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -17,49 +19,68 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 interface RailItem {
   label: string;
   icon: JSX.Element;
-  tool?: WorkspaceTool;
-  href?: string;
+
+  /** The route this item opens; `jobId` is the active job for the tools that work on one */
+  to: (jobId: string) => Route | null;
+
+  /** Which route kind makes it the current one */
+  kind: Route["kind"];
+
+  /** A page of its own (not part of the workspace): a normal page load */
+  isFullPage?: boolean;
 }
 
 const ITEMS: RailItem[] = [
-  { label: "Vault", icon: <FolderOpenIcon fontSize="small" />, tool: "vault" },
+  {
+    label: "Vault",
+    icon: <FolderOpenIcon fontSize="small" />,
+    kind: "vault",
+    to: () => ({ kind: "vault" }),
+  },
   {
     label: "Templates",
     icon: <LayersIcon fontSize="small" />,
-    tool: "templates",
+    kind: "templates",
+    to: () => ({ kind: "templates", tab: "templates" }),
   },
   {
     label: "Jobs",
     icon: <WorkOutlineIcon fontSize="small" />,
-    tool: "jobs",
+    kind: "jobs",
+    to: (jobId) => ({ kind: "jobs", jobId, view: "page" }),
   },
   {
     label: "Tailor",
     icon: <AutoAwesomeIcon fontSize="small" />,
-    tool: "tailor",
+    kind: "tailor",
+    to: () => ({ kind: "tailor" }),
   },
   {
     label: "Chat",
     icon: <ChatBubbleOutlineIcon fontSize="small" />,
-    tool: "chat",
+    kind: "chat",
+    to: (jobId) => ({ kind: "chat", jobId }),
   },
   {
     label: "Applied",
     icon: <DescriptionOutlinedIcon fontSize="small" />,
-    href: "/?applications",
+    kind: "applications",
+    to: () => ({ kind: "applications", search: "" }),
+    isFullPage: true,
   },
 ];
 
 const SETTINGS: RailItem = {
   label: "AI setup",
   icon: <MemoryIcon fontSize="small" />,
-  tool: "ai",
+  kind: "ai",
+  to: () => ({ kind: "ai" }),
 };
 
 /** The left rail: switches between the tools of the workspace */
 export function ToolRail(): JSX.Element {
-  const dispatch = useAppDispatch();
-  const tool = useAppSelector((s) => s.app.tool);
+  const route = useRoute();
+  const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const { mode, toggle } = useThemeMode();
 
   return (
@@ -113,16 +134,19 @@ export function ToolRail(): JSX.Element {
             </ButtonBase>
           );
         }
-        const isOn = item.tool === tool;
+        const target = item.to(activeJobId);
+        const href = target ? formatRoute(target) : undefined;
+        const isOn = item.kind === route.kind;
         return (
           <ButtonBase
             key={item.label}
-            component={item.href ? "a" : "button"}
-            href={item.href}
+            component="a"
+            href={href}
             aria-current={isOn ? "page" : undefined}
             onClick={
-              item.tool
-                ? () => dispatch(setTool(item.tool as WorkspaceTool))
+              target && !item.isFullPage
+                ? (event: MouseEvent<HTMLElement>) =>
+                    onAppLinkClick(event, target)
                 : undefined
             }
             sx={{
