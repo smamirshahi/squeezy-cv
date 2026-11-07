@@ -181,7 +181,7 @@ describe("job switcher", () => {
 });
 
 describe("new job", () => {
-  async function fill(name: string): Promise<void> {
+  function fill(name: string): void {
     fireEvent.click(screen.getByRole("button", { name: "New job" }));
     fireEvent.change(screen.getByLabelText("New job name"), {
       target: { value: name },
@@ -222,7 +222,7 @@ describe("new job", () => {
   it("can use another existing template", async () => {
     const store = setup(<JobSwitcher />);
     addJob(store, "acme", "t2", "Template 2");
-    await fill("Third");
+    fill("Third");
     fireEvent.mouseDown(screen.getByLabelText("Template"));
     fireEvent.click(screen.getByRole("option", { name: /Template 1/ }));
     fireEvent.click(screen.getByRole("button", { name: "Create job" }));
@@ -235,7 +235,7 @@ describe("new job", () => {
 
   it("offers a separate new template, named Template N by default", async () => {
     const store = setup(<JobSwitcher />);
-    await fill("Acme");
+    fill("Acme");
     fireEvent.mouseDown(screen.getByLabelText("Template"));
     fireEvent.click(screen.getByRole("option", { name: "New template…" }));
     expect(
@@ -259,7 +259,7 @@ describe("new job", () => {
 
   it("starts again from the job being edited each time it opens", async () => {
     const store = setup(<JobSwitcher />);
-    await fill("First");
+    fill("First");
     fireEvent.mouseDown(screen.getByLabelText("Template"));
     fireEvent.click(screen.getByRole("option", { name: "New template…" }));
     fireEvent.click(screen.getByRole("button", { name: "Create job" }));
@@ -267,7 +267,7 @@ describe("new job", () => {
     expect(templates(store)).toHaveLength(2);
 
     // the second job shares the template of the first one (the job being edited now)
-    await fill("Second");
+    fill("Second");
     expect(screen.getByLabelText("New job name")).toHaveProperty(
       "value",
       "Second"
@@ -286,7 +286,7 @@ describe("new job", () => {
 
   it("makes nothing when cancelled", async () => {
     const store = setup(<JobSwitcher />);
-    await fill("Acme");
+    fill("Acme");
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     await closed();
     expect(jobs(store)).toHaveLength(1);
