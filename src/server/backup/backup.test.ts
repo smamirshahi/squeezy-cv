@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { splitVariant } from "@shared/variant/template-job";
 import { createVariant } from "@shared/variant/variant-utils";
 import { buildServer } from "@server/app";
 import { BackupService } from "@server/backup/backup-service";
@@ -109,6 +110,29 @@ describe("VersionedCvStorage", () => {
     await new VersionedCvStorage(files, backup).saveVault(cvFile);
     expect(await files.loadVault()).toEqual(cvFile);
     expect((await backup.status()).lastError).toContain("boom");
+  });
+});
+
+describe("VersionedCvStorage templates and jobs", () => {
+  it("commits every template and job change", async () => {
+    initRepo(dir);
+    const storage = new VersionedCvStorage(
+      new FileCvStorage(dir),
+      new BackupService(new GitDataRepo(dir))
+    );
+    const { template, job } = splitVariant(variant, "tpl1", "2026-11-07");
+    await storage.saveTemplate(template);
+    await storage.saveJob(job);
+    await storage.deleteJob("acme");
+    await storage.deleteTemplate("tpl1");
+    expect(git(dir, "log", "--format=%s")).toBe(
+      [
+        "Delete: template tpl1",
+        "Delete: job acme",
+        "Save: job acme",
+        "Save: template tpl1",
+      ].join("\n")
+    );
   });
 });
 

@@ -7,6 +7,8 @@ import {
   NewApplicationSchema,
 } from "@custom-types/application-types";
 import { CvFileSchema } from "@custom-types/vault-types";
+import { JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
+import { TemplateSchema } from "@custom-types/template-types";
 import { VARIANT_ID_PATTERN, VariantSchema } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
@@ -39,6 +41,7 @@ import {
   toIsoDay,
   updateApplication,
 } from "@shared/application/application-utils";
+import { resolveVariant } from "@shared/variant/template-job";
 import { isVariantLocked } from "@shared/variant/variant-lock";
 import { BackupService } from "@server/backup/backup-service";
 import { PdfRenderer } from "@server/pdf/pdf-renderer";
@@ -496,6 +499,102 @@ export function buildServer({
     }
   );
 
+  app.get("/api/templates", () => storage.listTemplates());
+
+  app.get<{ Params: { id: string } }>("/api/templates/:id", (request) =>
+    storage.loadTemplate(request.params.id)
+  );
+
+  app.put<{ Params: { id: string } }>(
+    "/api/templates/:id",
+    async (request, reply) => {
+      const template = TemplateSchema.check(request.body);
+      if (template.id !== request.params.id) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "invalid",
+          "The id in the body must match the id in the URL."
+        );
+      }
+      await storage.saveTemplate(template);
+      return { status: "saved" };
+    }
+  );
+
+  // A template that a job still uses cannot go: the job would have no look
+  app.delete<{ Params: { id: string } }>(
+    "/api/templates/:id",
+    async (request, reply) => {
+      await storage.loadTemplate(request.params.id);
+      const jobs = (await storage.listJobs()).filter(
+        (job) => job.templateId === request.params.id
+      );
+      if (jobs.length > 0) {
+        return sendError(
+          reply,
+          HTTP_CONFLICT,
+          "in_use",
+          `This template is used by ${jobs.length} job(s): ${jobs
+            .map((job) => job.name)
+            .join(", ")}. Move them to another template first.`
+        );
+      }
+      await storage.deleteTemplate(request.params.id);
+      return { status: "deleted" };
+    }
+  );
+
+  app.get("/api/jobs", () => storage.listJobs());
+
+  app.get<{ Params: { id: string } }>("/api/jobs/:id", (request) =>
+    storage.loadJob(request.params.id)
+  );
+
+  // The variant a job shows with its template: what the print page and the preview draw
+  app.get<{ Params: { id: string } }>(
+    "/api/jobs/:id/resolved",
+    async (request) => {
+      const job = await storage.loadJob(request.params.id);
+      return resolveVariant(await storage.loadTemplate(job.templateId), job);
+    }
+  );
+
+  app.put<{ Params: { id: string } }>(
+    "/api/jobs/:id",
+    async (request, reply) => {
+      const job = JobSchema.check(request.body);
+      if (job.id !== request.params.id) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "invalid",
+          "The id in the body must match the id in the URL."
+        );
+      }
+      try {
+        await storage.loadTemplate(job.templateId);
+      } catch (error) {
+        if (error instanceof StorageError && error.code !== "invalid_id") {
+          return sendError(
+            reply,
+            HTTP_BAD_REQUEST,
+            "invalid",
+            `The job's template ${job.templateId} cannot be used: ${error.message}`
+          );
+        }
+        throw error;
+      }
+      await storage.saveJob(job);
+      return { status: "saved" };
+    }
+  );
+
+  app.delete<{ Params: { id: string } }>("/api/jobs/:id", async (request) => {
+    await storage.deleteJob(request.params.id);
+    return { status: "deleted" };
+  });
+
   app.get("/api/applications", () => storage.listApplications());
 
   app.get<{ Params: { id: string } }>("/api/applications/:id", (request) =>
@@ -572,7 +671,31 @@ export function buildServer({
     }
   );
 
-  app.post<{ Body: { variantId?: unknown } }>(
+  /** Renders the saved variant or job `id` and sends the PDF, or a readable error */
+  async function sendPdf(
+    reply: FastifyReply,
+    id: string
+  ): Promise<FastifyReply> {
+    let bytes: Buffer;
+    try {
+      bytes = await (pdf as PdfRenderer).render(id);
+    } catch (error) {
+      app.log.error(error);
+      const reason = error instanceof Error ? error.message : "unknown error";
+      return sendError(
+        reply,
+        HTTP_SERVER_ERROR,
+        "pdf_failed",
+        `The PDF could not be made: ${reason}. Is the web app running, and is Chromium installed (pnpm exec playwright install chromium)?`
+      );
+    }
+    return reply
+      .header("Content-Type", "application/pdf")
+      .header("Content-Disposition", `attachment; filename="${id}.pdf"`)
+      .send(bytes);
+  }
+
+  app.post<{ Body: { variantId?: unknown; jobId?: unknown } }>(
     "/api/pdf",
     async (request, reply) => {
       if (!pdf) {
@@ -582,6 +705,21 @@ export function buildServer({
           "pdf_unavailable",
           "PDF export is not set up on this server."
         );
+      }
+      const jobId = request.body?.jobId;
+      if (jobId !== undefined) {
+        if (typeof jobId !== "string" || !JOB_ID_PATTERN.test(jobId)) {
+          return sendError(
+            reply,
+            HTTP_BAD_REQUEST,
+            "invalid",
+            "jobId is not valid."
+          );
+        }
+        // The job and its template must exist and be readable before a browser is started
+        const job = await storage.loadJob(jobId);
+        await storage.loadTemplate(job.templateId);
+        return sendPdf(reply, jobId);
       }
       const variantId = request.body?.variantId;
       if (
@@ -597,26 +735,7 @@ export function buildServer({
       }
       // The page that gets printed loads the variant from here, so it must exist and be readable
       await storage.loadVariant(variantId);
-      let bytes: Buffer;
-      try {
-        bytes = await pdf.render(variantId);
-      } catch (error) {
-        app.log.error(error);
-        const reason = error instanceof Error ? error.message : "unknown error";
-        return sendError(
-          reply,
-          HTTP_SERVER_ERROR,
-          "pdf_failed",
-          `The PDF could not be made: ${reason}. Is the web app running, and is Chromium installed (pnpm exec playwright install chromium)?`
-        );
-      }
-      return reply
-        .header("Content-Type", "application/pdf")
-        .header(
-          "Content-Disposition",
-          `attachment; filename="${variantId}.pdf"`
-        )
-        .send(bytes);
+      return sendPdf(reply, variantId);
     }
   );
 

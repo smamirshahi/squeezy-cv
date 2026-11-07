@@ -16,6 +16,9 @@ import {
   VariantLayoutSchema,
 } from "@custom-types/variant-types";
 
+/** Ids become file names, so only these characters (same rule as variants) */
+export const TEMPLATE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
 /** The current version of the template format. Bump it together with a migration. */
 export const CURRENT_TEMPLATE_VERSION = 1;
 

@@ -12,6 +12,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Added
 
 - Templates and jobs (#165, in progress): pure model for splitting a variant into a template (look) and a job (what is shown), with `resolveVariant` and `splitVariant` (#166). Not used by the app yet.
+- Server storage and API for templates and jobs (#167): `templates/<id>.json` and `jobs/<id>.json` (validated, atomic, `.bak`, versioned git commits), `GET/PUT/DELETE /api/templates` and `/api/jobs` (409 `in_use` for a template that a job uses), `GET /api/jobs/:id/resolved`, `POST /api/pdf {jobId}`. Old `variants/*.json` are read as one template + one job each when no jobs exist yet. `/api/variants` is unchanged.
 
 ## [0.1.0] - 2026-11-07
 
