@@ -13,8 +13,10 @@ describe("fieldSpecsFor", () => {
       "location",
       "startDate",
       "endDate",
+      "link",
     ]);
     expect(fieldSpecsFor("education").map((f) => f.key)).toContain("institute");
+    expect(fieldSpecsFor("education").map((f) => f.key)).toContain("link");
     expect(fieldSpecsFor("projects").map((f) => f.key)).toContain(
       "description"
     );

@@ -12,6 +12,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 Version 0.2.0 (not released yet; the user tests first). The variant is split into a
 template and a job (#165-#172).
 
+### Added
+
+- Work Experience and Education: an optional Link on each item; when set, the organisation on the CV (and in the PDF) is a hyperlink. Only http(s) links are used (#235).
+
 ### Changed
 
 - Work Experience and Education are ordered automatically, newest first: by end date (no end date = current), then by start date. The reorder arrows are gone from their editors; each job can still order items itself (#237).

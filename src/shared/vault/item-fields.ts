@@ -41,6 +41,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         { key: "location", label: "Location", kind: "text", span: 1 },
         START,
         END,
+        { key: "link", label: "Link (optional)", kind: "text", span: 3 },
       ];
     case "education":
       return [
@@ -49,6 +50,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         { key: "location", label: "Location", kind: "text", span: 1 },
         START,
         END,
+        { key: "link", label: "Link (optional)", kind: "text", span: 3 },
         {
           key: "dissertationTitle",
           label: "Dissertation title",

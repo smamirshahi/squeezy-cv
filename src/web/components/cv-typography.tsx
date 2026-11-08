@@ -13,6 +13,9 @@ interface TypographyVariantProps {
   /** The text to display */
   text: string;
 
+  /** Makes the text a hyperlink to this (already checked http(s)) address */
+  href?: string;
+
   /** Draws the text bold (an item highlighted in the variant) */
   isEmphasised?: boolean;
 
@@ -27,6 +30,7 @@ interface TypographyVariantProps {
 export function CvTypography({
   variant,
   text,
+  href,
   isEmphasised = false,
   pageBreak,
 }: TypographyVariantProps): JSX.Element {
@@ -61,6 +65,9 @@ export function CvTypography({
 
   return (
     <Typography
+      {...(href
+        ? { component: "a", href, target: "_blank", rel: "noopener noreferrer" }
+        : {})}
       sx={{
         ...typography[variant],
         p: "0px",
@@ -69,6 +76,7 @@ export function CvTypography({
         // Auto-fit can scale all text through the paper's --cv-font-scale
         fontSize: `calc(${typography[variant].fontSize} * var(--cv-font-scale, 1))`,
         ...additionalStyle,
+        ...(href ? { color: "inherit", textDecoration: "underline" } : {}),
         ...(isEmphasised ? { fontWeight: 700 } : {}),
         ...(pageBreak ? { breakInside: "avoid" } : {}),
         ...(pageBreak === "keep-with-next" ? { breakAfter: "avoid" } : {}),

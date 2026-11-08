@@ -1,3 +1,4 @@
+import { normaliseLink } from "@shared/vault/link-utils";
 import { Box, Grid } from "@mui/material";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
@@ -69,6 +70,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
                 variant="bodyMd"
                 isEmphasised={item.emphasis === "high"}
                 text={item.fields.company ?? ""}
+                href={normaliseLink(item.fields.link)}
               />
               <IconWithText
                 icon={LocationOnIcon}
