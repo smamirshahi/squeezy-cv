@@ -3,9 +3,8 @@ import { Section } from "@custom-types/vault-types";
 /** Pages of the editor that change nothing in the CV data, so they have no Apply/Discard */
 const PAGES_WITHOUT_APPLY = ["styleSettings", "sections", "variants", "ai"];
 
+/** Experience and education have their "Add new ..." button below their list */
 const ADD_LABELS: Partial<Record<Section["type"], string>> = {
-  experience: "Add new experience",
-  education: "Add new education",
   skills: "Add new skill category",
   projects: "Add new item",
   certifications: "Add new item",

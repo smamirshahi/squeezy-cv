@@ -17,7 +17,8 @@ interface Props {
   accordionIndex: number;
   swapFunction: (index1: number, index2: number) => void;
   removeFunction: (id: string) => void;
-  onVisibilityChange: (id: string, shouldShow: boolean) => void;
+  /** Leave out when what is shown is decided per job elsewhere: no eye button then */
+  onVisibilityChange?: (id: string, shouldShow: boolean) => void;
   title: string;
   entity: { id: string; shouldShow: boolean };
   isLastEntity: boolean;
@@ -71,14 +72,16 @@ export function EditorAccordionHeader({
             pr: 1,
           }}
         >
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation();
-              onVisibilityChange(entity.id, !entity.shouldShow);
-            }}
-          >
-            {entity.shouldShow ? <VisibilityIcon /> : <VisibilityOffIcon />}
-          </IconButton>
+          {onVisibilityChange && (
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onVisibilityChange(entity.id, !entity.shouldShow);
+              }}
+            >
+              {entity.shouldShow ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
+          )}
 
           <IconButton
             onClick={(e) => {

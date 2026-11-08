@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { Section } from "@custom-types/vault-types";
 import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
@@ -45,6 +45,9 @@ interface ReturnProps {
   /** Shows or hides the item in the active job, at once */
   setVisibility: (itemId: string, shouldShow: boolean) => void;
 
+  /** Adds a new item made from the section's template to the draft */
+  addNewItem: () => void;
+
   /** The draft's dispatch, for edits that are specific to one section type */
   draftDispatch: ReturnType<typeof useVaultDraft>["draftDispatch"];
 }
@@ -75,23 +78,29 @@ export function useSectionDraft(
     }
   });
 
-  useEffect(() => {
-    if (!shouldAddNewItem) {
-      return;
-    }
+  const addNewItem = useCallback((): void => {
     const itemId = nanoid();
     draftDispatch(addItem({ sectionId, id: itemId, fields: template.fields }));
     for (const bullet of template.bullets) {
       draftDispatch(addBullet({ sectionId, itemId, ...bullet }));
     }
+  }, [draftDispatch, sectionId, template]);
+
+  // The footer's "Add new ..." button (sections that have no inline button)
+  useEffect(() => {
+    if (!shouldAddNewItem) {
+      return;
+    }
+    addNewItem();
     dispatch(setShouldAddNewItem(false));
-  }, [dispatch, draftDispatch, sectionId, shouldAddNewItem, template]);
+  }, [addNewItem, dispatch, shouldAddNewItem]);
 
   const section = draft.sections[0];
 
   return {
     section,
     draftDispatch,
+    addNewItem,
     updateFields: (itemId, fields) =>
       draftDispatch(updateItemFields({ sectionId, itemId, fields })),
     removeItem: (itemId) => draftDispatch(removeItem({ sectionId, itemId })),

@@ -7,6 +7,8 @@ import {
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { sectionsSelector } from "@store/vault/vault-slice";
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { cssVar } from "@custom-styles/theme";
 import { getAddButtonLabel } from "@pages/editor-page/editor-footer-utils";
 
 export function EditorFooter(): JSX.Element | null {
@@ -25,12 +27,21 @@ export function EditorFooter(): JSX.Element | null {
 
   return (
     <Box
+      // Stays at the bottom of the scrolling middle area, always reachable. The negative
+      // margins let it span the area's padding.
       sx={{
+        position: "sticky",
+        bottom: 0,
+        zIndex: 2,
         display: "flex",
         justifyContent: "flex-end",
         gap: 2,
-        mr: "20px",
-        my: "20px",
+        mx: -3,
+        mb: -3,
+        px: 3,
+        py: 1.5,
+        bgcolor: cssVar("bg"),
+        borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
       }}
     >
       {addNewItemButtonLabel && (

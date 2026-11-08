@@ -81,6 +81,20 @@ describe("VaultPage", () => {
     ).toHaveLength(4);
   });
 
+  it("experience and education have no eye button and keep Add below the list", () => {
+    renderEditor(createStore());
+    for (const name of [/^Work Experience/, /^Education/]) {
+      fireEvent.click(screen.getByRole("link", { name }));
+      expect(screen.queryByTestId("VisibilityIcon")).toBeNull();
+      expect(screen.queryByTestId("VisibilityOffIcon")).toBeNull();
+      const add = screen.getByRole("button", { name: /^Add new/ });
+      const apply = screen.getByRole("button", { name: "Apply" });
+      // The add button is inside the editor panel, the footer is a separate sticky bar
+      expect(apply.parentElement?.contains(add)).toBe(false);
+      expect(getComputedStyle(apply.parentElement!).position).toBe("sticky");
+    }
+  });
+
   it("holds only the user's data: no job data, style or layout pages", () => {
     renderEditor(createStore());
     for (const label of ["Job data", "Style Settings", "Jobs", "SETTINGS"]) {
