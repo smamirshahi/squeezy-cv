@@ -1,3 +1,4 @@
+import { normaliseLink } from "@shared/vault/link-utils";
 import { Grid } from "@mui/material";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
@@ -63,6 +64,7 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
                 variant="bodyMd"
                 isEmphasised={item.emphasis === "high"}
                 text={item.fields.institute ?? ""}
+                href={normaliseLink(item.fields.link)}
               />
               <IconWithText
                 icon={LocationOnIcon}
