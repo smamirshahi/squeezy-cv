@@ -87,13 +87,33 @@ export function sortItemsByVariant(
   return sortByOrder(items, (id) => selection[id]?.order);
 }
 
+/**
+ * The bullets an item has in this job: the ones the AI made from its description when the job
+ * has some, otherwise the vault's own.
+ */
+export function jobBullets(
+  item: Item,
+  selection: Variant["selection"]
+): Bullet[] {
+  const generated = selection[item.id]?.generated;
+  if (!generated || generated.length === 0) {
+    return item.bullets;
+  }
+  return generated.map((bullet) => ({
+    id: bullet.id,
+    text: bullet.text,
+    alt: {},
+    tags: [],
+  }));
+}
+
 /** Bullets of an item in the order the variant shows them (hidden ones included) */
 export function sortBulletsByVariant(
   item: Item,
   selection: Variant["selection"]
 ): Bullet[] {
   const choices = selection[item.id]?.bullets;
-  return sortByOrder(item.bullets, (id) => choices?.[id]?.order);
+  return sortByOrder(jobBullets(item, selection), (id) => choices?.[id]?.order);
 }
 
 /** The visible items in variant order, each with its visible bullets carrying the chosen wording */

@@ -25,6 +25,7 @@ import {
 } from "@shared/vault/page-structure";
 import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
+import { DescriptionBullets } from "@pages/workspace/description-bullets";
 import { SkillList } from "@pages/workspace/skill-list";
 import { FitPanel } from "@pages/workspace/fit-panel";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
@@ -54,6 +55,7 @@ import {
   SkillDisplay,
   Variant,
 } from "@custom-types/variant-types";
+import { jobBullets } from "@shared/variant/render";
 import { tracksLevels } from "@shared/vault/vault-utils";
 import { Section } from "@custom-types/vault-types";
 
@@ -493,7 +495,12 @@ function BlockInspector(): JSX.Element | null {
                   Emphasise
                 </Button>
               </Box>
-              {item.bullets.length > 0 && <Heading>Bullets</Heading>}
+              {section.type !== "skills" && section.type !== "summary" && (
+                <DescriptionBullets item={item} />
+              )}
+              {jobBullets(item, variant.selection).length > 0 && (
+                <Heading>Bullets</Heading>
+              )}
               <ItemBullets item={item} isCard />
             </>
           ) : (

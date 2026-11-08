@@ -2,6 +2,7 @@ import { Style } from "@custom-types/styles-types";
 import {
   BulletSelection,
   CURRENT_VARIANT_VERSION,
+  GeneratedBullet,
   ItemSelection,
   Variant,
 } from "@custom-types/variant-types";
@@ -146,4 +147,22 @@ export function updateBulletSelection<T extends HasSelection>(
   return updateItemSelection(variant, itemId, {
     bullets: { ...item.bullets, [bulletId]: { ...current, ...change } },
   });
+}
+
+/**
+ * The change of an item's selection that sets its generated bullets (`undefined` or an empty
+ * list = back to the vault's bullets). Choices made on the bullets being replaced are dropped.
+ */
+export function generatedBulletsChange(
+  current: ItemSelection | undefined,
+  next: GeneratedBullet[] | undefined
+): Partial<ItemSelection> {
+  const replaced = new Set((current?.generated ?? []).map((b) => b.id));
+  const kept = Object.fromEntries(
+    Object.entries(current?.bullets ?? {}).filter(([id]) => !replaced.has(id))
+  );
+  return {
+    generated: next && next.length > 0 ? next : undefined,
+    bullets: Object.keys(kept).length > 0 ? kept : undefined,
+  };
 }

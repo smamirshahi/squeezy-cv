@@ -4,6 +4,7 @@ import { Variant } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
+  jobBullets,
   render,
   RenderedPart,
   sortItemsByVariant,
@@ -15,6 +16,7 @@ import {
   computeOrders,
   createVariant,
   copyJob,
+  generatedBulletsChange,
   updateBulletSelection,
   updateItemSelection,
 } from "@shared/variant/variant-utils";
@@ -521,5 +523,95 @@ describe("job title", () => {
     );
     // the vault itself is not changed
     expect(vault.profile.headline).not.toBe("Frontend Engineer");
+  });
+});
+
+describe("generated bullets (made from the description)", () => {
+  const generated = [
+    { id: "g1", text: "First made bullet" },
+    { id: "g2", text: "Second made bullet" },
+  ];
+
+  it("replaces the vault bullets in this job only, and the vault stays as it is", () => {
+    const { section, item } = sectionWithBullets();
+    const before = JSON.stringify(vault);
+    const variant = updateItemSelection(
+      base(),
+      item.id,
+      generatedBulletsChange(undefined, generated)
+    );
+    const shown = sectionPart(allParts(render(vault, variant)), section.id)
+      ?.items.find((i) => i.id === item.id)
+      ?.bullets.map((b) => b.text);
+    expect(shown).toEqual(["First made bullet", "Second made bullet"]);
+    // another job, and the vault, still have the vault's bullets
+    const other = sectionPart(allParts(render(vault, base())), section.id)
+      ?.items.find((i) => i.id === item.id)
+      ?.bullets.map((b) => b.text);
+    expect(other).toEqual(item.bullets.map((b) => b.text));
+    expect(JSON.stringify(vault)).toBe(before);
+  });
+
+  it("hides and orders generated bullets like any other", () => {
+    const { section, item } = sectionWithBullets();
+    let variant = updateItemSelection(
+      base(),
+      item.id,
+      generatedBulletsChange(undefined, generated)
+    );
+    variant = updateBulletSelection(variant, item.id, "g1", {
+      isVisible: false,
+    });
+    const shown = sectionPart(allParts(render(vault, variant)), section.id)
+      ?.items.find((i) => i.id === item.id)
+      ?.bullets.map((b) => b.id);
+    expect(shown).toEqual(["g2"]);
+    expect(computeBulletOrders(item, variant, "g2", 0)).toEqual({
+      g2: 0,
+      g1: 1,
+    });
+  });
+
+  it("jobBullets gives the vault's bullets when there are no generated ones", () => {
+    const { item } = sectionWithBullets();
+    expect(jobBullets(item, {})).toBe(item.bullets);
+    expect(
+      jobBullets(item, { [item.id]: { isVisible: true, generated: [] } })
+    ).toBe(item.bullets);
+  });
+});
+
+describe("generatedBulletsChange", () => {
+  it("drops the choices made on the bullets it replaces, keeps the others", () => {
+    const current = {
+      isVisible: true,
+      generated: [{ id: "old", text: "Old" }],
+      bullets: {
+        old: { isVisible: false },
+        vault1: { isVisible: false },
+      },
+    };
+    expect(
+      generatedBulletsChange(current, [{ id: "new", text: "New" }])
+    ).toEqual({
+      generated: [{ id: "new", text: "New" }],
+      bullets: { vault1: { isVisible: false } },
+    });
+  });
+
+  it("going back to the vault's bullets clears generated", () => {
+    const current = {
+      isVisible: true,
+      generated: [{ id: "old", text: "Old" }],
+      bullets: { old: { isVisible: true } },
+    };
+    expect(generatedBulletsChange(current, undefined)).toEqual({
+      generated: undefined,
+      bullets: undefined,
+    });
+    expect(generatedBulletsChange(current, [])).toEqual({
+      generated: undefined,
+      bullets: undefined,
+    });
   });
 });
