@@ -38,7 +38,6 @@ export async function rewriteBullet(
       bullet: bullet.text,
       item: {
         fields: item.fields,
-        tags: item.tags,
         otherBullets: item.bullets
           .filter((b) => b.id !== bullet.id)
           .map((b) => b.text),
@@ -56,7 +55,6 @@ export async function rewriteBullet(
     bullet.text,
     ...Object.values(item.fields),
     ...item.bullets.map((b) => b.text),
-    ...item.tags,
   ];
   return {
     itemId: item.id,

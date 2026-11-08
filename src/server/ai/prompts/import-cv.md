@@ -9,7 +9,7 @@ the structure below and reply with a single JSON object, nothing else (no commen
 "sections": [
 { "type": "summary" | "experience" | "education" | "skills" | "projects" | "certifications" | "publications" | "volunteering" | "custom",
 "title": string,
-"items": [ { "fields": { ... }, "bullets": string[], "tags": string[] } ] }
+"items": [ { "fields": { ... }, "bullets": string[] } ] }
 ]
 }
 

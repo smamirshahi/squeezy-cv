@@ -25,7 +25,7 @@ export const LinkItemSchema = Object({
   /** Full URL */
   url: String,
 
-  /** Free tags, used later for tailoring */
+  /** Free tags: no longer edited or sent to AI, kept so older files still read */
   tags: Array(String),
 });
 
@@ -43,7 +43,7 @@ const BulletSchema = Object({
     formal: String.optional(),
   }).optional(),
 
-  /** Free tags, used later for tailoring */
+  /** Free tags: no longer edited or sent to AI, kept so older files still read */
   tags: Array(String),
 
   /** 0 to 5 in steps of 0.5. Only used by skill entries, where `text` is the skill name. */
@@ -79,7 +79,7 @@ const ItemSchema = Object({
   /** Bullet points (for skills groups: the individual skills) */
   bullets: Array(BulletSchema),
 
-  /** Free tags, used later for tailoring */
+  /** Free tags: no longer edited or sent to AI, kept so older files still read */
   tags: Array(String),
 
   /**

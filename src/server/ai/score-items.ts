@@ -16,7 +16,7 @@ const MAX_REASON = 200;
 /**
  * Scores every item of the saved CV against the advert: first what the job asks for (the same
  * extraction as tailoring), then one call per section (large sections are split). The model sees
- * short ids ("i1"...), item text and tags, never the profile (scrubbed like tailoring). The answer
+ * short ids ("i1"...), item text, never the profile (scrubbed like tailoring). The answer
  * is made safe: unknown or repeated ids are dropped, scores are rounded and kept within 0-100.
  * Nothing is applied here.
  */
@@ -65,7 +65,6 @@ export async function scoreItems(
             label: getItemLabel(item),
             section: section.title,
             fields: item.fields,
-            tags: item.tags,
             bullets: item.bullets.map((bullet) => bullet.text),
           })),
         }),

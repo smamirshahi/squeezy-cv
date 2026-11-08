@@ -12,7 +12,7 @@ import {
 } from "@store/vault/vault-slice";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { migrateLegacyFile } from "@shared/vault/migrate-vault";
-import { collectTags, replaceBulletTexts } from "@shared/vault/vault-utils";
+import { replaceBulletTexts } from "@shared/vault/vault-utils";
 import {
   SECTION_TYPES,
   SECTION_TYPE_LABELS,
@@ -229,27 +229,6 @@ describe("labels", () => {
     expect(getAddButtonLabel("metaData", sections).addNewItemButtonLabel).toBe(
       ""
     );
-  });
-});
-
-describe("collectTags", () => {
-  it("collects distinct tags from items, bullets and links, sorted, case-insensitive", () => {
-    const vault = freshVault();
-    vault.links[0].tags = ["Web"];
-    vault.sections[1].items[0].tags = ["react", "Leadership"];
-    vault.sections[1].items[1].tags = ["REACT", "ci-cd"];
-    vault.sections[1].items[0].bullets[0].tags = ["testing", "web"];
-    expect(collectTags(vault)).toEqual([
-      "ci-cd",
-      "Leadership",
-      "react",
-      "testing",
-      "Web",
-    ]);
-  });
-
-  it("returns nothing for a vault without tags", () => {
-    expect(collectTags(freshVault())).toEqual([]);
   });
 });
 

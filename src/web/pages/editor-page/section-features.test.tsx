@@ -23,8 +23,6 @@ import { Section } from "@custom-types/vault-types";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
-import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
-import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 
@@ -52,19 +50,9 @@ function section(store: AppStore, id: string): Section {
   return store.getState().vault.sections.find((s) => s.id === id)!;
 }
 
-/** Opens the collapsed "Tags ..." panel of the item with the given index */
+/** Opens the collapsed "Alternative wordings" panel of the item with the given index */
 function openExtras(index = 0): void {
-  fireEvent.click(
-    screen.getAllByText(/^Tags( and alternative wordings)?$/)[index]
-  );
-}
-
-function addTag(label: string, tag: string, index = 0): void {
-  const field = screen
-    .getAllByLabelText<HTMLInputElement>(label)
-    .filter((el) => el.tagName === "INPUT")[index];
-  fireEvent.change(field, { target: { value: tag } });
-  fireEvent.keyDown(field, { key: "Enter" });
+  fireEvent.click(screen.getAllByText("Alternative wordings")[index]);
 }
 
 function wording(label: string): HTMLElement {
@@ -148,64 +136,8 @@ describe("SectionTitleField and AddSectionButton", () => {
   });
 });
 
-describe("tags and alternative wordings", () => {
-  it("adds item tags in the draft and applies them, normalized", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    openExtras(0);
-    addTag("Tags", "react");
-    addTag("Tags", "React");
-    addTag("Tags", "leadership");
-    expect(section(store, "experience").items[0].tags).toEqual([]);
-    apply(store);
-    expect(section(store, "experience").items[0].tags).toEqual([
-      "react",
-      "leadership",
-    ]);
-    expect(section(store, "experience").items[1].tags).toEqual([]);
-  });
-
-  it("offers tags used elsewhere as suggestions", () => {
-    const store = createStore();
-    const vault = store.getState().vault;
-    store.dispatch(
-      setVault({
-        ...vault,
-        sections: vault.sections.map((s) =>
-          s.id === "education"
-            ? {
-                ...s,
-                items: s.items.map((i) => ({ ...i, tags: ["research"] })),
-              }
-            : s
-        ),
-      })
-    );
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    openExtras(0);
-    fireEvent.mouseDown(screen.getAllByLabelText("Tags")[0]);
-    expect(
-      screen.getByRole("option", { name: "research", hidden: true })
-    ).toBeTruthy();
-  });
-
-  it("edits tags on education items and skill groups", () => {
-    const store = createStore();
-    renderWith(store, <EditorEducation sectionId="education" />);
-    openExtras(0);
-    addTag("Tags", "academic");
-    apply(store);
-    expect(section(store, "education").items[0].tags).toEqual(["academic"]);
-    cleanup();
-
-    renderWith(store, <EditorSkills sectionId="skills" />);
-    openExtras(1);
-    addTag("Tags", "web");
-    apply(store);
-    expect(section(store, "skills").items[1].tags).toEqual(["web"]);
-  });
-
-  it("sets alternative wordings and bullet tags without touching the main text", () => {
+describe("alternative wordings", () => {
+  it("sets alternative wordings without touching the main text", () => {
     const store = createStore();
     const mainText = section(store, "experience").items[0].bullets[0].text;
     renderWith(store, <EditorExperience sectionId="experience" />);
@@ -214,13 +146,11 @@ describe("tags and alternative wordings", () => {
     fireEvent.change(wording("Short wording of bullet 1"), {
       target: { value: "Led dashboard" },
     });
-    addTag("Tags of bullet 1", "frontend");
     apply(store);
 
     const bullet = section(store, "experience").items[0].bullets[0];
     expect(bullet.text).toBe(mainText);
     expect(bullet.alt).toEqual({ short: "Led dashboard" });
-    expect(bullet.tags).toEqual(["frontend"]);
   });
 
   it("clearing an alternative wording removes it", () => {
@@ -240,18 +170,6 @@ describe("tags and alternative wordings", () => {
     expect(section(store, "experience").items[0].bullets[1]).not.toHaveProperty(
       "alt"
     );
-  });
-
-  it("discarding drops unapplied tags", () => {
-    const store = createStore();
-    renderWith(store, <EditorEducation sectionId="education" />);
-    openExtras(0);
-    addTag("Tags", "temp");
-    expect(screen.getByText("temp")).toBeTruthy();
-    act(() => {
-      store.dispatch({ type: "app/setShouldDiscardChanges", payload: true });
-    });
-    expect(screen.queryByText("temp")).toBeNull();
   });
 });
 
@@ -283,8 +201,6 @@ describe("generic sections", () => {
     fireEvent.change(screen.getByLabelText("Bullet Point List"), {
       target: { value: "• Uses React\n• Has tests" },
     });
-    openExtras(0);
-    addTag("Tags", "react");
     apply(store);
 
     const item = section(store, "proj").items[0];
@@ -297,7 +213,6 @@ describe("generic sections", () => {
       "Uses React",
       "Has tests",
     ]);
-    expect(item.tags).toEqual(["react"]);
     expect(item.shouldShow).toBe(true);
   });
 

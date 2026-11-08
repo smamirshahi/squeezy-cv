@@ -16,12 +16,10 @@ import {
   MenuItem,
   Rating,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
@@ -49,7 +47,6 @@ import {
   removeItem,
   sectionsSelector,
   setBulletAlt,
-  setItemTags,
   setSectionTracksLevel,
   updateBullet,
   updateItemFields,
@@ -60,69 +57,6 @@ const ALT_KINDS = [
   { kind: "long", label: "Long" },
   { kind: "formal", label: "Formal" },
 ] as const;
-
-interface TagsProps {
-  tags: string[];
-  label: string;
-  onChange: (tags: string[]) => void;
-}
-
-/** Tags as chips you can remove, and a box to add one (Enter) */
-function TagEditor({ tags, label, onChange }: TagsProps): JSX.Element {
-  const [text, setText] = useState<string>("");
-  function add(): void {
-    const tag = text.trim();
-    if (tag && !tags.includes(tag)) {
-      onChange([...tags, tag]);
-    }
-    setText("");
-  }
-  return (
-    <Box
-      sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}
-    >
-      {tags.map((tag) => (
-        <Chip
-          key={tag}
-          size="small"
-          label={tag}
-          onDelete={() => onChange(tags.filter((entry) => entry !== tag))}
-        />
-      ))}
-      <TextField
-        size="small"
-        placeholder="Tag name"
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            add();
-          }
-        }}
-        slotProps={{ htmlInput: { "aria-label": label } }}
-        sx={{
-          width: 140,
-          "& .MuiOutlinedInput-root": { borderRadius: 999 },
-        }}
-      />
-      <Button
-        size="small"
-        variant="contained"
-        onClick={add}
-        disabled={text.trim() === ""}
-        sx={{ borderRadius: 999, textTransform: "none" }}
-      >
-        Add tag
-      </Button>
-      <Tooltip title="Tags are short keywords (for example React or leadership). They help rank this item when you tailor a CV to a job advert. They are never printed on the CV.">
-        <IconButton size="small" aria-label="What are tags?">
-          <InfoOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
-}
 
 interface FieldProps {
   spec: FieldSpec;
@@ -401,13 +335,6 @@ function BulletCard({
         </IconButton>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 4.5 }}>
-        <TagEditor
-          tags={bullet.tags}
-          label={`Add a tag to bullet ${index + 1}`}
-          onChange={(tags) =>
-            dispatch(updateBullet({ ...ref, update: { tags } }))
-          }
-        />
         <Box sx={{ flex: 1 }} />
         <Chip
           size="small"
@@ -628,23 +555,6 @@ export function VaultItemEditor({
             }
           />
         ))}
-        <Box sx={{ gridColumn: "span 3" }}>
-          <Typography
-            sx={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: WORKSPACE_COLORS.muted,
-              mb: 0.5,
-            }}
-          >
-            TAGS (for matching a job)
-          </Typography>
-          <TagEditor
-            tags={item.tags}
-            label="Add a tag to this item"
-            onChange={(tags) => dispatch(setItemTags({ ...ref, tags }))}
-          />
-        </Box>
       </Box>
 
       {isSkills && (
