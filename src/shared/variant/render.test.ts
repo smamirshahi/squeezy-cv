@@ -462,3 +462,39 @@ describe("hidden sections", () => {
     expect(vault.sections.some((s) => s.id === "experience")).toBe(true);
   });
 });
+
+describe("links", () => {
+  function linksOf(variant: Variant): string[] {
+    const part = allParts(render(vault, variant)).find(
+      (p) => p.kind === "contactInfo"
+    );
+    if (part?.kind !== "contactInfo") {
+      throw new Error("no contact part");
+    }
+    return part.links.map((l) => l.id);
+  }
+
+  it("keeps the vault order by default and follows the job's order", () => {
+    const variant = createDefaultVariant(file, "links");
+    const ids = vault.links.map((l) => l.id);
+    expect(ids.length).toBeGreaterThan(1);
+    expect(linksOf(variant)).toEqual(ids);
+    const reversed = [...ids].reverse();
+    expect(linksOf({ ...variant, linkOrder: reversed })).toEqual(reversed);
+    // a link the order does not list comes last
+    expect(linksOf({ ...variant, linkOrder: [ids[1]] })).toEqual([
+      ids[1],
+      ...ids.filter((id) => id !== ids[1]),
+    ]);
+  });
+
+  it("draws no links when the template hides them", () => {
+    const variant = createDefaultVariant(file, "links");
+    expect(
+      linksOf({
+        ...variant,
+        style: { ...variant.style, shouldShowLinks: false },
+      })
+    ).toEqual([]);
+  });
+});

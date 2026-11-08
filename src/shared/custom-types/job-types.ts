@@ -44,6 +44,9 @@ export const JobSchema = Object({
   /** Ids of vault sections this job leaves out of the CV. Missing = every section is shown. */
   hiddenSections: Array(String).optional(),
 
+  /** Link ids in the order this job shows them; links not listed come last. Missing = vault order. */
+  linkOrder: Array(String).optional(),
+
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),
 

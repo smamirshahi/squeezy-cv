@@ -312,6 +312,13 @@ describe("EditorSummary", () => {
 });
 
 describe("EditorMainInfo", () => {
+  it("has no sort buttons for the links (order belongs to the job)", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    expect(
+      document.querySelector('[data-testid="ArrowUpwardIcon"]')
+    ).toBeNull();
+  });
+
   it("disables a link type that another link already uses", () => {
     renderWith(createStore(), <EditorMainInfo />);
     fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
@@ -351,7 +358,7 @@ describe("EditorMainInfo", () => {
     expect(profile.email).toBe("jane.doe@example.com");
   });
 
-  it("adds, edits, reorders and removes links", () => {
+  it("adds, edits and removes links", () => {
     const store = createStore();
     renderWith(store, <EditorMainInfo />);
     expect(screen.getAllByLabelText("URL")).toHaveLength(2);
@@ -365,22 +372,13 @@ describe("EditorMainInfo", () => {
       target: { value: "https://jane.example.com" },
     });
 
-    // move the new link to the top
-    fireEvent.click(
-      screen.getAllByTestId("ArrowUpwardIcon")[2].closest("button")!
-    );
-    fireEvent.click(
-      screen.getAllByTestId("ArrowUpwardIcon")[1].closest("button")!
-    );
-    expect(input("Label").value).toBe("My blog 2");
-
-    // remove GitHub (now last)
-    fireEvent.click(screen.getAllByLabelText("Remove link")[2]);
+    // remove GitHub
+    fireEvent.click(screen.getAllByLabelText("Remove link")[1]);
     click(setShouldApplyChanges, store);
 
     expect(store.getState().vault.links.map((l) => l.label)).toEqual([
-      "My blog 2",
       "LinkedIn",
+      "My blog 2",
     ]);
   });
 

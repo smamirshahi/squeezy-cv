@@ -16,7 +16,6 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addLink,
   initialState,
-  moveLink,
   removeLink,
   setLinks,
   setProfile,
@@ -32,7 +31,6 @@ import {
   linkTypeOfLabel,
   OTHER_LINK_TYPE_ID,
 } from "@shared/vault/link-types";
-import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 /** Edits the name, headline, contact details and the list of links */
 export function EditorMainInfo(): JSX.Element | null {
@@ -166,7 +164,7 @@ export function EditorMainInfo(): JSX.Element | null {
       >
         <Typography variant="h6">Links</Typography>
       </Box>
-      {draft.links.map((link, index) => (
+      {draft.links.map((link) => (
         <Box
           key={link.id}
           sx={{
@@ -176,13 +174,6 @@ export function EditorMainInfo(): JSX.Element | null {
             my: 1,
           }}
         >
-          <SortingIcons
-            index={index}
-            swapFunction={(_from, toIndex) =>
-              draftDispatch(moveLink({ id: link.id, toIndex }))
-            }
-            isLastEntity={index === draft.links.length - 1}
-          />
           <LinkTypeSelect
             value={linkTypeOfLabel(link.label).id}
             takenTypeIds={draft.links
