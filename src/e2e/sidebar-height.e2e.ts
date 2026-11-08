@@ -63,7 +63,7 @@ describe("sidebars fill the window height", () => {
     await page.getByText("Jane Doe").first().waitFor();
     await openTool("Vault");
     await expectFullHeight("Vault tree", "Resize the vault tree");
-    await expectFullHeight("Appears in", "Resize the item panel");
+    await expectFullHeight("Item panel", "Resize the item panel");
   });
 
   it("Jobs: the inspector", async () => {
@@ -90,6 +90,6 @@ describe("sidebars fill the window height", () => {
     await page.setViewportSize({ width: 1280, height: 420 });
     await openTool("Vault");
     await expectFullHeight("Vault tree", "Resize the vault tree");
-    await expectFullHeight("Appears in", "Resize the item panel");
+    await expectFullHeight("Item panel", "Resize the item panel");
   });
 });

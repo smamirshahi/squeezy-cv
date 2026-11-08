@@ -4,14 +4,11 @@ import {
   Box,
   Button,
   Divider,
-  IconButton,
   List,
   ListItemButton,
   ListItemText,
   Typography,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { styled } from "@mui/material/styles";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
@@ -28,7 +25,7 @@ import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { formatRoute } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { setItemSelection, variantsSelector } from "@store/jobs/jobs-slice";
+import { variantsSelector } from "@store/jobs/jobs-slice";
 import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
 import {
   ensureUnsortedSection,
@@ -206,15 +203,16 @@ function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
   );
 }
 
-/** Right: in which jobs an item is shown; the eye hides it there only */
-function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
-  const dispatch = useAppDispatch();
-  const variants = useAppSelector(variantsSelector);
+/**
+ * Right: the item panel. It has nothing to show for now (what a job shows is decided in the
+ * job, and a sent application is a frozen copy), so it stays empty.
+ */
+function ItemPanel(): JSX.Element {
   return (
     <ResizableAside side="right" label="the item panel" defaultWidth={300}>
       <Box
         component="aside"
-        aria-label="Appears in"
+        aria-label="Item panel"
         sx={{
           width: "100%",
           flex: "none",
@@ -223,68 +221,12 @@ function AppearsIn({ itemId }: { itemId: string }): JSX.Element {
           p: 2,
           overflow: "auto",
         }}
-      >
-        <Typography sx={{ fontWeight: 700, mb: 1 }}>
-          Where this item appears
-        </Typography>
-        {itemId ? (
-          <>
-            {variants.map((variant) => {
-              const isShown = variant.selection[itemId]?.isVisible !== false;
-              return (
-                <Box
-                  key={variant.id}
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <Typography
-                    sx={{
-                      flex: 1,
-                      fontSize: 13,
-                      opacity: isShown ? 1 : 0.5,
-                    }}
-                  >
-                    {variant.name}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    aria-label={`${isShown ? "Hide in" : "Show in"} ${variant.name}`}
-                    onClick={() =>
-                      dispatch(
-                        setItemSelection({
-                          jobId: variant.id,
-                          itemId,
-                          change: { isVisible: !isShown },
-                        })
-                      )
-                    }
-                  >
-                    {isShown ? (
-                      <VisibilityIcon fontSize="small" />
-                    ) : (
-                      <VisibilityOffIcon fontSize="small" />
-                    )}
-                  </IconButton>
-                </Box>
-              );
-            })}
-            <Typography
-              sx={{ mt: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
-            >
-              The eye hides this item in that job. The fact stays in the vault
-              and in every other job.
-            </Typography>
-          </>
-        ) : (
-          <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
-            Pick an item in the tree to see which jobs show it.
-          </Typography>
-        )}
-      </Box>
+      />
     </ResizableAside>
   );
 }
 
-/** The vault tool (design B2): tree, the editor for the chosen page, and where an item appears */
+/** The vault tool (design B2): tree, the editor for the chosen page, and an empty item panel */
 export function VaultPage(): JSX.Element {
   const pages = useEditorPages();
   const route = useRoute();
@@ -370,7 +312,7 @@ export function VaultPage(): JSX.Element {
           </>
         )}
       </Box>
-      <AppearsIn itemId={selectedItemId} />
+      <ItemPanel />
     </>
   );
 }
