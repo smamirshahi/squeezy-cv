@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "@store/store";
@@ -8,6 +14,7 @@ import { AppStore } from "@store/store-helper";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
 import { StyleHoverProvider } from "@pages/editor-page/sections/editor-style-settings/style-hover";
+import { setDateFormat, setPaperMargin } from "@store/cv-data/cv-data-slice";
 import { TypographyVariant } from "@custom-styles/custom-styles";
 
 afterEach(cleanup);
@@ -134,5 +141,29 @@ describe("Style settings page", () => {
       target: { value: "20" },
     });
     expect(getComputedStyle(title()).marginTop).toBe("20px");
+  });
+
+  it("draws the date format, margin and right-to-work line in the preview", () => {
+    const store = setup();
+    const paper = screen.getByTestId("style-preview-paper");
+    expect(paper.textContent).toContain("Dec 2018 - Present");
+    expect(paper.textContent).not.toContain("Right to work");
+    const padding = (): string => getComputedStyle(paper).paddingTop;
+
+    act(() => {
+      store.dispatch(setDateFormat("DD/MM/YYYY"));
+    });
+    expect(paper.textContent).toContain("01/12/2018 - Present");
+
+    fireEvent.click(
+      screen.getByLabelText("Show the right-to-work line under my name")
+    );
+    expect(paper.textContent).toContain("Right to work");
+
+    const before = padding();
+    act(() => {
+      store.dispatch(setPaperMargin("normal"));
+    });
+    expect(padding()).not.toBe(before);
   });
 });
