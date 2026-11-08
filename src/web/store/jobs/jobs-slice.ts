@@ -575,6 +575,24 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** Stores the page layout and style the editor shows into a template (by template id) */
+    setTemplateLook(
+      state,
+      action: PayloadAction<{
+        templateId: string;
+        layout: VariantLayout;
+        style: Style;
+      }>
+    ) {
+      const template = state.templates.find(
+        (t) => t.id === action.payload.templateId
+      );
+      if (template) {
+        template.layout = action.payload.layout;
+        template.style = action.payload.style;
+      }
+    },
+
     /** Stores the page layout and style the editor currently shows into the job's template */
     setTemplateAppearance(
       state,
@@ -608,6 +626,7 @@ export const {
   setBulletOrders,
   setItemOrders,
   setTemplateAppearance,
+  setTemplateLook,
   setTone,
   setItemScores,
   setSectionShown,
@@ -647,6 +666,20 @@ export function activeTemplateSelector(state: SliceRoot): Template {
   const { templates } = state.jobs;
   const job = activeJobSelector(state);
   return templates.find((t) => t.id === job.templateId) ?? templates[0];
+}
+
+/**
+ * The template the Page layout / Style settings editors work on: the one named in
+ * `app.editedTemplateId` when it exists, otherwise the active job's template.
+ */
+export function editedTemplateSelector(
+  state: SliceRoot & { app: { editedTemplateId: string | null } }
+): Template {
+  const { templates } = state.jobs;
+  return (
+    templates.find((t) => t.id === state.app.editedTemplateId) ??
+    activeTemplateSelector(state)
+  );
 }
 
 export function templatesSelector(state: SliceRoot): Template[] {

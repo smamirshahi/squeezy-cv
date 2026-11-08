@@ -14,6 +14,7 @@ template and a job (#165-#172).
 
 ### Changed
 
+- **Edit a chosen template (#212)**: Page layout and Style settings now edit the template named in the address (`/templates/<id>/layout`, `/templates/<id>/style`), not always the template of the job you are editing. Both pages start with an "Editing template" switcher and say whether the job being edited uses it; every template card has an **Edit** button; a new or duplicated template is selected. Reload and Back keep the template.
 - **Grey page, white cards (#205)**: the middle area of Vault, Templates and Job settings is a grey page with white bordered cards, white inputs with a visible border and an amber "vault fact" warning.
 - **Wider rail and resizable panels (#206)**: the left tool rail is wider, and the style preview, the Tailor panels and the application panel can be resized like the vault panels.
 - **Tags (#207)**: an "Add tag" button and an (i) explaining tags replace the "+ tag" box.

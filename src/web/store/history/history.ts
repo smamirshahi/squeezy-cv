@@ -57,7 +57,7 @@ export function historyReducer(
 interface Undoable {
   vault: Vault;
   jobs: { templates: Template[]; jobs: Job[]; activeJobId: string };
-  app: { structure: PageStructure };
+  app: { structure: PageStructure; editedTemplateId?: string | null };
   cvData: { style: Style };
   history: HistoryState;
 }
@@ -79,7 +79,9 @@ function restore<S extends Undoable>(state: S, snapshot: Snapshot): S {
     snapshot.jobs.find((j) => j.id === snapshot.activeJobId) ??
     snapshot.jobs.find((j) => j.id === state.jobs.activeJobId) ??
     snapshot.jobs[0];
+  // The editor mirrors the template being edited: the one named on the Templates pages, if any
   const template =
+    snapshot.templates.find((t) => t.id === state.app.editedTemplateId) ??
     snapshot.templates.find((t) => t.id === active.templateId) ??
     snapshot.templates[0];
   return {

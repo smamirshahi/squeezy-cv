@@ -164,4 +164,46 @@ describe("templates and jobs in the browser", () => {
     expect(await button.isDisabled()).toBe(true);
     await page.getByText(/Used by 2 jobs/).waitFor();
   });
+  it("Edit on a template card changes that template only, and the address keeps it", async () => {
+    await page.goto(`${app.webUrl}/jobs`);
+    await page.getByText("Jane Doe").first().waitFor();
+    const sizeBefore = await sectionTitleSize();
+
+    // A template no job uses
+    await openTool("Templates");
+    await page.getByLabel("New template name").fill("Unused look");
+    await page.getByRole("button", { name: "Create template" }).click();
+    const card = page.getByRole("listitem").filter({ hasText: "Unused look" });
+    await card.waitFor();
+
+    // Edit opens Page layout of that template, with its id in the address
+    await card.getByRole("link", { name: "Edit template Unused look" }).click();
+    await page.waitForURL(/\/templates\/[^/]+\/layout$/);
+    const layoutUrl = page.url();
+    await page
+      .getByRole("combobox", { name: "Editing template" })
+      .filter({ hasText: "Unused look" })
+      .waitFor();
+    await page.getByText(/Not used by the job you are editing/).waitFor();
+
+    // Change a style there
+    await page.getByText("Style settings", { exact: true }).click();
+    await page.waitForURL(/\/templates\/[^/]+\/style$/);
+    await page.getByLabel("Increase headingMd size").click();
+    const styleUrl = page.url();
+    expect(styleUrl.replace("/style", "/layout")).toBe(layoutUrl);
+
+    // The job being edited did not change
+    await openTool("Jobs");
+    expect(await sectionTitleSize()).toBe(sizeBefore);
+
+    // The address survives a reload (the edit is saved first)
+    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByText("Saved", { exact: true }).waitFor();
+    await page.goto(styleUrl);
+    await page
+      .getByRole("combobox", { name: "Editing template" })
+      .filter({ hasText: "Unused look" })
+      .waitFor();
+  });
 });
