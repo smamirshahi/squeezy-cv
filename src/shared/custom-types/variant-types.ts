@@ -55,6 +55,13 @@ const BulletSelectionSchema = Object({
   order: Number.optional(),
 });
 
+/** A bullet the AI made from an item's description for this job (accepted by the user, then saved) */
+const GeneratedBulletSchema = Object({
+  /** Stable id; per-bullet choices (hidden, order, wording) use it like a vault bullet's id */
+  id: String,
+  text: String,
+});
+
 export const ItemSelectionSchema = Object({
   /** Hiding an item in a variant never removes it from the vault */
   isVisible: Boolean,
@@ -72,6 +79,12 @@ export const ItemSelectionSchema = Object({
 
   /** Per-bullet choices by bullet id. A bullet without an entry is shown with its `text`. */
   bullets: Record(String, BulletSelectionSchema).optional(),
+
+  /**
+   * Bullets made from the item's description for this job. When there are some they are the
+   * item's bullets in this job (the vault bullets are not shown); the vault is never changed.
+   */
+  generated: Array(GeneratedBulletSchema).optional(),
 });
 
 /** Which parts sit in which column. Header parts and section ids, like the app's page structure. */
@@ -196,6 +209,7 @@ export type Tone = Static<typeof ToneSchema>;
 export type Wording = Static<typeof WordingSchema>;
 export type Emphasis = Static<typeof EmphasisSchema>;
 export type BulletSelection = Static<typeof BulletSelectionSchema>;
+export type GeneratedBullet = Static<typeof GeneratedBulletSchema>;
 export type ItemSelection = Static<typeof ItemSelectionSchema>;
 export type VariantLayout = Static<typeof VariantLayoutSchema>;
 export type Variant = Static<typeof VariantSchema>;

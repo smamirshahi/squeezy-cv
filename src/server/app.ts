@@ -39,6 +39,15 @@ import {
 } from "@custom-types/rewrite-types";
 import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
 import {
+  generateBullets,
+  ItemNotFoundError,
+  NothingToWorkFromError,
+} from "@server/ai/generate-bullets";
+import {
+  BulletsRequestSchema,
+  MAX_BULLETS_REQUIREMENTS,
+} from "@custom-types/bullets-types";
+import {
   MAX_JOB_AD_LENGTH,
   TailorRequestSchema,
 } from "@custom-types/tailor-types";
@@ -443,6 +452,50 @@ export function buildServer({
     } catch (error) {
       if (error instanceof BulletNotFoundError) {
         return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
+      }
+      throw error;
+    }
+  });
+
+  // Bullets made from an item's description for a job (the user reviews them; nothing is changed here)
+  app.post("/api/ai/bullets", async (request, reply) => {
+    const { client: ai } = registry.forTask("chat");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = BulletsRequestSchema.check(request.body);
+    const requirements = (body.requirements ?? [])
+      .slice(0, MAX_BULLETS_REQUIREMENTS)
+      .map((text) => text.slice(0, 200));
+    const { vault } = await storage.loadVault();
+    try {
+      return await generateBullets(
+        ai,
+        vault,
+        {
+          ...body,
+          requirements,
+          focus: body.focus?.slice(0, 200),
+          current: (body.current ?? []).map((text) => text.slice(0, 600)),
+        },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      );
+    } catch (error) {
+      if (error instanceof ItemNotFoundError) {
+        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
+      }
+      if (error instanceof NothingToWorkFromError) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "nothing_to_work_from",
+          error.message
+        );
       }
       throw error;
     }

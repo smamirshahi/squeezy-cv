@@ -17,6 +17,11 @@ import {
   RewriteResultSchema,
 } from "@custom-types/rewrite-types";
 import {
+  BulletsRequest,
+  BulletsResult,
+  BulletsResultSchema,
+} from "@custom-types/bullets-types";
+import {
   HideRequest,
   HideResult,
   HideResultSchema,
@@ -197,6 +202,7 @@ export interface ApiClient {
 
   /** One bullet made shorter, longer or more formal. Sends that item's CV text (no name or contact details) to the chosen provider. Nothing is changed. */
   rewriteBullet: (request: RewriteRequest) => Promise<RewriteResult>;
+  generateBullets: (request: BulletsRequest) => Promise<BulletsResult>;
 
   /** Scores every item of the saved CV against an advert. Sends item text (no name or contact details) to the chosen provider. Nothing is changed. */
   scoreItems: (jobAd: string) => Promise<ScoreResult>;
@@ -366,6 +372,11 @@ export function createApiClient(
     async rewriteBullet(body) {
       return RewriteResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/rewrite", body)
+      );
+    },
+    async generateBullets(body) {
+      return BulletsResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/bullets", body)
       );
     },
     async scoreItems(jobAd) {

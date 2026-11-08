@@ -22,6 +22,7 @@ import { Variant, Wording } from "@custom-types/variant-types";
 import { Item, Section } from "@custom-types/vault-types";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
 import {
+  jobBullets,
   sortBulletsByVariant,
   sortItemsByVariant,
 } from "@shared/variant/render";
@@ -82,7 +83,7 @@ function countShown(
       if (isOn && isItemShown) {
         result.entries[0] += 1;
       }
-      for (const bullet of item.bullets) {
+      for (const bullet of jobBullets(item, selection)) {
         result.bullets[1] += 1;
         if (
           isOn &&
@@ -337,7 +338,8 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
               const isOpen = openIds.includes(item.id);
               const label = getItemLabel(item);
               const subtitle = getItemSubtitle(item);
-              const bulletsShown = item.bullets.filter(
+              const itemBullets = jobBullets(item, variant.selection);
+              const bulletsShown = itemBullets.filter(
                 (b) => selection?.bullets?.[b.id]?.isVisible !== false
               ).length;
               return (
@@ -383,7 +385,7 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                             minWidth: 0,
                           }}
                         >
-                          {item.bullets.length > 0 && (
+                          {itemBullets.length > 0 && (
                             <IconButton
                               size="small"
                               aria-expanded={isOpen}
@@ -430,7 +432,7 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                               reason={selection?.relevanceReason}
                             />
                           </Box>
-                          {item.bullets.length > 0 && (
+                          {itemBullets.length > 0 && (
                             <Typography
                               sx={{
                                 flex: "none",
@@ -439,7 +441,7 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                                 color: WORKSPACE_COLORS.muted,
                               }}
                             >
-                              {bulletsShown} of {item.bullets.length}
+                              {bulletsShown} of {itemBullets.length}
                             </Typography>
                           )}
                         </Box>
