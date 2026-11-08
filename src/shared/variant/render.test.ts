@@ -498,3 +498,28 @@ describe("links", () => {
     ).toEqual([]);
   });
 });
+
+describe("job title", () => {
+  function headlineOf(variant: Variant, v: Vault = vault): string | undefined {
+    const part = allParts(render(v, variant)).find(
+      (p) => p.kind === "personalInfo"
+    );
+    if (part?.kind !== "personalInfo") {
+      throw new Error("no personal info part");
+    }
+    return part.profile.headline;
+  }
+
+  it("uses the vault's job title unless the job picked another", () => {
+    const variant = createDefaultVariant(file, "title");
+    expect(headlineOf(variant)).toBe(vault.profile.headline);
+    expect(headlineOf({ ...variant, headline: "Frontend Engineer" })).toBe(
+      "Frontend Engineer"
+    );
+    expect(headlineOf({ ...variant, headline: "  " })).toBe(
+      vault.profile.headline
+    );
+    // the vault itself is not changed
+    expect(vault.profile.headline).not.toBe("Frontend Engineer");
+  });
+});

@@ -477,6 +477,20 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** The job title one job shows; undefined goes back to the vault's Job Title */
+    setJobHeadline(
+      state,
+      action: PayloadAction<{ jobId: string; headline: string | undefined }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        if (action.payload.headline === undefined) {
+          delete job.headline;
+        } else {
+          job.headline = action.payload.headline;
+        }
+      });
+    },
+
     /** The order of the links for one job (link ids); the vault list is not touched */
     setLinkOrder(
       state,
@@ -660,6 +674,7 @@ export const {
   setItemScores,
   setSectionShown,
   setLinkOrder,
+  setJobHeadline,
   setPageLimit,
   setSkillStyle,
   setAutoFit,

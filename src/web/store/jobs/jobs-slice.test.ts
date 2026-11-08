@@ -21,6 +21,7 @@ import {
   setPageLimit,
   setSectionShown,
   setLinkOrder,
+  setJobHeadline,
   setSkillStyle,
   setTuning,
   setBulletOrders,
@@ -588,5 +589,26 @@ describe("setLinkOrder", () => {
     ]);
     expect(next.jobs[0]).toBe(base.jobs[0]);
     expect(next.templates).toEqual(base.templates);
+  });
+});
+
+describe("setJobHeadline", () => {
+  it("sets and clears the job title of one job only", () => {
+    const base = withTwo();
+    const set = jobsReducer(
+      base,
+      setJobHeadline({ jobId: "second", headline: "Frontend Engineer" })
+    );
+    expect(set.jobs.find((j) => j.id === "second")?.headline).toBe(
+      "Frontend Engineer"
+    );
+    expect(set.jobs[0]).toBe(base.jobs[0]);
+    const cleared = jobsReducer(
+      set,
+      setJobHeadline({ jobId: "second", headline: undefined })
+    );
+    expect(cleared.jobs.find((j) => j.id === "second")?.headline).toBe(
+      undefined
+    );
   });
 });

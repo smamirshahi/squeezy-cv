@@ -12,7 +12,7 @@ import { RenderedDocument, RenderedPart } from "@shared/variant/render";
 function renderPart(part: RenderedPart): JSX.Element | null {
   switch (part.kind) {
     case "personalInfo":
-      return <PersonalInfoPreviewPage key={part.id} />;
+      return <PersonalInfoPreviewPage key={part.id} profile={part.profile} />;
     case "contactInfo":
       return (
         <ContactInfoPreviewPage

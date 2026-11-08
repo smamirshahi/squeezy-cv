@@ -11,6 +11,7 @@ import { updatePageStructure } from "@store/app/app-slice";
 import {
   setDateFormat,
   setShouldShowRightToWork,
+  setShouldShowNationality,
 } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { setItemSelection, setVariants } from "@store/jobs/jobs-slice";
@@ -235,6 +236,18 @@ describe("UK single-column template", () => {
 
     store.dispatch(updateProfile({ rightToWork: "" }));
     expect(textOf(render(store))).not.toContain("Eligible to work");
+  });
+
+  it("shows the nationalities only when set and turned on", () => {
+    const store = makeStore();
+    store.dispatch(updateProfile({ nationalities: ["British", "Iranian"] }));
+    expect(textOf(render(store))).not.toContain("Nationality");
+
+    store.dispatch(setShouldShowNationality(true));
+    expect(textOf(render(store))).toContain("Nationality: British, Iranian");
+
+    store.dispatch(updateProfile({ nationalities: [] }));
+    expect(textOf(render(store))).not.toContain("Nationality");
   });
 
   it("draws a highlighted item in bold", () => {

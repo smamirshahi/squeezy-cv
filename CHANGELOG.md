@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Main Info: Full Name, Job Title and Right to work are one per line. The Job Title can have other options (with an (i) note on why); each job picks the one it shows (Jobs > Content > Job title). New optional Nationality (several, picked from an autofill list) shown under the name when turned on in Style settings (#225).
+
 - Links: the sort buttons are gone from Main Info (the vault only holds facts). A job sets the order of its links (Jobs > Content > Links) and the template decides whether links show at all (Style settings, "Show my links") (#223).
 
 - Main Info: "Add new link" is now inside the card below the links, the link type select is narrower and the URL wider; a link type another link already uses is disabled in the list, and the list is alphabetical (Other last) and opens at the top (#220).

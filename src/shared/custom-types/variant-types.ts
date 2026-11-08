@@ -153,6 +153,9 @@ export const VariantSchema = Object({
   /** Ids of vault sections the job leaves out. Missing = every section is shown. */
   hiddenSections: Array(String).optional(),
 
+  /** The job title this job shows (one of the vault's Job Title and options). Missing = the vault's Job Title. */
+  headline: String.optional(),
+
   /** Link ids in the order this job shows them; links not listed come last. Missing = vault order. */
   linkOrder: Array(String).optional(),
 

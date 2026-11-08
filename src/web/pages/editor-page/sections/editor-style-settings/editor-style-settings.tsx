@@ -18,6 +18,7 @@ import {
   setSectionSpacing,
   setShouldShowRightToWork,
   setShouldShowLinks,
+  setShouldShowNationality,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -31,6 +32,7 @@ export function EditorTypography(): JSX.Element {
   const {
     shouldShowRightToWork,
     shouldShowLinks,
+    shouldShowNationality,
     sectionSpacing,
     hasHeadingLine,
   } = useAppSelector(styleSelector);
@@ -126,6 +128,18 @@ export function EditorTypography(): JSX.Element {
               checked={shouldShowLinks !== false}
               onChange={(event) =>
                 dispatch(setShouldShowLinks(event.target.checked))
+              }
+            />
+          }
+        />
+        <FormControlLabel
+          sx={{ mt: 1, display: "flex" }}
+          label="Show my nationality under my name"
+          control={
+            <Checkbox
+              checked={shouldShowNationality ?? false}
+              onChange={(event) =>
+                dispatch(setShouldShowNationality(event.target.checked))
               }
             />
           }

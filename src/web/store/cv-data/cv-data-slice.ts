@@ -43,6 +43,10 @@ const cvDataSlice = createSlice({
       state.style.shouldShowRightToWork = action.payload;
     },
 
+    setShouldShowNationality(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowNationality = action.payload;
+    },
+
     setShouldShowLinks(state, action: PayloadAction<boolean>) {
       state.style.shouldShowLinks = action.payload;
     },
@@ -106,6 +110,7 @@ export const {
   setDateFormat,
   setShouldShowRightToWork,
   setShouldShowLinks,
+  setShouldShowNationality,
   setSectionSpacing,
   setHasHeadingLine,
   setPaperMargin,
