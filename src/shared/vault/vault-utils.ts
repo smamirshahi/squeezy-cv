@@ -29,7 +29,7 @@ function dateValue(iso: string | undefined, isEnd: boolean): number {
  * Items newest first: by end date (no end date = current = first), then by start date.
  * Items that tie keep their order. Returns a new array.
  */
-export function sortItemsByDate(items: Item[]): Item[] {
+function sortItemsByDate(items: Item[]): Item[] {
   return [...items].sort(
     (a, b) =>
       dateValue(b.fields.endDate, true) - dateValue(a.fields.endDate, true) ||
