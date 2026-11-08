@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Work Experience and Education item titles now close their parenthesis: "Role (Mar/2022 - Present)" (#250).
+
 ### Added
 
 - Every Description field has an (i) icon: write freely whatever comes to your mind; AI can later make bullet points from it or reword it for a specific job.

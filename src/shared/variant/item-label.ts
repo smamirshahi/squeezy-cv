@@ -28,3 +28,18 @@ export function getItemLabel(item: Item): string {
   }
   return "(untitled)";
 }
+
+/** "Title (Mar/2022 - Present)" for list headings; dates are left out when the start date is empty */
+export function datedTitle(
+  title: string,
+  startDate: string | undefined,
+  endDate: string | undefined,
+  formatDay: (day: string) => string
+): string {
+  const start = startDate?.trim();
+  if (!start) {
+    return title;
+  }
+  const end = endDate?.trim();
+  return `${title} (${formatDay(start)} - ${end ? formatDay(end) : "Present"})`;
+}

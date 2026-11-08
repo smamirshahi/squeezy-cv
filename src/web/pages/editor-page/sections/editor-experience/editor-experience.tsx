@@ -9,6 +9,7 @@ import {
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import { HintAdornment } from "@components/description-hint";
 import dayjs from "dayjs";
+import { datedTitle } from "@shared/variant/item-label";
 
 const NEW_EXPERIENCE: NewItemTemplate = {
   fields: {
@@ -43,12 +44,12 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
           key={item.id}
           accordionIndex={index}
           removeFunction={removeItem}
-          title={`${item.fields.jobTitle ?? ""} (
-          ${dayjs(item.fields.startDate).format(dateFormat)} - ${
-            item.fields.endDate
-              ? dayjs(item.fields.endDate).format(dateFormat)
-              : "Present"
-          }`}
+          title={datedTitle(
+            item.fields.jobTitle ?? "",
+            item.fields.startDate,
+            item.fields.endDate,
+            (day) => dayjs(day).format(dateFormat)
+          )}
           entity={{ id: item.id, shouldShow: true }}
           isLastEntity={index === items.length - 1}
         >
