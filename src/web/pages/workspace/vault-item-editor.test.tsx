@@ -203,7 +203,7 @@ describe("inline vault item editor", () => {
     const store = setup();
     open("Languages");
     const first = stored(store, "Languages").bullets[0];
-    pickLevel(0, "8 – Advanced");
+    pickLevel(0, "4 – Advanced");
     expect(stored(store, "Languages").bullets[0].rating).toBe(4);
     const years = screen.getByLabelText(`${first.text} years`);
 
@@ -242,16 +242,37 @@ describe("inline vault item editor", () => {
     });
     expect(stored(store, "Spoken languages").bullets[1].text).toBe("Français");
 
-    // level: pick 6 of 10 (3 in half steps), a half step too, then clear it (levels are optional)
-    pickLevel(1, "6 – Proficient");
+    // level 1-5 with names; the plus adds half a step and is not offered for 5
+    const plus = (): HTMLElement =>
+      screen.getByRole("button", { name: "Français plus" });
+    pickLevel(1, "3 – Proficient");
+    // the sample skill may already have a plus, which a new level keeps
+    if (stored(store, "Spoken languages").bullets[1].rating === 3.5) {
+      fireEvent.click(plus());
+    }
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3);
-    pickLevel(1, "7");
+    fireEvent.click(plus());
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3.5);
-    pickLevel(1, "No level");
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(0);
+    pickLevel(1, "4 – Advanced");
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(4.5);
+    fireEvent.click(plus());
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(4);
+    pickLevel(1, "5 – Expert");
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(5);
+    expect(plus().hasAttribute("disabled")).toBe(true);
+    // there is no "No level" choice: whether levels show is up to the template
+    fireEvent.mouseDown(screen.getAllByRole("combobox", { name: /^Level/ })[1]);
+    expect(screen.queryByRole("option", { name: "No level" })).toBeNull();
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
 
     fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
     expect(stored(store, "Spoken languages").bullets).toHaveLength(3);
+    // a new skill has no level chosen, so its plus is not offered yet
+    expect(
+      screen
+        .getByRole("button", { name: "Skill 3 plus" })
+        .hasAttribute("disabled")
+    ).toBe(true);
 
     const secondId = stored(store, "Spoken languages").bullets[1].id;
     fireEvent.click(screen.getByRole("button", { name: "Move skill 2 up" }));

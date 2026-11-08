@@ -15,6 +15,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Skill level in the vault is 1 to 5 with names (Learning, Working, Proficient, Advanced, Expert) and a + for "a bit above" (3 + plus = three and a half stars). The "No level" choice is gone: leave a skill without a level, and let the template decide whether levels are shown (#263).
 - Skills in the vault: the level is now a small dropdown (No level, 1-10, 10 = highest) instead of five stars, so the skill name has room; an (i) explains Level and Years, and the delete icon matches the others (#261).
 - Vault section pages (Work Experience, Education, Skills, Projects and the other sections): the middle area is now just the list of item titles with their dates; click one and its inputs open in the right panel. The grey expanding rows are gone. A new item is selected at once (#251). The vault tree on the left now lists only the sections; the right panel shows the full item editor (saves as you type) and the Apply/Discard step is gone for item lists. The section title field is full width and its trash icon lines up with the rows below (#254).
 
