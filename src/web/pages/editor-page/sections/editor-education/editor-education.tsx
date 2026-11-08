@@ -1,4 +1,5 @@
-import { AccordionDetails, Box, TextField } from "@mui/material";
+import { AccordionDetails, Box, Button, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
@@ -34,9 +35,8 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
     updateFields,
     removeItem,
     moveItem,
-    setVisibility,
-    isVisible,
     draftDispatch,
+    addNewItem,
   } = useSectionDraft(sectionId, NEW_EDUCATION);
 
   const items = section?.items ?? [];
@@ -49,14 +49,13 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
           accordionIndex={index}
           swapFunction={moveItem}
           removeFunction={removeItem}
-          onVisibilityChange={setVisibility}
           title={`${item.fields.degree ?? ""} (
                   ${dayjs(item.fields.startDate).format(dateFormat)} - ${
                     item.fields.endDate
                       ? dayjs(item.fields.endDate).format(dateFormat)
                       : "Present"
                   }`}
-          entity={{ id: item.id, shouldShow: isVisible(item.id) }}
+          entity={{ id: item.id, shouldShow: true }}
           isLastEntity={index === items.length - 1}
         >
           <AccordionDetails>
@@ -126,6 +125,9 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
           </AccordionDetails>
         </EditorAccordionHeader>
       ))}
+      <Button startIcon={<AddIcon />} onClick={addNewItem}>
+        Add new education
+      </Button>
     </>
   );
 }

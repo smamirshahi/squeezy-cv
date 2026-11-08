@@ -41,8 +41,8 @@ export function JobSettingsPage(): JSX.Element {
         >
           <EditorMetaData />
         </Box>
-        <EditorFooter />
       </Box>
+      <EditorFooter />
     </Box>
   );
 }

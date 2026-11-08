@@ -204,11 +204,12 @@ describe("labels", () => {
     expect(getAddButtonLabel("mainInfo", sections).addNewItemButtonLabel).toBe(
       ""
     );
+    // Experience and education have their add button below the list, not in the footer
     expect(
       getAddButtonLabel("experience", sections).addNewItemButtonLabel
-    ).toBe("Add new experience");
+    ).toBe("");
     expect(getAddButtonLabel("education", sections).addNewItemButtonLabel).toBe(
-      "Add new education"
+      ""
     );
     expect(getAddButtonLabel("skills", sections).addNewItemButtonLabel).toBe(
       "Add new skill category"

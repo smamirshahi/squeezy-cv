@@ -20,7 +20,7 @@ import {
 } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { setVariants, variantsSelector } from "@store/jobs/jobs-slice";
+import { setVariants } from "@store/jobs/jobs-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
@@ -188,31 +188,20 @@ describe("EditorExperience", () => {
     ]);
   });
 
-  it("toggles visibility in the store at once without losing other unapplied edits", () => {
+  it("has no eye button: what is shown is decided per job, and edits wait for Apply", () => {
     const store = createStore();
     renderWith(store, <EditorExperience sectionId="experience" />);
+    expect(screen.queryByTestId("VisibilityIcon")).toBeNull();
+    expect(screen.queryByTestId("VisibilityOffIcon")).toBeNull();
+
     fireEvent.change(input("Company"), { target: { value: "Edited Co" } });
-
-    // The third experience is hidden; show it
-    const eyes = screen.getAllByTestId("VisibilityOffIcon");
-    fireEvent.click(eyes[0].closest("button")!);
-
-    // visibility belongs to the active variant; the vault item is untouched
-    expect(
-      variantsSelector(store.getState())[0].selection["exp-3"]?.isVisible
-    ).toBe(true);
-    expect(storedSection(store, "experience").items[2].shouldShow).toBe(false);
-    expect(input("Company").value).toBe("Edited Co");
     expect(storedSection(store, "experience").items[0].fields.company).toBe(
       "Example Ltd"
     );
-
     click(setShouldApplyChanges, store);
-    const items = storedSection(store, "experience").items;
-    expect(items[0].fields.company).toBe("Edited Co");
-    expect(
-      variantsSelector(store.getState())[0].selection["exp-3"]?.isVisible
-    ).toBe(true);
+    expect(storedSection(store, "experience").items[0].fields.company).toBe(
+      "Edited Co"
+    );
   });
 
   it("follows the store when a new CV is loaded", () => {
