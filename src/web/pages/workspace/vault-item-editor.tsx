@@ -14,13 +14,14 @@ import {
   FormControlLabel,
   IconButton,
   MenuItem,
-  Rating,
+  Tooltip,
   TextField,
   Typography,
 } from "@mui/material";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
@@ -122,6 +123,20 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
   );
 }
 
+/** The level choices: 0 = none, 1-10 = the rating in half steps (10 = five stars, the highest) */
+const LEVEL_STEPS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+/** "No level", "3", "4 – Working": even steps also carry the name of the level */
+function levelOptionLabel(step: number): string {
+  if (step === 0) {
+    return "No level";
+  }
+  return step % 2 === 0 ? `${step} – ${levelLabel(step / 2)}` : String(step);
+}
+
+const LEVEL_HINT =
+  "Level: how well you know the skill, from 1 (just learning) to 10 (expert). It is not years of experience; that is the Years field. Both are optional, and each job decides whether to show them.";
+
 interface SkillCardProps {
   section: Section;
   item: Item;
@@ -197,41 +212,25 @@ function SkillCard({
         sx={{ flex: 1 }}
       />
       {tracksLevels(section) && (
-        <>
-          <Rating
-            name={`level-${bullet.id}`}
-            value={bullet.rating ?? 0}
-            precision={0.5}
-            getLabelText={(value) => `${skillName} level ${value}`}
-            onChange={(_, value) => {
-              const rating = value ?? 0;
-              if (isRatingAcceptable(rating)) {
-                dispatch(updateBullet({ ...ref, update: { rating } }));
-              }
-            }}
-          />
-          <Typography
-            sx={{
-              fontSize: 12,
-              width: 72,
-              color: bullet.rating
-                ? WORKSPACE_COLORS.text
-                : WORKSPACE_COLORS.muted,
-            }}
-          >
-            {levelLabel(bullet.rating)}
-          </Typography>
-          <Button
-            size="small"
-            aria-label={`Clear level of ${skillName}`}
-            disabled={!bullet.rating}
-            onClick={() =>
-              dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
+        <TextField
+          select
+          size="small"
+          label="Level"
+          value={String((bullet.rating ?? 0) * 2)}
+          onChange={(event) => {
+            const rating = Number(event.target.value) / 2;
+            if (isRatingAcceptable(rating)) {
+              dispatch(updateBullet({ ...ref, update: { rating } }));
             }
-          >
-            No level
-          </Button>
-        </>
+          }}
+          sx={{ width: 150 }}
+        >
+          {LEVEL_STEPS.map((step) => (
+            <MenuItem key={step} value={String(step)}>
+              {levelOptionLabel(step)}
+            </MenuItem>
+          ))}
+        </TextField>
       )}
       <TextField
         size="small"
@@ -263,7 +262,7 @@ function SkillCard({
         aria-label={`Remove skill ${index + 1}`}
         onClick={() => dispatch(removeBullet(ref))}
       >
-        <DeleteOutlineIcon fontSize="small" />
+        <DeleteIcon fontSize="small" />
       </IconButton>
     </Box>
   );
@@ -445,11 +444,26 @@ export function VaultItemEditor({
       {isSkills && (
         <>
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography sx={{ fontWeight: 700, flex: 1 }}>
+            <Typography sx={{ fontWeight: 700 }}>
               Skills · {item.bullets.length}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-              Enter in a skill adds the next one. A level is optional.
+            <Tooltip title={LEVEL_HINT}>
+              <InfoOutlinedIcon
+                fontSize="small"
+                tabIndex={0}
+                aria-label="About level and years"
+                sx={{ ml: 0.5, color: "text.secondary", cursor: "help" }}
+              />
+            </Tooltip>
+            <Typography
+              sx={{
+                fontSize: 12,
+                color: WORKSPACE_COLORS.muted,
+                flex: 1,
+                textAlign: "right",
+              }}
+            >
+              Enter in a skill adds the next one.
             </Typography>
           </Box>
           {item.bullets.map((bullet, bulletIndex) => (

@@ -64,6 +64,14 @@ function open(title: string): void {
   throw new Error(`No item "${title}" in any section`);
 }
 
+/** Choose an option of the Level dropdown of the skill at `index` (one per row, in order) */
+function pickLevel(index: number, option: string): void {
+  fireEvent.mouseDown(
+    screen.getAllByRole("combobox", { name: /^Level/ })[index]
+  );
+  fireEvent.click(screen.getByRole("option", { name: option }));
+}
+
 describe("inline vault item editor", () => {
   it("has no Move to section in normal sections, but keeps it for Unsorted items", () => {
     const store = setup();
@@ -154,6 +162,13 @@ describe("inline vault item editor", () => {
     );
   });
 
+  it("explains level and years in one (i) and uses the same delete icon as the lists", () => {
+    setup();
+    open("Languages");
+    expect(screen.getByLabelText("About level and years")).toBeTruthy();
+    expect(screen.queryByTestId("DeleteOutlinedIcon")).toBeNull();
+  });
+
   it("goes to the previous and next item, with the buttons or [ and ]", () => {
     setup();
     open("Senior Software Developer");
@@ -188,7 +203,8 @@ describe("inline vault item editor", () => {
     const store = setup();
     open("Languages");
     const first = stored(store, "Languages").bullets[0];
-    fireEvent.click(screen.getByLabelText(`${first.text} level 4`));
+    pickLevel(0, "8 – Advanced");
+    expect(stored(store, "Languages").bullets[0].rating).toBe(4);
     const years = screen.getByLabelText(`${first.text} years`);
 
     fireEvent.change(years, { target: { value: "7" } });
@@ -200,10 +216,14 @@ describe("inline vault item editor", () => {
     expect(stored(store, "Languages").bullets[0].years).toBeUndefined();
 
     fireEvent.click(screen.getByLabelText(/Track my level/));
-    expect(screen.queryByLabelText(`${first.text} level 4`)).toBeNull();
+    expect(screen.queryAllByRole("combobox", { name: /^Level/ })).toHaveLength(
+      0
+    );
     expect(stored(store, "Languages").bullets[0].rating).toBe(4);
     fireEvent.click(screen.getByLabelText(/Track my level/));
-    expect(screen.getByLabelText(`${first.text} level 4`)).toBeTruthy();
+    expect(
+      screen.getAllByRole("combobox", { name: /^Level/ }).length
+    ).toBeGreaterThan(0);
   });
 
   it("edits a skills group inline: group name, skill names, levels, add, move and remove", () => {
@@ -222,12 +242,12 @@ describe("inline vault item editor", () => {
     });
     expect(stored(store, "Spoken languages").bullets[1].text).toBe("Français");
 
-    // level: pick 3 stars, then clear it (levels are optional)
-    fireEvent.click(screen.getByLabelText("Français level 3"));
+    // level: pick 6 of 10 (3 in half steps), a half step too, then clear it (levels are optional)
+    pickLevel(1, "6 – Proficient");
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Clear level of Français" })
-    );
+    pickLevel(1, "7");
+    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3.5);
+    pickLevel(1, "No level");
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
