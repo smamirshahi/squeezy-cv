@@ -31,14 +31,8 @@ interface Props {
 /** Shows the experience in editor page */
 export function EditorExperience({ sectionId }: Props): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
-  const {
-    section,
-    updateFields,
-    removeItem,
-    moveItem,
-    draftDispatch,
-    addNewItem,
-  } = useSectionDraft(sectionId, NEW_EXPERIENCE);
+  const { section, updateFields, removeItem, draftDispatch, addNewItem } =
+    useSectionDraft(sectionId, NEW_EXPERIENCE);
 
   const items = section?.items ?? [];
 
@@ -48,7 +42,6 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
         <EditorAccordionHeader
           key={item.id}
           accordionIndex={index}
-          swapFunction={moveItem}
           removeFunction={removeItem}
           title={`${item.fields.jobTitle ?? ""} (
           ${dayjs(item.fields.startDate).format(dateFormat)} - ${

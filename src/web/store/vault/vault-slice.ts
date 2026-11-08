@@ -14,8 +14,11 @@ import {
   findItem,
   findSection,
   isYearsAcceptable,
+  keepInDateOrder,
   moveInArray,
   normalizeTags,
+  sortedSection,
+  withDatedSectionsSorted,
 } from "@shared/vault/vault-utils";
 
 /** State of the vault slice: the facts, independent of any one CV */
@@ -53,14 +56,16 @@ const vaultSlice = createSlice({
   initialState,
   reducers: {
     setVault(_state, action: PayloadAction<Vault>) {
-      return action.payload;
+      // Work experience and education are always in date order
+      return withDatedSectionsSorted(action.payload);
     },
 
     /** Replaces the section that has the same id (used to apply an edited draft) */
     setSection(state, action: PayloadAction<Section>) {
       const index = state.sections.findIndex((s) => s.id === action.payload.id);
       if (index !== -1) {
-        state.sections[index] = action.payload;
+        // The payload may be frozen, so sort a copy instead of assigning into it
+        state.sections[index] = sortedSection(action.payload);
       }
     },
 
@@ -110,13 +115,15 @@ const vaultSlice = createSlice({
     addItem: {
       reducer(state, action: PayloadAction<AddItemPayload>) {
         const { sectionId, id, fields, shouldShow } = action.payload;
-        findSection(state, sectionId)?.items.push({
+        const section = findSection(state, sectionId);
+        section?.items.push({
           id,
           fields,
           bullets: [],
           tags: [],
           shouldShow,
         });
+        keepInDateOrder(section);
       },
       prepare(input: {
         sectionId: string;
@@ -161,6 +168,7 @@ const vaultSlice = createSlice({
       }
       from.items = from.items.filter((i) => i.id !== itemId);
       to.items.push(item);
+      keepInDateOrder(to);
     },
 
     removeItem(state, action: PayloadAction<ItemRef>) {
@@ -184,6 +192,7 @@ const vaultSlice = createSlice({
       );
       if (item) {
         Object.assign(item.fields, action.payload.fields);
+        keepInDateOrder(findSection(state, action.payload.sectionId));
       }
     },
 

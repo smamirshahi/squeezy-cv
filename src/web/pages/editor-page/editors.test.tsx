@@ -156,8 +156,9 @@ describe("EditorExperience", () => {
     click(setShouldApplyChanges, store);
     const items = storedSection(store, "experience").items;
     expect(items).toHaveLength(4);
-    expect(items[3]).toMatchObject({ shouldShow: true });
-    expect(items[3].fields.jobTitle).toBe("");
+    // no end date = current, so it sits after the role that is current and before the ended ones
+    expect(items[1]).toMatchObject({ shouldShow: true });
+    expect(items[1].fields.jobTitle).toBe("");
   });
 
   it("removes an item from the draft, and only applies it on Apply", () => {
@@ -174,18 +175,15 @@ describe("EditorExperience", () => {
     ]);
   });
 
-  it("reorders items in the draft", () => {
+  it("shows items in date order, newest first, and has no reorder arrows", () => {
     const store = createStore();
     renderWith(store, <EditorExperience sectionId="experience" />);
-    const down = screen.getAllByTestId("ArrowDownwardIcon");
-    fireEvent.click(down[0].closest("button")!);
-    expect(input("Job Title", 0).value).toBe("Software Developer");
-    click(setShouldApplyChanges, store);
-    expect(storedSection(store, "experience").items.map((i) => i.id)).toEqual([
-      "exp-2",
-      "exp-1",
-      "exp-3",
-    ]);
+    expect(screen.queryByTestId("ArrowDownwardIcon")).toBeNull();
+    expect(screen.queryByTestId("ArrowUpwardIcon")).toBeNull();
+    // the current role first, then by end date
+    expect(input("Job Title", 0).value).toBe("Senior Software Developer");
+    expect(input("Job Title", 1).value).toBe("Software Developer");
+    expect(input("Job Title", 2).value).toBe("Intern");
   });
 
   it("has no eye button: what is shown is decided per job, and edits wait for Apply", () => {
