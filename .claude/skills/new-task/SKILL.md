@@ -1,6 +1,6 @@
 ---
 name: new-task
-description: Handle a newly given task by tracking it as a GitHub issue — search existing issues first, update the match with the new content, or create a detailed new issue (with design and acceptance criteria). Use whenever the user gives a new task, feature, bug or change request, or says "/new-task".
+description: Handle a newly given task end to end — track it as a GitHub issue (search first, update the match or create a detailed new one), then branch from main, implement, test and merge to main, unless the user says to only create the issue. Use whenever the user gives a new task, feature, bug or change request, or says "/new-task".
 argument-hint: <task description>
 ---
 
@@ -20,6 +20,11 @@ When the user gives a new task, make sure it is tracked in the GitHub issues bef
    - Labels that fit (for example `design-b` for the workspace redesign), and edge cases or out-of-scope notes
 4. **Report back** with the issue number and link, and say whether it was updated or created.
 
-## Working on it
+## Working on it (the default)
 
-Only start implementing when the user explicitly says to work on the task. Then follow the `work-on-issue` skill with that issue's ID. Otherwise stop after step 4.
+**Do not wait to be asked.** Whenever the user gives a task, bug, feature or change request (a screenshot with a remark counts), run the whole flow: issue (steps 1-4), then the `work-on-issue` skill with that issue's ID: a branch named from the issue ID, started from an up-to-date `main`, implement, test, PR, merge to `main`. The user has said they do not want to repeat this each time.
+
+- **Only create the issue** (stop after step 4) when the user says so explicitly, for example "only create an issue" or "don't work on it".
+- Several tasks in one message or sent while you work: one issue, one branch and one merge **each**, one after the other. Never mix two tasks in one branch.
+- Questions ("is this needed?") are answered first; start the flow when the user agrees or the intent is plain.
+- Uncommitted work that belongs to an earlier task is finished and merged first.

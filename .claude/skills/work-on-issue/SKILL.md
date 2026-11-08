@@ -6,7 +6,7 @@ argument-hint: <issue-id>
 
 # Work on an issue
 
-The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask for it.
+The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask for it. The `new-task` skill calls this skill by default for every new task, so it runs without the user asking.
 
 ## 1. Read the issue
 
@@ -17,7 +17,7 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
 ## 2. Create the branch
 
 - Start from an up-to-date `main`: `git switch main && git pull`.
-- Name the branch `feature/<issue-id>-<short-kebab-description>`, e.g. `feature/101-ai-import`.
+- Name the branch `feature/<issue-id>-<short-kebab-description>`, e.g. `feature/101-ai-import`. The issue ID comes first, so create the issue before the branch.
 - If there are uncommitted changes that are not part of this issue, stop and ask what to do with them.
 
 ## 3. Implement
