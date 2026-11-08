@@ -14,6 +14,7 @@ import {
   FormControlLabel,
   IconButton,
   MenuItem,
+  ToggleButton,
   Tooltip,
   TextField,
   Typography,
@@ -123,19 +124,17 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
   );
 }
 
-/** The level choices: 0 = none, 1-10 = the rating in half steps (10 = five stars, the highest) */
-const LEVEL_STEPS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/** The level choices, 1 (learning) to 5 (expert). A plus adds half a step (3 + plus = 3.5). */
+const LEVEL_STEPS = [1, 2, 3, 4, 5];
+const MAX_LEVEL = 5;
 
-/** "No level", "3", "4 – Working": even steps also carry the name of the level */
-function levelOptionLabel(step: number): string {
-  if (step === 0) {
-    return "No level";
-  }
-  return step % 2 === 0 ? `${step} – ${levelLabel(step / 2)}` : String(step);
+/** "3 – Proficient" */
+function levelOptionLabel(level: number): string {
+  return `${level} – ${levelLabel(level)}`;
 }
 
 const LEVEL_HINT =
-  "Level: how well you know the skill, from 1 (just learning) to 10 (expert). It is not years of experience; that is the Years field. Both are optional, and each job decides whether to show them.";
+  "Level: how well you know the skill, from 1 (just learning) to 5 (expert); the + means a bit above that level. It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
 
 interface SkillCardProps {
   section: Section;
@@ -158,6 +157,8 @@ function SkillCard({
   const dispatch = useAppDispatch();
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
   const skillName = bullet.text || `Skill ${index + 1}`;
+  const level = Math.floor(bullet.rating ?? 0);
+  const isPlus = (bullet.rating ?? 0) - level === 0.5;
   return (
     <Box
       sx={{
@@ -212,25 +213,49 @@ function SkillCard({
         sx={{ flex: 1 }}
       />
       {tracksLevels(section) && (
-        <TextField
-          select
-          size="small"
-          label="Level"
-          value={String((bullet.rating ?? 0) * 2)}
-          onChange={(event) => {
-            const rating = Number(event.target.value) / 2;
-            if (isRatingAcceptable(rating)) {
-              dispatch(updateBullet({ ...ref, update: { rating } }));
-            }
-          }}
-          sx={{ width: 150 }}
-        >
-          {LEVEL_STEPS.map((step) => (
-            <MenuItem key={step} value={String(step)}>
-              {levelOptionLabel(step)}
-            </MenuItem>
-          ))}
-        </TextField>
+        <>
+          <TextField
+            select
+            size="small"
+            label="Level"
+            value={level > 0 ? String(level) : ""}
+            onChange={(event) => {
+              const chosen = Number(event.target.value);
+              const rating =
+                isPlus && chosen < MAX_LEVEL ? chosen + 0.5 : chosen;
+              if (isRatingAcceptable(rating)) {
+                dispatch(updateBullet({ ...ref, update: { rating } }));
+              }
+            }}
+            sx={{ width: 150 }}
+          >
+            {LEVEL_STEPS.map((step) => (
+              <MenuItem key={step} value={String(step)}>
+                {levelOptionLabel(step)}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Tooltip title="Plus: a bit above this level (3 + plus = three and a half)">
+            <span>
+              <ToggleButton
+                value="plus"
+                size="small"
+                selected={isPlus}
+                disabled={level === 0 || level >= MAX_LEVEL}
+                aria-label={`${skillName} plus`}
+                onChange={() => {
+                  const rating = isPlus ? level : level + 0.5;
+                  if (isRatingAcceptable(rating)) {
+                    dispatch(updateBullet({ ...ref, update: { rating } }));
+                  }
+                }}
+                sx={{ px: 1, py: 0.75, minWidth: 0, lineHeight: 1 }}
+              >
+                +
+              </ToggleButton>
+            </span>
+          </Tooltip>
+        </>
       )}
       <TextField
         size="small"
