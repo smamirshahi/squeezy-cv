@@ -38,7 +38,6 @@ import {
 import { moveTargets as sectionTargets } from "@shared/vault/unsorted";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { variantsSelector } from "@store/jobs/jobs-slice";
 import {
   addBullet,
   moveBullet,
@@ -416,13 +415,9 @@ export function VaultItemEditor({
   onSelectItem,
 }: Props): JSX.Element {
   const dispatch = useAppDispatch();
-  const variants = useAppSelector(variantsSelector);
   const [focusBulletId, setFocusBulletId] = useState<string>("");
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const index = section.items.findIndex((entry) => entry.id === item.id);
-  const shownIn = variants.filter(
-    (variant) => variant.selection[item.id]?.isVisible !== false
-  ).length;
   const ref = { sectionId: section.id, itemId: item.id };
   const isSkills = section.type === "skills";
   const vaultSections = useAppSelector(sectionsSelector);
@@ -522,15 +517,6 @@ export function VaultItemEditor({
           Next ]
         </Button>
       </Box>
-
-      <Alert severity="warning">
-        You are editing a <b>vault fact</b>.{" "}
-        {shownIn === 0
-          ? "No job shows this item right now."
-          : `Changes apply to ${shownIn === variants.length ? "all " : ""}${shownIn} ${shownIn === 1 ? "job" : "jobs"} that use it.`}{" "}
-        To change only one job, edit it on the page instead. Changes are saved
-        to the vault as you type; use Save to write them to disk.
-      </Alert>
 
       <Box
         sx={{
