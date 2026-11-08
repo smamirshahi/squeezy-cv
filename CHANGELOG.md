@@ -12,6 +12,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 Version 0.2.0 (not released yet; the user tests first). The variant is split into a
 template and a job (#165-#172).
 
+### Added
+
+- Work Experience and Education: an optional Link on each item; when set, the organisation on the CV (and in the PDF) is a hyperlink. Only http(s) links are used (#235).
+
 ### Fixed
 
 - Vault: the "You are editing a vault fact" banner is gone from the item editor and the section pages (#231).

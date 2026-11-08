@@ -19,6 +19,7 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   moveSection,
   removeSection,
+  updateItemFields,
   setVault,
   updateProfile,
 } from "@store/vault/vault-slice";
@@ -271,5 +272,36 @@ describe("UK single-column template", () => {
     const html = render(makeStore());
     expect(html).toContain("break-inside:avoid");
     expect(html).toMatch(/color:#000;background-color:#fff/);
+  });
+
+  it("makes the organisation a hyperlink only when a valid link is set", () => {
+    const store = makeStore();
+    expect(render(store)).not.toContain('href="https://example.com/');
+
+    const expId = store
+      .getState()
+      .vault.sections.find((section) => section.type === "experience")!.id;
+    const itemId = store
+      .getState()
+      .vault.sections.find((section) => section.id === expId)!.items[0].id;
+    store.dispatch(
+      updateItemFields({
+        sectionId: expId,
+        itemId,
+        fields: { link: "example.com/about" },
+      })
+    );
+    const html = render(store);
+    expect(html).toContain('href="https://example.com/about"');
+    expect(html).toContain('rel="noopener noreferrer"');
+
+    store.dispatch(
+      updateItemFields({
+        sectionId: expId,
+        itemId,
+        fields: { link: "javascript:alert(1)" },
+      })
+    );
+    expect(render(store)).not.toContain("javascript:");
   });
 });
