@@ -17,7 +17,12 @@ import {
   vaultReducer,
   VaultState,
 } from "@store/vault/vault-slice";
-import { moveInArray, normalizeTags } from "@shared/vault/vault-utils";
+import {
+  moveInArray,
+  normalizeTags,
+  sortedSection,
+  withDatedSectionsSorted,
+} from "@shared/vault/vault-utils";
 
 function freshVault(): VaultState {
   let n = 0;
@@ -33,6 +38,40 @@ function exp(state: VaultState, itemId = "exp-1"): Item {
     .find((s) => s.id === EXP)!
     .items.find((i) => i.id === itemId)!;
 }
+
+describe("date order of work experience and education", () => {
+  it("sorts by end date (none = current first), then start date, and re-sorts on a date change", () => {
+    let state = vaultReducer(
+      freshVault(),
+      addItem({
+        sectionId: EXP,
+        id: "late",
+        fields: { startDate: "2019-01-01", endDate: "2022-02-28" },
+      })
+    );
+    const ids = (): string[] =>
+      state.sections.find((s) => s.id === EXP)!.items.map((i) => i.id);
+    // same end date as exp-2: the later start comes first
+    expect(ids()).toEqual(["exp-1", "late", "exp-2", "exp-3"]);
+
+    state = vaultReducer(
+      state,
+      updateItemFields({
+        sectionId: EXP,
+        itemId: "exp-3",
+        fields: { endDate: "2024-01-01" },
+      })
+    );
+    expect(ids()).toEqual(["exp-1", "exp-3", "late", "exp-2"]);
+  });
+
+  it("leaves other section types in the order they have", () => {
+    const vault = freshVault();
+    expect(withDatedSectionsSorted(vault)).toBe(vault);
+    const skills = freshVault().sections.find((s) => s.type === "skills")!;
+    expect(sortedSection(skills)).toBe(skills);
+  });
+});
 
 describe("vault-utils", () => {
   it("moveInArray moves, clamps and ignores bad indexes", () => {
@@ -65,9 +104,10 @@ describe("items", () => {
       tags: [],
       shouldShow: true,
     });
-    expect(state.sections.find((s) => s.id === EXP)!.items.at(-1)!.id).toBe(
-      "new"
-    );
+    // No end date = current: after the current role (later start), before the ended ones
+    expect(
+      state.sections.find((s) => s.id === EXP)!.items.map((i) => i.id)
+    ).toEqual(["exp-1", "new", "exp-2", "exp-3"]);
   });
 
   it("adds an item with given fields, hidden, and a generated id", () => {
@@ -75,7 +115,9 @@ describe("items", () => {
       freshVault(),
       addItem({ sectionId: EXP, fields: { company: "X" }, shouldShow: false })
     );
-    const added = state.sections.find((s) => s.id === EXP)!.items.at(-1)!;
+    const added = state.sections
+      .find((s) => s.id === EXP)!
+      .items.find((i) => i.fields.company === "X")!;
     expect(added.id).toBeTruthy();
     expect(added.fields).toEqual({ company: "X" });
     expect(added.shouldShow).toBe(false);

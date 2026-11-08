@@ -8,6 +8,23 @@ function parseUrl(url: string): URL | undefined {
   }
 }
 
+/**
+ * The address a typed link points to: `https://` is added when there is no scheme, and only
+ * http(s) is accepted. Empty, invalid or any other scheme (`javascript:`, `mailto:`)
+ * gives undefined, so the text stays plain.
+ */
+export function normaliseLink(text: string | undefined): string | undefined {
+  const trimmed = (text ?? "").trim();
+  if (trimmed === "") {
+    return undefined;
+  }
+  const parsed = parseUrl(trimmed);
+  if (!parsed || !["http:", "https:"].includes(parsed.protocol)) {
+    return undefined;
+  }
+  return parsed.href;
+}
+
 function hostWithoutWww(parsed: URL): string {
   return parsed.hostname.replace(/^www\./i, "").toLowerCase();
 }
