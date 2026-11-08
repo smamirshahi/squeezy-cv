@@ -12,6 +12,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 Version 0.2.0 (not released yet; the user tests first). The variant is split into a
 template and a job (#165-#172).
 
+### Fixed
+
+- **Style settings preview follows the Page card**: the demo sheet now reacts to Margin, Date format and the right-to-work line (it already followed icons, section spacing and the title line).
+
 ### Changed
 
 - **Delete a template that jobs use**: Delete is now allowed whenever it is not the last template. If jobs use it, the dialog lists them and asks which template to move them to (their auto-fit result is reset). Applications already sent keep their own frozen copy of the CV, so nothing sent changes.
