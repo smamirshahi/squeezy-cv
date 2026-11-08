@@ -9,8 +9,9 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
-Version 0.2.0 (not released yet; the user tests first). The variant is split into a
-template and a job (#165-#172).
+## [0.2.0] - 2026-11-08
+
+The variant is split into a template and a job (#165-#172).
 
 ### Added
 
@@ -185,5 +186,6 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/smamirshahi/CV-Builder/releases/tag/v0.1.0

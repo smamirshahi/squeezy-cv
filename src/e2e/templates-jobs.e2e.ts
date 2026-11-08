@@ -156,13 +156,17 @@ describe("templates and jobs in the browser", () => {
       .first()
       .waitFor();
 
-    // a template a job uses cannot be deleted, and the page says why
+    // a template jobs use can be deleted: the dialog says which jobs move and asks where to
     await openTool("Templates");
     const button = page.getByRole("button", {
       name: "Delete template Template Two",
     });
-    expect(await button.isDisabled()).toBe(true);
-    await page.getByText(/Used by 2 jobs/).waitFor();
+    await button.waitFor();
+    expect(await button.isDisabled()).toBe(false);
+    await button.click();
+    await page.getByText(/2 jobs use it/).waitFor();
+    await page.getByText("Move these jobs to").first().waitFor();
+    await page.getByRole("button", { name: "Cancel" }).click();
   });
   it("Edit on a template card changes that template only, and the address keeps it", async () => {
     await page.goto(`${app.webUrl}/jobs`);
