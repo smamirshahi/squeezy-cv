@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Work Experience and Education: a free-text Description on each item in the vault. Write what you did in your own words; it shows on the CV page and in the PDF, one block per line. It is the source for AI-made bullets in a later step (#242).
+
 ## [0.2.0] - 2026-11-08
 
 The variant is split into a template and a job (#165-#172).

@@ -9,6 +9,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
+import { ItemDescription } from "@pages/preview-page/item-description";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
 interface Props {
@@ -85,6 +86,7 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
               }}
             />
           </CvBlock>
+          <ItemDescription text={item.fields.description} />
           {item.bullets.length > 0 && (
             <Box
               component="ul"
