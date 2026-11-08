@@ -43,6 +43,10 @@ const cvDataSlice = createSlice({
       state.style.shouldShowRightToWork = action.payload;
     },
 
+    setShouldShowLinks(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowLinks = action.payload;
+    },
+
     setSectionSpacing(state, action: PayloadAction<number | undefined>) {
       if (action.payload === undefined) {
         delete state.style.sectionSpacing;
@@ -101,6 +105,7 @@ export const {
   setStyle,
   setDateFormat,
   setShouldShowRightToWork,
+  setShouldShowLinks,
   setSectionSpacing,
   setHasHeadingLine,
   setPaperMargin,

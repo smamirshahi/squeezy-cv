@@ -168,6 +168,26 @@ function flattenSkills(items: RenderedItem[]): RenderedItem[] {
       ];
 }
 
+/** The links in the job's order; links the order does not list keep their vault order, after the listed ones */
+export function orderLinks(
+  links: LinkItem[],
+  order: string[] | undefined
+): LinkItem[] {
+  if (!order || order.length === 0) {
+    return links;
+  }
+  const rank = (id: string): number => {
+    const index = order.indexOf(id);
+    return index < 0 ? order.length : index;
+  };
+  return links
+    .map((link, position) => ({ link, position }))
+    .sort(
+      (a, b) => rank(a.link.id) - rank(b.link.id) || a.position - b.position
+    )
+    .map(({ link }) => link);
+}
+
 /**
  * Resolves a vault and a variant into the document to draw. Pure: same input, same output.
  * The layout is reconciled with the vault, so a section added later still appears and a
@@ -187,7 +207,15 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
     }
     if (id === "contactInfo") {
       return [
-        { kind: "contactInfo", id, profile: vault.profile, links: vault.links },
+        {
+          kind: "contactInfo",
+          id,
+          profile: vault.profile,
+          links:
+            variant.style.shouldShowLinks === false
+              ? []
+              : orderLinks(vault.links, variant.linkOrder),
+        },
       ];
     }
     const section = sections.get(id);

@@ -8,7 +8,7 @@ import { IconWithText } from "@components/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
-import { vaultSelector } from "@store/vault/vault-slice";
+import { LinkItem, Profile } from "@custom-types/vault-types";
 import {
   LinkKind,
   getLinkDisplayText,
@@ -21,9 +21,17 @@ const LINK_ICONS: Record<LinkKind, React.ElementType> = {
   generic: LinkIcon,
 };
 
+interface ContactInfoPreviewPageProps {
+  profile: Profile;
+  /** The links the job shows, in its order (none when the template hides them) */
+  links: LinkItem[];
+}
+
 /** Contact Information (details) */
-export function ContactInfoPreviewPage(): JSX.Element | null {
-  const { profile, links } = useAppSelector(vaultSelector);
+export function ContactInfoPreviewPage({
+  profile,
+  links,
+}: ContactInfoPreviewPageProps): JSX.Element | null {
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (

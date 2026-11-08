@@ -66,6 +66,9 @@ export const StyleSchema = Object({
   /** Whether to show full URL for contact or just the ID */
   shouldShowFullContactLinks: Boolean,
 
+  /** Whether the contact area draws the links (LinkedIn, GitHub, ...); missing = shown */
+  shouldShowLinks: Boolean.optional(),
+
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 

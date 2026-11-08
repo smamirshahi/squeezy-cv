@@ -17,6 +17,7 @@ import {
   setHasHeadingLine,
   setSectionSpacing,
   setShouldShowRightToWork,
+  setShouldShowLinks,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -27,8 +28,12 @@ const SECTION_SPACING_RANGE = { min: 0, max: 40 } as const;
 /** The Style settings page (design B14): page options and the typography table (the live preview is the right panel) */
 export function EditorTypography(): JSX.Element {
   const dispatch = useAppDispatch();
-  const { shouldShowRightToWork, sectionSpacing, hasHeadingLine } =
-    useAppSelector(styleSelector);
+  const {
+    shouldShowRightToWork,
+    shouldShowLinks,
+    sectionSpacing,
+    hasHeadingLine,
+  } = useAppSelector(styleSelector);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -109,6 +114,18 @@ export function EditorTypography(): JSX.Element {
               checked={hasHeadingLine !== false}
               onChange={(event) =>
                 dispatch(setHasHeadingLine(event.target.checked))
+              }
+            />
+          }
+        />
+        <FormControlLabel
+          sx={{ mt: 1, display: "flex" }}
+          label="Show my links (LinkedIn, GitHub, ...) in the contact details"
+          control={
+            <Checkbox
+              checked={shouldShowLinks !== false}
+              onChange={(event) =>
+                dispatch(setShouldShowLinks(event.target.checked))
               }
             />
           }

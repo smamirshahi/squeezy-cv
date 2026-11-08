@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Links: the sort buttons are gone from Main Info (the vault only holds facts). A job sets the order of its links (Jobs > Content > Links) and the template decides whether links show at all (Style settings, "Show my links") (#223).
+
 - Main Info: "Add new link" is now inside the card below the links, the link type select is narrower and the URL wider; a link type another link already uses is disabled in the list, and the list is alphabetical (Other last) and opens at the top (#220).
 
 - Main Info: the inputs now show example placeholders (#218).

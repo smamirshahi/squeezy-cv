@@ -20,6 +20,7 @@ import {
   setJobTemplate,
   setPageLimit,
   setSectionShown,
+  setLinkOrder,
   setSkillStyle,
   setTuning,
   setBulletOrders,
@@ -571,5 +572,21 @@ describe("setSectionShown", () => {
     expect(shown.jobs.find((j) => j.id === "second")?.hiddenSections).toBe(
       undefined
     );
+  });
+});
+
+describe("setLinkOrder", () => {
+  it("stores the link order in one job only", () => {
+    const base = withTwo();
+    const next = jobsReducer(
+      base,
+      setLinkOrder({ jobId: "second", order: ["b", "a"] })
+    );
+    expect(next.jobs.find((j) => j.id === "second")?.linkOrder).toEqual([
+      "b",
+      "a",
+    ]);
+    expect(next.jobs[0]).toBe(base.jobs[0]);
+    expect(next.templates).toEqual(base.templates);
   });
 });

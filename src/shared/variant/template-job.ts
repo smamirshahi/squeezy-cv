@@ -20,7 +20,12 @@ const TEMPLATE_KEYS = [
 ] as const;
 
 /** Optional fields of a job that are copied only when set */
-const JOB_OPTIONAL_KEYS = ["hiddenSections", "tuning", "tailor"] as const;
+const JOB_OPTIONAL_KEYS = [
+  "hiddenSections",
+  "linkOrder",
+  "tuning",
+  "tailor",
+] as const;
 
 /** Length of "YYYY-MM-DD" */
 const DAY_LENGTH = 10;

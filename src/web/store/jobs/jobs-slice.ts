@@ -477,6 +477,16 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** The order of the links for one job (link ids); the vault list is not touched */
+    setLinkOrder(
+      state,
+      action: PayloadAction<{ jobId: string; order: string[] }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        job.linkOrder = [...action.payload.order];
+      });
+    },
+
     /** How skills are shown with the job's template: level style, columns, minimum level */
     setSkillStyle(
       state,
@@ -649,6 +659,7 @@ export const {
   setTone,
   setItemScores,
   setSectionShown,
+  setLinkOrder,
   setPageLimit,
   setSkillStyle,
   setAutoFit,

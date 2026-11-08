@@ -14,7 +14,13 @@ function renderPart(part: RenderedPart): JSX.Element | null {
     case "personalInfo":
       return <PersonalInfoPreviewPage key={part.id} />;
     case "contactInfo":
-      return <ContactInfoPreviewPage key={part.id} />;
+      return (
+        <ContactInfoPreviewPage
+          key={part.id}
+          profile={part.profile}
+          links={part.links}
+        />
+      );
     case "section":
       switch (part.type) {
         case "summary":
