@@ -66,7 +66,7 @@ describe("VaultPage", () => {
     expect(screen.getByText("Add new skill category")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("link", { name: "Main Info" }));
-    expect(screen.getByText("Add new link")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Add new link" })).toBeTruthy();
   });
 
   it("the footer buttons add an item and apply it end to end", () => {

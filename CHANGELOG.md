@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Main Info: "Add new link" is now inside the card below the links, the link type select is narrower and the URL wider; a link type another link already uses is disabled in the list, and the list is alphabetical (Other last) and opens at the top (#220).
+
 - Main Info: the inputs now show example placeholders (#218).
 
 - **Style settings preview follows the Page card**: the demo sheet now reacts to Margin, Date format and the right-to-work line (it already followed icons, section spacing and the title line).
