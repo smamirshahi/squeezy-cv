@@ -13,6 +13,60 @@ export function moveInArray<T>(array: T[], from: number, to: number): T[] {
   return array;
 }
 
+/** Section types whose items are kept in date order by the vault */
+const DATED_TYPES: Section["type"][] = ["experience", "education"];
+
+/** Sorts a dated item's date as a comparable number: an empty end date means "current" */
+function dateValue(iso: string | undefined, isEnd: boolean): number {
+  const time = iso ? Date.parse(iso) : NaN;
+  if (Number.isNaN(time)) {
+    return isEnd ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  }
+  return time;
+}
+
+/**
+ * Items newest first: by end date (no end date = current = first), then by start date.
+ * Items that tie keep their order. Returns a new array.
+ */
+export function sortItemsByDate(items: Item[]): Item[] {
+  return [...items].sort(
+    (a, b) =>
+      dateValue(b.fields.endDate, true) - dateValue(a.fields.endDate, true) ||
+      dateValue(b.fields.startDate, false) -
+        dateValue(a.fields.startDate, false)
+  );
+}
+
+/** The section with its items in date order (same object when it needs none or has no dates) */
+export function sortedSection(section: Section): Section {
+  if (!DATED_TYPES.includes(section.type)) {
+    return section;
+  }
+  const items = sortItemsByDate(section.items);
+  return items.every((item, index) => item === section.items[index])
+    ? section
+    : { ...section, items };
+}
+
+/**
+ * The vault with work experience and education in date order. Returns the same object when
+ * nothing has to move (editors compare the vault by reference to see unapplied changes).
+ */
+export function withDatedSectionsSorted(vault: Vault): Vault {
+  const sections = vault.sections.map(sortedSection);
+  return sections.every((section, index) => section === vault.sections[index])
+    ? vault
+    : { ...vault, sections };
+}
+
+/** Puts the items of a work experience or education section in date order (in place) */
+export function keepInDateOrder(section: Section | undefined): void {
+  if (section && DATED_TYPES.includes(section.type)) {
+    section.items = sortItemsByDate(section.items);
+  }
+}
+
 /** Trims tags, drops empty ones and duplicates (case-insensitive), keeps first spelling and order */
 export function normalizeTags(tags: string[]): string[] {
   const seen = new Set<string>();

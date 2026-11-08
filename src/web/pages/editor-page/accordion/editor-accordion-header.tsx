@@ -15,7 +15,8 @@ import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 interface Props {
   accordionIndex: number;
-  swapFunction: (index1: number, index2: number) => void;
+  /** Leave out when the order is automatic (no arrows then) */
+  swapFunction?: (index1: number, index2: number) => void;
   removeFunction: (id: string) => void;
   /** Leave out when what is shown is decided per job elsewhere: no eye button then */
   onVisibilityChange?: (id: string, shouldShow: boolean) => void;
@@ -52,11 +53,13 @@ export function EditorAccordionHeader({
           backgroundColor: WORKSPACE_COLORS.hover,
         }}
       >
-        <SortingIcons
-          index={accordionIndex}
-          swapFunction={swapFunction}
-          isLastEntity={isLastEntity}
-        />
+        {swapFunction && (
+          <SortingIcons
+            index={accordionIndex}
+            swapFunction={swapFunction}
+            isLastEntity={isLastEntity}
+          />
+        )}
         <AccordionSummary
           aria-controls={`panel-${entity.id}-content`}
           id={`panel-${entity.id}-header`}
