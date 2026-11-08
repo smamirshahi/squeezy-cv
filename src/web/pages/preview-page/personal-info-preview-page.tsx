@@ -10,8 +10,12 @@ export function PersonalInfoPreviewPage({
 }: {
   profile: Profile;
 }): JSX.Element | null {
-  const { shouldShowRightToWork, shouldShowNationality } =
-    useAppSelector(styleSelector);
+  const {
+    shouldShowRightToWork,
+    shouldShowNationality,
+    shouldShowMaritalStatus,
+    shouldShowGender,
+  } = useAppSelector(styleSelector);
 
   if (!profile.fullName) {
     return null;
@@ -34,6 +38,15 @@ export function PersonalInfoPreviewPage({
           variant="bodySm"
           text={`Nationality: ${(profile.nationalities ?? []).join(", ")}`}
         />
+      )}
+      {shouldShowMaritalStatus && profile.maritalStatus && (
+        <CvTypography
+          variant="bodySm"
+          text={`Marital status: ${profile.maritalStatus}`}
+        />
+      )}
+      {shouldShowGender && profile.gender && (
+        <CvTypography variant="bodySm" text={`Gender: ${profile.gender}`} />
       )}
       {shouldShowRightToWork && profile.rightToWork && (
         <CvTypography variant="bodySm" text={profile.rightToWork} />

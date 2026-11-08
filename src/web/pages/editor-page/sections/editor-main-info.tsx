@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  MenuItem,
   IconButton,
   InputAdornment,
   TextField,
@@ -27,6 +28,7 @@ import {
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 import { LinkTypeSelect } from "@pages/editor-page/link-type/link-type-select";
 import { NATIONALITIES } from "@shared/vault/nationalities";
+import { GENDERS, MARITAL_STATUSES } from "@shared/vault/personal-options";
 import { JobTitleOptions } from "@pages/editor-page/sections/job-title-options";
 import {
   guessLinkTypeFromUrl,
@@ -108,6 +110,34 @@ export function EditorMainInfo(): JSX.Element | null {
             />
           )}
         />
+        {(
+          [
+            ["maritalStatus", "Marital status (optional)", MARITAL_STATUSES],
+            ["gender", "Gender (optional)", GENDERS],
+          ] as const
+        ).map(([key, label, choices]) => (
+          <TextField
+            key={key}
+            select
+            label={label}
+            value={draft.profile[key] ?? ""}
+            onChange={(event) =>
+              draftDispatch(updateProfile({ [key]: event.target.value }))
+            }
+            helperText="Shown under your name when turned on in Style Settings."
+            slotProps={{
+              inputLabel: { shrink: true },
+              select: { displayEmpty: true },
+            }}
+          >
+            <MenuItem value="">Not stated</MenuItem>
+            {choices.map((choice) => (
+              <MenuItem key={choice} value={choice}>
+                {choice}
+              </MenuItem>
+            ))}
+          </TextField>
+        ))}
         <TextField
           slotProps={{ inputLabel: { shrink: true } }}
           label="Right to work (optional)"

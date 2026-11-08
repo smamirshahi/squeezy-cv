@@ -47,6 +47,14 @@ const cvDataSlice = createSlice({
       state.style.shouldShowNationality = action.payload;
     },
 
+    setShouldShowMaritalStatus(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowMaritalStatus = action.payload;
+    },
+
+    setShouldShowGender(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowGender = action.payload;
+    },
+
     setShouldShowLinks(state, action: PayloadAction<boolean>) {
       state.style.shouldShowLinks = action.payload;
     },
@@ -111,6 +119,8 @@ export const {
   setShouldShowRightToWork,
   setShouldShowLinks,
   setShouldShowNationality,
+  setShouldShowMaritalStatus,
+  setShouldShowGender,
   setSectionSpacing,
   setHasHeadingLine,
   setPaperMargin,

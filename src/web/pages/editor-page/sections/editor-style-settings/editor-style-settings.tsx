@@ -19,6 +19,8 @@ import {
   setShouldShowRightToWork,
   setShouldShowLinks,
   setShouldShowNationality,
+  setShouldShowMaritalStatus,
+  setShouldShowGender,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -33,6 +35,8 @@ export function EditorTypography(): JSX.Element {
     shouldShowRightToWork,
     shouldShowLinks,
     shouldShowNationality,
+    shouldShowMaritalStatus,
+    shouldShowGender,
     sectionSpacing,
     hasHeadingLine,
   } = useAppSelector(styleSelector);
@@ -140,6 +144,30 @@ export function EditorTypography(): JSX.Element {
               checked={shouldShowNationality ?? false}
               onChange={(event) =>
                 dispatch(setShouldShowNationality(event.target.checked))
+              }
+            />
+          }
+        />
+        <FormControlLabel
+          sx={{ mt: 1, display: "flex" }}
+          label="Show my marital status under my name"
+          control={
+            <Checkbox
+              checked={shouldShowMaritalStatus ?? false}
+              onChange={(event) =>
+                dispatch(setShouldShowMaritalStatus(event.target.checked))
+              }
+            />
+          }
+        />
+        <FormControlLabel
+          sx={{ mt: 1, display: "flex" }}
+          label="Show my gender under my name"
+          control={
+            <Checkbox
+              checked={shouldShowGender ?? false}
+              onChange={(event) =>
+                dispatch(setShouldShowGender(event.target.checked))
               }
             />
           }

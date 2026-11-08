@@ -113,6 +113,29 @@ describe("EditorMainInfo", () => {
     ]);
   });
 
+  it("sets and clears marital status and gender from lists, both optional", () => {
+    const store = createStore();
+    renderWith(store, <EditorMainInfo />);
+    expect(store.getState().vault.profile.maritalStatus).toBeUndefined();
+
+    fireEvent.mouseDown(
+      screen.getByRole("combobox", { name: /Marital status/ })
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Married" }));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: /Gender/ }));
+    fireEvent.click(screen.getByRole("option", { name: "Non-binary" }));
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.profile).toMatchObject({
+      maritalStatus: "Married",
+      gender: "Non-binary",
+    });
+
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: /Gender/ }));
+    fireEvent.click(screen.getByRole("option", { name: "Not stated" }));
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.profile.gender).toBe("");
+  });
+
   it("adds and removes other job titles and explains why", () => {
     const store = createStore();
     renderWith(store, <EditorMainInfo />);
@@ -140,7 +163,7 @@ describe("EditorMainInfo", () => {
 
   it("disables a link type that another link already uses", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const github = options.find((o) => /GitHub/.test(o.textContent ?? ""))!;
     const other = options.find((o) => /Other/.test(o.textContent ?? ""))!;
@@ -215,7 +238,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types with icons and an Other option", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const names = options.map((option) => option.textContent);
     expect(names).toEqual(
@@ -235,14 +258,14 @@ describe("EditorMainInfo", () => {
     renderWith(store, <EditorMainInfo />);
 
     // LinkedIn -> Instagram
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
     fireEvent.click(screen.getByRole("option", { name: "Instagram" }));
     expect(screen.getAllByTestId("link-icon-instagram").length).toBeGreaterThan(
       0
     );
 
     // GitHub -> Other, then a custom label
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[2]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[4]);
     fireEvent.click(screen.getByRole("option", { name: "Other" }));
     fireEvent.change(input("Label"), { target: { value: "My site" } });
 
@@ -267,7 +290,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types alphabetically with Other last", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
     const names = within(screen.getByRole("listbox"))
       .getAllByRole("option")
       .map((o) => o.textContent ?? "");

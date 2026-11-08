@@ -12,6 +12,8 @@ import {
   setDateFormat,
   setShouldShowRightToWork,
   setShouldShowNationality,
+  setShouldShowMaritalStatus,
+  setShouldShowGender,
 } from "@store/cv-data/cv-data-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { setItemSelection, setVariants } from "@store/jobs/jobs-slice";
@@ -249,6 +251,26 @@ describe("UK single-column template", () => {
 
     store.dispatch(updateProfile({ nationalities: [] }));
     expect(textOf(render(store))).not.toContain("Nationality");
+  });
+
+  it("shows the marital status and gender only when set and turned on", () => {
+    const store = makeStore();
+    store.dispatch(
+      updateProfile({ maritalStatus: "Married", gender: "Female" })
+    );
+    expect(textOf(render(store))).not.toContain("Marital status");
+    expect(textOf(render(store))).not.toContain("Gender");
+
+    store.dispatch(setShouldShowMaritalStatus(true));
+    expect(textOf(render(store))).toContain("Marital status: Married");
+    expect(textOf(render(store))).not.toContain("Gender");
+
+    store.dispatch(setShouldShowGender(true));
+    expect(textOf(render(store))).toContain("Gender: Female");
+
+    store.dispatch(updateProfile({ maritalStatus: "", gender: "" }));
+    expect(textOf(render(store))).not.toContain("Marital status");
+    expect(textOf(render(store))).not.toContain("Gender");
   });
 
   it("draws a highlighted item in bold", () => {
