@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
+import { ItemPanelContext } from "@pages/editor-page/item-list/item-panel-context";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
@@ -202,15 +203,20 @@ function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
 }
 
 /**
- * Right: the item panel. It has nothing to show for now (what a job shows is decided in the
- * job, and a sent application is a frozen copy), so it stays empty.
+ * Right: the item panel. The editor of a section with items draws the form of the chosen item
+ * into it (through `ItemPanelContext`); on other pages it stays empty.
  */
-function ItemPanel(): JSX.Element {
+function ItemPanel({
+  panelRef,
+}: {
+  panelRef: (element: HTMLElement | null) => void;
+}): JSX.Element {
   return (
-    <ResizableAside side="right" label="the item panel" defaultWidth={300}>
+    <ResizableAside side="right" label="the item panel" defaultWidth={340}>
       <Box
         component="aside"
         aria-label="Item panel"
+        ref={panelRef}
         sx={{
           width: "100%",
           flex: "none",
@@ -228,6 +234,7 @@ function ItemPanel(): JSX.Element {
 export function VaultPage(): JSX.Element {
   const pages = useEditorPages();
   const route = useRoute();
+  const [panel, setPanel] = useState<HTMLElement | null>(null);
   const selectedPageId =
     route.kind === "vault" ? (route.sectionId ?? "mainInfo") : "mainInfo";
   const selectedItemId = route.kind === "vault" ? (route.itemId ?? "") : "";
@@ -258,7 +265,7 @@ export function VaultPage(): JSX.Element {
     selectedSection.type !== "summary";
 
   return (
-    <>
+    <ItemPanelContext.Provider value={panel}>
       <VaultTree
         selectedPage={selectedPageId}
         selectedItemId={selectedItemId}
@@ -302,7 +309,7 @@ export function VaultPage(): JSX.Element {
           </>
         )}
       </Box>
-      <ItemPanel />
-    </>
+      <ItemPanel panelRef={setPanel} />
+    </ItemPanelContext.Provider>
   );
 }

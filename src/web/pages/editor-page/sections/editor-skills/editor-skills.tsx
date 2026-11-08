@@ -1,10 +1,4 @@
-import {
-  AccordionDetails,
-  Box,
-  IconButton,
-  Rating,
-  TextField,
-} from "@mui/material";
+import { Box, IconButton, Rating, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { isRatingAcceptable } from "@custom-types/type-guards";
@@ -22,7 +16,7 @@ import {
 } from "@pages/editor-page/use-section-draft";
 import { useRatingIcon } from "@hooks/use-rating-icon";
 import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
-import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
+import { ItemListEditor } from "@pages/editor-page/item-list/item-list-editor";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 
 const NEW_SKILL_CATEGORY: NewItemTemplate = {
@@ -53,19 +47,23 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
   const items = section?.items ?? [];
 
   return (
-    <>
-      {items.map((group, index) => (
-        <EditorAccordionHeader
-          key={group.id}
-          accordionIndex={index}
-          swapFunction={moveItem}
-          removeFunction={removeItem}
-          onVisibilityChange={setVisibility}
-          title={group.fields.category ?? ""}
-          entity={{ id: group.id, shouldShow: isVisible(group.id) }}
-          isLastEntity={index === items.length - 1}
-        >
-          <AccordionDetails>
+    <ItemListEditor
+      noun="skill category"
+      rows={items.map((group) => ({
+        id: group.id,
+        title: group.fields.category ?? "",
+        shouldShow: isVisible(group.id),
+      }))}
+      onRemove={removeItem}
+      onMove={moveItem}
+      onVisibilityChange={setVisibility}
+      renderForm={(itemId) => {
+        const group = items.find((entry) => entry.id === itemId);
+        if (!group) {
+          return <></>;
+        }
+        return (
+          <>
             {/* Skill Category */}
             <Box
               sx={{
@@ -184,9 +182,9 @@ export function EditorSkills({ sectionId }: Props): JSX.Element {
               item={group}
               draftDispatch={draftDispatch}
             />
-          </AccordionDetails>
-        </EditorAccordionHeader>
-      ))}
-    </>
+          </>
+        );
+      }}
+    />
   );
 }

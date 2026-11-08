@@ -6,6 +6,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
@@ -59,7 +60,7 @@ describe("VaultPage", () => {
 
     fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     expect(store.getState().app.selectedSectionInEditorPage).toBe("experience");
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(3);
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
     expect(screen.getByText("Add new experience")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("link", { name: /^Skills/ }));
@@ -74,7 +75,7 @@ describe("VaultPage", () => {
     renderEditor(store);
     fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     fireEvent.click(screen.getByText("Add new experience"));
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(4);
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
     fireEvent.click(screen.getByText("Apply"));
     expect(
       store.getState().vault.sections.find((s) => s.id === "experience")!.items
@@ -95,11 +96,23 @@ describe("VaultPage", () => {
     }
   });
 
-  it("has an empty item panel: no per-job eyes in the vault", () => {
+  it("shows the inputs of the chosen item in the right panel, not in the middle", () => {
     renderEditor(createStore());
     fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     const panel = screen.getByRole("complementary", { name: "Item panel" });
-    expect(panel.textContent).toBe("");
+    const main = screen.getByRole("main", { name: "Edit" });
+    expect(within(panel).getByLabelText("Job Title")).toBeTruthy();
+    expect(within(main).queryByLabelText("Job Title")).toBeNull();
+
+    fireEvent.click(within(main).getByRole("button", { name: /^Intern/ }));
+    expect(
+      within(panel).getByLabelText<HTMLInputElement>("Job Title").value
+    ).toBe("Intern");
+  });
+
+  it("has no per-job eyes in the vault", () => {
+    renderEditor(createStore());
+    fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     expect(screen.queryByText("Where this item appears")).toBeNull();
     expect(
       screen.queryByRole("button", { name: /^(Hide|Show) in / })
