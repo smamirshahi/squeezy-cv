@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Vault: the "Where this item appears" panel with per-job eyes is gone; the right panel stays, empty. What a job shows is decided in the job (#229).
+
 - Work Experience and Education: no eye button (what is shown is decided per job), and "Add new experience/education" sits below the list. Apply and Discard stay fixed at the bottom of the middle area on every page that has them (#227).
 
 - Main Info: Full Name, Job Title and Right to work are one per line. The Job Title can have other options (with an (i) note on why); each job picks the one it shows (Jobs > Content > Job title). New optional Nationality (several, picked from an autofill list) shown under the name when turned on in Style settings (#225).

@@ -95,6 +95,17 @@ describe("VaultPage", () => {
     }
   });
 
+  it("has an empty item panel: no per-job eyes in the vault", () => {
+    renderEditor(createStore());
+    fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
+    const panel = screen.getByRole("complementary", { name: "Item panel" });
+    expect(panel.textContent).toBe("");
+    expect(screen.queryByText("Where this item appears")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /^(Hide|Show) in / })
+    ).toBeNull();
+  });
+
   it("holds only the user's data: no job data, style or layout pages", () => {
     renderEditor(createStore());
     for (const label of ["Job data", "Style Settings", "Jobs", "SETTINGS"]) {
