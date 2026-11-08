@@ -1,10 +1,11 @@
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import {
   Box,
   Button,
   List,
   ListItemButton,
   ListItemText,
+  MenuItem,
   ButtonBase,
   Dialog,
   DialogActions,
@@ -15,8 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Template } from "@custom-types/template-types";
-import { onAppLinkClick, useRoute } from "@hooks/navigation";
-import { TemplatesTab, formatRoute } from "@shared/routing/routes";
+import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
+import { Route, TemplatesTab, formatRoute } from "@shared/routing/routes";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
@@ -71,8 +72,64 @@ const TEMPLATE_TABS: { id: TemplateTab; label: string }[] = [
   { id: "style", label: "Style settings" },
 ];
 
+/** The address of a Templates page; Page layout and Style settings name the template they edit */
+function templatesRoute(tab: TemplateTab, templateId: string): Route {
+  return tab === "templates"
+    ? { kind: "templates", tab }
+    : { kind: "templates", tab, templateId };
+}
+
+/** Top of Page layout and Style settings: which template is being edited, and a way to switch */
+function EditedTemplateSwitcher({
+  tab,
+  templateId,
+}: {
+  tab: TemplateTab;
+  templateId: string;
+}): JSX.Element {
+  const templates = useAppSelector(templatesSelector);
+  const jobs = useAppSelector(jobsSelector);
+  const activeJob = useAppSelector(activeJobSelector);
+  const current = templates.find((t) => t.id === templateId);
+  const isActiveJobs = current?.id === activeJob.templateId;
+  return (
+    <Box sx={{ mb: 2 }}>
+      <TextField
+        select
+        size="small"
+        label="Editing template"
+        value={templateId}
+        onChange={(event) => navigate(templatesRoute(tab, event.target.value))}
+        sx={{ minWidth: 280, bgcolor: "background.paper" }}
+      >
+        {templates.map((template) => (
+          <MenuItem key={template.id} value={template.id}>
+            {template.name} (
+            {jobCountText(
+              jobs.filter((j) => j.templateId === template.id).length
+            )}
+            )
+          </MenuItem>
+        ))}
+      </TextField>
+      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mt: 0.5 }}>
+        {isActiveJobs
+          ? `Used by the job you are editing (${activeJob.name}).`
+          : `Not used by the job you are editing (${activeJob.name}); its look does not change.`}
+      </Typography>
+    </Box>
+  );
+}
+
 /** Left: the three parts of the Templates area, like the sections list in the vault */
-function TemplatesNav({ tab }: { tab: TemplateTab }): JSX.Element {
+function TemplatesNav({
+  tab,
+  templateId,
+}: {
+  tab: TemplateTab;
+  /** The template the Page layout and Style settings links open */
+  templateId: string;
+}): JSX.Element {
   return (
     <ResizableAside side="left" label="the template menu" defaultWidth={220}>
       <Box
@@ -92,10 +149,10 @@ function TemplatesNav({ tab }: { tab: TemplateTab }): JSX.Element {
             <ListItemButton
               key={entry.id}
               component="a"
-              href={formatRoute({ kind: "templates", tab: entry.id })}
+              href={formatRoute(templatesRoute(entry.id, templateId))}
               selected={tab === entry.id}
               onClick={(event: MouseEvent<HTMLElement>) =>
-                onAppLinkClick(event, { kind: "templates", tab: entry.id })
+                onAppLinkClick(event, templatesRoute(entry.id, templateId))
               }
             >
               <ListItemText primary={entry.label} />
@@ -123,11 +180,19 @@ export function TemplatesPage(): JSX.Element {
   const [draftName, setDraftName] = useState<string>("");
   const route = useRoute();
   const tab: TemplateTab = route.kind === "templates" ? route.tab : "templates";
+  const routeTemplateId =
+    route.kind === "templates" ? route.templateId : undefined;
 
   // The template the sample shows; missing or deleted = the active job's template
   const [pickedId, setPickedId] = useState<string | null>(null);
+  // The address names the template when Page layout or Style settings is open: it becomes the pick
+  useEffect(() => {
+    if (routeTemplateId !== undefined) {
+      setPickedId(routeTemplateId);
+    }
+  }, [routeTemplateId]);
   const shownTemplate =
-    templates.find((t) => t.id === pickedId) ??
+    templates.find((t) => t.id === (routeTemplateId ?? pickedId)) ??
     templates.find((t) => t.id === activeJob.templateId);
   const shownId = shownTemplate?.id ?? activeJob.templateId;
 
@@ -141,7 +206,7 @@ export function TemplatesPage(): JSX.Element {
 
   return (
     <StyleHoverProvider>
-      <TemplatesNav tab={tab} />
+      <TemplatesNav tab={tab} templateId={shownId} />
       <Box
         component="main"
         aria-label="Templates"
@@ -156,11 +221,13 @@ export function TemplatesPage(): JSX.Element {
       >
         {tab === "layout" && (
           <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+            <EditedTemplateSwitcher tab={tab} templateId={shownId} />
             <EditorPageStructure />
           </Box>
         )}
         {tab === "style" && (
           <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+            <EditedTemplateSwitcher tab={tab} templateId={shownId} />
             <EditorTypography />
           </Box>
         )}
@@ -299,6 +366,24 @@ export function TemplatesPage(): JSX.Element {
                           }
                         >
                           Use for “{activeJob.name}”
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          component="a"
+                          href={formatRoute(
+                            templatesRoute("layout", template.id)
+                          )}
+                          aria-label={`Edit template ${template.name}`}
+                          onClick={(event: MouseEvent<HTMLElement>) => {
+                            event.stopPropagation();
+                            onAppLinkClick(
+                              event,
+                              templatesRoute("layout", template.id)
+                            );
+                          }}
+                        >
+                          Edit
                         </Button>
                         <Button
                           size="small"

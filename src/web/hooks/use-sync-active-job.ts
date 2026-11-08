@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
@@ -9,9 +9,9 @@ import {
   useAppSelector,
 } from "@store/store-helper";
 import {
-  activeVariantSelector,
+  editedTemplateSelector,
   setActiveJob,
-  setTemplateAppearance,
+  setTemplateLook,
 } from "@store/jobs/jobs-slice";
 
 /**
@@ -34,24 +34,40 @@ export function activateTemplateLook(
 }
 
 /**
- * Keeps the layout and style of the active job's template equal to what the editor shows, so
- * changes on the Jobs page (Sections & layout) and Style Settings belong to the template (and every
- * job that uses it). Mount it once.
+ * Keeps the layout and style of the edited template equal to what the editor shows, so changes on
+ * the Jobs page (Sections & layout) and the Templates pages belong to the template (and every job
+ * that uses it). The edited template is the one named in the address on Templates > Page layout /
+ * Style settings, otherwise the active job's. When it changes, its look is loaded into the editor
+ * first, so the previous template's look is never written into the new one. Mount it once.
  */
 export function useSyncActiveJob(): void {
   const dispatch = useAppDispatch();
-  const variant = useAppSelector(activeVariantSelector);
+  const template = useAppSelector(editedTemplateSelector);
   const { structure } = useAppSelector(appSelector);
   const style = useAppSelector(styleSelector);
+  const loadedFor = useRef<string>(template.id);
 
   useEffect(() => {
+    if (loadedFor.current !== template.id) {
+      loadedFor.current = template.id;
+      dispatch(updatePageStructure(template.layout));
+      dispatch(setStyle(template.style));
+      return;
+    }
     if (
-      JSON.stringify(variant.layout) !== JSON.stringify(structure) ||
-      JSON.stringify(variant.style) !== JSON.stringify(style)
+      JSON.stringify(template.layout) !== JSON.stringify(structure) ||
+      JSON.stringify(template.style) !== JSON.stringify(style)
     ) {
       dispatch(
-        setTemplateAppearance({ id: variant.id, layout: structure, style })
+        setTemplateLook({ templateId: template.id, layout: structure, style })
       );
     }
-  }, [dispatch, variant.id, variant.layout, variant.style, structure, style]);
+  }, [
+    dispatch,
+    template.id,
+    template.layout,
+    template.style,
+    structure,
+    style,
+  ]);
 }

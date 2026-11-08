@@ -5,7 +5,7 @@ import { activateTemplateLook } from "@hooks/use-sync-active-job";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { AppDispatch, useAppSelector } from "@store/store-helper";
 import {
-  activeTemplateSelector,
+  editedTemplateSelector,
   jobsSelector,
   setJobTemplate,
 } from "@store/jobs/jobs-slice";
@@ -25,9 +25,9 @@ export function nextTemplateName(templates: Template[]): string {
   return `Template ${number}`;
 }
 
-/** The template the active job uses and how many jobs share it */
+/** The template being edited (the active job's, unless the Templates pages name another) and how many jobs share it */
 function useTemplateScope(): { template: Template; jobCount: number } {
-  const template = useAppSelector(activeTemplateSelector);
+  const template = useAppSelector(editedTemplateSelector);
   const jobs = useAppSelector(jobsSelector);
   return {
     template,

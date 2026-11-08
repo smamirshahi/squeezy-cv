@@ -25,6 +25,13 @@ interface AppState {
 
   structure: PageStructure;
 
+  /**
+   * The template whose layout and style `structure` and the style slice mirror, while the
+   * Templates > Page layout / Style settings pages edit a template that is not the active job's.
+   * null = the active job's template.
+   */
+  editedTemplateId: string | null;
+
   columnWidth: {
     /** Width of the left column in preview page in percentage */
     left: number;
@@ -65,6 +72,7 @@ export const initialState: AppState = {
     left: [],
     right: [],
   },
+  editedTemplateId: null,
   columnWidth: {
     left: 50,
     right: 50,
@@ -114,6 +122,10 @@ const appSlice = createSlice({
       state.selectedSectionInEditorPage = action.payload;
     },
 
+    setEditedTemplateId(state, action: PayloadAction<string | null>) {
+      state.editedTemplateId = action.payload;
+    },
+
     setTool(state, action: PayloadAction<WorkspaceTool>) {
       state.tool = action.payload;
     },
@@ -160,6 +172,7 @@ export const {
 
   setSelectedSectionInEditorPage,
   setTool,
+  setEditedTemplateId,
   setSelectedBlock,
   setCanvasZoom,
   setFit,

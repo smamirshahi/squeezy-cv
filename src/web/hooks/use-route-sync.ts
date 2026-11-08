@@ -2,8 +2,16 @@ import { useEffect, useRef } from "react";
 import { Route } from "@shared/routing/routes";
 import { navigate } from "@hooks/navigation";
 import { activateVariant } from "@hooks/use-sync-active-job";
-import { setSelectedBlock, setTool } from "@store/app/app-slice";
-import { variantsSelector } from "@store/jobs/jobs-slice";
+import {
+  setEditedTemplateId,
+  setSelectedBlock,
+  setTool,
+} from "@store/app/app-slice";
+import {
+  activeTemplateSelector,
+  templatesSelector,
+  variantsSelector,
+} from "@store/jobs/jobs-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 /**
@@ -19,7 +27,42 @@ export function useRouteSync(route: Route): void {
   const variants = useAppSelector(variantsSelector);
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
+  const templates = useAppSelector(templatesSelector);
+  const activeTemplateId = useAppSelector((s) => activeTemplateSelector(s).id);
   const last = useRef<{ route?: string; active?: string } | null>(null);
+
+  // The template the Page layout and Style settings pages edit: the one in the address. An
+  // address without one (`/templates/layout`) gets the active job's template filled in.
+  const templateTab =
+    route.kind === "templates" && route.tab !== "templates" ? route.tab : null;
+  const routeTemplateId =
+    route.kind === "templates" ? route.templateId : undefined;
+  useEffect(() => {
+    if (templateTab === null || isLoading) {
+      dispatch(setEditedTemplateId(null));
+      return;
+    }
+    if (routeTemplateId === undefined) {
+      navigate(
+        { kind: "templates", tab: templateTab, templateId: activeTemplateId },
+        { replace: true }
+      );
+      return;
+    }
+    // An unknown id stays unset; the workspace shows it as not found
+    dispatch(
+      setEditedTemplateId(
+        templates.some((t) => t.id === routeTemplateId) ? routeTemplateId : null
+      )
+    );
+  }, [
+    templateTab,
+    routeTemplateId,
+    activeTemplateId,
+    templates,
+    isLoading,
+    dispatch,
+  ]);
 
   // Tool and vault section
   const toolKind = route.kind;

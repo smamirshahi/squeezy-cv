@@ -38,6 +38,16 @@ describe("parseRoute", () => {
       kind: "templates",
       tab: "style",
     });
+    expect(parseRoute("/templates/t1/layout")).toEqual({
+      kind: "templates",
+      tab: "layout",
+      templateId: "t1",
+    });
+    expect(parseRoute("/templates/a%20b/style")).toEqual({
+      kind: "templates",
+      tab: "style",
+      templateId: "a b",
+    });
     expect(parseRoute("/tailor")).toEqual({ kind: "tailor" });
     expect(parseRoute("/chat/main")).toEqual({ kind: "chat", jobId: "main" });
     expect(parseRoute("/ai")).toEqual({ kind: "ai" });
@@ -69,6 +79,10 @@ describe("parseRoute", () => {
       "/vault/a/b/c",
       "/jobs/a/b",
       "/templates/colours",
+      "/templates/t1",
+      "/templates/t1/colours",
+      "/templates/t1/templates",
+      "/templates/t1/layout/x",
       "/tailor/x",
       "/print",
       "/applications/a/b",
@@ -88,6 +102,8 @@ describe("formatRoute", () => {
     { kind: "templates", tab: "templates" },
     { kind: "templates", tab: "layout" },
     { kind: "templates", tab: "style" },
+    { kind: "templates", tab: "layout", templateId: "t1" },
+    { kind: "templates", tab: "style", templateId: "a b/c" },
     { kind: "tailor" },
     { kind: "chat", jobId: "main" },
     { kind: "chat" },

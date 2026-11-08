@@ -8,7 +8,7 @@ export type TemplatesTab = "templates" | "layout" | "style";
 export type Route =
   | { kind: "vault"; sectionId?: string; itemId?: string }
   | { kind: "jobs"; jobId?: string; view: JobsView }
-  | { kind: "templates"; tab: TemplatesTab }
+  | { kind: "templates"; tab: TemplatesTab; templateId?: string }
   | { kind: "tailor" }
   | { kind: "chat"; jobId?: string }
   | { kind: "ai" }
@@ -68,9 +68,15 @@ export function parseRoute(pathname: string, search = ""): Route {
             view: params.get("view") === "settings" ? "settings" : "page",
           };
     case "templates": {
+      // `/templates`, `/templates/<tab>` (no template named yet) or `/templates/<id>/layout|style`
       const tab = second ?? "templates";
-      return third === undefined && TEMPLATE_TABS.some((t) => t === tab)
-        ? { kind: "templates", tab: tab as TemplatesTab }
+      if (third === undefined && TEMPLATE_TABS.some((t) => t === tab)) {
+        return { kind: "templates", tab: tab as TemplatesTab };
+      }
+      return second !== undefined &&
+        (third === "layout" || third === "style") &&
+        rest.length === 0
+        ? { kind: "templates", tab: third, templateId: second }
         : notFound;
     }
     case "tailor":
@@ -114,8 +120,11 @@ export function formatRoute(route: Route): string {
     case "jobs":
       return `/jobs${segment(route.jobId)}${route.view === "settings" ? "?view=settings" : ""}`;
     case "templates":
-      return route.tab === "templates"
-        ? "/templates"
+      if (route.tab === "templates") {
+        return "/templates";
+      }
+      return route.templateId
+        ? `/templates/${encodeURIComponent(route.templateId)}/${route.tab}`
         : `/templates/${route.tab}`;
     case "tailor":
       return "/tailor";

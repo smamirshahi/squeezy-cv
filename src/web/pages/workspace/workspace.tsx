@@ -26,7 +26,7 @@ import { onAppLinkClick } from "@hooks/navigation";
 import { useRouteSync } from "@hooks/use-route-sync";
 import { WorkspaceRoute, formatRoute } from "@shared/routing/routes";
 import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
-import { jobsSelector } from "@store/jobs/jobs-slice";
+import { jobsSelector, templatesSelector } from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
@@ -38,13 +38,14 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
   const canvasRef = useRef<HTMLElement>(null);
   const tool = route.kind;
   const jobs = useAppSelector(jobsSelector);
+  const templates = useAppSelector(templatesSelector);
   const sections = useAppSelector(sectionsSelector);
   const activeJobName = useAppSelector(
     (s) => s.jobs.jobs.find((job) => job.id === s.jobs.activeJobId)?.name ?? ""
   );
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
   useRouteSync(route);
-  const missing = missingThing(route, isLoading, jobs, sections);
+  const missing = missingThing(route, isLoading, jobs, sections, templates);
   useEffect(() => {
     document.title = `${missing ? "Not found" : titleOf(route, activeJobName)} · CV Builder`;
   }, [route, activeJobName, missing]);
@@ -197,10 +198,21 @@ function missingThing(
   route: WorkspaceRoute,
   isLoading: boolean,
   jobs: { id: string }[],
-  sections: { id: string; items: { id: string }[] }[]
+  sections: { id: string; items: { id: string }[] }[],
+  templates: { id: string }[]
 ): Missing | null {
   if (isLoading) {
     return null;
+  }
+  if (
+    route.kind === "templates" &&
+    route.templateId !== undefined &&
+    !templates.some((template) => template.id === route.templateId)
+  ) {
+    return {
+      what: "template",
+      backTo: { href: "/templates", label: "Back to the templates" },
+    };
   }
   if (
     (route.kind === "jobs" || route.kind === "chat") &&
