@@ -6,6 +6,7 @@ import {
   NewItemTemplate,
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
+import { HintAdornment } from "@components/description-hint";
 import dayjs from "dayjs";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
@@ -119,6 +120,7 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
               }
               multiline
               minRows={3}
+              slotProps={{ input: { endAdornment: <HintAdornment /> } }}
               sx={{ mt: 2 }}
               fullWidth
             />

@@ -131,6 +131,18 @@ describe("inline vault item editor", () => {
     expect(screen.getByLabelText("Description")).toBeTruthy();
   });
 
+  it("explains the description in an (i) tooltip", async () => {
+    setup();
+    open("Senior Software Developer");
+    fireEvent.mouseOver(screen.getByLabelText("About this field"));
+    expect(
+      await screen.findByText(/Write freely whatever comes to your mind/)
+    ).toBeTruthy();
+    expect(screen.getByRole("tooltip").textContent).toMatch(
+      /AI can generate bullet points from it or reword it for a specific job/
+    );
+  });
+
   it("goes to the previous and next item, with the buttons or [ and ]", () => {
     setup();
     open("Senior Software Developer");

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DESCRIPTION_HINT,
   fieldSpecsFor,
   fromMonthValue,
   toMonthValue,
@@ -21,6 +22,13 @@ describe("fieldSpecsFor", () => {
     expect(fieldSpecsFor("projects").map((f) => f.key)).toContain(
       "description"
     );
+  });
+
+  it("puts the same hint on every description field", () => {
+    for (const type of ["experience", "education", "projects"] as const) {
+      const spec = fieldSpecsFor(type).find((f) => f.key === "description");
+      expect(spec?.hint).toBe(DESCRIPTION_HINT);
+    }
   });
 
   it("gives experience and education a free-text description", () => {
