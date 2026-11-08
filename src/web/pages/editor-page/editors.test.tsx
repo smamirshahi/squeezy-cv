@@ -312,6 +312,22 @@ describe("EditorSummary", () => {
 });
 
 describe("EditorMainInfo", () => {
+  it("shows an example placeholder in every contact field", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    for (const label of [
+      "Full Name",
+      "Job Title",
+      "Right to work (optional)",
+      "Email",
+      "Phone",
+      "Location",
+    ]) {
+      expect(
+        screen.getByLabelText(label).getAttribute("placeholder")
+      ).toBeTruthy();
+    }
+  });
+
   it("edits the profile and applies it", () => {
     const store = createStore();
     renderWith(store, <EditorMainInfo />);

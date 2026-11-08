@@ -68,7 +68,9 @@ export function EditorMainInfo(): JSX.Element | null {
         }}
       >
         <TextField
+          slotProps={{ inputLabel: { shrink: true } }}
           label="Full Name"
+          placeholder="Jane Doe"
           variant="outlined"
           value={draft.profile.fullName}
           onChange={(event) =>
@@ -77,7 +79,9 @@ export function EditorMainInfo(): JSX.Element | null {
           fullWidth
         />
         <TextField
+          slotProps={{ inputLabel: { shrink: true } }}
           label="Job Title"
+          placeholder="Senior Software Engineer"
           variant="outlined"
           value={draft.profile.headline ?? ""}
           onChange={(event) =>
@@ -86,7 +90,9 @@ export function EditorMainInfo(): JSX.Element | null {
           fullWidth
         />
         <TextField
+          slotProps={{ inputLabel: { shrink: true } }}
           label="Right to work (optional)"
+          placeholder="Eligible to work in the UK"
           helperText='e.g. "Eligible to work in the UK". Shown under your name when turned on in Style Settings.'
           variant="outlined"
           value={draft.profile.rightToWork ?? ""}
@@ -106,6 +112,7 @@ export function EditorMainInfo(): JSX.Element | null {
       >
         <TextField
           label="Email"
+          placeholder="jane.doe@example.com"
           slotProps={{
             input: {
               startAdornment: (
@@ -123,6 +130,7 @@ export function EditorMainInfo(): JSX.Element | null {
         />
         <TextField
           label="Phone"
+          placeholder="+44 7700 900123"
           slotProps={{
             input: {
               startAdornment: (
@@ -140,6 +148,7 @@ export function EditorMainInfo(): JSX.Element | null {
         />
         <TextField
           label="Location"
+          placeholder="London, UK"
           slotProps={{
             input: {
               startAdornment: (
@@ -209,6 +218,8 @@ export function EditorMainInfo(): JSX.Element | null {
           {linkTypeOfLabel(link.label).id === OTHER_LINK_TYPE_ID && (
             <TextField
               label="Label"
+              slotProps={{ inputLabel: { shrink: true } }}
+              placeholder="Portfolio"
               value={link.label}
               onChange={(event) =>
                 draftDispatch(
@@ -223,6 +234,7 @@ export function EditorMainInfo(): JSX.Element | null {
           )}
           <TextField
             label="URL"
+            slotProps={{ inputLabel: { shrink: true } }}
             placeholder={linkTypeOfLabel(link.label).urlHint}
             value={link.url}
             onChange={(event) => {
