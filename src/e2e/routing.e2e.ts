@@ -58,7 +58,11 @@ describe("routing in a real browser", () => {
   it("keeps the vault item after a reload", async () => {
     await page.goto(`${app.webUrl}/vault`);
     const tree = page.getByRole("complementary", { name: "Vault tree" });
-    await tree.getByRole("link", { name: "Senior Software Developer" }).click();
+    await tree.getByRole("link", { name: /^Work Experience/ }).click();
+    await page
+      .getByRole("main", { name: "Edit" })
+      .getByRole("link", { name: /^Senior Software Developer/ })
+      .click();
     await page.getByLabel("Edit item").waitFor();
     const address = new URL(page.url()).pathname;
     expect(address).toMatch(/^\/vault\/[^/]+\/[^/]+$/);

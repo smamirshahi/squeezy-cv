@@ -25,7 +25,7 @@ import {
   serializeCvFile,
 } from "@shared/vault/cv-file";
 import { getPreviewPartLabel } from "@store/vault/section-labels";
-import { getAddButtonLabel } from "@pages/editor-page/editor-footer-utils";
+import { shouldShowApplyButton } from "@pages/editor-page/editor-footer-utils";
 import { CURRENT_VAULT_VERSION, VaultSchema } from "@custom-types/vault-types";
 
 function freshVault(): VaultState {
@@ -199,39 +199,11 @@ describe("labels", () => {
     expect(getPreviewPartLabel("gone", sections)).toBe("gone");
   });
 
-  it("decides footer buttons per page", () => {
-    expect(
-      getAddButtonLabel("styleSettings", sections).shouldShowApplyButton
-    ).toBe(false);
-    expect(getAddButtonLabel("mainInfo", sections).addNewItemButtonLabel).toBe(
-      ""
-    );
-    // Experience and education have their add button below the list, not in the footer
-    expect(
-      getAddButtonLabel("experience", sections).addNewItemButtonLabel
-    ).toBe("");
-    expect(getAddButtonLabel("education", sections).addNewItemButtonLabel).toBe(
-      ""
-    );
-    expect(getAddButtonLabel("skills", sections).addNewItemButtonLabel).toBe(
-      "Add new skill category"
-    );
-    expect(getAddButtonLabel("sections", sections).shouldShowApplyButton).toBe(
-      false
-    );
-    expect(
-      getAddButtonLabel("proj", [
-        ...sections,
-        { id: "proj", type: "projects", title: "P", items: [] },
-      ]).addNewItemButtonLabel
-    ).toBe("Add new item");
-    expect(getAddButtonLabel("summary", sections)).toEqual({
-      shouldShowApplyButton: true,
-      addNewItemButtonLabel: "",
-    });
-    expect(getAddButtonLabel("metaData", sections).addNewItemButtonLabel).toBe(
-      ""
-    );
+  it("shows Apply and Discard only on pages that edit a draft", () => {
+    expect(shouldShowApplyButton("styleSettings")).toBe(false);
+    expect(shouldShowApplyButton("sections")).toBe(false);
+    expect(shouldShowApplyButton("mainInfo")).toBe(true);
+    expect(shouldShowApplyButton("summary")).toBe(true);
   });
 });
 

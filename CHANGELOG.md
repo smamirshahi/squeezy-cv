@@ -15,7 +15,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
-- Vault section pages (Work Experience, Education, Skills, Projects and the other sections): the middle area is now just the list of item titles with their dates; click one and its inputs open in the right panel. The grey expanding rows are gone. A new item is selected at once (#251).
+- Vault section pages (Work Experience, Education, Skills, Projects and the other sections): the middle area is now just the list of item titles with their dates; click one and its inputs open in the right panel. The grey expanding rows are gone. A new item is selected at once (#251). The vault tree on the left now lists only the sections; the right panel shows the full item editor (saves as you type) and the Apply/Discard step is gone for item lists. The section title field is full width and its trash icon lines up with the rows below (#254).
 
 ### Added
 

@@ -27,7 +27,11 @@ describe("editing an item in the vault (inline editor)", () => {
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByRole("link", { name: "Vault" }).click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
-    await tree.getByRole("link", { name: "Senior Software Developer" }).click();
+    await tree.getByRole("link", { name: /^Work Experience/ }).click();
+    await page
+      .getByRole("main", { name: "Edit" })
+      .getByRole("link", { name: /^Senior Software Developer/ })
+      .click();
     await page.getByLabel("Edit item").waitFor();
 
     await page.getByLabel("Job title").fill("Principal Engineer");
@@ -60,11 +64,12 @@ describe("editing an item in the vault (inline editor)", () => {
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByRole("link", { name: "Vault" }).click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
-    await tree
+    await tree.getByRole("link", { name: /^Work Experience/ }).click();
+    await page
+      .getByRole("main", { name: "Edit" })
       .getByRole("link", {
-        name: /Principal Engineer|Senior Software Developer/,
+        name: /^(Principal Engineer|Senior Software Developer)/,
       })
-      .first()
       .click();
     await page.getByLabel("Edit item").waitFor();
     await page

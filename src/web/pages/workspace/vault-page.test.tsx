@@ -70,30 +70,55 @@ describe("VaultPage", () => {
     expect(screen.getByRole("button", { name: "Add new link" })).toBeTruthy();
   });
 
-  it("the footer buttons add an item and apply it end to end", () => {
+  it("the left tree lists only sections, not their items", () => {
+    renderEditor(createStore());
+    const tree = screen.getByRole("complementary", { name: "Vault tree" });
+    expect(
+      within(tree).getByRole("link", { name: /^Work Experience/ })
+    ).toBeTruthy();
+    expect(within(tree).queryByText("Senior Software Developer")).toBeNull();
+    expect(within(tree).queryByText("Intern")).toBeNull();
+  });
+
+  it("adds an item with the button under the list, selects it and saves at once", () => {
     const store = createStore();
     renderEditor(store);
     fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     fireEvent.click(screen.getByText("Add new experience"));
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
-    fireEvent.click(screen.getByText("Apply"));
     expect(
       store.getState().vault.sections.find((s) => s.id === "experience")!.items
     ).toHaveLength(4);
+    // no Apply step for lists of items
+    expect(screen.queryByRole("button", { name: "Apply" })).toBeNull();
   });
 
-  it("experience and education have no eye button and keep Add below the list", () => {
+  it("removes an item from the list only after confirming", () => {
+    const store = createStore();
+    renderEditor(store);
+    fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Delete Intern/ }));
+    expect(
+      store.getState().vault.sections.find((s) => s.id === "experience")!.items
+    ).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(
+      store.getState().vault.sections.find((s) => s.id === "experience")!.items
+    ).toHaveLength(2);
+  });
+
+  it("lists experience and education items with their dates and no eye or arrows", () => {
     renderEditor(createStore());
     for (const name of [/^Work Experience/, /^Education/]) {
       fireEvent.click(screen.getByRole("link", { name }));
       expect(screen.queryByTestId("VisibilityIcon")).toBeNull();
-      expect(screen.queryByTestId("VisibilityOffIcon")).toBeNull();
-      const add = screen.getByRole("button", { name: /^Add new/ });
-      const apply = screen.getByRole("button", { name: "Apply" });
-      // The add button is inside the editor panel, the footer is a separate sticky bar
-      expect(apply.parentElement?.contains(add)).toBe(false);
-      expect(getComputedStyle(apply.parentElement!).position).toBe("sticky");
+      expect(screen.queryByTestId("ArrowUpwardIcon")).toBeNull();
+      expect(screen.getByRole("button", { name: /^Add new/ })).toBeTruthy();
     }
+    const titles = screen
+      .getAllByRole("listitem")
+      .map((row) => row.textContent);
+    expect(titles[0]).toMatch(/^BSc Computer Science/);
   });
 
   it("shows the inputs of the chosen item in the right panel, not in the middle", () => {
@@ -101,12 +126,12 @@ describe("VaultPage", () => {
     fireEvent.click(screen.getByRole("link", { name: /^Work Experience/ }));
     const panel = screen.getByRole("complementary", { name: "Item panel" });
     const main = screen.getByRole("main", { name: "Edit" });
-    expect(within(panel).getByLabelText("Job Title")).toBeTruthy();
-    expect(within(main).queryByLabelText("Job Title")).toBeNull();
+    expect(within(panel).getByLabelText("Job title")).toBeTruthy();
+    expect(within(main).queryByLabelText("Job title")).toBeNull();
 
-    fireEvent.click(within(main).getByRole("button", { name: /^Intern/ }));
+    fireEvent.click(within(main).getByRole("link", { name: /^Intern/ }));
     expect(
-      within(panel).getByLabelText<HTMLInputElement>("Job Title").value
+      within(panel).getByLabelText<HTMLInputElement>("Job title").value
     ).toBe("Intern");
   });
 

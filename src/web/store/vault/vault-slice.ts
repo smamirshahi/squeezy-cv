@@ -48,7 +48,7 @@ interface AddItemPayload {
   shouldShow: boolean;
 }
 
-export type AltKind = "short" | "long" | "formal";
+type AltKind = "short" | "long" | "formal";
 
 /** Slice to access the vault */
 const vaultSlice = createSlice({

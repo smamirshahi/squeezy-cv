@@ -14,7 +14,6 @@ import sample from "@fixtures/sample-cv.json";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import {
-  setShouldAddNewItem,
   setShouldApplyChanges,
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
@@ -24,9 +23,6 @@ import { setVariants } from "@store/jobs/jobs-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
-import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
-import { EditorEducation } from "@pages/editor-page/sections/editor-education/editor-education";
-import { EditorSkills } from "@pages/editor-page/sections/editor-skills/editor-skills";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 
@@ -61,191 +57,6 @@ function storedSection(store: AppStore, id: string): Section {
 function input(label: string, index = 0): HTMLInputElement {
   return screen.getAllByLabelText(label)[index] as HTMLInputElement;
 }
-
-describe("EditorExperience", () => {
-  it("shows the stored values", () => {
-    renderWith(createStore(), <EditorExperience sectionId="experience" />);
-    expect(input("Job Title").value).toBe("Senior Software Developer");
-    expect(input("Company").value).toBe("Example Ltd");
-    // only the chosen item has its inputs open; the others are titles in the list
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(1);
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
-  });
-
-  it("opens the inputs of the item that is clicked", () => {
-    renderWith(createStore(), <EditorExperience sectionId="experience" />);
-    fireEvent.click(screen.getByRole("button", { name: /^Intern/ }));
-    expect(input("Job Title").value).toBe("Intern");
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(1);
-  });
-
-  it("keeps edits in a draft until Apply, then writes them to the store", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-
-    fireEvent.change(input("Job Title"), {
-      target: { value: "Principal Engineer" },
-    });
-    expect(input("Job Title").value).toBe("Principal Engineer");
-    expect(storedSection(store, "experience").items[0].fields.jobTitle).toBe(
-      "Senior Software Developer"
-    );
-
-    click(setShouldApplyChanges, store);
-    const item = storedSection(store, "experience").items[0];
-    expect(item.fields.jobTitle).toBe("Principal Engineer");
-    expect(item.fields.company).toBe("Example Ltd");
-    expect(item.id).toBe("exp-1");
-    expect(store.getState().app.shouldApplyChanges).toBe(false);
-  });
-
-  it("Discard restores the stored values", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    fireEvent.change(input("Company"), { target: { value: "Changed" } });
-    click(setShouldDiscardChanges, store);
-    expect(input("Company").value).toBe("Example Ltd");
-    expect(store.getState().app.shouldDiscardChanges).toBe(false);
-  });
-
-  it("edits the description of an experience and applies it; there is no bullet list", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    expect(screen.queryByLabelText("Bullet Point List")).toBeNull();
-    expect(screen.queryByText("Alternative wordings")).toBeNull();
-
-    const [description] = screen.getAllByLabelText("Description");
-    fireEvent.change(description, {
-      target: { value: "Ran the platform team\nCut deploy time" },
-    });
-    click(setShouldApplyChanges, store);
-
-    const first = storedSection(store, "experience").items[0];
-    expect(first.fields.description).toBe(
-      "Ran the platform team\nCut deploy time"
-    );
-    expect(first.bullets).toEqual([]);
-  });
-
-  it("adds a new empty experience through the footer flag", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    act(() => {
-      store.dispatch(setShouldAddNewItem(true));
-    });
-    expect(screen.getAllByRole("listitem")).toHaveLength(4);
-    // the new item is selected so it can be filled in
-    expect(input("Job Title").value).toBe("");
-    expect(store.getState().app.shouldAddNewItem).toBe(false);
-
-    click(setShouldApplyChanges, store);
-    const items = storedSection(store, "experience").items;
-    expect(items).toHaveLength(4);
-    // no end date = current, so it sits after the role that is current and before the ended ones
-    expect(items[1]).toMatchObject({ shouldShow: true });
-    expect(items[1].fields.jobTitle).toBe("");
-  });
-
-  it("removes an item from the draft, and only applies it on Apply", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    const deleteButtons = screen.getAllByTestId("DeleteIcon");
-    fireEvent.click(deleteButtons[0].closest("button")!);
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(storedSection(store, "experience").items).toHaveLength(3);
-    click(setShouldApplyChanges, store);
-    expect(storedSection(store, "experience").items.map((i) => i.id)).toEqual([
-      "exp-2",
-      "exp-3",
-    ]);
-  });
-
-  it("shows items in date order, newest first, and has no reorder arrows", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    expect(screen.queryByTestId("ArrowDownwardIcon")).toBeNull();
-    expect(screen.queryByTestId("ArrowUpwardIcon")).toBeNull();
-    // the current role first, then by end date
-    const titles = screen
-      .getAllByRole("listitem")
-      .map((row) => row.textContent);
-    expect(titles[0]).toMatch(/^Senior Software Developer \(.* - Present\)$/);
-    expect(titles[1]).toMatch(/^Software Developer \(.*\)$/);
-    expect(titles[2]).toMatch(/^Intern \(.*\)$/);
-  });
-
-  it("has no eye button: what is shown is decided per job, and edits wait for Apply", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    expect(screen.queryByTestId("VisibilityIcon")).toBeNull();
-    expect(screen.queryByTestId("VisibilityOffIcon")).toBeNull();
-
-    fireEvent.change(input("Company"), { target: { value: "Edited Co" } });
-    expect(storedSection(store, "experience").items[0].fields.company).toBe(
-      "Example Ltd"
-    );
-    click(setShouldApplyChanges, store);
-    expect(storedSection(store, "experience").items[0].fields.company).toBe(
-      "Edited Co"
-    );
-  });
-
-  it("follows the store when a new CV is loaded", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    fireEvent.change(input("Company"), { target: { value: "Unapplied" } });
-    act(() => {
-      store.dispatch(setVault(migrateCvFile(sample).vault));
-    });
-    expect(input("Company").value).toBe("Example Ltd");
-  });
-});
-
-describe("EditorEducation", () => {
-  it("edits and applies a field", () => {
-    const store = createStore();
-    renderWith(store, <EditorEducation sectionId="education" />);
-    expect(input("Degree").value).toBe("BSc Computer Science");
-    fireEvent.change(input("Institute"), { target: { value: "New Uni" } });
-    click(setShouldApplyChanges, store);
-    expect(storedSection(store, "education").items[0].fields.institute).toBe(
-      "New Uni"
-    );
-  });
-});
-
-describe("EditorSkills", () => {
-  it("shows categories and skills", () => {
-    renderWith(createStore(), <EditorSkills sectionId="skills" />);
-    expect(input("Skill Category").value).toBe("Languages");
-    expect(input("Skill Item 1").value).toBe("English");
-  });
-
-  it("adds and renames a skill and applies it", () => {
-    const store = createStore();
-    renderWith(store, <EditorSkills sectionId="skills" />);
-    fireEvent.click(screen.getAllByTestId("AddIcon")[0].closest("button")!);
-    expect(screen.getAllByLabelText(/Skill Item 3/)).toHaveLength(1);
-    fireEvent.change(input("Skill Item 3"), { target: { value: "German" } });
-    click(setShouldApplyChanges, store);
-    const bullets = storedSection(store, "skills").items[0].bullets;
-    expect(bullets.map((b) => b.text)).toEqual(["English", "French", "German"]);
-    expect(bullets[2].rating).toBe(0);
-  });
-
-  it("adds a new category through the footer flag", () => {
-    const store = createStore();
-    renderWith(store, <EditorSkills sectionId="skills" />);
-    act(() => {
-      store.dispatch(setShouldAddNewItem(true));
-    });
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
-    click(setShouldApplyChanges, store);
-    const added = storedSection(store, "skills").items[2];
-    expect(added.fields.category).toBe("");
-    expect(added.bullets).toHaveLength(1);
-  });
-});
 
 describe("EditorSummary", () => {
   it("edits the summary text and applies it", () => {

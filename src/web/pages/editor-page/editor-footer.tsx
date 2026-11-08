@@ -1,27 +1,19 @@
 import { Box, Button } from "@mui/material";
 import {
   appSelector,
-  setShouldAddNewItem,
   setShouldApplyChanges,
   setShouldDiscardChanges,
 } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { sectionsSelector } from "@store/vault/vault-slice";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { cssVar } from "@custom-styles/theme";
-import { getAddButtonLabel } from "@pages/editor-page/editor-footer-utils";
+import { shouldShowApplyButton } from "@pages/editor-page/editor-footer-utils";
 
 export function EditorFooter(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const { selectedSectionInEditorPage } = useAppSelector(appSelector);
-  const sections = useAppSelector(sectionsSelector);
 
-  const { shouldShowApplyButton, addNewItemButtonLabel } = getAddButtonLabel(
-    selectedSectionInEditorPage,
-    sections
-  );
-
-  if (!shouldShowApplyButton) {
+  if (!shouldShowApplyButton(selectedSectionInEditorPage)) {
     return null;
   }
 
@@ -44,15 +36,6 @@ export function EditorFooter(): JSX.Element | null {
         borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
       }}
     >
-      {addNewItemButtonLabel && (
-        <Button
-          variant="contained"
-          onClick={() => dispatch(setShouldAddNewItem(true))}
-        >
-          {addNewItemButtonLabel}
-        </Button>
-      )}
-
       <Button
         variant="contained"
         onClick={() => dispatch(setShouldApplyChanges(true))}
