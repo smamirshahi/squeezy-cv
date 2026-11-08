@@ -1,3 +1,4 @@
+import { HintAdornment } from "@components/description-hint";
 import { KeyboardEvent, useEffect, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
@@ -109,6 +110,13 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
       multiline={spec.kind === "multiline"}
       minRows={spec.kind === "multiline" ? 3 : undefined}
       onChange={(event) => onChange(event.target.value)}
+      slotProps={{
+        input: {
+          endAdornment: spec.hint ? (
+            <HintAdornment hint={spec.hint} />
+          ) : undefined,
+        },
+      }}
       sx={{ gridColumn: `span ${spec.span}` }}
     />
   );

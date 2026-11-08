@@ -1,3 +1,4 @@
+import { HintAdornment } from "@components/description-hint";
 import { AccordionDetails, Box, TextField } from "@mui/material";
 import {
   NewItemTemplate,
@@ -105,6 +106,7 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
                 updateFields(item.id, { description: e.target.value })
               }
               multiline
+              slotProps={{ input: { endAdornment: <HintAdornment /> } }}
               sx={{ mb: 2 }}
               fullWidth
             />

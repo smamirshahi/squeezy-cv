@@ -12,7 +12,14 @@ export interface FieldSpec {
 
   /** An end date: empty means "Present" */
   isEnd?: boolean;
+
+  /** Help shown in an (i) tooltip beside the field */
+  hint?: string;
 }
+
+/** What the (i) beside every Description field says */
+export const DESCRIPTION_HINT =
+  "Write freely whatever comes to your mind about this. Later, AI can generate bullet points from it or reword it for a specific job.";
 
 const START: FieldSpec = {
   key: "startDate",
@@ -47,6 +54,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           label: "Description",
           kind: "multiline",
           span: 3,
+          hint: DESCRIPTION_HINT,
         },
       ];
     case "education":
@@ -68,6 +76,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           label: "Description",
           kind: "multiline",
           span: 3,
+          hint: DESCRIPTION_HINT,
         },
       ];
     case "skills":
@@ -86,6 +95,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           label: "Description",
           kind: "multiline",
           span: 3,
+          hint: DESCRIPTION_HINT,
         },
       ];
   }

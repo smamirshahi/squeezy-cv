@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Every Description field has an (i) icon: write freely whatever comes to your mind; AI can later make bullet points from it or reword it for a specific job.
 - Jobs: AI makes bullets from an item's description for the job. Select an item on the page, then "Make bullets" (and, once there are bullets, "Shorten"; with a tailored job also "Rephrase for this job" and "Emphasise" a requirement). You review the proposal first; a bullet with a number or name that is not in your description is flagged and starts unticked. The accepted bullets are saved in the job (the vault is not changed, "Use the vault's bullets instead" undoes it), so the PDF and a sent application keep them (#243).
 - Work Experience and Education: a free-text Description on each item in the vault. Write what you did in your own words; it shows on the CV page and in the PDF, one block per line. It is the source for AI-made bullets in a later step (#242).
 
