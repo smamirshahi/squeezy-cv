@@ -123,6 +123,12 @@ export const ProfileSchema = Object({
 
   /** Nationalities, picked from a list (e.g. "British"). Shown under the name when the style asks for it. */
   nationalities: Array(String).optional(),
+
+  /** Marital status, picked from a list. Shown under the name when the style asks for it. */
+  maritalStatus: String.optional(),
+
+  /** Gender, picked from a list. Shown under the name when the style asks for it. */
+  gender: String.optional(),
 });
 
 export const VaultSchema = Object({

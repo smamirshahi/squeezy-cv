@@ -72,6 +72,12 @@ export const StyleSchema = Object({
   /** Whether the nationalities (from the profile) are shown under the name; missing = hidden */
   shouldShowNationality: Boolean.optional(),
 
+  /** Whether the marital status (from the profile) is shown under the name; missing = hidden */
+  shouldShowMaritalStatus: Boolean.optional(),
+
+  /** Whether the gender (from the profile) is shown under the name; missing = hidden */
+  shouldShowGender: Boolean.optional(),
+
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 
