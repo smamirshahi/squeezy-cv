@@ -99,6 +99,17 @@ describe("inline vault item editor", () => {
     );
   });
 
+  it("writes a free-text description of an experience to the vault", () => {
+    const store = setup();
+    open("Senior Software Developer");
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "Ran the platform team\nCut deploy time" },
+    });
+    expect(stored(store, "Example Ltd").fields.description).toBe(
+      "Ran the platform team\nCut deploy time"
+    );
+  });
+
   it("edits a date as a month, and Current means no end date", () => {
     const store = setup();
     open("Software Developer");

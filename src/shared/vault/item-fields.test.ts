@@ -14,12 +14,20 @@ describe("fieldSpecsFor", () => {
       "startDate",
       "endDate",
       "link",
+      "description",
     ]);
     expect(fieldSpecsFor("education").map((f) => f.key)).toContain("institute");
     expect(fieldSpecsFor("education").map((f) => f.key)).toContain("link");
     expect(fieldSpecsFor("projects").map((f) => f.key)).toContain(
       "description"
     );
+  });
+
+  it("gives experience and education a free-text description", () => {
+    for (const type of ["experience", "education"] as const) {
+      const spec = fieldSpecsFor(type).find((f) => f.key === "description");
+      expect(spec?.kind).toBe("multiline");
+    }
   });
 
   it("marks only the end date as one that can be 'Present'", () => {

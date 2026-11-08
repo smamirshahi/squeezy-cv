@@ -54,4 +54,27 @@ describe("editing an item in the vault (inline editor)", () => {
     await page.reload();
     await page.getByText("Principal Engineer").first().waitFor();
   });
+
+  it("writes a description, which shows on the page and in the PDF text", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+    await page.getByRole("link", { name: "Vault" }).click();
+    const tree = page.getByRole("complementary", { name: "Vault tree" });
+    await tree
+      .getByRole("link", {
+        name: /Principal Engineer|Senior Software Developer/,
+      })
+      .first()
+      .click();
+    await page.getByLabel("Edit item").waitFor();
+    await page
+      .getByLabel("Description")
+      .fill("Owned the billing platform\nMentored two engineers");
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Jobs" })
+      .click();
+    await page.getByText("Owned the billing platform").first().waitFor();
+    await page.getByText("Mentored two engineers").first().waitFor();
+  });
 });

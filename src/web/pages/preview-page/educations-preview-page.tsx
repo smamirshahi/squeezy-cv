@@ -7,6 +7,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
+import { ItemDescription } from "@pages/preview-page/item-description";
 
 interface Props {
   section: RenderedSection;
@@ -86,6 +87,7 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
               />
             )}
           </CvBlock>
+          <ItemDescription text={item.fields.description} />
         </Grid>
       ))}
     </Grid>
