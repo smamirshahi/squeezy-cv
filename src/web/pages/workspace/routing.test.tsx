@@ -176,15 +176,15 @@ describe("routing in the workspace", () => {
 
 describe("leaving an editor with unapplied changes", () => {
   it("asks first, and stays when the user says no", async () => {
-    await open("/vault/education");
-    fireEvent.change(screen.getByLabelText("Degree"), {
+    await open("/vault/mainInfo");
+    fireEvent.change(screen.getByLabelText("Full Name"), {
       target: { value: "Changed" },
     });
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     fireEvent.click(rail("Templates"));
     expect(confirm).toHaveBeenCalled();
-    expect(window.location.pathname).toBe("/vault/education");
-    expect(screen.getByLabelText<HTMLInputElement>("Degree").value).toBe(
+    expect(window.location.pathname).toBe("/vault/mainInfo");
+    expect(screen.getByLabelText<HTMLInputElement>("Full Name").value).toBe(
       "Changed"
     );
 
@@ -194,7 +194,7 @@ describe("leaving an editor with unapplied changes", () => {
   });
 
   it("does not ask when nothing is unapplied", async () => {
-    await open("/vault/education");
+    await open("/vault/mainInfo");
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     fireEvent.click(rail("Templates"));
     expect(confirm).not.toHaveBeenCalled();

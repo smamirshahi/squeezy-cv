@@ -1,36 +1,7 @@
-import { Section } from "@custom-types/vault-types";
-
 /** Pages of the editor that change nothing in the CV data, so they have no Apply/Discard */
 const PAGES_WITHOUT_APPLY = ["styleSettings", "sections", "variants", "ai"];
 
-/** Experience and education have their "Add new ..." button below their list */
-const ADD_LABELS: Partial<Record<Section["type"], string>> = {
-  skills: "Add new skill category",
-  projects: "Add new item",
-  certifications: "Add new item",
-  publications: "Add new item",
-  volunteering: "Add new item",
-  custom: "Add new item",
-  unsorted: "Add new item",
-};
-
-/** What the editor footer shows for the selected editor page */
-export function getAddButtonLabel(
-  selectedPageId: string,
-  sections: Section[]
-): { shouldShowApplyButton: boolean; addNewItemButtonLabel: string } {
-  if (PAGES_WITHOUT_APPLY.includes(selectedPageId)) {
-    return { shouldShowApplyButton: false, addNewItemButtonLabel: "" };
-  }
-  if (selectedPageId === "mainInfo") {
-    return {
-      shouldShowApplyButton: true,
-      addNewItemButtonLabel: "",
-    };
-  }
-  const section = sections.find((s) => s.id === selectedPageId);
-  return {
-    shouldShowApplyButton: true,
-    addNewItemButtonLabel: section ? (ADD_LABELS[section.type] ?? "") : "",
-  };
+/** Whether the editor footer (Apply, Discard) is shown for the selected editor page */
+export function shouldShowApplyButton(selectedPageId: string): boolean {
+  return !PAGES_WITHOUT_APPLY.includes(selectedPageId);
 }

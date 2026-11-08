@@ -2,7 +2,6 @@
 import { setItemSelection } from "@store/jobs/jobs-slice";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  act,
   cleanup,
   fireEvent,
   render,
@@ -15,14 +14,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { setShouldApplyChanges } from "@store/app/app-slice";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { addItem, addSection, setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
-import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 
 afterEach(cleanup);
@@ -37,12 +34,6 @@ function createStore(): AppStore {
 
 function renderWith(store: AppStore, ui: JSX.Element): void {
   render(<Provider store={store}>{ui}</Provider>);
-}
-
-function apply(store: AppStore): void {
-  act(() => {
-    store.dispatch(setShouldApplyChanges(true));
-  });
 }
 
 function section(store: AppStore, id: string): Section {
@@ -130,34 +121,6 @@ describe("generic sections", () => {
     );
     return store;
   }
-
-  it("adds and edits an item and applies it", () => {
-    const store = storeWithProjects();
-    renderWith(store, <EditorGenericSection sectionId="proj" />);
-    expect(screen.queryAllByLabelText("Title")).toHaveLength(0);
-    act(() => {
-      store.dispatch({ type: "app/setShouldAddNewItem", payload: true });
-    });
-    fireEvent.change(screen.getByLabelText("Title"), {
-      target: { value: "CV Builder" },
-    });
-    fireEvent.change(screen.getByLabelText("Subtitle"), {
-      target: { value: "Side project" },
-    });
-    fireEvent.change(screen.getByLabelText("Description"), {
-      target: { value: "Builds CVs" },
-    });
-    apply(store);
-
-    const item = section(store, "proj").items[0];
-    expect(item.fields).toMatchObject({
-      title: "CV Builder",
-      subtitle: "Side project",
-      description: "Builds CVs",
-    });
-    expect(item.bullets).toEqual([]);
-    expect(item.shouldShow).toBe(true);
-  });
 
   it("is shown in the preview, and hidden items are not", () => {
     const store = storeWithProjects();

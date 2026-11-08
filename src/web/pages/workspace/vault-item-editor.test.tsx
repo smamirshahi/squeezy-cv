@@ -47,10 +47,21 @@ function stored(store: AppStore, label: string): Item {
     .find((i) => Object.values(i.fields).includes(label))!;
 }
 
-/** Open an item of the tree in the inline editor */
+/** Open a section, then an item of its list in the middle: its editor shows in the right panel */
 function open(title: string): void {
   const tree = screen.getByRole("complementary", { name: "Vault tree" });
-  fireEvent.click(within(tree).getByRole("link", { name: title }));
+  const main = screen.getByRole("main", { name: "Edit" });
+  for (const section of within(tree).getAllByRole("link")) {
+    fireEvent.click(section);
+    const item = within(main).queryAllByRole("link", {
+      name: new RegExp(`^${title}`),
+    })[0];
+    if (item) {
+      fireEvent.click(item);
+      return;
+    }
+  }
+  throw new Error(`No item "${title}" in any section`);
 }
 
 describe("inline vault item editor", () => {

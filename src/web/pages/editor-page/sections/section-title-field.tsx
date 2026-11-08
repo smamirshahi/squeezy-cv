@@ -33,7 +33,7 @@ export function SectionTitleField({
         onChange={(event) =>
           dispatch(renameSection({ id: section.id, title: event.target.value }))
         }
-        sx={{ minWidth: 280 }}
+        fullWidth
       />
       {section.type !== "unsorted" && (
         <IconButton

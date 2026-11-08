@@ -10,9 +10,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
-import { ItemPanelContext } from "@pages/editor-page/item-list/item-panel-context";
+import { selectedItemOf } from "@pages/workspace/section-items";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
-import { getItemLabel } from "@shared/variant/item-label";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
@@ -38,11 +37,10 @@ const FACT_PAGES = new Set(["mainInfo"]);
 
 interface TreeProps {
   selectedPage: string;
-  selectedItemId: string;
 }
 
 /** Left: the vault as a tree, plus the settings pages and JSON import/export */
-function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
+function VaultTree({ selectedPage }: TreeProps): JSX.Element {
   const dispatch = useAppDispatch();
   const pages = useEditorPages();
   const sections = useAppSelector(sectionsSelector);
@@ -102,7 +100,7 @@ function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
               .map((section) => (
                 <Box key={section.id}>
                   <ListItemButton
-                    selected={selectedPage === section.id && !selectedItemId}
+                    selected={selectedPage === section.id}
                     component="a"
                     href={formatRoute({ kind: "vault", sectionId: section.id })}
                     onClick={(event: MouseEvent<HTMLElement>) =>
@@ -122,29 +120,6 @@ function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
                       {section.items.length}
                     </Typography>
                   </ListItemButton>
-                  {section.type !== "summary" &&
-                    section.items.map((item) => (
-                      <ListItemButton
-                        key={item.id}
-                        sx={{ pl: 4 }}
-                        selected={selectedItemId === item.id}
-                        component="a"
-                        href={formatRoute({
-                          kind: "vault",
-                          sectionId: section.id,
-                          itemId: item.id,
-                        })}
-                        onClick={(event: MouseEvent<HTMLElement>) =>
-                          onAppLinkClick(event, {
-                            kind: "vault",
-                            sectionId: section.id,
-                            itemId: item.id,
-                          })
-                        }
-                      >
-                        <ListItemText primary={getItemLabel(item)} />
-                      </ListItemButton>
-                    ))}
                 </Box>
               ))}
             {!sections.some((section) => section.type === "unsorted") && (
@@ -203,20 +178,15 @@ function VaultTree({ selectedPage, selectedItemId }: TreeProps): JSX.Element {
 }
 
 /**
- * Right: the item panel. The editor of a section with items draws the form of the chosen item
- * into it (through `ItemPanelContext`); on other pages it stays empty.
+ * Right: the item panel. It holds the editor of the item chosen in the middle list (it saves to
+ * the vault as you type); on pages without an item list it stays empty.
  */
-function ItemPanel({
-  panelRef,
-}: {
-  panelRef: (element: HTMLElement | null) => void;
-}): JSX.Element {
+function ItemPanel({ children }: { children?: JSX.Element }): JSX.Element {
   return (
     <ResizableAside side="right" label="the item panel" defaultWidth={340}>
       <Box
         component="aside"
         aria-label="Item panel"
-        ref={panelRef}
         sx={{
           width: "100%",
           flex: "none",
@@ -225,51 +195,38 @@ function ItemPanel({
           p: 2,
           overflow: "auto",
         }}
-      />
+      >
+        {children}
+      </Box>
     </ResizableAside>
   );
 }
 
-/** The vault tool (design B2): tree, the editor for the chosen page, and an empty item panel */
+/** The vault tool (design B2): tree of sections, the page of the chosen section, the item panel */
 export function VaultPage(): JSX.Element {
   const pages = useEditorPages();
   const route = useRoute();
-  const [panel, setPanel] = useState<HTMLElement | null>(null);
   const selectedPageId =
     route.kind === "vault" ? (route.sectionId ?? "mainInfo") : "mainInfo";
   const selectedItemId = route.kind === "vault" ? (route.itemId ?? "") : "";
   const sections = useAppSelector(sectionsSelector);
   const page = pages.find((entry) => entry.id === selectedPageId) ?? pages[0];
-  // An item chosen in the tree is edited inline (no Apply step); only the summary has no item list
-  const selectedSection = sections.find((section) =>
-    section.items.some((item) => item.id === selectedItemId)
-  );
-  const selectedItem = selectedSection?.items.find(
-    (item) => item.id === selectedItemId
-  );
+  const section = sections.find((entry) => entry.id === selectedPageId);
+  // A section with items lists them in the middle and edits the chosen one in the right panel
+  const hasItemList = section !== undefined && section.type !== "summary";
+  const selectedItem =
+    hasItemList && section
+      ? selectedItemOf(section, selectedItemId)
+      : undefined;
   // The footer and the editors read the page from the store
   const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(setSelectedSectionInEditorPage(selectedPageId));
   }, [selectedPageId, dispatch]);
-  const setSelectedItemId = (itemId: string): void => {
-    navigate({
-      kind: "vault",
-      sectionId: selectedSection?.id ?? selectedPageId,
-      itemId: itemId === "" ? undefined : itemId,
-    });
-  };
-  const hasInlineEditor =
-    selectedSection !== undefined &&
-    selectedItem !== undefined &&
-    selectedSection.type !== "summary";
 
   return (
-    <ItemPanelContext.Provider value={panel}>
-      <VaultTree
-        selectedPage={selectedPageId}
-        selectedItemId={selectedItemId}
-      />
+    <>
+      <VaultTree selectedPage={selectedPageId} />
       <Box
         component="main"
         aria-label="Edit"
@@ -285,31 +242,34 @@ export function VaultPage(): JSX.Element {
           gap: 2,
         }}
       >
-        {hasInlineEditor && (
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `1px solid ${WORKSPACE_COLORS.border}`,
+            borderRadius: "6px",
+            p: 2,
+          }}
+        >
+          {page.content}
+        </Box>
+        {!hasItemList && <EditorFooter />}
+      </Box>
+      <ItemPanel>
+        {section && selectedItem ? (
           <VaultItemEditor
             key={selectedItem.id}
-            section={selectedSection}
+            section={section}
             item={selectedItem}
-            onSelectItem={setSelectedItemId}
+            onSelectItem={(itemId) =>
+              navigate({
+                kind: "vault",
+                sectionId: section.id,
+                itemId: itemId === "" ? undefined : itemId,
+              })
+            }
           />
-        )}
-        {!hasInlineEditor && (
-          <>
-            <Box
-              sx={{
-                bgcolor: WORKSPACE_COLORS.panel,
-                border: `1px solid ${WORKSPACE_COLORS.border}`,
-                borderRadius: "6px",
-                p: 2,
-              }}
-            >
-              {page.content}
-            </Box>
-            <EditorFooter />
-          </>
-        )}
-      </Box>
-      <ItemPanel panelRef={setPanel} />
-    </ItemPanelContext.Provider>
+        ) : undefined}
+      </ItemPanel>
+    </>
   );
 }

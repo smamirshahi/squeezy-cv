@@ -55,7 +55,6 @@ interface AppState {
 
   shouldApplyChanges: boolean;
   shouldDiscardChanges: boolean;
-  shouldAddNewItem: boolean;
 }
 
 export const initialState: AppState = {
@@ -90,7 +89,6 @@ export const initialState: AppState = {
   },
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
-  shouldAddNewItem: false,
 };
 
 export const ZOOM_MIN = 0.5;
@@ -154,10 +152,6 @@ const appSlice = createSlice({
       state.shouldDiscardChanges = action.payload;
     },
 
-    setShouldAddNewItem(state, action: PayloadAction<boolean>) {
-      state.shouldAddNewItem = action.payload;
-    },
-
     resetAppState: () => initialState,
   },
   selectors: {
@@ -180,7 +174,6 @@ export const {
 
   setShouldApplyChanges,
   setShouldDiscardChanges,
-  setShouldAddNewItem,
 } = appSlice.actions;
 
 export const appReducer = appSlice.reducer;
