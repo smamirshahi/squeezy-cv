@@ -188,7 +188,6 @@ export function toOperations(
           original.text,
           ...Object.values(parent?.fields ?? {}),
           ...(parent?.bullets.map((b) => b.text) ?? []),
-          ...(parent?.tags ?? []),
         ];
         const flags = describeFlags(checkRewrite(entry.text, sources).flags);
         if (flags.length > 0) {

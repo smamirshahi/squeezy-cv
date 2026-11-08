@@ -18,6 +18,7 @@ template and a job (#165-#172).
 
 ### Changed
 
+- **Tags removed from the interface**: tags had no function (nothing filtered or ranked by them, the AI reads the text itself). The tag boxes, chips and the (i) are gone and tags are no longer sent to AI; old files still load (the field is kept in the data). The vault item editor and the old editors keep the alternative wordings.
 - **Delete a template that jobs use**: Delete is now allowed whenever it is not the last template. If jobs use it, the dialog lists them and asks which template to move them to (their auto-fit result is reset). Applications already sent keep their own frozen copy of the CV, so nothing sent changes.
 - **Edit a chosen template (#212)**: Page layout and Style settings now edit the template named in the address (`/templates/<id>/layout`, `/templates/<id>/style`), not always the template of the job you are editing. Both pages start with an "Editing template" switcher and say whether the job being edited uses it; every template card has an **Edit** button; a new or duplicated template is selected. Reload and Back keep the template.
 - **Grey page, white cards (#205)**: the middle area of Vault, Templates and Job settings is a grey page with white bordered cards, white inputs with a visible border and an amber "vault fact" warning.

@@ -122,7 +122,7 @@ export function ScoreItems(): JSX.Element {
       {ai?.isConfigured && (
         <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
           {ai.info.isOnline
-            ? `Sends the advert and the text and tags of your saved entries to ${ai.info.recipient}; not your name or contact details. Save first so new entries are included.`
+            ? `Sends the advert and the text of your saved entries to ${ai.info.recipient}; not your name or contact details. Save first so new entries are included.`
             : "The advert and entry text go to your local model only. Save first so new entries are included."}
         </Typography>
       )}

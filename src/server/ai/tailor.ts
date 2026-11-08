@@ -24,7 +24,6 @@ function allText(vault: Vault): string[] {
   return vault.sections.flatMap((section) =>
     section.items.flatMap((item) => [
       ...Object.values(item.fields),
-      ...item.tags,
       ...item.bullets.map((b) => b.text),
     ])
   );
@@ -68,7 +67,7 @@ export function buildRefs(vault: Vault): CvRefs {
   return refs;
 }
 
-/** What the model is told about the CV: short names, text, tags. Nothing it does not need. */
+/** What the model is told about the CV: short names and text. Nothing it does not need. */
 export function describeCv(
   vault: Vault,
   refs: CvRefs = buildRefs(vault)
@@ -87,11 +86,9 @@ export function describeCv(
         id: itemRef.get(item.id),
         label: getItemLabel(item),
         fields: item.fields,
-        tags: item.tags,
         bullets: item.bullets.map((bullet) => ({
           id: bulletRef.get(bullet.id),
           text: bullet.text,
-          tags: bullet.tags,
           ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
         })),
       })),
@@ -305,7 +302,6 @@ export function sanitiseProposal(vault: Vault, proposal: Proposal): Sanitised {
       original?.text ?? "",
       ...Object.values(item?.fields ?? {}),
       ...(item?.bullets.map((b) => b.text) ?? []),
-      ...(item?.tags ?? []),
     ];
     const check = checkRewrite(rest.rewrite.text, sources);
     const flags = describeFlags(check.flags);

@@ -116,7 +116,7 @@ describe("inline vault item editor", () => {
     expect(before).not.toContain(after[1].id);
   });
 
-  it("keeps wordings and tags on the bullet, and an empty wording is removed", () => {
+  it("keeps wordings on the bullet, and an empty wording is removed", () => {
     const store = setup();
     open("Senior Software Developer");
     fireEvent.click(screen.getAllByRole("button", { name: "Wordings" })[0]);
@@ -131,11 +131,6 @@ describe("inline vault item editor", () => {
       target: { value: "" },
     });
     expect(stored(store, "Example Ltd").bullets[0].alt).toBeUndefined();
-
-    const tagBox = screen.getByLabelText("Add a tag to bullet 1");
-    fireEvent.change(tagBox, { target: { value: "react" } });
-    fireEvent.keyDown(tagBox, { key: "Enter" });
-    expect(stored(store, "Example Ltd").bullets[0].tags).toContain("react");
   });
 
   it("goes to the previous and next item, with the buttons or [ and ]", () => {

@@ -206,8 +206,8 @@ export function AiSetup(): JSX.Element {
         >
           <b>Before anything is sent</b>
           <br />
-          <b>Sent:</b> the job advert, bullet text, tags, titles, employer and
-          school names, dates
+          <b>Sent:</b> the job advert, bullet text, titles, employer and school
+          names, dates
           <br />
           <b>Masked:</b> your name → [Candidate Name], email → [Email], phone →
           [Phone Number], address → [Address], links → [Link n]

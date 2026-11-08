@@ -2,7 +2,6 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Box,
   Checkbox,
-  Chip,
   FormControlLabel,
   IconButton,
   MenuItem,
@@ -252,9 +251,6 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                         pl: 6,
                       }}
                     >
-                      {bullet.tags.slice(0, 2).map((tag) => (
-                        <Chip key={tag} size="small" label={tag} />
-                      ))}
                       <Box sx={{ flex: 1 }} />
                       <ToggleButtonGroup
                         exclusive

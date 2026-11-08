@@ -70,26 +70,6 @@ export function replaceBulletTexts(
   });
 }
 
-/** All distinct tags used anywhere in the vault (items, bullets and links), sorted, for suggestions */
-export function collectTags(vault: Vault): string[] {
-  const seen = new Map<string, string>();
-  function add(tags: string[]): void {
-    for (const tag of tags) {
-      if (!seen.has(tag.toLowerCase())) {
-        seen.set(tag.toLowerCase(), tag);
-      }
-    }
-  }
-  vault.links.forEach((link) => add(link.tags));
-  for (const section of vault.sections) {
-    for (const item of section.items) {
-      add(item.tags);
-      item.bullets.forEach((bullet) => add(bullet.tags));
-    }
-  }
-  return [...seen.values()].sort((a, b) => a.localeCompare(b));
-}
-
 /** Whether a skills section uses levels: the explicit choice, else whether any skill has one */
 export function tracksLevels(section: Section): boolean {
   return (
