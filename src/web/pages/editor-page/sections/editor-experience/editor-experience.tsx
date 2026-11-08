@@ -1,12 +1,11 @@
-import { AccordionDetails, Box, Button, TextField } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, TextField } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
   NewItemTemplate,
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
-import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
+import { ItemListEditor } from "@pages/editor-page/item-list/item-list-editor";
 import { HintAdornment } from "@components/description-hint";
 import dayjs from "dayjs";
 import { datedTitle } from "@shared/variant/item-label";
@@ -38,22 +37,27 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
   const items = section?.items ?? [];
 
   return (
-    <>
-      {items.map((item, index) => (
-        <EditorAccordionHeader
-          key={item.id}
-          accordionIndex={index}
-          removeFunction={removeItem}
-          title={datedTitle(
-            item.fields.jobTitle ?? "",
-            item.fields.startDate,
-            item.fields.endDate,
-            (day) => dayjs(day).format(dateFormat)
-          )}
-          entity={{ id: item.id, shouldShow: true }}
-          isLastEntity={index === items.length - 1}
-        >
-          <AccordionDetails>
+    <ItemListEditor
+      noun="experience"
+      rows={items.map((item) => ({
+        id: item.id,
+        title: datedTitle(
+          item.fields.jobTitle ?? "",
+          item.fields.startDate,
+          item.fields.endDate,
+          (day) => dayjs(day).format(dateFormat)
+        ),
+      }))}
+      onRemove={removeItem}
+      onAdd={addNewItem}
+      addLabel="Add new experience"
+      renderForm={(itemId) => {
+        const item = items.find((entry) => entry.id === itemId);
+        if (!item) {
+          return <></>;
+        }
+        return (
+          <>
             <TextField
               label="Job Title"
               value={item.fields.jobTitle ?? ""}
@@ -115,12 +119,9 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
               slotProps={{ input: { endAdornment: <HintAdornment /> } }}
               fullWidth
             />
-          </AccordionDetails>
-        </EditorAccordionHeader>
-      ))}
-      <Button startIcon={<AddIcon />} onClick={addNewItem}>
-        Add new experience
-      </Button>
-    </>
+          </>
+        );
+      }}
+    />
   );
 }

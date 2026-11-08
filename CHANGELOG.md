@@ -13,6 +13,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 - Work Experience and Education item titles now close their parenthesis: "Role (Mar/2022 - Present)" (#250).
 
+### Changed
+
+- Vault section pages (Work Experience, Education, Skills, Projects and the other sections): the middle area is now just the list of item titles with their dates; click one and its inputs open in the right panel. The grey expanding rows are gone. A new item is selected at once (#251).
+
 ### Added
 
 - Every Description field has an (i) icon: write freely whatever comes to your mind; AI can later make bullet points from it or reword it for a specific job.

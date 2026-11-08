@@ -66,8 +66,17 @@ describe("EditorExperience", () => {
   it("shows the stored values", () => {
     renderWith(createStore(), <EditorExperience sectionId="experience" />);
     expect(input("Job Title").value).toBe("Senior Software Developer");
-    expect(input("Company", 1).value).toBe("Sample Systems");
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(3);
+    expect(input("Company").value).toBe("Example Ltd");
+    // only the chosen item has its inputs open; the others are titles in the list
+    expect(screen.getAllByLabelText("Job Title")).toHaveLength(1);
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+  });
+
+  it("opens the inputs of the item that is clicked", () => {
+    renderWith(createStore(), <EditorExperience sectionId="experience" />);
+    fireEvent.click(screen.getByRole("button", { name: /^Intern/ }));
+    expect(input("Job Title").value).toBe("Intern");
+    expect(screen.getAllByLabelText("Job Title")).toHaveLength(1);
   });
 
   it("keeps edits in a draft until Apply, then writes them to the store", () => {
@@ -124,7 +133,9 @@ describe("EditorExperience", () => {
     act(() => {
       store.dispatch(setShouldAddNewItem(true));
     });
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(4);
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    // the new item is selected so it can be filled in
+    expect(input("Job Title").value).toBe("");
     expect(store.getState().app.shouldAddNewItem).toBe(false);
 
     click(setShouldApplyChanges, store);
@@ -140,7 +151,7 @@ describe("EditorExperience", () => {
     renderWith(store, <EditorExperience sectionId="experience" />);
     const deleteButtons = screen.getAllByTestId("DeleteIcon");
     fireEvent.click(deleteButtons[0].closest("button")!);
-    expect(screen.getAllByLabelText("Job Title")).toHaveLength(2);
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(storedSection(store, "experience").items).toHaveLength(3);
     click(setShouldApplyChanges, store);
     expect(storedSection(store, "experience").items.map((i) => i.id)).toEqual([
@@ -155,9 +166,12 @@ describe("EditorExperience", () => {
     expect(screen.queryByTestId("ArrowDownwardIcon")).toBeNull();
     expect(screen.queryByTestId("ArrowUpwardIcon")).toBeNull();
     // the current role first, then by end date
-    expect(input("Job Title", 0).value).toBe("Senior Software Developer");
-    expect(input("Job Title", 1).value).toBe("Software Developer");
-    expect(input("Job Title", 2).value).toBe("Intern");
+    const titles = screen
+      .getAllByRole("listitem")
+      .map((row) => row.textContent);
+    expect(titles[0]).toMatch(/^Senior Software Developer \(.* - Present\)$/);
+    expect(titles[1]).toMatch(/^Software Developer \(.*\)$/);
+    expect(titles[2]).toMatch(/^Intern \(.*\)$/);
   });
 
   it("has no eye button: what is shown is decided per job, and edits wait for Apply", () => {
@@ -225,7 +239,7 @@ describe("EditorSkills", () => {
     act(() => {
       store.dispatch(setShouldAddNewItem(true));
     });
-    expect(screen.getAllByLabelText("Skill Category")).toHaveLength(3);
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
     click(setShouldApplyChanges, store);
     const added = storedSection(store, "skills").items[2];
     expect(added.fields.category).toBe("");

@@ -1,10 +1,10 @@
 import { HintAdornment } from "@components/description-hint";
-import { AccordionDetails, Box, TextField } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import {
   NewItemTemplate,
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
-import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
+import { ItemListEditor } from "@pages/editor-page/item-list/item-list-editor";
 
 const NEW_ITEM: NewItemTemplate = {
   fields: {
@@ -37,19 +37,23 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
   const items = section?.items ?? [];
 
   return (
-    <>
-      {items.map((item, index) => (
-        <EditorAccordionHeader
-          key={item.id}
-          accordionIndex={index}
-          swapFunction={moveItem}
-          removeFunction={removeItem}
-          onVisibilityChange={setVisibility}
-          title={item.fields.title || "(untitled)"}
-          entity={{ id: item.id, shouldShow: isVisible(item.id) }}
-          isLastEntity={index === items.length - 1}
-        >
-          <AccordionDetails>
+    <ItemListEditor
+      noun="item"
+      rows={items.map((item) => ({
+        id: item.id,
+        title: item.fields.title || "(untitled)",
+        shouldShow: isVisible(item.id),
+      }))}
+      onRemove={removeItem}
+      onMove={moveItem}
+      onVisibilityChange={setVisibility}
+      renderForm={(itemId) => {
+        const item = items.find((entry) => entry.id === itemId);
+        if (!item) {
+          return <></>;
+        }
+        return (
+          <>
             <TextField
               label="Title"
               value={item.fields.title ?? ""}
@@ -110,9 +114,9 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
               sx={{ mb: 2 }}
               fullWidth
             />
-          </AccordionDetails>
-        </EditorAccordionHeader>
-      ))}
-    </>
+          </>
+        );
+      }}
+    />
   );
 }

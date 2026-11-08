@@ -1,5 +1,4 @@
-import { AccordionDetails, Box, Button, TextField } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, TextField } from "@mui/material";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
@@ -9,7 +8,7 @@ import {
 import { HintAdornment } from "@components/description-hint";
 import dayjs from "dayjs";
 import { datedTitle } from "@shared/variant/item-label";
-import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
+import { ItemListEditor } from "@pages/editor-page/item-list/item-list-editor";
 
 const NEW_EDUCATION: NewItemTemplate = {
   fields: {
@@ -39,22 +38,27 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
   const items = section?.items ?? [];
 
   return (
-    <>
-      {items.map((item, index) => (
-        <EditorAccordionHeader
-          key={item.id}
-          accordionIndex={index}
-          removeFunction={removeItem}
-          title={datedTitle(
-            item.fields.degree ?? "",
-            item.fields.startDate,
-            item.fields.endDate,
-            (day) => dayjs(day).format(dateFormat)
-          )}
-          entity={{ id: item.id, shouldShow: true }}
-          isLastEntity={index === items.length - 1}
-        >
-          <AccordionDetails>
+    <ItemListEditor
+      noun="education"
+      rows={items.map((item) => ({
+        id: item.id,
+        title: datedTitle(
+          item.fields.degree ?? "",
+          item.fields.startDate,
+          item.fields.endDate,
+          (day) => dayjs(day).format(dateFormat)
+        ),
+      }))}
+      onRemove={removeItem}
+      onAdd={addNewItem}
+      addLabel="Add new education"
+      renderForm={(itemId) => {
+        const item = items.find((entry) => entry.id === itemId);
+        if (!item) {
+          return <></>;
+        }
+        return (
+          <>
             <TextField
               label="Degree"
               value={item.fields.degree ?? ""}
@@ -125,12 +129,9 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
               sx={{ mt: 2 }}
               fullWidth
             />
-          </AccordionDetails>
-        </EditorAccordionHeader>
-      ))}
-      <Button startIcon={<AddIcon />} onClick={addNewItem}>
-        Add new education
-      </Button>
-    </>
+          </>
+        );
+      }}
+    />
   );
 }
