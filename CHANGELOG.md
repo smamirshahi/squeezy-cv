@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Main Info: the inputs now show example placeholders (#218).
+
 - **Style settings preview follows the Page card**: the demo sheet now reacts to Margin, Date format and the right-to-work line (it already followed icons, section spacing and the title line).
 
 ### Changed
