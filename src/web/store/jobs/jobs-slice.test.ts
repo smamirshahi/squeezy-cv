@@ -385,7 +385,7 @@ describe("templates and jobs: who owns what", () => {
     expect(state.jobs.map((j) => j.name)).toEqual(["Default", "Second"]);
   });
 
-  it("refuses to delete a template a job uses, or the last template", () => {
+  it("keeps a template jobs use unless they are moved, and never deletes the last", () => {
     const used = withTwo();
     expect(jobsReducer(used, deleteTemplate({ id: "template-second" }))).toBe(
       used
@@ -396,6 +396,19 @@ describe("templates and jobs: who owns what", () => {
         deleteTemplate({ id: initialState.templates[0].id })
       )
     ).toBe(initialState);
+  });
+
+  it("moves the jobs to the chosen template when deleting one they use", () => {
+    const used = withTwo();
+    const other = used.templates.find((t) => t.id !== "template-second")!;
+    const after = jobsReducer(
+      used,
+      deleteTemplate({ id: "template-second", moveJobsTo: other.id })
+    );
+    expect(after.templates.map((t) => t.id)).not.toContain("template-second");
+    expect(after.jobs.every((j) => j.templateId !== "template-second")).toBe(
+      true
+    );
   });
 
   it("deletes a template no job uses", () => {

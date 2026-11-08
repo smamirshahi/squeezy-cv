@@ -45,13 +45,7 @@ import {
 import { nanoid } from "@reduxjs/toolkit";
 
 /** Why a template cannot be deleted, or an empty text when it can */
-export function deleteBlockReason(
-  jobNames: string[],
-  templateCount: number
-): string {
-  if (jobNames.length > 0) {
-    return `Used by ${jobCountText(jobNames.length)} (${jobNames.join(", ")}). Move ${jobNames.length === 1 ? "it" : "them"} to another template first.`;
-  }
+export function deleteBlockReason(templateCount: number): string {
   if (templateCount <= 1) {
     return "This is the only template. There must always be one.";
   }
@@ -178,6 +172,11 @@ export function TemplatesPage(): JSX.Element {
   const [newName, setNewName] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
+  const [moveToId, setMoveToId] = useState<string>("");
+  const deletingJobs =
+    asking?.kind === "delete"
+      ? jobs.filter((j) => j.templateId === asking.template.id)
+      : [];
   const route = useRoute();
   const tab: TemplateTab = route.kind === "templates" ? route.tab : "templates";
   const routeTemplateId =
@@ -289,10 +288,7 @@ export function TemplatesPage(): JSX.Element {
                   const users = jobs.filter(
                     (j) => j.templateId === template.id
                   );
-                  const reason = deleteBlockReason(
-                    users.map((j) => j.name),
-                    templates.length
-                  );
+                  const reason = deleteBlockReason(templates.length);
                   const isActive = template.id === activeJob.templateId;
                   const isShown = template.id === shownId;
                   const reasonId = `delete-reason-${template.id}`;
@@ -418,9 +414,13 @@ export function TemplatesPage(): JSX.Element {
                           disabled={reason !== ""}
                           aria-label={`Delete template ${template.name}`}
                           aria-describedby={reason ? reasonId : undefined}
-                          onClick={() =>
-                            setAsking({ kind: "delete", template })
-                          }
+                          onClick={() => {
+                            setMoveToId(
+                              templates.find((t) => t.id !== template.id)?.id ??
+                                ""
+                            );
+                            setAsking({ kind: "delete", template });
+                          }}
                         >
                           Delete
                         </Button>
@@ -491,9 +491,35 @@ export function TemplatesPage(): JSX.Element {
           <DialogTitle>Delete template?</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              “{asking?.template.name}” will be deleted. No job uses it, and
-              your data (the vault) is not affected.
+              “{asking?.template.name}” will be deleted. Your data (the vault)
+              and applications you already sent are not affected: an application
+              keeps its own frozen copy of the CV.
             </DialogContentText>
+            {deletingJobs.length > 0 && (
+              <>
+                <DialogContentText sx={{ mt: 1.5, mb: 1.5 }}>
+                  {jobCountText(deletingJobs.length)} use it (
+                  {deletingJobs.map((j) => j.name).join(", ")}). Their look will
+                  change to the template you choose:
+                </DialogContentText>
+                <TextField
+                  select
+                  size="small"
+                  fullWidth
+                  label="Move these jobs to"
+                  value={moveToId}
+                  onChange={(event) => setMoveToId(event.target.value)}
+                >
+                  {templates
+                    .filter((t) => t.id !== asking?.template.id)
+                    .map((t) => (
+                      <MenuItem key={t.id} value={t.id}>
+                        {t.name}
+                      </MenuItem>
+                    ))}
+                </TextField>
+              </>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setAsking(null)}>Cancel</Button>
@@ -501,7 +527,12 @@ export function TemplatesPage(): JSX.Element {
               color="error"
               onClick={() => {
                 if (asking?.kind === "delete") {
-                  dispatch(deleteTemplate({ id: asking.template.id }));
+                  dispatch(
+                    deleteTemplate({
+                      id: asking.template.id,
+                      moveJobsTo: moveToId,
+                    })
+                  );
                 }
                 setAsking(null);
               }}
