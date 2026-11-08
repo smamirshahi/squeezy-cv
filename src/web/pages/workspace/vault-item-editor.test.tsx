@@ -13,7 +13,11 @@ import sample from "@fixtures/sample-cv.json";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { setVault } from "@store/vault/vault-slice";
+import {
+  addItem,
+  ensureUnsortedSection,
+  setVault,
+} from "@store/vault/vault-slice";
 import { setVariants } from "@store/jobs/jobs-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -50,6 +54,31 @@ function open(title: string): void {
 }
 
 describe("inline vault item editor", () => {
+  it("has no Move to section in normal sections, but keeps it for Unsorted items", () => {
+    const store = setup();
+    open("Senior Software Developer");
+    expect(screen.queryByLabelText("Move to section")).toBeNull();
+
+    cleanup();
+    store.dispatch(ensureUnsortedSection());
+    store.dispatch(
+      addItem({
+        sectionId: "unsorted",
+        id: "u1",
+        fields: { title: "AWS cert" },
+      })
+    );
+    render(
+      <Provider store={store}>
+        <VaultPage />
+      </Provider>
+    );
+    open("AWS cert");
+    expect(screen.getAllByLabelText("Move to section").length).toBeGreaterThan(
+      0
+    );
+  });
+
   it("opens when an item is chosen, has no vault-fact banner and no Apply step", () => {
     setup();
     open("Senior Software Developer");

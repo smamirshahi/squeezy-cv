@@ -102,9 +102,9 @@ export function UnsortedPlacement({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
       <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
-        Drop anything here without choosing a section. Move an item with
-        &quot;Move to section&quot; on the item, or ask the AI to suggest where
-        each belongs. Unsorted is only on a CV if a job includes it.
+        Drop anything here without choosing a section. Open an item and use
+        &quot;Move to section&quot;, or ask the AI to suggest where each
+        belongs. Unsorted is only on a CV if a job includes it.
       </Typography>
       {ai?.isConfigured && (
         <>
