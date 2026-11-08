@@ -35,7 +35,10 @@ import {
   fromMonthValue,
   toMonthValue,
 } from "@shared/vault/item-fields";
-import { moveTargets as sectionTargets } from "@shared/vault/unsorted";
+import {
+  moveTargets as sectionTargets,
+  UNSORTED_SECTION_ID,
+} from "@shared/vault/unsorted";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
@@ -476,7 +479,8 @@ export function VaultItemEditor({
             {getItemLabel(item)}
           </Typography>
         </Box>
-        {moveTargets.length > 0 && (
+        {/* Only Unsorted needs it: its items have no other manual way into a section */}
+        {section.id === UNSORTED_SECTION_ID && moveTargets.length > 0 && (
           <TextField
             select
             size="small"

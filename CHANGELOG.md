@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Vault item editor: "Move to section" is gone, except for items in Unsorted, which need it to be placed (#238).
+
 - Vault: the "You are editing a vault fact" banner is gone from the item editor and the section pages (#231).
 
 - Vault: the "Where this item appears" panel with per-job eyes is gone; the right panel stays, empty. What a job shows is decided in the job (#229).
