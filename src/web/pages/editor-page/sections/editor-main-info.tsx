@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   IconButton,
@@ -25,6 +26,8 @@ import {
 } from "@store/vault/vault-slice";
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 import { LinkTypeSelect } from "@pages/editor-page/link-type/link-type-select";
+import { NATIONALITIES } from "@shared/vault/nationalities";
+import { JobTitleOptions } from "@pages/editor-page/sections/job-title-options";
 import {
   guessLinkTypeFromUrl,
   linkTypeById,
@@ -52,6 +55,7 @@ export function EditorMainInfo(): JSX.Element | null {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           gap: 2,
           mb: 2,
         }}
@@ -77,6 +81,32 @@ export function EditorMainInfo(): JSX.Element | null {
             draftDispatch(updateProfile({ headline: event.target.value }))
           }
           fullWidth
+        />
+        <JobTitleOptions
+          options={draft.profile.headlineOptions ?? []}
+          onChange={(headlineOptions) =>
+            draftDispatch(updateProfile({ headlineOptions }))
+          }
+        />
+        <Autocomplete
+          multiple
+          options={[...NATIONALITIES]}
+          value={draft.profile.nationalities ?? []}
+          onChange={(_event, nationalities) =>
+            draftDispatch(updateProfile({ nationalities }))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Nationality (optional)"
+              placeholder="Start typing, e.g. British"
+              helperText="Pick one or more. Shown under your name when turned on in Style Settings."
+              slotProps={{
+                ...params.slotProps,
+                inputLabel: { ...params.slotProps?.inputLabel, shrink: true },
+              }}
+            />
+          )}
         />
         <TextField
           slotProps={{ inputLabel: { shrink: true } }}

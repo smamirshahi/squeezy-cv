@@ -167,9 +167,12 @@ export function importToVault(
 export function mergeIntoVault(existing: Vault, imported: Vault): Vault {
   const profile = { ...existing.profile };
   for (const [key, value] of Object.entries(imported.profile)) {
-    const current = (profile as Record<string, string | undefined>)[key];
-    if (!current?.trim() && value) {
-      (profile as Record<string, string>)[key] = value;
+    if (typeof value !== "string") {
+      continue; // the list of other job titles is never imported
+    }
+    const current = (profile as Record<string, unknown>)[key];
+    if (!(typeof current === "string" && current.trim()) && value) {
+      (profile as Record<string, unknown>)[key] = value;
     }
   }
 

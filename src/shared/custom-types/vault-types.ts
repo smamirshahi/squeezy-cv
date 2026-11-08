@@ -110,12 +110,19 @@ const SectionSchema = Object({
 export const ProfileSchema = Object({
   fullName: String,
   headline: String.optional(),
+
+  /** Other job titles to choose from per job (e.g. "Frontend Engineer"); the one shown is the job's choice */
+  headlineOptions: Array(String).optional(),
+
   email: String.optional(),
   phone: String.optional(),
   location: String.optional(),
 
   /** e.g. "Eligible to work in the UK". Shown under the name when the style asks for it. */
   rightToWork: String.optional(),
+
+  /** Nationalities, picked from a list (e.g. "British"). Shown under the name when the style asks for it. */
+  nationalities: Array(String).optional(),
 });
 
 export const VaultSchema = Object({

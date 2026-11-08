@@ -203,7 +203,15 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
 
   function renderPart(id: string): RenderedPart[] {
     if (id === "personalInfo") {
-      return [{ kind: "personalInfo", id, profile: vault.profile }];
+      return [
+        {
+          kind: "personalInfo",
+          id,
+          profile: variant.headline?.trim()
+            ? { ...vault.profile, headline: variant.headline }
+            : vault.profile,
+        },
+      ];
     }
     if (id === "contactInfo") {
       return [

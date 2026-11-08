@@ -312,6 +312,39 @@ describe("EditorSummary", () => {
 });
 
 describe("EditorMainInfo", () => {
+  it("picks several nationalities from an autofill list", () => {
+    const store = createStore();
+    renderWith(store, <EditorMainInfo />);
+    const box = screen.getByRole("combobox", { name: /Nationality/ });
+    fireEvent.change(box, { target: { value: "Brit" } });
+    fireEvent.click(screen.getByRole("option", { name: "British" }));
+    fireEvent.change(box, { target: { value: "Iran" } });
+    fireEvent.click(screen.getByRole("option", { name: "Iranian" }));
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.profile.nationalities).toEqual([
+      "British",
+      "Iranian",
+    ]);
+  });
+
+  it("adds and removes other job titles and explains why", () => {
+    const store = createStore();
+    renderWith(store, <EditorMainInfo />);
+    expect(screen.getByLabelText("Why keep other job titles")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Add another job title" })
+    );
+    fireEvent.change(screen.getByLabelText("Other job title 1"), {
+      target: { value: "Frontend Engineer" },
+    });
+    click(setShouldApplyChanges, store);
+    expect(store.getState().vault.profile.headlineOptions).toEqual([
+      "Frontend Engineer",
+    ]);
+    fireEvent.click(screen.getByLabelText("Remove job title 1"));
+    expect(screen.queryByLabelText("Other job title 1")).toBeNull();
+  });
+
   it("has no sort buttons for the links (order belongs to the job)", () => {
     renderWith(createStore(), <EditorMainInfo />);
     expect(
@@ -321,7 +354,7 @@ describe("EditorMainInfo", () => {
 
   it("disables a link type that another link already uses", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const github = options.find((o) => /GitHub/.test(o.textContent ?? ""))!;
     const other = options.find((o) => /Other/.test(o.textContent ?? ""))!;
@@ -396,7 +429,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types with icons and an Other option", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const names = options.map((option) => option.textContent);
     expect(names).toEqual(
@@ -416,14 +449,14 @@ describe("EditorMainInfo", () => {
     renderWith(store, <EditorMainInfo />);
 
     // LinkedIn -> Instagram
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
     fireEvent.click(screen.getByRole("option", { name: "Instagram" }));
     expect(screen.getAllByTestId("link-icon-instagram").length).toBeGreaterThan(
       0
     );
 
     // GitHub -> Other, then a custom label
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[2]);
     fireEvent.click(screen.getByRole("option", { name: "Other" }));
     fireEvent.change(input("Label"), { target: { value: "My site" } });
 
@@ -448,7 +481,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types alphabetically with Other last", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
     const names = within(screen.getByRole("listbox"))
       .getAllByRole("option")
       .map((o) => o.textContent ?? "");

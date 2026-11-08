@@ -22,6 +22,7 @@ const TEMPLATE_KEYS = [
 /** Optional fields of a job that are copied only when set */
 const JOB_OPTIONAL_KEYS = [
   "hiddenSections",
+  "headline",
   "linkOrder",
   "tuning",
   "tailor",

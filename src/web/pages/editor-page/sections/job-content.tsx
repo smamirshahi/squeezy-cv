@@ -37,6 +37,7 @@ import {
   getDropIndex,
   useReorderSensors,
 } from "@pages/editor-page/sections/job-section-items";
+import { JobHeadline } from "@pages/editor-page/sections/job-headline";
 import { JobLinks } from "@pages/editor-page/sections/job-links";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -558,6 +559,7 @@ export function JobContent(): JSX.Element {
           isOn={!hidden.includes(section.id)}
         />
       ))}
+      <JobHeadline />
       <JobLinks />
     </Box>
   );

@@ -69,6 +69,9 @@ export const StyleSchema = Object({
   /** Whether the contact area draws the links (LinkedIn, GitHub, ...); missing = shown */
   shouldShowLinks: Boolean.optional(),
 
+  /** Whether the nationalities (from the profile) are shown under the name; missing = hidden */
+  shouldShowNationality: Boolean.optional(),
+
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 
