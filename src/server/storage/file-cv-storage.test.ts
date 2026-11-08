@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
+import { CURRENT_VAULT_VERSION } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { createVariant } from "@shared/variant/variant-utils";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
@@ -95,7 +96,9 @@ describe("vault", () => {
 
   it("reads files written before the vault existed", async () => {
     await writeFile(path.join(dir, "vault.json"), JSON.stringify(sample));
-    expect((await storage.loadVault()).vault.version).toBe(1);
+    expect((await storage.loadVault()).vault.version).toBe(
+      CURRENT_VAULT_VERSION
+    );
   });
 
   it("reports a file that is not JSON as corrupt and leaves it untouched", async () => {

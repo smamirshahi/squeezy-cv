@@ -122,55 +122,13 @@ describe("inline vault item editor", () => {
     expect(screen.getByLabelText<HTMLInputElement>("End").disabled).toBe(true);
   });
 
-  it("edits the canonical bullet text, and adds, moves and removes bullets", () => {
-    const store = setup();
+  it("has no bullets, wordings or Add bullet for a job: the description is the text", () => {
+    setup();
     open("Senior Software Developer");
-    fireEvent.change(screen.getByLabelText("Bullet 1 text"), {
-      target: { value: "Led a rebuild" },
-    });
-    expect(stored(store, "Example Ltd").bullets[0].text).toBe("Led a rebuild");
-
-    fireEvent.click(screen.getByRole("button", { name: "Add bullet" }));
-    expect(stored(store, "Example Ltd").bullets).toHaveLength(4);
-    expect(screen.getByText("Bullets · 4")).toBeTruthy();
-
-    const secondId = stored(store, "Example Ltd").bullets[1].id;
-    fireEvent.click(screen.getByRole("button", { name: "Move bullet 2 up" }));
-    expect(stored(store, "Example Ltd").bullets[0].id).toBe(secondId);
-
-    fireEvent.click(screen.getByRole("button", { name: "Remove bullet 4" }));
-    expect(stored(store, "Example Ltd").bullets).toHaveLength(3);
-  });
-
-  it("Ctrl+Enter adds the next bullet right after this one", () => {
-    const store = setup();
-    open("Senior Software Developer");
-    const before = stored(store, "Example Ltd").bullets.map((b) => b.id);
-    fireEvent.keyDown(screen.getByLabelText("Bullet 1 text"), {
-      key: "Enter",
-      ctrlKey: true,
-    });
-    const after = stored(store, "Example Ltd").bullets;
-    expect(after).toHaveLength(before.length + 1);
-    expect(after[0].id).toBe(before[0]);
-    expect(before).not.toContain(after[1].id);
-  });
-
-  it("keeps wordings on the bullet, and an empty wording is removed", () => {
-    const store = setup();
-    open("Senior Software Developer");
-    fireEvent.click(screen.getAllByRole("button", { name: "Wordings" })[0]);
-    fireEvent.change(screen.getByLabelText("Short wording of bullet 1"), {
-      target: { value: "Led a React dashboard" },
-    });
-    expect(stored(store, "Example Ltd").bullets[0].alt?.short).toBe(
-      "Led a React dashboard"
-    );
-    expect(screen.getByText("1 wording")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Short wording of bullet 1"), {
-      target: { value: "" },
-    });
-    expect(stored(store, "Example Ltd").bullets[0].alt).toBeUndefined();
+    expect(screen.queryByRole("button", { name: "Add bullet" })).toBeNull();
+    expect(screen.queryByText(/Bullets ·/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Wordings" })).toBeNull();
+    expect(screen.getByLabelText("Description")).toBeTruthy();
   });
 
   it("goes to the previous and next item, with the buttons or [ and ]", () => {

@@ -76,8 +76,69 @@ export type IdGenerator = () => string;
 /** One step that turns vault version N into version N+1 (raw JSON in, raw JSON out) */
 export type VaultMigration = (raw: Record<string, unknown>) => unknown;
 
-/** Key N migrates the vault from version N to N+1. Empty while version 1 is current. */
-const VAULT_MIGRATIONS: Record<number, VaultMigration> = {};
+/** Sections whose items keep their bullets (a skill group's bullets are its skills) */
+const KEEPS_BULLETS = new Set(["skills", "summary"]);
+
+/**
+ * Version 1 to 2 (#244): an item's bullets become lines of its free-text description (after any
+ * description it already had), and the item keeps no bullets. Bullets of a job's own making
+ * come from the description later. Alternative wordings (short/long/formal) are dropped.
+ */
+export const foldBulletsIntoDescriptions: VaultMigration = (raw) => {
+  const vault = isRecord(raw.vault) ? raw.vault : {};
+  const sections = globalThis.Array.isArray(vault.sections)
+    ? vault.sections
+    : [];
+  return {
+    ...raw,
+    vault: {
+      ...vault,
+      version: 2,
+      sections: sections.map((section: unknown) => {
+        if (
+          !isRecord(section) ||
+          KEEPS_BULLETS.has(globalThis.String(section.type)) ||
+          !globalThis.Array.isArray(section.items)
+        ) {
+          return section;
+        }
+        return {
+          ...section,
+          items: section.items.map((item: unknown) => {
+            if (!isRecord(item) || !globalThis.Array.isArray(item.bullets)) {
+              return item;
+            }
+            const fields = isRecord(item.fields) ? item.fields : {};
+            const lines = [
+              typeof fields.description === "string" ? fields.description : "",
+              ...item.bullets.map((bullet: unknown) =>
+                isRecord(bullet) && typeof bullet.text === "string"
+                  ? bullet.text.trim()
+                  : ""
+              ),
+            ].filter((line) => line.trim() !== "");
+            return {
+              ...item,
+              fields:
+                lines.length > 0
+                  ? { ...fields, description: lines.join("\n") }
+                  : fields,
+              bullets: [],
+            };
+          }),
+        };
+      }),
+    },
+  };
+};
+
+/** Key N migrates the vault from version N to N+1. */
+const VAULT_MIGRATIONS: Record<number, VaultMigration> = {
+  1: foldBulletsIntoDescriptions,
+};
+
+/** A legacy file is converted to this vault version first, then the chain brings it up to date */
+const LEGACY_TARGET_VERSION = 1;
 
 const LINKEDIN_BASE_URL = "https://www.linkedin.com/in/";
 const GITHUB_BASE_URL = "https://github.com/";
@@ -221,7 +282,7 @@ export function migrateLegacyFile(
   return {
     metaData: legacy.metaData,
     vault: {
-      version: CURRENT_VAULT_VERSION,
+      version: LEGACY_TARGET_VERSION,
       profile: {
         fullName: data.personalInfo.name,
         headline: data.personalInfo.jobTitle || undefined,
@@ -260,7 +321,7 @@ export function migrateCvFile(
   }
 
   if (!("vault" in raw)) {
-    return migrateLegacyFile(raw, newId);
+    return migrateCvFile(migrateLegacyFile(raw, newId), options);
   }
 
   const vault = raw.vault;

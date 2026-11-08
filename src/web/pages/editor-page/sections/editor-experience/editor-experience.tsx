@@ -2,13 +2,10 @@ import { AccordionDetails, Box, Button, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
-import { setItemBullets } from "@store/vault/vault-slice";
 import {
   NewItemTemplate,
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
-import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
-import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 import dayjs from "dayjs";
 
@@ -20,7 +17,7 @@ const NEW_EXPERIENCE: NewItemTemplate = {
     startDate: "",
     endDate: "",
   },
-  bullets: [{ text: "" }],
+  bullets: [],
 };
 
 interface Props {
@@ -31,8 +28,10 @@ interface Props {
 /** Shows the experience in editor page */
 export function EditorExperience({ sectionId }: Props): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
-  const { section, updateFields, removeItem, draftDispatch, addNewItem } =
-    useSectionDraft(sectionId, NEW_EXPERIENCE);
+  const { section, updateFields, removeItem, addNewItem } = useSectionDraft(
+    sectionId,
+    NEW_EXPERIENCE
+  );
 
   const items = section?.items ?? [];
 
@@ -103,20 +102,15 @@ export function EditorExperience({ sectionId }: Props): JSX.Element {
               />
             </Box>
 
-            {/* Bullet Points */}
-            <EditorExperienceBp
-              bullets={item.bullets}
-              onChange={(bullets) =>
-                draftDispatch(
-                  setItemBullets({ sectionId, itemId: item.id, bullets })
-                )
+            <TextField
+              label="Description"
+              value={item.fields.description ?? ""}
+              onChange={(e) =>
+                updateFields(item.id, { description: e.target.value })
               }
-            />
-            <ItemExtras
-              sectionId={sectionId}
-              item={item}
-              draftDispatch={draftDispatch}
-              shouldEditBullets
+              multiline
+              minRows={3}
+              fullWidth
             />
           </AccordionDetails>
         </EditorAccordionHeader>

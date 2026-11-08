@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import sample from "@fixtures/sample-cv.json";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
@@ -23,7 +23,6 @@ import {
 } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { TailorResult } from "@custom-types/tailor-types";
 
 afterEach(() => {
@@ -31,7 +30,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const file = migrateCvFile(sample);
+const file = sampleFileWithBullets();
 const experience = file.vault.sections.find((s) => s.type === "experience")!;
 const [job1, job2] = experience.items;
 

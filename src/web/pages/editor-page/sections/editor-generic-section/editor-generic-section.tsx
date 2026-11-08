@@ -1,12 +1,9 @@
 import { AccordionDetails, Box, TextField } from "@mui/material";
-import { setItemBullets } from "@store/vault/vault-slice";
 import {
   NewItemTemplate,
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
-import { EditorExperienceBp } from "@pages/editor-page/sections/editor-experience/editor-experience-bp";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
-import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
 
 const NEW_ITEM: NewItemTemplate = {
   fields: {
@@ -34,7 +31,6 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
     moveItem,
     setVisibility,
     isVisible,
-    draftDispatch,
   } = useSectionDraft(sectionId, NEW_ITEM);
 
   const items = section?.items ?? [];
@@ -111,20 +107,6 @@ export function EditorGenericSection({ sectionId }: Props): JSX.Element {
               multiline
               sx={{ mb: 2 }}
               fullWidth
-            />
-            <EditorExperienceBp
-              bullets={item.bullets}
-              onChange={(bullets) =>
-                draftDispatch(
-                  setItemBullets({ sectionId, itemId: item.id, bullets })
-                )
-              }
-            />
-            <ItemExtras
-              sectionId={sectionId}
-              item={item}
-              draftDispatch={draftDispatch}
-              shouldEditBullets
             />
           </AccordionDetails>
         </EditorAccordionHeader>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { configureStore } from "@reduxjs/toolkit";
-import sample from "@fixtures/sample-cv.json";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { Operation } from "@custom-types/chat-types";
 import { undoableReducer } from "@store/store";
 import { operationsToActions } from "@store/chat/operations-to-actions";
@@ -15,9 +15,8 @@ import {
   variantsSelector,
 } from "@store/jobs/jobs-slice";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
 
-const file = migrateCvFile(sample);
+const file = sampleFileWithBullets();
 const experience = file.vault.sections.find((s) => s.type === "experience")!;
 const [job1, job2] = experience.items;
 

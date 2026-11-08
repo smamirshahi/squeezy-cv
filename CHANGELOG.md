@@ -24,6 +24,8 @@ The variant is split into a template and a job (#165-#172).
 
 ### Changed
 
+- Experience, education and other sections no longer have bullet points in the vault. Write what you did in the Description; bullets are made per job with "Make bullets" (#243). **Saved data (vault version 2):** when an older file is opened, each item's existing bullets become the lines of its Description, and the item keeps no bullets (skills are unchanged). Short/Long/Formal wordings of those bullets are not kept. A CV then shows those lines as plain text until you make bullets for the job. Nothing is written until you Save; the server keeps the previous file as `.bak`. AI import puts imported points into the description the same way (#244).
+
 - Work Experience and Education are ordered automatically, newest first: by end date (no end date = current), then by start date. The reorder arrows are gone from their editors; each job can still order items itself (#237).
 
 ### Fixed

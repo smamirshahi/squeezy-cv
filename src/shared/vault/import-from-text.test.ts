@@ -69,10 +69,12 @@ describe("importToVault", () => {
     expect(job.fields.startDate).toBe("2021-03-01");
     // "Present" is not a date: left out without a warning
     expect(job.fields.endDate).toBeUndefined();
-    expect(job.bullets[0].text).toBe("Led the rebuild of the onboarding flow");
-    expect(
-      new Set([job.id, job.bullets[0].id, vault.sections[0].id]).size
-    ).toBe(3);
+    // points of a job become lines of its description; no bullets are kept (#244)
+    expect(job.fields.description).toBe(
+      "Led the rebuild of the onboarding flow"
+    );
+    expect(job.bullets).toEqual([]);
+    expect(new Set([job.id, vault.sections[0].id]).size).toBe(2);
   });
 
   it("reports a bullet the model made up", () => {

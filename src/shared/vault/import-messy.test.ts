@@ -37,7 +37,11 @@ describe("import of a messy CV with a small model's answer", () => {
     const degree = vault.sections[2].items[0];
     expect(degree.fields.startDate).toBe("2013-01-01");
     expect(degree.fields.endDate).toBe("2016-01-01");
-    expect(vault.sections[1].items[0].bullets).toHaveLength(3);
+    // the three points of the first job became lines of its description (#244)
+    expect(vault.sections[1].items[0].bullets).toHaveLength(0);
+    expect(
+      vault.sections[1].items[0].fields.description?.split("\n")
+    ).toHaveLength(3);
     // the app's own key for the institution, so the editor and the page show it
     expect(degree.fields.institute).toBe("University of Leeds");
     expect(degree.fields).not.toHaveProperty("institution");

@@ -129,14 +129,24 @@ export function importToVault(
       for (const bullet of bullets) {
         check(`A ${section.title} point`, bullet);
       }
+      // Only a skills group keeps bullets (its skills); everywhere else the points become the
+      // lines of the item's description (#244)
+      const keepsBullets = section.type === "skills";
+      if (!keepsBullets && bullets.length > 0) {
+        fields.description = [fields.description ?? "", ...bullets]
+          .filter((line) => line.trim() !== "")
+          .join("\n");
+      }
       return {
         id: newId(),
         fields,
-        bullets: bullets.map((text) => ({
-          id: newId(),
-          text,
-          tags: [],
-        })),
+        bullets: keepsBullets
+          ? bullets.map((text) => ({
+              id: newId(),
+              text,
+              tags: [],
+            }))
+          : [],
         tags: item.tags ?? [],
         shouldShow: true,
       };

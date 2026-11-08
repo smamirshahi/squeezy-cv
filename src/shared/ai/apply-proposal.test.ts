@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import sample from "@fixtures/sample-cv.json";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { Proposal } from "@custom-types/tailor-types";
 import {
   AppliedProposal,
@@ -21,9 +21,8 @@ import {
   createVariant,
   updateItemSelection,
 } from "@shared/variant/variant-utils";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
 
-const file = migrateCvFile(sample);
+const file = sampleFileWithBullets();
 const { vault } = file;
 const base = createVariant(vault, file.style, "base", "Base");
 

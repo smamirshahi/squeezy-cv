@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import legacyV0 from "@fixtures/legacy-cv-v0.json";
 import sample from "@fixtures/sample-cv.json";
-import { CvFileSchema, Section } from "@custom-types/vault-types";
-import { migrateCvFile, migrateLegacyFile } from "@shared/vault/migrate-vault";
+import {
+  CURRENT_VAULT_VERSION,
+  CvFileSchema,
+  Section,
+} from "@custom-types/vault-types";
+import {
+  foldBulletsIntoDescriptions,
+  migrateCvFile,
+  migrateLegacyFile,
+} from "@shared/vault/migrate-vault";
 
 function counter(): () => string {
   let n = 0;
@@ -155,7 +163,7 @@ describe("migrateLegacyFile (edge cases)", () => {
 
 describe("migrateCvFile", () => {
   it("migrates legacy files", () => {
-    expect(migrateCvFile(sample).vault.version).toBe(1);
+    expect(migrateCvFile(sample).vault.version).toBe(CURRENT_VAULT_VERSION);
   });
 
   it("is idempotent and survives a JSON round trip", () => {
@@ -181,7 +189,7 @@ describe("migrateCvFile", () => {
 
   it("rejects files from a newer app version", () => {
     const file = clone(migrateCvFile(sample));
-    file.vault.version = 2;
+    file.vault.version = CURRENT_VAULT_VERSION + 1;
     expect(() => migrateCvFile(file)).toThrow(/Update the app/);
   });
 
@@ -192,7 +200,7 @@ describe("migrateCvFile", () => {
   });
 
   it("runs the migration chain in order up to the current version", () => {
-    const file = clone(migrateCvFile(sample));
+    const file = clone(migrateLegacyFile(sample));
     const calls: number[] = [];
     const result = migrateCvFile(file, {
       currentVersion: 3,
@@ -212,16 +220,78 @@ describe("migrateCvFile", () => {
   });
 
   it("fails clearly when a migration step is missing", () => {
-    const file = clone(migrateCvFile(sample));
+    const file = clone(migrateLegacyFile(sample));
     expect(() =>
       migrateCvFile(file, { currentVersion: 2, migrations: {} })
     ).toThrow(/No migration from vault version 1 to 2/);
   });
 
   it("fails when a migration returns something that is not an object", () => {
-    const file = clone(migrateCvFile(sample));
+    const file = clone(migrateLegacyFile(sample));
     expect(() =>
       migrateCvFile(file, { currentVersion: 2, migrations: { 1: () => null } })
     ).toThrow(/did not return an object/);
+  });
+});
+
+describe("version 1 to 2: bullets become the description (#244)", () => {
+  const old = migrateLegacyFile(sample);
+  const oldJobs = old.vault.sections.find((x) => x.type === "experience")!;
+  const migrated = migrateCvFile(old);
+  const jobs = migrated.vault.sections.find((x) => x.type === "experience")!;
+
+  it("writes an item's bullets as the lines of its description and keeps none", () => {
+    const withBullets = oldJobs.items.find((i) => i.bullets.length > 0)!;
+    const after = jobs.items.find((i) => i.id === withBullets.id)!;
+    expect(after.bullets).toEqual([]);
+    expect(after.fields.description).toBe(
+      withBullets.bullets.map((b) => b.text.trim()).join("\n")
+    );
+    // the other facts are untouched
+    expect(after.fields.jobTitle).toBe(withBullets.fields.jobTitle);
+  });
+
+  it("puts the bullets after a description the item already had, and skips empty ones", () => {
+    const raw = clone(old) as unknown as {
+      vault: { sections: Section[] };
+    };
+    const item = raw.vault.sections.find((x) => x.type === "experience")!
+      .items[0];
+    item.fields.description = "Existing text";
+    item.bullets = [
+      { id: "a", text: "  First  ", tags: [] },
+      { id: "b", text: "   ", tags: [] },
+      { id: "c", text: "Second", tags: [] },
+    ];
+    const out = foldBulletsIntoDescriptions(raw) as typeof raw;
+    expect(
+      out.vault.sections.find((x) => x.type === "experience")!.items[0].fields
+        .description
+    ).toBe("Existing text\nFirst\nSecond");
+  });
+
+  it("leaves skills (their bullets are the skills) and items without bullets alone", () => {
+    const skills = old.vault.sections.find((x) => x.type === "skills")!;
+    const after = migrated.vault.sections.find((x) => x.type === "skills")!;
+    expect(after.items.map((i) => i.bullets.length)).toEqual(
+      skills.items.map((i) => i.bullets.length)
+    );
+    const education = migrated.vault.sections.find(
+      (x) => x.type === "education"
+    )!;
+    expect(
+      education.items.every((i) => i.fields.description === undefined)
+    ).toBe(true);
+  });
+
+  it("sets the version, and running it again on the result changes nothing", () => {
+    expect(migrated.vault.version).toBe(2);
+    expect(migrateCvFile(clone(migrated))).toEqual(migrated);
+  });
+
+  it("does not change the input", () => {
+    const before = JSON.stringify(old);
+    migrateCvFile(old);
+    expect(JSON.stringify(old)).toBe(before);
   });
 });
