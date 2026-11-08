@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   IconButton,
   InputAdornment,
   TextField,
@@ -10,8 +11,7 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useMemo } from "react";
-import { appSelector, setShouldAddNewItem } from "@store/app/app-slice";
+import { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addLink,
@@ -38,7 +38,6 @@ import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 export function EditorMainInfo(): JSX.Element | null {
   const dispatch = useAppDispatch();
   const { profile, links } = useAppSelector(vaultSelector);
-  const { shouldAddNewItem } = useAppSelector(appSelector);
 
   const source = useMemo(
     () => ({ ...initialState, profile, links }),
@@ -49,14 +48,6 @@ export function EditorMainInfo(): JSX.Element | null {
     dispatch(setProfile(applied.profile));
     dispatch(setLinks(applied.links));
   });
-
-  // The footer button "Add new link"
-  useEffect(() => {
-    if (shouldAddNewItem) {
-      draftDispatch(addLink({}));
-      dispatch(setShouldAddNewItem(false));
-    }
-  }, [dispatch, draftDispatch, shouldAddNewItem]);
 
   return (
     <>
@@ -174,12 +165,6 @@ export function EditorMainInfo(): JSX.Element | null {
         }}
       >
         <Typography variant="h6">Links</Typography>
-        <IconButton
-          aria-label="Add link"
-          onClick={() => draftDispatch(addLink({}))}
-        >
-          <AddIcon />
-        </IconButton>
       </Box>
       {draft.links.map((link, index) => (
         <Box
@@ -200,6 +185,9 @@ export function EditorMainInfo(): JSX.Element | null {
           />
           <LinkTypeSelect
             value={linkTypeOfLabel(link.label).id}
+            takenTypeIds={draft.links
+              .filter((other) => other.id !== link.id)
+              .map((other) => linkTypeOfLabel(other.label).id)}
             onChange={(typeId) =>
               draftDispatch(
                 updateLink({
@@ -259,6 +247,13 @@ export function EditorMainInfo(): JSX.Element | null {
           </IconButton>
         </Box>
       ))}
+      <Button
+        startIcon={<AddIcon />}
+        onClick={() => draftDispatch(addLink({}))}
+        sx={{ mt: 1 }}
+      >
+        Add new link
+      </Button>
     </>
   );
 }

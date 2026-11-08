@@ -202,7 +202,7 @@ describe("labels", () => {
       getAddButtonLabel("styleSettings", sections).shouldShowApplyButton
     ).toBe(false);
     expect(getAddButtonLabel("mainInfo", sections).addNewItemButtonLabel).toBe(
-      "Add new link"
+      ""
     );
     expect(
       getAddButtonLabel("experience", sections).addNewItemButtonLabel

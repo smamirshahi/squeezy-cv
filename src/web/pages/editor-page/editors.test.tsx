@@ -312,6 +312,16 @@ describe("EditorSummary", () => {
 });
 
 describe("EditorMainInfo", () => {
+  it("disables a link type that another link already uses", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    const options = within(screen.getByRole("listbox")).getAllByRole("option");
+    const github = options.find((o) => /GitHub/.test(o.textContent ?? ""))!;
+    const other = options.find((o) => /Other/.test(o.textContent ?? ""))!;
+    expect(github.getAttribute("aria-disabled")).toBe("true");
+    expect(other.getAttribute("aria-disabled")).toBeNull();
+  });
+
   it("shows an example placeholder in every contact field", () => {
     renderWith(createStore(), <EditorMainInfo />);
     for (const label of [
@@ -346,7 +356,7 @@ describe("EditorMainInfo", () => {
     renderWith(store, <EditorMainInfo />);
     expect(screen.getAllByLabelText("URL")).toHaveLength(2);
 
-    fireEvent.click(screen.getByLabelText("Add link"));
+    fireEvent.click(screen.getByRole("button", { name: "Add new link" }));
     expect(screen.getAllByLabelText("URL")).toHaveLength(3);
     // a new link is "Other", so it is the only one with a free label field
     expect(screen.getAllByLabelText("Label")).toHaveLength(1);
@@ -429,7 +439,7 @@ describe("EditorMainInfo", () => {
   it("picks the type from a pasted address on a new link", () => {
     const store = createStore();
     renderWith(store, <EditorMainInfo />);
-    fireEvent.click(screen.getByLabelText("Add link"));
+    fireEvent.click(screen.getByRole("button", { name: "Add new link" }));
     fireEvent.change(input("URL", 2), {
       target: { value: "https://github.com/jane" },
     });
@@ -438,13 +448,14 @@ describe("EditorMainInfo", () => {
     expect(store.getState().vault.links[2].label).toBe("GitHub");
   });
 
-  it("adds a link through the footer flag", () => {
-    const store = createStore();
-    renderWith(store, <EditorMainInfo />);
-    act(() => {
-      store.dispatch(setShouldAddNewItem(true));
-    });
-    expect(screen.getAllByLabelText("URL")).toHaveLength(3);
-    expect(store.getState().app.shouldAddNewItem).toBe(false);
+  it("lists the link types alphabetically with Other last", () => {
+    renderWith(createStore(), <EditorMainInfo />);
+    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    const names = within(screen.getByRole("listbox"))
+      .getAllByRole("option")
+      .map((o) => o.textContent ?? "");
+    expect(names.at(-1)).toBe("Other");
+    const rest = names.slice(0, -1);
+    expect(rest).toEqual([...rest].sort((a, b) => a.localeCompare(b)));
   });
 });

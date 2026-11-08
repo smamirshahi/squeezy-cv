@@ -26,7 +26,7 @@ export function getAddButtonLabel(
   if (selectedPageId === "mainInfo") {
     return {
       shouldShowApplyButton: true,
-      addNewItemButtonLabel: "Add new link",
+      addNewItemButtonLabel: "",
     };
   }
   const section = sections.find((s) => s.id === selectedPageId);
