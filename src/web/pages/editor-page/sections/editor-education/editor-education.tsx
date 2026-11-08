@@ -7,7 +7,6 @@ import {
   useSectionDraft,
 } from "@pages/editor-page/use-section-draft";
 import dayjs from "dayjs";
-import { ItemExtras } from "@pages/editor-page/item-metadata/item-extras";
 import { EditorAccordionHeader } from "@pages/editor-page/accordion/editor-accordion-header";
 
 const NEW_EDUCATION: NewItemTemplate = {
@@ -30,8 +29,10 @@ interface Props {
 /** Shows the education in editor page */
 export function EditorEducation({ sectionId }: Props): JSX.Element {
   const { dateFormat } = useAppSelector(styleSelector);
-  const { section, updateFields, removeItem, draftDispatch, addNewItem } =
-    useSectionDraft(sectionId, NEW_EDUCATION);
+  const { section, updateFields, removeItem, addNewItem } = useSectionDraft(
+    sectionId,
+    NEW_EDUCATION
+  );
 
   const items = section?.items ?? [];
 
@@ -110,10 +111,16 @@ export function EditorEducation({ sectionId }: Props): JSX.Element {
               }
               fullWidth
             />
-            <ItemExtras
-              sectionId={sectionId}
-              item={item}
-              draftDispatch={draftDispatch}
+            <TextField
+              label="Description"
+              value={item.fields.description ?? ""}
+              onChange={(e) =>
+                updateFields(item.id, { description: e.target.value })
+              }
+              multiline
+              minRows={3}
+              sx={{ mt: 2 }}
+              fullWidth
             />
           </AccordionDetails>
         </EditorAccordionHeader>

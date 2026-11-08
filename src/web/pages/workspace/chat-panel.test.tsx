@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import sample from "@fixtures/sample-cv.json";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { ChatPanel } from "@pages/workspace/chat-panel";
 import { undoableReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
@@ -20,7 +20,6 @@ import { activeVariantSelector, setVariants } from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { AI_PROVIDER_INFO } from "@shared/ai/providers";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { ChatResponse } from "@custom-types/chat-types";
 
 afterEach(() => {
@@ -29,7 +28,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const file = migrateCvFile(sample);
+const file = sampleFileWithBullets();
 const jobs = file.vault.sections.find((s) => s.type === "experience")!.items;
 const bullet = jobs[0].bullets[0];
 

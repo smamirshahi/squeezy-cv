@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -48,17 +47,10 @@ import {
   moveItemToSection,
   removeItem,
   sectionsSelector,
-  setBulletAlt,
   setSectionTracksLevel,
   updateBullet,
   updateItemFields,
 } from "@store/vault/vault-slice";
-
-const ALT_KINDS = [
-  { kind: "short", label: "Short" },
-  { kind: "long", label: "Long" },
-  { kind: "formal", label: "Formal" },
-] as const;
 
 interface FieldProps {
   spec: FieldSpec;
@@ -122,7 +114,7 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
   );
 }
 
-interface BulletCardProps {
+interface SkillCardProps {
   section: Section;
   item: Item;
   bullet: Bullet;
@@ -131,148 +123,18 @@ interface BulletCardProps {
   onNewAfter: (index: number) => void;
 }
 
-/** One bullet: its canonical text, tags and alternative wordings. Every change is saved to the vault at once. */
-function BulletCard({
+/** One skill of a group: name, level and years. Every change is saved to the vault at once. */
+function SkillCard({
   section,
   item,
   bullet,
   index,
   count,
   onNewAfter,
-}: BulletCardProps): JSX.Element {
+}: SkillCardProps): JSX.Element {
   const dispatch = useAppDispatch();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
-  const altCount = ALT_KINDS.filter(({ kind }) => bullet.alt?.[kind]).length;
-
-  if (section.type === "skills") {
-    const skillName = bullet.text || `Skill ${index + 1}`;
-    return (
-      <Box
-        sx={{
-          border: `1px solid ${WORKSPACE_COLORS.border}`,
-          borderRadius: 1.5,
-          bgcolor: WORKSPACE_COLORS.panel,
-          p: 1,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Box sx={{ display: "flex" }}>
-          <IconButton
-            size="small"
-            aria-label={`Move skill ${index + 1} up`}
-            disabled={index === 0}
-            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index - 1 }))}
-          >
-            <ArrowUpwardIcon fontSize="inherit" />
-          </IconButton>
-          <IconButton
-            size="small"
-            aria-label={`Move skill ${index + 1} down`}
-            disabled={index === count - 1}
-            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index + 1 }))}
-          >
-            <ArrowDownwardIcon fontSize="inherit" />
-          </IconButton>
-        </Box>
-        <TextField
-          size="small"
-          value={bullet.text}
-          placeholder="Skill name"
-          onChange={(event) =>
-            dispatch(
-              updateBullet({ ...ref, update: { text: event.target.value } })
-            )
-          }
-          onKeyDown={(event: KeyboardEvent) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              onNewAfter(index);
-            }
-          }}
-          slotProps={{
-            htmlInput: {
-              "aria-label": `Skill ${index + 1} name`,
-              "data-bullet-input": bullet.id,
-            },
-          }}
-          sx={{ flex: 1 }}
-        />
-        {tracksLevels(section) && (
-          <>
-            <Rating
-              name={`level-${bullet.id}`}
-              value={bullet.rating ?? 0}
-              precision={0.5}
-              getLabelText={(value) => `${skillName} level ${value}`}
-              onChange={(_, value) => {
-                const rating = value ?? 0;
-                if (isRatingAcceptable(rating)) {
-                  dispatch(updateBullet({ ...ref, update: { rating } }));
-                }
-              }}
-            />
-            <Typography
-              sx={{
-                fontSize: 12,
-                width: 72,
-                color: bullet.rating
-                  ? WORKSPACE_COLORS.text
-                  : WORKSPACE_COLORS.muted,
-              }}
-            >
-              {levelLabel(bullet.rating)}
-            </Typography>
-            <Button
-              size="small"
-              aria-label={`Clear level of ${skillName}`}
-              disabled={!bullet.rating}
-              onClick={() =>
-                dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
-              }
-            >
-              No level
-            </Button>
-          </>
-        )}
-        <TextField
-          size="small"
-          label="Years"
-          type="number"
-          value={bullet.years ?? ""}
-          onChange={(event) => {
-            const text = event.target.value.trim();
-            if (text === "") {
-              dispatch(updateBullet({ ...ref, update: { years: null } }));
-              return;
-            }
-            const years = Number(text);
-            if (isYearsAcceptable(years)) {
-              dispatch(updateBullet({ ...ref, update: { years } }));
-            }
-          }}
-          slotProps={{
-            htmlInput: {
-              min: 0,
-              step: 1,
-              "aria-label": `${skillName} years`,
-            },
-          }}
-          sx={{ width: 80 }}
-        />
-        <IconButton
-          size="small"
-          aria-label={`Remove skill ${index + 1}`}
-          onClick={() => dispatch(removeBullet(ref))}
-        >
-          <DeleteOutlineIcon fontSize="small" />
-        </IconButton>
-      </Box>
-    );
-  }
-
+  const skillName = bullet.text || `Skill ${index + 1}`;
   return (
     <Box
       sx={{
@@ -281,120 +143,120 @@ function BulletCard({
         bgcolor: WORKSPACE_COLORS.panel,
         p: 1,
         display: "flex",
-        flexDirection: "column",
-        gap: 0.75,
+        alignItems: "center",
+        gap: 1,
       }}
     >
-      <Box sx={{ display: "flex", gap: 0.5, alignItems: "flex-start" }}>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <IconButton
-            size="small"
-            aria-label={`Move bullet ${index + 1} up`}
-            disabled={index === 0}
-            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index - 1 }))}
-          >
-            <ArrowUpwardIcon fontSize="inherit" />
-          </IconButton>
-          <IconButton
-            size="small"
-            aria-label={`Move bullet ${index + 1} down`}
-            disabled={index === count - 1}
-            onClick={() => dispatch(moveBullet({ ...ref, toIndex: index + 1 }))}
-          >
-            <ArrowDownwardIcon fontSize="inherit" />
-          </IconButton>
-        </Box>
-        <TextField
-          fullWidth
-          multiline
-          minRows={2}
-          size="small"
-          value={bullet.text}
-          onChange={(event) =>
-            dispatch(
-              updateBullet({ ...ref, update: { text: event.target.value } })
-            )
-          }
-          onKeyDown={(event: KeyboardEvent) => {
-            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-              event.preventDefault();
-              onNewAfter(index);
-            }
-          }}
-          slotProps={{
-            htmlInput: {
-              "aria-label": `Bullet ${index + 1} text`,
-              "data-bullet-input": bullet.id,
-            },
-          }}
-        />
+      <Box sx={{ display: "flex" }}>
         <IconButton
           size="small"
-          aria-label={`Remove bullet ${index + 1}`}
-          onClick={() => dispatch(removeBullet(ref))}
+          aria-label={`Move skill ${index + 1} up`}
+          disabled={index === 0}
+          onClick={() => dispatch(moveBullet({ ...ref, toIndex: index - 1 }))}
         >
-          <DeleteOutlineIcon fontSize="small" />
+          <ArrowUpwardIcon fontSize="inherit" />
+        </IconButton>
+        <IconButton
+          size="small"
+          aria-label={`Move skill ${index + 1} down`}
+          disabled={index === count - 1}
+          onClick={() => dispatch(moveBullet({ ...ref, toIndex: index + 1 }))}
+        >
+          <ArrowDownwardIcon fontSize="inherit" />
         </IconButton>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 4.5 }}>
-        <Box sx={{ flex: 1 }} />
-        <Chip
-          size="small"
-          label={
-            altCount > 0
-              ? `${altCount} wording${altCount === 1 ? "" : "s"}`
-              : "Canonical"
+      <TextField
+        size="small"
+        value={bullet.text}
+        placeholder="Skill name"
+        onChange={(event) =>
+          dispatch(
+            updateBullet({ ...ref, update: { text: event.target.value } })
+          )
+        }
+        onKeyDown={(event: KeyboardEvent) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onNewAfter(index);
           }
-          color={altCount > 0 ? "primary" : "default"}
-        />
-        <Button
-          size="small"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((wasOpen) => !wasOpen)}
-        >
-          Wordings
-        </Button>
-      </Box>
-      {isOpen && (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "56px 1fr",
-            gap: 0.75,
-            alignItems: "center",
-            pl: 4.5,
-          }}
-        >
-          {ALT_KINDS.map(({ kind, label }) => (
-            <Box key={kind} sx={{ display: "contents" }}>
-              <Typography
-                sx={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: WORKSPACE_COLORS.muted,
-                }}
-              >
-                {label.toUpperCase()}
-              </Typography>
-              <TextField
-                size="small"
-                value={bullet.alt?.[kind] ?? ""}
-                placeholder="Empty: the canonical text is used"
-                onChange={(event) =>
-                  dispatch(
-                    setBulletAlt({ ...ref, kind, text: event.target.value })
-                  )
-                }
-                slotProps={{
-                  htmlInput: {
-                    "aria-label": `${label} wording of bullet ${index + 1}`,
-                  },
-                }}
-              />
-            </Box>
-          ))}
-        </Box>
+        }}
+        slotProps={{
+          htmlInput: {
+            "aria-label": `Skill ${index + 1} name`,
+            "data-bullet-input": bullet.id,
+          },
+        }}
+        sx={{ flex: 1 }}
+      />
+      {tracksLevels(section) && (
+        <>
+          <Rating
+            name={`level-${bullet.id}`}
+            value={bullet.rating ?? 0}
+            precision={0.5}
+            getLabelText={(value) => `${skillName} level ${value}`}
+            onChange={(_, value) => {
+              const rating = value ?? 0;
+              if (isRatingAcceptable(rating)) {
+                dispatch(updateBullet({ ...ref, update: { rating } }));
+              }
+            }}
+          />
+          <Typography
+            sx={{
+              fontSize: 12,
+              width: 72,
+              color: bullet.rating
+                ? WORKSPACE_COLORS.text
+                : WORKSPACE_COLORS.muted,
+            }}
+          >
+            {levelLabel(bullet.rating)}
+          </Typography>
+          <Button
+            size="small"
+            aria-label={`Clear level of ${skillName}`}
+            disabled={!bullet.rating}
+            onClick={() =>
+              dispatch(updateBullet({ ...ref, update: { rating: 0 } }))
+            }
+          >
+            No level
+          </Button>
+        </>
       )}
+      <TextField
+        size="small"
+        label="Years"
+        type="number"
+        value={bullet.years ?? ""}
+        onChange={(event) => {
+          const text = event.target.value.trim();
+          if (text === "") {
+            dispatch(updateBullet({ ...ref, update: { years: null } }));
+            return;
+          }
+          const years = Number(text);
+          if (isYearsAcceptable(years)) {
+            dispatch(updateBullet({ ...ref, update: { years } }));
+          }
+        }}
+        slotProps={{
+          htmlInput: {
+            min: 0,
+            step: 1,
+            "aria-label": `${skillName} years`,
+          },
+        }}
+        sx={{ width: 80 }}
+      />
+      <IconButton
+        size="small"
+        aria-label={`Remove skill ${index + 1}`}
+        onClick={() => dispatch(removeBullet(ref))}
+      >
+        <DeleteOutlineIcon fontSize="small" />
+      </IconButton>
     </Box>
   );
 }
@@ -408,8 +270,8 @@ interface Props {
 }
 
 /**
- * The vault item editor (design B2): the fields of one item and its bullets with tags and
- * wordings, saved to the vault as you type (no Apply step). `[` and `]` go to the previous
+ * The vault item editor (design B2): the fields of one item (a skills group also has its
+ * skills), saved to the vault as you type (no Apply step). `[` and `]` go to the previous
  * and next item. It is a fact: it changes in every job that shows the item.
  */
 export function VaultItemEditor({
@@ -572,34 +434,38 @@ export function VaultItemEditor({
           />
         </>
       )}
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Typography sx={{ fontWeight: 700, flex: 1 }}>
-          {isSkills ? "Skills" : "Bullets"} · {item.bullets.length}
-        </Typography>
-        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          {isSkills
-            ? "Enter in a skill adds the next one. A level is optional."
-            : "Ctrl/⌘+Enter in a bullet adds the next one"}
-        </Typography>
-      </Box>
-      {item.bullets.map((bullet, bulletIndex) => (
-        <BulletCard
-          key={bullet.id}
-          section={section}
-          item={item}
-          bullet={bullet}
-          index={bulletIndex}
-          count={item.bullets.length}
-          onNewAfter={newBulletAfter}
-        />
-      ))}
+      {isSkills && (
+        <>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography sx={{ fontWeight: 700, flex: 1 }}>
+              Skills · {item.bullets.length}
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+              Enter in a skill adds the next one. A level is optional.
+            </Typography>
+          </Box>
+          {item.bullets.map((bullet, bulletIndex) => (
+            <SkillCard
+              key={bullet.id}
+              section={section}
+              item={item}
+              bullet={bullet}
+              index={bulletIndex}
+              count={item.bullets.length}
+              onNewAfter={newBulletAfter}
+            />
+          ))}
+        </>
+      )}
       <Box sx={{ display: "flex", gap: 1 }}>
-        <Button
-          variant="outlined"
-          onClick={() => newBulletAfter(item.bullets.length - 1)}
-        >
-          {isSkills ? "Add skill" : "Add bullet"}
-        </Button>
+        {isSkills && (
+          <Button
+            variant="outlined"
+            onClick={() => newBulletAfter(item.bullets.length - 1)}
+          >
+            Add skill
+          </Button>
+        )}
         <Box sx={{ flex: 1 }} />
         <Button color="error" onClick={() => setIsRemoving(true)}>
           Remove this item

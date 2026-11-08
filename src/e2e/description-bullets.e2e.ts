@@ -2,14 +2,15 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { sampleFile } from "@e2e/fixtures";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { readPdf } from "@e2e/read-pdf";
 
 let app: RunningApp;
 let browser: Browser;
 let page: Page;
 
-const file = sampleFile();
+// the vault still has bullets on this item, so we can see them replaced in the job
+const file = sampleFileWithBullets();
 const experience = file.vault.sections.find((s) => s.type === "experience")!;
 const target = experience.items[0];
 target.fields.description = "Ran the platform team.\nCut deploy time.";

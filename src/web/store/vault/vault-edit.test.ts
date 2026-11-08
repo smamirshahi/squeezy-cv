@@ -11,7 +11,7 @@ import {
   VaultState,
 } from "@store/vault/vault-slice";
 import { createDefaultVault } from "@shared/vault/default-vault";
-import { migrateLegacyFile } from "@shared/vault/migrate-vault";
+import { migrateCvFile, migrateLegacyFile } from "@shared/vault/migrate-vault";
 import { replaceBulletTexts } from "@shared/vault/vault-utils";
 import {
   SECTION_TYPES,
@@ -26,7 +26,7 @@ import {
 } from "@shared/vault/cv-file";
 import { getPreviewPartLabel } from "@store/vault/section-labels";
 import { getAddButtonLabel } from "@pages/editor-page/editor-footer-utils";
-import { VaultSchema } from "@custom-types/vault-types";
+import { CURRENT_VAULT_VERSION, VaultSchema } from "@custom-types/vault-types";
 
 function freshVault(): VaultState {
   let n = 0;
@@ -170,7 +170,7 @@ describe("replaceBulletTexts", () => {
 describe("cv file", () => {
   it("round-trips through the saved text", () => {
     const file = createCvFile(
-      freshVault(),
+      migrateCvFile(sample).vault,
       { title: "T", jobUrl: "u", version: "1.0" },
       migrateLegacyFile(sample).style
     );
@@ -178,7 +178,9 @@ describe("cv file", () => {
   });
 
   it("reads legacy files and rejects broken text", () => {
-    expect(parseCvFileText(JSON.stringify(sample)).vault.version).toBe(1);
+    expect(parseCvFileText(JSON.stringify(sample)).vault.version).toBe(
+      CURRENT_VAULT_VERSION
+    );
     expect(() => parseCvFileText("{not json")).toThrow();
     expect(() => parseCvFileText("[]")).toThrow();
   });

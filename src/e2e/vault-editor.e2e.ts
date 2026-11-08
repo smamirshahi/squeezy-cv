@@ -22,7 +22,7 @@ afterAll(async () => {
 });
 
 describe("editing an item in the vault (inline editor)", () => {
-  it("edits a job and a bullet, sees them on the page, saves and keeps them after a reload", async () => {
+  it("edits a job and its description, sees them on the page, saves and keeps them after a reload", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByRole("link", { name: "Vault" }).click();
@@ -32,7 +32,7 @@ describe("editing an item in the vault (inline editor)", () => {
 
     await page.getByLabel("Job title").fill("Principal Engineer");
     await page
-      .getByLabel("Bullet 1 text")
+      .getByLabel("Description")
       .fill("Led the migration to TypeScript");
     await page.getByText("Unsaved changes").waitFor();
 

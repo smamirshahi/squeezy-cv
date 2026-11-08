@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import sample from "@fixtures/sample-cv.json";
+import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { buildServer } from "@server/app";
 import {
   AiClient,
@@ -16,9 +16,8 @@ import { loadPrompt } from "@server/ai/prompts";
 import { describeCv, sanitiseProposal, tailor } from "@server/ai/tailor";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { Proposal, Requirements } from "@custom-types/tailor-types";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
 
-const file = migrateCvFile(sample);
+const file = sampleFileWithBullets();
 const { vault } = file;
 
 const REQUIREMENTS: Requirements = {

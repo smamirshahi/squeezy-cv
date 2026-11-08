@@ -22,7 +22,6 @@ import { addItem, addSection, setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
-import { EditorExperience } from "@pages/editor-page/sections/editor-experience/editor-experience";
 import { EditorGenericSection } from "@pages/editor-page/sections/editor-generic-section/editor-generic-section";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 
@@ -48,19 +47,6 @@ function apply(store: AppStore): void {
 
 function section(store: AppStore, id: string): Section {
   return store.getState().vault.sections.find((s) => s.id === id)!;
-}
-
-/** Opens the collapsed "Alternative wordings" panel of the item with the given index */
-function openExtras(index = 0): void {
-  fireEvent.click(screen.getAllByText("Alternative wordings")[index]);
-}
-
-function wording(label: string): HTMLElement {
-  // multiline fields have a hidden shadow textarea; use the real one
-  const [field] = screen
-    .getAllByLabelText(label)
-    .filter((el) => el.getAttribute("aria-hidden") !== "true");
-  return field;
 }
 
 describe("SectionTitleField and AddSectionButton", () => {
@@ -136,43 +122,6 @@ describe("SectionTitleField and AddSectionButton", () => {
   });
 });
 
-describe("alternative wordings", () => {
-  it("sets alternative wordings without touching the main text", () => {
-    const store = createStore();
-    const mainText = section(store, "experience").items[0].bullets[0].text;
-    renderWith(store, <EditorExperience sectionId="experience" />);
-
-    openExtras(0);
-    fireEvent.change(wording("Short wording of bullet 1"), {
-      target: { value: "Led dashboard" },
-    });
-    apply(store);
-
-    const bullet = section(store, "experience").items[0].bullets[0];
-    expect(bullet.text).toBe(mainText);
-    expect(bullet.alt).toEqual({ short: "Led dashboard" });
-  });
-
-  it("clearing an alternative wording removes it", () => {
-    const store = createStore();
-    renderWith(store, <EditorExperience sectionId="experience" />);
-    openExtras(0);
-    fireEvent.change(wording("Long wording of bullet 2"), {
-      target: { value: "A longer version" },
-    });
-    expect(
-      (wording("Long wording of bullet 2") as HTMLTextAreaElement).value
-    ).toBe("A longer version");
-    fireEvent.change(wording("Long wording of bullet 2"), {
-      target: { value: "" },
-    });
-    apply(store);
-    expect(section(store, "experience").items[0].bullets[1]).not.toHaveProperty(
-      "alt"
-    );
-  });
-});
-
 describe("generic sections", () => {
   function storeWithProjects(): AppStore {
     const store = createStore();
@@ -198,9 +147,6 @@ describe("generic sections", () => {
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Builds CVs" },
     });
-    fireEvent.change(screen.getByLabelText("Bullet Point List"), {
-      target: { value: "• Uses React\n• Has tests" },
-    });
     apply(store);
 
     const item = section(store, "proj").items[0];
@@ -209,10 +155,7 @@ describe("generic sections", () => {
       subtitle: "Side project",
       description: "Builds CVs",
     });
-    expect(item.bullets.map((b) => b.text)).toEqual([
-      "Uses React",
-      "Has tests",
-    ]);
+    expect(item.bullets).toEqual([]);
     expect(item.shouldShow).toBe(true);
   });
 

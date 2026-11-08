@@ -99,49 +99,23 @@ describe("EditorExperience", () => {
     expect(store.getState().app.shouldDiscardChanges).toBe(false);
   });
 
-  it("keeps tags and alternative wordings of bullets that were only edited", () => {
+  it("edits the description of an experience and applies it; there is no bullet list", () => {
     const store = createStore();
-    const section = storedSection(store, "experience");
-    const tagged = {
-      ...section,
-      items: section.items.map((item, i) =>
-        i === 0
-          ? {
-              ...item,
-              bullets: item.bullets.map((b, j) =>
-                j === 0
-                  ? { ...b, tags: ["react"], alt: { short: "Led dashboard" } }
-                  : b
-              ),
-            }
-          : item
-      ),
-    };
-    store.dispatch(
-      setVault({
-        ...store.getState().vault,
-        sections: [
-          tagged,
-          ...store
-            .getState()
-            .vault.sections.filter((s) => s.id !== "experience"),
-        ],
-      })
-    );
     renderWith(store, <EditorExperience sectionId="experience" />);
+    expect(screen.queryByLabelText("Bullet Point List")).toBeNull();
+    expect(screen.queryByText("Alternative wordings")).toBeNull();
 
-    const list = input("Bullet Point List");
-    fireEvent.change(list, {
-      target: {
-        value: list.value.replace("200 internal users", "300 internal users"),
-      },
+    const [description] = screen.getAllByLabelText("Description");
+    fireEvent.change(description, {
+      target: { value: "Ran the platform team\nCut deploy time" },
     });
     click(setShouldApplyChanges, store);
 
-    const first = storedSection(store, "experience").items[0].bullets[0];
-    expect(first.text).toContain("300 internal users");
-    expect(first.tags).toEqual(["react"]);
-    expect(first.alt).toEqual({ short: "Led dashboard" });
+    const first = storedSection(store, "experience").items[0];
+    expect(first.fields.description).toBe(
+      "Ran the platform team\nCut deploy time"
+    );
+    expect(first.bullets).toEqual([]);
   });
 
   it("adds a new empty experience through the footer flag", () => {

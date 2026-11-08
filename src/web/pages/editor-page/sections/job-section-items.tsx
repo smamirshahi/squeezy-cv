@@ -178,6 +178,8 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
           const choice = variant.selection[item.id]?.bullets?.[bullet.id];
           const wordings = availableWordings(item, bullet.id);
           const isShown = choice?.isVisible !== false;
+          // AI rewording works on the vault's bullets; bullets made for this job are redone with "Make bullets"
+          const isVaultBullet = item.bullets.some((b) => b.id === bullet.id);
           if (isCard) {
             return (
               <SortableRow key={bullet.id} id={bullet.id}>
@@ -285,9 +287,11 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                         ))}
                       </ToggleButtonGroup>
                     </Box>
-                    <Box sx={{ px: 1, pb: 1, pl: 6 }}>
-                      <BulletAiActions item={item} bullet={bullet} />
-                    </Box>
+                    {isVaultBullet && (
+                      <Box sx={{ px: 1, pb: 1, pl: 6 }}>
+                        <BulletAiActions item={item} bullet={bullet} />
+                      </Box>
+                    )}
                   </Box>
                 )}
               </SortableRow>
@@ -361,9 +365,11 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                       </TextField>
                     )}
                   </Box>
-                  <Box sx={{ pl: 12, pb: 0.5 }}>
-                    <BulletAiActions item={item} bullet={bullet} />
-                  </Box>
+                  {isVaultBullet && (
+                    <Box sx={{ pl: 12, pb: 0.5 }}>
+                      <BulletAiActions item={item} bullet={bullet} />
+                    </Box>
+                  )}
                 </>
               )}
             </SortableRow>

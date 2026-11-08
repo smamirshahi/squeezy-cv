@@ -13,7 +13,7 @@ import { MetaDataSchema } from "@custom-types/json-types";
 import { StyleSchema } from "@custom-types/styles-types";
 
 /** The current version of the vault format. Bump it together with a new migration. */
-export const CURRENT_VAULT_VERSION = 1;
+export const CURRENT_VAULT_VERSION = 2;
 
 export const LinkItemSchema = Object({
   /** Stable id */
