@@ -14,6 +14,8 @@ template and a job (#165-#172).
 
 ### Fixed
 
+- Vault: the "You are editing a vault fact" banner is gone from the item editor and the section pages (#231).
+
 - Vault: the "Where this item appears" panel with per-job eyes is gone; the right panel stays, empty. What a job shows is decided in the job (#229).
 
 - Work Experience and Education: no eye button (what is shown is decided per job), and "Add new experience/education" sits below the list. Apply and Discard stay fixed at the bottom of the middle area on every page that has them (#227).

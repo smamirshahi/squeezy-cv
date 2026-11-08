@@ -1,6 +1,5 @@
 import { MouseEvent, useEffect, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   Divider,
@@ -25,7 +24,6 @@ import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { formatRoute } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { variantsSelector } from "@store/jobs/jobs-slice";
 import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
 import {
   ensureUnsortedSection,
@@ -233,7 +231,6 @@ export function VaultPage(): JSX.Element {
   const selectedPageId =
     route.kind === "vault" ? (route.sectionId ?? "mainInfo") : "mainInfo";
   const selectedItemId = route.kind === "vault" ? (route.itemId ?? "") : "";
-  const variants = useAppSelector(variantsSelector);
   const sections = useAppSelector(sectionsSelector);
   const page = pages.find((entry) => entry.id === selectedPageId) ?? pages[0];
   // An item chosen in the tree is edited inline (no Apply step); only the summary has no item list
@@ -288,13 +285,6 @@ export function VaultPage(): JSX.Element {
             item={selectedItem}
             onSelectItem={setSelectedItemId}
           />
-        )}
-        {!hasInlineEditor && (
-          <Alert severity="warning">
-            You are editing a <b>vault fact</b>. Changes apply to all{" "}
-            {variants.length} {variants.length === 1 ? "job" : "jobs"} that use
-            it. To change only one job, edit it on the page instead.
-          </Alert>
         )}
         {!hasInlineEditor && (
           <>

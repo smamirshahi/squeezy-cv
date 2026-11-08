@@ -50,11 +50,11 @@ function open(title: string): void {
 }
 
 describe("inline vault item editor", () => {
-  it("opens when an item is chosen, says it is a shared fact, and has no Apply step", () => {
+  it("opens when an item is chosen, has no vault-fact banner and no Apply step", () => {
     setup();
     open("Senior Software Developer");
     const editor = screen.getByLabelText("Edit item");
-    expect(within(editor).getByText(/vault fact/)).toBeTruthy();
+    expect(within(editor).queryByText(/vault fact/)).toBeNull();
     expect(within(editor).getByText(/Item 1 of 3/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Apply" })).toBeNull();
   });
