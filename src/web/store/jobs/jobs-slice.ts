@@ -252,17 +252,36 @@ const jobsSlice = createSlice({
       }
     },
 
-    /** Deleting a template a job uses is refused (move the jobs first), and so is deleting the last one */
-    deleteTemplate(state, action: PayloadAction<{ id: string }>) {
-      if (
-        state.templates.length <= 1 ||
-        jobsUsingTemplate(state.jobs, action.payload.id).length > 0
-      ) {
+    /**
+     * Deleting the last template is refused. Jobs on the template move to `moveJobsTo` (their
+     * auto-fit result belonged to the old look, so it is dropped); without a valid target a
+     * template that jobs still use stays. Applications are frozen copies and are not affected.
+     */
+    deleteTemplate(
+      state,
+      action: PayloadAction<{ id: string; moveJobsTo?: string }>
+    ) {
+      const { id, moveJobsTo } = action.payload;
+      if (state.templates.length <= 1) {
         return;
       }
-      state.templates = state.templates.filter(
-        (t) => t.id !== action.payload.id
-      );
+      const users = jobsUsingTemplate(state.jobs, id);
+      if (users.length > 0) {
+        if (
+          !moveJobsTo ||
+          moveJobsTo === id ||
+          !state.templates.some((t) => t.id === moveJobsTo)
+        ) {
+          return;
+        }
+        for (const job of state.jobs) {
+          if (job.templateId === id) {
+            job.templateId = moveJobsTo;
+            delete job.tuning;
+          }
+        }
+      }
+      state.templates = state.templates.filter((t) => t.id !== id);
     },
 
     /**

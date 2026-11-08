@@ -351,21 +351,26 @@ describe("templates page", () => {
     ).toBe(true);
   });
 
-  it("disables delete while a job uses the template and says why", () => {
+  it("deletes a template jobs use by moving them to the chosen template", async () => {
     const store = setup(<TemplatesPage />);
     users(store);
+    act(() => {
+      store.dispatch(addTemplate({ id: "spare", name: "Spare" }));
+    });
     const button = screen.getByRole("button", {
       name: "Delete template Template 1",
     });
-    expect(button.hasAttribute("disabled")).toBe(true);
-    const reason = document.getElementById(
-      button.getAttribute("aria-describedby") ?? "none"
-    );
-    expect(reason?.textContent).toContain("Used by 2 jobs (Default, acme)");
-    expect(reason?.textContent).toContain("Move them to another template");
-    // pressing it does nothing
+    expect(button.hasAttribute("disabled")).toBe(false);
     fireEvent.click(button);
-    expect(templates(store)).toHaveLength(2);
+    expect(screen.getByText(/2 jobs use it/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Delete template" }));
+    await closed();
+    expect(templates(store).map((t) => t.name)).not.toContain("Template 1");
+    expect(
+      jobs(store).every((j) =>
+        templates(store).some((t) => t.id === j.templateId)
+      )
+    ).toBe(true);
   });
 
   it("deletes an unused template only after confirming", async () => {
@@ -402,9 +407,8 @@ describe("templates page", () => {
   });
 
   it("explains the reasons in words", () => {
-    expect(deleteBlockReason(["A"], 2)).toContain("Used by 1 job (A)");
-    expect(deleteBlockReason([], 1)).toContain("only template");
-    expect(deleteBlockReason([], 2)).toBe("");
+    expect(deleteBlockReason(1)).toContain("only template");
+    expect(deleteBlockReason(2)).toBe("");
     expect(jobCountText(1)).toBe("1 job");
     expect(jobCountText(0)).toBe("0 jobs");
     const named = [
