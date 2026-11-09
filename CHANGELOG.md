@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Publications is now a default section. Each item has title, authors, journal, year and link; paste a BibTeX entry to fill them, and choose the publication style (APA-like, IEEE-like, plain) in Style settings (#256).
+
 ### Changed
 
 - Vault: a **+ Add section** button under the sections list; the type list is Summary, Experience, Education, Skills and "Other section" (for certifications, awards, projects...), each with a short description; deleting a section returns to the main vault page and no longer says "0 item(s)"; "Add skill" is on the right; more space under the SECTIONS title (#281).

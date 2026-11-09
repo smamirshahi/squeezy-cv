@@ -6,6 +6,7 @@ const DEFAULT_SECTION_IDS = {
   experience: "experience",
   education: "education",
   skills: "skills",
+  publications: "publications",
 } as const;
 
 /** Ids of the two parts of the CV header. They come from the profile and links, not from sections. */
@@ -40,6 +41,12 @@ export function createDefaultVault(): Vault {
         id: DEFAULT_SECTION_IDS.skills,
         type: "skills",
         title: "Skills",
+        items: [],
+      },
+      {
+        id: DEFAULT_SECTION_IDS.publications,
+        type: "publications",
+        title: "Publications",
         items: [],
       },
     ],

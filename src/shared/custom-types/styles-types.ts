@@ -84,6 +84,13 @@ export const StyleSchema = Object({
   /** Space above each section title in px (0-40); missing = the default */
   sectionSpacing: Number.optional(),
 
+  /** How a publication is written: apa (default), ieee or plain */
+  citationStyle: Union(
+    Literal("apa"),
+    Literal("ieee"),
+    Literal("plain")
+  ).optional(),
+
   /** The line under each section title; missing = shown */
   hasHeadingLine: Boolean.optional(),
 

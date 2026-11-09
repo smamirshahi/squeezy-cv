@@ -67,6 +67,10 @@ const cvDataSlice = createSlice({
       }
     },
 
+    setCitationStyle(state, action: PayloadAction<Style["citationStyle"]>) {
+      state.style.citationStyle = action.payload;
+    },
+
     setHasHeadingLine(state, action: PayloadAction<boolean>) {
       state.style.hasHeadingLine = action.payload;
     },
@@ -123,6 +127,7 @@ export const {
   setShouldShowGender,
   setSectionSpacing,
   setHasHeadingLine,
+  setCitationStyle,
   setPaperMargin,
   setTypography,
   resetTypography,
