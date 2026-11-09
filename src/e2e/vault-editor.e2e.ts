@@ -22,6 +22,27 @@ afterAll(async () => {
 });
 
 describe("editing an item in the vault (inline editor)", () => {
+  it("shows Start and End date inputs at the same width", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+    await page.getByRole("link", { name: "Vault" }).click();
+    const tree = page.getByRole("complementary", { name: "Vault tree" });
+    await tree.getByRole("link", { name: /^Work Experience/ }).click();
+    await page
+      .getByRole("main", { name: "Edit" })
+      .getByRole("link", { name: /^Senior Software Developer/ })
+      .click();
+
+    const start = await page.getByLabel("Start").boundingBox();
+    const end = await page.getByLabel("End").boundingBox();
+    expect(start).not.toBeNull();
+    expect(end).not.toBeNull();
+    expect(Math.abs(start!.width - end!.width)).toBeLessThan(1);
+    expect(
+      await page.getByRole("checkbox", { name: "Current" }).isEnabled()
+    ).toBe(true);
+  });
+
   it("edits a job and its description, sees them on the page, saves and keeps them after a reload", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();

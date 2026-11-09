@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Vault item editor: Start and End date inputs are now the same width (#267).
 - Vault item editor: Apply and Discard buttons for each experience, education and other item; every input is on its own line, with start, end and Current together (#265).
 
 ### Fixed
