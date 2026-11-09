@@ -68,6 +68,38 @@ describe("migrateLegacyFile (current legacy format)", () => {
     expect(items.map((i) => i.shouldShow)).toEqual([true, true, false]);
   });
 
+  it("preserves remote and education field values from extended legacy data", () => {
+    const withNewFields = {
+      ...sample,
+      data: {
+        ...sample.data,
+        experiences: sample.data.experiences.map((experience, index) =>
+          index === 0 ? { ...experience, remote: "true" } : experience
+        ),
+        educations: sample.data.educations.map((education, index) =>
+          index === 0
+            ? {
+                ...education,
+                remote: "true",
+                fieldOfStudy: "Civil Engineering",
+              }
+            : education
+        ),
+      },
+    };
+    const migrated = migrateLegacyFile(withNewFields);
+    const experience = migrated.vault.sections.find(
+      (section) => section.type === "experience"
+    )!.items[0];
+    const education = migrated.vault.sections.find(
+      (section) => section.type === "education"
+    )!.items[0];
+
+    expect(experience.fields.remote).toBe("true");
+    expect(education.fields.remote).toBe("true");
+    expect(education.fields.fieldOfStudy).toBe("Civil Engineering");
+  });
+
   it("gives plain-string bullets new ids", () => {
     // gen-1 and gen-2 are the links, gen-3 the summary item
     expect(section("experience").items[0].bullets.map((b) => b.id)).toEqual([

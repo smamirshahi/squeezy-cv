@@ -95,17 +95,6 @@ const vaultSlice = createSlice({
       }
     },
 
-    /** Turns levels on or off for a skills section. The stored levels are kept. */
-    setSectionTracksLevel(
-      state,
-      action: PayloadAction<{ id: string; tracksLevel: boolean }>
-    ) {
-      const section = state.sections.find((s) => s.id === action.payload.id);
-      if (section) {
-        section.tracksLevel = action.payload.tracksLevel;
-      }
-    },
-
     /** Moves a section to a new position. The index is clamped to the valid range. */
     moveSection(state, action: PayloadAction<{ id: string; toIndex: number }>) {
       const from = state.sections.findIndex((s) => s.id === action.payload.id);
@@ -438,7 +427,6 @@ export const {
   renameSection,
   ensureUnsortedSection,
   moveItemToSection,
-  setSectionTracksLevel,
   moveSection,
   addItem,
   removeItem,

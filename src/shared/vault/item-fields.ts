@@ -61,13 +61,19 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
       return [
         { key: "degree", label: "Degree", kind: "text", span: 2 },
         { key: "institute", label: "Institute", kind: "text", span: 1 },
+        {
+          key: "fieldOfStudy",
+          label: "Field of study",
+          kind: "text",
+          span: 3,
+        },
         { key: "location", label: "Location", kind: "text", span: 1 },
         START,
         END,
         { key: "link", label: "Link (optional)", kind: "text", span: 3 },
         {
           key: "dissertationTitle",
-          label: "Dissertation title",
+          label: "Dissertation title (optional)",
           kind: "text",
           span: 3,
         },
@@ -80,7 +86,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         },
       ];
     case "skills":
-      return [{ key: "category", label: "Group", kind: "text", span: 3 }];
+      return [{ key: "category", label: "Category", kind: "text", span: 3 }];
     case "summary":
       return [{ key: "text", label: "Summary", kind: "multiline", span: 3 }];
     default:
@@ -110,4 +116,13 @@ export function toMonthValue(iso: string | undefined): string {
 /** A month input's "2021-03" as the stored ISO day; empty stays empty */
 export function fromMonthValue(month: string): string {
   return /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : "";
+}
+
+export function locationLabel(
+  location: string | undefined,
+  isRemote: string | undefined
+): string {
+  return [location?.trim(), isRemote === "true" ? "Remote" : ""]
+    .filter(Boolean)
+    .join(" · ");
 }

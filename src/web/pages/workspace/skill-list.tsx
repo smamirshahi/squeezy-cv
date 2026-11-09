@@ -14,7 +14,7 @@ import {
   sortItemsByVariant,
 } from "@shared/variant/render";
 import { computeBulletOrders } from "@shared/variant/variant-utils";
-import { levelLabel, tracksLevels } from "@shared/vault/vault-utils";
+import { levelLabel } from "@shared/vault/vault-utils";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import {
   getDropIndex,
@@ -28,16 +28,10 @@ import { setBulletOrders, setBulletSelection } from "@store/jobs/jobs-slice";
 interface GroupProps {
   item: Item;
   variant: Variant;
-  hasLevels: boolean;
   hasTitle: boolean;
 }
 
-function SkillGroup({
-  item,
-  variant,
-  hasLevels,
-  hasTitle,
-}: GroupProps): JSX.Element {
+function SkillGroup({ item, variant, hasTitle }: GroupProps): JSX.Element {
   const dispatch = useAppDispatch();
   const sensors = useReorderSensors();
   const bullets = sortBulletsByVariant(item, variant.selection);
@@ -121,13 +115,11 @@ function SkillGroup({
                     >
                       {bullet.text}
                     </Typography>
-                    {hasLevels && (
-                      <Typography
-                        sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
-                      >
-                        {levelLabel(bullet.rating)}
-                      </Typography>
-                    )}
+                    <Typography
+                      sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+                    >
+                      {levelLabel(bullet.rating)}
+                    </Typography>
                     <SortingIcons
                       index={index}
                       swapFunction={(_from, toIndex) =>
@@ -153,7 +145,6 @@ interface Props {
 
 /** Every skill of the section in one list: show/hide and order for this variant */
 export function SkillList({ section, variant }: Props): JSX.Element {
-  const hasLevels = tracksLevels(section);
   const items = sortItemsByVariant(section.items, variant.selection).filter(
     (item) => variant.selection[item.id]?.isVisible !== false
   );
@@ -187,7 +178,6 @@ export function SkillList({ section, variant }: Props): JSX.Element {
             key={item.id}
             item={item}
             variant={variant}
-            hasLevels={hasLevels}
             hasTitle={items.length > 1}
           />
         ))}

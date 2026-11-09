@@ -8,6 +8,7 @@ import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 import { ItemDescription } from "@pages/preview-page/item-description";
+import { locationLabel } from "@shared/vault/item-fields";
 
 interface Props {
   section: RenderedSection;
@@ -67,9 +68,13 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
                 text={item.fields.institute ?? ""}
                 href={normaliseLink(item.fields.link)}
               />
+              <CvTypography
+                variant="bodyMd"
+                text={item.fields.fieldOfStudy ?? ""}
+              />
               <IconWithText
                 icon={LocationOnIcon}
-                text={item.fields.location ?? ""}
+                text={locationLabel(item.fields.location, item.fields.remote)}
                 variant="bodyMd"
               />
             </Grid>

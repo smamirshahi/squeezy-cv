@@ -2,19 +2,12 @@ import { HintAdornment } from "@components/description-hint";
 import { KeyboardEvent, useEffect, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControlLabel,
   IconButton,
   MenuItem,
-  ToggleButton,
   Tooltip,
   TextField,
   Typography,
@@ -26,11 +19,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
-import {
-  isYearsAcceptable,
-  levelLabel,
-  tracksLevels,
-} from "@shared/vault/vault-utils";
+import { isYearsAcceptable, levelLabel } from "@shared/vault/vault-utils";
 import {
   FieldSpec,
   fieldSpecsFor,
@@ -49,9 +38,7 @@ import {
   moveBullet,
   removeBullet,
   moveItemToSection,
-  removeItem,
   sectionsSelector,
-  setSectionTracksLevel,
   updateBullet,
   updateItemFields,
 } from "@store/vault/vault-slice";
@@ -63,54 +50,9 @@ interface FieldProps {
 }
 
 function Field({ spec, value, onChange }: FieldProps): JSX.Element {
-  if (spec.kind === "month") {
-    const isCurrent = spec.isEnd === true && value === "";
-    return (
-      <Box
-        sx={{
-          gridColumn: `span ${spec.span}`,
-          display: spec.isEnd ? "grid" : "flex",
-          gridTemplateColumns: spec.isEnd
-            ? "repeat(2, minmax(0, 1fr))"
-            : undefined,
-          gap: 1.5,
-          alignItems: "center",
-        }}
-      >
-        <TextField
-          size="small"
-          type="month"
-          label={spec.label}
-          value={toMonthValue(value)}
-          disabled={isCurrent}
-          onChange={(event) => onChange(fromMonthValue(event.target.value))}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={spec.isEnd ? { minWidth: 0, width: "100%" } : { flex: 1 }}
-        />
-        {spec.isEnd && (
-          <FormControlLabel
-            label="Current"
-            control={
-              <Checkbox
-                size="small"
-                checked={isCurrent}
-                onChange={(event) =>
-                  onChange(
-                    event.target.checked
-                      ? ""
-                      : fromMonthValue(new Date().toISOString().slice(0, 7))
-                  )
-                }
-              />
-            }
-          />
-        )}
-      </Box>
-    );
-  }
   return (
     <TextField
-      size="small"
+      size="medium"
       label={spec.label}
       value={value}
       multiline={spec.kind === "multiline"}
@@ -128,9 +70,121 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
   );
 }
 
-/** The level choices, 1 (learning) to 5 (expert). A plus adds half a step (3 + plus = 3.5). */
+interface DateFieldsProps {
+  startValue: string;
+  endValue: string;
+  onStartChange: (value: string) => void;
+  onEndChange: (value: string) => void;
+}
+
+function DateFields({
+  startValue,
+  endValue,
+  onStartChange,
+  onEndChange,
+}: DateFieldsProps): JSX.Element {
+  const isCurrent = endValue === "";
+  return (
+    <Box
+      role="group"
+      aria-label="Dates"
+      sx={{
+        gridColumn: "span 3",
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) auto",
+        gap: 1.5,
+        alignItems: "center",
+      }}
+    >
+      <TextField
+        size="medium"
+        type="month"
+        label="Start"
+        value={toMonthValue(startValue)}
+        onChange={(event) => onStartChange(fromMonthValue(event.target.value))}
+        slotProps={{ inputLabel: { shrink: true } }}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <TextField
+        size="medium"
+        type="month"
+        label="End"
+        value={toMonthValue(endValue)}
+        disabled={isCurrent}
+        onChange={(event) => onEndChange(fromMonthValue(event.target.value))}
+        slotProps={{ inputLabel: { shrink: true } }}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <FormControlLabel
+        label="Current"
+        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
+        control={
+          <Checkbox
+            size="small"
+            checked={isCurrent}
+            onChange={(event) =>
+              onEndChange(
+                event.target.checked
+                  ? ""
+                  : fromMonthValue(new Date().toISOString().slice(0, 7))
+              )
+            }
+          />
+        }
+      />
+    </Box>
+  );
+}
+
+interface LocationFieldProps {
+  value: string;
+  isRemote: boolean;
+  onLocationChange: (value: string) => void;
+  onRemoteChange: (isRemote: boolean) => void;
+}
+
+function LocationField({
+  value,
+  isRemote,
+  onLocationChange,
+  onRemoteChange,
+}: LocationFieldProps): JSX.Element {
+  return (
+    <Box
+      role="group"
+      aria-label="Location"
+      sx={{
+        gridColumn: "span 3",
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        gap: 1.5,
+        alignItems: "center",
+      }}
+    >
+      <TextField
+        size="medium"
+        label="Location"
+        value={value}
+        onChange={(event) => onLocationChange(event.target.value)}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <FormControlLabel
+        label="Remote"
+        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
+        control={
+          <Checkbox
+            size="small"
+            checked={isRemote}
+            onChange={(event) => onRemoteChange(event.target.checked)}
+          />
+        }
+      />
+    </Box>
+  );
+}
+
+/** The level choices, 1 (learning) to 5 (expert). */
 const LEVEL_STEPS = [1, 2, 3, 4, 5];
-const MAX_LEVEL = 5;
 
 /** "3 – Proficient" */
 function levelOptionLabel(level: number): string {
@@ -138,7 +192,7 @@ function levelOptionLabel(level: number): string {
 }
 
 const LEVEL_HINT =
-  "Level: how well you know the skill, from 1 (just learning) to 5 (expert); the + means a bit above that level. It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
+  "Level: how well you know the skill, from 1 (just learning) to 5 (expert). It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
 
 interface SkillCardProps {
   section: Section;
@@ -162,7 +216,6 @@ function SkillCard({
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
   const skillName = bullet.text || `Skill ${index + 1}`;
   const level = Math.floor(bullet.rating ?? 0);
-  const isPlus = (bullet.rating ?? 0) - level === 0.5;
   return (
     <Box
       sx={{
@@ -216,51 +269,25 @@ function SkillCard({
         }}
         sx={{ flex: 1 }}
       />
-      {tracksLevels(section) && (
-        <>
-          <TextField
-            select
-            size="small"
-            label="Level"
-            value={level > 0 ? String(level) : ""}
-            onChange={(event) => {
-              const chosen = Number(event.target.value);
-              const rating =
-                isPlus && chosen < MAX_LEVEL ? chosen + 0.5 : chosen;
-              if (isRatingAcceptable(rating)) {
-                dispatch(updateBullet({ ...ref, update: { rating } }));
-              }
-            }}
-            sx={{ width: 150 }}
-          >
-            {LEVEL_STEPS.map((step) => (
-              <MenuItem key={step} value={String(step)}>
-                {levelOptionLabel(step)}
-              </MenuItem>
-            ))}
-          </TextField>
-          <Tooltip title="Plus: a bit above this level (3 + plus = three and a half)">
-            <span>
-              <ToggleButton
-                value="plus"
-                size="small"
-                selected={isPlus}
-                disabled={level === 0 || level >= MAX_LEVEL}
-                aria-label={`${skillName} plus`}
-                onChange={() => {
-                  const rating = isPlus ? level : level + 0.5;
-                  if (isRatingAcceptable(rating)) {
-                    dispatch(updateBullet({ ...ref, update: { rating } }));
-                  }
-                }}
-                sx={{ px: 1, py: 0.75, minWidth: 0, lineHeight: 1 }}
-              >
-                +
-              </ToggleButton>
-            </span>
-          </Tooltip>
-        </>
-      )}
+      <TextField
+        select
+        size="small"
+        label="Level"
+        value={level > 0 ? String(level) : ""}
+        onChange={(event) => {
+          const chosen = Number(event.target.value);
+          if (isRatingAcceptable(chosen)) {
+            dispatch(updateBullet({ ...ref, update: { rating: chosen } }));
+          }
+        }}
+        sx={{ width: 150 }}
+      >
+        {LEVEL_STEPS.map((step) => (
+          <MenuItem key={step} value={String(step)}>
+            {levelOptionLabel(step)}
+          </MenuItem>
+        ))}
+      </TextField>
       <TextField
         size="small"
         label="Years"
@@ -317,12 +344,12 @@ export function VaultItemEditor({
 }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
-  const [isRemoving, setIsRemoving] = useState<boolean>(false);
   // Edits of the fields wait here until Apply (a skills group saves as you type)
   const [draft, setDraft] = useState<Record<string, string>>({});
   const index = section.items.findIndex((entry) => entry.id === item.id);
   const ref = { sectionId: section.id, itemId: item.id };
   const isSkills = section.type === "skills";
+  const fieldSpecs = fieldSpecsFor(section.type);
   const vaultSections = useAppSelector(sectionsSelector);
   const moveTargets = sectionTargets({ sections: vaultSections }, section.id);
   const changes = Object.fromEntries(
@@ -336,6 +363,14 @@ export function VaultItemEditor({
   function apply(): void {
     dispatch(updateItemFields({ ...ref, fields: changes }));
     setDraft({});
+  }
+
+  function changeField(key: string, value: string): void {
+    if (isSkills) {
+      dispatch(updateItemFields({ ...ref, fields: { [key]: value } }));
+    } else {
+      setDraft((current) => ({ ...current, [key]: value }));
+    }
   }
 
   useEffect(() => {
@@ -438,58 +473,67 @@ export function VaultItemEditor({
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 1.5,
-          p: 2,
-          bgcolor: WORKSPACE_COLORS.panel,
-          border: `1px solid ${WORKSPACE_COLORS.border}`,
-          borderRadius: 1.5,
+          gap: 2.5,
+          ...(isSkills
+            ? {}
+            : {
+                p: 2.5,
+                bgcolor: WORKSPACE_COLORS.panel,
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                borderRadius: 1.5,
+              }),
         }}
       >
-        {fieldSpecsFor(section.type).map((spec) => (
-          <Field
-            key={spec.key}
-            spec={{
-              ...spec,
-              // One input per line; start, end and Current share one line
-              span: spec.kind !== "month" ? 3 : spec.isEnd ? 2 : 1,
-            }}
-            value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
-            onChange={(value) =>
-              isSkills
-                ? dispatch(
-                    updateItemFields({ ...ref, fields: { [spec.key]: value } })
-                  )
-                : setDraft((current) => ({ ...current, [spec.key]: value }))
-            }
-          />
-        ))}
-      </Box>
-
-      {isSkills && (
-        <>
-          <Alert severity="warning" sx={{ py: 0 }}>
-            You are editing vault facts. Levels and years are stored here, and
-            each job decides whether and how to show them. The AI never changes
-            a level.
-          </Alert>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={tracksLevels(section)}
-                onChange={(event) =>
-                  dispatch(
-                    setSectionTracksLevel({
-                      id: section.id,
-                      tracksLevel: event.target.checked,
-                    })
-                  )
+        {fieldSpecs.map((spec) => {
+          if (
+            spec.key === "location" &&
+            (section.type === "experience" || section.type === "education")
+          ) {
+            return (
+              <LocationField
+                key={spec.key}
+                value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+                isRemote={(draft.remote ?? item.fields.remote ?? "") === "true"}
+                onLocationChange={(value) => changeField(spec.key, value)}
+                onRemoteChange={(isRemote) =>
+                  changeField("remote", isRemote ? "true" : "")
                 }
               />
+            );
+          }
+          if (spec.kind === "month") {
+            if (spec.isEnd) {
+              return null;
             }
-            label="Track my level (optional)"
-          />
-        </>
-      )}
+            const endSpec = fieldSpecs.find(
+              (candidate) => candidate.kind === "month" && candidate.isEnd
+            );
+            if (!endSpec) {
+              throw new Error(
+                `Missing end-date field for ${section.type} section`
+              );
+            }
+            return (
+              <DateFields
+                key="dates"
+                startValue={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+                endValue={draft[endSpec.key] ?? item.fields[endSpec.key] ?? ""}
+                onStartChange={(value) => changeField(spec.key, value)}
+                onEndChange={(value) => changeField(endSpec.key, value)}
+              />
+            );
+          }
+          return (
+            <Field
+              key={spec.key}
+              spec={{ ...spec, span: 3 }}
+              value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+              onChange={(value) => changeField(spec.key, value)}
+            />
+          );
+        })}
+      </Box>
+
       {isSkills && (
         <>
           <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -548,35 +592,7 @@ export function VaultItemEditor({
             </Button>
           </>
         )}
-        <Button color="error" onClick={() => setIsRemoving(true)}>
-          Remove this item
-        </Button>
       </Box>
-
-      <Dialog open={isRemoving} onClose={() => setIsRemoving(false)}>
-        <DialogTitle>Remove “{getItemLabel(item)}”?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            It is removed from the vault and from every job. Until you press
-            Save you can still reload the page to get it back.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsRemoving(false)}>Cancel</Button>
-          <Button
-            color="error"
-            onClick={() => {
-              const neighbour =
-                section.items[index + 1] ?? section.items[index - 1];
-              dispatch(removeItem(ref));
-              onSelectItem(neighbour?.id ?? "");
-              setIsRemoving(false);
-            }}
-          >
-            Remove
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

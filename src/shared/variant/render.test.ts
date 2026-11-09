@@ -328,7 +328,7 @@ describe("computeOrders", () => {
 });
 
 describe("skill levels", () => {
-  it("leaves levels out when the section does not track them, keeping the stored value", () => {
+  it("renders stored levels even when legacy data disables tracking", () => {
     const rated: Vault = {
       ...vault,
       sections: vault.sections.map((section) =>
@@ -354,8 +354,8 @@ describe("skill levels", () => {
         s.id === skills.id ? { ...s, tracksLevel: false } : s
       ),
     };
-    const hidden = sectionPart(allParts(render(off, variant)), skills.id)!;
-    expect(hidden.items[0].bullets[0].rating).toBeUndefined();
+    const stillShown = sectionPart(allParts(render(off, variant)), skills.id)!;
+    expect(stillShown.items[0].bullets[0].rating).toBe(4);
     expect(
       off.sections.find((s) => s.id === skills.id)!.items[0].bullets[0].rating
     ).toBe(4);
@@ -364,14 +364,13 @@ describe("skill levels", () => {
 
 describe("skill display (variant)", () => {
   const ratings = [5, 3, 0];
-  function ratedVault(tracksLevel?: boolean): Vault {
+  function ratedVault(): Vault {
     return {
       ...vault,
       sections: vault.sections.map((section) =>
         section.type === "skills"
           ? {
               ...section,
-              ...(tracksLevel === undefined ? {} : { tracksLevel }),
               items: section.items.map((item) => ({
                 ...item,
                 bullets: item.bullets.map((b, i) => ({
@@ -417,16 +416,24 @@ describe("skill display (variant)", () => {
     expect(shown.length).toBeLessThan(all);
   });
 
-  it("a section that does not track levels is a plain list whatever the variant says", () => {
-    const v = ratedVault(false);
+  it("legacy tracking settings do not override the variant skill style or level filter", () => {
+    const rated = ratedVault();
+    const v: Vault = {
+      ...rated,
+      sections: rated.sections.map((section) =>
+        section.type === "skills" ? { ...section, tracksLevel: false } : section
+      ),
+    };
     const variant = {
       ...createDefaultVariant(file, "main"),
       skillDisplay: "stars",
       skillMinLevel: 5,
     } as Variant;
     const part = skills(render(v, variant), v);
-    expect(part.skillStyle?.display).toBe("none");
-    expect(part.items.flatMap((i) => i.bullets).length).toBeGreaterThan(1);
+    expect(part.skillStyle?.display).toBe("stars");
+    const bullets = part.items.flatMap((i) => i.bullets);
+    expect(bullets.length).toBeGreaterThan(0);
+    expect(bullets.every((bullet) => bullet.rating === 5)).toBe(true);
   });
 
   it("flat grouping merges the groups into one list, highest level first, in this variant only", () => {

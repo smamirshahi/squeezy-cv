@@ -56,7 +56,6 @@ import {
   Variant,
 } from "@custom-types/variant-types";
 import { jobBullets } from "@shared/variant/render";
-import { tracksLevels } from "@shared/vault/vault-utils";
 import { Section } from "@custom-types/vault-types";
 
 const PERCENT = 100;
@@ -301,7 +300,6 @@ function SkillStyleControls({
   section,
 }: SkillStyleProps): JSX.Element {
   const dispatch = useAppDispatch();
-  const hasLevels = tracksLevels(section);
   // a template without a choice keeps the earlier look, which is stars
   const display = variant.skillDisplay ?? "stars";
   const columns = variant.skillColumns ?? 1;
@@ -311,19 +309,12 @@ function SkillStyleControls({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <TemplateScopeNote verb="Skill display changes" />
       <Heading>Show levels as</Heading>
-      {!hasLevels && (
-        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          Levels are turned off in the vault (Track my level), so the page shows
-          names only.
-        </Typography>
-      )}
       <ToggleButtonGroup
         exclusive
         fullWidth
         size="small"
         aria-label="Skill display"
         value={display}
-        disabled={!hasLevels}
         onChange={(_event, value: SkillDisplay | null) =>
           value && dispatch(setSkillStyle({ id: variant.id, display: value }))
         }
@@ -362,27 +353,23 @@ function SkillStyleControls({
         <ToggleButton value={1}>1 column</ToggleButton>
         <ToggleButton value={2}>2 columns</ToggleButton>
       </ToggleButtonGroup>
-      {hasLevels && (
-        <>
-          <Heading>Minimum level</Heading>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, px: 1 }}>
-            <Slider
-              min={0}
-              max={MAX_LEVEL}
-              step={1}
-              marks
-              value={minLevel}
-              aria-label="Minimum level"
-              onChange={(_event, value) =>
-                dispatch(setSkillStyle({ id: variant.id, minLevel: value }))
-              }
-            />
-            <Typography sx={{ fontWeight: 700, width: 56 }}>
-              {minLevel === 0 ? "Any" : minLevel}
-            </Typography>
-          </Box>
-        </>
-      )}
+      <Heading>Minimum level</Heading>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, px: 1 }}>
+        <Slider
+          min={0}
+          max={MAX_LEVEL}
+          step={1}
+          marks
+          value={minLevel}
+          aria-label="Minimum level"
+          onChange={(_event, value) =>
+            dispatch(setSkillStyle({ id: variant.id, minLevel: value }))
+          }
+        />
+        <Typography sx={{ fontWeight: 700, width: 56 }}>
+          {minLevel === 0 ? "Any" : minLevel}
+        </Typography>
+      </Box>
       <SkillList section={section} variant={variant} />
       <Typography
         sx={{

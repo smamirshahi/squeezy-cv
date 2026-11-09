@@ -215,11 +215,15 @@ describe("inline vault item editor", () => {
   it("removes the item only after confirming", async () => {
     const store = setup();
     open("Software Developer");
-    fireEvent.click(screen.getByRole("button", { name: "Remove this item" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /^Delete Software Developer/ })
+    );
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(stored(store, "Sample Systems")).toBeDefined();
     fireEvent.click(
-      await screen.findByRole("button", { name: "Remove this item" })
+      await screen.findByRole("button", {
+        name: /^Delete Software Developer/,
+      })
     );
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
     expect(
@@ -230,7 +234,7 @@ describe("inline vault item editor", () => {
     ).toBe(false);
   });
 
-  it("sets and clears Years, ignores invalid years, and keeps levels when tracking is turned off", () => {
+  it("sets and clears Years, ignores invalid years, and always shows skill levels", () => {
     const store = setup();
     open("Languages");
     const first = stored(store, "Languages").bullets[0];
@@ -246,24 +250,18 @@ describe("inline vault item editor", () => {
     fireEvent.change(years, { target: { value: "" } });
     expect(stored(store, "Languages").bullets[0].years).toBeUndefined();
 
-    fireEvent.click(screen.getByLabelText(/Track my level/));
-    expect(screen.queryAllByRole("combobox", { name: /^Level/ })).toHaveLength(
-      0
-    );
+    expect(screen.queryByLabelText(/Track my level/)).toBeNull();
+    expect(screen.getAllByRole("combobox", { name: /^Level/ })).toHaveLength(2);
     expect(stored(store, "Languages").bullets[0].rating).toBe(4);
-    fireEvent.click(screen.getByLabelText(/Track my level/));
-    expect(
-      screen.getAllByRole("combobox", { name: /^Level/ }).length
-    ).toBeGreaterThan(0);
   });
 
-  it("edits a skills group inline: group name, skill names, levels, add, move and remove", () => {
+  it("edits a skills category inline: category name, skill names, levels, add, move and remove", () => {
     const store = setup();
     open("Languages");
     const editor = screen.getByLabelText("Edit item");
     expect(within(editor).getByText("Skills · 2")).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText("Group"), {
+    fireEvent.change(screen.getByLabelText("Category"), {
       target: { value: "Spoken languages" },
     });
     expect(stored(store, "Spoken languages")).toBeDefined();
@@ -273,24 +271,14 @@ describe("inline vault item editor", () => {
     });
     expect(stored(store, "Spoken languages").bullets[1].text).toBe("Français");
 
-    // level 1-5 with names; the plus adds half a step and is not offered for 5
-    const plus = (): HTMLElement =>
-      screen.getByRole("button", { name: "Français plus" });
+    // Level choices are whole steps from 1 to 5; there is no plus control.
     pickLevel(1, "3 – Proficient");
-    // the sample skill may already have a plus, which a new level keeps
-    if (stored(store, "Spoken languages").bullets[1].rating === 3.5) {
-      fireEvent.click(plus());
-    }
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3);
-    fireEvent.click(plus());
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3.5);
     pickLevel(1, "4 – Advanced");
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(4.5);
-    fireEvent.click(plus());
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(4);
     pickLevel(1, "5 – Expert");
     expect(stored(store, "Spoken languages").bullets[1].rating).toBe(5);
-    expect(plus().hasAttribute("disabled")).toBe(true);
+    expect(screen.queryByRole("button", { name: / plus$/ })).toBeNull();
     // there is no "No level" choice: whether levels show is up to the template
     fireEvent.mouseDown(screen.getAllByRole("combobox", { name: /^Level/ })[1]);
     expect(screen.queryByRole("option", { name: "No level" })).toBeNull();
@@ -298,12 +286,7 @@ describe("inline vault item editor", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
     expect(stored(store, "Spoken languages").bullets).toHaveLength(3);
-    // a new skill has no level chosen, so its plus is not offered yet
-    expect(
-      screen
-        .getByRole("button", { name: "Skill 3 plus" })
-        .hasAttribute("disabled")
-    ).toBe(true);
+    expect(screen.queryByRole("button", { name: / plus$/ })).toBeNull();
 
     const secondId = stored(store, "Spoken languages").bullets[1].id;
     fireEvent.click(screen.getByRole("button", { name: "Move skill 2 up" }));

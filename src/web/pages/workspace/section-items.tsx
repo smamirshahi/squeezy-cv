@@ -37,6 +37,7 @@ function newItemFields(section: Section): Record<string, string> {
         jobTitle: "",
         company: "",
         location: "",
+        remote: "",
         startDate: "",
         endDate: "",
       };
@@ -44,7 +45,9 @@ function newItemFields(section: Section): Record<string, string> {
       return {
         degree: "",
         institute: "",
+        fieldOfStudy: "",
         location: "",
+        remote: "",
         startDate: "",
         endDate: "",
       };

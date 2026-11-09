@@ -25,7 +25,7 @@ export function SectionTitleField({
   const [isAsking, setIsAsking] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
       <TextField
         label="Section title"
         size="small"

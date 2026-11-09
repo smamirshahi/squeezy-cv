@@ -9,7 +9,7 @@ export const PAPER_MARGIN_MM = {
 /** Gaps in px that auto-fit can scale, see `spaced` */
 export const GAP_PX = {
   item: 10,
-  sectionTop: 8,
+  sectionTop: 16,
   bullet: 2,
 } as const;
 

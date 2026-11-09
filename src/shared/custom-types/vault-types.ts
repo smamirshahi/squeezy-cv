@@ -98,10 +98,7 @@ const SectionSchema = Object({
   /** The heading shown on the CV */
   title: String,
 
-  /**
-   * Skills sections only: whether levels are used. Missing means "yes if any skill has one"
-   * (see `tracksLevels`). Turning it off keeps the stored levels.
-   */
+  /** Legacy field retained while loading old files; skill levels are always tracked. */
   tracksLevel: Boolean.optional(),
 
   items: Array(ItemSchema),
