@@ -1,6 +1,5 @@
 import { Box, ButtonBase, Chip, Typography } from "@mui/material";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
-import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
@@ -132,7 +131,6 @@ export function EditorPageStructure(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <TemplateScopeNote />
       <Box
         component="section"
         sx={{

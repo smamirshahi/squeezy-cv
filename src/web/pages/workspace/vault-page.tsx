@@ -11,6 +11,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { selectedItemOf } from "@pages/workspace/section-items";
+import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
@@ -84,6 +85,7 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
           <Typography
             sx={{
               px: 1,
+              mb: 1,
               fontSize: 11,
               fontWeight: 700,
               color: "text.secondary",
@@ -139,12 +141,15 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
               </ListItemButton>
             )}
           </List>
+          <Box sx={{ display: "flex", px: 1, pt: 1 }}>
+            <AddSectionButton />
+          </Box>
         </Box>
         <Box
           sx={{
             p: 1,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            display: "flex",
+            flexWrap: "wrap",
             gap: 1,
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
@@ -152,7 +157,7 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
           <Button
             size="small"
             variant="contained"
-            sx={{ gridColumn: "1 / -1" }}
+            sx={{ flex: "1 1 100%" }}
             onClick={() => setIsImportOpen(true)}
           >
             Paste CV text, AI sorts it
@@ -161,13 +166,19 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
             isOpen={isImportOpen}
             onClose={() => setIsImportOpen(false)}
           />
-          <Button component="label" size="small" variant="outlined">
+          <Button
+            component="label"
+            size="small"
+            variant="outlined"
+            sx={{ flex: "1 1 120px" }}
+          >
             Import JSON
             <HiddenInput type="file" accept=".json" onChange={handleImport} />
           </Button>
           <Button
             size="small"
             variant="outlined"
+            sx={{ flex: "1 1 120px" }}
             onClick={() => handleExport("cv-export")}
           >
             Export JSON

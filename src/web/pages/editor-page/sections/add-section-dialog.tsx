@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  ListItemText,
   MenuItem,
   TextField,
 } from "@mui/material";
@@ -13,8 +14,7 @@ import { SectionType } from "@custom-types/vault-types";
 import { useAppDispatch } from "@store/store-helper";
 import { addSection } from "@store/vault/vault-slice";
 import {
-  SECTION_TYPES,
-  SECTION_TYPE_LABELS,
+  ADD_SECTION_OPTIONS,
   getDefaultSectionTitle,
 } from "@store/vault/section-types";
 
@@ -22,7 +22,7 @@ import {
 export function AddSectionButton(): JSX.Element {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
-  const [type, setType] = useState<SectionType>("projects");
+  const [type, setType] = useState<SectionType>("custom");
   const [title, setTitle] = useState("");
 
   function handleAdd(): void {
@@ -54,17 +54,32 @@ export function AddSectionButton(): JSX.Element {
             value={type}
             onChange={(event) => setType(event.target.value as SectionType)}
             sx={{ mt: 1 }}
+            slotProps={{
+              select: {
+                renderValue: (value) =>
+                  ADD_SECTION_OPTIONS.find((option) => option.type === value)
+                    ?.label ?? "",
+              },
+            }}
           >
-            {SECTION_TYPES.map((option) => (
-              <MenuItem key={option} value={option}>
-                {SECTION_TYPE_LABELS[option]}
+            {ADD_SECTION_OPTIONS.map((option) => (
+              <MenuItem key={option.type} value={option.type}>
+                <ListItemText
+                  primary={option.label}
+                  secondary={option.description}
+                  slotProps={{ secondary: { sx: { whiteSpace: "normal" } } }}
+                />
               </MenuItem>
             ))}
           </TextField>
           <TextField
             label="New section title"
             value={title}
-            placeholder={getDefaultSectionTitle(type)}
+            placeholder={
+              type === "custom"
+                ? "e.g. Certifications, Awards"
+                : getDefaultSectionTitle(type)
+            }
             onChange={(event) => setTitle(event.target.value)}
           />
         </DialogContent>

@@ -11,6 +11,7 @@ import {
   TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { navigate } from "@hooks/navigation";
 import { Section } from "@custom-types/vault-types";
 import { useAppDispatch } from "@store/store-helper";
 import { removeSection, renameSection } from "@store/vault/vault-slice";
@@ -47,8 +48,9 @@ export function SectionTitleField({
         <DialogTitle>Delete section?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            &quot;{section.title}&quot; and its {section.items.length} item(s)
-            will be deleted. This cannot be undone.
+            {section.items.length === 0
+              ? `"${section.title}" will be deleted. This cannot be undone.`
+              : `"${section.title}" and its ${section.items.length} ${section.items.length === 1 ? "item" : "items"} will be deleted. This cannot be undone.`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -58,6 +60,7 @@ export function SectionTitleField({
             onClick={() => {
               dispatch(removeSection({ id: section.id }));
               setIsAsking(false);
+              navigate({ kind: "vault" });
             }}
           >
             Delete

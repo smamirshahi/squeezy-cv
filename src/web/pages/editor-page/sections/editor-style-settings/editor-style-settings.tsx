@@ -11,7 +11,6 @@ import { DropdownMargin } from "@pages/editor-page/sections/editor-style-setting
 import { DropdownBulletPointIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-bullet-point-icon";
 import { TypographyTable } from "@pages/editor-page/sections/editor-style-settings/typography-table";
 import { GAP_PX } from "@custom-styles/custom-styles";
-import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   setHasHeadingLine,
@@ -50,9 +49,6 @@ export function EditorTypography(): JSX.Element {
         <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
           The preview on the right updates as you change things.
         </Typography>
-        <Box sx={{ mt: 1 }}>
-          <TemplateScopeNote />
-        </Box>
       </Box>
       <Box
         component="section"

@@ -573,6 +573,7 @@ export function VaultItemEditor({
         </>
       )}
       <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ flex: 1 }} />
         {isSkills && (
           <Button
             variant="outlined"
@@ -581,7 +582,6 @@ export function VaultItemEditor({
             Add skill
           </Button>
         )}
-        <Box sx={{ flex: 1 }} />
         {!isSkills && (
           <>
             <Button disabled={!isDirty} onClick={() => setDraft({})}>
