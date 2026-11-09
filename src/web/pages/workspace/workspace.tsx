@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { Box, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { AiSetup } from "@pages/workspace/ai-setup";
+import { SettingsPage } from "@pages/workspace/settings-page";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
@@ -182,7 +182,7 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
         {!missing && tool === "templates" && <TemplatesPage />}
         {!missing && tool === "vault" && <VaultPage />}
         {!missing && tool === "tailor" && <AiAssistant />}
-        {!missing && tool === "ai" && <AiSetup />}
+        {!missing && tool === "ai" && <SettingsPage />}
       </Box>
     </Box>
   );
@@ -257,6 +257,6 @@ function titleOf(route: WorkspaceRoute, jobName: string): string {
     case "chat":
       return `Chat${jobName ? ` · ${jobName}` : ""}`;
     case "ai":
-      return "AI setup";
+      return "Settings";
   }
 }

@@ -300,23 +300,7 @@ export function buildServer({
       provider: tailoring.provider,
       providers: registry.providers(),
       choice: registry.choice(),
-      maskOrganisations: registry.isMaskingOrganisations(),
     };
-  });
-
-  // Also hide employer and school names (as [Company 1], [School 1]) in what is sent to a model
-  app.put("/api/ai/privacy", async (request, reply) => {
-    const body = request.body as { maskOrganisations?: unknown } | null;
-    if (typeof body?.maskOrganisations !== "boolean") {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        "maskOrganisations must be true or false."
-      );
-    }
-    await registry.setMaskOrganisations(body.maskOrganisations);
-    return { maskOrganisations: registry.isMaskingOrganisations() };
   });
 
   // Which provider each task uses. Keys stay in .env; only the choice is stored.

@@ -146,9 +146,6 @@ export interface AiStatus {
   provider: AiProviderId;
   providers?: (AiProviderInfo & { isConfigured: boolean })[];
   choice?: AiChoice;
-
-  /** Employer and school names are masked too (#133); absent in older answers = off */
-  maskOrganisations?: boolean;
 }
 
 /** The provider a task uses and whether it is set up, from a status (older answers have only tailoring's) */
@@ -186,7 +183,6 @@ export interface ApiClient {
   setAiChoice: (change: Partial<AiChoice>) => Promise<AiChoice>;
 
   /** Also hide employer and school names ([Company 1], [School 1]) in what is sent to a model */
-  setMaskOrganisations: (isMasking: boolean) => Promise<boolean>;
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;
@@ -317,12 +313,6 @@ export function createApiClient(
         change
       )) as { choice: AiChoice };
       return answer.choice;
-    },
-    async setMaskOrganisations(isMasking) {
-      const answer = (await request(fetchImpl, "PUT", "/api/ai/privacy", {
-        maskOrganisations: isMasking,
-      })) as { maskOrganisations: boolean };
-      return answer.maskOrganisations;
     },
     async tailor(body) {
       return TailorResultSchema.check(

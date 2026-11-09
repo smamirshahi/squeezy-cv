@@ -131,7 +131,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
         <Alert severity={target && !target.info.isOnline ? "info" : "warning"}>
           {target && !target.info.isOnline
             ? `Using ${target.info.label} on this computer: the text stays here.`
-            : `The whole text you paste or take from a PDF, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in AI setup if you do not want that.`}
+            : `The whole text you paste or take from a PDF, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in Settings if you do not want that.`}
         </Alert>
         {target && !target.isConfigured && (
           <Alert severity="info">

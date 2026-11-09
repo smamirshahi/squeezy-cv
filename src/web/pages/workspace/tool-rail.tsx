@@ -71,7 +71,7 @@ const ITEMS: RailItem[] = [
 ];
 
 const SETTINGS: RailItem = {
-  label: "AI setup",
+  label: "Settings",
   icon: <MemoryIcon fontSize="small" />,
   kind: "ai",
   to: () => ({ kind: "ai" }),
