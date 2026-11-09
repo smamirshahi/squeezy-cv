@@ -144,7 +144,7 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
           sx={{
             p: 1,
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
             gap: 1,
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
