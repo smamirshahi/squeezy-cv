@@ -14,6 +14,7 @@ export function DropdownSkillIcon(): JSX.Element {
         label="Skill Icon"
         onChange={(event) => dispatch(setRatingIcon(event.target.value))}
       >
+        <MenuItem value="text">Text (level name)</MenuItem>
         <MenuItem value="star">Star</MenuItem>
         <MenuItem value="circle">Circle</MenuItem>
       </Select>

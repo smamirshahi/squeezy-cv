@@ -95,7 +95,7 @@ export const StyleSchema = Object({
   hasHeadingLine: Boolean.optional(),
 
   /** The rating icon */
-  ratingIcon: Union(Literal("star"), Literal("circle")),
+  ratingIcon: Union(Literal("star"), Literal("circle"), Literal("text")),
 
   /** The bullet point icon */
   bulletPointIcon: Union(

@@ -22,6 +22,8 @@ export function useRatingIcon(): ReturnProps {
           emptyIcon: <CircleOutlinedIcon fontSize="inherit" />,
         };
 
+      // "text" shows the level as a word instead (the skills page); these are not drawn
+      case "text":
       case "star":
         return {
           icon: <StarBorderIcon fontSize="inherit" />,

@@ -63,8 +63,8 @@ export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
     color: "#333333",
   },
   icon: {
-    fontSize: "20pt",
+    fontSize: "10pt",
     fontWeight: "400",
-    color: "#1976d2",
+    color: "#333333",
   },
 };

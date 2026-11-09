@@ -18,7 +18,7 @@ export const initialState: CvDataState = {
   style: {
     shouldShowFullContactLinks: true,
     shouldShowRightToWork: false,
-    ratingIcon: "star",
+    ratingIcon: "text",
     bulletPointIcon: "disc",
     dateFormat: "MMM YYYY",
     typography: TypographyVariant,
