@@ -15,6 +15,29 @@ export function jobCountText(count: number): string {
   return `${count} ${count === 1 ? "job" : "jobs"}`;
 }
 
+export type TemplateSort = "newest" | "popular" | "alphabetic";
+
+/** The templates in the order asked for; the list given is not changed. Ties keep their order. */
+export function sortTemplates(
+  templates: Template[],
+  jobs: { templateId: string }[],
+  sort: TemplateSort,
+  isReversed = false
+): Template[] {
+  const count = (t: Template): number =>
+    jobs.filter((j) => j.templateId === t.id).length;
+  const sorted = [...templates];
+  if (sort === "alphabetic") {
+    sorted.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === "popular") {
+    sorted.sort((a, b) => count(b) - count(a));
+  } else {
+    // Newest first; templates without a date count as the oldest
+    sorted.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+  }
+  return isReversed ? sorted.reverse() : sorted;
+}
+
 /** The name for a new template: "Template 1", "Template 2", ... the first one not taken */
 export function nextTemplateName(templates: Template[]): string {
   const names = new Set(templates.map((t) => t.name));

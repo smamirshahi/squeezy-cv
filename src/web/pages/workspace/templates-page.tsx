@@ -5,7 +5,10 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Collapse,
+  Menu,
   MenuItem,
+  Tooltip,
   ButtonBase,
   Dialog,
   DialogActions,
@@ -15,6 +18,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
+import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import { Template } from "@custom-types/template-types";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { Route, TemplatesTab, formatRoute } from "@shared/routing/routes";
@@ -24,8 +30,9 @@ import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-sett
 import { StyleHoverProvider } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import {
   jobCountText,
-  moveJobToTemplate,
+  TemplateSort,
   nextTemplateName,
+  sortTemplates,
 } from "@pages/workspace/template-scope";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { TemplateSample } from "@pages/workspace/template-section-styles";
@@ -53,6 +60,19 @@ export function deleteBlockReason(templateCount: number): string {
 }
 
 type TemplateTab = TemplatesTab;
+
+const SORT_LABELS: Record<TemplateSort, string> = {
+  newest: "Date",
+  popular: "Popularity",
+  alphabetic: "Name",
+};
+
+/** What the arrow means for each sort: [normal order, reversed] */
+const SORT_DIRECTION_HINTS: Record<TemplateSort, [string, string]> = {
+  newest: ["newest first", "oldest first"],
+  popular: ["most jobs first", "fewest jobs first"],
+  alphabetic: ["A to Z", "Z to A"],
+};
 
 /** One dialog for the two name questions: rename and delete confirmation share the shell */
 type Asking =
@@ -83,9 +103,6 @@ function EditedTemplateSwitcher({
 }): JSX.Element {
   const templates = useAppSelector(templatesSelector);
   const jobs = useAppSelector(jobsSelector);
-  const activeJob = useAppSelector(activeJobSelector);
-  const current = templates.find((t) => t.id === templateId);
-  const isActiveJobs = current?.id === activeJob.templateId;
   return (
     <Box sx={{ mb: 2 }}>
       <TextField
@@ -106,11 +123,6 @@ function EditedTemplateSwitcher({
           </MenuItem>
         ))}
       </TextField>
-      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mt: 0.5 }}>
-        {isActiveJobs
-          ? `Used by the job you are editing (${activeJob.name}).`
-          : `Not used by the job you are editing (${activeJob.name}); its look does not change.`}
-      </Typography>
     </Box>
   );
 }
@@ -172,6 +184,10 @@ export function TemplatesPage(): JSX.Element {
   const [newName, setNewName] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
+  const [sort, setSort] = useState<TemplateSort>("newest");
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [isReversed, setIsReversed] = useState<boolean>(false);
+  const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
   const [moveToId, setMoveToId] = useState<string>("");
   const deletingJobs =
     asking?.kind === "delete"
@@ -263,7 +279,7 @@ export function TemplatesPage(): JSX.Element {
                     }
                   }}
                   helperText="Starts as a copy of the look you are editing now."
-                  sx={{ minWidth: 260 }}
+                  sx={{ flex: 1 }}
                 />
                 <Button
                   variant="contained"
@@ -272,6 +288,55 @@ export function TemplatesPage(): JSX.Element {
                 >
                   Create template
                 </Button>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  mb: 1,
+                }}
+              >
+                <Button
+                  size="small"
+                  aria-haspopup="menu"
+                  onClick={(event) => setSortAnchor(event.currentTarget)}
+                >
+                  Sort by: {SORT_LABELS[sort]}
+                </Button>
+                <Tooltip title={SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]}>
+                  <Button
+                    size="small"
+                    aria-label={`Reverse the order (now ${SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]})`}
+                    onClick={() => setIsReversed((value) => !value)}
+                    sx={{ minWidth: 0, px: 0.75 }}
+                  >
+                    {isReversed ? (
+                      <ArrowUpwardOutlinedIcon fontSize="small" />
+                    ) : (
+                      <ArrowDownwardOutlinedIcon fontSize="small" />
+                    )}
+                  </Button>
+                </Tooltip>
+                <Menu
+                  anchorEl={sortAnchor}
+                  open={sortAnchor !== null}
+                  onClose={() => setSortAnchor(null)}
+                >
+                  {(Object.keys(SORT_LABELS) as TemplateSort[]).map((key) => (
+                    <MenuItem
+                      key={key}
+                      selected={key === sort}
+                      onClick={() => {
+                        setSort(key);
+                        setIsReversed(false);
+                        setSortAnchor(null);
+                      }}
+                    >
+                      {SORT_LABELS[key]}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Box>
               <Box
                 component="ul"
@@ -284,162 +349,201 @@ export function TemplatesPage(): JSX.Element {
                   gap: 2,
                 }}
               >
-                {templates.map((template) => {
-                  const users = jobs.filter(
-                    (j) => j.templateId === template.id
-                  );
-                  const reason = deleteBlockReason(templates.length);
-                  const isActive = template.id === activeJob.templateId;
-                  const isShown = template.id === shownId;
-                  const reasonId = `delete-reason-${template.id}`;
-                  return (
-                    <Box
-                      component="li"
-                      key={template.id}
-                      data-selected={isShown}
-                      onClick={() => setPickedId(template.id)}
-                      sx={{
-                        border: `1px solid ${
-                          isShown
-                            ? WORKSPACE_COLORS.accent
-                            : WORKSPACE_COLORS.border
-                        }`,
-                        boxShadow: isShown
-                          ? `0 0 0 1px ${WORKSPACE_COLORS.accent}`
-                          : "none",
-                        borderRadius: "6px",
-                        bgcolor: isShown
-                          ? WORKSPACE_COLORS.accentSoft
-                          : WORKSPACE_COLORS.panel,
-                        cursor: "pointer",
-                        p: 1.75,
-                      }}
-                    >
+                {sortTemplates(templates, jobs, sort, isReversed).map(
+                  (template) => {
+                    const users = jobs.filter(
+                      (j) => j.templateId === template.id
+                    );
+                    const reason = deleteBlockReason(templates.length);
+                    const isShown = template.id === shownId;
+                    const isExpanded = expandedIds.includes(template.id);
+                    const reasonId = `delete-reason-${template.id}`;
+                    return (
                       <Box
-                        sx={{ display: "flex", alignItems: "baseline", gap: 1 }}
-                      >
-                        <ButtonBase
-                          aria-pressed={isShown}
-                          aria-label={`Show a sample of ${template.name}`}
-                          onClick={() => setPickedId(template.id)}
-                          sx={{ textAlign: "left", borderRadius: 0.5 }}
-                        >
-                          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
-                            {template.name}
-                          </Typography>
-                        </ButtonBase>
-                        <Typography
-                          sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
-                        >
-                          {jobCountText(users.length)}
-                          {isActive ? " · used by the job you are editing" : ""}
-                        </Typography>
-                      </Box>
-                      <Typography
+                        component="li"
+                        key={template.id}
+                        data-selected={isShown}
+                        onClick={() => setPickedId(template.id)}
                         sx={{
-                          fontSize: 12,
-                          color: WORKSPACE_COLORS.muted,
-                          mb: 1,
+                          border: `1px solid ${
+                            isShown
+                              ? WORKSPACE_COLORS.accent
+                              : WORKSPACE_COLORS.border
+                          }`,
+                          boxShadow: isShown
+                            ? `0 0 0 1px ${WORKSPACE_COLORS.accent}`
+                            : "none",
+                          borderRadius: "6px",
+                          bgcolor: isShown
+                            ? WORKSPACE_COLORS.accentSoft
+                            : WORKSPACE_COLORS.panel,
+                          cursor: "pointer",
+                          p: 1.75,
                         }}
                       >
-                        {users.length > 0
-                          ? users.map((j) => j.name).join(", ")
-                          : "No job uses it yet."}
-                      </Typography>
-                      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          disabled={isActive}
-                          aria-label={`Use template ${template.name} for ${activeJob.name}`}
-                          onClick={() =>
-                            moveJobToTemplate(
-                              dispatch,
-                              activeJob,
-                              template,
-                              true
-                            )
-                          }
-                        >
-                          Use for “{activeJob.name}”
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          component="a"
-                          href={formatRoute(
-                            templatesRoute("layout", template.id)
-                          )}
-                          aria-label={`Edit template ${template.name}`}
-                          onClick={(event: MouseEvent<HTMLElement>) => {
-                            event.stopPropagation();
-                            onAppLinkClick(
-                              event,
-                              templatesRoute("layout", template.id)
-                            );
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          aria-label={`Rename template ${template.name}`}
-                          onClick={() => {
-                            setDraftName(template.name);
-                            setAsking({ kind: "rename", template });
-                          }}
-                        >
-                          Rename
-                        </Button>
-                        <Button
-                          size="small"
-                          aria-label={`Duplicate template ${template.name}`}
-                          onClick={() => {
-                            const id = nanoid();
-                            dispatch(
-                              addTemplate({
-                                id,
-                                name: `${template.name} (copy)`,
-                                sourceId: template.id,
-                              })
-                            );
-                            setPickedId(id);
-                          }}
-                        >
-                          Duplicate
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          disabled={reason !== ""}
-                          aria-label={`Delete template ${template.name}`}
-                          aria-describedby={reason ? reasonId : undefined}
-                          onClick={() => {
-                            setMoveToId(
-                              templates.find((t) => t.id !== template.id)?.id ??
-                                ""
-                            );
-                            setAsking({ kind: "delete", template });
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                      {reason && (
-                        <Typography
-                          id={reasonId}
+                        <Box
                           sx={{
-                            fontSize: 12,
-                            mt: 0.75,
-                            color: WORKSPACE_COLORS.muted,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            flexWrap: "wrap",
+                            gap: 1,
                           }}
                         >
-                          Cannot be deleted: {reason}
-                        </Typography>
-                      )}
-                    </Box>
-                  );
-                })}
+                          <ButtonBase
+                            aria-pressed={isShown}
+                            aria-label={`Show a sample of ${template.name}`}
+                            onClick={() => setPickedId(template.id)}
+                            sx={{ textAlign: "left", borderRadius: 0.5 }}
+                          >
+                            <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+                              {template.name}
+                            </Typography>
+                          </ButtonBase>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              flexWrap: "wrap",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Button
+                              size="small"
+                              variant="contained"
+                              component="a"
+                              href={formatRoute(
+                                templatesRoute("layout", template.id)
+                              )}
+                              aria-label={`Edit template ${template.name}`}
+                              onClick={(event: MouseEvent<HTMLElement>) => {
+                                event.stopPropagation();
+                                onAppLinkClick(
+                                  event,
+                                  templatesRoute("layout", template.id)
+                                );
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="small"
+                              aria-label={`Rename template ${template.name}`}
+                              onClick={() => {
+                                setDraftName(template.name);
+                                setAsking({ kind: "rename", template });
+                              }}
+                            >
+                              Rename
+                            </Button>
+                            <Button
+                              size="small"
+                              aria-label={`Duplicate template ${template.name}`}
+                              onClick={() => {
+                                const id = nanoid();
+                                dispatch(
+                                  addTemplate({
+                                    id,
+                                    name: `${template.name} (copy)`,
+                                    sourceId: template.id,
+                                  })
+                                );
+                                setPickedId(id);
+                              }}
+                            >
+                              Duplicate
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              disabled={reason !== ""}
+                              aria-label={`Delete template ${template.name}`}
+                              aria-describedby={reason ? reasonId : undefined}
+                              onClick={() => {
+                                setMoveToId(
+                                  templates.find((t) => t.id !== template.id)
+                                    ?.id ?? ""
+                                );
+                                setAsking({ kind: "delete", template });
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        </Box>
+                        {reason && (
+                          <Typography
+                            id={reasonId}
+                            sx={{
+                              fontSize: 12,
+                              mt: 0.75,
+                              color: WORKSPACE_COLORS.muted,
+                            }}
+                          >
+                            Cannot be deleted: {reason}
+                          </Typography>
+                        )}
+                        <Box sx={{ mt: 1 }}>
+                          {users.length === 0 ? (
+                            <Typography
+                              sx={{
+                                fontSize: 12,
+                                color: WORKSPACE_COLORS.muted,
+                              }}
+                            >
+                              No jobs prepared with this template
+                            </Typography>
+                          ) : (
+                            <>
+                              <ButtonBase
+                                aria-expanded={isExpanded}
+                                aria-controls={`template-jobs-${template.id}`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setExpandedIds((ids) =>
+                                    isExpanded
+                                      ? ids.filter((id) => id !== template.id)
+                                      : [...ids, template.id]
+                                  );
+                                }}
+                                sx={{
+                                  gap: 0.5,
+                                  borderRadius: 0.5,
+                                  fontSize: 12,
+                                  color: WORKSPACE_COLORS.muted,
+                                }}
+                              >
+                                <ExpandMoreOutlinedIcon
+                                  fontSize="small"
+                                  sx={{
+                                    transform: isExpanded
+                                      ? "rotate(180deg)"
+                                      : "none",
+                                  }}
+                                />
+                                {jobCountText(users.length)} prepared with this
+                                template
+                              </ButtonBase>
+                              <Collapse
+                                in={isExpanded}
+                                id={`template-jobs-${template.id}`}
+                              >
+                                <Box
+                                  component="ul"
+                                  sx={{ m: 0, pl: 4, fontSize: 13, pt: 0.5 }}
+                                >
+                                  {users.map((job) => (
+                                    <li key={job.id}>{job.name}</li>
+                                  ))}
+                                </Box>
+                              </Collapse>
+                            </>
+                          )}
+                        </Box>
+                      </Box>
+                    );
+                  }
+                )}
               </Box>
             </Box>
           </>

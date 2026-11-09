@@ -98,9 +98,10 @@ export function splitVariant(
 export function duplicateTemplate(
   source: Template,
   id: string,
-  name: string
+  name: string,
+  createdAt: string = today()
 ): Template {
-  return { ...structuredClone(source), id, name };
+  return { ...structuredClone(source), id, name, createdAt };
 }
 
 /**

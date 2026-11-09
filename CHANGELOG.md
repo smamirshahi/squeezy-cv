@@ -11,6 +11,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Vault: a **+ Add section** button under the sections list; the type list is Summary, Experience, Education, Skills and "Other section" (for certifications, awards, projects...), each with a short description; deleting a section returns to the main vault page and no longer says "0 item(s)"; "Add skill" is on the right; more space under the SECTIONS title (#281).
+- Templates page: the "Use for <job>" button and the notes about the job you are editing are gone; each card has its buttons beside the title and an expandable "N jobs prepared with this template" list; the new-template name field is wider; sort by date, popularity or name with a reverse arrow; templates now remember the day they were made (#281).
 - Vault tree footer: "Paste CV text" is full width, Import JSON and Export JSON share one line with equal widths, and each gets its own line when the sidebar is too narrow (#278).
 - Import dialog: "Sort it" is now **Analyze with AI**; the PDF area is a full-width drop zone with a plus icon (click, keyboard or drop); the dialog shows the next step, and the disabled Analyze and Add buttons say why in a tooltip (#276).
 - Resizable side panels no longer have a fixed maximum width and can be collapsed to zero; chosen widths remain saved per side (#273).

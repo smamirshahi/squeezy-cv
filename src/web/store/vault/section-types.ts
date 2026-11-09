@@ -14,10 +14,44 @@ export const SECTION_TYPE_LABELS: Record<SectionType, string> = {
   unsorted: "Unsorted",
 };
 
-/** Types the user can pick when adding a section (Unsorted is built in) */
+/** Types a section can have (Unsorted is built in) */
 export const SECTION_TYPES = (
   Object.keys(SECTION_TYPE_LABELS) as SectionType[]
 ).filter((type) => type !== "unsorted");
+
+/** What the "Add a section" type list offers: a name and a one-line explanation per type */
+export const ADD_SECTION_OPTIONS: {
+  type: SectionType;
+  label: string;
+  description: string;
+}[] = [
+  {
+    type: "summary",
+    label: "Summary",
+    description: "One short paragraph about you",
+  },
+  {
+    type: "experience",
+    label: "Experience",
+    description: "Jobs: company, role, dates, description",
+  },
+  {
+    type: "education",
+    label: "Education",
+    description: "Schools: institute, degree, dates",
+  },
+  {
+    type: "skills",
+    label: "Skills",
+    description: "Groups of skills with an optional level",
+  },
+  {
+    type: "custom",
+    label: "Other section",
+    description:
+      "Any list of entries, e.g. Certifications, Awards, Projects, Publications, Volunteering",
+  },
+];
 
 /** Types that have their own editor and preview; all others use the generic item layout */
 export const SPECIAL_SECTION_TYPES: SectionType[] = [
