@@ -69,8 +69,11 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
       <Box
         sx={{
           gridColumn: `span ${spec.span}`,
-          display: "flex",
-          gap: 1,
+          display: spec.isEnd ? "grid" : "flex",
+          gridTemplateColumns: spec.isEnd
+            ? "repeat(2, minmax(0, 1fr))"
+            : undefined,
+          gap: 1.5,
           alignItems: "center",
         }}
       >
@@ -82,7 +85,7 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
           disabled={isCurrent}
           onChange={(event) => onChange(fromMonthValue(event.target.value))}
           slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ flex: 1 }}
+          sx={spec.isEnd ? { minWidth: 0, width: "100%" } : { flex: 1 }}
         />
         {spec.isEnd && (
           <FormControlLabel
