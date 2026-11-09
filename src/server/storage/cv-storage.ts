@@ -31,6 +31,7 @@ export interface JobSummary {
   templateId: string;
   company?: string;
   role?: string;
+  stage?: "draft" | "ready";
   createdAt: string;
   isCorrupt: boolean;
 }

@@ -3,10 +3,8 @@ import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
@@ -25,9 +23,6 @@ interface RailItem {
 
   /** Which route kind makes it the current one */
   kind: Route["kind"];
-
-  /** A page of its own (not part of the workspace): a normal page load */
-  isFullPage?: boolean;
 }
 
 const ITEMS: RailItem[] = [
@@ -44,29 +39,16 @@ const ITEMS: RailItem[] = [
     to: () => ({ kind: "templates", tab: "templates" }),
   },
   {
-    label: "Jobs",
+    label: "Apply",
     icon: <WorkOutlineIcon fontSize="small" />,
     kind: "jobs",
-    to: (jobId) => ({ kind: "jobs", jobId, view: "page" }),
+    to: (jobId) => ({ kind: "jobs", jobId, view: "details" }),
   },
   {
-    label: "Tailor",
-    icon: <AutoAwesomeIcon fontSize="small" />,
-    kind: "tailor",
-    to: () => ({ kind: "tailor" }),
-  },
-  {
-    label: "Chat",
-    icon: <ChatBubbleOutlineIcon fontSize="small" />,
-    kind: "chat",
-    to: (jobId) => ({ kind: "chat", jobId }),
-  },
-  {
-    label: "Applied",
+    label: "Applications",
     icon: <DescriptionOutlinedIcon fontSize="small" />,
     kind: "applications",
     to: () => ({ kind: "applications", search: "" }),
-    isFullPage: true,
   },
 ];
 
@@ -136,7 +118,10 @@ export function ToolRail(): JSX.Element {
         }
         const target = item.to(activeJobId);
         const href = target ? formatRoute(target) : undefined;
-        const isOn = item.kind === route.kind;
+        const isOn =
+          item.kind === route.kind ||
+          (item.kind === "jobs" &&
+            (route.kind === "tailor" || route.kind === "chat"));
         return (
           <ButtonBase
             key={item.label}
@@ -144,7 +129,7 @@ export function ToolRail(): JSX.Element {
             href={href}
             aria-current={isOn ? "page" : undefined}
             onClick={
-              target && !item.isFullPage
+              target
                 ? (event: MouseEvent<HTMLElement>) =>
                     onAppLinkClick(event, target)
                 : undefined

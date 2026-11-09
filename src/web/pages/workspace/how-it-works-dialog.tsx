@@ -65,7 +65,7 @@ const STEPS: Step[] = [
         every job using it follows.
       </>,
     ],
-    note: "Start with “Sample CV”. Copy it when you want a second look.",
+    note: "Start with one template. Copy it when you want a second look.",
   },
   {
     name: "Job application",
@@ -273,7 +273,7 @@ function Diagram({ step }: { step: number }): JSX.Element {
         caption="Senior React Developer, Ledgerly"
       >
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-          <Pill isAccent>Template: Sample CV</Pill>
+          <Pill isAccent>Template: Classic</Pill>
           <Pill>Shows 9 of 14 items</Pill>
           <Pill>Reworded summary</Pill>
         </Box>

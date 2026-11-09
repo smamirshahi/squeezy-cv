@@ -1,12 +1,10 @@
 import { useEffect } from "react";
 import { AppThemeProvider } from "@custom-styles/theme";
 import { Workspace } from "@pages/workspace/workspace";
-import { ApplicationsPage } from "@pages/applications-page/applications-page";
-import { ApplicationView } from "@pages/applications-page/application-view";
 import { PrintView } from "@pages/print-page/print-view";
 import { NotFound } from "@pages/workspace/not-found";
 import { navigate, useRoute } from "@hooks/navigation";
-import { isWorkspaceRoute, legacyRedirect } from "@shared/routing/routes";
+import { isShellRoute, legacyRedirect } from "@shared/routing/routes";
 
 /**
  * Which page to show, from the address (see `shared/routing/routes.ts`): the workspace
@@ -37,15 +35,7 @@ export function App(): JSX.Element {
   // The print page has no theme: the PDF is always the light default
   return (
     <AppThemeProvider>
-      {isWorkspaceRoute(route) ? (
-        <Workspace route={route} />
-      ) : route.kind === "applications" ? (
-        <ApplicationsPage />
-      ) : route.kind === "application" ? (
-        <ApplicationView applicationId={route.id} />
-      ) : (
-        <NotFoundPage />
-      )}
+      {isShellRoute(route) ? <Workspace route={route} /> : <NotFoundPage />}
     </AppThemeProvider>
   );
 }

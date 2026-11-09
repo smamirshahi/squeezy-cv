@@ -38,7 +38,6 @@ export function SaveStatus(): JSX.Element {
         display: "flex",
         alignItems: "center",
         gap: 1,
-        mr: 2,
       }}
     >
       <Chip
@@ -52,15 +51,18 @@ export function SaveStatus(): JSX.Element {
           Retry
         </Button>
       )}
-      <Button
-        color="inherit"
-        size="small"
-        variant="outlined"
-        disabled={status !== "ready" || isSaving || !hasUnsavedChanges}
-        onClick={save}
-      >
-        Save
-      </Button>
+      {/* Only there when there is something to save, so the saved state takes no room */}
+      {status === "ready" && (hasUnsavedChanges || isSaving) && (
+        <Button
+          color="inherit"
+          size="small"
+          variant="outlined"
+          disabled={isSaving}
+          onClick={save}
+        >
+          Save
+        </Button>
+      )}
     </Box>
   );
 }

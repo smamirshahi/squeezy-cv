@@ -1,5 +1,3 @@
-export type LinkKind = "linkedin" | "github" | "generic";
-
 function parseUrl(url: string): URL | undefined {
   try {
     return new URL(/^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`);
@@ -27,22 +25,6 @@ export function normaliseLink(text: string | undefined): string | undefined {
 
 function hostWithoutWww(parsed: URL): string {
   return parsed.hostname.replace(/^www\./i, "").toLowerCase();
-}
-
-/** Decides which icon a link gets, from its host */
-export function getLinkKind(url: string): LinkKind {
-  const parsed = parseUrl(url);
-  if (!parsed) {
-    return "generic";
-  }
-  const host = hostWithoutWww(parsed);
-  if (host === "linkedin.com" || host.endsWith(".linkedin.com")) {
-    return "linkedin";
-  }
-  if (host === "github.com") {
-    return "github";
-  }
-  return "generic";
 }
 
 /**

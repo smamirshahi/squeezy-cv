@@ -238,7 +238,9 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
           links:
             variant.style.shouldShowLinks === false
               ? []
-              : orderLinks(vault.links, variant.linkOrder),
+              : orderLinks(vault.links, variant.linkOrder).filter(
+                  (link) => !variant.hiddenLinks?.includes(link.id)
+                ),
         },
       ];
     }

@@ -1,9 +1,15 @@
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { orderLinks } from "@shared/variant/render";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { activeVariantSelector, setLinkOrder } from "@store/jobs/jobs-slice";
+import {
+  activeVariantSelector,
+  setLinkOrder,
+  setLinkShown,
+} from "@store/jobs/jobs-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 /**
@@ -38,7 +44,8 @@ export function JobLinks(): JSX.Element | null {
       <Typography
         sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted, mb: 0.5 }}
       >
-        Their order on this CV. Showing links at all is set on the template.
+        Their order on this CV, and the eye hides a link in this job only.
+        Showing links at all is set on the template.
       </Typography>
       {ordered.map((link, index) => (
         <Box
@@ -50,9 +57,39 @@ export function JobLinks(): JSX.Element | null {
             swapFunction={move}
             isLastEntity={index === ordered.length - 1}
           />
-          <Typography sx={{ fontSize: 13.5 }}>
+          <Typography
+            sx={{
+              fontSize: 13.5,
+              flex: 1,
+              color: variant.hiddenLinks?.includes(link.id)
+                ? WORKSPACE_COLORS.muted
+                : WORKSPACE_COLORS.text,
+              textDecoration: variant.hiddenLinks?.includes(link.id)
+                ? "line-through"
+                : "none",
+            }}
+          >
             {link.label || link.url}
           </Typography>
+          <IconButton
+            size="small"
+            aria-label={`${variant.hiddenLinks?.includes(link.id) ? "Show" : "Hide"} ${link.label || link.url} on this CV`}
+            onClick={() =>
+              dispatch(
+                setLinkShown({
+                  jobId: variant.id,
+                  linkId: link.id,
+                  isShown: variant.hiddenLinks?.includes(link.id) === true,
+                })
+              )
+            }
+          >
+            {variant.hiddenLinks?.includes(link.id) ? (
+              <VisibilityOffIcon fontSize="small" />
+            ) : (
+              <VisibilityIcon fontSize="small" />
+            )}
+          </IconButton>
         </Box>
       ))}
     </Box>

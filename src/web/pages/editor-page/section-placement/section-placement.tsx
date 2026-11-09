@@ -19,11 +19,15 @@ import { Box } from "@mui/material";
 import { PageStructure } from "@store/app/app-slice-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
+import { activeVariantSelector } from "@store/jobs/jobs-slice";
 
 export function SectionPlacement(): JSX.Element {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector(appSelector);
   const [pageStructure, setPageStructure] = useState<PageStructure>(structure);
+  const removed = useAppSelector(activeVariantSelector).hiddenSections ?? [];
+  const shown = (ids: string[]): string[] =>
+    ids.filter((id) => !removed.includes(id));
   const hasColumns = structure.left.length > 0 || structure.right.length > 0;
 
   // Follow the store, e.g. when a section was added, deleted or imported
@@ -76,20 +80,20 @@ export function SectionPlacement(): JSX.Element {
                 title="Full width"
                 hint="above the columns"
                 side="fullWidth"
-                itemIds={pageStructure.fullWidth}
+                itemIds={shown(pageStructure.fullWidth)}
                 hasColumns
               />
             </Box>
             <SortableColumn
               title="Left column"
               side="left"
-              itemIds={pageStructure.left}
+              itemIds={shown(pageStructure.left)}
               hasColumns
             />
             <SortableColumn
               title="Right column"
               side="right"
-              itemIds={pageStructure.right}
+              itemIds={shown(pageStructure.right)}
               hasColumns
             />
           </>
@@ -98,7 +102,7 @@ export function SectionPlacement(): JSX.Element {
             title="Page"
             hint="sections stack from top to bottom"
             side="fullWidth"
-            itemIds={pageStructure.fullWidth}
+            itemIds={shown(pageStructure.fullWidth)}
             hasColumns={false}
           />
         )}

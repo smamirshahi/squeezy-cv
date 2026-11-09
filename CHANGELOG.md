@@ -11,6 +11,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- The Jobs tool is now **Apply** (#298): a left sidebar with Job application (name, company, role, location, work mode, employment, salary range or fixed, expected salary, how I feel, my chance, link, advert text or PDF, Mark as ready), Template & content (template picker on top, the CV page and a step-by-step panel for the header, links and each section's entries) and the assistants Tailor and Chat. Tailor and Chat are no longer rail items; the first edit creates the job, there is no dialog.
+- **Applications** opens inside the same app (no page reload) with a status list on the left (All, Draft, Ready to apply, Applied, Interview, Offer, Accepted, Rejected, Withdrawn, No reply), one table of unsent jobs and sent applications, and the details of a row on the right.
+- Template page: sections are removed with a bin and brought back with Add section; the Vault button is "New section". Entries use an eye, Highlight is a star button, links can be hidden per job, and every link type shows its own icon on the CV.
+- Top bar: Tailor, Export PDF and Mark as applied buttons removed for now; "How it works" is a ? next to the name; undo and redo no longer move when the save state changes.
+- The sample CV is no longer shown when nothing is saved; AI import no longer adds empty items or a second summary item.
 - Jobs and Chat show "No job added yet" (with an Add a job button) until you add a job; Templates shows the page with no cards until you create a template. The stand-in default job and template are no longer saved or shown.
 - "Paste CV text, AI sorts it" is disabled with a "Coming soon" tooltip; the import also repairs near-valid answers from small local models.
 

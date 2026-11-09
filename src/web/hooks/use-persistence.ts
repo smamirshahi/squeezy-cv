@@ -1,7 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { useStore } from "react-redux";
-import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { CvFile } from "@custom-types/vault-types";
 import { createApiClient } from "@store/persistence/api-client";
 import {
   loadFromServer,
@@ -10,15 +8,6 @@ import {
 import { isDirty, toSavedState } from "@store/persistence/persistence-logic";
 import { savableOf } from "@store/jobs/jobs-slice";
 import { AppDispatch, RootState, useAppSelector } from "@store/store-helper";
-
-/** In development only: the fake sample CV, shown when nothing is saved yet */
-async function loadSample(): Promise<CvFile | null> {
-  if (!import.meta.env.DEV) {
-    return null;
-  }
-  const module = await import("@fixtures/sample-cv.json");
-  return migrateCvFile(module.default);
-}
 
 /** True if the editor holds changes that are not saved on the server */
 export function useHasUnsavedChanges(): boolean {
@@ -52,12 +41,7 @@ export function useSaveActions(): SaveActions {
     save: () =>
       void saveToServer(api, store.dispatch as AppDispatch, store.getState),
     retry: () =>
-      void loadFromServer(
-        api,
-        store.dispatch as AppDispatch,
-        store.getState,
-        loadSample
-      ),
+      void loadFromServer(api, store.dispatch as AppDispatch, store.getState),
   };
 }
 

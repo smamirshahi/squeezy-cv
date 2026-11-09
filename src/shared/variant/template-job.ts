@@ -24,6 +24,7 @@ const JOB_OPTIONAL_KEYS = [
   "hiddenSections",
   "headline",
   "linkOrder",
+  "hiddenLinks",
   "tuning",
   "tailor",
 ] as const;

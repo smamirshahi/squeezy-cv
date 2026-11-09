@@ -75,6 +75,17 @@ const ICONS: Record<
   reddit: SiReddit,
 };
 
+/** The icon component of a link type (one 24x24 svg), for drawing it in the CV */
+export function linkTypeIconComponent(typeId: string): React.ElementType {
+  if (typeId === "linkedin") {
+    return LinkedInIcon;
+  }
+  if (typeId === "website") {
+    return PublicOutlinedIcon;
+  }
+  return ICONS[typeId] ?? LinkOutlinedIcon;
+}
+
 /** The icon of a link type; a plain link icon for Other and unknown ids */
 export function LinkTypeIcon({ typeId }: { typeId: string }): JSX.Element {
   let icon: JSX.Element;

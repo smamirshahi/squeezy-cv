@@ -172,6 +172,9 @@ export const VariantSchema = Object({
   /** Link ids in the order this job shows them; links not listed come last. Missing = vault order. */
   linkOrder: Array(String).optional(),
 
+  /** Link ids this job leaves out. Missing = every link is shown. */
+  hiddenLinks: Array(String).optional(),
+
   /** Whether the preview shrinks (or fills) the CV to the page limit */
   isAutoFit: Boolean.optional(),
 

@@ -43,12 +43,10 @@ import {
   isNoReply,
   toIsoDay,
 } from "@shared/application/application-utils";
+import { onAppLinkClick } from "@hooks/navigation";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import {
-  APPLICATIONS_TOP_BAR_HEIGHT,
-  ApplicationsTopBar,
-} from "@pages/applications-page/applications-top-bar";
-import {
+  JobSummary,
   applicationPdfUrl,
   createApiClient,
 } from "@store/persistence/api-client";
@@ -112,14 +110,19 @@ export function ApplicationsPage(): JSX.Element {
     queryToView(window.location.search)
   );
   const [selectedId, setSelectedId] = useState<string>("");
+  const [jobs, setJobs] = useState<JobSummary[]>([]);
   const today = toIsoDay(new Date());
 
   useEffect(() => {
     let isCancelled = false;
     api
       .listApplications()
-      .then((applications) => {
+      .then(async (applications) => {
+        // Jobs that were never sent are drafts; failing to list them must not hide the rest
+        const unsentJobs = await api.listJobs().catch(() => []);
         if (!isCancelled) {
+          const sent = new Set(applications.map((a) => a.jobId));
+          setJobs(unsentJobs.filter((j) => !j.isCorrupt && !sent.has(j.id)));
           setState({ status: "ready", applications });
         }
       })
@@ -158,16 +161,39 @@ export function ApplicationsPage(): JSX.Element {
     });
   }
 
+  const jobRows = arrangeJobs(jobs, view);
+  const readable = state.status === "ready" ? state.applications : [];
+
+  async function setStage(
+    jobId: string,
+    stage: "draft" | "ready"
+  ): Promise<void> {
+    const job = await api.loadJob(jobId);
+    await api.saveJob({ ...job, stage });
+    setJobs((current) =>
+      current.map((entry) => (entry.id === jobId ? { ...entry, stage } : entry))
+    );
+  }
+
+  const selectedJob = selectedId.startsWith(JOB_PREFIX)
+    ? jobs.find((j) => `${JOB_PREFIX}${j.id}` === selectedId)
+    : undefined;
+
   return (
-    <Box>
-      <ApplicationsTopBar />
-      <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+    <Box sx={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
+      <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+        <CategoriesSidebar
+          applications={readable}
+          jobs={jobs}
+          status={view.status}
+          today={today}
+          onChange={(status) => setView({ ...view, status })}
+        />
         <Box
           sx={{
             flex: 1,
             minWidth: 0,
-            maxWidth: selectedId ? undefined : 1000,
-            mx: selectedId ? 0 : "auto",
+            overflow: "auto",
             p: 3,
             display: "flex",
             flexDirection: "column",
@@ -175,7 +201,8 @@ export function ApplicationsPage(): JSX.Element {
           }}
         >
           <Typography variant="h4" component="h1">
-            Applications
+            {CATEGORY_TITLES[view.status] ??
+              STATUS_LABELS[view.status as ApplicationStatus]}
           </Typography>
 
           {state.status === "loading" && <Typography>Loading…</Typography>}
@@ -183,27 +210,10 @@ export function ApplicationsPage(): JSX.Element {
             <Alert severity="error">{state.message}</Alert>
           )}
 
-          {state.status === "ready" && state.applications.length === 0 && (
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Typography gutterBottom>No applications yet.</Typography>
-              <Typography
-                gutterBottom
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Tailor a CV in the editor, then press{" "}
-                <strong>Mark as applied</strong>.
-              </Typography>
-              <Button href="/" variant="contained">
-                Go to the editor
-              </Button>
-            </Paper>
-          )}
-
-          {state.status === "ready" && state.applications.length > 0 && (
+          {state.status === "ready" && (
             <ApplicationsTable
               applications={state.applications}
+              jobRows={jobRows}
               view={view}
               onViewChange={setView}
               onSort={sortBy}
@@ -225,18 +235,26 @@ export function ApplicationsPage(): JSX.Element {
               sx={{
                 width: "100%",
                 flex: "none",
-                minHeight: `calc(100vh - ${APPLICATIONS_TOP_BAR_HEIGHT}px)`,
+                overflow: "auto",
                 borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
                 boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
                 bgcolor: WORKSPACE_COLORS.panel,
                 color: WORKSPACE_COLORS.text,
               }}
             >
-              <ApplicationView
-                key={selectedId}
-                applicationId={selectedId}
-                isEmbedded
-              />
+              {selectedJob ? (
+                <JobPanel
+                  key={selectedJob.id}
+                  job={selectedJob}
+                  onStage={(stage) => void setStage(selectedJob.id, stage)}
+                />
+              ) : (
+                <ApplicationView
+                  key={selectedId}
+                  applicationId={selectedId}
+                  isEmbedded
+                />
+              )}
             </Box>
           </ResizableAside>
         )}
@@ -245,24 +263,115 @@ export function ApplicationsPage(): JSX.Element {
   );
 }
 
-interface TilesProps {
+const JOB_PREFIX = "job:";
+
+const CATEGORY_TITLES: Partial<Record<ListView["status"], string>> = {
+  all: "All applications",
+  draft: "Draft",
+  ready: "Ready to apply",
+  noReply: "No reply",
+};
+
+/** Jobs that were never sent, filtered like the table (search and category) */
+function arrangeJobs(jobs: JobSummary[], view: ListView): JobSummary[] {
+  if (
+    view.status !== "all" &&
+    view.status !== "draft" &&
+    view.status !== "ready"
+  ) {
+    return [];
+  }
+  const query = view.query.trim().toLowerCase();
+  return jobs
+    .filter((job) => {
+      const stage = job.stage ?? "draft";
+      return (
+        (view.status === "all" || view.status === stage) &&
+        (query === "" ||
+          [job.name, job.company ?? "", job.role ?? ""].some((text) =>
+            text.toLowerCase().includes(query)
+          ))
+      );
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** The right panel for a job that was not sent yet */
+function JobPanel({
+  job,
+  onStage,
+}: {
+  job: JobSummary;
+  onStage: (stage: "draft" | "ready") => void;
+}): JSX.Element {
+  const stage = job.stage ?? "draft";
+  return (
+    <Box sx={{ p: 2.5, display: "grid", gap: 1.5 }}>
+      <Typography variant="h6">{job.name}</Typography>
+      <Chip
+        size="small"
+        label={stage === "ready" ? "Ready to apply" : "Draft"}
+        sx={{ justifySelf: "start" }}
+      />
+      <Typography>Company: {job.company || "-"}</Typography>
+      <Typography>Role: {job.role || "-"}</Typography>
+      <Typography sx={{ color: WORKSPACE_COLORS.muted, fontSize: 13 }}>
+        Created {formatDay(job.createdAt)}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Button
+          variant="contained"
+          href={`/jobs/${encodeURIComponent(job.id)}?view=details`}
+          onClick={(event) =>
+            onAppLinkClick(event, {
+              kind: "jobs",
+              jobId: job.id,
+              view: "details",
+            })
+          }
+        >
+          Open job
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => onStage(stage === "ready" ? "draft" : "ready")}
+        >
+          {stage === "ready" ? "Back to draft" : "Mark as ready"}
+        </Button>
+      </Box>
+      <Typography sx={{ color: WORKSPACE_COLORS.muted, fontSize: 13 }}>
+        Open the job, then use Mark as applied when you have sent it.
+      </Typography>
+    </Box>
+  );
+}
+
+interface SidebarProps {
   applications: ApplicationSummary[];
+  jobs: JobSummary[];
   status: ListView["status"];
   today: string;
   onChange: (status: ListView["status"]) => void;
 }
 
-/** One tile per status with its count; a tile is also the filter. "No reply" is derived, never stored. */
-function StatusTiles({
+/** The categories (a filter of the table): All, Draft, Ready to apply, then each status. "No reply" is derived. */
+function CategoriesSidebar({
   applications,
+  jobs,
   status,
   today,
   onChange,
-}: TilesProps): JSX.Element {
+}: SidebarProps): JSX.Element {
   const counts = countByStatus(applications);
   const readable = applications.filter((a) => !a.isCorrupt).length;
+  const draftCount = jobs.filter(
+    (j) => (j.stage ?? "draft") === "draft"
+  ).length;
+  const readyCount = jobs.filter((j) => j.stage === "ready").length;
   const tiles: { key: ListView["status"]; label: string; count: number }[] = [
-    { key: "all", label: "All", count: readable },
+    { key: "all", label: "All", count: readable + jobs.length },
+    { key: "draft", label: "Draft", count: draftCount },
+    { key: "ready", label: "Ready to apply", count: readyCount },
     ...APPLICATION_STATUSES.map((s) => ({
       key: s,
       label: STATUS_LABELS[s],
@@ -275,74 +384,68 @@ function StatusTiles({
     },
   ];
   return (
-    <Box
-      role="group"
-      aria-label="Filter by status"
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))",
-        gap: 1,
-      }}
-    >
-      {tiles.map((tile) => {
-        const isOn = status === tile.key;
-        const isWarning = tile.key === "noReply" && tile.count > 0;
-        return (
-          <Box
-            key={tile.key}
-            component="button"
-            type="button"
-            aria-pressed={isOn}
-            onClick={() => onChange(tile.key)}
-            sx={{
-              textAlign: "left",
-              p: "8px 10px",
-              cursor: "pointer",
-              font: "inherit",
-              color: WORKSPACE_COLORS.text,
-              bgcolor: isOn
-                ? WORKSPACE_COLORS.accentSoft
-                : WORKSPACE_COLORS.panel,
-              border: `1px solid ${
-                isOn
-                  ? WORKSPACE_COLORS.accent
-                  : isWarning
-                    ? "var(--wrb)"
-                    : WORKSPACE_COLORS.border
-              }`,
-              borderRadius: 1.5,
-            }}
-          >
-            <Typography
-              component="span"
+    <ResizableAside side="left" label="the status list" defaultWidth={210}>
+      <Box
+        component="nav"
+        aria-label="Filter by status"
+        sx={{
+          width: "100%",
+          flex: "none",
+          overflow: "auto",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+          p: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.25,
+        }}
+      >
+        {tiles.map((tile) => {
+          const isOn = status === tile.key;
+          return (
+            <Box
+              key={tile.key}
+              component="button"
+              type="button"
+              aria-pressed={isOn}
+              onClick={() => onChange(tile.key)}
               sx={{
-                display: "block",
-                fontSize: 12,
-                color: WORKSPACE_COLORS.muted,
+                display: "flex",
+                justifyContent: "space-between",
+                textAlign: "left",
+                px: 1.25,
+                py: 0.9,
+                cursor: "pointer",
+                font: "inherit",
+                fontSize: 14,
+                color: isOn
+                  ? WORKSPACE_COLORS.accentText
+                  : WORKSPACE_COLORS.text,
+                bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
+                border: 0,
+                borderRadius: 1,
+                "&:hover": {
+                  bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover,
+                },
+                borderTop:
+                  tile.key === "draft" || tile.key === "applied"
+                    ? `1px solid ${WORKSPACE_COLORS.border}`
+                    : 0,
               }}
             >
-              {tile.label}
-            </Typography>
-            <Typography
-              component="span"
-              sx={{
-                display: "block",
-                fontSize: 22,
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
-              {tile.count}
-            </Typography>
-          </Box>
-        );
-      })}
-    </Box>
+              <span>{tile.label}</span>
+              <span>{tile.count}</span>
+            </Box>
+          );
+        })}
+      </Box>
+    </ResizableAside>
   );
 }
 
 interface TableProps {
   applications: ApplicationSummary[];
+  jobRows: JobSummary[];
   view: ListView;
   onViewChange: (view: ListView) => void;
   onSort: (key: SortKey) => void;
@@ -353,6 +456,7 @@ interface TableProps {
 
 function ApplicationsTable({
   applications,
+  jobRows,
   view,
   onViewChange,
   onSort,
@@ -388,13 +492,6 @@ function ApplicationsTable({
             ),
           },
         }}
-      />
-
-      <StatusTiles
-        applications={applications}
-        status={view.status}
-        today={today}
-        onChange={(status) => onViewChange({ ...view, status })}
       />
 
       <Paper variant="outlined">
@@ -439,6 +536,30 @@ function ApplicationsTable({
             </TableRow>
           </TableHead>
           <TableBody>
+            {jobRows.map((job) => (
+              <TableRow
+                key={job.id}
+                hover
+                sx={{ cursor: "pointer" }}
+                selected={`${JOB_PREFIX}${job.id}` === selectedId}
+                onClick={() => onSelect(`${JOB_PREFIX}${job.id}`)}
+              >
+                <TableCell>{job.company || "-"}</TableCell>
+                <TableCell>{job.role || "-"}</TableCell>
+                <TableCell>{job.name}</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={job.stage === "ready" ? "Ready to apply" : "Draft"}
+                    color={job.stage === "ready" ? "info" : "default"}
+                  />
+                </TableCell>
+                <TableCell align="right">-</TableCell>
+                <TableCell>-</TableCell>
+              </TableRow>
+            ))}
             {shown.map((application) =>
               application.isCorrupt ? (
                 <TableRow key={application.id}>
@@ -461,7 +582,13 @@ function ApplicationsTable({
                     <Link
                       href={`/applications/${encodeURIComponent(application.id)}`}
                       underline="hover"
-                      onClick={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onAppLinkClick(event, {
+                          kind: "application",
+                          id: application.id,
+                        });
+                      }}
                     >
                       {application.company}
                     </Link>
@@ -501,11 +628,9 @@ function ApplicationsTable({
                 </TableRow>
               )
             )}
-            {shown.length === 0 && (
+            {shown.length === 0 && jobRows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7}>
-                  No application matches this search.
-                </TableCell>
+                <TableCell colSpan={7}>Nothing here yet.</TableCell>
               </TableRow>
             )}
           </TableBody>

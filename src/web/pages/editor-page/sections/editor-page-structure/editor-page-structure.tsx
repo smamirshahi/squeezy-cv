@@ -1,7 +1,7 @@
 import { Box, ButtonBase, Chip, Typography } from "@mui/material";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";
-import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
+import { IncludeSectionButton } from "@pages/editor-page/section-placement/include-section-button";
 import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -199,15 +199,16 @@ export function EditorPageStructure(): JSX.Element {
             2 · Arrange sections
           </Typography>
           <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
-            Tick the sections this job includes, then drag them (or use the
-            arrows) to set their order and place. Which entries appear inside a
-            section is set on the Content tab. Your name and contact details
-            always stay at the top.
+            Drag the sections (or use the arrows) to set their order and place.
+            The bin removes a section from this job; Add section brings back one
+            you removed. New sections are made in the Vault. Which entries
+            appear inside a section is set on the Content tab. Your name and
+            contact details always stay at the top.
           </Typography>
         </Box>
         {hasColumns && <PageStructureSlider />}
         <SectionPlacement />
-        <AddSectionButton />
+        <IncludeSectionButton />
       </Box>
     </Box>
   );

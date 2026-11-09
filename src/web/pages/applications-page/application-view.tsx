@@ -1,3 +1,4 @@
+import { onAppLinkClick } from "@hooks/navigation";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
@@ -54,19 +55,9 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
 
-/**
- * Back to the list. If we came from it, step back in history so its search and filters
- * are still there; otherwise (e.g. a link from the "Saved" message) just open the list.
- */
-function goBackToList(event: React.MouseEvent): void {
-  const isFromList =
-    document.referrer !== "" &&
-    new URL(document.referrer).origin === window.location.origin &&
-    new URL(document.referrer).pathname === "/applications";
-  if (isFromList && window.history.length > 1) {
-    event.preventDefault();
-    window.history.back();
-  }
+/** Back to the list, inside the app (no page load) */
+function goBackToList(event: React.MouseEvent<HTMLElement>): void {
+  onAppLinkClick(event, { kind: "applications", search: "" });
 }
 
 /** One application: where it stands, its timeline, and the exact CV that was sent */
@@ -149,7 +140,9 @@ export function ApplicationView({
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="error">{state.message}</Alert>
-        <Link href="/applications">All applications</Link>
+        <Link href="/applications" onClick={goBackToList}>
+          All applications
+        </Link>
       </Box>
     );
   }

@@ -37,7 +37,7 @@ export const JOB_OPINIONS = [
 ] as const;
 
 /** How the user feels about the job they apply for */
-const JobOpinionSchema = Union(
+export const JobOpinionSchema = Union(
   Literal("wantIt"),
   Literal("goodMatch"),
   Literal("optimistic"),
