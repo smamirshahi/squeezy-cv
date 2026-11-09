@@ -12,7 +12,6 @@ import {
 import AddOutlined from "@mui/icons-material/AddOutlined";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import RemoveOutlined from "@mui/icons-material/RemoveOutlined";
-import { useStyleHover } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   COLOR_PRESETS,
@@ -124,7 +123,6 @@ function ColorField({
 export function TypographyTable(): JSX.Element {
   const dispatch = useAppDispatch();
   const { typography } = useAppSelector(styleSelector);
-  const { setHovered } = useStyleHover();
 
   return (
     <Box
@@ -183,10 +181,6 @@ export function TypographyTable(): JSX.Element {
             <Box
               role="row"
               data-style-row={variant}
-              onMouseEnter={() => setHovered(variant)}
-              onMouseLeave={() => setHovered(null)}
-              onFocus={() => setHovered(variant)}
-              onBlur={() => setHovered(null)}
               sx={{
                 display: "grid",
                 gridTemplateColumns: COLUMNS,

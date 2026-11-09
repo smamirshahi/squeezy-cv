@@ -72,9 +72,9 @@ describe("routing in a real browser", () => {
   });
 
   it("opens the template tab by address", async () => {
-    await page.goto(`${app.webUrl}/templates/style`);
+    await page.goto(`${app.webUrl}/templates/design`);
     await page.getByRole("main", { name: "Templates" }).waitFor();
-    await page.getByText("Reset to defaults").waitFor();
+    await page.getByText("Reset colours and text styles").waitFor();
   });
 
   it("says not found for an unknown job, with a way back", async () => {

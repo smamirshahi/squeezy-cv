@@ -34,20 +34,23 @@ describe("parseRoute", () => {
       kind: "templates",
       tab: "templates",
     });
-    expect(parseRoute("/templates/style")).toEqual({
+    expect(parseRoute("/templates/design")).toEqual({
       kind: "templates",
-      tab: "style",
+      tab: "design",
     });
-    expect(parseRoute("/templates/t1/layout")).toEqual({
+    expect(parseRoute("/templates/t1/design")).toEqual({
       kind: "templates",
-      tab: "layout",
+      tab: "design",
       templateId: "t1",
     });
-    expect(parseRoute("/templates/a%20b/style")).toEqual({
+    expect(parseRoute("/templates/a%20b/design")).toEqual({
       kind: "templates",
-      tab: "style",
+      tab: "design",
       templateId: "a b",
     });
+    // the earlier Page layout and Style settings addresses no longer exist
+    expect(parseRoute("/templates/t1/layout").kind).toBe("notFound");
+    expect(parseRoute("/templates/style").kind).toBe("notFound");
     expect(parseRoute("/tailor")).toEqual({ kind: "tailor" });
     expect(parseRoute("/chat/main")).toEqual({ kind: "chat", jobId: "main" });
     expect(parseRoute("/ai")).toEqual({ kind: "ai" });
@@ -82,7 +85,7 @@ describe("parseRoute", () => {
       "/templates/t1",
       "/templates/t1/colours",
       "/templates/t1/templates",
-      "/templates/t1/layout/x",
+      "/templates/t1/design/x",
       "/tailor/x",
       "/print",
       "/applications/a/b",
@@ -100,10 +103,9 @@ describe("formatRoute", () => {
     { kind: "jobs", jobId: "main", view: "page" },
     { kind: "jobs", jobId: "main", view: "settings" },
     { kind: "templates", tab: "templates" },
-    { kind: "templates", tab: "layout" },
-    { kind: "templates", tab: "style" },
-    { kind: "templates", tab: "layout", templateId: "t1" },
-    { kind: "templates", tab: "style", templateId: "a b/c" },
+    { kind: "templates", tab: "design" },
+    { kind: "templates", tab: "design", templateId: "t1" },
+    { kind: "templates", tab: "design", templateId: "a b/c" },
     { kind: "tailor" },
     { kind: "chat", jobId: "main" },
     { kind: "chat" },

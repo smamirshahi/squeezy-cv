@@ -70,10 +70,10 @@ describe("routing in the workspace", () => {
   });
 
   it("shows the tool of each address", async () => {
-    await open("/templates/style");
+    await open("/templates/design");
     expect(rail("Templates").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("main", { name: "Templates" })).toBeTruthy();
-    expect(document.title).toContain("Style settings");
+    expect(document.title).toContain("Design");
   });
 
   it("makes the rail real links and changes the address on a click", async () => {

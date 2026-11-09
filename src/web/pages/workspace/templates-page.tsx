@@ -27,7 +27,6 @@ import { Route, TemplatesTab, formatRoute } from "@shared/routing/routes";
 import { EditorPageStructure } from "@pages/editor-page/sections/editor-page-structure/editor-page-structure";
 import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
 import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
-import { StyleHoverProvider } from "@pages/editor-page/sections/editor-style-settings/style-hover";
 import {
   jobCountText,
   TemplateSort,
@@ -82,18 +81,17 @@ type Asking =
 
 const TEMPLATE_TABS: { id: TemplateTab; label: string }[] = [
   { id: "templates", label: "Templates" },
-  { id: "layout", label: "Page layout" },
-  { id: "style", label: "Style settings" },
+  { id: "design", label: "Design" },
 ];
 
-/** The address of a Templates page; Page layout and Style settings name the template they edit */
+/** The address of a Templates page; Design names the template it edits */
 function templatesRoute(tab: TemplateTab, templateId: string): Route {
   return tab === "templates"
     ? { kind: "templates", tab }
     : { kind: "templates", tab, templateId };
 }
 
-/** Top of Page layout and Style settings: which template is being edited, and a way to switch */
+/** Top of Design: which template is being edited, and a way to switch */
 function EditedTemplateSwitcher({
   tab,
   templateId,
@@ -133,7 +131,7 @@ function TemplatesNav({
   templateId,
 }: {
   tab: TemplateTab;
-  /** The template the Page layout and Style settings links open */
+  /** The template the Design link opens */
   templateId: string;
 }): JSX.Element {
   return (
@@ -200,7 +198,7 @@ export function TemplatesPage(): JSX.Element {
 
   // The template the sample shows; missing or deleted = the active job's template
   const [pickedId, setPickedId] = useState<string | null>(null);
-  // The address names the template when Page layout or Style settings is open: it becomes the pick
+  // The address names the template when Design is open: it becomes the pick
   useEffect(() => {
     if (routeTemplateId !== undefined) {
       setPickedId(routeTemplateId);
@@ -220,7 +218,7 @@ export function TemplatesPage(): JSX.Element {
   }
 
   return (
-    <StyleHoverProvider>
+    <>
       <TemplatesNav tab={tab} templateId={shownId} />
       <Box
         component="main"
@@ -234,16 +232,19 @@ export function TemplatesPage(): JSX.Element {
           ...MIDDLE_AREA_SX,
         }}
       >
-        {tab === "layout" && (
+        {tab === "design" && (
           <Box sx={{ maxWidth: 1000, mx: "auto" }}>
             <EditedTemplateSwitcher tab={tab} templateId={shownId} />
+            <Typography
+              component="h2"
+              sx={{ fontSize: 18, fontWeight: 700, mb: 1 }}
+            >
+              Layout
+            </Typography>
             <EditorPageStructure />
-          </Box>
-        )}
-        {tab === "style" && (
-          <Box sx={{ maxWidth: 1000, mx: "auto" }}>
-            <EditedTemplateSwitcher tab={tab} templateId={shownId} />
-            <EditorTypography />
+            <Box sx={{ mt: 3 }}>
+              <EditorTypography />
+            </Box>
           </Box>
         )}
         {tab === "templates" && (
@@ -253,11 +254,11 @@ export function TemplatesPage(): JSX.Element {
                 Templates
               </Typography>
               <Typography sx={{ color: WORKSPACE_COLORS.muted, mb: 2 }}>
-                A template is how a CV looks: layout, section order, fonts,
-                colours, margins, page limit, skill display and auto-fit. Jobs
-                that share a template always look the same, so changing a
-                template changes all of its jobs. What each job shows is set per
-                job.
+                A template decides which sections a CV has, their order and
+                their styles. The items inside each section are decided by the
+                job, through its variant. Changing a template does not change
+                jobs you have already applied with, only the ones still in
+                draft.
               </Typography>
               <Box
                 sx={{
@@ -413,14 +414,14 @@ export function TemplatesPage(): JSX.Element {
                               variant="contained"
                               component="a"
                               href={formatRoute(
-                                templatesRoute("layout", template.id)
+                                templatesRoute("design", template.id)
                               )}
                               aria-label={`Edit template ${template.name}`}
                               onClick={(event: MouseEvent<HTMLElement>) => {
                                 event.stopPropagation();
                                 onAppLinkClick(
                                   event,
-                                  templatesRoute("layout", template.id)
+                                  templatesRoute("design", template.id)
                                 );
                               }}
                             >
@@ -646,8 +647,8 @@ export function TemplatesPage(): JSX.Element {
           </DialogActions>
         </Dialog>
       </Box>
-      {tab === "style" ? (
-        <StylePreviewPanel />
+      {tab === "design" ? (
+        <StylePreviewPanel templateId={shownId} />
       ) : (
         <ResizableAside side="right" label="the sample CV" defaultWidth={380}>
           <Box
@@ -683,6 +684,6 @@ export function TemplatesPage(): JSX.Element {
           </Box>
         </ResizableAside>
       )}
-    </StyleHoverProvider>
+    </>
   );
 }
