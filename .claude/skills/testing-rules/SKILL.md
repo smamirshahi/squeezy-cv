@@ -5,6 +5,8 @@ description: Rules for tests in this repo — cover everything you build or chan
 
 # Testing rules
 
+> **PAUSED (user decision):** while the UI, UX and logic are still changing, do NOT write, update or run tests (`pnpm test`, `pnpm test:e2e`) and do not run them before merging to `main`. The rules below apply again only when the user says tests are back on. If a test is known to be outdated, just mention it in the final report.
+
 These apply to every piece of work (features, fixes, refactors, dead-code removal).
 
 ## 1. Test as much as possible, cover everything
