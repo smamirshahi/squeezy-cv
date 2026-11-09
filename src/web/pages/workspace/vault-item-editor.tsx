@@ -2,7 +2,6 @@ import { HintAdornment } from "@components/description-hint";
 import { KeyboardEvent, useEffect, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -568,11 +567,6 @@ export function VaultItemEditor({
 
       {isSkills && (
         <>
-          <Alert severity="warning" sx={{ py: 0 }}>
-            You are editing vault facts. Levels and years are stored here, and
-            each job decides whether and how to show them. The AI never changes
-            a level.
-          </Alert>
           <FormControlLabel
             control={
               <Checkbox
