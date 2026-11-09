@@ -285,10 +285,21 @@ describe("templates page", () => {
     const list = screen.getByRole("list", { name: "Templates" });
     const rows = within(list).getAllByRole("listitem");
     expect(rows).toHaveLength(2);
-    expect(within(rows[0]).getByText("2 jobs")).toBeTruthy();
-    expect(within(rows[0]).getByText("Default, acme")).toBeTruthy();
+    const rowOf = (name: string): HTMLElement =>
+      rows.find((row) => within(row).queryByText(name))!;
+
+    const first = rowOf("Template 1");
+    fireEvent.click(
+      within(first).getByRole("button", {
+        name: "2 jobs prepared with this template",
+      })
+    );
+    expect(within(first).getByText("Default")).toBeTruthy();
+    expect(within(first).getByText("acme")).toBeTruthy();
     expect(
-      within(rows[1]).getByText("1 job · used by the job you are editing")
+      within(rowOf("Template 2")).getByRole("button", {
+        name: "1 job prepared with this template",
+      })
     ).toBeTruthy();
   });
 
@@ -389,23 +400,6 @@ describe("templates page", () => {
     expect(templates(store).map((t) => t.id)).not.toContain("spare");
   });
 
-  it("moves the job being edited to a template with 'Use for'", () => {
-    const store = setup(<TemplatesPage />);
-    act(() => {
-      store.dispatch(addTemplate({ id: "spare", name: "Spare" }));
-    });
-    expect(
-      screen
-        .getByRole("button", { name: "Use template Template 1 for Default" })
-        .hasAttribute("disabled")
-    ).toBe(true);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Use template Spare for Default" })
-    );
-    expect(jobs(store)[0].templateId).toBe("spare");
-    expect(screen.getByText("No job uses it yet.")).toBeTruthy();
-  });
-
   it("explains the reasons in words", () => {
     expect(deleteBlockReason(1)).toContain("only template");
     expect(deleteBlockReason(2)).toBe("");
@@ -491,12 +485,9 @@ describe("inspector and style settings say what they change", () => {
     expect(activeVariantSelector(store.getState()).skillDisplay).toBe("bars");
   });
 
-  it("the Style Settings page names the template it edits", () => {
+  it("a style change on the Style Settings page reaches every job on the template", () => {
     const store = setup(<EditorTypography />);
     addJob(store, "acme");
-    expect(
-      screen.getByText("Changes template “Template 1”, used by 2 jobs.")
-    ).toBeTruthy();
     fireEvent.click(screen.getByLabelText("Increase bodyMd size"));
     const sizes = variantsSelector(store.getState()).map(
       (v) => v.style.typography.bodyMd.fontSize

@@ -17,6 +17,7 @@ import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { addItem, addSection, setVault } from "@store/vault/vault-slice";
+import { getDefaultSectionTitle } from "@store/vault/section-types";
 import { Section } from "@custom-types/vault-types";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
@@ -58,13 +59,13 @@ describe("SectionTitleField and AddSectionButton", () => {
     renderWith(store, <AddSectionButton />);
     fireEvent.click(screen.getByText("Add section"));
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Type" }));
-    fireEvent.click(screen.getByRole("option", { name: "Publications" }));
+    fireEvent.click(screen.getByRole("option", { name: /^Skills/ }));
     fireEvent.change(screen.getByLabelText("New section title"), {
       target: { value: "My papers" },
     });
     fireEvent.click(screen.getByText("Add"));
     expect(store.getState().vault.sections.at(-1)).toMatchObject({
-      type: "publications",
+      type: "skills",
       title: "My papers",
       items: [],
     });
@@ -76,8 +77,8 @@ describe("SectionTitleField and AddSectionButton", () => {
     fireEvent.click(screen.getByText("Add section"));
     fireEvent.click(screen.getByText("Add"));
     expect(store.getState().vault.sections.at(-1)).toMatchObject({
-      type: "projects",
-      title: "Projects",
+      type: "custom",
+      title: getDefaultSectionTitle("custom"),
     });
   });
 
@@ -89,9 +90,7 @@ describe("SectionTitleField and AddSectionButton", () => {
     );
     fireEvent.click(screen.getByLabelText("Delete section Education"));
     const dialog = screen.getByRole("dialog");
-    expect(
-      within(dialog).getByText(/1 item\(s\) will be deleted/)
-    ).toBeTruthy();
+    expect(within(dialog).getByText(/its 1 item will be deleted/)).toBeTruthy();
     fireEvent.click(within(dialog).getByText("Cancel"));
     expect(section(store, "education")).toBeTruthy();
     expect(store.getState().vault.sections).toHaveLength(4);

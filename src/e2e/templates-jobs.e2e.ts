@@ -39,13 +39,29 @@ async function openTool(name: "Vault" | "Jobs" | "Templates"): Promise<void> {
     .click();
 }
 
-async function chooseJob(name: string): Promise<void> {
-  await page.getByLabel("Switch job").click();
-  await page.getByRole("option", { name, exact: true }).click();
+/** The job controls (job, name, template, page limit) are on the Jobs tool's "Job settings" view */
+async function openJobSettings(): Promise<void> {
+  await page.getByRole("link", { name: "Job settings" }).click();
+  await page.getByLabel("Active job").waitFor();
 }
 
+async function openCvPage(): Promise<void> {
+  await page.getByRole("link", { name: "CV page" }).click();
+  await page.locator("[data-cv-paper]").waitFor();
+}
+
+/** Picks the job on the settings view and goes back to the page */
+async function chooseJob(name: string): Promise<void> {
+  await openJobSettings();
+  await page.getByLabel("Active job").click();
+  await page.getByRole("option", { name, exact: true }).click();
+  await openCvPage();
+}
+
+/** Makes a job on the settings view; stays there */
 async function newJob(name: string, templateOption?: string): Promise<void> {
-  await page.getByRole("button", { name: "New job" }).click();
+  await openJobSettings();
+  await page.getByRole("button", { name: "New job", exact: true }).click();
   await page.getByLabel("New job name").fill(name);
   if (templateOption) {
     await page.getByLabel("Template", { exact: true }).click();
@@ -85,6 +101,7 @@ describe("templates and jobs in the browser", () => {
       .getByLabel("Template of this job")
       .filter({ hasText: "Template Two" })
       .waitFor();
+    await openCvPage();
 
     // Hide an item in Job B only
     await page
@@ -117,7 +134,8 @@ describe("templates and jobs in the browser", () => {
     await openTool("Templates");
     await page.getByRole("link", { name: "Design", exact: true }).click();
     await page
-      .getByText("Changes template “Template Two”, used by 2 jobs.")
+      .getByRole("combobox", { name: "Editing template" })
+      .filter({ hasText: "Template Two (2 jobs)" })
       .waitFor();
     await page.getByLabel("Increase headingMd size").click();
     await openTool("Jobs");
@@ -138,11 +156,14 @@ describe("templates and jobs in the browser", () => {
     await page.reload();
     await page.getByText("Jane Doe").first().waitFor();
 
+    await openTool("Jobs");
     await chooseJob("Job B");
+    await openJobSettings();
     await page
       .getByLabel("Template of this job")
       .filter({ hasText: "Template Two" })
       .waitFor();
+    await openCvPage();
     expect(
       await page
         .locator("[data-cv-item]")
@@ -188,7 +209,6 @@ describe("templates and jobs in the browser", () => {
       .getByRole("combobox", { name: "Editing template" })
       .filter({ hasText: "Unused look" })
       .waitFor();
-    await page.getByText(/Not used by the job you are editing/).waitFor();
 
     // Change a style there
     await page.getByLabel("Increase headingMd size").click();

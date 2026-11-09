@@ -8,24 +8,19 @@ import { rootReducer } from "@store/store";
 
 afterEach(cleanup);
 
-function show(tool: string): void {
+function show(): void {
   render(
     <Provider store={configureStore({ reducer: rootReducer })}>
-      <NoJobs tool={tool} />
+      <NoJobs />
     </Provider>
   );
 }
 
 describe("NoJobs", () => {
   it("says no job is added and offers to add one", () => {
-    show("jobs");
+    show();
     expect(screen.getByText("No job added yet")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Add a job" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
-  });
-
-  it("says no template on the Templates tool", () => {
-    show("templates");
-    expect(screen.getByText("No template yet")).toBeTruthy();
   });
 });

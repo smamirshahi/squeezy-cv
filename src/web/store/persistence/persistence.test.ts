@@ -263,6 +263,26 @@ describe("load and save through the server", () => {
     expect((await api.listJobs()).map((j) => j.id)).toEqual(["first"]);
   });
 
+  it("a template can be created with no job: only the template is saved", async () => {
+    const store = newStore();
+    const api = clientFor(app);
+    await loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    store.dispatch(addTemplate({ name: "Mine", id: "template-mine" }));
+    expect(store.getState().jobs.isTemplatePlaceholder).toBe(false);
+    expect(store.getState().jobs.isPlaceholder).toBe(true);
+    expect(store.getState().jobs.templates.map((t) => t.id)).toEqual([
+      "template-mine",
+    ]);
+
+    await saveToServer(api, store.dispatch, store.getState);
+    expect((await api.listTemplates()).map((t) => t.id)).toEqual([
+      "template-mine",
+    ]);
+    expect(await api.listJobs()).toEqual([]);
+  });
+
   it("save writes only the changed templates and jobs", async () => {
     const store = newStore();
     const api = clientFor(app);

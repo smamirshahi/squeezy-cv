@@ -5,7 +5,11 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { TemplatesPage } from "@pages/workspace/templates-page";
-import { addTemplate, templatesSelector } from "@store/jobs/jobs-slice";
+import {
+  addTemplate,
+  markPlaceholder,
+  templatesSelector,
+} from "@store/jobs/jobs-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setVault } from "@store/vault/vault-slice";
@@ -42,5 +46,23 @@ describe("templates page", () => {
     expect(selected).toHaveLength(1);
     expect(selected[0].textContent).toContain("Second look");
     expect(screen.getByTestId("sample-cv").textContent).toContain("Jane Doe");
+  });
+
+  it("with no template: no cards, and the Design link is disabled", () => {
+    const store: AppStore = configureStore({ reducer: rootReducer });
+    store.dispatch(setVault(migrateCvFile(sample).vault));
+    store.dispatch(markPlaceholder());
+    render(
+      <Provider store={store}>
+        <TemplatesPage />
+      </Provider>
+    );
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(
+      screen.getByRole("button", { name: "Create template" })
+    ).toBeTruthy();
+    const design = screen.getByText("Design").closest("a");
+    expect(design?.getAttribute("aria-disabled")).toBe("true");
+    expect(screen.getByText("Create a template first")).toBeTruthy();
   });
 });

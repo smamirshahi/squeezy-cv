@@ -25,7 +25,10 @@ describe("editing an item in the vault (inline editor)", () => {
   it("fills the date row with equal Start and End inputs before Current", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
-    await page.getByRole("link", { name: "Vault" }).click();
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Vault" })
+      .click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
     await tree.getByRole("link", { name: /^Work Experience/ }).click();
     await page
@@ -63,7 +66,10 @@ describe("editing an item in the vault (inline editor)", () => {
   it("edits a job and its description, sees them on the page, saves and keeps them after a reload", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
-    await page.getByRole("link", { name: "Vault" }).click();
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Vault" })
+      .click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
     await tree.getByRole("link", { name: /^Work Experience/ }).click();
     await page
@@ -101,7 +107,10 @@ describe("editing an item in the vault (inline editor)", () => {
   it("writes a description, which shows on the page and in the PDF text", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
-    await page.getByRole("link", { name: "Vault" }).click();
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Vault" })
+      .click();
     const tree = page.getByRole("complementary", { name: "Vault tree" });
     await tree.getByRole("link", { name: /^Work Experience/ }).click();
     await page

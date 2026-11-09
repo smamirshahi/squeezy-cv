@@ -52,6 +52,8 @@ export interface JobsState {
    * template into a real one and drops the stand-in job.
    */
   isPlaceholder: boolean;
+  /** Same for the template: true until the first template is created (or the first job is added) */
+  isTemplatePlaceholder: boolean;
 }
 
 const DEFAULT_VARIANT_ID = "default";
@@ -74,6 +76,7 @@ function createInitialState(): JobsState {
     jobs: [job],
     activeJobId: job.id,
     isPlaceholder: false,
+    isTemplatePlaceholder: false,
   };
 }
 
@@ -87,7 +90,14 @@ function normalise(
   templates: Template[],
   jobs: Job[],
   activeJobId: string
-): Pick<JobsState, "templates" | "jobs" | "activeJobId" | "isPlaceholder"> {
+): Pick<
+  JobsState,
+  | "templates"
+  | "jobs"
+  | "activeJobId"
+  | "isPlaceholder"
+  | "isTemplatePlaceholder"
+> {
   const fallback = createInitialState();
   const usableTemplates = templates.length ? templates : fallback.templates;
   const ids = new Set(usableTemplates.map((t) => t.id));
@@ -102,6 +112,7 @@ function normalise(
       ? activeJobId
       : finalJobs[0].id,
     isPlaceholder: jobs.length === 0,
+    isTemplatePlaceholder: templates.length === 0,
   };
 }
 
@@ -110,6 +121,7 @@ function dropPlaceholderJob(state: JobsState): void {
   if (state.isPlaceholder) {
     state.jobs = [];
     state.isPlaceholder = false;
+    state.isTemplatePlaceholder = false;
   }
 }
 
@@ -202,6 +214,7 @@ const jobsSlice = createSlice({
     /** Marks the current job and template as stand-ins (nothing is saved yet) */
     markPlaceholder(state) {
       state.isPlaceholder = true;
+      state.isTemplatePlaceholder = true;
     },
 
     /**
@@ -255,13 +268,21 @@ const jobsSlice = createSlice({
         const source =
           state.templates.find((t) => t.id === action.payload.sourceId) ??
           templateOf(state, jobOf(state, state.activeJobId) ?? state.jobs[0]);
-        state.templates.push(
-          duplicateTemplate(
-            current(source),
-            action.payload.id,
-            action.payload.name
-          )
+        const created = duplicateTemplate(
+          current(source),
+          action.payload.id,
+          action.payload.name
         );
+        if (state.isTemplatePlaceholder) {
+          // the first real template replaces the stand-in; the stand-in job moves to it
+          state.templates = [created];
+          for (const job of state.jobs) {
+            job.templateId = created.id;
+          }
+          state.isTemplatePlaceholder = false;
+        } else {
+          state.templates.push(created);
+        }
       },
       prepare(input: { name: string; id?: string; sourceId?: string }) {
         return { payload: { ...input, id: input.id ?? nanoid() } };
@@ -753,6 +774,10 @@ export function editedTemplateSelector(
   );
 }
 
+export function isTemplatePlaceholderSelector(state: SliceRoot): boolean {
+  return state.jobs.isTemplatePlaceholder;
+}
+
 export function isPlaceholderSelector(state: SliceRoot): boolean {
   return state.jobs.isPlaceholder;
 }
@@ -762,9 +787,10 @@ export function savableOf(jobs: JobsState): {
   templates: Template[];
   jobs: Job[];
 } {
-  return jobs.isPlaceholder
-    ? { templates: [], jobs: [] }
-    : { templates: jobs.templates, jobs: jobs.jobs };
+  return {
+    templates: jobs.isTemplatePlaceholder ? [] : jobs.templates,
+    jobs: jobs.isPlaceholder ? [] : jobs.jobs,
+  };
 }
 
 export function templatesSelector(state: SliceRoot): Template[] {

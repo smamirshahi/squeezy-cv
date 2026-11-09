@@ -49,9 +49,7 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
     (s) => s.jobs.jobs.find((job) => job.id === s.jobs.activeJobId)?.name ?? ""
   );
   const isPlaceholder = useAppSelector(isPlaceholderSelector);
-  const isEmpty =
-    isPlaceholder &&
-    (tool === "jobs" || tool === "chat" || tool === "templates");
+  const isEmpty = isPlaceholder && (tool === "jobs" || tool === "chat");
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
   useRouteSync(route);
   const missing = missingThing(route, isLoading, jobs, sections, templates);
@@ -189,8 +187,8 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
               {tool === "chat" ? <ChatPanel /> : <Inspector />}
             </>
           )}
-        {!missing && !isEmpty && tool === "templates" && <TemplatesPage />}
-        {!missing && isEmpty && <NoJobs tool={tool} />}
+        {!missing && tool === "templates" && <TemplatesPage />}
+        {!missing && isEmpty && <NoJobs />}
         {!missing && tool === "vault" && <VaultPage />}
         {!missing && tool === "tailor" && <AiAssistant />}
         {!missing && tool === "ai" && <SettingsPage />}

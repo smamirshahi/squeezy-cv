@@ -6,14 +6,13 @@ import {
   WORKSPACE_COLORS,
 } from "@pages/workspace/workspace-tokens";
 
-/** What the Jobs, Templates and Chat tools show until the first job is added */
-export function NoJobs({ tool }: { tool: string }): JSX.Element {
+/** What the Jobs and Chat tools show until the first job is added */
+export function NoJobs(): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const what = tool === "templates" ? "No template yet" : "No job added yet";
   return (
     <Box
       component="main"
-      aria-label={what}
+      aria-label="No job added yet"
       sx={{
         ...MIDDLE_AREA_SX,
         flex: 1,
@@ -25,11 +24,11 @@ export function NoJobs({ tool }: { tool: string }): JSX.Element {
         p: 4,
       }}
     >
-      <Typography sx={{ fontSize: 18, fontWeight: 700 }}>{what}</Typography>
+      <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
+        No job added yet
+      </Typography>
       <Typography sx={{ color: WORKSPACE_COLORS.muted, textAlign: "center" }}>
-        {tool === "templates"
-          ? "You can create a template based on the Vault."
-          : "Add a job to build a CV for one application from your vault."}
+        Add a job to build a CV for one application from your vault.
       </Typography>
       <Button variant="contained" onClick={() => setIsOpen(true)}>
         Add a job

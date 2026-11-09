@@ -30,15 +30,16 @@ describe("overflow and hiding to fit (measured in a real browser)", () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
 
-    // The top bar and the banner say how far over it is
-    await page.getByText(/\d+ lines? over 1 page/).waitFor();
+    // The banner says how far over it is
     await page.getByText(/lines? (is|are) over; page 2 starts at/).waitFor();
 
     // The inspector offers the least relevant items and a one-click fix
     await page
       .getByRole("button", { name: "Hide the least relevant until it fits" })
       .click();
-    await page.getByText(/^Fits 1 page · \d+%$/).waitFor();
+    await page
+      .getByText(/lines? (is|are) over; page 2 starts at/)
+      .waitFor({ state: "detached" });
     expect(
       await page.getByText(/lines? (is|are) over; page 2 starts at/).count()
     ).toBe(0);

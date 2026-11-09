@@ -44,6 +44,8 @@ import {
   activeJobSelector,
   addTemplate,
   deleteTemplate,
+  isPlaceholderSelector,
+  isTemplatePlaceholderSelector,
   jobsSelector,
   renameTemplate,
   templatesSelector,
@@ -129,8 +131,11 @@ function EditedTemplateSwitcher({
 function TemplatesNav({
   tab,
   templateId,
+  hasTemplates,
 }: {
   tab: TemplateTab;
+  /** False until a template exists: there is nothing to design yet */
+  hasTemplates: boolean;
   /** The template the Design link opens */
   templateId: string;
 }): JSX.Element {
@@ -155,11 +160,19 @@ function TemplatesNav({
               component="a"
               href={formatRoute(templatesRoute(entry.id, templateId))}
               selected={tab === entry.id}
+              disabled={entry.id === "design" && !hasTemplates}
               onClick={(event: MouseEvent<HTMLElement>) =>
                 onAppLinkClick(event, templatesRoute(entry.id, templateId))
               }
             >
-              <ListItemText primary={entry.label} />
+              <ListItemText
+                primary={entry.label}
+                secondary={
+                  entry.id === "design" && !hasTemplates
+                    ? "Create a template first"
+                    : undefined
+                }
+              />
             </ListItemButton>
           ))}
         </List>
@@ -176,8 +189,13 @@ function TemplatesNav({
  */
 export function TemplatesPage(): JSX.Element {
   const dispatch = useAppDispatch();
-  const templates = useAppSelector(templatesSelector);
-  const jobs = useAppSelector(jobsSelector);
+  const isTemplatePlaceholder = useAppSelector(isTemplatePlaceholderSelector);
+  const isJobPlaceholder = useAppSelector(isPlaceholderSelector);
+  const allTemplates = useAppSelector(templatesSelector);
+  const allJobs = useAppSelector(jobsSelector);
+  // stand-ins are not shown: with no template made yet the page lists nothing
+  const templates = isTemplatePlaceholder ? [] : allTemplates;
+  const jobs = isJobPlaceholder ? [] : allJobs;
   const activeJob = useAppSelector(activeJobSelector);
   const [newName, setNewName] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
@@ -209,6 +227,13 @@ export function TemplatesPage(): JSX.Element {
     templates.find((t) => t.id === activeJob.templateId);
   const shownId = shownTemplate?.id ?? activeJob.templateId;
 
+  // With no template there is nothing to design: an address for it goes back to the list
+  useEffect(() => {
+    if (isTemplatePlaceholder && tab === "design") {
+      navigate({ kind: "templates", tab: "templates" }, { replace: true });
+    }
+  }, [isTemplatePlaceholder, tab]);
+
   function create(): void {
     const name = newName.trim() || nextTemplateName(templates);
     const id = nanoid();
@@ -219,7 +244,11 @@ export function TemplatesPage(): JSX.Element {
 
   return (
     <>
-      <TemplatesNav tab={tab} templateId={shownId} />
+      <TemplatesNav
+        tab={tab}
+        templateId={shownId}
+        hasTemplates={!isTemplatePlaceholder}
+      />
       <Box
         component="main"
         aria-label="Templates"
@@ -649,7 +678,7 @@ export function TemplatesPage(): JSX.Element {
       </Box>
       {tab === "design" ? (
         <StylePreviewPanel templateId={shownId} />
-      ) : (
+      ) : isTemplatePlaceholder ? null : (
         <ResizableAside side="right" label="the sample CV" defaultWidth={380}>
           <Box
             component="aside"

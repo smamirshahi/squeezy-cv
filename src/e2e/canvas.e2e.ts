@@ -29,7 +29,8 @@ describe("canvas zoom and Tab between blocks (real browser)", () => {
   it("zooms the page without changing what is measured", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
-    const chip = page.getByText(/\d+ lines? over 1 page/);
+    // the overflow banner under the page says how far over it is
+    const chip = page.getByText(/\d+ lines? (is|are) over; page 2 starts at/);
     await chip.waitFor();
     const before = await chip.innerText();
     const paper = page.locator("[data-cv-paper]");

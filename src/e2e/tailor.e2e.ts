@@ -22,6 +22,15 @@ afterAll(async () => {
   await app?.close();
 });
 
+/** Saves, then lists the template names the server has (the template picker moved off the top bar) */
+async function savedTemplateNames(): Promise<string[]> {
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByText("Saved", { exact: true }).waitFor();
+  const response = await fetch(`${app.apiUrl}/api/templates`);
+  const list = (await response.json()) as { name: string }[];
+  return list.map((t) => t.name);
+}
+
 describe("tailor review: pins, diff and section moves (AI answers stubbed)", () => {
   it("puts numbered pins next to the changed items and links them to the list", async () => {
     const file = sampleFile();
@@ -108,15 +117,15 @@ describe("tailor review: pins, diff and section moves (AI answers stubbed)", () 
       .getByRole("button", { name: /Create job from the accepted changes/ })
       .click();
     await page.getByText(/Created the job "Dev"/).waitFor();
-    const select = page.getByLabel("Template of this job");
-    expect(await select.textContent()).not.toContain("(tailored)");
+    expect(await savedTemplateNames()).not.toContain("(tailored)");
 
     // tick the reorder again and create a second job: now a copy exists and is used
     await page.getByRole("checkbox", { name: /Reorder the sections/ }).check();
     await page
       .getByRole("button", { name: /Create job from the accepted changes/ })
       .click();
-    await select.getByText(/\(tailored\)/).waitFor();
-    expect(await select.textContent()).toContain("(tailored)");
+    expect(
+      (await savedTemplateNames()).some((n) => /\(tailored\)/.test(n))
+    ).toBe(true);
   });
 });
