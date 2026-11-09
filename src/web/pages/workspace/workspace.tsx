@@ -251,7 +251,7 @@ function titleOf(route: WorkspaceRoute, jobName: string): string {
     case "jobs":
       return `${route.view === "settings" ? "Job settings" : "Jobs"}${jobName ? ` · ${jobName}` : ""}`;
     case "templates":
-      return `Templates${route.tab === "templates" ? "" : ` · ${route.tab === "layout" ? "Page layout" : "Style settings"}`}`;
+      return `Templates${route.tab === "templates" ? "" : " · Design"}`;
     case "tailor":
       return "Tailor";
     case "chat":

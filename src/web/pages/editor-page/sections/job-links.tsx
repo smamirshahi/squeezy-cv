@@ -8,7 +8,7 @@ import { vaultSelector } from "@store/vault/vault-slice";
 
 /**
  * The order of the links (LinkedIn, GitHub, ...) in this job. The vault list is not changed;
- * whether links show at all is a template setting (Style settings).
+ * whether links show at all is a template setting (Templates > Design).
  */
 export function JobLinks(): JSX.Element | null {
   const dispatch = useAppDispatch();

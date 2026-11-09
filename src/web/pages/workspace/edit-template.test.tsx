@@ -70,7 +70,7 @@ afterEach(() => {
 
 describe("editing the template named in the address", () => {
   it("writes style edits to that template, not to the active job's", async () => {
-    const store = await open("/templates/second/style");
+    const store = await open("/templates/second/design");
     const firstId = templatesSelector(store.getState())[0].id;
     const before = look(store, firstId).style;
     expect(store.getState().app.editedTemplateId).toBe("second");
@@ -85,7 +85,7 @@ describe("editing the template named in the address", () => {
   });
 
   it("writes layout edits to that template only", async () => {
-    const store = await open("/templates/second/layout");
+    const store = await open("/templates/second/design");
     const firstId = templatesSelector(store.getState())[0].id;
     const before = look(store, firstId).layout;
     const custom = { fullWidth: ["personalInfo"], left: [], right: [] };
@@ -100,7 +100,7 @@ describe("editing the template named in the address", () => {
   });
 
   it("loads the template's own look when the switcher changes it", async () => {
-    const store = await open("/templates/second/style");
+    const store = await open("/templates/second/design");
     const firstId = templatesSelector(store.getState())[0].id;
     act(() => {
       store.dispatch(setPaperMargin("normal"));
@@ -122,14 +122,14 @@ describe("editing the template named in the address", () => {
     );
 
     await waitFor(() =>
-      expect(window.location.pathname).toBe(`/templates/${firstId}/style`)
+      expect(window.location.pathname).toBe(`/templates/${firstId}/design`)
     );
     expect(store.getState().cvData.style).toEqual(look(store, firstId).style);
     expect(look(store, "second").style.paperMargin).toBe("normal");
   });
 
   it("names the template and says when the job being edited does not use it", async () => {
-    await open("/templates/second/layout");
+    await open("/templates/second/design");
     const field = screen.getByRole("combobox", { name: "Editing template" });
     expect(field.textContent).toContain("Second look");
     expect(
@@ -141,16 +141,16 @@ describe("editing the template named in the address", () => {
   });
 
   it("fills in the active job's template when the address has none", async () => {
-    const store = await open("/templates/layout");
+    const store = await open("/templates/design");
     const firstId = templatesSelector(store.getState())[0].id;
     await waitFor(() =>
-      expect(window.location.pathname).toBe(`/templates/${firstId}/layout`)
+      expect(window.location.pathname).toBe(`/templates/${firstId}/design`)
     );
     expect(store.getState().app.editedTemplateId).toBe(firstId);
   });
 
   it("shows not found for an unknown template", async () => {
-    const store = await open("/templates/nope/layout");
+    const store = await open("/templates/nope/design");
     expect(
       screen.getByRole("main", { name: "Not found" }).textContent
     ).toContain("This template does not exist");
@@ -161,7 +161,7 @@ describe("editing the template named in the address", () => {
   });
 
   it("goes back to the active job's template when the page is left", async () => {
-    const store = await open("/templates/second/style");
+    const store = await open("/templates/second/design");
     fireEvent.click(
       within(screen.getByRole("navigation", { name: "Tools" })).getByRole(
         "link",
@@ -176,7 +176,7 @@ describe("editing the template named in the address", () => {
   });
 
   it("undo restores the edited template's look in the editor", async () => {
-    const store = await open("/templates/second/style");
+    const store = await open("/templates/second/design");
     const original = look(store, "second").style.paperMargin;
     const other = original === "normal" ? "narrow" : "normal";
     act(() => {
@@ -196,14 +196,14 @@ describe("editing the template named in the address", () => {
 });
 
 describe("the Templates list", () => {
-  it("has an Edit button on every card that opens Page layout for that template", async () => {
+  it("has an Edit button on every card that opens Design for that template", async () => {
     const store = await open("/templates");
     const edit = screen.getByRole("link", {
       name: "Edit template Second look",
     });
-    expect(edit.getAttribute("href")).toBe("/templates/second/layout");
+    expect(edit.getAttribute("href")).toBe("/templates/second/design");
     fireEvent.click(edit);
-    expect(window.location.pathname).toBe("/templates/second/layout");
+    expect(window.location.pathname).toBe("/templates/second/design");
     await waitFor(() =>
       expect(store.getState().app.editedTemplateId).toBe("second")
     );
@@ -212,25 +212,18 @@ describe("the Templates list", () => {
     ).toContain("Second look");
   });
 
-  it("opens Page layout and Style settings for the template picked on the list", async () => {
+  it("opens Design for the template picked on the list", async () => {
     await open("/templates");
     fireEvent.click(
       screen.getByRole("button", { name: "Show a sample of Second look" })
     );
     const nav = screen.getByRole("navigation", { name: "Template sections" });
     expect(
-      within(nav)
-        .getByRole("link", { name: "Page layout" })
-        .getAttribute("href")
-    ).toBe("/templates/second/layout");
-    expect(
-      within(nav)
-        .getByRole("link", { name: "Style settings" })
-        .getAttribute("href")
-    ).toBe("/templates/second/style");
+      within(nav).getByRole("link", { name: "Design" }).getAttribute("href")
+    ).toBe("/templates/second/design");
   });
 
-  it("selects a newly created template, and the layout tab then edits it", async () => {
+  it("selects a newly created template, and the Design tab then edits it", async () => {
     const store = await open("/templates");
     fireEvent.change(screen.getByLabelText("New template name"), {
       target: { value: "Fresh" },
@@ -241,9 +234,7 @@ describe("the Templates list", () => {
     )!;
     const nav = screen.getByRole("navigation", { name: "Template sections" });
     expect(
-      within(nav)
-        .getByRole("link", { name: "Style settings" })
-        .getAttribute("href")
-    ).toBe(`/templates/${fresh.id}/style`);
+      within(nav).getByRole("link", { name: "Design" }).getAttribute("href")
+    ).toBe(`/templates/${fresh.id}/design`);
   });
 });

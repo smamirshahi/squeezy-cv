@@ -102,7 +102,7 @@ export function EditorMainInfo(): JSX.Element | null {
               {...params}
               label="Nationality (optional)"
               placeholder="Start typing, e.g. British"
-              helperText="Pick one or more. Shown under your name when turned on in Style Settings."
+              helperText="Pick one or more. Shown under your name when turned on in Templates > Design."
               slotProps={{
                 ...params.slotProps,
                 inputLabel: { ...params.slotProps?.inputLabel, shrink: true },
@@ -124,7 +124,7 @@ export function EditorMainInfo(): JSX.Element | null {
             onChange={(event) =>
               draftDispatch(updateProfile({ [key]: event.target.value }))
             }
-            helperText="Shown under your name when turned on in Style Settings."
+            helperText="Shown under your name when turned on in Templates > Design."
             slotProps={{
               inputLabel: { shrink: true },
               select: { displayEmpty: true },
@@ -142,7 +142,7 @@ export function EditorMainInfo(): JSX.Element | null {
           slotProps={{ inputLabel: { shrink: true } }}
           label="Right to work (optional)"
           placeholder="Eligible to work in the UK"
-          helperText='e.g. "Eligible to work in the UK". Shown under your name when turned on in Style Settings.'
+          helperText='e.g. "Eligible to work in the UK". Shown under your name when turned on in Templates > Design.'
           variant="outlined"
           value={draft.profile.rightToWork ?? ""}
           onChange={(event) =>
