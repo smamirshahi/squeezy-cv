@@ -14,6 +14,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 // eslint-disable-next-line no-restricted-imports -- App.tsx is the only module outside the aliased folders
 import { App } from "../../App";
+import { navigate } from "@hooks/navigation";
+import { createJob } from "@store/jobs/jobs-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
@@ -41,6 +43,22 @@ async function open(path: string, loads = true): Promise<AppStore> {
     await waitFor(() =>
       expect(store.getState().persistence.status).not.toBe("loading")
     );
+    // Loading leaves "no job yet"; these tests need a job
+    await act(() =>
+      Promise.resolve(
+        store.dispatch(
+          createJob({
+            vault: store.getState().vault,
+            style: store.getState().cvData.style,
+            name: "Default",
+          })
+        )
+      )
+    );
+    // the address followed the new job: open the one the test asked for
+    act(() => {
+      navigate(path, { replace: true });
+    });
   }
   return store;
 }

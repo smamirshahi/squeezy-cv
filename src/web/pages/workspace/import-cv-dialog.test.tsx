@@ -79,8 +79,9 @@ describe("ImportCvDialog with a PDF", () => {
   it("reads a dropped PDF the same way", async () => {
     serve(() => reply({ text: "Dropped text", pages: 1 }));
     open();
-    const zone = screen.getByText(/or drop a PDF here/)
-      .parentElement as Element;
+    const zone = screen.getByRole("button", {
+      name: "Choose a PDF file, or drop one here",
+    });
     fireEvent.drop(zone, { dataTransfer: { files: [PDF] } });
     await waitFor(() =>
       expect(

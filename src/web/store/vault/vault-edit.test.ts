@@ -34,7 +34,7 @@ function freshVault(): VaultState {
 }
 
 describe("default vault", () => {
-  it("is valid and has the four usual sections with the preview headings", () => {
+  it("is valid and has the five usual sections with the preview headings", () => {
     const vault = createDefaultVault();
     expect(() => VaultSchema.check(vault)).not.toThrow();
     expect(vault.sections.map((s) => [s.id, s.type, s.title])).toEqual([
@@ -42,6 +42,7 @@ describe("default vault", () => {
       ["experience", "experience", "Work Experience"],
       ["education", "education", "Education"],
       ["skills", "skills", "Skills"],
+      ["publications", "publications", "Publications"],
     ]);
   });
 
@@ -51,8 +52,10 @@ describe("default vault", () => {
   });
 
   it("uses the same section ids as the migration, so structures stay valid", () => {
+    // a migrated file has no publications; the default vault adds that one on top
+    const defaults = createDefaultVault().sections.map((s) => s.id);
     expect(freshVault().sections.map((s) => s.id)).toEqual(
-      createDefaultVault().sections.map((s) => s.id)
+      defaults.filter((id) => id !== "publications")
     );
   });
 });

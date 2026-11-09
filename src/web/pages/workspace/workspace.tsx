@@ -26,7 +26,12 @@ import { onAppLinkClick } from "@hooks/navigation";
 import { useRouteSync } from "@hooks/use-route-sync";
 import { WorkspaceRoute, formatRoute } from "@shared/routing/routes";
 import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
-import { jobsSelector, templatesSelector } from "@store/jobs/jobs-slice";
+import {
+  isPlaceholderSelector,
+  jobsSelector,
+  templatesSelector,
+} from "@store/jobs/jobs-slice";
+import { NoJobs } from "@pages/workspace/no-jobs";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
@@ -43,6 +48,8 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
   const activeJobName = useAppSelector(
     (s) => s.jobs.jobs.find((job) => job.id === s.jobs.activeJobId)?.name ?? ""
   );
+  const isPlaceholder = useAppSelector(isPlaceholderSelector);
+  const isEmpty = isPlaceholder && (tool === "jobs" || tool === "chat");
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
   useRouteSync(route);
   const missing = missingThing(route, isLoading, jobs, sections, templates);
@@ -94,7 +101,7 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {missing && <NotFound what={missing.what} backTo={missing.backTo} />}
-        {!missing && tool === "jobs" && (
+        {!missing && !isEmpty && tool === "jobs" && (
           <Box
             sx={{
               flex: "none",
@@ -135,10 +142,11 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
             </ToggleButtonGroup>
           </Box>
         )}
-        {!missing && tool === "jobs" && jobsView === "settings" && (
+        {!missing && !isEmpty && tool === "jobs" && jobsView === "settings" && (
           <JobSettingsPage />
         )}
         {!missing &&
+          !isEmpty &&
           ((tool === "jobs" && jobsView === "page") || tool === "chat") && (
             <>
               {isOutlineOpen && (
@@ -180,6 +188,7 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
             </>
           )}
         {!missing && tool === "templates" && <TemplatesPage />}
+        {!missing && isEmpty && <NoJobs />}
         {!missing && tool === "vault" && <VaultPage />}
         {!missing && tool === "tailor" && <AiAssistant />}
         {!missing && tool === "ai" && <SettingsPage />}

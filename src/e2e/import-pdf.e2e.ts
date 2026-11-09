@@ -23,7 +23,8 @@ afterAll(async () => {
 });
 
 describe("PDF import", () => {
-  it("puts the text of an uploaded PDF in the import box", async () => {
+  // Skipped while the import button is disabled ("Coming soon"); see the issue to bring it back
+  it.skip("puts the text of an uploaded PDF in the import box", async () => {
     await page.goto(app.webUrl);
     await page
       .getByRole("navigation", { name: "Tools" })

@@ -8,6 +8,7 @@ import {
   saveToServer,
 } from "@store/persistence/persistence-actions";
 import { isDirty, toSavedState } from "@store/persistence/persistence-logic";
+import { savableOf } from "@store/jobs/jobs-slice";
 import { AppDispatch, RootState, useAppSelector } from "@store/store-helper";
 
 /** In development only: the fake sample CV, shown when nothing is saved yet */
@@ -24,13 +25,15 @@ export function useHasUnsavedChanges(): boolean {
   const vault = useAppSelector((s) => s.vault);
   const metaData = useAppSelector((s) => s.cvData.metaData);
   const style = useAppSelector((s) => s.cvData.style);
-  const templates = useAppSelector((s) => s.jobs.templates);
-  const jobs = useAppSelector((s) => s.jobs.jobs);
+  const jobsState = useAppSelector((s) => s.jobs);
   const saved = useAppSelector((s) => s.persistence.saved);
-  return useMemo(
-    () => isDirty(saved, toSavedState(vault, metaData, style, templates, jobs)),
-    [vault, metaData, style, templates, jobs, saved]
-  );
+  return useMemo(() => {
+    const { templates, jobs } = savableOf(jobsState);
+    return isDirty(
+      saved,
+      toSavedState(vault, metaData, style, templates, jobs)
+    );
+  }, [vault, metaData, style, jobsState, saved]);
 }
 
 interface SaveActions {

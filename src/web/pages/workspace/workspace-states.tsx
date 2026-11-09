@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
@@ -95,9 +95,17 @@ export function FirstRun(): JSX.Element | null {
         <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
           Add your facts once. Every CV is a view of them.
         </Typography>
-        <Button variant="contained" onClick={() => setIsImportOpen(true)}>
-          Paste CV text, AI sorts it
-        </Button>
+        <Tooltip title="Coming soon">
+          <span>
+            <Button
+              variant="contained"
+              disabled
+              onClick={() => setIsImportOpen(true)}
+            >
+              Paste CV text, AI sorts it
+            </Button>
+          </span>
+        </Tooltip>
         <ImportCvDialog
           isOpen={isImportOpen}
           onClose={() => setIsImportOpen(false)}

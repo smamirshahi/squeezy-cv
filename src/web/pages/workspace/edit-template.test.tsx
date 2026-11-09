@@ -18,7 +18,12 @@ import { undoableReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle, setPaperMargin } from "@store/cv-data/cv-data-slice";
 import { updatePageStructure } from "@store/app/app-slice";
-import { addTemplate, templatesSelector } from "@store/jobs/jobs-slice";
+import { navigate } from "@hooks/navigation";
+import {
+  addTemplate,
+  createJob,
+  templatesSelector,
+} from "@store/jobs/jobs-slice";
 import { undo } from "@store/history/history";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
@@ -45,7 +50,16 @@ async function open(path: string): Promise<AppStore> {
   );
   // After loading, because the load of the (empty, offline) data sets the templates itself
   act(() => {
+    // the load leaves "no job yet": make the default job (and its template) real first
+    store.dispatch(
+      createJob({
+        vault: store.getState().vault,
+        style: store.getState().cvData.style,
+        name: "Default",
+      })
+    );
     store.dispatch(addTemplate({ id: "second", name: "Second look" }));
+    navigate(path, { replace: true });
   });
   return store;
 }
@@ -128,16 +142,11 @@ describe("editing the template named in the address", () => {
     expect(look(store, "second").style.paperMargin).toBe("normal");
   });
 
-  it("names the template and says when the job being edited does not use it", async () => {
+  it("names the template and says how many jobs use it", async () => {
     await open("/templates/second/design");
     const field = screen.getByRole("combobox", { name: "Editing template" });
     expect(field.textContent).toContain("Second look");
-    expect(
-      screen.getByText(/Not used by the job you are editing/)
-    ).toBeTruthy();
-    expect(screen.getByRole("note").textContent).toContain(
-      "Changes template “Second look”, used by 0 jobs"
-    );
+    expect(field.textContent).toMatch(/Second look \(0 jobs\)/);
   });
 
   it("fills in the active job's template when the address has none", async () => {

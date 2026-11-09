@@ -3,7 +3,7 @@ import { Variant } from "@custom-types/variant-types";
 import { ApiClient } from "@store/persistence/api-client";
 import { saveToServer } from "@store/persistence/persistence-actions";
 import { isDirty, toSavedState } from "@store/persistence/persistence-logic";
-import { activeVariantSelector } from "@store/jobs/jobs-slice";
+import { activeVariantSelector, savableOf } from "@store/jobs/jobs-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 
 /**
@@ -24,8 +24,8 @@ export async function saveActiveJob(
     initial.vault,
     initial.cvData.metaData,
     initial.cvData.style,
-    initial.jobs.templates,
-    initial.jobs.jobs
+    savableOf(initial.jobs).templates,
+    savableOf(initial.jobs).jobs
   );
   if (isDirty(initial.persistence.saved, current)) {
     await saveToServer(api, dispatch, store.getState);

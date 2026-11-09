@@ -23,7 +23,12 @@ import {
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
-import { setTemplatesAndJobs, setVariants } from "@store/jobs/jobs-slice";
+import {
+  markPlaceholder,
+  savableOf,
+  setTemplatesAndJobs,
+  setVariants,
+} from "@store/jobs/jobs-slice";
 import { setVault } from "@store/vault/vault-slice";
 
 /** The templates and jobs of a CV, or variants that are split into one template and one job each */
@@ -52,6 +57,7 @@ export function loadCvFileIntoStore(
   } else {
     first = createDefaultVariant(file, nanoid(), initialAppState.structure);
     dispatch(setVariants([first]));
+    dispatch(markPlaceholder());
   }
   activateVariant(dispatch, first);
   // a loaded file starts a new history: undo never goes back to the file before it
@@ -116,8 +122,8 @@ export async function loadFromServer(
       state.vault,
       state.cvData.metaData,
       state.cvData.style,
-      state.jobs.templates,
-      state.jobs.jobs
+      savableOf(state.jobs).templates,
+      savableOf(state.jobs).jobs
     );
     // Templates and jobs that were not on disk (defaults made for an old file) stay unsaved
     const onDisk = {
@@ -187,8 +193,8 @@ export async function saveToServer(
     state.vault,
     state.cvData.metaData,
     state.cvData.style,
-    state.jobs.templates,
-    state.jobs.jobs
+    savableOf(state.jobs).templates,
+    savableOf(state.jobs).jobs
   );
   const plan = planSave(state.persistence.saved, current);
 

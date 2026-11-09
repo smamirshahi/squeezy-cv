@@ -46,6 +46,14 @@ export interface JobsState {
   templates: Template[];
   jobs: Job[];
   activeJobId: string;
+  /**
+   * True while the one job and template are only stand-ins made because nothing is saved yet:
+   * the app shows "no job added", and they are never saved. Adding a job turns the stand-in
+   * template into a real one and drops the stand-in job.
+   */
+  isPlaceholder: boolean;
+  /** Same for the template: true until the first template is created (or the first job is added) */
+  isTemplatePlaceholder: boolean;
 }
 
 const DEFAULT_VARIANT_ID = "default";
@@ -67,6 +75,8 @@ function createInitialState(): JobsState {
     templates: [{ ...template, name: "Template 1" }],
     jobs: [job],
     activeJobId: job.id,
+    isPlaceholder: false,
+    isTemplatePlaceholder: false,
   };
 }
 
@@ -80,7 +90,14 @@ function normalise(
   templates: Template[],
   jobs: Job[],
   activeJobId: string
-): Pick<JobsState, "templates" | "jobs" | "activeJobId"> {
+): Pick<
+  JobsState,
+  | "templates"
+  | "jobs"
+  | "activeJobId"
+  | "isPlaceholder"
+  | "isTemplatePlaceholder"
+> {
   const fallback = createInitialState();
   const usableTemplates = templates.length ? templates : fallback.templates;
   const ids = new Set(usableTemplates.map((t) => t.id));
@@ -94,7 +111,18 @@ function normalise(
     activeJobId: finalJobs.some((j) => j.id === activeJobId)
       ? activeJobId
       : finalJobs[0].id,
+    isPlaceholder: jobs.length === 0,
+    isTemplatePlaceholder: templates.length === 0,
   };
+}
+
+/** The first real job replaces the stand-in one (its template stays and becomes real) */
+function dropPlaceholderJob(state: JobsState): void {
+  if (state.isPlaceholder) {
+    state.jobs = [];
+    state.isPlaceholder = false;
+    state.isTemplatePlaceholder = false;
+  }
 }
 
 function jobOf(state: JobsState, jobId: string): Job | undefined {
@@ -162,6 +190,7 @@ const jobsSlice = createSlice({
       );
       state.templates = pairs.map((pair) => pair.template);
       state.jobs = pairs.map((pair) => pair.job);
+      state.isPlaceholder = false;
       if (!state.jobs.some((j) => j.id === state.activeJobId)) {
         state.activeJobId = state.jobs[0].id;
       }
@@ -182,6 +211,12 @@ const jobsSlice = createSlice({
       );
     },
 
+    /** Marks the current job and template as stand-ins (nothing is saved yet) */
+    markPlaceholder(state) {
+      state.isPlaceholder = true;
+      state.isTemplatePlaceholder = true;
+    },
+
     /**
      * A new job. It shares a template instead of getting a copy: the one given by `templateId`,
      * else the template of the active job, so a change of that template reaches the new job too.
@@ -200,6 +235,7 @@ const jobsSlice = createSlice({
           ? (wanted as string)
           : templateOf(state, jobOf(state, state.activeJobId) ?? state.jobs[0])
               .id;
+        dropPlaceholderJob(state);
         state.jobs.push({ ...action.payload.job, templateId });
         state.activeJobId = action.payload.job.id;
       },
@@ -232,13 +268,21 @@ const jobsSlice = createSlice({
         const source =
           state.templates.find((t) => t.id === action.payload.sourceId) ??
           templateOf(state, jobOf(state, state.activeJobId) ?? state.jobs[0]);
-        state.templates.push(
-          duplicateTemplate(
-            current(source),
-            action.payload.id,
-            action.payload.name
-          )
+        const created = duplicateTemplate(
+          current(source),
+          action.payload.id,
+          action.payload.name
         );
+        if (state.isTemplatePlaceholder) {
+          // the first real template replaces the stand-in; the stand-in job moves to it
+          state.templates = [created];
+          for (const job of state.jobs) {
+            job.templateId = created.id;
+          }
+          state.isTemplatePlaceholder = false;
+        } else {
+          state.templates.push(created);
+        }
       },
       prepare(input: { name: string; id?: string; sourceId?: string }) {
         return { payload: { ...input, id: input.id ?? nanoid() } };
@@ -297,6 +341,7 @@ const jobsSlice = createSlice({
         state.templates.push(template);
       }
       if (state.templates.some((t) => t.id === job.templateId)) {
+        dropPlaceholderJob(state);
         state.jobs.push(job);
         state.activeJobId = job.id;
       }
@@ -319,6 +364,7 @@ const jobsSlice = createSlice({
           // a copy keeps the record of the proposal it came from, as variants always did
           ...(source.tailor ? { tailor: structuredClone(source.tailor) } : {}),
         };
+        dropPlaceholderJob(state);
         state.jobs.push(copy);
         state.activeJobId = copy.id;
       },
@@ -652,6 +698,7 @@ const jobsSlice = createSlice({
 export const jobsReducer = jobsSlice.reducer;
 
 export const {
+  markPlaceholder,
   setVariants,
   setTemplatesAndJobs,
   createJob,
@@ -725,6 +772,25 @@ export function editedTemplateSelector(
     templates.find((t) => t.id === state.app.editedTemplateId) ??
     activeTemplateSelector(state)
   );
+}
+
+export function isTemplatePlaceholderSelector(state: SliceRoot): boolean {
+  return state.jobs.isTemplatePlaceholder;
+}
+
+export function isPlaceholderSelector(state: SliceRoot): boolean {
+  return state.jobs.isPlaceholder;
+}
+
+/** What is written on Save: nothing while the job and template are only stand-ins */
+export function savableOf(jobs: JobsState): {
+  templates: Template[];
+  jobs: Job[];
+} {
+  return {
+    templates: jobs.isTemplatePlaceholder ? [] : jobs.templates,
+    jobs: jobs.isPlaceholder ? [] : jobs.jobs,
+  };
 }
 
 export function templatesSelector(state: SliceRoot): Template[] {

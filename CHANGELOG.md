@@ -9,6 +9,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Jobs and Chat show "No job added yet" (with an Add a job button) until you add a job; Templates shows the page with no cards until you create a template. The stand-in default job and template are no longer saved or shown.
+- "Paste CV text, AI sorts it" is disabled with a "Coming soon" tooltip; the import also repairs near-valid answers from small local models.
+
 ### Added
 
 - Top bar: the job and template dropdowns, New job and the fit chip are gone; the centre now shows Vault → Template → Job application as links, each with an (i). A new "How it works" button opens a three-step explanation of the three (#295).

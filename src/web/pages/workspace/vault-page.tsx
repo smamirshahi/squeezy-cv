@@ -6,6 +6,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -154,14 +155,19 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <Button
-            size="small"
-            variant="contained"
-            sx={{ flex: "1 1 100%" }}
-            onClick={() => setIsImportOpen(true)}
-          >
-            Paste CV text, AI sorts it
-          </Button>
+          <Tooltip title="Coming soon">
+            <span style={{ flex: "1 1 100%", display: "flex" }}>
+              <Button
+                size="small"
+                variant="contained"
+                disabled
+                sx={{ flex: "1 1 100%" }}
+                onClick={() => setIsImportOpen(true)}
+              >
+                Paste CV text, AI sorts it
+              </Button>
+            </span>
+          </Tooltip>
           <ImportCvDialog
             isOpen={isImportOpen}
             onClose={() => setIsImportOpen(false)}
