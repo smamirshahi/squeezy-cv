@@ -42,6 +42,7 @@ import {
   UNSORTED_SECTION_ID,
 } from "@shared/vault/unsorted";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { useUnappliedDraft } from "@hooks/navigation";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addBullet,
@@ -303,7 +304,7 @@ interface Props {
 
 /**
  * The vault item editor (design B2): the fields of one item (a skills group also has its
- * skills), saved to the vault as you type (no Apply step). `[` and `]` go to the previous
+ * skills), kept in a draft until Apply (a skills group saves as you type). `[` and `]` go to the previous
  * and next item. It is a fact: it changes in every job that shows the item.
  */
 export function VaultItemEditor({
@@ -314,11 +315,25 @@ export function VaultItemEditor({
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
+  // Edits of the fields wait here until Apply (a skills group saves as you type)
+  const [draft, setDraft] = useState<Record<string, string>>({});
   const index = section.items.findIndex((entry) => entry.id === item.id);
   const ref = { sectionId: section.id, itemId: item.id };
   const isSkills = section.type === "skills";
   const vaultSections = useAppSelector(sectionsSelector);
   const moveTargets = sectionTargets({ sections: vaultSections }, section.id);
+  const changes = Object.fromEntries(
+    Object.entries(draft).filter(
+      ([key, value]) => value !== (item.fields[key] ?? "")
+    )
+  );
+  const isDirty = Object.keys(changes).length > 0;
+  useUnappliedDraft(isDirty);
+
+  function apply(): void {
+    dispatch(updateItemFields({ ...ref, fields: changes }));
+    setDraft({});
+  }
 
   useEffect(() => {
     if (!focusBulletId) {
@@ -430,12 +445,18 @@ export function VaultItemEditor({
         {fieldSpecsFor(section.type).map((spec) => (
           <Field
             key={spec.key}
-            spec={spec}
-            value={item.fields[spec.key] ?? ""}
+            spec={{
+              ...spec,
+              // One input per line; start, end and Current share one line
+              span: spec.kind !== "month" ? 3 : spec.isEnd ? 2 : 1,
+            }}
+            value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
             onChange={(value) =>
-              dispatch(
-                updateItemFields({ ...ref, fields: { [spec.key]: value } })
-              )
+              isSkills
+                ? dispatch(
+                    updateItemFields({ ...ref, fields: { [spec.key]: value } })
+                  )
+                : setDraft((current) => ({ ...current, [spec.key]: value }))
             }
           />
         ))}
@@ -514,6 +535,16 @@ export function VaultItemEditor({
           </Button>
         )}
         <Box sx={{ flex: 1 }} />
+        {!isSkills && (
+          <>
+            <Button disabled={!isDirty} onClick={() => setDraft({})}>
+              Discard
+            </Button>
+            <Button variant="contained" disabled={!isDirty} onClick={apply}>
+              Apply
+            </Button>
+          </>
+        )}
         <Button color="error" onClick={() => setIsRemoving(true)}>
           Remove this item
         </Button>

@@ -89,8 +89,10 @@ describe("VaultPage", () => {
     expect(
       store.getState().vault.sections.find((s) => s.id === "experience")!.items
     ).toHaveLength(4);
-    // no Apply step for lists of items
-    expect(screen.queryByRole("button", { name: "Apply" })).toBeNull();
+    // the new item's form has Apply, disabled until a field is edited
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "Apply" }).disabled
+    ).toBe(true);
   });
 
   it("removes an item from the list only after confirming", () => {

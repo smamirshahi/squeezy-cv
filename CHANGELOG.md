@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Vault item editor: Apply and Discard buttons for each experience, education and other item; every input is on its own line, with start, end and Current together (#265).
+
 ### Fixed
 
 - Work Experience and Education item titles now close their parenthesis: "Role (Mar/2022 - Present)" (#250).
