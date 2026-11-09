@@ -53,6 +53,8 @@ function newItemFields(section: Section): Record<string, string> {
       };
     case "skills":
       return { category: "" };
+    case "publications":
+      return { title: "", authors: "", journal: "", year: "", link: "" };
     default:
       return {
         title: "",

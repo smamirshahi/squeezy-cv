@@ -5,6 +5,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { DropdownCitationStyle } from "@pages/editor-page/sections/editor-style-settings/dropdown-citation-style";
 import { DropdownDateType } from "@pages/editor-page/sections/editor-style-settings/dropdown-date-type";
 import { DropdownSkillIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-skill-icon";
 import { DropdownMargin } from "@pages/editor-page/sections/editor-style-settings/dropdown-margin";
@@ -83,6 +84,7 @@ export function EditorTypography(): JSX.Element {
           <DropdownDateType />
           <DropdownSkillIcon />
           <DropdownBulletPointIcon />
+          <DropdownCitationStyle />
           <TextField
             type="number"
             label="Space between sections (px)"

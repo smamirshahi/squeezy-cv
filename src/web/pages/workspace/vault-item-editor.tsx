@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
+import { parseBibtex } from "@shared/vault/bibtex";
 import { getItemLabel } from "@shared/variant/item-label";
 import { isYearsAcceptable, levelLabel } from "@shared/vault/vault-utils";
 import {
@@ -345,6 +346,7 @@ export function VaultItemEditor({
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
   // Edits of the fields wait here until Apply (a skills group saves as you type)
+  const [bibtexMessage, setBibtexMessage] = useState("");
   const [draft, setDraft] = useState<Record<string, string>>({});
   const index = section.items.findIndex((entry) => entry.id === item.id);
   const ref = { sectionId: section.id, itemId: item.id };
@@ -363,6 +365,18 @@ export function VaultItemEditor({
   function apply(): void {
     dispatch(updateItemFields({ ...ref, fields: changes }));
     setDraft({});
+  }
+
+  function pasteBibtex(text: string): void {
+    const parsed = parseBibtex(text);
+    if (!parsed) {
+      setBibtexMessage(
+        text.trim() === "" ? "" : "No BibTeX entry found in this text."
+      );
+      return;
+    }
+    setBibtexMessage("");
+    setDraft((current) => ({ ...current, ...parsed }));
   }
 
   function changeField(key: string, value: string): void {
@@ -468,6 +482,22 @@ export function VaultItemEditor({
           Next ]
         </Button>
       </Box>
+
+      {section.type === "publications" && (
+        <TextField
+          label="Paste BibTeX or LaTeX entry"
+          placeholder="@article{key, title = {...}, author = {...}, journal = {...}, year = {2024}}"
+          helperText={
+            bibtexMessage ||
+            "Fills the fields below from the entry. Edit them after if needed."
+          }
+          error={bibtexMessage !== ""}
+          value=""
+          multiline
+          minRows={3}
+          onChange={(event) => pasteBibtex(event.target.value)}
+        />
+      )}
 
       <Box
         sx={{

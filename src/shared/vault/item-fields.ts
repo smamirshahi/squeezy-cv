@@ -85,6 +85,20 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           hint: DESCRIPTION_HINT,
         },
       ];
+    case "publications":
+      return [
+        { key: "title", label: "Title", kind: "text", span: 3 },
+        {
+          key: "authors",
+          label: "Authors",
+          kind: "text",
+          span: 3,
+          hint: "Separate names with commas, e.g. Jane Doe, John Smith",
+        },
+        { key: "journal", label: "Journal / venue", kind: "text", span: 2 },
+        { key: "year", label: "Year", kind: "text", span: 1 },
+        { key: "link", label: "Link or DOI URL", kind: "text", span: 3 },
+      ];
     case "skills":
       return [{ key: "category", label: "Category", kind: "text", span: 3 }];
     case "summary":
