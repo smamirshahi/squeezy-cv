@@ -1,25 +1,22 @@
 export type PanelSide = "left" | "right";
 
-const MIN_PANEL_WIDTH = 220;
-const MAX_PANEL_WIDTH = 640;
-
 const STORAGE_PREFIX = "cv-builder-panel-width:";
 
-export function clampPanelWidth(width: number): number {
-  if (!Number.isFinite(width)) {
-    return MIN_PANEL_WIDTH;
-  }
-  return Math.min(
-    MAX_PANEL_WIDTH,
-    Math.max(MIN_PANEL_WIDTH, Math.round(width))
-  );
+export function normalisePanelWidth(width: number): number {
+  return Number.isFinite(width) ? Math.max(0, Math.round(width)) : 0;
 }
 
 /** The remembered width of a side, or the default when none or unusable */
 export function readPanelWidth(side: PanelSide, fallback: number): number {
   try {
-    const stored = Number(localStorage.getItem(STORAGE_PREFIX + side));
-    return stored > 0 ? clampPanelWidth(stored) : fallback;
+    const raw = localStorage.getItem(STORAGE_PREFIX + side);
+    if (raw === null || raw.trim() === "") {
+      return fallback;
+    }
+    const stored = Number(raw);
+    return Number.isFinite(stored) && stored >= 0
+      ? normalisePanelWidth(stored)
+      : fallback;
   } catch {
     return fallback;
   }
@@ -27,7 +24,10 @@ export function readPanelWidth(side: PanelSide, fallback: number): number {
 
 export function writePanelWidth(side: PanelSide, width: number): void {
   try {
-    localStorage.setItem(STORAGE_PREFIX + side, String(width));
+    localStorage.setItem(
+      STORAGE_PREFIX + side,
+      String(normalisePanelWidth(width))
+    );
   } catch {
     // Storage may be blocked; the width then just is not remembered
   }
