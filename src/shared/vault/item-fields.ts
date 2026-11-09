@@ -86,7 +86,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         },
       ];
     case "skills":
-      return [{ key: "category", label: "Group", kind: "text", span: 3 }];
+      return [{ key: "category", label: "Category", kind: "text", span: 3 }];
     case "summary":
       return [{ key: "text", label: "Summary", kind: "multiline", span: 3 }];
     default:

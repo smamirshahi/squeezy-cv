@@ -15,7 +15,6 @@ import {
 } from "@custom-types/vault-types";
 import { HEADER_IDS } from "@shared/vault/default-vault";
 import { reconcileStructure } from "@shared/vault/page-structure";
-import { tracksLevels } from "@shared/vault/vault-utils";
 
 interface RenderedBullet {
   id: string;
@@ -138,7 +137,6 @@ function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
 function renderItems(
   items: Item[],
   selection: Variant["selection"],
-  hasLevels: boolean,
   minLevel?: number
 ): RenderedItem[] {
   return resolveItems(items, selection)
@@ -155,9 +153,7 @@ function renderItems(
       bullets: item.bullets.map((bullet) => ({
         id: bullet.id,
         text: bullet.text,
-        ...(bullet.rating === undefined || !hasLevels
-          ? {}
-          : { rating: bullet.rating }),
+        ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
       })),
       emphasis: selection[item.id]?.emphasis ?? "normal",
     }));
@@ -251,12 +247,10 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
       return [];
     }
     const isSkills = section.type === "skills";
-    const hasLevels = !isSkills || tracksLevels(section);
     const grouped = renderItems(
       section.items,
       variant.selection,
-      hasLevels,
-      isSkills && hasLevels ? variant.skillMinLevel : undefined
+      isSkills ? variant.skillMinLevel : undefined
     );
     const items =
       isSkills && variant.skillGroupBy === "level"
@@ -274,12 +268,9 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
             ...(isSkills
               ? {
                   skillStyle: {
-                    // without levels there is nothing to draw: a plain list
-                    ...(hasLevels
-                      ? variant.skillDisplay
-                        ? { display: variant.skillDisplay }
-                        : {}
-                      : { display: "none" as const }),
+                    ...(variant.skillDisplay
+                      ? { display: variant.skillDisplay }
+                      : {}),
                     columns: variant.skillColumns ?? 1,
                   },
                 }

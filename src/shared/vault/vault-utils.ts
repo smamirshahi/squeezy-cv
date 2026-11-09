@@ -124,14 +124,6 @@ export function replaceBulletTexts(
   });
 }
 
-/** Whether a skills section uses levels: the explicit choice, else whether any skill has one */
-export function tracksLevels(section: Section): boolean {
-  return (
-    section.tracksLevel ??
-    section.items.some((item) => item.bullets.some((bullet) => !!bullet.rating))
-  );
-}
-
 /** Whether a number of years is acceptable: a whole number from 0 to 80 */
 export function isYearsAcceptable(years: number): boolean {
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers

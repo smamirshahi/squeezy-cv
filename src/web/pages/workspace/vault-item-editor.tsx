@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   IconButton,
   MenuItem,
-  ToggleButton,
   Tooltip,
   TextField,
   Typography,
@@ -20,16 +19,11 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { getItemLabel } from "@shared/variant/item-label";
-import {
-  isYearsAcceptable,
-  levelLabel,
-  tracksLevels,
-} from "@shared/vault/vault-utils";
+import { isYearsAcceptable, levelLabel } from "@shared/vault/vault-utils";
 import {
   FieldSpec,
   fieldSpecsFor,
   fromMonthValue,
-  locationLabel,
   toMonthValue,
 } from "@shared/vault/item-fields";
 import {
@@ -45,7 +39,6 @@ import {
   removeBullet,
   moveItemToSection,
   sectionsSelector,
-  setSectionTracksLevel,
   updateBullet,
   updateItemFields,
 } from "@store/vault/vault-slice";
@@ -190,9 +183,8 @@ function LocationField({
   );
 }
 
-/** The level choices, 1 (learning) to 5 (expert). A plus adds half a step (3 + plus = 3.5). */
+/** The level choices, 1 (learning) to 5 (expert). */
 const LEVEL_STEPS = [1, 2, 3, 4, 5];
-const MAX_LEVEL = 5;
 
 /** "3 – Proficient" */
 function levelOptionLabel(level: number): string {
@@ -200,7 +192,7 @@ function levelOptionLabel(level: number): string {
 }
 
 const LEVEL_HINT =
-  "Level: how well you know the skill, from 1 (just learning) to 5 (expert); the + means a bit above that level. It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
+  "Level: how well you know the skill, from 1 (just learning) to 5 (expert). It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
 
 interface SkillCardProps {
   section: Section;
@@ -224,7 +216,6 @@ function SkillCard({
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
   const skillName = bullet.text || `Skill ${index + 1}`;
   const level = Math.floor(bullet.rating ?? 0);
-  const isPlus = (bullet.rating ?? 0) - level === 0.5;
   return (
     <Box
       sx={{
@@ -278,51 +269,25 @@ function SkillCard({
         }}
         sx={{ flex: 1 }}
       />
-      {tracksLevels(section) && (
-        <>
-          <TextField
-            select
-            size="small"
-            label="Level"
-            value={level > 0 ? String(level) : ""}
-            onChange={(event) => {
-              const chosen = Number(event.target.value);
-              const rating =
-                isPlus && chosen < MAX_LEVEL ? chosen + 0.5 : chosen;
-              if (isRatingAcceptable(rating)) {
-                dispatch(updateBullet({ ...ref, update: { rating } }));
-              }
-            }}
-            sx={{ width: 150 }}
-          >
-            {LEVEL_STEPS.map((step) => (
-              <MenuItem key={step} value={String(step)}>
-                {levelOptionLabel(step)}
-              </MenuItem>
-            ))}
-          </TextField>
-          <Tooltip title="Plus: a bit above this level (3 + plus = three and a half)">
-            <span>
-              <ToggleButton
-                value="plus"
-                size="small"
-                selected={isPlus}
-                disabled={level === 0 || level >= MAX_LEVEL}
-                aria-label={`${skillName} plus`}
-                onChange={() => {
-                  const rating = isPlus ? level : level + 0.5;
-                  if (isRatingAcceptable(rating)) {
-                    dispatch(updateBullet({ ...ref, update: { rating } }));
-                  }
-                }}
-                sx={{ px: 1, py: 0.75, minWidth: 0, lineHeight: 1 }}
-              >
-                +
-              </ToggleButton>
-            </span>
-          </Tooltip>
-        </>
-      )}
+      <TextField
+        select
+        size="small"
+        label="Level"
+        value={level > 0 ? String(level) : ""}
+        onChange={(event) => {
+          const chosen = Number(event.target.value);
+          if (isRatingAcceptable(chosen)) {
+            dispatch(updateBullet({ ...ref, update: { rating: chosen } }));
+          }
+        }}
+        sx={{ width: 150 }}
+      >
+        {LEVEL_STEPS.map((step) => (
+          <MenuItem key={step} value={String(step)}>
+            {levelOptionLabel(step)}
+          </MenuItem>
+        ))}
+      </TextField>
       <TextField
         size="small"
         label="Years"
@@ -509,10 +474,14 @@ export function VaultItemEditor({
           display: "grid",
           gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: 2.5,
-          p: 2.5,
-          bgcolor: WORKSPACE_COLORS.panel,
-          border: `1px solid ${WORKSPACE_COLORS.border}`,
-          borderRadius: 1.5,
+          ...(isSkills
+            ? {}
+            : {
+                p: 2.5,
+                bgcolor: WORKSPACE_COLORS.panel,
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                borderRadius: 1.5,
+              }),
         }}
       >
         {fieldSpecs.map((spec) => {
@@ -565,26 +534,6 @@ export function VaultItemEditor({
         })}
       </Box>
 
-      {isSkills && (
-        <>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={tracksLevels(section)}
-                onChange={(event) =>
-                  dispatch(
-                    setSectionTracksLevel({
-                      id: section.id,
-                      tracksLevel: event.target.checked,
-                    })
-                  )
-                }
-              />
-            }
-            label="Track my level (optional)"
-          />
-        </>
-      )}
       {isSkills && (
         <>
           <Box sx={{ display: "flex", alignItems: "center" }}>
