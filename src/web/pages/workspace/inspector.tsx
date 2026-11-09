@@ -27,7 +27,6 @@ import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
 import { DescriptionBullets } from "@pages/workspace/description-bullets";
 import { SkillList } from "@pages/workspace/skill-list";
-import { FitPanel } from "@pages/workspace/fit-panel";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -160,7 +159,6 @@ function PageInspector(): JSX.Element {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <TemplateScopeNote />
-      <FitPanel />
       <Heading>Page limit</Heading>
       <ToggleButtonGroup
         exclusive

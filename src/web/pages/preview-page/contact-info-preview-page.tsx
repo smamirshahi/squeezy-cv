@@ -1,25 +1,28 @@
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import LinkIcon from "@mui/icons-material/Link";
 import { Grid } from "@mui/material";
 import { IconWithText } from "@components/icon-with-text";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { LinkItem, Profile } from "@custom-types/vault-types";
+import { getLinkDisplayText } from "@shared/vault/link-utils";
 import {
-  LinkKind,
-  getLinkDisplayText,
-  getLinkKind,
-} from "@shared/vault/link-utils";
+  OTHER_LINK_TYPE_ID,
+  guessLinkTypeFromUrl,
+  linkTypeOfLabel,
+} from "@shared/vault/link-types";
+import { linkTypeIconComponent } from "@pages/editor-page/link-type/link-type-icon";
 
-const LINK_ICONS: Record<LinkKind, React.ElementType> = {
-  linkedin: LinkedInIcon,
-  github: GitHubIcon,
-  generic: LinkIcon,
-};
+/** The icon of a link: by its label (LinkedIn, Twitter...), else by the site in its URL */
+function iconOfLink(link: LinkItem): React.ElementType {
+  const byLabel = linkTypeOfLabel(link.label);
+  const type =
+    byLabel.id === OTHER_LINK_TYPE_ID
+      ? guessLinkTypeFromUrl(link.url)
+      : byLabel;
+  return linkTypeIconComponent(type.id);
+}
 
 interface ContactInfoPreviewPageProps {
   profile: Profile;
@@ -56,7 +59,7 @@ export function ContactInfoPreviewPage({
         <IconWithText
           key={link.id}
           variant="bulletText"
-          icon={LINK_ICONS[getLinkKind(link.url)]}
+          icon={iconOfLink(link)}
           text={getLinkDisplayText(link.url, shouldShowFullContactLinks)}
         />
       ))}

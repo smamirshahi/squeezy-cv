@@ -373,6 +373,38 @@ const jobsSlice = createSlice({
       },
     },
 
+    /** Edits the details of a job (what it is for); only the given fields change */
+    setJobDetails(
+      state,
+      action: PayloadAction<{
+        id: string;
+        details: Partial<
+          Pick<
+            Job,
+            | "name"
+            | "company"
+            | "role"
+            | "url"
+            | "jobAd"
+            | "stage"
+            | "salaryMin"
+            | "salaryMax"
+            | "salaryIsRange"
+            | "expectedSalary"
+            | "feeling"
+            | "chance"
+            | "location"
+            | "workMode"
+            | "employmentType"
+          >
+        >;
+      }>
+    ) {
+      editJob(state, action.payload.id, (job) => {
+        Object.assign(job, action.payload.details);
+      });
+    },
+
     renameJob(state, action: PayloadAction<{ id: string; name: string }>) {
       editJob(state, action.payload.id, (job) => {
         job.name = action.payload.name;
@@ -547,6 +579,26 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** Shows or hides one link in this job; the vault list is not touched */
+    setLinkShown(
+      state,
+      action: PayloadAction<{ jobId: string; linkId: string; isShown: boolean }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        const others = (job.hiddenLinks ?? []).filter(
+          (id) => id !== action.payload.linkId
+        );
+        const next = action.payload.isShown
+          ? others
+          : [...others, action.payload.linkId];
+        if (next.length === 0) {
+          delete job.hiddenLinks;
+        } else {
+          job.hiddenLinks = next;
+        }
+      });
+    },
+
     /** How skills are shown with the job's template: level style, columns, minimum level */
     setSkillStyle(
       state,
@@ -705,6 +757,7 @@ export const {
   insertTailoredJob,
   copyJob,
   renameJob,
+  setJobDetails,
   deleteJob,
   addTemplate,
   renameTemplate,
@@ -721,6 +774,7 @@ export const {
   setItemScores,
   setSectionShown,
   setLinkOrder,
+  setLinkShown,
   setJobHeadline,
   setPageLimit,
   setSkillStyle,

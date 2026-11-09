@@ -61,10 +61,13 @@ interface TemplateSummary {
 }
 
 /** What the server lists for a saved job */
-interface JobSummary {
+export interface JobSummary {
   id: string;
   name: string;
   templateId: string;
+  company?: string;
+  role?: string;
+  stage?: "draft" | "ready";
   createdAt: string;
   isCorrupt: boolean;
 }

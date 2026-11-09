@@ -1,17 +1,16 @@
 import { useState } from "react";
 import {
   Box,
-  Button,
-  Checkbox,
   IconButton,
   MenuItem,
-  Switch,
   TextField,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import StarIcon from "@mui/icons-material/Star";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -48,12 +47,52 @@ import {
   setBulletSelection,
   setItemOrders,
   setItemSelection,
-  setSectionShown,
 } from "@store/jobs/jobs-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /** Columns of the table: drag handle, tick, entry, wording, highlight, order buttons */
-const COLUMNS = "32px 28px minmax(0, 1fr) 132px 112px 72px";
+/** The Wording column only exists while some entry has bullets (otherwise it would only take room) */
+function columnsFor(hasWording: boolean): string {
+  return `32px 32px minmax(0, 1fr) ${hasWording ? "120px" : "0px"} 40px 64px`;
+}
+
+/** True when any entry of the vault has bullets, i.e. there is something to word */
+function useHasWording(): boolean {
+  const sections = useAppSelector(sectionsSelector);
+  const variant = useAppSelector(activeVariantSelector);
+  return sections.some((section) =>
+    section.items.some((item) => jobBullets(item, variant.selection).length > 0)
+  );
+}
+
+/** The eye that shows or hides an entry or bullet in this job */
+function EyeToggle({
+  isShown,
+  label,
+  onChange,
+}: {
+  isShown: boolean;
+  label: string;
+  onChange: (isShown: boolean) => void;
+}): JSX.Element {
+  return (
+    <IconButton
+      size="small"
+      aria-label={`${isShown ? "Hide" : "Show"} ${label}`}
+      aria-pressed={isShown}
+      title={
+        isShown ? "Shown on this CV. Click to hide." : "Hidden. Click to show."
+      }
+      onClick={() => onChange(!isShown)}
+    >
+      {isShown ? (
+        <VisibilityIcon fontSize="small" />
+      ) : (
+        <VisibilityOffIcon fontSize="small" />
+      )}
+    </IconButton>
+  );
+}
 
 const SUBTITLE_FIELDS = ["company", "institute", "institution", "subtitle"];
 
@@ -105,6 +144,7 @@ interface BulletRowsProps {
 
 /** The bullets of one item, indented under it: tick, wording, order */
 function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
+  const hasWording = useHasWording();
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sensors = useReorderSensors();
@@ -145,7 +185,7 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: COLUMNS,
+                    gridTemplateColumns: columnsFor(hasWording),
                     alignItems: "center",
                     columnGap: 1,
                     minHeight: 44,
@@ -156,21 +196,16 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                   }}
                 >
                   {handle}
-                  <Checkbox
-                    size="small"
-                    checked={isShown}
-                    slotProps={{
-                      input: {
-                        "aria-label": `Show bullet: ${shorten(bullet.text)}`,
-                      },
-                    }}
-                    onChange={(event) =>
+                  <EyeToggle
+                    isShown={isShown}
+                    label={`bullet: ${shorten(bullet.text)}`}
+                    onChange={(next) =>
                       dispatch(
                         setBulletSelection({
                           jobId: variant.id,
                           itemId: item.id,
                           bulletId: bullet.id,
-                          change: { isVisible: event.target.checked },
+                          change: { isVisible: next },
                         })
                       )
                     }
@@ -248,6 +283,7 @@ interface SectionRowsProps {
 
 /** The section row (with its switch) and, when it is shown, the entries of the section */
 function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
+  const hasWording = useHasWording();
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
   const sensors = useReorderSensors();
@@ -292,32 +328,8 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
         <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
           {isOn
             ? `${shownCount} of ${items.length} shown`
-            : "Hidden from this job"}
+            : "Removed from this job on the template"}
         </Typography>
-        <Box sx={{ flex: 1 }} />
-        <Typography
-          component="label"
-          htmlFor={`show-section-${section.id}`}
-          sx={{ fontSize: 12.5 }}
-        >
-          Show section
-        </Typography>
-        <Switch
-          id={`show-section-${section.id}`}
-          checked={isOn}
-          slotProps={{
-            input: { "aria-label": `Show section ${section.title}` },
-          }}
-          onChange={(event) =>
-            dispatch(
-              setSectionShown({
-                jobId: variant.id,
-                sectionId: section.id,
-                isShown: event.target.checked,
-              })
-            )
-          }
-        />
       </Box>
       {isOn && items.length > 0 && (
         <DndContext
@@ -349,7 +361,7 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                       <Box
                         sx={{
                           display: "grid",
-                          gridTemplateColumns: COLUMNS,
+                          gridTemplateColumns: columnsFor(hasWording),
                           alignItems: "center",
                           columnGap: 1,
                           minHeight: 52,
@@ -361,18 +373,15 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                         }}
                       >
                         {handle}
-                        <Checkbox
-                          size="small"
-                          checked={isShown}
-                          slotProps={{
-                            input: { "aria-label": `Show ${label}` },
-                          }}
-                          onChange={(event) =>
+                        <EyeToggle
+                          isShown={isShown}
+                          label={label}
+                          onChange={(next) =>
                             dispatch(
                               setItemSelection({
                                 jobId: variant.id,
                                 itemId: item.id,
-                                change: { isVisible: event.target.checked },
+                                change: { isVisible: next },
                               })
                             )
                           }
@@ -426,12 +435,14 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                               </Typography>
                             )}
                           </Box>
-                          <Box sx={{ ml: 1 }}>
-                            <RelevanceBadge
-                              relevance={selection?.relevance}
-                              reason={selection?.relevanceReason}
-                            />
-                          </Box>
+                          {selection?.relevance !== undefined && (
+                            <Box sx={{ ml: 1 }}>
+                              <RelevanceBadge
+                                relevance={selection.relevance}
+                                reason={selection.relevanceReason}
+                              />
+                            </Box>
+                          )}
                           {itemBullets.length > 0 && (
                             <Typography
                               sx={{
@@ -446,18 +457,16 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                           )}
                         </Box>
                         <span />
-                        <Button
+                        <IconButton
                           size="small"
-                          variant={isHighlighted ? "contained" : "outlined"}
-                          color={isHighlighted ? "primary" : "inherit"}
+                          aria-label={`Highlight ${label}`}
                           aria-pressed={isHighlighted}
-                          startIcon={
-                            isHighlighted ? (
-                              <StarIcon />
-                            ) : (
-                              <StarBorderOutlinedIcon />
-                            )
+                          title={
+                            isHighlighted
+                              ? "Highlighted. Click to remove."
+                              : "Highlight this entry on the CV"
                           }
+                          color={isHighlighted ? "primary" : "default"}
                           onClick={() =>
                             dispatch(
                               setItemSelection({
@@ -469,10 +478,13 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                               })
                             )
                           }
-                          sx={{ height: 34, width: 104 }}
                         >
-                          Highlight
-                        </Button>
+                          {isHighlighted ? (
+                            <StarIcon fontSize="small" />
+                          ) : (
+                            <StarBorderOutlinedIcon fontSize="small" />
+                          )}
+                        </IconButton>
                         <SortingIcons
                           index={index}
                           swapFunction={(_from, toIndex) =>
@@ -498,9 +510,15 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
  * The Content tab: which sections and entries this job shows, in what order, with which
  * wording and highlight. Changes apply at once and only change the job.
  */
-export function JobContent(): JSX.Element {
+export function JobContent({
+  only,
+}: {
+  /** Show just this section (its id), or just the header and links ("header") */
+  only?: string;
+}): JSX.Element {
   const sections = useAppSelector(sectionsSelector);
   const variant = useAppSelector(activeVariantSelector);
+  const hasWording = useHasWording();
   const hidden = variant.hiddenSections ?? [];
   const counts = countShown(sections, variant.selection, hidden);
 
@@ -514,7 +532,14 @@ export function JobContent(): JSX.Element {
         overflow: "hidden",
       }}
     >
-      <Box sx={{ px: 2.5, py: 1.75, display: "flex", gap: 1.5 }}>
+      <Box
+        sx={{
+          px: 2.5,
+          py: 1.75,
+          display: only === undefined ? "flex" : "none",
+          gap: 1.5,
+        }}
+      >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
             What appears on this CV
@@ -534,8 +559,8 @@ export function JobContent(): JSX.Element {
       </Box>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: COLUMNS,
+          display: only === "header" ? "none" : "grid",
+          gridTemplateColumns: columnsFor(hasWording),
           columnGap: 1,
           px: 2.5,
           py: 1,
@@ -550,19 +575,24 @@ export function JobContent(): JSX.Element {
         <span />
         <span />
         <span>Entry</span>
-        <span>Wording</span>
-        <span>Highlight</span>
+        <span>{hasWording ? "Wording" : ""}</span>
+        <StarBorderOutlinedIcon
+          titleAccess="Highlight"
+          sx={{ fontSize: 16, justifySelf: "center" }}
+        />
         <span />
       </Box>
-      {sections.map((section) => (
-        <SectionRows
-          key={section.id}
-          section={section}
-          isOn={!hidden.includes(section.id)}
-        />
-      ))}
-      <JobHeadline />
-      <JobLinks />
+      {sections
+        .filter((section) => only === undefined || section.id === only)
+        .map((section) => (
+          <SectionRows
+            key={section.id}
+            section={section}
+            isOn={!hidden.includes(section.id)}
+          />
+        ))}
+      {(only === undefined || only === "header") && <JobHeadline />}
+      {(only === undefined || only === "header") && <JobLinks />}
     </Box>
   );
 }

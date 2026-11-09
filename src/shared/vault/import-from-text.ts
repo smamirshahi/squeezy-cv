@@ -169,6 +169,16 @@ export function importToVault(
   };
 }
 
+/** True when an item has any text in its fields or any bullets */
+function hasContent(item: Item): boolean {
+  return (
+    item.bullets.length > 0 ||
+    Object.values(item.fields).some(
+      (value) => typeof value === "string" && value.trim() !== ""
+    )
+  );
+}
+
 /**
  * Adds an imported vault to an existing one without losing anything: empty profile fields are
  * filled (existing ones kept), items go into the section of the same type (a section is added
@@ -193,10 +203,21 @@ export function mergeIntoVault(existing: Vault, imported: Vault): Vault {
   for (const incoming of imported.sections) {
     // the first section of the same type is its home
     const target = sections.find((section) => section.type === incoming.type);
+    // an item with nothing in it is not worth adding
+    const items = incoming.items.filter(hasContent);
     if (target) {
-      target.items.push(...incoming.items);
+      if (incoming.type === "summary") {
+        // the summary is one text: an imported one never adds a second item, it only fills an empty one
+        const kept = target.items.filter(hasContent);
+        target.items = kept.length > 0 ? kept : items.slice(0, 1);
+      } else {
+        target.items.push(...items);
+      }
     } else {
-      sections.push({ ...incoming, items: [...incoming.items] });
+      sections.push({
+        ...incoming,
+        items: incoming.type === "summary" ? items.slice(0, 1) : items,
+      });
     }
   }
 

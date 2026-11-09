@@ -1,4 +1,15 @@
-import { Array, Number, Object, Record, Static, String } from "runtypes";
+import {
+  Array,
+  Boolean,
+  Literal,
+  Number,
+  Object,
+  Record,
+  Static,
+  String,
+  Union,
+} from "runtypes";
+import { JobOpinionSchema } from "@custom-types/json-types";
 import {
   FitTuningSchema,
   ItemSelectionSchema,
@@ -33,6 +44,53 @@ export const JobSchema = Object({
 
   role: String.optional(),
 
+  /** Where the job is before it is sent: still being prepared (default) or ready to apply */
+  stage: Union(Literal("draft"), Literal("ready")).optional(),
+
+  /** Where the job is, e.g. "London" */
+  location: String.optional(),
+
+  /** Where the work is done */
+  workMode: Union(
+    Literal("onsite"),
+    Literal("hybrid"),
+    Literal("remote")
+  ).optional(),
+
+  /** Full time, part time and so on */
+  employmentType: Union(
+    Literal("fullTime"),
+    Literal("partTime"),
+    Literal("contract"),
+    Literal("freelance"),
+    Literal("internship")
+  ).optional(),
+
+  /** Salary range of the job, both ends as the advert states them (per year) */
+  salaryMin: Number.optional(),
+  salaryMax: Number.optional(),
+
+  /** False when the advert gives one fixed number (kept in `salaryMin`); missing = a range */
+  salaryIsRange: Boolean.optional(),
+
+  /** How the user feels about the job (private) */
+  feeling: JobOpinionSchema.optional(),
+
+  /** How likely the user thinks it is to get the job (private) */
+  chance: Union(
+    Literal("veryLow"),
+    Literal("low"),
+    Literal("medium"),
+    Literal("high"),
+    Literal("veryHigh")
+  ).optional(),
+
+  /** The salary the user expects */
+  expectedSalary: Number.optional(),
+
+  /** Link to the advert */
+  url: String.optional(),
+
   /** Day it was made, "YYYY-MM-DD" */
   createdAt: String,
 
@@ -49,6 +107,9 @@ export const JobSchema = Object({
 
   /** Link ids in the order this job shows them; links not listed come last. Missing = vault order. */
   linkOrder: Array(String).optional(),
+
+  /** Link ids this job leaves out. Missing = every link is shown. */
+  hiddenLinks: Array(String).optional(),
 
   /** The result of the last auto-fit, so printing gives the same page */
   tuning: FitTuningSchema.optional(),

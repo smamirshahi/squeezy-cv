@@ -1,18 +1,14 @@
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import RedoIcon from "@mui/icons-material/Redo";
 import UndoIcon from "@mui/icons-material/Undo";
 import { redo, undo } from "@store/history/history";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { SaveStatus } from "@pages/editor-page/save-status";
-import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
 import { useState } from "react";
-import { ExportDialog } from "@pages/workspace/export-dialog";
 import { HowItWorksDialog } from "@pages/workspace/how-it-works-dialog";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
-import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
+import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -206,7 +202,6 @@ function FlowSteps({
 
 /** The dark bar on top: the app flow, save state and the main actions */
 export function TopBar(): JSX.Element {
-  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [helpStep, setHelpStep] = useState<number | null>(null);
   const openHelp = (step: number): void => setHelpStep(step);
 
@@ -230,57 +225,25 @@ export function TopBar(): JSX.Element {
         },
       }}
     >
-      <Typography sx={{ fontWeight: 700, fontSize: 14, mr: 0.5 }}>
-        CV Builder
-      </Typography>
+      <Typography sx={{ fontWeight: 700, fontSize: 14 }}>CV Builder</Typography>
+      <IconButton
+        size="small"
+        aria-label="How it works"
+        onClick={() => openHelp(0)}
+        sx={{ color: WORKSPACE_COLORS.barText, ml: -0.5 }}
+      >
+        <HelpOutlineIcon fontSize="small" />
+      </IconButton>
       <Box sx={{ flex: 1 }} />
       <FlowSteps onInfo={openHelp} />
       <Box sx={{ flex: 1 }} />
-      <Button
-        size="small"
-        variant="outlined"
-        startIcon={<HelpOutlineIcon />}
-        onClick={() => openHelp(0)}
-        sx={{ borderColor: "rgba(255,255,255,.3)" }}
-      >
-        How it works
-      </Button>
-      <UndoRedo />
+      {/* The status grows to the left, so undo and redo never move */}
       <SaveStatus />
-      <Button
-        size="small"
-        variant="contained"
-        startIcon={<AutoAwesomeIcon />}
-        onClick={() => navigate({ kind: "tailor" })}
-        sx={{
-          bgcolor: WORKSPACE_COLORS.ai,
-          color: WORKSPACE_COLORS.aiContrast,
-          "&:hover": {
-            bgcolor: WORKSPACE_COLORS.ai,
-            filter: "brightness(.92)",
-          },
-        }}
-      >
-        Tailor to job ad
-      </Button>
-      <Button
-        size="small"
-        variant="outlined"
-        startIcon={<PictureAsPdfIcon />}
-        onClick={() => setIsExportOpen(true)}
-        sx={{ borderColor: "rgba(255,255,255,.3)" }}
-      >
-        Export PDF
-      </Button>
-      <MarkAsApplied />
+      <UndoRedo />
       <HowItWorksDialog
         isOpen={helpStep !== null}
         startStep={helpStep ?? 0}
         onClose={() => setHelpStep(null)}
-      />
-      <ExportDialog
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
       />
     </Box>
   );

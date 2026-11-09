@@ -18,7 +18,7 @@ import {
   getDefaultSectionTitle,
 } from "@store/vault/section-types";
 
-/** A "+ Add section" button that opens a small form: type and title */
+/** A "+ New section" button (it makes a new section in the vault) that opens a small form: type and title */
 export function AddSectionButton(): JSX.Element {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
@@ -41,10 +41,10 @@ export function AddSectionButton(): JSX.Element {
         onClick={() => setIsOpen(true)}
         sx={{ alignSelf: "flex-start" }}
       >
-        Add section
+        New section
       </Button>
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} fullWidth>
-        <DialogTitle>Add a section</DialogTitle>
+        <DialogTitle>New section</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
         >

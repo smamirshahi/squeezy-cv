@@ -1,14 +1,15 @@
-import { useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
-import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {
   MIDDLE_AREA_SX,
   WORKSPACE_COLORS,
 } from "@pages/workspace/workspace-tokens";
+import { onAppLinkClick } from "@hooks/navigation";
+import { formatRoute } from "@shared/routing/routes";
 
-/** What the Jobs and Chat tools show until the first job is added */
+const DETAILS = { kind: "jobs", view: "details" } as const;
+
+/** What the pages of a job show until the first job application has been started */
 export function NoJobs(): JSX.Element {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <Box
       component="main"
@@ -25,15 +26,19 @@ export function NoJobs(): JSX.Element {
       }}
     >
       <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
-        No job added yet
+        Start with the job application
       </Typography>
       <Typography sx={{ color: WORKSPACE_COLORS.muted, textAlign: "center" }}>
-        Add a job to build a CV for one application from your vault.
+        Fill in the job (company, role, advert) first. This page then works on
+        that job.
       </Typography>
-      <Button variant="contained" onClick={() => setIsOpen(true)}>
-        Add a job
+      <Button
+        variant="contained"
+        href={formatRoute(DETAILS)}
+        onClick={(event) => onAppLinkClick(event, DETAILS)}
+      >
+        Go to Job application
       </Button>
-      <NewJobDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </Box>
   );
 }

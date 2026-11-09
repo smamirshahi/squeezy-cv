@@ -10,7 +10,7 @@ import {
   vaultReducer,
   VaultState,
 } from "@store/vault/vault-slice";
-import { getLinkDisplayText, getLinkKind } from "@shared/vault/link-utils";
+import { getLinkDisplayText } from "@shared/vault/link-utils";
 
 function freshVault(): VaultState {
   let n = 0;
@@ -134,18 +134,6 @@ describe("profile", () => {
 });
 
 describe("link display", () => {
-  it.each([
-    ["https://www.linkedin.com/in/jane", "linkedin"],
-    ["https://uk.linkedin.com/in/jane", "linkedin"],
-    ["linkedin.com/in/jane", "linkedin"],
-    ["https://github.com/jane", "github"],
-    ["https://notgithub.com/jane", "generic"],
-    ["https://jane.example.com", "generic"],
-    ["", "generic"],
-  ])("detects the kind of %s", (url, kind) => {
-    expect(getLinkKind(url)).toBe(kind);
-  });
-
   it("shows the full url when asked", () => {
     expect(getLinkDisplayText("https://github.com/jane", true)).toBe(
       "https://github.com/jane"

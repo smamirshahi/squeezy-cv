@@ -1,13 +1,12 @@
 import {
   Box,
-  Checkbox,
-  Chip,
   IconButton,
   MenuItem,
   TextField,
   Typography,
 } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useSortable } from "@dnd-kit/sortable";
@@ -62,10 +61,26 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
   const { structure } = useAppSelector(appSelector);
   const variant = useAppSelector(activeVariantSelector);
   const isHeader = (HEADER_IDS as readonly string[]).includes(itemId);
-  const isIncluded = !variant.hiddenSections?.includes(itemId);
+  const removed = variant.hiddenSections ?? [];
+  const isVisible = (id: string): boolean => !removed.includes(id);
   const name = getPreviewPartLabel(itemId, sections);
-  const column = structure[side];
+  const column = structure[side].filter(isVisible);
   const index = column.indexOf(itemId);
+
+  /** One step among the sections still shown (removed ones sit in the column but are skipped) */
+  function move(delta: -1 | 1): void {
+    const full = structure[side];
+    const from = full.indexOf(itemId);
+    let to = from + delta;
+    while (to >= 0 && to < full.length && !isVisible(full[to])) {
+      to += delta;
+    }
+    let next = structure;
+    for (let step = 0; step < Math.abs(to - from); step += 1) {
+      next = moveWithinColumn(next, itemId, delta);
+    }
+    dispatch(updatePageStructure(next));
+  }
 
   return (
     <Box
@@ -98,22 +113,6 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
       >
         <DragIndicatorIcon fontSize="small" />
       </IconButton>
-      {!isHeader && (
-        <Checkbox
-          size="small"
-          checked={isIncluded}
-          slotProps={{ input: { "aria-label": `Include ${name} in this job` } }}
-          onChange={(event) =>
-            dispatch(
-              setSectionShown({
-                jobId: variant.id,
-                sectionId: itemId,
-                isShown: event.target.checked,
-              })
-            )
-          }
-        />
-      )}
       <Typography
         noWrap
         sx={{
@@ -121,13 +120,12 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
           minWidth: 0,
           fontWeight: 500,
           fontSize: 14,
-          color: isIncluded ? WORKSPACE_COLORS.text : WORKSPACE_COLORS.muted,
-          pl: isHeader ? 1 : 0,
+          color: WORKSPACE_COLORS.text,
+          pl: 1,
         }}
       >
         {name}
       </Typography>
-      {!isIncluded && <Chip size="small" label="Not included" />}
       {hasColumns && !isHeader && (
         <TextField
           select
@@ -154,9 +152,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         size="small"
         aria-label={`Move ${name} up`}
         disabled={index <= 0}
-        onClick={() =>
-          dispatch(updatePageStructure(moveWithinColumn(structure, itemId, -1)))
-        }
+        onClick={() => move(-1)}
       >
         <ArrowUpwardIcon fontSize="small" />
       </IconButton>
@@ -164,12 +160,28 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         size="small"
         aria-label={`Move ${name} down`}
         disabled={index < 0 || index === column.length - 1}
-        onClick={() =>
-          dispatch(updatePageStructure(moveWithinColumn(structure, itemId, 1)))
-        }
+        onClick={() => move(1)}
       >
         <ArrowDownwardIcon fontSize="small" />
       </IconButton>
+      {!isHeader && (
+        <IconButton
+          size="small"
+          aria-label={`Remove ${name} from this job`}
+          title="Remove from this job (your vault keeps it)"
+          onClick={() =>
+            dispatch(
+              setSectionShown({
+                jobId: variant.id,
+                sectionId: itemId,
+                isShown: false,
+              })
+            )
+          }
+        >
+          <DeleteOutlineIcon fontSize="small" />
+        </IconButton>
+      )}
     </Box>
   );
 }

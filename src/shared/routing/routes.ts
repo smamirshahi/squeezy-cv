@@ -1,5 +1,5 @@
 /** How the Jobs tool shows a job: the CV page, or the settings of the job */
-type JobsView = "page" | "settings";
+type JobsView = "page" | "settings" | "details";
 
 /** The pages of the Templates tool */
 export type TemplatesTab = "templates" | "design";
@@ -25,6 +25,18 @@ export type WorkspaceRoute = Extract<
   { kind: "vault" | "jobs" | "templates" | "tailor" | "chat" | "ai" }
 >;
 
+/** Everything that is drawn inside the workspace shell: the tools and the applications pages */
+export type ShellRoute =
+  WorkspaceRoute | Extract<Route, { kind: "applications" | "application" }>;
+
+export function isShellRoute(route: Route): route is ShellRoute {
+  return (
+    isWorkspaceRoute(route) ||
+    route.kind === "applications" ||
+    route.kind === "application"
+  );
+}
+
 export function isWorkspaceRoute(route: Route): route is WorkspaceRoute {
   return (
     route.kind === "vault" ||
@@ -42,6 +54,10 @@ function decode(segment: string): string {
   } catch {
     return segment;
   }
+}
+
+function jobsViewOf(value: string | null): JobsView {
+  return value === "settings" || value === "details" ? value : "page";
 }
 
 /** Turns an address (`window.location.pathname` and `.search`) into a route */
@@ -65,7 +81,7 @@ export function parseRoute(pathname: string, search = ""): Route {
         : {
             kind: "jobs",
             jobId: second,
-            view: params.get("view") === "settings" ? "settings" : "page",
+            view: jobsViewOf(params.get("view")),
           };
     case "templates": {
       // `/templates`, `/templates/<tab>` (no template named yet) or `/templates/<id>/design`
@@ -117,7 +133,7 @@ export function formatRoute(route: Route): string {
     case "vault":
       return `/vault${segment(route.sectionId, route.sectionId ? route.itemId : undefined)}`;
     case "jobs":
-      return `/jobs${segment(route.jobId)}${route.view === "settings" ? "?view=settings" : ""}`;
+      return `/jobs${segment(route.jobId)}${route.view === "page" ? "" : `?view=${route.view}`}`;
     case "templates":
       if (route.tab === "templates") {
         return "/templates";

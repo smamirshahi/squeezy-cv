@@ -1,5 +1,5 @@
-import { MouseEvent, useEffect, useRef, useState } from "react";
-import { Box, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { Box, Button } from "@mui/material";
 import { SettingsPage } from "@pages/workspace/settings-page";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { AiAssistant } from "@pages/ai-page/ai-assistant";
@@ -10,7 +10,6 @@ import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
 import { ChatPanel } from "@pages/workspace/chat-panel";
 import { BlockToolbar } from "@pages/workspace/block-toolbar";
-import { Inspector } from "@pages/workspace/inspector";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { JobSettingsPage } from "@pages/workspace/job-settings-page";
 import { TemplatesPage } from "@pages/workspace/templates-page";
@@ -22,15 +21,20 @@ import { usePersistence } from "@hooks/use-persistence";
 import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { useAppSelector } from "@store/store-helper";
 import { NotFound } from "@pages/workspace/not-found";
-import { onAppLinkClick } from "@hooks/navigation";
 import { useRouteSync } from "@hooks/use-route-sync";
-import { WorkspaceRoute, formatRoute } from "@shared/routing/routes";
+import { Route, ShellRoute } from "@shared/routing/routes";
 import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
 import {
   isPlaceholderSelector,
   jobsSelector,
   templatesSelector,
 } from "@store/jobs/jobs-slice";
+import { JobDetailsPage } from "@pages/workspace/job-details-page";
+import { ApplicationsPage } from "@pages/applications-page/applications-page";
+import { ApplicationView } from "@pages/applications-page/application-view";
+import { ContentPanel } from "@pages/workspace/content-panel";
+import { TemplateBar } from "@pages/workspace/template-bar";
+import { ApplySidebar } from "@pages/workspace/apply-sidebar";
 import { NoJobs } from "@pages/workspace/no-jobs";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
@@ -38,7 +42,7 @@ import { sectionsSelector } from "@store/vault/vault-slice";
  * The editor (design B): top bar, tool rail, the CV on a canvas and an inspector that
  * follows what is clicked. Vault and Tailor open the existing pages in the same frame.
  */
-export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
+export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   const contentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLElement>(null);
   const tool = route.kind;
@@ -49,7 +53,12 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
     (s) => s.jobs.jobs.find((job) => job.id === s.jobs.activeJobId)?.name ?? ""
   );
   const isPlaceholder = useAppSelector(isPlaceholderSelector);
-  const isEmpty = isPlaceholder && (tool === "jobs" || tool === "chat");
+  const isEmpty =
+    isPlaceholder &&
+    (tool === "chat" ||
+      (tool === "jobs" && route.kind === "jobs" && route.view !== "details"));
+  const isJobsWithoutJobs =
+    isPlaceholder && route.kind === "jobs" && route.view === "details";
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
   useRouteSync(route);
   const missing = missingThing(route, isLoading, jobs, sections, templates);
@@ -101,90 +110,68 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {missing && <NotFound what={missing.what} backTo={missing.backTo} />}
-        {!missing && !isEmpty && tool === "jobs" && (
-          <Box
-            sx={{
-              flex: "none",
-              display: "flex",
-              flexDirection: "column",
-              borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
-              bgcolor: WORKSPACE_COLORS.panel,
-              p: 0.75,
-            }}
-          >
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              orientation="vertical"
-              aria-label="Job view"
-              value={jobsView}
-            >
-              {(["page", "settings"] as const).map((view) => {
-                const target = {
-                  kind: "jobs" as const,
-                  jobId: activeJobId,
-                  view,
-                };
-                return (
-                  <ToggleButton
-                    key={view}
-                    value={view}
-                    component="a"
-                    href={formatRoute(target)}
-                    onClick={(event: MouseEvent<HTMLElement>) =>
-                      onAppLinkClick(event, target)
-                    }
-                  >
-                    {view === "page" ? "CV page" : "Job settings"}
-                  </ToggleButton>
-                );
-              })}
-            </ToggleButtonGroup>
-          </Box>
-        )}
-        {!missing && !isEmpty && tool === "jobs" && jobsView === "settings" && (
-          <JobSettingsPage />
+        {!missing && ["jobs", "tailor", "chat"].includes(tool) && (
+          <ApplySidebar jobId={isPlaceholder ? undefined : activeJobId} />
         )}
         {!missing &&
+          tool === "jobs" &&
+          (isJobsWithoutJobs || jobsView === "details") && <JobDetailsPage />}
+        {!missing &&
           !isEmpty &&
+          !isJobsWithoutJobs &&
+          tool === "jobs" &&
+          jobsView === "settings" && <JobSettingsPage />}
+        {!missing &&
+          !isEmpty &&
+          !isJobsWithoutJobs &&
           ((tool === "jobs" && jobsView === "page") || tool === "chat") && (
             <>
               {isOutlineOpen && (
                 <Outline onClose={() => setIsOutlineOpen(false)} />
               )}
               <Box
-                component="main"
-                aria-label="Canvas"
-                ref={canvasRef}
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                  overflow: "auto",
-                  bgcolor: WORKSPACE_COLORS.canvas,
-                  py: 3,
                   display: "flex",
-                  justifyContent: "center",
-                  position: "relative",
+                  flexDirection: "column",
                 }}
               >
-                <FirstRun />
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
-                  sx={{ position: "absolute", left: 12, top: 12, zIndex: 3 }}
+                {tool === "jobs" && <TemplateBar />}
+                <Box
+                  component="main"
+                  aria-label="Canvas"
+                  ref={canvasRef}
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    overflow: "auto",
+                    bgcolor: WORKSPACE_COLORS.canvas,
+                    py: 3,
+                    display: "flex",
+                    justifyContent: "safe center",
+                    position: "relative",
+                  }}
                 >
-                  {isOutlineOpen ? "Hide outline" : "Outline (O)"}
-                </Button>
-                <ZoomControls
-                  getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
-                />
-                <ZoomFrame zoom={zoom}>
-                  <PreviewPage contentRef={contentRef} />
-                </ZoomFrame>
-                <BlockToolbar canvasRef={canvasRef} />
+                  <FirstRun />
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
+                    sx={{ position: "absolute", left: 12, top: 12, zIndex: 3 }}
+                  >
+                    {isOutlineOpen ? "Hide outline" : "Outline (O)"}
+                  </Button>
+                  <ZoomControls
+                    getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
+                  />
+                  <ZoomFrame zoom={zoom}>
+                    <PreviewPage contentRef={contentRef} />
+                  </ZoomFrame>
+                  <BlockToolbar canvasRef={canvasRef} />
+                </Box>
               </Box>
-              {tool === "chat" ? <ChatPanel /> : <Inspector />}
+              {tool === "chat" ? <ChatPanel /> : <ContentPanel />}
             </>
           )}
         {!missing && tool === "templates" && <TemplatesPage />}
@@ -192,6 +179,12 @@ export function Workspace({ route }: { route: WorkspaceRoute }): JSX.Element {
         {!missing && tool === "vault" && <VaultPage />}
         {!missing && tool === "tailor" && <AiAssistant />}
         {!missing && tool === "ai" && <SettingsPage />}
+        {!missing && route.kind === "applications" && <ApplicationsPage />}
+        {!missing && route.kind === "application" && (
+          <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+            <ApplicationView applicationId={route.id} />
+          </Box>
+        )}
       </Box>
     </Box>
   );
@@ -204,7 +197,7 @@ interface Missing {
 
 /** What the address names that does not exist (only once the data has loaded), if anything */
 function missingThing(
-  route: WorkspaceRoute,
+  route: Route,
   isLoading: boolean,
   jobs: { id: string }[],
   sections: { id: string; items: { id: string }[] }[],
@@ -253,12 +246,12 @@ function missingThing(
 }
 
 /** The page title: the section (and the job, where there is one) */
-function titleOf(route: WorkspaceRoute, jobName: string): string {
+function titleOf(route: ShellRoute, jobName: string): string {
   switch (route.kind) {
     case "vault":
       return "Vault";
     case "jobs":
-      return `${route.view === "settings" ? "Job settings" : "Jobs"}${jobName ? ` · ${jobName}` : ""}`;
+      return `${route.view === "settings" ? "Content" : route.view === "details" ? "Job application" : "Apply"}${jobName ? ` · ${jobName}` : ""}`;
     case "templates":
       return `Templates${route.tab === "templates" ? "" : " · Design"}`;
     case "tailor":
@@ -267,5 +260,8 @@ function titleOf(route: WorkspaceRoute, jobName: string): string {
       return `Chat${jobName ? ` · ${jobName}` : ""}`;
     case "ai":
       return "Settings";
+    case "applications":
+    case "application":
+      return "Applications";
   }
 }
