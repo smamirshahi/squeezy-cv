@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Jobs, Templates and Chat show "No job added yet" (with an Add a job button) until you add a job. The stand-in default job and template are no longer saved or shown.
 - "Paste CV text, AI sorts it" is disabled with a "Coming soon" tooltip; the import also repairs near-valid answers from small local models.
 
 ### Added

@@ -211,6 +211,14 @@ describe("load and save through the server", () => {
       createJob({
         vault: store.getState().vault,
         style: store.getState().cvData.style,
+        name: "Base",
+        id: "base",
+      })
+    );
+    store.dispatch(
+      createJob({
+        vault: store.getState().vault,
+        style: store.getState().cvData.style,
         name: "Extra",
         id: "extra",
       })
@@ -223,22 +231,36 @@ describe("load and save through the server", () => {
     expect((await api.listJobs()).map((v) => v.id)).not.toContain("extra");
   });
 
-  it("first start: one default template and one default job, saved with the first Save", async () => {
+  it("first start: no job is shown or saved until one is added", async () => {
     const store = newStore();
     const api = clientFor(app);
     await loadFromServer(api, store.dispatch, store.getState, () =>
       Promise.resolve(file)
     );
+    expect(store.getState().jobs.isPlaceholder).toBe(true);
+
+    await saveToServer(api, store.dispatch, store.getState);
+    expect(await api.listTemplates()).toEqual([]);
+    expect(await api.listJobs()).toEqual([]);
+
+    store.dispatch(
+      createJob({
+        vault: store.getState().vault,
+        style: store.getState().cvData.style,
+        name: "First",
+        id: "first",
+      })
+    );
     const { templates, jobs } = store.getState().jobs;
+    expect(store.getState().jobs.isPlaceholder).toBe(false);
+    expect(jobs.map((j) => j.id)).toEqual(["first"]);
     expect(templates).toHaveLength(1);
-    expect(jobs).toHaveLength(1);
-    expect(jobs[0].templateId).toBe(templates[0].id);
 
     await saveToServer(api, store.dispatch, store.getState);
     expect((await api.listTemplates()).map((t) => t.id)).toEqual([
       templates[0].id,
     ]);
-    expect((await api.listJobs()).map((j) => j.id)).toEqual([jobs[0].id]);
+    expect((await api.listJobs()).map((j) => j.id)).toEqual(["first"]);
   });
 
   it("save writes only the changed templates and jobs", async () => {
@@ -301,6 +323,14 @@ describe("load and save through the server", () => {
     const api = clientFor(app);
     await loadFromServer(api, store.dispatch, store.getState, () =>
       Promise.resolve(file)
+    );
+    store.dispatch(
+      createJob({
+        vault: store.getState().vault,
+        style: store.getState().cvData.style,
+        name: "Base",
+        id: "base",
+      })
     );
     store.dispatch(addTemplate({ name: "Extra", id: "template-extra" }));
     store.dispatch(
