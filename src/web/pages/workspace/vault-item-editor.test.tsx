@@ -98,21 +98,49 @@ describe("inline vault item editor", () => {
     );
   });
 
-  it("opens when an item is chosen, has no vault-fact banner and no Apply step", () => {
+  it("opens when an item is chosen and has no vault-fact banner", () => {
     setup();
     open("Senior Software Developer");
     const editor = screen.getByLabelText("Edit item");
     expect(within(editor).queryByText(/vault fact/)).toBeNull();
     expect(within(editor).getByText(/Item 1 of 3/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Apply" })).toBeNull();
   });
 
-  it("saves a field to the vault as you type", () => {
+  it("keeps edits in a draft until Apply, and Discard restores the stored values", () => {
+    const store = setup();
+    open("Senior Software Developer");
+    const apply = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Apply",
+    });
+    const discard = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Discard",
+    });
+    expect(apply.disabled).toBe(true);
+    expect(discard.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("Job title"), {
+      target: { value: "Principal Developer" },
+    });
+    expect(apply.disabled).toBe(false);
+    expect(
+      store
+        .getState()
+        .vault.sections.flatMap((s) => s.items)
+        .some((i) => i.fields.title === "Principal Developer")
+    ).toBe(false);
+    fireEvent.click(discard);
+    expect(screen.getByLabelText<HTMLInputElement>("Job title").value).toBe(
+      "Senior Software Developer"
+    );
+    expect(apply.disabled).toBe(true);
+  });
+
+  it("saves the fields to the vault on Apply", () => {
     const store = setup();
     open("Senior Software Developer");
     fireEvent.change(screen.getByLabelText("Job title"), {
       target: { value: "Principal Developer" },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(stored(store, "Principal Developer").fields.company).toBe(
       "Example Ltd"
     );
@@ -124,6 +152,7 @@ describe("inline vault item editor", () => {
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Ran the platform team\nCut deploy time" },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(stored(store, "Example Ltd").fields.description).toBe(
       "Ran the platform team\nCut deploy time"
     );
@@ -135,8 +164,10 @@ describe("inline vault item editor", () => {
     const end = screen.getByLabelText<HTMLInputElement>("End");
     expect(end.value).toBe("2022-02");
     fireEvent.change(end, { target: { value: "2022-06" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(stored(store, "Sample Systems").fields.endDate).toBe("2022-06-01");
     fireEvent.click(screen.getByRole("checkbox", { name: "Current" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(stored(store, "Sample Systems").fields.endDate).toBe("");
     expect(screen.getByLabelText<HTMLInputElement>("End").disabled).toBe(true);
   });
