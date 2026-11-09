@@ -2,7 +2,7 @@ import { KeyboardEvent, PointerEvent, ReactNode, useState } from "react";
 import { Box } from "@mui/material";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
-  clampPanelWidth,
+  normalisePanelWidth,
   readPanelWidth,
   writePanelWidth,
   PanelSide,
@@ -33,9 +33,9 @@ export function ResizableAside({
   const isLeft = side === "left";
 
   function change(next: number): void {
-    const clamped = clampPanelWidth(next);
-    setWidth(clamped);
-    writePanelWidth(side, clamped);
+    const normalised = normalisePanelWidth(next);
+    setWidth(normalised);
+    writePanelWidth(side, normalised);
   }
 
   function onPointerDown(event: PointerEvent<HTMLDivElement>): void {

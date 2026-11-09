@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Resizable side panels no longer have a fixed maximum width and can be collapsed to zero; chosen widths remain saved per side (#273).
 - "AI setup" is now **Settings** (`/settings`): a list on the left, an "All tasks" card and one card per AI task in the middle (with a description of what each does and sends), the provider radio buttons on the right, and the set-up steps on the page. Employer and school names are always masked; the checkbox is gone (#271).
 
 ### Changed
