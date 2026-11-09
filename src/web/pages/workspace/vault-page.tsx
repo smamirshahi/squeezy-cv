@@ -143,15 +143,16 @@ function VaultTree({ selectedPage }: TreeProps): JSX.Element {
         <Box
           sx={{
             p: 1,
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
             gap: 1,
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-            flexWrap: "wrap",
           }}
         >
           <Button
             size="small"
             variant="contained"
+            sx={{ gridColumn: "1 / -1" }}
             onClick={() => setIsImportOpen(true)}
           >
             Paste CV text, AI sorts it
