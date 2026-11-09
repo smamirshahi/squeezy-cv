@@ -76,6 +76,18 @@ describe("routing in the workspace", () => {
     expect(document.title).toContain("Design");
   });
 
+  it("shows layout and style together on the Design page", async () => {
+    await open("/templates/design");
+    expect(screen.getByRole("heading", { name: "Layout" })).toBeTruthy();
+    expect(
+      screen.getByRole("radiogroup", { name: "Page layout" })
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Style" })).toBeTruthy();
+    expect(screen.getByLabelText("Colours")).toBeTruthy();
+    expect(screen.getByLabelText("Typography")).toBeTruthy();
+    expect(screen.getByLabelText("Live preview")).toBeTruthy();
+  });
+
   it("makes the rail real links and changes the address on a click", async () => {
     await open("/vault");
     expect(rail("Templates").getAttribute("href")).toBe("/templates");

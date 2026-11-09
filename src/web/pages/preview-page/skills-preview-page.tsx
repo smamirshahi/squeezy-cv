@@ -4,6 +4,7 @@ import React from "react";
 import { CvTypography } from "@components/cv-typography";
 import { useRatingIcon } from "@hooks/use-rating-icon";
 import { SkillDisplay } from "@custom-types/variant-types";
+import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { levelLabel } from "@shared/vault/vault-utils";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
@@ -31,7 +32,7 @@ interface LevelProps {
 }
 
 function Level({ display, rating }: LevelProps): JSX.Element | null {
-  const { fontSize, color } = useAppSelector(styleSelector).typography.icon;
+  const { fontSize, color } = useResolvedStyle().typography.icon;
   const level = levelOf(rating);
   if (display === "none" || level === 0) {
     return null;
@@ -84,7 +85,8 @@ function Level({ display, rating }: LevelProps): JSX.Element | null {
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
   const RatingIcon = useRatingIcon();
-  const { ratingIcon, typography } = useAppSelector(styleSelector);
+  const { ratingIcon } = useAppSelector(styleSelector);
+  const { typography } = useResolvedStyle();
   const display = section.skillStyle?.display;
   const columns = section.skillStyle?.columns ?? 1;
 

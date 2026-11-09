@@ -3,6 +3,7 @@ import { Box, Grid } from "@mui/material";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
+import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -20,6 +21,7 @@ interface Props {
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
   const { bulletPointIcon } = useAppSelector(styleSelector);
+  const { accent } = useResolvedStyle();
 
   const listStyleType = getBulletListStyle(bulletPointIcon);
 
@@ -91,7 +93,12 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
           {item.bullets.length > 0 && (
             <Box
               component="ul"
-              sx={{ my: "0px", pl: "20px", ...listStyleType }}
+              sx={{
+                my: "0px",
+                pl: "20px",
+                ...listStyleType,
+                "& li::marker": { color: accent },
+              }}
             >
               {item.bullets.map((bullet) => (
                 <li

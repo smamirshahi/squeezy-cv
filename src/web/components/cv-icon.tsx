@@ -1,6 +1,5 @@
 import { SvgIcon } from "@mui/material";
-import { styleSelector } from "@store/cv-data/cv-data-slice";
-import { useAppSelector } from "@store/store-helper";
+import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { useCvTypographyUtils } from "@components/cv-typography-utils";
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
 
 /** Wraps an svg icon and make the color based on the user selection */
 export function CvIcon({ icon }: Props): JSX.Element {
-  const { typography } = useAppSelector(styleSelector);
+  const { typography } = useResolvedStyle();
   const { opacity } = useCvTypographyUtils();
 
   return (

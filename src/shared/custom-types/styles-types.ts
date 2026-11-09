@@ -62,6 +62,18 @@ const TypographyVariantSchema = Object({
   icon: FontStyleSchema,
 });
 
+/** The few colours of a CV (#283): the rest of the page is drawn from these */
+const ColorsSchema = Object({
+  /** Name, headings, body text, bullets and skills */
+  text: String,
+
+  /** Dates, locations and the contact line */
+  secondary: String,
+
+  /** Section titles, the rule under them and the bullet and skill symbols; missing = same as text */
+  accent: String.optional(),
+});
+
 export const StyleSchema = Object({
   /** Whether to show full URL for contact or just the ID */
   shouldShowFullContactLinks: Boolean,
@@ -114,6 +126,12 @@ export const StyleSchema = Object({
     Literal("YYYY.MM.DD")
   ),
 
+  /**
+   * The colours of the page. Missing (a file from before #283) = text from the `bodyMd` colour and
+   * secondary from `bodySm`, no accent. The colours inside `typography` are no longer used.
+   */
+  colors: ColorsSchema.optional(),
+
   /** Displays different font names and sizes */
   typography: TypographyVariantSchema,
 
@@ -124,6 +142,7 @@ export const StyleSchema = Object({
 export type FontSize = Static<typeof FontSizeSchema>;
 export type FontWeight = Static<typeof FontWeightSchema>;
 export type AvailableFonts = Static<typeof AvailableFontsSchema>;
+export type Colors = Static<typeof ColorsSchema>;
 export type FontStyle = Static<typeof FontStyleSchema>;
 export type Style = Static<typeof StyleSchema>;
 export type Side = Static<typeof SideSchema>;

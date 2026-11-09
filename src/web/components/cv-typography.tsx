@@ -4,6 +4,7 @@ import { SxProps, Typography } from "@mui/material";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { useMemo } from "react";
+import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { useCvTypographyUtils } from "@components/cv-typography-utils";
 
 interface TypographyVariantProps {
@@ -34,8 +35,8 @@ export function CvTypography({
   isEmphasised = false,
   pageBreak,
 }: TypographyVariantProps): JSX.Element {
-  const { typography, sectionSpacing, hasHeadingLine } =
-    useAppSelector(styleSelector);
+  const { sectionSpacing, hasHeadingLine } = useAppSelector(styleSelector);
+  const { typography, accent } = useResolvedStyle();
   const { opacity } = useCvTypographyUtils();
 
   const additionalStyle: SxProps = useMemo(() => {
@@ -44,7 +45,8 @@ export function CvTypography({
         return {};
       case "headingMd":
         return {
-          borderBottom: hasHeadingLine === false ? "none" : "2px solid black",
+          borderBottom:
+            hasHeadingLine === false ? "none" : `2px solid ${accent}`,
           width: "100%",
           mt: spaced(sectionSpacing ?? GAP_PX.sectionTop),
         };
@@ -61,7 +63,7 @@ export function CvTypography({
       case "icon":
         return {};
     }
-  }, [variant, sectionSpacing, hasHeadingLine]);
+  }, [variant, sectionSpacing, hasHeadingLine, accent]);
 
   return (
     <Typography
