@@ -6,11 +6,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControlLabel,
   IconButton,
   MenuItem,
@@ -35,6 +30,7 @@ import {
   FieldSpec,
   fieldSpecsFor,
   fromMonthValue,
+  locationLabel,
   toMonthValue,
 } from "@shared/vault/item-fields";
 import {
@@ -49,7 +45,6 @@ import {
   moveBullet,
   removeBullet,
   moveItemToSection,
-  removeItem,
   sectionsSelector,
   setSectionTracksLevel,
   updateBullet,
@@ -63,54 +58,9 @@ interface FieldProps {
 }
 
 function Field({ spec, value, onChange }: FieldProps): JSX.Element {
-  if (spec.kind === "month") {
-    const isCurrent = spec.isEnd === true && value === "";
-    return (
-      <Box
-        sx={{
-          gridColumn: `span ${spec.span}`,
-          display: spec.isEnd ? "grid" : "flex",
-          gridTemplateColumns: spec.isEnd
-            ? "repeat(2, minmax(0, 1fr))"
-            : undefined,
-          gap: 1.5,
-          alignItems: "center",
-        }}
-      >
-        <TextField
-          size="small"
-          type="month"
-          label={spec.label}
-          value={toMonthValue(value)}
-          disabled={isCurrent}
-          onChange={(event) => onChange(fromMonthValue(event.target.value))}
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={spec.isEnd ? { minWidth: 0, width: "100%" } : { flex: 1 }}
-        />
-        {spec.isEnd && (
-          <FormControlLabel
-            label="Current"
-            control={
-              <Checkbox
-                size="small"
-                checked={isCurrent}
-                onChange={(event) =>
-                  onChange(
-                    event.target.checked
-                      ? ""
-                      : fromMonthValue(new Date().toISOString().slice(0, 7))
-                  )
-                }
-              />
-            }
-          />
-        )}
-      </Box>
-    );
-  }
   return (
     <TextField
-      size="small"
+      size="medium"
       label={spec.label}
       value={value}
       multiline={spec.kind === "multiline"}
@@ -125,6 +75,119 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
       }}
       sx={{ gridColumn: `span ${spec.span}` }}
     />
+  );
+}
+
+interface DateFieldsProps {
+  startValue: string;
+  endValue: string;
+  onStartChange: (value: string) => void;
+  onEndChange: (value: string) => void;
+}
+
+function DateFields({
+  startValue,
+  endValue,
+  onStartChange,
+  onEndChange,
+}: DateFieldsProps): JSX.Element {
+  const isCurrent = endValue === "";
+  return (
+    <Box
+      role="group"
+      aria-label="Dates"
+      sx={{
+        gridColumn: "span 3",
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) auto",
+        gap: 1.5,
+        alignItems: "center",
+      }}
+    >
+      <TextField
+        size="medium"
+        type="month"
+        label="Start"
+        value={toMonthValue(startValue)}
+        onChange={(event) => onStartChange(fromMonthValue(event.target.value))}
+        slotProps={{ inputLabel: { shrink: true } }}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <TextField
+        size="medium"
+        type="month"
+        label="End"
+        value={toMonthValue(endValue)}
+        disabled={isCurrent}
+        onChange={(event) => onEndChange(fromMonthValue(event.target.value))}
+        slotProps={{ inputLabel: { shrink: true } }}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <FormControlLabel
+        label="Current"
+        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
+        control={
+          <Checkbox
+            size="small"
+            checked={isCurrent}
+            onChange={(event) =>
+              onEndChange(
+                event.target.checked
+                  ? ""
+                  : fromMonthValue(new Date().toISOString().slice(0, 7))
+              )
+            }
+          />
+        }
+      />
+    </Box>
+  );
+}
+
+interface LocationFieldProps {
+  value: string;
+  isRemote: boolean;
+  onLocationChange: (value: string) => void;
+  onRemoteChange: (isRemote: boolean) => void;
+}
+
+function LocationField({
+  value,
+  isRemote,
+  onLocationChange,
+  onRemoteChange,
+}: LocationFieldProps): JSX.Element {
+  return (
+    <Box
+      role="group"
+      aria-label="Location"
+      sx={{
+        gridColumn: "span 3",
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        gap: 1.5,
+        alignItems: "center",
+      }}
+    >
+      <TextField
+        size="medium"
+        label="Location"
+        value={value}
+        onChange={(event) => onLocationChange(event.target.value)}
+        sx={{ minWidth: 0, width: "100%" }}
+      />
+      <FormControlLabel
+        label="Remote"
+        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
+        control={
+          <Checkbox
+            size="small"
+            checked={isRemote}
+            onChange={(event) => onRemoteChange(event.target.checked)}
+          />
+        }
+      />
+    </Box>
   );
 }
 
@@ -317,12 +380,12 @@ export function VaultItemEditor({
 }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
-  const [isRemoving, setIsRemoving] = useState<boolean>(false);
   // Edits of the fields wait here until Apply (a skills group saves as you type)
   const [draft, setDraft] = useState<Record<string, string>>({});
   const index = section.items.findIndex((entry) => entry.id === item.id);
   const ref = { sectionId: section.id, itemId: item.id };
   const isSkills = section.type === "skills";
+  const fieldSpecs = fieldSpecsFor(section.type);
   const vaultSections = useAppSelector(sectionsSelector);
   const moveTargets = sectionTargets({ sections: vaultSections }, section.id);
   const changes = Object.fromEntries(
@@ -336,6 +399,14 @@ export function VaultItemEditor({
   function apply(): void {
     dispatch(updateItemFields({ ...ref, fields: changes }));
     setDraft({});
+  }
+
+  function changeField(key: string, value: string): void {
+    if (isSkills) {
+      dispatch(updateItemFields({ ...ref, fields: { [key]: value } }));
+    } else {
+      setDraft((current) => ({ ...current, [key]: value }));
+    }
   }
 
   useEffect(() => {
@@ -438,31 +509,61 @@ export function VaultItemEditor({
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 1.5,
-          p: 2,
+          gap: 2.5,
+          p: 2.5,
           bgcolor: WORKSPACE_COLORS.panel,
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           borderRadius: 1.5,
         }}
       >
-        {fieldSpecsFor(section.type).map((spec) => (
-          <Field
-            key={spec.key}
-            spec={{
-              ...spec,
-              // One input per line; start, end and Current share one line
-              span: spec.kind !== "month" ? 3 : spec.isEnd ? 2 : 1,
-            }}
-            value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
-            onChange={(value) =>
-              isSkills
-                ? dispatch(
-                    updateItemFields({ ...ref, fields: { [spec.key]: value } })
-                  )
-                : setDraft((current) => ({ ...current, [spec.key]: value }))
+        {fieldSpecs.map((spec) => {
+          if (
+            spec.key === "location" &&
+            (section.type === "experience" || section.type === "education")
+          ) {
+            return (
+              <LocationField
+                key={spec.key}
+                value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+                isRemote={(draft.remote ?? item.fields.remote ?? "") === "true"}
+                onLocationChange={(value) => changeField(spec.key, value)}
+                onRemoteChange={(isRemote) =>
+                  changeField("remote", isRemote ? "true" : "")
+                }
+              />
+            );
+          }
+          if (spec.kind === "month") {
+            if (spec.isEnd) {
+              return null;
             }
-          />
-        ))}
+            const endSpec = fieldSpecs.find(
+              (candidate) => candidate.kind === "month" && candidate.isEnd
+            );
+            if (!endSpec) {
+              throw new Error(
+                `Missing end-date field for ${section.type} section`
+              );
+            }
+            return (
+              <DateFields
+                key="dates"
+                startValue={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+                endValue={draft[endSpec.key] ?? item.fields[endSpec.key] ?? ""}
+                onStartChange={(value) => changeField(spec.key, value)}
+                onEndChange={(value) => changeField(endSpec.key, value)}
+              />
+            );
+          }
+          return (
+            <Field
+              key={spec.key}
+              spec={{ ...spec, span: 3 }}
+              value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
+              onChange={(value) => changeField(spec.key, value)}
+            />
+          );
+        })}
       </Box>
 
       {isSkills && (
@@ -548,35 +649,7 @@ export function VaultItemEditor({
             </Button>
           </>
         )}
-        <Button color="error" onClick={() => setIsRemoving(true)}>
-          Remove this item
-        </Button>
       </Box>
-
-      <Dialog open={isRemoving} onClose={() => setIsRemoving(false)}>
-        <DialogTitle>Remove “{getItemLabel(item)}”?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            It is removed from the vault and from every job. Until you press
-            Save you can still reload the page to get it back.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsRemoving(false)}>Cancel</Button>
-          <Button
-            color="error"
-            onClick={() => {
-              const neighbour =
-                section.items[index + 1] ?? section.items[index - 1];
-              dispatch(removeItem(ref));
-              onSelectItem(neighbour?.id ?? "");
-              setIsRemoving(false);
-            }}
-          >
-            Remove
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

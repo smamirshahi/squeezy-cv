@@ -11,7 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
-- Vault item editor: Start and End date inputs are now the same width (#267).
+- Vault item editor: Start and End date inputs are equal-width across the full row, with Current at the far right; experience and education forms have larger inputs and more spacing, Remote location controls, an optional dissertation title, and a Field of study input for education. Section-title spacing is increased, and item removal stays in the middle list (#267).
 - Vault item editor: Apply and Discard buttons for each experience, education and other item; every input is on its own line, with start, end and Current together (#265).
 
 ### Fixed

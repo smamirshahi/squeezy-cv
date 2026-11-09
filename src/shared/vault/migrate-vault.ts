@@ -228,6 +228,7 @@ export function migrateLegacyFile(
           jobTitle: e.jobTitle,
           company: e.company,
           location: e.location,
+          remote: e.remote,
           startDate: e.startDate,
           endDate: e.endDate,
         }),
@@ -245,7 +246,9 @@ export function migrateLegacyFile(
         fields: definedFields({
           degree: e.degree,
           institute: e.institute,
+          fieldOfStudy: e.fieldOfStudy,
           location: e.location,
+          remote: e.remote,
           startDate: e.startDate,
           endDate: e.endDate,
           dissertationTitle: e.dissertationTitle,

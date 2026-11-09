@@ -22,7 +22,7 @@ afterAll(async () => {
 });
 
 describe("editing an item in the vault (inline editor)", () => {
-  it("shows Start and End date inputs at the same width", async () => {
+  it("fills the date row with equal Start and End inputs before Current", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByRole("link", { name: "Vault" }).click();
@@ -33,14 +33,31 @@ describe("editing an item in the vault (inline editor)", () => {
       .getByRole("link", { name: /^Senior Software Developer/ })
       .click();
 
-    const start = await page.getByLabel("Start").boundingBox();
-    const end = await page.getByLabel("End").boundingBox();
-    expect(start).not.toBeNull();
-    expect(end).not.toBeNull();
-    expect(Math.abs(start!.width - end!.width)).toBeLessThan(1);
-    expect(
-      await page.getByRole("checkbox", { name: "Current" }).isEnabled()
-    ).toBe(true);
+    const dateRow = page.getByRole("group", { name: "Dates" });
+    const currentLabel = page.locator("label").filter({ hasText: "Current" });
+    for (const width of [1440, 1000]) {
+      await page.setViewportSize({ width, height: 900 });
+      const row = await dateRow.boundingBox();
+      const start = await page.getByLabel("Start").boundingBox();
+      const end = await page.getByLabel("End").boundingBox();
+      const current = await currentLabel.boundingBox();
+      const link = await page.getByLabel("Link (optional)").boundingBox();
+      expect(row).not.toBeNull();
+      expect(start).not.toBeNull();
+      expect(end).not.toBeNull();
+      expect(current).not.toBeNull();
+      expect(link).not.toBeNull();
+      expect(Math.abs(start!.width - end!.width)).toBeLessThan(1);
+      expect(
+        Math.abs(row!.x + row!.width - (current!.x + current!.width))
+      ).toBeLessThan(1);
+      expect(Math.abs(row!.width - link!.width)).toBeLessThan(1);
+      expect(start!.x).toBeLessThan(end!.x);
+      expect(end!.x + end!.width).toBeLessThan(current!.x);
+      expect(
+        await page.getByRole("checkbox", { name: "Current" }).isEnabled()
+      ).toBe(true);
+    }
   });
 
   it("edits a job and its description, sees them on the page, saves and keeps them after a reload", async () => {

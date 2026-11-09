@@ -10,8 +10,14 @@ export const EducationSchema = Object({
   /** The institute of the education */
   institute: String,
 
+  /** Field of study (e.g. Civil Engineering) */
+  fieldOfStudy: String.optional(),
+
   /** The location of education */
   location: String,
+
+  /** Whether the education was remote */
+  remote: String.optional(),
 
   /** The start date of the education */
   startDate: String,

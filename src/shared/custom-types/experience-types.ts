@@ -13,6 +13,9 @@ export const ExperienceSchema = Object({
   /** The location of job */
   location: String,
 
+  /** Whether the job was remote */
+  remote: String.optional(),
+
   /** The start date of the experience */
   startDate: String,
 
