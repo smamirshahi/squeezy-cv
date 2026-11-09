@@ -28,7 +28,7 @@ export function NoJobs({ tool }: { tool: string }): JSX.Element {
       <Typography sx={{ fontSize: 18, fontWeight: 700 }}>{what}</Typography>
       <Typography sx={{ color: WORKSPACE_COLORS.muted, textAlign: "center" }}>
         {tool === "templates"
-          ? "A template is created together with your first job."
+          ? "You can create a template based on the Vault."
           : "Add a job to build a CV for one application from your vault."}
       </Typography>
       <Button variant="contained" onClick={() => setIsOpen(true)}>
