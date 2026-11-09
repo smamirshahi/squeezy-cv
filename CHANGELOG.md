@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Top bar: the job and template dropdowns, New job and the fit chip are gone; the centre now shows Vault → Template → Job application as links, each with an (i). A new "How it works" button opens a three-step explanation of the three (#295).
 - Publications is now a default section. Each item has title, authors, journal, year and link; paste a BibTeX entry to fill them, and choose the publication style (APA-like, IEEE-like, plain) in Style settings (#256).
 
 ### Changed
