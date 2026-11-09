@@ -2,6 +2,7 @@ import { Box, Grid } from "@mui/material";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { useAppSelector } from "@store/store-helper";
+import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { DatePeriod } from "@components/date-period";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -19,6 +20,7 @@ export function GenericSectionPreviewPage({
   section,
 }: Props): JSX.Element | null {
   const { bulletPointIcon } = useAppSelector(styleSelector);
+  const { accent } = useResolvedStyle();
   const visibleItems = section.items;
 
   if (visibleItems.length === 0) {
@@ -99,6 +101,7 @@ export function GenericSectionPreviewPage({
                 my: "0px",
                 pl: "20px",
                 ...getBulletListStyle(bulletPointIcon),
+                "& li::marker": { color: accent },
               }}
             >
               {item.bullets.map((bullet) => (

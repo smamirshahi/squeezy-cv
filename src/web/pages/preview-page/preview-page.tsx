@@ -77,7 +77,7 @@ export function PreviewPage({
       mode: fitMode,
       pageLimit,
       base,
-      bodyPt: parseFloat(style.typography.bulletText.fontSize),
+      bodyPt: parseFloat(style.typography.bodyMd.fontSize),
       limits: variant.fitLimits,
       restartKey,
     },

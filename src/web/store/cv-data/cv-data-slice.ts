@@ -1,7 +1,13 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TypographyVariant } from "@custom-styles/custom-styles";
+import { DEFAULT_COLORS } from "@shared/style/resolve-style";
 import { MetaData } from "@custom-types/json-types";
-import { AvailableFonts, FontStyle, Style } from "@custom-types/styles-types";
+import {
+  AvailableFonts,
+  Colors,
+  FontStyle,
+  Style,
+} from "@custom-types/styles-types";
 
 /** State of the current CV file apart from its content (that lives in the vault slice) */
 export interface CvDataState {
@@ -21,6 +27,7 @@ export const initialState: CvDataState = {
     ratingIcon: "text",
     bulletPointIcon: "disc",
     dateFormat: "MMM YYYY",
+    colors: DEFAULT_COLORS,
     typography: TypographyVariant,
     paperMargin: "narrow",
   },
@@ -93,9 +100,37 @@ const cvDataSlice = createSlice({
       state.style.typography[action.payload.variant] = action.payload.fontStyle;
     },
 
-    /** Puts every style back to its default size, weight and colour */
+    /** Sets some of the page colours; an accent of `null` removes the accent */
+    setColors(
+      state,
+      action: PayloadAction<{
+        text?: string;
+        secondary?: string;
+        accent?: string | null;
+      }>
+    ) {
+      const { text, secondary, accent } = action.payload;
+      const current: Colors = {
+        text: state.style.colors?.text ?? state.style.typography.bodyMd.color,
+        secondary:
+          state.style.colors?.secondary ?? state.style.typography.bodySm.color,
+        accent: state.style.colors?.accent,
+      };
+      const next: Colors = {
+        text: text ?? current.text,
+        secondary: secondary ?? current.secondary,
+      };
+      const nextAccent = accent === undefined ? current.accent : accent;
+      if (nextAccent !== null && nextAccent !== undefined) {
+        next.accent = nextAccent;
+      }
+      state.style.colors = next;
+    },
+
+    /** Puts every style back to its default size and weight, and the colours to their defaults */
     resetTypography(state) {
       state.style.typography = structuredClone(TypographyVariant);
+      state.style.colors = { ...DEFAULT_COLORS };
     },
 
     setRatingIcon(state, action: PayloadAction<Style["ratingIcon"]>) {
@@ -130,6 +165,7 @@ export const {
   setCitationStyle,
   setPaperMargin,
   setTypography,
+  setColors,
   resetTypography,
   setRatingIcon,
   setBulletPointIcon,
