@@ -15,6 +15,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Style settings: the right panel always shows your own CV (the demo text is gone); the Skill icon list has a Text choice, now first and the default for new CVs, that shows the level as a word such as "Advanced"; skills are one per line, and the icon style (size and colour) now changes the rating icons; its default is smaller (10pt).
 - Templates: "Page layout" and "Style settings" are now one **Design** tab (layout and section order first, then page options, colours and text styles) with one live preview; the addresses are `/templates/design` and `/templates/<id>/design` (the old two no longer exist).
 - Vault: a **+ Add section** button under the sections list; the type list is Summary, Experience, Education, Skills and "Other section" (for certifications, awards, projects...), each with a short description; deleting a section returns to the main vault page and no longer says "0 item(s)"; "Add skill" is on the right; more space under the SECTIONS title (#281).
 - Templates page: the "Use for <job>" button and the notes about the job you are editing are gone; each card has its buttons beside the title and an expandable "N jobs prepared with this template" list; the new-template name field is wider; sort by date, popularity or name with a reverse arrow; templates now remember the day they were made (#281).
