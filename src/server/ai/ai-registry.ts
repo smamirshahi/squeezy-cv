@@ -18,10 +18,8 @@ export interface AiSettingsStore {
   save: (settings: AiSettingsData) => Promise<void>;
 }
 
-/** The provider per task, and whether employer and school names are masked too (#133) */
-export type AiSettingsData = Partial<Record<AiTask, string>> & {
-  maskOrganisations?: boolean;
-};
+/** The provider per task (older files may also hold a `maskOrganisations` flag, now ignored) */
+export type AiSettingsData = Partial<Record<AiTask, string>>;
 
 export class MemoryAiSettings implements AiSettingsStore {
   saved: AiSettingsData | undefined;
@@ -71,7 +69,6 @@ export interface ProviderStatus extends AiProviderInfo {
  */
 export class AiRegistry {
   private current: AiChoice;
-  private isMasking = false;
 
   constructor(
     private readonly clients: Partial<Record<AiProviderId, AiClient>>,
@@ -104,20 +101,11 @@ export class AiRegistry {
         this.current[task] = wanted;
       }
     }
-    this.isMasking = saved.maskOrganisations === true;
   }
 
-  /** Whether employer and school names are also replaced by placeholders before text is sent */
+  /** Employer and school names are always replaced by placeholders before text is sent (#271) */
   isMaskingOrganisations(): boolean {
-    return this.isMasking;
-  }
-
-  async setMaskOrganisations(isMasking: boolean): Promise<void> {
-    this.isMasking = isMasking;
-    await this.settings.save({
-      ...this.current,
-      maskOrganisations: isMasking,
-    });
+    return true;
   }
 
   choice(): AiChoice {
@@ -158,10 +146,7 @@ export class AiRegistry {
       next[task as AiTask] = provider;
     }
     this.current = next;
-    await this.settings.save({
-      ...next,
-      maskOrganisations: this.isMasking,
-    });
+    await this.settings.save(next);
     return this.choice();
   }
 }

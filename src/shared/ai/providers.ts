@@ -14,6 +14,38 @@ export const AI_TASK_LABELS: Record<AiTask, string> = {
   place: "Place unsorted items",
 };
 
+/** What each task does and what it sends, for the Settings page (#271) */
+export const AI_TASK_DESCRIPTIONS: Record<
+  AiTask,
+  { what: string; sends: string }
+> = {
+  tailor: {
+    what: "Reads a job advert and proposes what to show, hide and reword for it. Also scores items against an advert. Nothing changes until you accept.",
+    sends:
+      "The advert and the text of your saved entries (titles, bullets, dates), masked: no name or contact details, employers and schools as [Company n] / [School n].",
+  },
+  import: {
+    what: "Sorts CV text you paste (or take from a PDF) into vault sections and items. You review it before anything is added.",
+    sends:
+      "The whole text you paste, including your name and contact details. It is not masked because the text is the personal data.",
+  },
+  hide: {
+    what: "When the CV is too long, suggests which items to hide to fit the page limit, with a reason for each.",
+    sends:
+      "Only short labels of the visible items (job titles), the lines each would save and how relevant it is. No vault text and no profile data.",
+  },
+  chat: {
+    what: "Turns what you type in Chat into edits you approve first (hide, move, reword). Also makes bullets from an item's description.",
+    sends:
+      "Your message and your saved entries with short ids, masked like tailoring. Never the profile.",
+  },
+  place: {
+    what: "Suggests which section each item in Unsorted belongs to.",
+    sends:
+      "The text of the unsorted items and the names of your sections, masked like tailoring.",
+  },
+};
+
 export type AiChoice = Record<AiTask, AiProviderId>;
 
 export interface AiProviderInfo {

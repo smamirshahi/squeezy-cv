@@ -83,6 +83,7 @@ export function parseRoute(pathname: string, search = ""): Route {
       return second === undefined ? { kind: "tailor" } : notFound;
     case "chat":
       return third === undefined ? { kind: "chat", jobId: second } : notFound;
+    case "settings":
     case "ai":
       return second === undefined ? { kind: "ai" } : notFound;
     case "applications":
@@ -131,7 +132,7 @@ export function formatRoute(route: Route): string {
     case "chat":
       return `/chat${segment(route.jobId)}`;
     case "ai":
-      return "/ai";
+      return "/settings";
     case "applications":
       return `/applications${route.search}`;
     case "application":

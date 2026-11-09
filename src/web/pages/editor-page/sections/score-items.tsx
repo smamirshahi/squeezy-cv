@@ -101,7 +101,7 @@ export function ScoreItems(): JSX.Element {
       />
       {status && !ai?.isConfigured && (
         <Alert severity="info">
-          AI is not set up. Choose a provider in AI setup to score items.
+          AI is not set up. Choose a provider in Settings to score items.
         </Alert>
       )}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

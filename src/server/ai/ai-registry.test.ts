@@ -76,20 +76,9 @@ describe("AiRegistry", () => {
     expect(again.forTask("import").provider).toBe("ollama");
   });
 
-  it("remembers masking employer and school names, and keeps it when a provider is chosen", async () => {
-    const settings = new MemoryAiSettings();
-    const registry = new AiRegistry({ claude, ollama }, "claude", settings);
-    expect(registry.isMaskingOrganisations()).toBe(false);
-    await registry.setMaskOrganisations(true);
-    await registry.choose({ import: "ollama" });
-    expect(settings.saved).toMatchObject({
-      import: "ollama",
-      maskOrganisations: true,
-    });
-
-    const again = new AiRegistry({ claude, ollama }, "claude", settings);
-    await again.load();
-    expect(again.isMaskingOrganisations()).toBe(true);
+  it("always masks employer and school names (#271)", () => {
+    const registry = new AiRegistry({ claude, ollama }, "claude");
+    expect(registry.isMaskingOrganisations()).toBe(true);
   });
 
   it("refuses a provider that is not set up, an unknown one and an unknown task", async () => {
@@ -232,23 +221,13 @@ describe("the AI routes with a registry", () => {
     expect(status.choice.hide).toBe("ollama");
   });
 
-  it("turns masking of employer and school names on and off, and reports it", async () => {
-    const status = async (): Promise<{ maskOrganisations: boolean }> =>
-      (await app.inject({ method: "GET", url: "/api/ai/status" })).json();
-    expect((await status()).maskOrganisations).toBe(false);
+  it("has no switch for masking employer and school names any more (#271)", async () => {
     const put = await app.inject({
       method: "PUT",
       url: "/api/ai/privacy",
-      payload: { maskOrganisations: true },
+      payload: { maskOrganisations: false },
     });
-    expect(put.json()).toEqual({ maskOrganisations: true });
-    expect((await status()).maskOrganisations).toBe(true);
-    const bad = await app.inject({
-      method: "PUT",
-      url: "/api/ai/privacy",
-      payload: { maskOrganisations: "yes" },
-    });
-    expect(bad.statusCode).toBe(400);
+    expect(put.statusCode).toBe(404);
   });
 
   it("refuses a bad choice with 400 and keeps the old one", async () => {
