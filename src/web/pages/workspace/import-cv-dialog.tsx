@@ -9,8 +9,10 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import {
   MAX_IMPORT_LENGTH,
   MAX_IMPORT_PDF_BYTES,
@@ -76,7 +78,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
       const read = await api.extractPdfText(file);
       setText(read.text);
       setPdfNote(
-        `Text taken from ${file.name} (${read.pages} ${read.pages === 1 ? "page" : "pages"}). Check it below before sorting.`
+        `Text taken from ${file.name} (${read.pages} ${read.pages === 1 ? "page" : "pages"}). Check it below, then press Analyze with AI.`
       );
     } catch (caught) {
       setError(
@@ -124,6 +126,26 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
     }
   }
 
+  /** Why "Analyze with AI" cannot be pressed (empty = it can) */
+  const analyseBlockedReason = isBusy
+    ? "The AI is working on it."
+    : !target?.isConfigured
+      ? "AI is not set up yet (see the note above)."
+      : text.trim().length === 0
+        ? "Paste your CV text or choose a PDF first."
+        : text.length > MAX_IMPORT_LENGTH
+          ? `The text is longer than ${MAX_IMPORT_LENGTH} characters; shorten it.`
+          : "";
+  /** Why "Add to my vault" cannot be pressed (empty = it can) */
+  const addBlockedReason = result
+    ? ""
+    : "Press Analyze with AI first; you can then check what it found before adding it.";
+  const nextStep = result
+    ? "Step 3 of 3: check what was found, then add it to your vault."
+    : text.trim().length === 0
+      ? "Step 1 of 3: paste your CV text or choose a PDF."
+      : "Step 2 of 3: press Analyze with AI.";
+
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Paste CV text, AI sorts it</DialogTitle>
@@ -141,6 +163,21 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           </Alert>
         )}
         <Box
+          role="button"
+          tabIndex={0}
+          aria-label="Choose a PDF file, or drop one here"
+          aria-disabled={isReadingPdf}
+          onClick={() => {
+            if (!isReadingPdf) {
+              fileInput.current?.click();
+            }
+          }}
+          onKeyDown={(event) => {
+            if ((event.key === "Enter" || event.key === " ") && !isReadingPdf) {
+              event.preventDefault();
+              fileInput.current?.click();
+            }
+          }}
           onDragOver={(event) => {
             event.preventDefault();
             setIsDragging(true);
@@ -149,27 +186,44 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           onDrop={onDrop}
           sx={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: 2,
-            p: 1.5,
-            border: "1px dashed",
+            justifyContent: "center",
+            gap: 0.5,
+            width: "100%",
+            px: 2,
+            py: 2.5,
+            textAlign: "center",
+            cursor: isReadingPdf ? "progress" : "pointer",
+            border: "2px dashed",
             borderColor: isDragging ? "primary.main" : "divider",
+            bgcolor: isDragging ? "action.hover" : "transparent",
             borderRadius: 1,
+            "&:hover, &:focus-visible": {
+              borderColor: "primary.main",
+              bgcolor: "action.hover",
+            },
           }}
         >
-          <Button
-            variant="outlined"
-            disabled={isReadingPdf}
-            onClick={() => fileInput.current?.click()}
-          >
-            Choose PDF
-          </Button>
+          {isReadingPdf ? (
+            <CircularProgress size={28} />
+          ) : (
+            <AddOutlinedIcon color="primary" sx={{ fontSize: 32 }} />
+          )}
+          <Typography sx={{ fontWeight: "bold" }}>
+            Click to choose a PDF, or drop it here
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Its text is read on this computer and put in the box below for you
+            to check. Scanned PDFs (images) are not supported.
+          </Typography>
           <input
             ref={fileInput}
             type="file"
             accept="application/pdf,.pdf"
             hidden
             aria-label="PDF file"
+            onClick={(event) => event.stopPropagation()}
             onChange={(event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
@@ -178,11 +232,6 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
               }
             }}
           />
-          <Typography variant="body2">
-            or drop a PDF here. Its text is read on this computer and put in the
-            box below for you to check; scanned PDFs (images) are not supported.
-          </Typography>
-          {isReadingPdf && <CircularProgress size={20} />}
         </Box>
         {pdfNote && <Alert severity="success">{pdfNote}</Alert>}
         <TextField
@@ -192,7 +241,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           maxRows={14}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          helperText={`${text.length} / ${MAX_IMPORT_LENGTH} characters. Paste it or choose a PDF; messy is fine.`}
+          helperText={`${text.length} / ${MAX_IMPORT_LENGTH} characters. Paste it here or choose a PDF above; messy is fine.`}
         />
         {error && <Alert severity="error">{error}</Alert>}
         {result && (
@@ -232,24 +281,39 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
           </Box>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ flex: 1 }}
+          aria-live="polite"
+        >
+          {nextStep}
+        </Typography>
         {isBusy && <CircularProgress size={22} />}
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="outlined"
-          disabled={
-            isBusy ||
-            !target?.isConfigured ||
-            text.trim().length === 0 ||
-            text.length > MAX_IMPORT_LENGTH
-          }
-          onClick={() => void analyse()}
-        >
-          Sort it
-        </Button>
-        <Button variant="contained" disabled={!result} onClick={add}>
-          Add to my vault
-        </Button>
+        <Tooltip title={analyseBlockedReason} arrow>
+          <span>
+            <Button
+              variant={result ? "outlined" : "contained"}
+              disabled={analyseBlockedReason !== ""}
+              onClick={() => void analyse()}
+            >
+              Analyze with AI
+            </Button>
+          </span>
+        </Tooltip>
+        <Tooltip title={addBlockedReason} arrow>
+          <span>
+            <Button
+              variant="contained"
+              disabled={addBlockedReason !== ""}
+              onClick={add}
+            >
+              Add to my vault
+            </Button>
+          </span>
+        </Tooltip>
       </DialogActions>
     </Dialog>
   );
