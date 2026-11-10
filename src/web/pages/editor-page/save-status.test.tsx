@@ -24,8 +24,9 @@ function show(store: AppStore): void {
   );
 }
 
-function saveButton(): HTMLButtonElement {
-  return screen.getByRole("button", { name: "Save" });
+/** The Save button only exists while there is something to save */
+function saveButton(): HTMLButtonElement | null {
+  return screen.queryByRole<HTMLButtonElement>("button", { name: "Save" });
 }
 
 function markSaved(store: AppStore): void {
@@ -44,26 +45,26 @@ function markSaved(store: AppStore): void {
 }
 
 describe("SaveStatus", () => {
-  it("shows loading and cannot save while loading", () => {
+  it("shows loading and offers no Save while loading", () => {
     const store = configureStore({ reducer: rootReducer });
     show(store);
     expect(screen.getByText("Loading…")).toBeTruthy();
-    expect(saveButton().disabled).toBe(true);
+    expect(saveButton()).toBeNull();
   });
 
-  it("shows saved, then unsaved after an edit, which enables Save", () => {
+  it("shows saved, then unsaved after an edit, which shows Save", () => {
     const store = configureStore({ reducer: rootReducer });
     store.dispatch(setStorageStatus({ status: "ready" }));
     markSaved(store);
     show(store);
     expect(screen.getByText("Saved")).toBeTruthy();
-    expect(saveButton().disabled).toBe(true);
+    expect(saveButton()).toBeNull();
 
     act(() => {
       store.dispatch(updateProfile({ fullName: "Someone Else" }));
     });
     expect(screen.getByText("Unsaved changes")).toBeTruthy();
-    expect(saveButton().disabled).toBe(false);
+    expect(saveButton()?.disabled).toBe(false);
   });
 
   it("shows a failed save", () => {
@@ -80,12 +81,12 @@ describe("SaveStatus", () => {
     show(store);
     expect(screen.getByText("Server offline - not saved")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Retry" })).toBeTruthy();
-    expect(saveButton().disabled).toBe(true);
+    expect(saveButton()).toBeNull();
 
     act(() => {
       store.dispatch(setStorageStatus({ status: "error", message: "bad" }));
     });
     expect(screen.getByText("Cannot read saved data")).toBeTruthy();
-    expect(saveButton().disabled).toBe(true);
+    expect(saveButton()).toBeNull();
   });
 });

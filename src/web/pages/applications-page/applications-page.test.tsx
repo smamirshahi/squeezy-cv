@@ -41,10 +41,17 @@ function entry(
   };
 }
 
-function stubList(body: unknown, status = 200): void {
+/** The applications answer `body`; the jobs list (drafts) is `jobs` */
+function stubList(body: unknown, status = 200, jobs: unknown[] = []): void {
   vi.stubGlobal(
     "fetch",
-    vi.fn(() => Promise.resolve(new Response(JSON.stringify(body), { status })))
+    vi.fn((url: string) =>
+      Promise.resolve(
+        String(url).includes("/api/jobs")
+          ? new Response(JSON.stringify(jobs), { status: 200 })
+          : new Response(JSON.stringify(body), { status })
+      )
+    )
   );
 }
 
@@ -158,11 +165,13 @@ describe("Applications page", () => {
     render(<ApplicationsPage />);
     await screen.findByText("Beta Labs");
     const tiles = within(
-      screen.getByRole("group", { name: "Filter by status" })
+      screen.getByRole("navigation", { name: "Filter by status" })
     );
     const tile = (name: RegExp): HTMLElement =>
       tiles.getByRole("button", { name });
     expect(tile(/^All/).textContent).toBe("All4");
+    expect(tile(/^Draft/).textContent).toBe("Draft0");
+    expect(tile(/^Ready to apply/).textContent).toBe("Ready to apply0");
     expect(tile(/^Applied/).textContent).toBe("Applied2");
     expect(tile(/^Interview/).textContent).toBe("Interview1");
     expect(tile(/^Rejected/).textContent).toBe("Rejected1");
@@ -211,15 +220,15 @@ describe("Applications page", () => {
   it("explains the next step when there are none", async () => {
     stubList([]);
     render(<ApplicationsPage />);
-    await screen.findByText("No applications yet.");
-    expect(screen.getByText(/Mark as applied/)).toBeTruthy();
+    await screen.findByText(/No applications yet\./);
+    expect(screen.getByText(/Mark a job as applied/)).toBeTruthy();
   });
 
   it("shows an error instead of an empty list when the data cannot be read", async () => {
     stubList({ code: "corrupt", message: "The data could not be read." }, 500);
     render(<ApplicationsPage />);
     await screen.findByText("The data could not be read.");
-    expect(screen.queryByText("No applications yet.")).toBeNull();
+    expect(screen.queryByText(/No applications yet\./)).toBeNull();
   });
 
   it("shows a damaged application as a warning, not as a missing one", async () => {
@@ -239,5 +248,36 @@ describe("Applications page", () => {
     await screen.findByText(/Cannot read the application/);
     fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
     expect(screen.getByText(/Cannot read the application/)).toBeTruthy();
+  });
+
+  it("lists jobs that were not sent as Draft or Ready to apply, and filters them", async () => {
+    const job = (id: string, name: string, stage?: "draft" | "ready") => ({
+      id,
+      name,
+      templateId: "t1",
+      createdAt: "2026-11-06",
+      isCorrupt: false,
+      ...(stage ? { stage } : {}),
+    });
+    stubList(list, 200, [
+      job("j1", "Gamma draft"),
+      job("j2", "Delta ready", "ready"),
+      // this job was sent already (application "a" is for job "v1"), so it is not a draft
+      job("v1", "Already sent"),
+    ]);
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma draft");
+    expect(screen.getByText("Delta ready")).toBeTruthy();
+    expect(screen.queryByText("Already sent")).toBeNull();
+    const nav = within(
+      screen.getByRole("navigation", { name: "Filter by status" })
+    );
+    expect(nav.getByRole("button", { name: /^Draft/ }).textContent).toBe(
+      "Draft1"
+    );
+    fireEvent.click(nav.getByRole("button", { name: /^Ready to apply/ }));
+    expect(screen.queryByText("Gamma draft")).toBeNull();
+    expect(screen.getByText("Delta ready")).toBeTruthy();
+    expect(screen.queryByText("Beta Labs")).toBeNull();
   });
 });

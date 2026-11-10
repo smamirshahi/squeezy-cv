@@ -75,6 +75,14 @@ const ICONS: Record<
   reddit: SiReddit,
 };
 
+/** The same icons without their built-in <title>, so no brand name lands in the CV's text */
+const QUIET_ICONS: Record<string, React.ElementType> = Object.fromEntries(
+  Object.entries(ICONS).map(([id, Icon]) => [
+    id,
+    (props: object) => <Icon {...props} title="" />,
+  ])
+);
+
 /** The icon component of a link type (one 24x24 svg), for drawing it in the CV */
 export function linkTypeIconComponent(typeId: string): React.ElementType {
   if (typeId === "linkedin") {
@@ -83,7 +91,7 @@ export function linkTypeIconComponent(typeId: string): React.ElementType {
   if (typeId === "website") {
     return PublicOutlinedIcon;
   }
-  return ICONS[typeId] ?? LinkOutlinedIcon;
+  return QUIET_ICONS[typeId] ?? LinkOutlinedIcon;
 }
 
 /** The icon of a link type; a plain link icon for Other and unknown ids */

@@ -109,12 +109,12 @@ describe("routing in the workspace", () => {
   it("makes the rail real links and changes the address on a click", async () => {
     await open("/vault");
     expect(rail("Templates").getAttribute("href")).toBe("/templates");
-    expect(rail("Applied").getAttribute("href")).toBe("/applications");
+    expect(rail("Applications").getAttribute("href")).toBe("/applications");
     fireEvent.click(rail("Templates"));
     expect(window.location.pathname).toBe("/templates");
     expect(rail("Templates").getAttribute("aria-current")).toBe("page");
 
-    fireEvent.click(rail("Jobs"));
+    fireEvent.click(rail("Apply"));
     await waitFor(() => expect(window.location.pathname).toMatch(/^\/jobs\//));
   });
 
@@ -155,8 +155,14 @@ describe("routing in the workspace", () => {
   it("opens the job in the address", async () => {
     const store = await open("/jobs");
     const id = store.getState().jobs.activeJobId;
-    fireEvent.click(screen.getByRole("link", { name: "Job settings" }));
-    expect(window.location.search).toBe("?view=settings");
+    const sidebar = within(
+      screen.getByRole("navigation", { name: "Job application" })
+    );
+    fireEvent.click(sidebar.getByRole("link", { name: /Job application/ }));
+    expect(window.location.search).toBe("?view=details");
+    expect(window.location.pathname).toBe(`/jobs/${id}`);
+    fireEvent.click(sidebar.getByRole("link", { name: /Template & content/ }));
+    expect(window.location.search).toBe("");
     expect(window.location.pathname).toBe(`/jobs/${id}`);
   });
 

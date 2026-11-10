@@ -57,7 +57,7 @@ describe("SectionTitleField and AddSectionButton", () => {
   it("adds a section with the chosen type and title", () => {
     const store = createStore();
     renderWith(store, <AddSectionButton />);
-    fireEvent.click(screen.getByText("Add section"));
+    fireEvent.click(screen.getByText("New section"));
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Type" }));
     fireEvent.click(screen.getByRole("option", { name: /^Skills/ }));
     fireEvent.change(screen.getByLabelText("New section title"), {
@@ -74,7 +74,7 @@ describe("SectionTitleField and AddSectionButton", () => {
   it("uses the default title when none is typed", () => {
     const store = createStore();
     renderWith(store, <AddSectionButton />);
-    fireEvent.click(screen.getByText("Add section"));
+    fireEvent.click(screen.getByText("New section"));
     fireEvent.click(screen.getByText("Add"));
     expect(store.getState().vault.sections.at(-1)).toMatchObject({
       type: "custom",
