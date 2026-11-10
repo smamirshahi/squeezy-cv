@@ -45,7 +45,7 @@ const DEFAULT_OLLAMA_MODEL = "llama3.1";
 const DEFAULT_NUM_CTX = 16_384;
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 const DEFAULT_GEMINI_URL = "https://generativelanguage.googleapis.com";
-const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
+const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
 const DEFAULT_GROQ_URL = "https://api.groq.com/openai";
 const LOCAL_NAMES = ["127.0.0.1", "localhost", "[::1]"];
 

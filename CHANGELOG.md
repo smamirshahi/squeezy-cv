@@ -30,6 +30,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Fixed
 
 - Apply: the content panel scrolls to the end of a long entry instead of cutting it off (#336).
+- Groq: the default model is now `openai/gpt-oss-120b` (the Llama model before gave a 404 on a normal key); a failed "Analyse job description" says that the analysis shown is from an earlier run (#333).
 
 ## [0.3.0] - 2026-11-10
 
