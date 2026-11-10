@@ -17,7 +17,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
- * "Tailor all sections": the same scoring as each section's Tailor button, run for every
+ * "Score all sections": the same scoring as each section's Score entries button, run for every
  * section the job includes, one after the other. The scores of a section appear as soon as it
  * is done, so the results still show per section; the bar shows how many sections are done.
  * It can be stopped between sections. Only scores are stored; nothing is hidden or moved.
@@ -90,7 +90,7 @@ export function TailorAll(): JSX.Element {
   return (
     <Box
       component="section"
-      aria-label="Tailor all sections"
+      aria-label="Score all sections"
       sx={{
         display: "grid",
         gap: 0.75,
@@ -107,7 +107,7 @@ export function TailorAll(): JSX.Element {
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void run()}
         >
-          Tailor all sections
+          Score all sections
         </Button>
         {isRunning && (
           <Button
