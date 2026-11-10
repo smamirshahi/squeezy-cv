@@ -8,6 +8,7 @@ import {
   createApiClient,
   taskProvider,
 } from "@store/persistence/api-client";
+import { withOneApproval } from "@store/persistence/send-gate";
 import {
   activeJobSelector,
   activeVariantSelector,
@@ -62,17 +63,28 @@ export function TailorAll(): JSX.Element {
     let scored = 0;
     let done = 0;
     try {
-      for (const section of targets) {
-        if (isStopping.current) {
-          break;
+      // One approval in the "Send to AI" dialog covers every section
+      await withOneApproval(
+        targets.map((section) => ({
+          url: "/api/ai/score-section",
+          body: { sectionId: section.id, requirements: analysis },
+        })),
+        async () => {
+          for (const section of targets) {
+            if (isStopping.current) {
+              break;
+            }
+            setCurrent({ done, title: section.title });
+            const result = await api.scoreSection(section.id, analysis);
+            dispatch(
+              setSectionScores({ jobId: job.id, scores: result.scores })
+            );
+            setWarnings((before) => [...before, ...result.warnings]);
+            scored += result.scores.length;
+            done += 1;
+          }
         }
-        setCurrent({ done, title: section.title });
-        const result = await api.scoreSection(section.id, analysis);
-        dispatch(setSectionScores({ jobId: job.id, scores: result.scores }));
-        setWarnings((before) => [...before, ...result.warnings]);
-        scored += result.scores.length;
-        done += 1;
-      }
+      );
       setSummary(
         isStopping.current
           ? `Stopped after ${done} of ${targets.length} sections.`

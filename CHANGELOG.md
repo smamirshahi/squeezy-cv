@@ -12,6 +12,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Added
 
 - A third tutorial, "Your templates" (layout, arranging sections, style, and where items are chosen), in the Tutorials list.
+- A "Send to AI" window before any text goes to an online model: it shows the exact masked text as a readable outline, lets you switch automatic masks off, hide any selected word as Company, School, Person, Location, Date or Other, and mark a job advert as private; the model's answer gets the real words back. Local models skip it, and "Score all sections" asks once and lists every section (#332).
 
 ### Changed
 

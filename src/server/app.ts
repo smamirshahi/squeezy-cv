@@ -1,6 +1,10 @@
 import { APP_VERSION } from "@shared/version";
 import { randomBytes } from "node:crypto";
-import Fastify, { FastifyInstance, FastifyReply } from "fastify";
+import Fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 import { ValidationError } from "runtypes";
 import {
   ApplicationPatchSchema,
@@ -31,7 +35,14 @@ import {
   MAX_CHAT_MESSAGE_LENGTH,
 } from "@custom-types/chat-types";
 import { AiChoiceError, AiRegistry } from "@server/ai/ai-registry";
-import { AiProviderId } from "@shared/ai/providers";
+import { MaskingSchema } from "@custom-types/masking-types";
+import {
+  PreviewStop,
+  Recorder,
+  createRecorder,
+  maskedClient,
+} from "@server/ai/send-preview";
+import { AiProviderId, AiTask } from "@shared/ai/providers";
 import {
   HideRequestSchema,
   MAX_HIDE_CANDIDATES,
@@ -184,6 +195,28 @@ export function buildServer({
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
   const registry = aiRegistry ?? AiRegistry.single(ai, aiProvider);
+
+  // The AI client for one request. With the header `x-ai-preview: 1` it only records what would be
+  // sent (answered as `PreviewStop`, see the error handler), and works without a key. A body
+  // `masking` (the user's choices in the "Send to AI" dialog) is added to whatever is sent.
+  const recorders = new WeakMap<FastifyRequest, Recorder>();
+  function aiFor(
+    task: AiTask,
+    request: FastifyRequest,
+    options: { callsToRecord?: number; standIn?: unknown } = {}
+  ): AiClient | undefined {
+    const { client, provider } = registry.forTask(task);
+    const rawMasking = (request.body as { masking?: unknown } | undefined)
+      ?.masking;
+    const masking =
+      rawMasking === undefined ? undefined : MaskingSchema.check(rawMasking);
+    if (request.headers["x-ai-preview"] === "1") {
+      const recorder = createRecorder({ provider, masking, ...options });
+      recorders.set(request, recorder);
+      return recorder;
+    }
+    return client ? maskedClient(client, masking) : undefined;
+  }
   const app = Fastify({
     // eslint-disable-next-line @typescript-eslint/naming-convention -- Fastify option name
     logger: isLoggingEnabled,
@@ -209,7 +242,25 @@ export function buildServer({
     done();
   });
 
+  // A preview of a task that ran to its end (it never reached a stop) is answered here
+  app.addHook("onSend", (request, reply, payload, done) => {
+    const recorder = recorders.get(request);
+    if (
+      recorder &&
+      !recorder.isStopped &&
+      reply.statusCode < HTTP_BAD_REQUEST
+    ) {
+      reply.type("application/json");
+      done(null, JSON.stringify(recorder.finish()));
+      return;
+    }
+    done(null, payload);
+  });
+
   app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof PreviewStop) {
+      return reply.send(error.preview);
+    }
     if (error instanceof StorageError) {
       return sendError(reply, statusOf(error.code), error.code, error.message);
     }
@@ -327,7 +378,15 @@ export function buildServer({
   });
 
   app.post("/api/ai/tailor", async (request, reply) => {
-    const { client: ai } = registry.forTask("tailor");
+    const ai = aiFor("tailor", request, {
+      callsToRecord: 2,
+      standIn: {
+        jobTitle: "(answer of the first call)",
+        mustHave: [],
+        niceToHave: [],
+        keywords: [],
+      },
+    });
     if (!ai) {
       return sendError(
         reply,
@@ -357,7 +416,7 @@ export function buildServer({
 
   // Reads an advert once: keywords and requirements for the job (the user stores them; nothing is changed here)
   app.post("/api/ai/analyse", async (request, reply) => {
-    const { client: ai } = registry.forTask("tailor");
+    const ai = aiFor("tailor", request);
     if (!ai) {
       return sendError(
         reply,
@@ -383,7 +442,11 @@ export function buildServer({
 
   // A relevance score and reason for every entry (and skill) of ONE section (the user applies it; nothing is changed here)
   app.post("/api/ai/score-section", async (request, reply) => {
-    const { client: ai } = registry.forTask("tailor");
+    // A preview records every batch of the section, answered with empty scores
+    const ai = aiFor("tailor", request, {
+      callsToRecord: Number.POSITIVE_INFINITY,
+      standIn: { scores: [] },
+    });
     if (!ai) {
       return sendError(
         reply,
@@ -410,7 +473,7 @@ export function buildServer({
 
   // One chat turn: a reply and typed operations for the user to approve (nothing is changed here)
   app.post("/api/ai/chat", async (request, reply) => {
-    const { client: ai } = registry.forTask("chat");
+    const ai = aiFor("chat", request);
     if (!ai) {
       return sendError(
         reply,
@@ -444,7 +507,7 @@ export function buildServer({
 
   // One bullet made shorter, longer or more formal (the user accepts it; nothing is changed here)
   app.post("/api/ai/rewrite", async (request, reply) => {
-    const { client: ai } = registry.forTask("chat");
+    const ai = aiFor("chat", request);
     if (!ai) {
       return sendError(
         reply,
@@ -475,7 +538,7 @@ export function buildServer({
 
   // Bullets made from an item's description for a job (the user reviews them; nothing is changed here)
   app.post("/api/ai/bullets", async (request, reply) => {
-    const { client: ai } = registry.forTask("chat");
+    const ai = aiFor("chat", request);
     if (!ai) {
       return sendError(
         reply,
@@ -519,7 +582,7 @@ export function buildServer({
 
   // One text (summary, description) shortened, lengthened or fitted to the job's keywords (the user reviews it; nothing is changed here)
   app.post("/api/ai/reword", async (request, reply) => {
-    const { client: ai } = registry.forTask("chat");
+    const ai = aiFor("chat", request);
     if (!ai) {
       return sendError(
         reply,
@@ -560,7 +623,7 @@ export function buildServer({
 
   // Which items to hide so the CV fits (the user confirms; nothing is changed here)
   app.post("/api/ai/hide", async (request, reply) => {
-    const { client: ai } = registry.forTask("hide");
+    const ai = aiFor("hide", request);
     if (!ai) {
       return sendError(
         reply,
@@ -586,7 +649,7 @@ export function buildServer({
 
   // Where items in the Unsorted section belong (the user confirms; nothing is moved here)
   app.post("/api/ai/place", async (request, reply) => {
-    const { client: ai } = registry.forTask("place");
+    const ai = aiFor("place", request);
     if (!ai) {
       return sendError(
         reply,
@@ -631,7 +694,7 @@ export function buildServer({
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
   app.post("/api/ai/import", async (request, reply) => {
-    const { client: ai } = registry.forTask("import");
+    const ai = aiFor("import", request);
     if (!ai) {
       return sendError(
         reply,

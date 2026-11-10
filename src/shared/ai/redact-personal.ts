@@ -1,3 +1,4 @@
+import { MaskKind, MaskTerm, Masking } from "@custom-types/masking-types";
 import { LinkItem, Profile, Section } from "@custom-types/vault-types";
 
 /** The personal details that must never leave the machine */
@@ -10,6 +11,9 @@ export interface PersonalData {
    * placeholder, `[Company 1]` or `[School 1]`, numbered by its place in the list.
    */
   organisations?: Organisations;
+
+  /** The user's own choices: extra text to hide, and automatic masks to leave off */
+  masking?: Masking;
 }
 
 /** Names of employers and schools as written in the CV */
@@ -75,6 +79,10 @@ const PLACEHOLDER_STARTS = [
   "link",
   "company",
   "school",
+  "person",
+  "location",
+  "date",
+  "other",
 ];
 
 function escapeRegExp(text: string): string {
@@ -221,7 +229,79 @@ export function personalOf(
  * The replacements for this person, in the order they are applied: the longest and most
  * specific first (email and links contain the name), name parts last.
  */
-function buildRules(data: PersonalData): Rule[] {
+function buildRules(
+  data: PersonalData,
+  options: { isKeepingSkipped?: boolean } = {}
+): Rule[] {
+  const rules = buildAutomaticRules(data);
+  const custom = customRules(data);
+  // Longest first, so a hand-picked "Acme Labs" goes before the employer "Acme"
+  const organisationNames = new Set(
+    organisationRules(data.organisations).map((rule) => rule.placeholder)
+  );
+  const orgRules = rules.filter((rule) =>
+    organisationNames.has(rule.placeholder)
+  );
+  const others = rules.filter(
+    (rule) => !organisationNames.has(rule.placeholder)
+  );
+  const firstOrganisation = rules.findIndex((rule) =>
+    organisationNames.has(rule.placeholder)
+  );
+  const merged = [...orgRules, ...custom].sort(
+    (a, b) => b.value.length - a.value.length
+  );
+  const head =
+    firstOrganisation < 0 ? others : others.slice(0, firstOrganisation);
+  const tail = firstOrganisation < 0 ? [] : others.slice(firstOrganisation);
+  const all = [...head, ...merged, ...tail];
+  if (options.isKeepingSkipped) {
+    return all;
+  }
+  const skipped = new Set((data.masking?.skip ?? []).map(normaliseTerm));
+  return all.filter((rule) => !skipped.has(normaliseTerm(rule.value)));
+}
+
+function normaliseTerm(text: string): string {
+  return text.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+const KIND_LABELS: Record<MaskKind, string> = {
+  company: "Company",
+  school: "School",
+  person: "Person",
+  location: "Location",
+  date: "Date",
+  other: "Other",
+};
+
+/** The placeholders of text the user masked by hand; the same text always gets the same one */
+function customRules(data: PersonalData): Rule[] {
+  const rules: Rule[] = [];
+  const seen = new Map<string, string>();
+  const counters: Record<MaskKind, number> = {
+    company: data.organisations?.companies.length ?? 0,
+    school: data.organisations?.schools.length ?? 0,
+    person: 0,
+    location: 0,
+    date: 0,
+    other: 0,
+  };
+  for (const { text, kind } of data.masking?.custom ?? []) {
+    const value = text.trim();
+    const key = normaliseTerm(value);
+    if (value === "" || seen.has(key)) {
+      continue;
+    }
+    counters[kind] += 1;
+    const placeholder = `[${KIND_LABELS[kind]} ${counters[kind]}]`;
+    seen.set(key, placeholder);
+    rules.push({ placeholder, value, pattern: literalPattern(value) });
+  }
+  return rules;
+}
+
+function buildAutomaticRules(data: PersonalData): Rule[] {
   const { profile, links } = data;
   const rules: Rule[] = [];
   function add(placeholder: string, value: string, pattern?: RegExp): void {
@@ -334,4 +414,75 @@ export function restore(
     })
     .map(([token]) => token);
   return { text: result, unresolved: [...new Set(unresolved)] };
+}
+
+/**
+ * Everything that would be replaced in `text` (the raw text, before masking), how often, and
+ * whether it is on: for the "Send to AI" dialog. Counts follow the order the replacements
+ * are applied, so a value inside a longer one is not counted twice. Automatic masks the user
+ * turned off are listed (`isMasked: false`); automatic ones that do not appear are left out.
+ */
+export function describeMasking(text: string, data: PersonalData): MaskTerm[] {
+  const skipped = new Set((data.masking?.skip ?? []).map(normaliseTerm));
+  const customPlaceholders = new Set(
+    customRules(data).map((rule) => rule.placeholder)
+  );
+  let result = text;
+  const terms: MaskTerm[] = [];
+  for (const rule of buildRules(data, { isKeepingSkipped: true })) {
+    const isMasked = !skipped.has(normaliseTerm(rule.value));
+    const count = [...result.matchAll(rule.pattern)].length;
+    if (isMasked) {
+      result = result.replace(rule.pattern, rule.placeholder);
+    }
+    const isCustom = customPlaceholders.has(rule.placeholder);
+    if (count > 0 || isCustom) {
+      terms.push({
+        placeholder: rule.placeholder,
+        value: rule.value,
+        count,
+        isMasked,
+        isCustom,
+      });
+    }
+  }
+  return terms;
+}
+
+const EMAIL_IN_TEXT = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.\p{L}{2,}/gu;
+const URL_IN_TEXT = /(?:https?:\/\/|www\.)[^\s<>"')\],;]+/giu;
+const PHONE_IN_TEXT =
+  /(?<![\p{L}\p{N}])\+?\d[\d\s().-]{7,}\d(?![\p{L}\p{N}])/gu;
+const MIN_SUGGESTED_PHONE_DIGITS = 8;
+const DATE_SHAPE = /^\d{1,4}[-./\s]\d{1,2}[-./\s]\d{1,4}$/;
+
+/**
+ * Emails, links and phone numbers still in the text after masking (other people's, or ones the
+ * profile does not list): the dialog offers to mask them. Names of people and firms inside
+ * sentences cannot be found reliably without an AI, so those are left for the user to select.
+ */
+export function suggestMasks(text: string, data: PersonalData): string[] {
+  const masked = scrub(text, data).text;
+  const found = new Set<string>();
+  for (const pattern of [EMAIL_IN_TEXT, URL_IN_TEXT, PHONE_IN_TEXT]) {
+    for (const [match] of masked.matchAll(pattern)) {
+      const value = match.trim().replace(/[.,;:]+$/, "");
+      const isPhone = pattern === PHONE_IN_TEXT;
+      // A date such as 2026-03-01 or 01/03/2026 has the shape of a phone number but is not one
+      if (isPhone && DATE_SHAPE.test(value)) {
+        continue;
+      }
+      if (
+        isPhone &&
+        value.replace(/\D/g, "").length < MIN_SUGGESTED_PHONE_DIGITS
+      ) {
+        continue;
+      }
+      found.add(value);
+    }
+  }
+  const alreadyCustom = new Set(
+    (data.masking?.custom ?? []).map((entry) => normaliseTerm(entry.text))
+  );
+  return [...found].filter((value) => !alreadyCustom.has(normaliseTerm(value)));
 }
