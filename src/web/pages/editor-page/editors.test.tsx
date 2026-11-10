@@ -97,6 +97,11 @@ describe("EditorSummary", () => {
   });
 });
 
+/** The Type dropdown of the link at `index` (the profile fields above it are comboboxes too) */
+function linkTypeBox(index: number): HTMLElement {
+  return screen.getAllByRole("combobox", { name: /^Type/ })[index];
+}
+
 describe("EditorMainInfo", () => {
   it("picks several nationalities from an autofill list", () => {
     const store = createStore();
@@ -163,7 +168,7 @@ describe("EditorMainInfo", () => {
 
   it("disables a link type that another link already uses", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
+    fireEvent.mouseDown(linkTypeBox(0));
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const github = options.find((o) => /GitHub/.test(o.textContent ?? ""))!;
     const other = options.find((o) => /Other/.test(o.textContent ?? ""))!;
@@ -179,7 +184,7 @@ describe("EditorMainInfo", () => {
       "Right to work (optional)",
       "Email",
       "Phone",
-      "Location",
+      "Location (city, country)",
     ]) {
       expect(
         screen.getByLabelText(label).getAttribute("placeholder")
@@ -238,7 +243,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types with icons and an Other option", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
+    fireEvent.mouseDown(linkTypeBox(0));
     const options = within(screen.getByRole("listbox")).getAllByRole("option");
     const names = options.map((option) => option.textContent);
     expect(names).toEqual(
@@ -258,14 +263,14 @@ describe("EditorMainInfo", () => {
     renderWith(store, <EditorMainInfo />);
 
     // LinkedIn -> Instagram
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
+    fireEvent.mouseDown(linkTypeBox(0));
     fireEvent.click(screen.getByRole("option", { name: "Instagram" }));
     expect(screen.getAllByTestId("link-icon-instagram").length).toBeGreaterThan(
       0
     );
 
     // GitHub -> Other, then a custom label
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[4]);
+    fireEvent.mouseDown(linkTypeBox(1));
     fireEvent.click(screen.getByRole("option", { name: "Other" }));
     fireEvent.change(input("Label"), { target: { value: "My site" } });
 
@@ -290,7 +295,7 @@ describe("EditorMainInfo", () => {
 
   it("lists the link types alphabetically with Other last", () => {
     renderWith(createStore(), <EditorMainInfo />);
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[3]);
+    fireEvent.mouseDown(linkTypeBox(0));
     const names = within(screen.getByRole("listbox"))
       .getAllByRole("option")
       .map((o) => o.textContent ?? "");

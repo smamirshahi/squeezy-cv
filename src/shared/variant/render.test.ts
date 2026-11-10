@@ -622,3 +622,88 @@ describe("generatedBulletsChange", () => {
     });
   });
 });
+
+describe("skills drawn by level", () => {
+  const skillVault: Vault = {
+    ...vault,
+    sections: [
+      {
+        id: "skills",
+        type: "skills",
+        title: "Skills",
+        items: [
+          {
+            id: "g",
+            fields: { category: "Tools" },
+            bullets: [
+              { id: "a", text: "A", tags: [], rating: 2 },
+              { id: "b", text: "B", tags: [] },
+              { id: "c", text: "C", tags: [], rating: 5 },
+            ],
+            tags: [],
+            shouldShow: true,
+          },
+        ],
+      },
+    ],
+  };
+  const skillIds = (variant: Variant): string[] | undefined =>
+    sectionPart(
+      allParts(render(skillVault, variant)),
+      "skills"
+    )?.items[0].bullets.map((b) => b.id);
+  const variant = (): Variant => ({
+    ...createDefaultVariant(file, "main"),
+    layout: { fullWidth: [], left: ["skills"], right: [] },
+  });
+
+  it("puts the highest level first and unrated skills last", () => {
+    expect(skillIds(variant())).toEqual(["c", "a", "b"]);
+  });
+
+  it("keeps the order the job chose for the group", () => {
+    const chosen = updateBulletSelection(variant(), "g", "b", { order: 0 });
+    expect(skillIds(chosen)?.[0]).toBe("b");
+  });
+});
+
+describe("awards and interests", () => {
+  it("are drawn as sections of their own type", () => {
+    const extra: Vault = {
+      ...vault,
+      sections: [
+        {
+          id: "aw",
+          type: "awards",
+          title: "Awards",
+          items: [
+            {
+              id: "i1",
+              fields: { title: "Best Poster", issuer: "MARUM", date: "2015" },
+              bullets: [],
+              tags: [],
+              shouldShow: true,
+            },
+          ],
+        },
+        {
+          id: "in",
+          type: "interests",
+          title: "Personal Interests",
+          items: [
+            {
+              id: "i2",
+              fields: { title: "Cycling" },
+              bullets: [],
+              tags: [],
+              shouldShow: true,
+            },
+          ],
+        },
+      ],
+    };
+    const parts = allParts(render(extra, createDefaultVariant(file, "main")));
+    expect(sectionPart(parts, "aw")?.type).toBe("awards");
+    expect(sectionPart(parts, "in")?.type).toBe("interests");
+  });
+});
