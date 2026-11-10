@@ -53,6 +53,12 @@ const BulletSelectionSchema = Object({
 
   /** Position within its item. Bullets without one keep their vault position after those with one. */
   order: Number.optional(),
+
+  /** How relevant this bullet (e.g. a skill) is to the job (0-100), from the section's Tailor button */
+  relevance: Number.optional(),
+
+  /** One sentence on why it got that relevance */
+  relevanceReason: String.optional(),
 });
 
 /** A bullet the AI made from an item's description for this job (accepted by the user, then saved) */

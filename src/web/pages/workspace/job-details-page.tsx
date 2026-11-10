@@ -1,3 +1,4 @@
+import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
   Box,
@@ -379,6 +380,7 @@ export function JobDetailsPage(): JSX.Element {
               value={job?.jobAd ?? ""}
               onChange={(event) => edit({ jobAd: event.target.value })}
             />
+            {job && <AnalyseJobAd job={job} />}
             <Box
               sx={{
                 display: "flex",

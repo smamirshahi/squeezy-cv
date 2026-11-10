@@ -210,21 +210,36 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                       )
                     }
                   />
-                  <Typography
+                  <Box
                     sx={{
-                      fontSize: 13.5,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
                       minWidth: 0,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      color:
-                        isShown && !isDimmed
-                          ? WORKSPACE_COLORS.text
-                          : WORKSPACE_COLORS.muted,
                     }}
                   >
-                    {shorten(bullet.text)}
-                  </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: 13.5,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        color:
+                          isShown && !isDimmed
+                            ? WORKSPACE_COLORS.text
+                            : WORKSPACE_COLORS.muted,
+                      }}
+                    >
+                      {shorten(bullet.text)}
+                    </Typography>
+                    {choice?.relevance !== undefined && (
+                      <RelevanceBadge
+                        relevance={choice.relevance}
+                        reason={choice.relevanceReason}
+                      />
+                    )}
+                  </Box>
                   <Box>
                     {wordings.length > 1 && (
                       <TextField

@@ -10,7 +10,13 @@ import {
   AiProviderInfo,
   AiTask,
 } from "@shared/ai/providers";
-import { ScoreResult, ScoreResultSchema } from "@custom-types/score-types";
+import {
+  AnalyseResult,
+  AnalyseResultSchema,
+  ScoreResult,
+  ScoreResultSchema,
+} from "@custom-types/score-types";
+import { Requirements } from "@custom-types/requirements-types";
 import {
   RewriteRequest,
   RewriteResult,
@@ -138,7 +144,7 @@ export interface ImportedCv {
 }
 
 /** The messages tailoring would send, see the server's `previewTailorRequest` */
-export interface TailorPreview {
+interface TailorPreview {
   provider: AiProviderId;
   calls: { promptName: string; system: string; input: string }[];
 }
@@ -203,8 +209,14 @@ export interface ApiClient {
   rewriteBullet: (request: RewriteRequest) => Promise<RewriteResult>;
   generateBullets: (request: BulletsRequest) => Promise<BulletsResult>;
 
-  /** Scores every item of the saved CV against an advert. Sends item text (no name or contact details) to the chosen provider. Nothing is changed. */
-  scoreItems: (jobAd: string) => Promise<ScoreResult>;
+  /** Reads an advert once: what it asks for. Sends only the advert text to the chosen provider. Nothing is changed. */
+  analyseJobAd: (jobAd: string) => Promise<AnalyseResult>;
+
+  /** Scores every entry (and skill) of one saved section against what the advert asks for. Sends that section's text (no name or contact details) to the chosen provider. Nothing is changed. */
+  scoreSection: (
+    sectionId: string,
+    requirements: Requirements
+  ) => Promise<ScoreResult>;
 
   /** Asks the AI which items to hide so the CV fits. Sends item labels, not personal details. Nothing is changed. */
   suggestHide: (request: HideRequest) => Promise<HideResult>;
@@ -372,9 +384,17 @@ export function createApiClient(
         await request(fetchImpl, "POST", "/api/ai/bullets", body)
       );
     },
-    async scoreItems(jobAd) {
+    async analyseJobAd(jobAd) {
+      return AnalyseResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/analyse", { jobAd })
+      );
+    },
+    async scoreSection(sectionId, requirements) {
       return ScoreResultSchema.check(
-        await request(fetchImpl, "POST", "/api/ai/score", { jobAd })
+        await request(fetchImpl, "POST", "/api/ai/score-section", {
+          sectionId,
+          requirements,
+        })
       );
     },
     async suggestHide(body) {

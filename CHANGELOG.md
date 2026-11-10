@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).
 - The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
 
 ## [0.3.0] - 2026-11-10

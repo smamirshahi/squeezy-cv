@@ -13,13 +13,13 @@ export interface DiffPart {
   text: string;
 }
 
-export interface DiffBullet {
+interface DiffBullet {
   bulletId: string;
   status: DiffStatus;
   parts: DiffPart[];
 }
 
-export interface DiffItem {
+interface DiffItem {
   itemId: string;
   label: string;
   status: DiffStatus;

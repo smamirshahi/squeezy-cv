@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { JobContent } from "@pages/editor-page/sections/job-content";
+import { SectionTailor } from "@pages/workspace/section-tailor";
 import { Inspector } from "@pages/workspace/inspector";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -84,6 +85,9 @@ export function ContentPanel(): JSX.Element {
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           Step {index + 1} of {steps.length}
         </Typography>
+        {steps[index].id !== HEADER_STEP && (
+          <SectionTailor sectionId={steps[index].id} />
+        )}
         <JobContent only={steps[index].id} />
       </Box>
     </ResizableAside>

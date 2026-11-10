@@ -37,13 +37,6 @@ const MAIN: Entry[] = [
 
 const ASSISTANTS: Entry[] = [
   {
-    id: "tailor",
-    label: "Tailor",
-    hint: "Adapt the CV to the advert",
-    to: () => ({ kind: "tailor" }),
-    isOn: (r) => r.kind === "tailor",
-  },
-  {
     id: "chat",
     label: "Chat",
     hint: "Ask for changes in words",

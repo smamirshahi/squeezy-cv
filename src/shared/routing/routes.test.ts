@@ -106,7 +106,6 @@ describe("formatRoute", () => {
     { kind: "templates", tab: "design" },
     { kind: "templates", tab: "design", templateId: "t1" },
     { kind: "templates", tab: "design", templateId: "a b/c" },
-    { kind: "tailor" },
     { kind: "chat", jobId: "main" },
     { kind: "chat" },
     { kind: "ai" },
