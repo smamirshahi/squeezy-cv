@@ -86,7 +86,9 @@ You can use any of these providers. In the app, **AI setup** (left rail) lets yo
 
 Restart `pnpm dev` after changing `.env`.
 
-Before anything is sent, your name, email, phone, address and links are replaced with placeholders. Employer and school names can optionally be masked too (a checkbox in AI setup). Dates and wording are still sent, so they can identify you. For anything sensitive, use Ollama. The Tailor page has **Preview the exact request** to show what would be sent.
+**Groq models.** Groq changes which models a key can use, and some (such as the Llama ones marked "Enterprise / Contact Sales") answer `404 model does not exist` on a normal key. The current list is at <https://console.groq.com/docs/models>. Pick a model that is listed under Production Models without "Contact Sales" and set it in `.env`, for example `GROQ_MODEL=openai/gpt-oss-120b` (the default; `openai/gpt-oss-20b` is smaller and faster). If you get a 404, check that page first.
+
+Before anything is sent to an online provider, a **Send to AI** window shows the exact text. Your name, email, phone, address, links, employers and schools are already replaced with placeholders (`[Company 1]`); you can switch each off, select any other word or phrase to hide it everywhere, and mark a job advert as private. The model's answer gets the real words back on your computer. Dates and wording are still sent, so they can identify you. For anything sensitive, use Ollama, which stays on your computer and shows no window.
 
 ### Installing Ollama (local, free, private)
 

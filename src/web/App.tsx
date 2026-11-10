@@ -3,6 +3,7 @@ import { AppThemeProvider } from "@custom-styles/theme";
 import { Workspace } from "@pages/workspace/workspace";
 import { PrintView } from "@pages/print-page/print-view";
 import { NotFound } from "@pages/workspace/not-found";
+import { SendToAiHost } from "@pages/workspace/send-to-ai-dialog";
 import { navigate, useRoute } from "@hooks/navigation";
 import { isShellRoute, legacyRedirect } from "@shared/routing/routes";
 
@@ -36,6 +37,7 @@ export function App(): JSX.Element {
   return (
     <AppThemeProvider>
       {isShellRoute(route) ? <Workspace route={route} /> : <NotFoundPage />}
+      <SendToAiHost />
     </AppThemeProvider>
   );
 }
