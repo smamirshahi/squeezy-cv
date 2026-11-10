@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { JobContent } from "@pages/editor-page/sections/job-content";
+import { TailorAll } from "@pages/workspace/tailor-all";
 import { SectionTailor } from "@pages/workspace/section-tailor";
 import { Inspector } from "@pages/workspace/inspector";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
@@ -52,6 +53,7 @@ export function ContentPanel(): JSX.Element {
           alignContent: "start",
         }}
       >
+        <TailorAll />
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button
             size="small"

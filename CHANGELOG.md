@@ -12,6 +12,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Changed
 
 - Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).
+- Apply: each entry can show or hide its parts (title, dissertation, description ...), Start and End are one "Dates" part, and hiding the dates no longer shows "Present". The summary and descriptions get Shorten, Rephrase for this job and Make longer (#323).
+- Apply: "Tailor all sections" scores every section in one go with a progress bar (#324).
+- Apply: entries are a table (Entry, Organisation, Dates) where a section has those; the Wording column only shows when used (#325).
+- Vault: lists are tables with sortable headers instead of up/down arrows (#326).
+- Style: "Icons next to details" option (on by default); the template bar says how many jobs were already applied with it (#327).
 - The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
 
 ## [0.3.0] - 2026-11-10

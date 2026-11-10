@@ -1,4 +1,5 @@
 import { useState } from "react";
+import dayjs from "dayjs";
 import {
   Box,
   IconButton,
@@ -9,17 +10,21 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import StarIcon from "@mui/icons-material/Star";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { EyeToggle } from "@pages/workspace/eye-toggle";
+import { ItemParts, itemPartsOf } from "@pages/workspace/item-parts";
 import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { Variant, Wording } from "@custom-types/variant-types";
 import { Item, Section } from "@custom-types/vault-types";
-import { getItemLabel, shorten } from "@shared/variant/item-label";
+import {
+  entryColumns,
+  getItemLabel,
+  shorten,
+} from "@shared/variant/item-label";
 import {
   jobBullets,
   sortBulletsByVariant,
@@ -48,6 +53,7 @@ import {
   setItemOrders,
   setItemSelection,
 } from "@store/jobs/jobs-slice";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 /** Columns of the table: drag handle, tick, entry, wording, highlight, order buttons */
@@ -56,52 +62,37 @@ function columnsFor(hasWording: boolean): string {
   return `32px 32px minmax(0, 1fr) ${hasWording ? "120px" : "0px"} 40px 64px`;
 }
 
-/** True when any entry of the vault has bullets, i.e. there is something to word */
+/** Inside the Entry cell: title, organisation, dates */
+interface ShownColumns {
+  hasOrganisation: boolean;
+  hasDates: boolean;
+}
+
+/** The columns inside the Entry cell; organisation and dates only exist when an entry of the section has them */
+function entryGrid({ hasOrganisation, hasDates }: ShownColumns): string {
+  return `minmax(0, 1.4fr)${hasOrganisation ? " minmax(0, 1fr)" : ""}${hasDates ? " minmax(0, 0.9fr)" : ""}`;
+}
+
+/** Which of the optional columns a section needs (a summary or a skills group has neither) */
+function shownColumnsOf(section: Section): ShownColumns {
+  const all = section.items.map((item) => entryColumns(item, () => ""));
+  return {
+    hasOrganisation: all.some((entry) => entry.organisation !== ""),
+    hasDates: all.some((entry) => entry.dates !== ""),
+  };
+}
+
+/** True when some bullet has a Short, Long or Formal wording to choose from (otherwise the column would be empty) */
 function useHasWording(): boolean {
   const sections = useAppSelector(sectionsSelector);
   const variant = useAppSelector(activeVariantSelector);
   return sections.some((section) =>
-    section.items.some((item) => jobBullets(item, variant.selection).length > 0)
+    section.items.some((item) =>
+      jobBullets(item, variant.selection).some(
+        (bullet) => availableWordings(item, bullet.id).length > 1
+      )
+    )
   );
-}
-
-/** The eye that shows or hides an entry or bullet in this job */
-function EyeToggle({
-  isShown,
-  label,
-  onChange,
-}: {
-  isShown: boolean;
-  label: string;
-  onChange: (isShown: boolean) => void;
-}): JSX.Element {
-  return (
-    <IconButton
-      size="small"
-      aria-label={`${isShown ? "Hide" : "Show"} ${label}`}
-      aria-pressed={isShown}
-      title={
-        isShown ? "Shown on this CV. Click to hide." : "Hidden. Click to show."
-      }
-      onClick={() => onChange(!isShown)}
-    >
-      {isShown ? (
-        <VisibilityIcon fontSize="small" />
-      ) : (
-        <VisibilityOffIcon fontSize="small" />
-      )}
-    </IconButton>
-  );
-}
-
-const SUBTITLE_FIELDS = ["company", "institute", "institution", "subtitle"];
-
-/** "Acme · London": the first filled-in company-like field and the location */
-function getItemSubtitle(item: Item): string {
-  const first = SUBTITLE_FIELDS.map((key) => item.fields[key]?.trim()).find(
-    Boolean
-  );
-  return [first, item.fields.location?.trim()].filter(Boolean).join(" · ");
 }
 
 /** How many entries and bullets this job shows, out of those in the vault */
@@ -291,6 +282,53 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
   );
 }
 
+/** The column titles above the entries of one section (skills have no organisation or dates) */
+function ColumnHeader({
+  columns,
+  hasWording,
+}: {
+  columns: ShownColumns;
+  hasWording: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: columnsFor(hasWording),
+        columnGap: 1,
+        px: 2.5,
+        py: 1,
+        borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        color: WORKSPACE_COLORS.muted,
+      }}
+    >
+      <span />
+      <span />
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: entryGrid(columns),
+          columnGap: 1,
+        }}
+      >
+        <span>Entry</span>
+        {columns.hasOrganisation && <span>Organisation</span>}
+        {columns.hasDates && <span>Dates</span>}
+      </Box>
+      <span>{hasWording ? "Wording" : ""}</span>
+      <StarBorderOutlinedIcon
+        titleAccess="Highlight"
+        sx={{ fontSize: 16, justifySelf: "center" }}
+      />
+      <span />
+    </Box>
+  );
+}
+
 interface SectionRowsProps {
   section: Section;
   isOn: boolean;
@@ -301,9 +339,11 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
   const hasWording = useHasWording();
   const dispatch = useAppDispatch();
   const variant = useAppSelector(activeVariantSelector);
+  const { dateFormat } = useAppSelector(styleSelector);
   const sensors = useReorderSensors();
   const [openIds, setOpenIds] = useState<string[]>([]);
   const items = sortItemsByVariant(section.items, variant.selection);
+  const shown = shownColumnsOf(section);
   const ids = items.map((i) => i.id);
   const shownCount = items.filter(
     (i) => variant.selection[i.id]?.isVisible !== false
@@ -347,6 +387,9 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
         </Typography>
       </Box>
       {isOn && items.length > 0 && (
+        <ColumnHeader columns={shown} hasWording={hasWording} />
+      )}
+      {isOn && items.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -364,8 +407,13 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
               const isHighlighted = selection?.emphasis === "high";
               const isOpen = openIds.includes(item.id);
               const label = getItemLabel(item);
-              const subtitle = getItemSubtitle(item);
+              const columns = entryColumns(item, (day) =>
+                dayjs(day).format(dateFormat)
+              );
               const itemBullets = jobBullets(item, variant.selection);
+              const hasParts =
+                section.type !== "skills" &&
+                itemPartsOf(section, item).length > 0;
               const bulletsShown = itemBullets.filter(
                 (b) => selection?.bullets?.[b.id]?.isVisible !== false
               ).length;
@@ -403,71 +451,110 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                         />
                         <Box
                           sx={{
-                            display: "flex",
+                            display: "grid",
+                            gridTemplateColumns: entryGrid(shown),
+                            columnGap: 1,
                             alignItems: "center",
-                            gap: 0.5,
                             minWidth: 0,
                           }}
                         >
-                          {itemBullets.length > 0 && (
-                            <IconButton
-                              size="small"
-                              aria-expanded={isOpen}
-                              aria-label={`${isOpen ? "Collapse" : "Expand"} ${label}`}
-                              onClick={() => toggleOpen(item.id)}
-                            >
-                              <ExpandMoreIcon
-                                fontSize="small"
-                                sx={{
-                                  transform: isOpen ? "none" : "rotate(-90deg)",
-                                }}
-                              />
-                            </IconButton>
-                          )}
                           <Box
                             sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
                               minWidth: 0,
-                              color: isShown
-                                ? WORKSPACE_COLORS.text
-                                : WORKSPACE_COLORS.muted,
                             }}
                           >
-                            <Typography
-                              noWrap
-                              sx={{ fontSize: 14, fontWeight: 600 }}
+                            {(itemBullets.length > 0 || hasParts) && (
+                              <IconButton
+                                size="small"
+                                aria-expanded={isOpen}
+                                aria-label={`${isOpen ? "Collapse" : "Expand"} ${label}`}
+                                onClick={() => toggleOpen(item.id)}
+                              >
+                                <ExpandMoreIcon
+                                  fontSize="small"
+                                  sx={{
+                                    transform: isOpen
+                                      ? "none"
+                                      : "rotate(-90deg)",
+                                  }}
+                                />
+                              </IconButton>
+                            )}
+                            <Box
+                              sx={{
+                                minWidth: 0,
+                                color: isShown
+                                  ? WORKSPACE_COLORS.text
+                                  : WORKSPACE_COLORS.muted,
+                              }}
                             >
-                              {label}
-                            </Typography>
-                            {subtitle && (
                               <Typography
                                 noWrap
+                                sx={{ fontSize: 14, fontWeight: 600 }}
+                              >
+                                {label}
+                              </Typography>
+                            </Box>
+                            {selection?.relevance !== undefined && (
+                              <Box sx={{ ml: 1 }}>
+                                <RelevanceBadge
+                                  relevance={selection.relevance}
+                                  reason={selection.relevanceReason}
+                                />
+                              </Box>
+                            )}
+                            {itemBullets.length > 0 && (
+                              <Typography
                                 sx={{
+                                  flex: "none",
+                                  ml: 1,
                                   fontSize: 12,
                                   color: WORKSPACE_COLORS.muted,
                                 }}
                               >
-                                {subtitle}
+                                {bulletsShown} of {itemBullets.length}
                               </Typography>
                             )}
                           </Box>
-                          {selection?.relevance !== undefined && (
-                            <Box sx={{ ml: 1 }}>
-                              <RelevanceBadge
-                                relevance={selection.relevance}
-                                reason={selection.relevanceReason}
-                              />
-                            </Box>
-                          )}
-                          {itemBullets.length > 0 && (
-                            <Typography
+                          {shown.hasOrganisation && (
+                            <Box
                               sx={{
-                                flex: "none",
-                                ml: 1,
-                                fontSize: 12,
-                                color: WORKSPACE_COLORS.muted,
+                                minWidth: 0,
+                                color: isShown
+                                  ? WORKSPACE_COLORS.text
+                                  : WORKSPACE_COLORS.muted,
                               }}
                             >
-                              {bulletsShown} of {itemBullets.length}
+                              <Typography noWrap sx={{ fontSize: 13 }}>
+                                {columns.organisation}
+                              </Typography>
+                              {columns.location && (
+                                <Typography
+                                  noWrap
+                                  sx={{
+                                    fontSize: 11.5,
+                                    color: WORKSPACE_COLORS.muted,
+                                  }}
+                                >
+                                  {columns.location}
+                                </Typography>
+                              )}
+                            </Box>
+                          )}
+                          {shown.hasDates && (
+                            <Typography
+                              noWrap
+                              sx={{
+                                fontSize: 12.5,
+                                color: isShown
+                                  ? WORKSPACE_COLORS.text
+                                  : WORKSPACE_COLORS.muted,
+                              }}
+                            >
+                              {columns.dates}
                             </Typography>
                           )}
                         </Box>
@@ -508,6 +595,13 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                           isLastEntity={index === items.length - 1}
                         />
                       </Box>
+                      {isOpen && hasParts && (
+                        <ItemParts
+                          section={section}
+                          item={item}
+                          isDimmed={!isShown}
+                        />
+                      )}
                       {isOpen && <BulletRows item={item} isDimmed={!isShown} />}
                     </Box>
                   )}
@@ -533,7 +627,6 @@ export function JobContent({
 }): JSX.Element {
   const sections = useAppSelector(sectionsSelector);
   const variant = useAppSelector(activeVariantSelector);
-  const hasWording = useHasWording();
   const hidden = variant.hiddenSections ?? [];
   const counts = countShown(sections, variant.selection, hidden);
 
@@ -571,31 +664,6 @@ export function JobContent({
           {counts.bullets[0]} of {counts.bullets[1]}{" "}
           {counts.bullets[1] === 1 ? "bullet" : "bullets"}
         </Typography>
-      </Box>
-      <Box
-        sx={{
-          display: only === "header" ? "none" : "grid",
-          gridTemplateColumns: columnsFor(hasWording),
-          columnGap: 1,
-          px: 2.5,
-          py: 1,
-          borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          color: WORKSPACE_COLORS.muted,
-        }}
-      >
-        <span />
-        <span />
-        <span>Entry</span>
-        <span>{hasWording ? "Wording" : ""}</span>
-        <StarBorderOutlinedIcon
-          titleAccess="Highlight"
-          sx={{ fontSize: 16, justifySelf: "center" }}
-        />
-        <span />
       </Box>
       {sections
         .filter((section) => only === undefined || section.id === only)

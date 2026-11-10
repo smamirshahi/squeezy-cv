@@ -93,6 +93,9 @@ export const StyleSchema = Object({
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 
+  /** Whether the small icons (link, date, location, email, phone ...) show before details; missing = shown */
+  shouldShowIcons: Boolean.optional(),
+
   /** Space above each section title in px (0-40); missing = the default */
   sectionSpacing: Number.optional(),
 

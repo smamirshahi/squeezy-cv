@@ -16,6 +16,11 @@ import {
   ScoreResult,
   ScoreResultSchema,
 } from "@custom-types/score-types";
+import {
+  RewordRequest,
+  RewordResult,
+  RewordResultSchema,
+} from "@custom-types/reword-types";
 import { Requirements } from "@custom-types/requirements-types";
 import {
   RewriteRequest,
@@ -209,6 +214,9 @@ export interface ApiClient {
   rewriteBullet: (request: RewriteRequest) => Promise<RewriteResult>;
   generateBullets: (request: BulletsRequest) => Promise<BulletsResult>;
 
+  /** One text (summary, description) shortened, lengthened or fitted to the keywords. Sends that item's saved text (no name or contact details) to the chosen provider. Nothing is changed. */
+  rewordText: (request: RewordRequest) => Promise<RewordResult>;
+
   /** Reads an advert once: what it asks for. Sends only the advert text to the chosen provider. Nothing is changed. */
   analyseJobAd: (jobAd: string) => Promise<AnalyseResult>;
 
@@ -387,6 +395,11 @@ export function createApiClient(
     async analyseJobAd(jobAd) {
       return AnalyseResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/analyse", { jobAd })
+      );
+    },
+    async rewordText(body) {
+      return RewordResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/reword", body)
       );
     },
     async scoreSection(sectionId, requirements) {

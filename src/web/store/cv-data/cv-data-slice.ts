@@ -24,6 +24,7 @@ export const initialState: CvDataState = {
   style: {
     shouldShowFullContactLinks: true,
     shouldShowRightToWork: false,
+    shouldShowIcons: true,
     ratingIcon: "text",
     bulletPointIcon: "disc",
     dateFormat: "MMM YYYY",
@@ -76,6 +77,10 @@ const cvDataSlice = createSlice({
 
     setCitationStyle(state, action: PayloadAction<Style["citationStyle"]>) {
       state.style.citationStyle = action.payload;
+    },
+
+    setShouldShowIcons(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowIcons = action.payload;
     },
 
     setHasHeadingLine(state, action: PayloadAction<boolean>) {
@@ -162,6 +167,7 @@ export const {
   setShouldShowGender,
   setSectionSpacing,
   setHasHeadingLine,
+  setShouldShowIcons,
   setCitationStyle,
   setPaperMargin,
   setTypography,

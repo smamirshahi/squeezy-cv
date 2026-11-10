@@ -41,6 +41,8 @@ import {
   RewriteRequestSchema,
 } from "@custom-types/rewrite-types";
 import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
+import { rewordText } from "@server/ai/reword-text";
+import { RewordRequestSchema } from "@custom-types/reword-types";
 import {
   generateBullets,
   ItemNotFoundError,
@@ -496,6 +498,47 @@ export function buildServer({
           requirements,
           focus: body.focus?.slice(0, 200),
           current: (body.current ?? []).map((text) => text.slice(0, 600)),
+        },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      );
+    } catch (error) {
+      if (error instanceof ItemNotFoundError) {
+        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
+      }
+      if (error instanceof NothingToWorkFromError) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "nothing_to_work_from",
+          error.message
+        );
+      }
+      throw error;
+    }
+  });
+
+  // One text (summary, description) shortened, lengthened or fitted to the job's keywords (the user reviews it; nothing is changed here)
+  app.post("/api/ai/reword", async (request, reply) => {
+    const { client: ai } = registry.forTask("chat");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = RewordRequestSchema.check(request.body);
+    const { vault } = await storage.loadVault();
+    try {
+      return await rewordText(
+        ai,
+        vault,
+        {
+          ...body,
+          requirements: (body.requirements ?? []).map((text) =>
+            text.slice(0, 200)
+          ),
         },
         { isMaskingOrganisations: registry.isMaskingOrganisations() }
       );

@@ -43,3 +43,30 @@ export function datedTitle(
   const end = endDate?.trim();
   return `${title} (${formatDay(start)} - ${end ? formatDay(end) : "Present"})`;
 }
+
+const ORGANISATION_FIELDS = [
+  "company",
+  "institute",
+  "institution",
+  "subtitle",
+  "issuer",
+  "journal",
+];
+
+/** Title, organisation (with location) and date period of an item, for table rows */
+export function entryColumns(
+  item: Item,
+  formatDay: (day: string) => string
+): { title: string; organisation: string; location: string; dates: string } {
+  const field = (key: string): string => item.fields[key]?.trim() ?? "";
+  const start = field("startDate");
+  const end = field("endDate");
+  return {
+    title: getItemLabel(item, Infinity),
+    organisation: ORGANISATION_FIELDS.map(field).find(Boolean) ?? "",
+    location: field("location"),
+    dates: start
+      ? `${formatDay(start)} - ${end ? formatDay(end) : "Present"}`
+      : field("date") || field("year"),
+  };
+}

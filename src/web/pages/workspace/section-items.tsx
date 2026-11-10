@@ -2,15 +2,13 @@ import { MouseEvent, useState } from "react";
 import {
   Box,
   Button,
+  ButtonBase,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   IconButton,
-  Menu,
-  MenuItem,
-  Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
@@ -19,22 +17,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import dayjs from "dayjs";
 import { Item, Section } from "@custom-types/vault-types";
 import { itemYear } from "@shared/vault/vault-utils";
-import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { UnsortedPlacement } from "@pages/workspace/unsorted-placement";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useDraftFields, withDraft } from "@pages/workspace/draft-fields";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute } from "@shared/routing/routes";
-import { datedTitle, getItemLabel } from "@shared/variant/item-label";
+import {
+  datedTitle,
+  entryColumns,
+  getItemLabel,
+} from "@shared/variant/item-label";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
-import {
-  addBullet,
-  addItem,
-  moveItem,
-  removeItem,
-} from "@store/vault/vault-slice";
+import { addBullet, addItem, removeItem } from "@store/vault/vault-slice";
 
 /** An item with nothing filled in (no field text and no bullet text) */
 function isEmptyItem(item: Section["items"][number]): boolean {
@@ -91,53 +87,276 @@ const ADD_LABELS: Partial<Record<Section["type"], string>> = {
   skills: "Add new skill category",
 };
 
-/** Experience and education are kept in date order by the vault, so they have no arrows */
-const hasManualOrder = (section: Section): boolean =>
-  section.type !== "experience" &&
-  section.type !== "education" &&
-  section.type !== "publications" &&
-  section.type !== "awards";
+/** How a section can be sorted in the list. The first option is the vault's own order (newest first). */
+interface SortOption {
+  key: string;
+  label: string;
 
-type ItemSort = "year" | "title";
+  /** "date": newest first, then reversed; "text": A to Z, then reversed */
+  kind: "date" | "text";
 
-const SORT_LABELS: Record<ItemSort, string> = { year: "Year", title: "Title" };
+  /** The text a "text" sort compares */
+  text?: (item: Item) => string;
+}
 
-/** What the direction arrow means: [default, reversed] */
-const SORT_DIRECTION_HINTS: Record<ItemSort, [string, string]> = {
-  year: ["newest first", "oldest first"],
-  title: ["A to Z", "Z to A"],
+const field =
+  (key: string) =>
+  (item: Item): string =>
+    item.fields[key] ?? "";
+
+const DATES: SortOption = { key: "dates", label: "Dates", kind: "date" };
+const TITLE: SortOption = {
+  key: "title",
+  label: "Title",
+  kind: "text",
+  text: field("title"),
 };
 
-/** Sorting is offered for publications and awards (the vault keeps them newest first) */
-const hasSortChoice = (section: Section): boolean =>
-  section.type === "publications" || section.type === "awards";
+/** The list's own order, first for sections that have no date or year to start from */
+const ORDER: SortOption = { key: "order", label: "Order", kind: "text" };
+
+/** Sort choices by section type; a type without an entry (summary, unsorted) is not sorted. The first option is the vault order. */
+const SORT_OPTIONS: Partial<Record<Section["type"], SortOption[]>> = {
+  experience: [
+    DATES,
+    {
+      key: "organisation",
+      label: "Organisation",
+      kind: "text",
+      text: field("company"),
+    },
+    {
+      key: "jobTitle",
+      label: "Job title",
+      kind: "text",
+      text: field("jobTitle"),
+    },
+  ],
+  education: [
+    DATES,
+    {
+      key: "institute",
+      label: "Institute",
+      kind: "text",
+      text: field("institute"),
+    },
+    { key: "degree", label: "Degree", kind: "text", text: field("degree") },
+  ],
+  publications: [
+    { ...DATES, key: "year", label: "Year" },
+    TITLE,
+    { key: "journal", label: "Journal", kind: "text", text: field("journal") },
+  ],
+  awards: [
+    { ...DATES, key: "year", label: "Year" },
+    TITLE,
+    { key: "issuer", label: "Issuer", kind: "text", text: field("issuer") },
+  ],
+  skills: [
+    ORDER,
+    {
+      key: "category",
+      label: "Category",
+      kind: "text",
+      text: field("category"),
+    },
+  ],
+  interests: [
+    ORDER,
+    { key: "title", label: "Interest", kind: "text", text: field("title") },
+  ],
+  projects: [ORDER, DATES, TITLE],
+  certifications: [ORDER, DATES, TITLE],
+  volunteering: [ORDER, DATES, TITLE],
+  custom: [ORDER, DATES, TITLE],
+};
+
+const sortOptionsOf = (section: Section): SortOption[] =>
+  SORT_OPTIONS[section.type] ?? [];
+
+/** What the direction arrow means: [default, reversed] */
+const SORT_DIRECTION_HINTS: Record<SortOption["kind"], [string, string]> = {
+  date: ["newest first", "oldest first"],
+  text: ["A to Z", "Z to A"],
+};
+
+/** A comparable moment for an item: its start date, date or year (items without one come last) */
+function dateValue(item: Item): number {
+  const text = item.fields.startDate || item.fields.date || item.fields.year;
+  const parsed = text ? Date.parse(text) : Number.NaN;
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+  const year = itemYear(item);
+  return year === null ? Number.NEGATIVE_INFINITY : Date.UTC(year, 0);
+}
 
 /** The items in the order the list shows them (the vault order is newest first) */
 function sortedForView(
   section: Section,
-  sort: ItemSort,
+  option: SortOption | undefined,
   isReversed: boolean
 ): Item[] {
-  if (!hasSortChoice(section) || (sort === "year" && !isReversed)) {
+  const isDefault = option === sortOptionsOf(section)[0];
+  if (!option || (isDefault && !isReversed)) {
     return section.items;
   }
-  const year = (item: Item): number =>
-    itemYear(item) ?? Number.NEGATIVE_INFINITY;
-  const sorted = [...section.items].sort((a, b) =>
-    sort === "year"
-      ? year(b) - year(a)
-      : (a.fields.title ?? "").localeCompare(b.fields.title ?? "")
+  const sorted = [...section.items].sort((x, y) =>
+    option.kind === "date"
+      ? dateValue(y) - dateValue(x)
+      : (option.text?.(x) ?? "").localeCompare(option.text?.(y) ?? "")
   );
   return isReversed ? sorted.reverse() : sorted;
 }
 
-/** The text shown on the right of a row: the year of a publication or award */
-function rightText(section: Section, item: Item): string {
-  return section.type === "publications"
-    ? (item.fields.year ?? "")
-    : section.type === "awards"
-      ? (item.fields.date ?? "")
-      : "";
+type EntryParts = ReturnType<typeof entryColumns>;
+
+interface TableColumn {
+  /** The sort option this column's title triggers */
+  key: string;
+  label: string;
+  value: (parts: EntryParts, item: Item) => string;
+
+  /** Drawn smaller and grey, like a date */
+  isMuted?: boolean;
+}
+
+const THREE_COLUMNS = "minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.9fr)";
+
+/** Experience, education and publications are listed as a table; null for the other sections */
+function tableOf(
+  section: Section
+): { template: string; columns: TableColumn[] } | null {
+  switch (section.type) {
+    case "experience":
+      return {
+        template: THREE_COLUMNS,
+        columns: [
+          { key: "jobTitle", label: "Job title", value: (p) => p.title },
+          {
+            key: "organisation",
+            label: "Organisation",
+            value: (p) => p.organisation,
+          },
+          {
+            key: "dates",
+            label: "Dates",
+            value: (p) => p.dates,
+            isMuted: true,
+          },
+        ],
+      };
+    case "education":
+      return {
+        template: THREE_COLUMNS,
+        columns: [
+          { key: "degree", label: "Degree", value: (p) => p.title },
+          {
+            key: "institute",
+            label: "Institute",
+            value: (p) => p.organisation,
+          },
+          {
+            key: "dates",
+            label: "Dates",
+            value: (p) => p.dates,
+            isMuted: true,
+          },
+        ],
+      };
+    case "publications":
+      return {
+        template: "minmax(0, 1fr) 90px",
+        columns: [
+          {
+            key: "title",
+            label: "Publication",
+            value: (_p, item) => item.fields.title ?? "",
+          },
+          {
+            key: "year",
+            label: "Year",
+            value: (_p, item) => item.fields.year ?? "",
+            isMuted: true,
+          },
+        ],
+      };
+    case "awards":
+      return {
+        template: "minmax(0, 1fr) 90px",
+        columns: [
+          {
+            key: "title",
+            label: "Award",
+            value: (_p, item) => item.fields.title ?? "",
+          },
+          {
+            key: "year",
+            label: "Year",
+            value: (_p, item) => item.fields.date ?? "",
+            isMuted: true,
+          },
+        ],
+      };
+    case "skills":
+      return {
+        template: "minmax(0, 1fr) minmax(0, 2fr)",
+        columns: [
+          {
+            key: "category",
+            label: "Category",
+            value: (_p, item) => item.fields.category ?? "",
+          },
+          {
+            key: "skills",
+            label: "Skills",
+            value: (_p, item) =>
+              item.bullets.map((bullet) => bullet.text).join(", "),
+            isMuted: true,
+          },
+        ],
+      };
+    case "interests":
+      return {
+        template: "minmax(0, 1fr) minmax(0, 1.5fr)",
+        columns: [
+          {
+            key: "title",
+            label: "Interest",
+            value: (_p, item) => item.fields.title ?? "",
+          },
+          {
+            key: "detail",
+            label: "Detail",
+            value: (_p, item) => item.fields.detail ?? "",
+            isMuted: true,
+          },
+        ],
+      };
+    case "projects":
+    case "certifications":
+    case "volunteering":
+    case "custom":
+      return {
+        template: THREE_COLUMNS,
+        columns: [
+          { key: "title", label: "Title", value: (p) => p.title },
+          {
+            key: "subtitle",
+            label: "Subtitle",
+            value: (p) => p.organisation,
+          },
+          {
+            key: "dates",
+            label: "Dates",
+            value: (p) => p.dates,
+            isMuted: true,
+          },
+        ],
+      };
+    default:
+      return null;
+  }
 }
 
 /** The item the right panel shows: the one in the address, else the first */
@@ -157,14 +376,17 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
   const route = useRoute();
   const { dateFormat } = useAppSelector(styleSelector);
   const [removingId, setRemovingId] = useState<string>("");
-  const [sort, setSort] = useState<ItemSort>("year");
+  const options = sortOptionsOf(section);
+  const [sortKey, setSortKey] = useState<string>("");
+  const sort = options.find((entry) => entry.key === sortKey) ?? options[0];
   const [isReversed, setIsReversed] = useState(false);
-  const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
   const itemId = route.kind === "vault" ? (route.itemId ?? "") : "";
   const selected = selectedItemOf(section, itemId);
   const removing = section.items.find((item) => item.id === removingId);
 
   const draftFields = useDraftFields();
+  const table = tableOf(section);
+  const viewItems = sortedForView(section, sort, isReversed);
 
   function select(id: string): void {
     navigate({ kind: "vault", sectionId: section.id, itemId: id });
@@ -197,55 +419,88 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
     <>
       <SectionTitleField key={`title-${section.id}`} section={section} />
       {section.type === "unsorted" && <UnsortedPlacement section={section} />}
-      {hasSortChoice(section) && section.items.length > 1 && (
+      {table && section.items.length > 0 && (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            mb: 1,
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) 40px",
+            borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+            borderLeft: "3px solid transparent",
           }}
         >
-          <Button
-            size="small"
-            aria-haspopup="menu"
-            onClick={(event) => setSortAnchor(event.currentTarget)}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: table?.template,
+              columnGap: 1.5,
+              px: 1.5,
+            }}
           >
-            Sort by: {SORT_LABELS[sort]}
-          </Button>
-          <Tooltip title={SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]}>
-            <Button
-              size="small"
-              aria-label={`Reverse the order (now ${SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]})`}
-              onClick={() => setIsReversed((value) => !value)}
-              sx={{ minWidth: 0, px: 0.75 }}
-            >
-              {isReversed ? (
-                <ArrowUpwardOutlinedIcon fontSize="small" />
-              ) : (
-                <ArrowDownwardOutlinedIcon fontSize="small" />
-              )}
-            </Button>
-          </Tooltip>
-          <Menu
-            anchorEl={sortAnchor}
-            open={sortAnchor !== null}
-            onClose={() => setSortAnchor(null)}
-          >
-            {(Object.keys(SORT_LABELS) as ItemSort[]).map((key) => (
-              <MenuItem
-                key={key}
-                selected={key === sort}
-                onClick={() => {
-                  setSort(key);
-                  setIsReversed(false);
-                  setSortAnchor(null);
-                }}
-              >
-                {SORT_LABELS[key]}
-              </MenuItem>
-            ))}
-          </Menu>
+            {table?.columns.map((column) => {
+              const option = options.find((entry) => entry.key === column.key);
+              const isActive = option !== undefined && option === sort;
+              const isDescending =
+                option?.kind === "date" ? !isReversed : isReversed;
+              if (!option) {
+                return (
+                  <Box
+                    key={column.key}
+                    sx={{
+                      py: 1,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: WORKSPACE_COLORS.muted,
+                    }}
+                  >
+                    {column.label}
+                  </Box>
+                );
+              }
+              return (
+                <ButtonBase
+                  key={column.key}
+                  aria-label={`Sort by ${column.label}${
+                    isActive
+                      ? ` (now ${SORT_DIRECTION_HINTS[option.kind][isReversed ? 1 : 0]})`
+                      : ""
+                  }`}
+                  onClick={() => {
+                    if (isActive) {
+                      setIsReversed((value) => !value);
+                    } else {
+                      setSortKey(column.key);
+                      setIsReversed(false);
+                    }
+                  }}
+                  sx={{
+                    justifyContent: "flex-start",
+                    gap: 0.5,
+                    py: 1,
+                    minWidth: 0,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: isActive
+                      ? WORKSPACE_COLORS.text
+                      : WORKSPACE_COLORS.muted,
+                    "&:hover": { color: WORKSPACE_COLORS.text },
+                  }}
+                >
+                  <span>{column.label}</span>
+                  {isActive &&
+                    (isDescending ? (
+                      <ArrowDownwardOutlinedIcon sx={{ fontSize: 14 }} />
+                    ) : (
+                      <ArrowUpwardOutlinedIcon sx={{ fontSize: 14 }} />
+                    ))}
+                </ButtonBase>
+              );
+            })}
+          </Box>
+          <span />
         </Box>
       )}
       <Box
@@ -253,7 +508,7 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
         aria-label="Items"
         sx={{ listStyle: "none", m: 0, p: 0 }}
       >
-        {sortedForView(section, sort, isReversed).map((item, index) => {
+        {viewItems.map((item) => {
           const isSelected = selected?.id === item.id;
           const shown = withDraft(item, draftFields);
           const title =
@@ -263,6 +518,9 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
               shown.fields.endDate,
               (day) => dayjs(day).format(dateFormat)
             ) || "(untitled)";
+          const columns = entryColumns(shown, (day) =>
+            dayjs(day).format(dateFormat)
+          );
           return (
             <Box
               component="li"
@@ -280,21 +538,6 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
                   : "transparent",
               }}
             >
-              {hasManualOrder(section) && (
-                <SortingIcons
-                  index={index}
-                  swapFunction={(_from, toIndex) =>
-                    dispatch(
-                      moveItem({
-                        sectionId: section.id,
-                        itemId: item.id,
-                        toIndex,
-                      })
-                    )
-                  }
-                  isLastEntity={index === section.items.length - 1}
-                />
-              )}
               <Box
                 component="a"
                 href={formatRoute({
@@ -321,23 +564,35 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
+                  ...(table && {
+                    display: "grid",
+                    gridTemplateColumns: table.template,
+                    columnGap: 1.5,
+                    alignItems: "center",
+                  }),
                 }}
               >
-                {title}
+                {table
+                  ? table.columns.map((column, position) => (
+                      <Box
+                        key={column.key}
+                        component="span"
+                        sx={{
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          ...(position > 0 && { fontWeight: 400 }),
+                          ...(column.isMuted && {
+                            fontSize: 13,
+                            color: WORKSPACE_COLORS.muted,
+                          }),
+                        }}
+                      >
+                        {column.value(columns, shown)}
+                      </Box>
+                    ))
+                  : title}
               </Box>
-              {rightText(section, shown) && (
-                <Box
-                  component="span"
-                  sx={{
-                    px: 1.5,
-                    fontSize: 13,
-                    color: WORKSPACE_COLORS.muted,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {rightText(section, shown)}
-                </Box>
-              )}
               <IconButton
                 aria-label={`Delete ${title}`}
                 onClick={() => setRemovingId(item.id)}

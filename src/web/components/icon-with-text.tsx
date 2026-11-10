@@ -1,6 +1,8 @@
 import { Grid } from "@mui/material";
 import { CvTypography } from "@components/cv-typography";
 import { CvIcon } from "@components/cv-icon";
+import { useAppSelector } from "@store/store-helper";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { AvailableFonts } from "@custom-types/styles-types";
 
 interface Props {
@@ -20,6 +22,8 @@ export function IconWithText({
   icon,
   text,
 }: Props): JSX.Element | null {
+  const { shouldShowIcons } = useAppSelector(styleSelector);
+
   if (!text) {
     return null;
   }
@@ -34,7 +38,7 @@ export function IconWithText({
         mr: "20px",
       }}
     >
-      <CvIcon icon={icon} />
+      {shouldShowIcons !== false && <CvIcon icon={icon} />}
       <CvTypography variant={variant} text={text} />
     </Grid>
   );

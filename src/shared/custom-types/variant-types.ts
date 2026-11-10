@@ -83,6 +83,12 @@ export const ItemSelectionSchema = Object({
   /** Position within its section. Items without one keep their vault position after those with one. */
   order: Number.optional(),
 
+  /** Keys of the item's fields (e.g. "dissertationTitle", "description") this job does not show. The vault keeps them. */
+  hiddenFields: Array(String).optional(),
+
+  /** Wording of a field for this job only (e.g. a shorter "description" or "text"), by field key. The vault text is never changed. */
+  fieldText: Record(String, String).optional(),
+
   /** Per-bullet choices by bullet id. A bullet without an entry is shown with its `text`. */
   bullets: Record(String, BulletSelectionSchema).optional(),
 

@@ -19,6 +19,7 @@ import { batch } from "@store/history/history";
 import { createApiClient } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
+  activeJobSelector,
   activeVariantSelector,
   setItemSelection,
 } from "@store/jobs/jobs-slice";
@@ -52,12 +53,15 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
   const description = (item.fields.description ?? "").trim();
   const choice = variant.selection[item.id];
   const hasGenerated = (choice?.generated?.length ?? 0) > 0;
+  const analysis = useAppSelector(activeJobSelector).analysis;
   const requirements = variant.tailor
     ? [
         ...variant.tailor.requirements.mustHave,
         ...variant.tailor.requirements.niceToHave,
       ]
-    : [];
+    : analysis
+      ? [...analysis.mustHave, ...analysis.niceToHave, ...analysis.keywords]
+      : [];
   const currentTexts = sortBulletsByVariant(item, variant.selection)
     .filter((bullet) => choice?.bullets?.[bullet.id]?.isVisible !== false)
     .map((bullet) => bullet.text);
