@@ -18,7 +18,7 @@ import { activeJobSelector, setSectionScores } from "@store/jobs/jobs-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 /**
- * The "Tailor" button of one section: the AI scores every entry of the section (for skills
+ * The "Score entries" button of one section: the AI scores every entry of the section (for skills
  * each category and each skill) against what "Analyse job description" found. Only scores
  * are stored, as one undo step; nothing is hidden or moved. The section must be saved first,
  * because the server reads the saved CV.
@@ -81,7 +81,7 @@ export function SectionTailor({
   return (
     <Box
       component="section"
-      aria-label="Tailor this section"
+      aria-label="Score this section's entries"
       sx={{
         display: "grid",
         gap: 0.75,
@@ -98,7 +98,7 @@ export function SectionTailor({
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void tailor()}
         >
-          Tailor
+          Score entries
         </Button>
         {isRunning && <CircularProgress size={18} />}
         {done && (
