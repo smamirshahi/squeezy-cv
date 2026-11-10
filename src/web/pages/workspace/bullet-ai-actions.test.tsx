@@ -147,7 +147,7 @@ describe("BulletAiActions", () => {
 describe("RelevanceBadge", () => {
   it("shows the score or that it is not scored", () => {
     const { rerender } = render(<RelevanceBadge relevance={72.4} />);
-    expect(screen.getByText("Relevance 72")).toBeTruthy();
+    expect(screen.getByText("Relevancy 72%")).toBeTruthy();
     rerender(<RelevanceBadge relevance={undefined} />);
     expect(screen.getByText("Not scored")).toBeTruthy();
   });

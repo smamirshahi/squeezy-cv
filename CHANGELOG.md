@@ -25,6 +25,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
 - "Score entries" is a filled button like "Score all sections"; Back and Next are outlined (#336).
 - AI buttons (Shorten, Rephrase for this job, Make longer, Make bullets, Emphasise and the per-bullet buttons) show a spinner until the result is there (#335).
+- The relevance badge reads "Relevancy 85%" and a tooltip explains what the number means and its bands (#334).
 
 ### Fixed
 
