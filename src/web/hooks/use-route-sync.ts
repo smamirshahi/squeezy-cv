@@ -71,7 +71,6 @@ export function useRouteSync(route: Route): void {
       toolKind === "vault" ||
       toolKind === "jobs" ||
       toolKind === "templates" ||
-      toolKind === "tailor" ||
       toolKind === "chat" ||
       toolKind === "ai"
     ) {

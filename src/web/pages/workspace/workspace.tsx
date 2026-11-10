@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Box, Button } from "@mui/material";
 import { SettingsPage } from "@pages/workspace/settings-page";
 import { VaultPage } from "@pages/workspace/vault-page";
-import { AiAssistant } from "@pages/ai-page/ai-assistant";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useUndoShortcuts } from "@pages/workspace/use-undo-shortcuts";
 import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
@@ -110,7 +109,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {missing && <NotFound what={missing.what} backTo={missing.backTo} />}
-        {!missing && ["jobs", "tailor", "chat"].includes(tool) && (
+        {!missing && ["jobs", "chat"].includes(tool) && (
           <ApplySidebar jobId={isPlaceholder ? undefined : activeJobId} />
         )}
         {!missing &&
@@ -177,7 +176,6 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
         {!missing && tool === "templates" && <TemplatesPage />}
         {!missing && isEmpty && <NoJobs />}
         {!missing && tool === "vault" && <VaultPage />}
-        {!missing && tool === "tailor" && <AiAssistant />}
         {!missing && tool === "ai" && <SettingsPage />}
         {!missing && route.kind === "applications" && <ApplicationsPage />}
         {!missing && route.kind === "application" && (
@@ -254,8 +252,6 @@ function titleOf(route: ShellRoute, jobName: string): string {
       return `${route.view === "settings" ? "Content" : route.view === "details" ? "Job application" : "Apply"}${jobName ? ` · ${jobName}` : ""}`;
     case "templates":
       return `Templates${route.tab === "templates" ? "" : " · Design"}`;
-    case "tailor":
-      return "Tailor";
     case "chat":
       return `Chat${jobName ? ` · ${jobName}` : ""}`;
     case "ai":

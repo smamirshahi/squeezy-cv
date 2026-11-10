@@ -12,8 +12,11 @@ import { TemplateSchema } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
-import { scoreItems } from "@server/ai/score-items";
-import { ScoreRequestSchema } from "@custom-types/score-types";
+import { analyseJobAd, scoreSection } from "@server/ai/analyse-job-ad";
+import {
+  AnalyseRequestSchema,
+  ScoreSectionRequestSchema,
+} from "@custom-types/score-types";
 import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
@@ -38,6 +41,8 @@ import {
   RewriteRequestSchema,
 } from "@custom-types/rewrite-types";
 import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
+import { rewordText } from "@server/ai/reword-text";
+import { RewordRequestSchema } from "@custom-types/reword-types";
 import {
   generateBullets,
   ItemNotFoundError,
@@ -350,8 +355,8 @@ export function buildServer({
     );
   });
 
-  // A relevance score and reason for every item against a job advert (the user applies it; nothing is changed here)
-  app.post("/api/ai/score", async (request, reply) => {
+  // Reads an advert once: keywords and requirements for the job (the user stores them; nothing is changed here)
+  app.post("/api/ai/analyse", async (request, reply) => {
     const { client: ai } = registry.forTask("tailor");
     if (!ai) {
       return sendError(
@@ -361,7 +366,7 @@ export function buildServer({
         "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
       );
     }
-    const jobAd = ScoreRequestSchema.check(request.body).jobAd.trim();
+    const jobAd = AnalyseRequestSchema.check(request.body).jobAd.trim();
     if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
       return sendError(
         reply,
@@ -371,7 +376,34 @@ export function buildServer({
       );
     }
     const { vault } = await storage.loadVault();
-    return scoreItems(ai, vault, jobAd, {
+    return analyseJobAd(ai, vault, jobAd, {
+      isMaskingOrganisations: registry.isMaskingOrganisations(),
+    });
+  });
+
+  // A relevance score and reason for every entry (and skill) of ONE section (the user applies it; nothing is changed here)
+  app.post("/api/ai/score-section", async (request, reply) => {
+    const { client: ai } = registry.forTask("tailor");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
+      );
+    }
+    const body = ScoreSectionRequestSchema.check(request.body);
+    const { vault } = await storage.loadVault();
+    const section = vault.sections.find((entry) => entry.id === body.sectionId);
+    if (!section) {
+      return sendError(
+        reply,
+        HTTP_NOT_FOUND,
+        "not_found",
+        "That section is not in the saved CV. Save first."
+      );
+    }
+    return scoreSection(ai, vault, section, body.requirements, {
       isMaskingOrganisations: registry.isMaskingOrganisations(),
     });
   });
@@ -466,6 +498,47 @@ export function buildServer({
           requirements,
           focus: body.focus?.slice(0, 200),
           current: (body.current ?? []).map((text) => text.slice(0, 600)),
+        },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      );
+    } catch (error) {
+      if (error instanceof ItemNotFoundError) {
+        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
+      }
+      if (error instanceof NothingToWorkFromError) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "nothing_to_work_from",
+          error.message
+        );
+      }
+      throw error;
+    }
+  });
+
+  // One text (summary, description) shortened, lengthened or fitted to the job's keywords (the user reviews it; nothing is changed here)
+  app.post("/api/ai/reword", async (request, reply) => {
+    const { client: ai } = registry.forTask("chat");
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = RewordRequestSchema.check(request.body);
+    const { vault } = await storage.loadVault();
+    try {
+      return await rewordText(
+        ai,
+        vault,
+        {
+          ...body,
+          requirements: (body.requirements ?? []).map((text) =>
+            text.slice(0, 200)
+          ),
         },
         { isMaskingOrganisations: registry.isMaskingOrganisations() }
       );

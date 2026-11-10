@@ -9,7 +9,6 @@ export type Route =
   | { kind: "vault"; sectionId?: string; itemId?: string }
   | { kind: "jobs"; jobId?: string; view: JobsView }
   | { kind: "templates"; tab: TemplatesTab; templateId?: string }
-  | { kind: "tailor" }
   | { kind: "chat"; jobId?: string }
   | { kind: "ai" }
   | { kind: "applications"; search: string }
@@ -22,7 +21,7 @@ const TEMPLATE_TABS: TemplatesTab[] = ["templates", "design"];
 /** The routes that are pages of the workspace (they share the rail and the top bar) */
 export type WorkspaceRoute = Extract<
   Route,
-  { kind: "vault" | "jobs" | "templates" | "tailor" | "chat" | "ai" }
+  { kind: "vault" | "jobs" | "templates" | "chat" | "ai" }
 >;
 
 /** Everything that is drawn inside the workspace shell: the tools and the applications pages */
@@ -42,7 +41,6 @@ export function isWorkspaceRoute(route: Route): route is WorkspaceRoute {
     route.kind === "vault" ||
     route.kind === "jobs" ||
     route.kind === "templates" ||
-    route.kind === "tailor" ||
     route.kind === "chat" ||
     route.kind === "ai"
   );
@@ -93,8 +91,6 @@ export function parseRoute(pathname: string, search = ""): Route {
         ? { kind: "templates", tab: third, templateId: second }
         : notFound;
     }
-    case "tailor":
-      return second === undefined ? { kind: "tailor" } : notFound;
     case "chat":
       return third === undefined ? { kind: "chat", jobId: second } : notFound;
     case "settings":
@@ -141,8 +137,6 @@ export function formatRoute(route: Route): string {
       return route.templateId
         ? `/templates/${encodeURIComponent(route.templateId)}/${route.tab}`
         : `/templates/${route.tab}`;
-    case "tailor":
-      return "/tailor";
     case "chat":
       return `/chat${segment(route.jobId)}`;
     case "ai":

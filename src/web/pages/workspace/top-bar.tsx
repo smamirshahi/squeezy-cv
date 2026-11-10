@@ -108,7 +108,7 @@ const FLOW_STEPS: FlowStep[] = [
   {
     label: "Job application",
     target: { kind: "jobs", view: "page" },
-    kinds: ["jobs", "tailor", "chat"],
+    kinds: ["jobs", "chat"],
     info: "One target. It picks a template, then chooses which items to show and how they are worded. Exporting and marking as applied freezes a copy of what you sent.",
   },
 ];

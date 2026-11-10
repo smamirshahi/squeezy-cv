@@ -9,6 +9,7 @@ import {
   String,
   Union,
 } from "runtypes";
+import { RequirementsSchema } from "@custom-types/requirements-types";
 import { JobOpinionSchema } from "@custom-types/json-types";
 import {
   FitTuningSchema,
@@ -117,8 +118,11 @@ export const JobSchema = Object({
   /** Set when the job was made from a tailoring proposal */
   tailor: TailorRecordSchema.optional(),
 
-  /** The advert last used for "Score items", so it need not be pasted again */
+  /** The advert pasted for this job */
   jobAd: String.optional(),
+
+  /** What the advert asks for (keywords, must-haves), made by "Analyse job description" and used by each section's Tailor button */
+  analysis: RequirementsSchema.optional(),
 });
 
 export type Job = Static<typeof JobSchema>;

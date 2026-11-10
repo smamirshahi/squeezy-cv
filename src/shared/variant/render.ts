@@ -134,6 +134,21 @@ function resolveItems(items: Item[], selection: Variant["selection"]): Item[] {
     });
 }
 
+/** The fields of an item as this job shows them: its own wording of a field, and without the parts it hides */
+function jobFields(
+  item: Item,
+  choice: Variant["selection"][string] | undefined
+): Record<string, string> {
+  const fields: Record<string, string> = {
+    ...item.fields,
+    ...choice?.fieldText,
+  };
+  for (const key of choice?.hiddenFields ?? []) {
+    delete fields[key];
+  }
+  return fields;
+}
+
 function renderItems(
   items: Item[],
   selection: Variant["selection"],
@@ -149,7 +164,7 @@ function renderItems(
     .filter((item) => !minLevel || item.bullets.length > 0)
     .map((item) => ({
       id: item.id,
-      fields: item.fields,
+      fields: jobFields(item, selection[item.id]),
       bullets: item.bullets.map((bullet) => ({
         id: bullet.id,
         text: bullet.text,

@@ -8,7 +8,7 @@ import { isShellRoute, legacyRedirect } from "@shared/routing/routes";
 
 /**
  * Which page to show, from the address (see `shared/routing/routes.ts`): the workspace
- * tools (`/vault`, `/jobs/<id>`, `/templates`, `/tailor`, `/chat/<id>`, `/ai`), the
+ * tools (`/vault`, `/jobs/<id>`, `/templates`, `/chat/<id>`, `/ai`), the
  * applications list and one application, and the print-only page `/print/<id>`. The old
  * query addresses (`/?applications`, `/?application=<id>`, `/?print=<id>`) and `/` are
  * redirected to the new ones.

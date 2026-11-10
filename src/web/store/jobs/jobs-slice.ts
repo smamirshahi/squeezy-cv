@@ -6,6 +6,7 @@ import {
   nanoid,
 } from "@reduxjs/toolkit";
 import { Job } from "@custom-types/job-types";
+import { Requirements } from "@custom-types/requirements-types";
 import { Style } from "@custom-types/styles-types";
 import { Template } from "@custom-types/template-types";
 import {
@@ -678,16 +679,20 @@ const jobsSlice = createSlice({
     },
 
     /**
-     * Puts AI relevance scores (0-100, with a reason) on items and remembers the advert. Only
-     * relevance, its reason and the advert change: nothing is shown, hidden or moved. One action,
-     * so one undo step.
+     * Puts AI relevance scores (0-100, with a reason) on the entries of one section and on their
+     * bullets (skills). Only relevance and its reason change: nothing is shown, hidden or moved.
+     * One action, so one undo step.
      */
-    setItemScores(
+    setSectionScores(
       state,
       action: PayloadAction<{
         jobId: string;
-        jobAd: string;
-        scores: { itemId: string; relevance: number; reason: string }[];
+        scores: {
+          itemId: string;
+          relevance: number;
+          reason: string;
+          bullets: { bulletId: string; relevance: number; reason: string }[];
+        }[];
       }>
     ) {
       editJob(state, action.payload.jobId, (job) => {
@@ -697,8 +702,29 @@ const jobsSlice = createSlice({
             relevance: score.relevance,
             relevanceReason: score.reason,
           });
+          for (const bullet of score.bullets) {
+            next = updateBulletSelection(next, score.itemId, bullet.bulletId, {
+              relevance: bullet.relevance,
+              relevanceReason: bullet.reason,
+            });
+          }
         }
-        Object.assign(job, next, { jobAd: action.payload.jobAd });
+        Object.assign(job, next);
+      });
+    },
+
+    /** Stores what "Analyse job description" found (and the advert it read) on the job */
+    setJobAnalysis(
+      state,
+      action: PayloadAction<{
+        jobId: string;
+        jobAd: string;
+        analysis: Requirements;
+      }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        job.jobAd = action.payload.jobAd;
+        job.analysis = action.payload.analysis;
       });
     },
 
@@ -771,7 +797,8 @@ export const {
   setTemplateAppearance,
   setTemplateLook,
   setTone,
-  setItemScores,
+  setSectionScores,
+  setJobAnalysis,
   setSectionShown,
   setLinkOrder,
   setLinkShown,

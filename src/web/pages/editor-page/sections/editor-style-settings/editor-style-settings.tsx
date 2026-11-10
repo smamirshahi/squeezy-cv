@@ -20,6 +20,7 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   resetTypography,
   setHasHeadingLine,
+  setShouldShowIcons,
   setSectionSpacing,
   setShouldShowRightToWork,
   setShouldShowLinks,
@@ -44,6 +45,7 @@ export function EditorTypography(): JSX.Element {
     shouldShowGender,
     sectionSpacing,
     hasHeadingLine,
+    shouldShowIcons,
   } = useAppSelector(styleSelector);
 
   /** The details that can be switched on in the header, one checkbox each */
@@ -169,6 +171,27 @@ export function EditorTypography(): JSX.Element {
             />
           }
         />
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <FormControlLabel
+            sx={{ mr: 0.5 }}
+            label="Icons next to details"
+            control={
+              <Checkbox
+                checked={shouldShowIcons !== false}
+                onChange={(event) =>
+                  dispatch(setShouldShowIcons(event.target.checked))
+                }
+              />
+            }
+          />
+          <Tooltip title="Shows a small icon before each detail so it is easy to tell what it is: a link icon for links, a calendar for dates, a pin for locations, and the same for email and phone. Untick for a plainer look.">
+            <InfoOutlined
+              tabIndex={0}
+              aria-label="About icons next to details"
+              sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted }}
+            />
+          </Tooltip>
+        </Box>
         <Box
           component="fieldset"
           sx={{ border: 0, p: 0, m: 0, mt: 1.5, minWidth: 0 }}

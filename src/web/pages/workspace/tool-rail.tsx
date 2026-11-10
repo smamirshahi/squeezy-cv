@@ -120,8 +120,7 @@ export function ToolRail(): JSX.Element {
         const href = target ? formatRoute(target) : undefined;
         const isOn =
           item.kind === route.kind ||
-          (item.kind === "jobs" &&
-            (route.kind === "tailor" || route.kind === "chat"));
+          (item.kind === "jobs" && route.kind === "chat");
         return (
           <ButtonBase
             key={item.label}

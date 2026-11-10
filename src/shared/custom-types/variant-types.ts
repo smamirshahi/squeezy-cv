@@ -53,6 +53,12 @@ const BulletSelectionSchema = Object({
 
   /** Position within its item. Bullets without one keep their vault position after those with one. */
   order: Number.optional(),
+
+  /** How relevant this bullet (e.g. a skill) is to the job (0-100), from the section's Tailor button */
+  relevance: Number.optional(),
+
+  /** One sentence on why it got that relevance */
+  relevanceReason: String.optional(),
 });
 
 /** A bullet the AI made from an item's description for this job (accepted by the user, then saved) */
@@ -76,6 +82,12 @@ export const ItemSelectionSchema = Object({
 
   /** Position within its section. Items without one keep their vault position after those with one. */
   order: Number.optional(),
+
+  /** Keys of the item's fields (e.g. "dissertationTitle", "description") this job does not show. The vault keeps them. */
+  hiddenFields: Array(String).optional(),
+
+  /** Wording of a field for this job only (e.g. a shorter "description" or "text"), by field key. The vault text is never changed. */
+  fieldText: Record(String, String).optional(),
 
   /** Per-bullet choices by bullet id. A bullet without an entry is shown with its `text`. */
   bullets: Record(String, BulletSelectionSchema).optional(),
