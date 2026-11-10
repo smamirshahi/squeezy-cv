@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
@@ -123,9 +124,10 @@ describe("EditorJobs", () => {
     const store = makeStore();
     show(store);
     const vaultBefore = JSON.stringify(store.getState().vault);
-    const boxes = screen.getAllByRole("checkbox");
+    const row = screen.getAllByTestId("job-content-item")[0];
 
-    fireEvent.click(boxes[0]);
+    // the eye of the first entry
+    fireEvent.click(within(row).getByRole("button", { name: /^Hide / }));
 
     const selection = variantsSelector(store.getState())[0].selection;
     expect(Object.values(selection).some((s) => s.isVisible === false)).toBe(
@@ -197,30 +199,38 @@ describe("tabs, sections and the explainer", () => {
     expect(screen.queryByText("1 · Pick a page layout")).toBeNull();
   });
 
-  it("hides a whole section in this job from the Content tab, not in the vault", () => {
+  it("leaves showing a section to the template: no switch on the Content tab", () => {
     const store = makeStore();
     show(store);
-    const vaultBefore = JSON.stringify(store.getState().vault);
-    fireEvent.click(
-      screen.getByRole("switch", { name: "Show section Work Experience" })
-    );
-    expect(variantsSelector(store.getState())[0].hiddenSections).toEqual([
-      "experience",
-    ]);
-    expect(screen.getByText("Hidden from this job")).toBeTruthy();
-    expect(JSON.stringify(store.getState().vault)).toBe(vaultBefore);
+    expect(screen.queryByRole("switch", { name: /Show section/ })).toBeNull();
+    expect(
+      variantsSelector(store.getState())[0].hiddenSections
+    ).toBeUndefined();
   });
 
-  it("includes and excludes a section on the Sections & layout tab", () => {
+  it("removes a section with the bin and brings it back with Add section, not in the vault", () => {
     const store = makeStore();
     showLayout(store);
+    const vaultBefore = JSON.stringify(store.getState().vault);
+    // nothing is removed yet, so there is nothing to add back
+    expect(screen.queryByRole("button", { name: "Add section" })).toBeNull();
+
     fireEvent.click(
-      screen.getByRole("checkbox", { name: "Include Education in this job" })
+      screen.getByRole("button", { name: "Remove Education from this job" })
     );
     expect(variantsSelector(store.getState())[0].hiddenSections).toEqual([
       "education",
     ]);
-    expect(screen.getByText("Not included")).toBeTruthy();
+    expect(screen.queryByText("Not included")).toBeNull();
+    expect(screen.queryByRole("listitem", { name: /Education/ })).toBeNull();
+    expect(JSON.stringify(store.getState().vault)).toBe(vaultBefore);
+
+    fireEvent.click(screen.getByRole("button", { name: "Add section" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Education" }));
+    expect(variantsSelector(store.getState())[0].hiddenSections ?? []).toEqual(
+      []
+    );
+    expect(screen.queryByRole("button", { name: "Add section" })).toBeNull();
   });
 
   it("moves a section down with its arrow button, which writes the template layout", () => {

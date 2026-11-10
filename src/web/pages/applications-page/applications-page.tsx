@@ -293,7 +293,7 @@ function arrangeJobs(jobs: JobSummary[], view: ListView): JobSummary[] {
           ))
       );
     })
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 }
 
 /** The right panel for a job that was not sent yet */
@@ -630,7 +630,13 @@ function ApplicationsTable({
             )}
             {shown.length === 0 && jobRows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7}>Nothing here yet.</TableCell>
+                <TableCell colSpan={7}>
+                  {view.query.trim() !== ""
+                    ? "No application matches this search."
+                    : view.status === "all"
+                      ? "No applications yet. Mark a job as applied once you have sent it."
+                      : "Nothing here yet."}
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
