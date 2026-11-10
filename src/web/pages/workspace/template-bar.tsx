@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { moveJobToTemplate } from "@pages/workspace/template-scope";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { createApiClient } from "@store/persistence/api-client";
@@ -11,7 +11,13 @@ import {
 } from "@store/jobs/jobs-slice";
 
 /** The first thing of "Template & content": which template this job is drawn with */
-export function TemplateBar(): JSX.Element {
+export function TemplateBar({
+  isOutlineOpen,
+  onToggleOutline,
+}: {
+  isOutlineOpen: boolean;
+  onToggleOutline: () => void;
+}): JSX.Element {
   const dispatch = useAppDispatch();
   const job = useAppSelector(activeJobSelector);
   const templates = useAppSelector(templatesSelector);
@@ -46,6 +52,9 @@ export function TemplateBar(): JSX.Element {
         borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
       }}
     >
+      <Button size="small" variant="contained" onClick={onToggleOutline}>
+        {isOutlineOpen ? "Hide outline" : "Outline (O)"}
+      </Button>
       <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
         Select template
       </Typography>

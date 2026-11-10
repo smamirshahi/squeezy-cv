@@ -13,7 +13,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** The tutorials in the dialog's left list */
-export type TutorialId = "overview" | "vault";
+export type TutorialId = "overview" | "vault" | "template";
 
 interface HowItWorksDialogProps {
   isOpen: boolean;
@@ -778,6 +778,701 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
   );
 }
 
+interface TemplateStep {
+  title: string;
+  lead: string;
+  body: JSX.Element[];
+  note: string;
+}
+
+const TEMPLATE_STEPS: TemplateStep[] = [
+  {
+    title: "A template is how your CV looks",
+    lead: "Not what it says.",
+    body: [
+      <>
+        It holds the page layout, which sections exist and where they sit, and
+        the colours and text styles. It holds <b>none of your facts</b>. Those
+        stay in the vault.
+      </>,
+      <>
+        Many jobs can <b>share one template</b>. Change a font once and every
+        job that uses it follows.
+      </>,
+    ],
+    note: "Jobs you have already applied with keep the CV exactly as it was sent.",
+  },
+  {
+    title: "Pick a page layout",
+    lead: "A starting point. You can still move every section.",
+    body: [
+      <>
+        <b>Single column (UK)</b> is recommended. It is the easiest layout for
+        recruiter software to read, and a good default for UK applications.
+      </>,
+      <>
+        <b>Two columns</b> sit side by side and save space for skills-heavy CVs,
+        but some recruiter software reads them less reliably.
+      </>,
+    ],
+    note: "With two columns, a slider sets how wide each column is.",
+  },
+  {
+    title: "Arrange your sections",
+    lead: "Order and place, one section at a time.",
+    body: [
+      <>
+        <b>Drag</b> a section, or use the <b>arrows</b>, to set its order and
+        place. With two columns, each one can be Full width, Left column or
+        Right column.
+      </>,
+      <>
+        The <b>bin</b> removes a section from the CV and <b>Add section</b>{" "}
+        brings back one you removed. New kinds of section are made in the Vault.
+      </>,
+    ],
+    note: "Your name and contact details always stay at the top.",
+  },
+  {
+    title: "Style it",
+    lead: "Three small groups of choices.",
+    body: [
+      <>
+        <b>Page:</b> margins, date format, icons, space between sections, and
+        which details show in the header, such as links or right to work.
+      </>,
+      <>
+        <b>Colours:</b> text, secondary and an optional accent. Two colours are
+        enough, and they print well in black and white.
+      </>,
+      <>
+        <b>Typography:</b> size and weight for your name, section headings, item
+        titles, body and small text.
+      </>,
+    ],
+    note: "“Reset colours and text styles” puts the colours and text styles back to their defaults.",
+  },
+  {
+    title: "Sections here, items per job",
+    lead: "The preview shows your whole vault.",
+    body: [
+      <>
+        While you edit a template, the CV preview on the right shows{" "}
+        <b>everything in your vault</b>. That is on purpose: you are designing
+        the look, not choosing content.
+      </>,
+      <>
+        Which items appear inside each section is decided <b>per job</b>, in{" "}
+        <b>Apply › Template &amp; content</b>.
+      </>,
+    ],
+    note: "Hiding an item never deletes it from the vault.",
+  },
+];
+
+function TemplateText({ step }: { step: number }): JSX.Element {
+  const current = TEMPLATE_STEPS[step];
+  return (
+    <>
+      <Typography
+        id="how-it-works-title"
+        component="h2"
+        sx={{ m: 0, fontSize: 26, fontWeight: 700, lineHeight: 1.2 }}
+      >
+        {current.title}
+      </Typography>
+      <Typography
+        sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted, mb: 0.75 }}
+      >
+        {current.lead}
+      </Typography>
+      {current.body.map((paragraph, index) => (
+        <Typography key={index} sx={{ fontSize: 14 }}>
+          {paragraph}
+        </Typography>
+      ))}
+      <Note>{current.note}</Note>
+    </>
+  );
+}
+
+const TEMPLATE_COLOR = "#B8400D";
+const JOB_COLOR = "#1E7A46";
+
+/** A small row of the picture: a section with a drag handle */
+function SectionRow({
+  name,
+  tag,
+}: {
+  name: string;
+  tag?: string;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        height: 30,
+        px: 1,
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: `1px solid ${WORKSPACE_COLORS.border}`,
+        borderRadius: "4px",
+        fontSize: 13,
+      }}
+    >
+      <span style={{ color: WORKSPACE_COLORS.borderStrong }}>⋮⋮</span>
+      <span style={{ flex: 1 }}>{name}</span>
+      {tag && (
+        <Chip
+          sx={{
+            height: 20,
+            borderRadius: "4px",
+            border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+          }}
+        >
+          {tag}
+        </Chip>
+      )}
+    </Box>
+  );
+}
+
+/** A column of the layout picture */
+function PictureLines({ count }: { count: number }): JSX.Element {
+  return (
+    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+      {Array.from({ length: count }, (_, index) => (
+        <Box key={index} sx={{ height: 3, bgcolor: "#CFCAC2" }} />
+      ))}
+    </Box>
+  );
+}
+
+function LayoutExample({
+  title,
+  text,
+  isTwoColumns,
+  isRecommended,
+}: {
+  title: string;
+  text: string;
+  isTwoColumns: boolean;
+  isRecommended?: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 1.75,
+        alignItems: "flex-start",
+        p: 1.5,
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: `2px solid ${isRecommended ? TEMPLATE_COLOR : WORKSPACE_COLORS.border}`,
+        borderRadius: 2,
+      }}
+    >
+      <Box
+        sx={{
+          flex: "none",
+          width: 56,
+          height: 78,
+          p: 0.9,
+          border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+          bgcolor: "#fff",
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+        }}
+      >
+        <Box sx={{ height: 5, width: "60%", bgcolor: "#7D7871" }} />
+        {isTwoColumns ? (
+          <Box sx={{ display: "flex", gap: 0.5, flex: 1 }}>
+            <PictureLines count={4} />
+            <PictureLines count={2} />
+          </Box>
+        ) : (
+          <PictureLines count={6} />
+        )}
+      </Box>
+      <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+            {title}
+          </Typography>
+          {isRecommended && (
+            <Chip
+              sx={{
+                bgcolor: JOB_COLOR,
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            >
+              Recommended
+            </Chip>
+          )}
+        </Box>
+        <Typography
+          sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted, mt: 0.5 }}
+        >
+          {text}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function StyleRow({
+  label,
+  children,
+  value,
+}: {
+  label: string;
+  children: JSX.Element | string;
+  value?: string;
+}): JSX.Element {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, fontSize: 12.5 }}>
+      <Box component="span" sx={{ width: 110, color: WORKSPACE_COLORS.muted }}>
+        {label}
+      </Box>
+      {children}
+      {value && (
+        <Box
+          component="span"
+          sx={{ ml: "auto", color: WORKSPACE_COLORS.muted }}
+        >
+          {value}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function Swatch({ color }: { color: string }): JSX.Element {
+  return (
+    <Box
+      component="span"
+      sx={{
+        width: 20,
+        height: 20,
+        borderRadius: "4px",
+        bgcolor: color,
+        border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+      }}
+    />
+  );
+}
+
+/** A tick box row of the "items per job" picture */
+function ItemRow({
+  name,
+  isShown,
+}: {
+  name: string;
+  isShown?: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        px: 1.75,
+        py: 1,
+        fontSize: 13,
+        borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        opacity: isShown === false ? 0.6 : 1,
+        color: isShown === false ? WORKSPACE_COLORS.muted : "inherit",
+      }}
+    >
+      {isShown === undefined ? null : (
+        <Box
+          component="span"
+          sx={{
+            width: 16,
+            height: 16,
+            borderRadius: "3px",
+            fontSize: 11,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            ...(isShown
+              ? { bgcolor: JOB_COLOR, color: "#fff" }
+              : { border: `1px solid ${WORKSPACE_COLORS.borderStrong}` }),
+          }}
+        >
+          {isShown ? "✓" : ""}
+        </Box>
+      )}
+      <span style={{ textDecoration: isShown === false ? "line-through" : "" }}>
+        {name}
+      </span>
+    </Box>
+  );
+}
+
+function TemplatePictureContent({ step }: { step: number }): JSX.Element {
+  if (step === 0) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `2px solid ${TEMPLATE_COLOR}`,
+            borderRadius: 2,
+            p: 1.75,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="span"
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                bgcolor: TEMPLATE_COLOR,
+              }}
+            />
+            <Typography sx={{ flex: 1, fontWeight: 700, fontSize: 15 }}>
+              Two Column CV
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: 0.75,
+              mt: 1.5,
+            }}
+          >
+            <Box
+              sx={{
+                gridColumn: "1 / 3",
+                height: 8,
+                borderRadius: "3px",
+                bgcolor: "#D49C80",
+              }}
+            />
+            {[0, 1, 2, 3].map((index) => (
+              <Box
+                key={index}
+                sx={{ height: 5, borderRadius: "3px", bgcolor: "#E5C3B1" }}
+              />
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1.5 }}>
+            {["Layout", "Sections and order", "Colours", "Text styles"].map(
+              (name) => (
+                <Chip
+                  key={name}
+                  sx={{
+                    bgcolor: WORKSPACE_COLORS.accentSoft,
+                    color: WORKSPACE_COLORS.accentText,
+                    border: "1px solid #E0A98E",
+                  }}
+                >
+                  {name}
+                </Chip>
+              )
+            )}
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            height: 22,
+            ml: 5,
+            borderLeft: `2px dashed ${WORKSPACE_COLORS.borderStrong}`,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            sx={{ ml: 1.25, fontSize: 11, color: WORKSPACE_COLORS.muted }}
+          >
+            shared by
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          {["Senior React Developer, Ledgerly", "Frontend Engineer, Acme"].map(
+            (name) => (
+              <Box
+                key={name}
+                sx={{
+                  flex: 1,
+                  bgcolor: WORKSPACE_COLORS.panel,
+                  border: `2px solid ${JOB_COLOR}`,
+                  borderRadius: 1.5,
+                  px: 1.5,
+                  py: 1,
+                }}
+              >
+                <Typography sx={{ fontWeight: 700, fontSize: 14 }}>
+                  Job
+                </Typography>
+                <Typography
+                  sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+                >
+                  {name}
+                </Typography>
+              </Box>
+            )
+          )}
+        </Box>
+      </Box>
+    );
+  }
+  if (step === 1) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <LayoutExample
+          title="Single column (UK)"
+          text="One column, easiest for recruiter software to read."
+          isTwoColumns={false}
+          isRecommended
+        />
+        <LayoutExample
+          title="Two columns"
+          text="Side by side. Saves space for skills-heavy CVs."
+          isTwoColumns
+        />
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: WORKSPACE_COLORS.muted,
+            textAlign: "center",
+          }}
+        >
+          A starting point. You can still move every section.
+        </Typography>
+      </Box>
+    );
+  }
+  if (step === 2) {
+    return (
+      <Box
+        sx={{
+          bgcolor: WORKSPACE_COLORS.panel,
+          border: `2px solid ${TEMPLATE_COLOR}`,
+          borderRadius: 2,
+          p: 1.75,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: ".05em",
+            textTransform: "uppercase",
+            color: WORKSPACE_COLORS.muted,
+          }}
+        >
+          Full width
+        </Typography>
+        <SectionRow name="Professional Summary" tag="Full width" />
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Box
+            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
+          >
+            <Typography
+              sx={{
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: ".05em",
+                textTransform: "uppercase",
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              Left column
+            </Typography>
+            <SectionRow name="Experience" />
+          </Box>
+          <Box
+            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
+          >
+            <Typography
+              sx={{
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: ".05em",
+                textTransform: "uppercase",
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              Right column
+            </Typography>
+            <SectionRow name="Education" />
+            <SectionRow name="Skills" />
+          </Box>
+        </Box>
+        <Typography
+          sx={{ color: TEMPLATE_COLOR, fontSize: 13, fontWeight: 600 }}
+        >
+          + Add section
+        </Typography>
+      </Box>
+    );
+  }
+  if (step === 3) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `2px solid ${TEMPLATE_COLOR}`,
+            borderRadius: 2,
+            p: 1.75,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.1,
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+            {["Margin: Narrow", "Date format", "Bullet point icon"].map(
+              (name) => (
+                <Chip
+                  key={name}
+                  sx={{
+                    height: 22,
+                    borderRadius: "4px",
+                    border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+                  }}
+                >
+                  {name}
+                </Chip>
+              )
+            )}
+          </Box>
+          <StyleRow label="Colours" value="text, secondary, accent">
+            <>
+              <Swatch color="#555555" />
+              <Swatch color="#777777" />
+              <Swatch color="#B8400D" />
+            </>
+          </StyleRow>
+          <StyleRow label="Name" value="Bold">
+            <b style={{ fontSize: 17 }}>Alex Morgan</b>
+          </StyleRow>
+          <StyleRow label="Section heading" value="Bold">
+            <b style={{ fontSize: 14 }}>Work Experience</b>
+          </StyleRow>
+          <StyleRow label="Body" value="Regular">
+            <span style={{ fontSize: 12 }}>Builds accessible interfaces</span>
+          </StyleRow>
+        </Box>
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: WORKSPACE_COLORS.muted,
+            textAlign: "center",
+          }}
+        >
+          The preview on the right updates as you change things.
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+      <Box
+        sx={{
+          bgcolor: WORKSPACE_COLORS.panel,
+          border: `2px solid ${TEMPLATE_COLOR}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            px: 1.75,
+            py: 1,
+            bgcolor: TEMPLATE_COLOR,
+            color: "#fff",
+            fontSize: 13,
+          }}
+        >
+          <b style={{ flex: 1 }}>Template preview</b>
+          <span>whole vault</span>
+        </Box>
+        <ItemRow name="Senior Software Developer" />
+        <ItemRow name="Software Developer" />
+        <ItemRow name="Intern" />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 1,
+          color: WORKSPACE_COLORS.muted,
+          fontSize: 12,
+        }}
+      >
+        <ArrowDownwardIcon sx={{ fontSize: 16 }} />
+        <span>Apply › Template &amp; content</span>
+      </Box>
+      <Box
+        sx={{
+          bgcolor: WORKSPACE_COLORS.panel,
+          border: `2px solid ${JOB_COLOR}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            px: 1.75,
+            py: 1,
+            bgcolor: JOB_COLOR,
+            color: "#fff",
+            fontSize: 13,
+          }}
+        >
+          <b style={{ flex: 1 }}>Job: Ledgerly</b>
+          <span>items chosen here</span>
+        </Box>
+        <ItemRow name="Senior Software Developer" isShown />
+        <ItemRow name="Software Developer" isShown />
+        <ItemRow name="Intern" isShown={false} />
+      </Box>
+    </Box>
+  );
+}
+
+/** The picture of a template tutorial step */
+function TemplatePicture({ step }: { step: number }): JSX.Element {
+  return (
+    <Box
+      aria-hidden="true"
+      sx={{
+        width: 380,
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.canvas,
+        p: 3,
+        display: { xs: "none", md: "flex" },
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <TemplatePictureContent step={step} />
+    </Box>
+  );
+}
+
 interface Tutorial {
   id: TutorialId;
   name: string;
@@ -800,6 +1495,13 @@ const TUTORIALS: Tutorial[] = [
     summary: "What to put in it and how it is used",
     stepNames: VAULT_STEPS.map((s) => s.title),
     lastLabel: "Start filling my vault",
+  },
+  {
+    id: "template",
+    name: "Your templates",
+    summary: "How a CV looks: layout, sections and style",
+    stepNames: TEMPLATE_STEPS.map((s) => s.title),
+    lastLabel: "Start designing",
   },
 ];
 
@@ -930,8 +1632,10 @@ export function HowItWorksDialog({
 
         {tutorialId === "overview" ? (
           <Diagram step={step} />
-        ) : (
+        ) : tutorialId === "vault" ? (
           <VaultPicture step={step} />
+        ) : (
+          <TemplatePicture step={step} />
         )}
         <Box
           sx={{ flex: 1, minWidth: 0, px: 4.5, pt: 3.5, pb: 2.5 }}
@@ -949,8 +1653,10 @@ export function HowItWorksDialog({
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
             {tutorialId === "overview" ? (
               <OverviewText step={step} />
-            ) : (
+            ) : tutorialId === "vault" ? (
               <VaultText step={step} />
+            ) : (
+              <TemplateText step={step} />
             )}
           </Box>
         </Box>

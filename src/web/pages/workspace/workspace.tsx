@@ -136,7 +136,14 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                   flexDirection: "column",
                 }}
               >
-                {tool === "jobs" && <TemplateBar />}
+                {tool === "jobs" && (
+                  <TemplateBar
+                    isOutlineOpen={isOutlineOpen}
+                    onToggleOutline={() =>
+                      setIsOutlineOpen((wasOpen) => !wasOpen)
+                    }
+                  />
+                )}
                 <Box
                   component="main"
                   aria-label="Canvas"
@@ -153,14 +160,21 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                   }}
                 >
                   <FirstRun />
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
-                    sx={{ position: "absolute", left: 12, top: 12, zIndex: 3 }}
-                  >
-                    {isOutlineOpen ? "Hide outline" : "Outline (O)"}
-                  </Button>
+                  {tool === "chat" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
+                      sx={{
+                        position: "absolute",
+                        left: 12,
+                        top: 12,
+                        zIndex: 3,
+                      }}
+                    >
+                      {isOutlineOpen ? "Hide outline" : "Outline (O)"}
+                    </Button>
+                  )}
                   <ZoomControls
                     getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
                   />

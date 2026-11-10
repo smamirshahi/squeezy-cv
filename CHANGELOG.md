@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- A third tutorial, "Your templates" (layout, arranging sections, style, and where items are chosen), in the Tutorials list.
+
 ### Changed
 
 - Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).
