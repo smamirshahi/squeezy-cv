@@ -9,7 +9,16 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Skills: skill names and group categories autocomplete from default lists (technical, general, spoken languages, AI-assisted development); suggestions already used are greyed out. Language groups use their own levels (Basic to Native). Skills in a group stay sorted by level, highest first. Only one empty skill or empty item at a time.
+- New section types **Awards** (title, issuer, date, short description, link) and **Personal interests** (a line of interests, optional detail), both default sections of a new CV; Publications is in the "Add a section" list.
+- Publications and awards are kept newest year first, with the year on the right of each row and a "Sort by" control (year or title, with a direction arrow); item titles in the list are no longer cut at 60 characters.
+
 ### Changed
+
+- The title of an item in the vault list and editor heading updates as you type, before Apply; the (i) icon of a one-line field is centred.
+- The Unsorted section is shown as a disabled "AI sorting" entry (coming soon) while it is empty (#306).
 
 - Location fields (Main Info, work experience and education) suggest "City, Country" while you type, from a built-in list of about 65,000 cities (GeoNames, CC BY 4.0, downloaded the first time you use a location field). You can still type anything. Rebuild the list with `scripts/build-cities.mjs`.
 - Work experience and education items: the "Remote" checkbox is now an optional "Work mode" (On-site, Hybrid, Remote) next to Location (city, country). Items saved with the old Remote tick show as Remote.

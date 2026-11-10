@@ -1,3 +1,4 @@
+import { SKILL_CATEGORIES } from "@shared/vault/skill-suggestions";
 import { SectionType } from "@custom-types/vault-types";
 
 export interface FieldSpec {
@@ -9,6 +10,9 @@ export interface FieldSpec {
 
   /** Columns it spans in a three-column grid */
   span: 1 | 2 | 3;
+
+  /** Suggestions offered while typing (any other text is still allowed) */
+  suggestions?: string[];
 
   /** An end date: empty means "Present" */
   isEnd?: boolean;
@@ -99,8 +103,71 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         { key: "year", label: "Year", kind: "text", span: 1 },
         { key: "link", label: "Link or DOI URL", kind: "text", span: 3 },
       ];
+    case "awards":
+      return [
+        {
+          key: "title",
+          label: "Title",
+          kind: "text",
+          span: 3,
+          hint: 'e.g. "Best Innovation Award"',
+        },
+        {
+          key: "issuer",
+          label: "Issuer",
+          kind: "text",
+          span: 2,
+          hint: "Organisation, company or competition",
+        },
+        {
+          key: "date",
+          label: "Date",
+          kind: "text",
+          span: 1,
+          hint: 'Month and year, or just the year, e.g. "Mar 2024" or "2024"',
+        },
+        {
+          key: "description",
+          label: "Short description (optional)",
+          kind: "text",
+          span: 3,
+          hint: "One line on why you won or what it recognised",
+        },
+        {
+          key: "link",
+          label: "Link (optional)",
+          kind: "text",
+          span: 3,
+          hint: "A certificate, announcement or results page",
+        },
+      ];
+    case "interests":
+      return [
+        {
+          key: "title",
+          label: "Interests",
+          kind: "text",
+          span: 3,
+          hint: 'A short list or one line, e.g. "Cycling, puzzle design, LEGO Technic"',
+        },
+        {
+          key: "detail",
+          label: "Detail (optional)",
+          kind: "multiline",
+          span: 3,
+          hint: 'One phrase, e.g. "Club cyclist, rides 100 km on weekends"',
+        },
+      ];
     case "skills":
-      return [{ key: "category", label: "Category", kind: "text", span: 3 }];
+      return [
+        {
+          key: "category",
+          label: "Category",
+          kind: "text",
+          span: 3,
+          suggestions: SKILL_CATEGORIES,
+        },
+      ];
     case "summary":
       return [{ key: "text", label: "Summary", kind: "multiline", span: 3 }];
     default:

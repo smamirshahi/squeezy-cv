@@ -293,6 +293,20 @@ const vaultSlice = createSlice({
       }
       if (update.rating !== undefined) {
         bullet.rating = update.rating;
+        // Skills of a group stay sorted by level, highest first (ties keep their order)
+        const section = state.sections.find((entry) => entry.id === sectionId);
+        const item = section?.items.find((entry) => entry.id === itemId);
+        if (section?.type === "skills" && item) {
+          const sorted = item.bullets
+            .map((entry, index) => ({ entry, index }))
+            .sort(
+              (a, b) =>
+                (b.entry.rating ?? 0) - (a.entry.rating ?? 0) ||
+                a.index - b.index
+            )
+            .map(({ entry }) => entry);
+          item.bullets.splice(0, item.bullets.length, ...sorted);
+        }
       }
       if (update.years === null) {
         delete bullet.years;

@@ -1,5 +1,5 @@
 import { HintAdornment } from "@components/description-hint";
-import { KeyboardEvent, useEffect, useState } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   IconButton,
   MenuItem,
   Tooltip,
+  Autocomplete,
   TextField,
   Typography,
 } from "@mui/material";
@@ -21,6 +22,8 @@ import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { parseBibtex } from "@shared/vault/bibtex";
 import { getItemLabel } from "@shared/variant/item-label";
+import { setDraftFields } from "@pages/workspace/draft-fields";
+import { skillSuggestions } from "@shared/vault/skill-suggestions";
 import { isYearsAcceptable, levelLabel } from "@shared/vault/vault-utils";
 import {
   FieldSpec,
@@ -51,9 +54,46 @@ interface FieldProps {
   spec: FieldSpec;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
+
+  /** Suggestions already taken elsewhere: shown greyed out and not selectable */
+  usedValues?: string[];
 }
 
-function Field({ spec, value, onChange }: FieldProps): JSX.Element {
+/** Whether a suggestion is in the list of used values (ignoring case) */
+function isUsed(option: string, used: string[] | undefined): boolean {
+  return (used ?? []).some(
+    (value) => value.trim().toLowerCase() === option.toLowerCase()
+  );
+}
+
+function Field({
+  spec,
+  value,
+  onChange,
+  onBlur,
+  usedValues,
+}: FieldProps): JSX.Element {
+  if (spec.suggestions) {
+    return (
+      <Autocomplete
+        freeSolo
+        options={spec.suggestions}
+        getOptionDisabled={(option) => isUsed(option, usedValues)}
+        inputValue={value}
+        onInputChange={(_event, text) => onChange(text)}
+        filterOptions={(all, state) =>
+          all.filter((option) =>
+            option.toLowerCase().includes(state.inputValue.toLowerCase())
+          )
+        }
+        renderInput={(params) => (
+          <TextField {...params} label={spec.label} onBlur={onBlur} />
+        )}
+        sx={{ gridColumn: `span ${spec.span}` }}
+      />
+    );
+  }
   return (
     <TextField
       size="medium"
@@ -65,7 +105,10 @@ function Field({ spec, value, onChange }: FieldProps): JSX.Element {
       slotProps={{
         input: {
           endAdornment: spec.hint ? (
-            <HintAdornment hint={spec.hint} />
+            <HintAdornment
+              hint={spec.hint}
+              isMultiline={spec.kind === "multiline"}
+            />
           ) : undefined,
         },
       }}
@@ -198,8 +241,8 @@ function LocationField({
 const LEVEL_STEPS = [1, 2, 3, 4, 5];
 
 /** "3 – Proficient" */
-function levelOptionLabel(level: number): string {
-  return `${level} – ${levelLabel(level)}`;
+function levelOptionLabel(level: number, category?: string): string {
+  return `${level} – ${levelLabel(level, category)}`;
 }
 
 const LEVEL_HINT =
@@ -257,28 +300,53 @@ function SkillCard({
           <ArrowDownwardIcon fontSize="inherit" />
         </IconButton>
       </Box>
-      <TextField
+      <Autocomplete
+        freeSolo
         size="small"
-        value={bullet.text}
-        placeholder="Skill name"
-        onChange={(event) =>
-          dispatch(
-            updateBullet({ ...ref, update: { text: event.target.value } })
+        options={skillSuggestions(item.fields.category)}
+        getOptionDisabled={(option) =>
+          isUsed(
+            option,
+            item.bullets
+              .filter((other) => other.id !== bullet.id)
+              .map((other) => other.text)
           )
         }
-        onKeyDown={(event: KeyboardEvent) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            onNewAfter(index);
-          }
-        }}
-        slotProps={{
-          htmlInput: {
-            "aria-label": `Skill ${index + 1} name`,
-            "data-bullet-input": bullet.id,
-          },
-        }}
+        inputValue={bullet.text}
+        onInputChange={(_event, text) =>
+          dispatch(updateBullet({ ...ref, update: { text } }))
+        }
+        filterOptions={(all, state) =>
+          state.inputValue.trim() === ""
+            ? all
+            : all.filter((option) =>
+                option.toLowerCase().includes(state.inputValue.toLowerCase())
+              )
+        }
         sx={{ flex: 1 }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Skill name"
+            onKeyDown={(event: KeyboardEvent) => {
+              if (
+                event.key === "Enter" &&
+                !params.slotProps?.htmlInput?.["aria-activedescendant"]
+              ) {
+                event.preventDefault();
+                onNewAfter(index);
+              }
+            }}
+            slotProps={{
+              ...params.slotProps,
+              htmlInput: {
+                ...params.slotProps?.htmlInput,
+                "aria-label": `Skill ${index + 1} name`,
+                "data-bullet-input": bullet.id,
+              },
+            }}
+          />
+        )}
       />
       <TextField
         select
@@ -295,7 +363,7 @@ function SkillCard({
       >
         {LEVEL_STEPS.map((step) => (
           <MenuItem key={step} value={String(step)}>
-            {levelOptionLabel(step)}
+            {levelOptionLabel(step, item.fields.category)}
           </MenuItem>
         ))}
       </TextField>
@@ -371,6 +439,12 @@ export function VaultItemEditor({
   );
   const isDirty = Object.keys(changes).length > 0;
   useUnappliedDraft(isDirty);
+  const draftKey = JSON.stringify(draft);
+  useEffect(() => {
+    setDraftFields(isDirty ? { itemId: item.id, fields: draft } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, item.id, draftKey]);
+  useEffect(() => () => setDraftFields(null), []);
 
   function apply(): void {
     dispatch(updateItemFields({ ...ref, fields: changes }));
@@ -414,7 +488,39 @@ export function VaultItemEditor({
     }
   }
 
+  /** Empty skill rows are dropped when the group is left or its category is edited */
+  const emptySkillIds = isSkills
+    ? item.bullets.filter((b) => b.text.trim() === "").map((b) => b.id)
+    : [];
+  const emptyIdsRef = useRef<string[]>([]);
+  emptyIdsRef.current = emptySkillIds;
+  const sectionId = section.id;
+  const itemId = item.id;
+  useEffect(
+    () => () => {
+      for (const bulletId of emptyIdsRef.current) {
+        dispatch(removeBullet({ sectionId, itemId, bulletId }));
+      }
+    },
+    [dispatch, sectionId, itemId]
+  );
+
+  function removeEmptySkills(): void {
+    for (const bulletId of emptySkillIds) {
+      dispatch(removeBullet({ ...ref, bulletId }));
+    }
+  }
+
   function newBulletAfter(position: number): void {
+    // Only one empty skill at a time: use the existing empty one
+    const existing = item.bullets.find((b) => b.text.trim() === "");
+    if (existing) {
+      setFocusBulletId(existing.id);
+      document
+        .querySelector<HTMLElement>(`[data-bullet-input="${existing.id}"]`)
+        ?.focus();
+      return;
+    }
     const id = nanoid();
     dispatch(addBullet({ ...ref, id }));
     dispatch(moveBullet({ ...ref, bulletId: id, toIndex: position + 1 }));
@@ -447,7 +553,7 @@ export function VaultItemEditor({
             {section.title} › Item {index + 1} of {section.items.length}
           </Typography>
           <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
-            {getItemLabel(item)}
+            {getItemLabel({ ...item, fields: { ...item.fields, ...draft } })}
           </Typography>
         </Box>
         {/* Only Unsorted needs it: its items have no other manual way into a section */}
@@ -573,6 +679,14 @@ export function VaultItemEditor({
               spec={{ ...spec, span: 3 }}
               value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
               onChange={(value) => changeField(spec.key, value)}
+              onBlur={isSkills ? removeEmptySkills : undefined}
+              usedValues={
+                isSkills && spec.key === "category"
+                  ? section.items
+                      .filter((other) => other.id !== item.id)
+                      .map((other) => other.fields.category ?? "")
+                  : undefined
+              }
             />
           );
         })}

@@ -62,6 +62,8 @@ export const SectionTypeSchema = Union(
   Literal("certifications"),
   Literal("publications"),
   Literal("volunteering"),
+  Literal("awards"),
+  Literal("interests"),
   Literal("custom"),
   Literal("unsorted")
 );

@@ -159,6 +159,20 @@ function renderItems(
     }));
 }
 
+/** The skills of one group, highest level first (unrated last, ties keep their order) */
+function sortSkillsByLevel(item: RenderedItem): RenderedItem {
+  return {
+    ...item,
+    bullets: item.bullets
+      .map((bullet, index) => ({ bullet, index }))
+      .sort(
+        (a, b) =>
+          (b.bullet.rating ?? 0) - (a.bullet.rating ?? 0) || a.index - b.index
+      )
+      .map(({ bullet }) => bullet),
+  };
+}
+
 /** One item with every visible skill, the highest level first (unrated last, ties keep their order) */
 function flattenSkills(items: RenderedItem[]): RenderedItem[] {
   if (items.length === 0) {
@@ -257,7 +271,9 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
     const items =
       isSkills && variant.skillGroupBy === "level"
         ? flattenSkills(grouped)
-        : grouped;
+        : isSkills
+          ? grouped.map(sortSkillsByLevel)
+          : grouped;
     return items.length === 0
       ? []
       : [
