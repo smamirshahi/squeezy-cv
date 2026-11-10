@@ -6,11 +6,13 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useMemo } from "react";
@@ -28,7 +30,9 @@ import {
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 import { LinkTypeSelect } from "@pages/editor-page/link-type/link-type-select";
 import { NATIONALITIES } from "@shared/vault/nationalities";
+import { RIGHT_TO_WORK_OPTIONS } from "@shared/vault/right-to-work-options";
 import { GENDERS, MARITAL_STATUSES } from "@shared/vault/personal-options";
+import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { JobTitleOptions } from "@pages/editor-page/sections/job-title-options";
 import {
   guessLinkTypeFromUrl,
@@ -138,17 +142,39 @@ export function EditorMainInfo(): JSX.Element | null {
             ))}
           </TextField>
         ))}
-        <TextField
-          slotProps={{ inputLabel: { shrink: true } }}
-          label="Right to work (optional)"
-          placeholder="Eligible to work in the UK"
-          helperText='e.g. "Eligible to work in the UK". Shown under your name when turned on in Templates > Design.'
-          variant="outlined"
+        <Autocomplete
+          freeSolo
+          options={[...RIGHT_TO_WORK_OPTIONS]}
           value={draft.profile.rightToWork ?? ""}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ rightToWork: event.target.value }))
+          inputValue={draft.profile.rightToWork ?? ""}
+          onInputChange={(_event, rightToWork) =>
+            draftDispatch(updateProfile({ rightToWork }))
           }
-          fullWidth
+          filterOptions={(options) => options}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Right to work (optional)"
+              placeholder="Type your own, or open the list for ready-made wordings"
+              helperText="Shown under your name when turned on in Templates > Design."
+              slotProps={{
+                ...params.slotProps,
+                inputLabel: { ...params.slotProps?.inputLabel, shrink: true },
+                input: {
+                  ...params.slotProps?.input,
+                  startAdornment: (
+                    <Tooltip title="Type any wording you like, or pick a ready-made one from the list (UK situations). A picked wording is only text: you can edit it afterwards, and replace anything in [brackets].">
+                      <InfoOutlinedIcon
+                        fontSize="small"
+                        aria-label="About right to work"
+                        sx={{ mr: 0.5, color: "text.secondary" }}
+                      />
+                    </Tooltip>
+                  ),
+                },
+              }}
+            />
+          )}
         />
       </Box>
       <Box
@@ -195,23 +221,16 @@ export function EditorMainInfo(): JSX.Element | null {
             draftDispatch(updateProfile({ phone: event.target.value }))
           }
         />
-        <TextField
-          label="Location"
-          placeholder="London, UK"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LocationOnIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          variant="outlined"
-          value={draft.profile.location ?? ""}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ location: event.target.value }))
+        <LocationAutocomplete
+          label="Location (city, country)"
+          placeholder="London, United Kingdom"
+          startAdornment={
+            <InputAdornment position="start">
+              <LocationOnIcon />
+            </InputAdornment>
           }
+          value={draft.profile.location ?? ""}
+          onChange={(location) => draftDispatch(updateProfile({ location }))}
         />
       </Box>
 
