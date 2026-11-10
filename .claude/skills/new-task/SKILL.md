@@ -6,6 +6,8 @@ argument-hint: <task description>
 
 # New task → GitHub issue
 
+> **Never commit directly to `main`.** Not even for a small change, a doc line or a follow-up. Every change, whatever its size, starts on a new branch (`git switch -c <name>`) and reaches `main` only by merging that branch. If you are on `main` with changes, create the branch first. A local hook (`.githooks/pre-commit`, enabled by `git config core.hooksPath .githooks`) refuses commits on `main`.
+
 When the user gives a new task, make sure it is tracked in the GitHub issues before anything else.
 
 ## Steps
