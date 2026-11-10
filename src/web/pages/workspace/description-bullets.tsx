@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   MenuItem,
   TextField,
@@ -145,6 +146,11 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
               size="small"
               variant="outlined"
               disabled={busy !== null}
+              startIcon={
+                busy === "make" ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : undefined
+              }
               onClick={() => void ask("make")}
             >
               {busy === "make" ? "Making…" : MODE_LABELS.make}
@@ -154,6 +160,11 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 size="small"
                 variant="outlined"
                 disabled={busy !== null}
+                startIcon={
+                  busy === "shorten" ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : undefined
+                }
                 onClick={() => void ask("shorten")}
               >
                 {busy === "shorten" ? "Shortening…" : MODE_LABELS.shorten}
@@ -164,6 +175,11 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 size="small"
                 variant="outlined"
                 disabled={busy !== null}
+                startIcon={
+                  busy === "rephrase" ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : undefined
+                }
                 onClick={() => void ask("rephrase")}
               >
                 {busy === "rephrase" ? "Rephrasing…" : MODE_LABELS.rephrase}
@@ -190,6 +206,11 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 size="small"
                 variant="outlined"
                 disabled={busy !== null || focus === ""}
+                startIcon={
+                  busy === "emphasise" ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : undefined
+                }
                 onClick={() => void ask("emphasise")}
               >
                 {busy === "emphasise" ? "Working…" : MODE_LABELS.emphasise}

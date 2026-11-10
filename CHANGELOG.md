@@ -24,6 +24,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - The per-section "Tailor" button is now "Score entries" and "Tailor all sections" is "Score all sections", because they only score entries and change nothing (#328).
 - The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
 - "Score entries" is a filled button like "Score all sections"; Back and Next are outlined (#336).
+- AI buttons (Shorten, Rephrase for this job, Make longer, Make bullets, Emphasise and the per-bullet buttons) show a spinner until the result is there (#335).
 
 ### Fixed
 
