@@ -146,7 +146,8 @@ describe("editing the template named in the address", () => {
     await open("/templates/second/design");
     const field = screen.getByRole("combobox", { name: "Editing template" });
     expect(field.textContent).toContain("Second look");
-    expect(field.textContent).toMatch(/Second look \(0 jobs\)/);
+    expect(field.textContent).not.toMatch(/jobs?\)/);
+    expect(screen.getByText(/this template is used by 0 jobs/)).toBeTruthy();
   });
 
   it("fills in the active job's template when the address has none", async () => {

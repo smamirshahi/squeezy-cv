@@ -11,6 +11,7 @@ import { appSelector } from "@store/app/app-slice";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import {
   activeTemplateSelector,
+  activeVariantSelector,
   templatesSelector,
 } from "@store/jobs/jobs-slice";
 import { useAppSelector } from "@store/store-helper";
@@ -22,9 +23,10 @@ const SAMPLE_ZOOM = 0.55;
 const SAMPLE_PAGES = 2;
 /** CSS pixels per millimetre */
 const MM_TO_PX = 96 / 25.4;
+const EMPTY_SECTIONS: string[] = [];
 
-/** A job that shows everything: the sample ignores what the active job hides */
-function sampleJob(templateId: string): Job {
+/** A job that shows every item; only sections removed from the active job (bin) are left out */
+function sampleJob(templateId: string, hiddenSections: string[]): Job {
   return {
     id: "sample",
     version: CURRENT_JOB_VERSION,
@@ -33,6 +35,7 @@ function sampleJob(templateId: string): Job {
     createdAt: "2000-01-01",
     tone: "neutral",
     selection: {},
+    ...(hiddenSections.length > 0 ? { hiddenSections } : {}),
   };
 }
 
@@ -59,16 +62,20 @@ export function TemplateSample({
   const structure = isActive ? app.structure : template.layout;
   const style = isActive ? liveStyle : template.style;
   const vault = useAppSelector(vaultSelector);
+  // Sections removed with the bin belong to the active job, so they are left out of its template's sample
+  const removedSections =
+    useAppSelector(activeVariantSelector).hiddenSections ?? [];
+  const hiddenSections = isActive ? removedSections : EMPTY_SECTIONS;
   const [available, setAvailable] = useState<number>(0);
   const observer = useRef<ResizeObserver | null>(null);
   const rendered = useMemo(
     () =>
       render(vault, {
-        ...resolveVariant(template, sampleJob(template.id)),
+        ...resolveVariant(template, sampleJob(template.id, hiddenSections)),
         layout: structure,
         style,
       }),
-    [vault, template, structure, style]
+    [vault, template, structure, style, hiddenSections]
   );
 
   const marginMm = PAPER_MARGIN_MM[style.paperMargin];

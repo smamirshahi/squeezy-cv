@@ -203,7 +203,11 @@ export function EditorPageStructure(): JSX.Element {
             The bin removes a section from this job; Add section brings back one
             you removed. New sections are made in the Vault. Which entries
             appear inside a section is set on the Content tab. Your name and
-            contact details always stay at the top.
+            contact details always stay at the top.{" "}
+            <Box component="strong">
+              To filter the items inside each section, go to Apply › Template &
+              content.
+            </Box>
           </Typography>
         </Box>
         {hasColumns && <PageStructureSlider />}
