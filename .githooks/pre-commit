@@ -1,0 +1,15 @@
+#!/bin/sh
+# Every commit goes on a branch named <type>/<issue>-<description> (a GitHub issue must exist)
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$branch" = "main" ]; then
+  echo "Never commit directly to main. Create a branch: git switch -c <type>/<issue>-<description>" >&2
+  exit 1
+fi
+case "$branch" in
+  */[0-9]*-*) ;;
+  "") ;; # detached HEAD (rebase etc.)
+  *)
+    echo "Branch '$branch' has no issue number. Name it <type>/<issue>-<description>, e.g. feature/330-short-name" >&2
+    exit 1
+    ;;
+esac
