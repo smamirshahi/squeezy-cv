@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { RewordMode, RewordResult } from "@custom-types/reword-types";
 import { Item, Section } from "@custom-types/vault-types";
 import {
@@ -106,6 +112,11 @@ function TextActions({ item, field, keywords }: TextActionsProps): JSX.Element {
               needsKeywords && keywords.length === 0
                 ? "Analyse the job description first"
                 : undefined
+            }
+            startIcon={
+              busy === mode ? (
+                <CircularProgress size={14} color="inherit" />
+              ) : undefined
             }
             onClick={() => void ask(mode)}
           >

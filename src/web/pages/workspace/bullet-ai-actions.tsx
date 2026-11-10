@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Checkbox, FormControlLabel } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+} from "@mui/material";
 import { Bullet, Item } from "@custom-types/vault-types";
 import { RewriteMode, RewriteResult } from "@custom-types/rewrite-types";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -103,6 +110,11 @@ export function BulletAiActions({ item, bullet }: Props): JSX.Element {
             variant="outlined"
             disabled={busy !== null}
             aria-label={`${label} bullet: ${bullet.text.slice(0, 30)}`}
+            startIcon={
+              busy === mode ? (
+                <CircularProgress size={14} color="inherit" />
+              ) : undefined
+            }
             onClick={() => void ask(mode)}
             sx={{ py: 0, px: 0.75, fontSize: 11.5, minWidth: 0 }}
           >
