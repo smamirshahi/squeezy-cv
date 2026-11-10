@@ -132,11 +132,27 @@ export function fromMonthValue(month: string): string {
   return /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : "";
 }
 
+/** Work mode choices of an experience or education item (optional; stored as the value) */
+export const WORK_MODES = [
+  { value: "onsite", label: "On-site" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "remote", label: "Remote" },
+] as const;
+
+/** The item's work mode value; an older item with `remote: "true"` counts as remote, else "" */
+export function workModeOf(fields: Record<string, string | undefined>): string {
+  const mode = fields.workMode ?? "";
+  if (WORK_MODES.some((choice) => choice.value === mode)) {
+    return mode;
+  }
+  return fields.remote === "true" ? "remote" : "";
+}
+
+/** "London, UK · Hybrid" (either part may be missing) */
 export function locationLabel(
   location: string | undefined,
-  isRemote: string | undefined
+  workMode: string | undefined
 ): string {
-  return [location?.trim(), isRemote === "true" ? "Remote" : ""]
-    .filter(Boolean)
-    .join(" · ");
+  const label = WORK_MODES.find((choice) => choice.value === workMode)?.label;
+  return [location?.trim(), label].filter(Boolean).join(" · ");
 }

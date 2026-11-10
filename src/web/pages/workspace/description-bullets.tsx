@@ -241,7 +241,17 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
               )}
             </Box>
           ))}
-          <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 0.5,
+              mt: 0.5,
+            }}
+          >
+            <Button size="small" onClick={() => setProposal(null)}>
+              Discard
+            </Button>
             <Button
               size="small"
               variant="contained"
@@ -249,9 +259,6 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
               onClick={accept}
             >
               Use these bullets
-            </Button>
-            <Button size="small" onClick={() => setProposal(null)}>
-              Discard
             </Button>
           </Box>
         </Box>

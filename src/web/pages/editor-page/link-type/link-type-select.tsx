@@ -35,7 +35,7 @@ export function LinkTypeSelect({
   takenTypeIds = [],
 }: LinkTypeSelectProps): JSX.Element {
   return (
-    <FormControl sx={{ width: 150, flexShrink: 0 }}>
+    <FormControl sx={{ width: 200, flexShrink: 0 }}>
       <InputLabel id="link-type-label">Type</InputLabel>
       <Select
         labelId="link-type-label"

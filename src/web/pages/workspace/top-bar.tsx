@@ -5,8 +5,15 @@ import { redo, undo } from "@store/history/history";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { SaveStatus } from "@pages/editor-page/save-status";
-import { useState } from "react";
-import { HowItWorksDialog } from "@pages/workspace/how-it-works-dialog";
+import { useEffect, useState } from "react";
+import {
+  HowItWorksDialog,
+  type TutorialId,
+} from "@pages/workspace/how-it-works-dialog";
+import {
+  hasSeenVaultTutorial,
+  markVaultTutorialSeen,
+} from "@pages/workspace/tutorial-seen";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";
@@ -202,8 +209,22 @@ function FlowSteps({
 
 /** The dark bar on top: the app flow, save state and the main actions */
 export function TopBar(): JSX.Element {
-  const [helpStep, setHelpStep] = useState<number | null>(null);
-  const openHelp = (step: number): void => setHelpStep(step);
+  const [help, setHelp] = useState<{
+    tutorial: TutorialId;
+    step: number;
+  } | null>(null);
+  const openHelp = (step: number): void =>
+    setHelp({ tutorial: "overview", step });
+  const route = useRoute();
+
+  // The first time the Vault is opened, its tutorial shows; after that only the ? button does
+  const isInVault = route.kind === "vault";
+  useEffect(() => {
+    if (isInVault && !hasSeenVaultTutorial()) {
+      markVaultTutorialSeen();
+      setHelp({ tutorial: "vault", step: 0 });
+    }
+  }, [isInVault]);
 
   return (
     <Box
@@ -228,7 +249,7 @@ export function TopBar(): JSX.Element {
       <Typography sx={{ fontWeight: 700, fontSize: 14 }}>CV Builder</Typography>
       <IconButton
         size="small"
-        aria-label="How it works"
+        aria-label="Tutorials"
         onClick={() => openHelp(0)}
         sx={{ color: WORKSPACE_COLORS.barText, ml: -0.5 }}
       >
@@ -241,9 +262,10 @@ export function TopBar(): JSX.Element {
       <SaveStatus />
       <UndoRedo />
       <HowItWorksDialog
-        isOpen={helpStep !== null}
-        startStep={helpStep ?? 0}
-        onClose={() => setHelpStep(null)}
+        isOpen={help !== null}
+        startTutorial={help?.tutorial}
+        startStep={help?.step ?? 0}
+        onClose={() => setHelp(null)}
       />
     </Box>
   );

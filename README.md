@@ -181,3 +181,7 @@ The current version is shown at the bottom of the tool rail and in `GET /api/hea
 - **AI says "not configured":** check `.env`, then restart. For Ollama check that it is running (`ollama list`) and that the model was pulled.
 - **AI request times out:** local models are slow on a CPU. Use a smaller model or a hosted provider.
 - **Port in use:** change `PORT` for the server, or stop whatever uses 3001 or 5173.
+
+## Credits
+
+City suggestions in the location fields use data from [GeoNames](https://www.geonames.org/) (CC BY 4.0), see `scripts/build-cities.mjs`.

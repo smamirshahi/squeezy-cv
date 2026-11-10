@@ -36,17 +36,14 @@ export function EditorFooter(): JSX.Element | null {
         borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
       }}
     >
+      <Button onClick={() => dispatch(setShouldDiscardChanges(true))}>
+        Discard
+      </Button>
       <Button
         variant="contained"
         onClick={() => dispatch(setShouldApplyChanges(true))}
       >
         Apply
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() => dispatch(setShouldDiscardChanges(true))}
-      >
-        Discard
       </Button>
     </Box>
   );

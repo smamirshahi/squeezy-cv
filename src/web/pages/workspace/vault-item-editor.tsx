@@ -17,6 +17,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
+import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { parseBibtex } from "@shared/vault/bibtex";
 import { getItemLabel } from "@shared/variant/item-label";
@@ -26,6 +27,8 @@ import {
   fieldSpecsFor,
   fromMonthValue,
   toMonthValue,
+  workModeOf,
+  WORK_MODES,
 } from "@shared/vault/item-fields";
 import {
   moveTargets as sectionTargets,
@@ -139,16 +142,17 @@ function DateFields({
 
 interface LocationFieldProps {
   value: string;
-  isRemote: boolean;
+  workMode: string;
   onLocationChange: (value: string) => void;
-  onRemoteChange: (isRemote: boolean) => void;
+  onWorkModeChange: (workMode: string) => void;
 }
 
+/** City and country, plus an optional work mode (on-site, hybrid, remote) */
 function LocationField({
   value,
-  isRemote,
+  workMode,
   onLocationChange,
-  onRemoteChange,
+  onWorkModeChange,
 }: LocationFieldProps): JSX.Element {
   return (
     <Box
@@ -157,29 +161,35 @@ function LocationField({
       sx={{
         gridColumn: "span 3",
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) auto",
+        gridTemplateColumns: "minmax(0, 1fr) 200px",
         gap: 1.5,
         alignItems: "center",
       }}
     >
-      <TextField
-        size="medium"
-        label="Location"
+      <LocationAutocomplete
+        label="Location (city, country)"
+        placeholder="London, United Kingdom"
         value={value}
-        onChange={(event) => onLocationChange(event.target.value)}
-        sx={{ minWidth: 0, width: "100%" }}
+        onChange={onLocationChange}
       />
-      <FormControlLabel
-        label="Remote"
-        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
-        control={
-          <Checkbox
-            size="small"
-            checked={isRemote}
-            onChange={(event) => onRemoteChange(event.target.checked)}
-          />
-        }
-      />
+      <TextField
+        select
+        size="medium"
+        label="Work mode (optional)"
+        value={workMode}
+        onChange={(event) => onWorkModeChange(event.target.value)}
+        slotProps={{
+          inputLabel: { shrink: true },
+          select: { displayEmpty: true },
+        }}
+      >
+        <MenuItem value="">Not stated</MenuItem>
+        {WORK_MODES.map((choice) => (
+          <MenuItem key={choice.value} value={choice.value}>
+            {choice.label}
+          </MenuItem>
+        ))}
+      </TextField>
     </Box>
   );
 }
@@ -523,10 +533,14 @@ export function VaultItemEditor({
               <LocationField
                 key={spec.key}
                 value={draft[spec.key] ?? item.fields[spec.key] ?? ""}
-                isRemote={(draft.remote ?? item.fields.remote ?? "") === "true"}
+                workMode={
+                  "workMode" in draft
+                    ? (draft.workMode ?? "")
+                    : workModeOf(item.fields)
+                }
                 onLocationChange={(value) => changeField(spec.key, value)}
-                onRemoteChange={(isRemote) =>
-                  changeField("remote", isRemote ? "true" : "")
+                onWorkModeChange={(workMode) =>
+                  changeField("workMode", workMode)
                 }
               />
             );
