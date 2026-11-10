@@ -51,12 +51,16 @@ export function ContentPanel(): JSX.Element {
           display: "grid",
           gap: 1.5,
           alignContent: "start",
+          // Rows are as tall as their content. Without this a row can shrink to the panel's
+          // height and its card (overflow: hidden) clips the content instead of the panel scrolling.
+          gridAutoRows: "max-content",
         }}
       >
         <TailorAll />
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button
             size="small"
+            variant="outlined"
             disabled={index === 0}
             onClick={() => setStep(steps[index - 1].id)}
           >
@@ -77,7 +81,7 @@ export function ContentPanel(): JSX.Element {
           </Select>
           <Button
             size="small"
-            variant="contained"
+            variant="outlined"
             disabled={index === steps.length - 1}
             onClick={() => setStep(steps[index + 1].id)}
           >

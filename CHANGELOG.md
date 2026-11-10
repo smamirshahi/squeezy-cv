@@ -23,6 +23,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - Style: "Icons next to details" option (on by default); the template bar says how many jobs were already applied with it (#327).
 - The per-section "Tailor" button is now "Score entries" and "Tailor all sections" is "Score all sections", because they only score entries and change nothing (#328).
 - The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
+- "Score entries" is a filled button like "Score all sections"; Back and Next are outlined (#336).
+
+### Fixed
+
+- Apply: the content panel scrolls to the end of a long entry instead of cutting it off (#336).
 
 ## [0.3.0] - 2026-11-10
 

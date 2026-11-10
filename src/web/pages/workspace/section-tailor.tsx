@@ -93,7 +93,7 @@ export function SectionTailor({
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
         <Button
-          variant="outlined"
+          variant="contained"
           size="small"
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void tailor()}
