@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-**Never commit directly to `main`.** Always create a branch first, then merge it (see the `work-on-issue` skill). `.githooks/pre-commit` refuses commits on `main`; enable it once with `git config core.hooksPath .githooks`.
+**Never commit directly to `main`.** Always create a branch first, then merge it (see the `work-on-issue` skill). Every branch is named `<type>/<issue>-<description>` and needs a GitHub issue. `.githooks/pre-commit` refuses commits on `main` and on branches without an issue number; enable it once with `git config core.hooksPath .githooks`.
 
 CV Builder: a React 19 + TypeScript + Vite app (MUI, Redux Toolkit) with a workspace — rail, live A4 preview and inspector — exportable to PDF, plus a small local Fastify server that stores the data as JSON files. The data model (version 0.2): **vault** (all facts) + **templates** (how a CV looks) + **jobs** (one target each: uses a template, decides what to show) + **applications** (frozen copy of what was sent). See "Templates and jobs" below. GitHub issues hold the roadmap and history (#28-#49 first phases, #165-#172 templates and jobs).
 
