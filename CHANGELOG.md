@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- The outline lists only the sections the template places and the job includes, and sections can no longer be reordered there (#318).
+
 ## [0.3.0] - 2026-11-10
 
 ### Added
