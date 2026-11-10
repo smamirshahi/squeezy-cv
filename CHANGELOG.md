@@ -9,6 +9,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-10
+
 ### Added
 
 - Skills: skill names and group categories autocomplete from default lists (technical, general, spoken languages, AI-assisted development); suggestions already used are greyed out. Language groups use their own levels (Basic to Native). Skills in a group stay sorted by level, highest first. Only one empty skill or empty item at a time.
@@ -250,6 +252,7 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/smamirshahi/CV-Builder/releases/tag/v0.1.0
