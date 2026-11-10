@@ -78,7 +78,7 @@ function Heading({ children }: { children: string }): JSX.Element {
 }
 
 /** Moves a section one place up or down inside its column */
-export function moveSection(
+function moveSection(
   structure: PageStructure,
   id: string,
   delta: -1 | 1
