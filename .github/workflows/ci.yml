@@ -21,6 +21,7 @@ jobs:
       - run: pnpm format-check
       - run: pnpm knip
       - run: pnpm test
+      # E2E PAUSED: the specs still drive the layout from before Apply (#298). Re-enable once fixed (see the issue 'Fix the e2e tests'):
       # Real browser: the PDF and the editor end to end (see src/e2e)
       # - run: pnpm exec playwright install --with-deps chromium
       # - run: pnpm test:e2e
