@@ -65,7 +65,8 @@ export function GenericSectionPreviewPage({
               direction="row"
               sx={{
                 alignItems: "center",
-                gap: 3,
+                columnGap: 3,
+                rowGap: 0,
               }}
             >
               <CvTypography

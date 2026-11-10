@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import { Template } from "@custom-types/template-types";
@@ -115,14 +116,27 @@ function EditedTemplateSwitcher({
       >
         {templates.map((template) => (
           <MenuItem key={template.id} value={template.id}>
-            {template.name} (
-            {jobCountText(
-              jobs.filter((j) => j.templateId === template.id).length
-            )}
-            )
+            {template.name}
           </MenuItem>
         ))}
       </TextField>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          mt: 1,
+          fontSize: 13,
+          color: WORKSPACE_COLORS.muted,
+        }}
+      >
+        <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+        <span>
+          Hint: this template is used by{" "}
+          {jobCountText(jobs.filter((j) => j.templateId === templateId).length)}
+          .
+        </span>
+      </Box>
     </Box>
   );
 }
