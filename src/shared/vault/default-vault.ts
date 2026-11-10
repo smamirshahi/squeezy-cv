@@ -1,12 +1,14 @@
 import { CURRENT_VAULT_VERSION, Vault } from "@custom-types/vault-types";
 
-/** Ids of the four sections every new CV starts with. Imported CVs keep their own ids. */
+/** Ids of the usual sections every new CV starts with. Imported CVs keep their own ids. */
 const DEFAULT_SECTION_IDS = {
   summary: "summary",
   experience: "experience",
   education: "education",
   skills: "skills",
   publications: "publications",
+  awards: "awards",
+  interests: "interests",
 } as const;
 
 /** Ids of the two parts of the CV header. They come from the profile and links, not from sections. */
@@ -47,6 +49,18 @@ export function createDefaultVault(): Vault {
         id: DEFAULT_SECTION_IDS.publications,
         type: "publications",
         title: "Publications",
+        items: [],
+      },
+      {
+        id: DEFAULT_SECTION_IDS.awards,
+        type: "awards",
+        title: "Awards",
+        items: [],
+      },
+      {
+        id: DEFAULT_SECTION_IDS.interests,
+        type: "interests",
+        title: "Personal Interests",
         items: [],
       },
     ],

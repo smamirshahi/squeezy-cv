@@ -7,7 +7,7 @@ the structure below and reply with a single JSON object, nothing else (no commen
 "profile": { "fullName": string, "headline": string?, "email": string?, "phone": string?, "location": string?, "rightToWork": string? },
 "links": [ { "label": string, "url": string } ],
 "sections": [
-{ "type": "summary" | "experience" | "education" | "skills" | "projects" | "certifications" | "publications" | "volunteering" | "custom",
+{ "type": "summary" | "experience" | "education" | "skills" | "projects" | "certifications" | "publications" | "volunteering" | "awards" | "interests" | "custom",
 "title": string,
 "items": [ { "fields": { ... }, "bullets": string[] } ] }
 ]
@@ -19,6 +19,8 @@ Fields by section type (use only these keys, and only when the text gives the va
 - experience: { "jobTitle", "company", "location", "startDate", "endDate" }; bullets are the achievements.
 - education: { "degree", "institute", "location", "startDate", "endDate" }; bullets are extra points (grade, modules).
 - skills: one item per group with { "category": the group name }; bullets are the individual skills, one each.
+- awards: { "title", "subtitle" (issuer), "startDate" (date), "description" }.
+- interests: { "title" (the interests as one short line), "description" (optional detail) }.
 - projects, certifications, publications, volunteering, custom: { "title", "subtitle", "location", "startDate", "endDate", "description" }.
 
 Rules:

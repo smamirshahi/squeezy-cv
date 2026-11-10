@@ -1,3 +1,7 @@
+import {
+  isLanguageGroup,
+  languageLevelLabel,
+} from "@shared/vault/skill-suggestions";
 import { Bullet, Item, Section, Vault } from "@custom-types/vault-types";
 
 /**
@@ -14,7 +18,36 @@ export function moveInArray<T>(array: T[], from: number, to: number): T[] {
 }
 
 /** Section types whose items are kept in date order by the vault */
-const DATED_TYPES: Section["type"][] = ["experience", "education"];
+const DATED_TYPES: Section["type"][] = [
+  "experience",
+  "education",
+  "publications",
+  "awards",
+];
+
+/** The year of an item: the first four digits of its year, date or start date (null when it has none) */
+export function itemYear(item: Item): number | null {
+  const text =
+    item.fields.year || item.fields.date || item.fields.startDate || "";
+  const match = /\b(\d{4})\b/.exec(text);
+  return match ? Number(match[1]) : null;
+}
+
+/** Items by year, newest first (items without a year last; ties keep their order). Returns a new array. */
+function sortItemsByYear(items: Item[]): Item[] {
+  return [...items].sort(
+    (a, b) =>
+      (itemYear(b) ?? Number.NEGATIVE_INFINITY) -
+        (itemYear(a) ?? Number.NEGATIVE_INFINITY) || 0
+  );
+}
+
+/** Keeps the right order for the section type: by year for publications and awards, else by date */
+function sortItemsFor(section: Section): Item[] {
+  return section.type === "publications" || section.type === "awards"
+    ? sortItemsByYear(section.items)
+    : sortItemsByDate(section.items);
+}
 
 /** Sorts a dated item's date as a comparable number: an empty end date means "current" */
 function dateValue(iso: string | undefined, isEnd: boolean): number {
@@ -43,7 +76,7 @@ export function sortedSection(section: Section): Section {
   if (!DATED_TYPES.includes(section.type)) {
     return section;
   }
-  const items = sortItemsByDate(section.items);
+  const items = sortItemsFor(section);
   return items.every((item, index) => item === section.items[index])
     ? section
     : { ...section, items };
@@ -63,7 +96,7 @@ export function withDatedSectionsSorted(vault: Vault): Vault {
 /** Puts the items of a work experience or education section in date order (in place) */
 export function keepInDateOrder(section: Section | undefined): void {
   if (section && DATED_TYPES.includes(section.type)) {
-    section.items = sortItemsByDate(section.items);
+    section.items = sortItemsFor(section);
   }
 }
 
@@ -131,7 +164,13 @@ export function isYearsAcceptable(years: number): boolean {
 }
 
 /** The name of a level (a rating in steps of 0.5; halves are named by the whole level below) */
-export function levelLabel(rating: number | undefined): string {
+export function levelLabel(
+  rating: number | undefined,
+  category?: string
+): string {
+  if (isLanguageGroup(category)) {
+    return languageLevelLabel(rating);
+  }
   const labels = ["No level", "Learning", "Working", "Proficient", "Advanced"];
   if (!rating) {
     return labels[0];

@@ -4,6 +4,10 @@ import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
 import { EducationsPreviewPage } from "@pages/preview-page/educations-preview-page";
+import {
+  AwardsPreviewPage,
+  InterestsPreviewPage,
+} from "@pages/preview-page/awards-interests-preview-page";
 import { PublicationsPreviewPage } from "@pages/preview-page/publications-preview-page";
 import { GenericSectionPreviewPage } from "@pages/preview-page/generic-section-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
@@ -32,6 +36,10 @@ function renderPart(part: RenderedPart): JSX.Element | null {
           return <EducationsPreviewPage key={part.id} section={part} />;
         case "publications":
           return <PublicationsPreviewPage key={part.id} section={part} />;
+        case "awards":
+          return <AwardsPreviewPage key={part.id} section={part} />;
+        case "interests":
+          return <InterestsPreviewPage key={part.id} section={part} />;
         case "skills":
           return <SkillsPreviewPage key={part.id} section={part} />;
         default:

@@ -136,7 +136,7 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
                     <Box component="span" data-cv-level="text" sx={{ ml: 1 }}>
                       <CvTypography
                         variant="bodySm"
-                        text={levelLabel(skill.rating)}
+                        text={levelLabel(skill.rating, group.fields.category)}
                       />
                     </Box>
                   ) : null

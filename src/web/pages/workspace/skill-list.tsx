@@ -118,7 +118,7 @@ function SkillGroup({ item, variant, hasTitle }: GroupProps): JSX.Element {
                     <Typography
                       sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
                     >
-                      {levelLabel(bullet.rating)}
+                      {levelLabel(bullet.rating, item.fields.category)}
                     </Typography>
                     <SortingIcons
                       index={index}

@@ -10,6 +10,8 @@ export const SECTION_TYPE_LABELS: Record<SectionType, string> = {
   certifications: "Certifications",
   publications: "Publications",
   volunteering: "Volunteering",
+  awards: "Awards",
+  interests: "Personal interests",
   custom: "Custom",
   unsorted: "Unsorted",
 };
@@ -46,10 +48,26 @@ export const ADD_SECTION_OPTIONS: {
     description: "Groups of skills with an optional level",
   },
   {
+    type: "publications",
+    label: "Publications",
+    description:
+      "Scientific papers: authors, journal, year; paste BibTeX to fill it",
+  },
+  {
+    type: "awards",
+    label: "Awards",
+    description: "Title, issuer, date and a short description",
+  },
+  {
+    type: "interests",
+    label: "Personal interests",
+    description: "A short list or one line, e.g. Cycling, puzzle design",
+  },
+  {
     type: "custom",
     label: "Other section",
     description:
-      "Any list of entries, e.g. Certifications, Awards, Projects, Publications, Volunteering",
+      "Any list of entries, e.g. Certifications, Projects, Volunteering",
   },
 ];
 

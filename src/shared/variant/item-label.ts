@@ -19,11 +19,11 @@ export function shorten(text: string, max = MAX_LABEL_LENGTH): string {
 }
 
 /** A short name for an item in lists, from its first filled-in field */
-export function getItemLabel(item: Item): string {
+export function getItemLabel(item: Item, max = MAX_LABEL_LENGTH): string {
   for (const key of LABEL_FIELDS) {
     const value = item.fields[key]?.trim();
     if (value) {
-      return shorten(value);
+      return shorten(value, max);
     }
   }
   return "(untitled)";
