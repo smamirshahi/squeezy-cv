@@ -6,6 +6,30 @@ import {
   toMonthValue,
 } from "@shared/vault/item-fields";
 
+describe("fieldSpecsFor awards, interests and skills", () => {
+  it("gives awards a title, issuer, date, short description and link", () => {
+    expect(fieldSpecsFor("awards").map((f) => f.key)).toEqual([
+      "title",
+      "issuer",
+      "date",
+      "description",
+      "link",
+    ]);
+  });
+
+  it("gives interests a title line and a multiline detail", () => {
+    const specs = fieldSpecsFor("interests");
+    expect(specs.map((f) => f.key)).toEqual(["title", "detail"]);
+    expect(specs[1].kind).toBe("multiline");
+  });
+
+  it("offers category suggestions on a skills group", () => {
+    const spec = fieldSpecsFor("skills")[0];
+    expect(spec.key).toBe("category");
+    expect(spec.suggestions).toContain("AI-assisted development");
+  });
+});
+
 describe("fieldSpecsFor", () => {
   it("uses the keys the page draws", () => {
     expect(fieldSpecsFor("experience").map((f) => f.key)).toEqual([

@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import {
   addBullet,
+  addItem,
+  updateBullet,
+  updateItemFields,
   initialState,
   setItemBullets,
   setLinks,
@@ -34,7 +37,7 @@ function freshVault(): VaultState {
 }
 
 describe("default vault", () => {
-  it("is valid and has the five usual sections with the preview headings", () => {
+  it("is valid and has the seven usual sections with the preview headings", () => {
     const vault = createDefaultVault();
     expect(() => VaultSchema.check(vault)).not.toThrow();
     expect(vault.sections.map((s) => [s.id, s.type, s.title])).toEqual([
@@ -43,6 +46,8 @@ describe("default vault", () => {
       ["education", "education", "Education"],
       ["skills", "skills", "Skills"],
       ["publications", "publications", "Publications"],
+      ["awards", "awards", "Awards"],
+      ["interests", "interests", "Personal Interests"],
     ]);
   });
 
@@ -52,10 +57,12 @@ describe("default vault", () => {
   });
 
   it("uses the same section ids as the migration, so structures stay valid", () => {
-    // a migrated file has no publications; the default vault adds that one on top
+    // a migrated file has no publications, awards or interests; the default vault adds those on top
     const defaults = createDefaultVault().sections.map((s) => s.id);
     expect(freshVault().sections.map((s) => s.id)).toEqual(
-      defaults.filter((id) => id !== "publications")
+      defaults.filter(
+        (id) => !["publications", "awards", "interests"].includes(id)
+      )
     );
   });
 });
@@ -216,7 +223,7 @@ describe("section types", () => {
       expect(SECTION_TYPE_LABELS[type]).toBeTruthy();
       expect(getDefaultSectionTitle(type)).toBe(SECTION_TYPE_LABELS[type]);
     }
-    expect(SECTION_TYPES).toHaveLength(9);
+    expect(SECTION_TYPES).toHaveLength(11);
   });
 
   it("knows which types have a special layout", () => {
@@ -226,5 +233,86 @@ describe("section types", () => {
       "education",
       "skills",
     ]);
+  });
+});
+
+describe("skills stay sorted by level", () => {
+  function skillsVault(): VaultState {
+    const vault = createDefaultVault();
+    const skills = vault.sections.find((s) => s.type === "skills")!;
+    skills.items.push({
+      id: "g",
+      fields: { category: "Tools" },
+      bullets: [
+        { id: "a", text: "A", tags: [], rating: 2 },
+        { id: "b", text: "B", tags: [], rating: 4 },
+        { id: "c", text: "C", tags: [] },
+      ],
+      tags: [],
+      shouldShow: true,
+    });
+    return vault;
+  }
+  const ref = { sectionId: "skills", itemId: "g" };
+  const order = (state: VaultState): string[] =>
+    state.sections
+      .find((s) => s.id === "skills")!
+      .items[0].bullets.map((b) => b.id);
+
+  it("moves a skill up when its level goes up, ties keep their order", () => {
+    let state = skillsVault();
+    state = vaultReducer(
+      state,
+      updateBullet({ ...ref, bulletId: "c", update: { rating: 4 } })
+    );
+    expect(order(state)).toEqual(["b", "c", "a"]);
+    state = vaultReducer(
+      state,
+      updateBullet({ ...ref, bulletId: "a", update: { rating: 5 } })
+    );
+    expect(order(state)).toEqual(["a", "b", "c"]);
+  });
+
+  it("does not reorder when only the text changes, nor outside skills", () => {
+    let state = skillsVault();
+    state = vaultReducer(
+      state,
+      updateBullet({ ...ref, bulletId: "c", update: { text: "Cc" } })
+    );
+    expect(order(state)).toEqual(["a", "b", "c"]);
+
+    const projects = vaultReducer(
+      createDefaultVault(),
+      addItem({ sectionId: "publications", fields: {} })
+    );
+    expect(
+      projects.sections.find((s) => s.id === "publications")!.items
+    ).toHaveLength(1);
+  });
+
+  it("keeps publications and awards newest year first when items are added or edited", () => {
+    let state = createDefaultVault();
+    for (const year of ["2016", "2022", "2018"]) {
+      state = vaultReducer(
+        state,
+        addItem({ sectionId: "publications", fields: { year } })
+      );
+    }
+    const years = () =>
+      state.sections
+        .find((s) => s.id === "publications")!
+        .items.map((i) => i.fields.year);
+    expect(years()).toEqual(["2022", "2018", "2016"]);
+    const oldest = state.sections.find((s) => s.id === "publications")!
+      .items[2];
+    state = vaultReducer(
+      state,
+      updateItemFields({
+        sectionId: "publications",
+        itemId: oldest.id,
+        fields: { year: "2030" },
+      })
+    );
+    expect(years()).toEqual(["2030", "2022", "2018"]);
   });
 });

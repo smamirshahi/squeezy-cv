@@ -272,7 +272,14 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
       isSkills && variant.skillGroupBy === "level"
         ? flattenSkills(grouped)
         : isSkills
-          ? grouped.map(sortSkillsByLevel)
+          ? grouped.map((item) =>
+              // an order the job has chosen for this group wins over the level order
+              Object.values(variant.selection[item.id]?.bullets ?? {}).some(
+                (choice) => choice.order !== undefined
+              )
+                ? item
+                : sortSkillsByLevel(item)
+            )
           : grouped;
     return items.length === 0
       ? []

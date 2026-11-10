@@ -238,7 +238,7 @@ describe("inline vault item editor", () => {
     const store = setup();
     open("Languages");
     const first = stored(store, "Languages").bullets[0];
-    pickLevel(0, "4 – Advanced");
+    pickLevel(0, "4 – Fluent");
     expect(stored(store, "Languages").bullets[0].rating).toBe(4);
     const years = screen.getByLabelText(`${first.text} years`);
 
@@ -266,31 +266,53 @@ describe("inline vault item editor", () => {
     });
     expect(stored(store, "Spoken languages")).toBeDefined();
 
+    const secondId = stored(store, "Spoken languages").bullets[1].id;
+    const bulletOf = (id: string) =>
+      stored(store, "Spoken languages").bullets.find(
+        (bullet) => bullet.id === id
+      );
     fireEvent.change(screen.getByLabelText("Skill 2 name"), {
       target: { value: "Français" },
     });
-    expect(stored(store, "Spoken languages").bullets[1].text).toBe("Français");
+    expect(bulletOf(secondId)?.text).toBe("Français");
 
-    // Level choices are whole steps from 1 to 5; there is no plus control.
-    pickLevel(1, "3 – Proficient");
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(3);
-    pickLevel(1, "4 – Advanced");
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(4);
-    pickLevel(1, "5 – Expert");
-    expect(stored(store, "Spoken languages").bullets[1].rating).toBe(5);
+    // A language group has its own level names, whole steps from 1 to 5.
+    // A skill moves in the list when its level changes (highest level first),
+    // so the row is found again by its text.
+    const rowOf = () =>
+      stored(store, "Spoken languages").bullets.findIndex(
+        (bullet) => bullet.id === secondId
+      );
+    pickLevel(rowOf(), "3 – Professional");
+    expect(bulletOf(secondId)?.rating).toBe(3);
+    pickLevel(rowOf(), "4 – Fluent");
+    expect(bulletOf(secondId)?.rating).toBe(4);
+    pickLevel(rowOf(), "5 – Native");
+    expect(bulletOf(secondId)?.rating).toBe(5);
     expect(screen.queryByRole("button", { name: / plus$/ })).toBeNull();
     // there is no "No level" choice: whether levels show is up to the template
-    fireEvent.mouseDown(screen.getAllByRole("combobox", { name: /^Level/ })[1]);
+    fireEvent.mouseDown(
+      screen.getAllByRole("combobox", { name: /^Level/ })[rowOf()]
+    );
     expect(screen.queryByRole("option", { name: "No level" })).toBeNull();
     fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
 
+    // the highest level is first
+    const ratings = stored(store, "Spoken languages").bullets.map(
+      (bullet) => bullet.rating ?? 0
+    );
+    expect(ratings).toEqual([...ratings].sort((x, y) => y - x));
+
+    fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
+    expect(stored(store, "Spoken languages").bullets).toHaveLength(3);
+    // only one empty skill at a time: a second click reuses the empty one
     fireEvent.click(screen.getByRole("button", { name: "Add skill" }));
     expect(stored(store, "Spoken languages").bullets).toHaveLength(3);
     expect(screen.queryByRole("button", { name: / plus$/ })).toBeNull();
 
-    const secondId = stored(store, "Spoken languages").bullets[1].id;
+    const movedId = stored(store, "Spoken languages").bullets[1].id;
     fireEvent.click(screen.getByRole("button", { name: "Move skill 2 up" }));
-    expect(stored(store, "Spoken languages").bullets[0].id).toBe(secondId);
+    expect(stored(store, "Spoken languages").bullets[0].id).toBe(movedId);
 
     fireEvent.click(screen.getByRole("button", { name: "Remove skill 3" }));
     expect(stored(store, "Spoken languages").bullets).toHaveLength(2);
