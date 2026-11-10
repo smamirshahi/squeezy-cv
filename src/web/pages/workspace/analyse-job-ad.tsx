@@ -113,7 +113,13 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
             : "AI is not set up. Choose a provider in Settings."}
         </Typography>
       </Box>
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && (
+        <Alert severity="error">
+          {error}
+          {analysis &&
+            " The analysis below is from an earlier run (possibly another provider), not from this attempt."}
+        </Alert>
+      )}
       {warnings.map((warning) => (
         <Typography key={warning} sx={{ fontSize: 12 }}>
           {warning}
