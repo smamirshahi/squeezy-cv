@@ -19,17 +19,12 @@ export function EditorFooter(): JSX.Element | null {
 
   return (
     <Box
-      // Stays at the bottom of the scrolling middle area, always reachable. The negative
-      // margins let it span the area's padding.
+      // A fixed row below the scrolling part of the middle area, so it is always at the very bottom
       sx={{
-        position: "sticky",
-        bottom: 0,
-        zIndex: 2,
+        flex: "none",
         display: "flex",
         justifyContent: "flex-end",
         gap: 2,
-        mx: -3,
-        mb: -3,
         px: 3,
         py: 1.5,
         bgcolor: cssVar("bg"),

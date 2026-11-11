@@ -16,6 +16,7 @@ import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
+import { MainInfoAsideContext } from "@pages/editor-page/sections/main-info-preview";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import {
   MIDDLE_AREA_SX,
@@ -251,8 +252,10 @@ export function VaultPage(): JSX.Element {
     dispatch(setSelectedSectionInEditorPage(selectedPageId));
   }, [selectedPageId, dispatch]);
 
+  const [asideSlot, setAsideSlot] = useState<HTMLElement | null>(null);
+
   return (
-    <>
+    <MainInfoAsideContext.Provider value={asideSlot}>
       <VaultTree selectedPage={selectedPageId} />
       <Box
         component="main"
@@ -260,24 +263,40 @@ export function VaultPage(): JSX.Element {
         sx={{
           flex: 1,
           minWidth: 0,
-          overflow: "auto",
+          minHeight: 0,
+          overflow: "hidden",
           ...MIDDLE_AREA_SX,
           mx: 1,
-          p: 3,
           display: "flex",
           flexDirection: "column",
-          gap: 2,
         }}
       >
         <Box
           sx={{
-            bgcolor: WORKSPACE_COLORS.panel,
-            border: `1px solid ${WORKSPACE_COLORS.border}`,
-            borderRadius: "6px",
-            p: 2,
+            flex: 1,
+            minHeight: 0,
+            overflow: "auto",
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
         >
-          {page.content}
+          {selectedPageId === "mainInfo" ? (
+            // Main Info is made of its own cards
+            page.content
+          ) : (
+            <Box
+              sx={{
+                bgcolor: WORKSPACE_COLORS.panel,
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                borderRadius: "6px",
+                p: 2,
+              }}
+            >
+              {page.content}
+            </Box>
+          )}
         </Box>
         {!hasItemList && <EditorFooter />}
       </Box>
@@ -295,8 +314,10 @@ export function VaultPage(): JSX.Element {
               })
             }
           />
+        ) : selectedPageId === "mainInfo" ? (
+          <div ref={setAsideSlot} />
         ) : undefined}
       </ItemPanel>
-    </>
+    </MainInfoAsideContext.Provider>
   );
 }

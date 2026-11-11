@@ -5,6 +5,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
@@ -52,6 +53,9 @@ const ITEMS: RailItem[] = [
   },
 ];
 
+/** Where the "Buy me a coffee" button goes. */
+const SUPPORT_URL = "https://ko-fi.com/mohammadamirshahi";
+
 const SETTINGS: RailItem = {
   label: "Settings",
   icon: <MemoryIcon fontSize="small" />,
@@ -81,9 +85,33 @@ export function ToolRail(): JSX.Element {
         gap: 0.25,
       }}
     >
-      {[...ITEMS, null, SETTINGS, "theme" as const].map((item) => {
+      {[...ITEMS, null, "coffee" as const, SETTINGS, "theme" as const].map((item) => {
         if (item === null) {
           return <Box key="spacer" sx={{ flex: 1 }} />;
+        }
+        if (item === "coffee") {
+          return (
+            <ButtonBase
+              key="coffee"
+              component="a"
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Buy me a coffee (opens Ko-fi)"
+              sx={{
+                width: 60,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              <LocalCafeOutlinedIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>Coffee</Typography>
+            </ButtonBase>
+          );
         }
         if (item === "theme") {
           return (

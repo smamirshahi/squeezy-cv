@@ -39,8 +39,8 @@ export function suggestFileName(fullName: string, variantName: string): string {
 
 /**
  * The checks shown before exporting. Pure: only what is known about the CV, nothing is
- * measured here. The PDF itself always has a real text layer and no photo or date of birth
- * (the vault has no field for them), so those are stated, not computed.
+ * measured here. The PDF itself always has a real text layer and no date of birth;
+ * a photo is only there when the profile has one.
  */
 export function exportChecks(input: ExportCheckInput): ExportCheck[] {
   const checks: ExportCheck[] = [];
@@ -88,12 +88,22 @@ export function exportChecks(input: ExportCheckInput): ExportCheck[] {
     title: "Text is selectable",
     detail: "Real text layer, standard headings, no images of text",
   });
-  checks.push({
-    id: "uk",
-    level: "ok",
-    title: "No photo or date of birth",
-    detail: "UK convention",
-  });
+  checks.push(
+    input.profile.photo
+      ? {
+          id: "uk",
+          level: "warning",
+          title: "Photo included",
+          detail:
+            "UK employers usually expect no photo. Remove it in Vault > Main Info if the role is in the UK.",
+        }
+      : {
+          id: "uk",
+          level: "ok",
+          title: "No photo or date of birth",
+          detail: "UK convention",
+        }
+  );
   if (input.hiddenItemCount > 0) {
     checks.push({
       id: "hidden",

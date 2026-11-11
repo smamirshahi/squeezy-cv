@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  ButtonBase,
   MenuItem,
   IconButton,
   InputAdornment,
@@ -9,13 +10,19 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import {
+  MainInfoPreview,
+  useMainInfoAside,
+} from "@pages/editor-page/sections/main-info-preview";
+import { PhotoDialog } from "@pages/editor-page/sections/photo-dialog";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addLink,
@@ -56,274 +63,432 @@ export function EditorMainInfo(): JSX.Element | null {
     dispatch(setLinks(applied.links));
   });
 
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+
+  const aside = useMainInfoAside();
+  const { profile: p } = draft;
+
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <TextField
-          slotProps={{ inputLabel: { shrink: true } }}
-          label="Full Name"
-          placeholder="Jane Doe"
-          variant="outlined"
-          value={draft.profile.fullName}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ fullName: event.target.value }))
-          }
-          fullWidth
-        />
-        <TextField
-          slotProps={{ inputLabel: { shrink: true } }}
-          label="Job Title"
-          placeholder="Senior Software Engineer"
-          variant="outlined"
-          value={draft.profile.headline ?? ""}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ headline: event.target.value }))
-          }
-          fullWidth
-        />
-        <JobTitleOptions
-          options={draft.profile.headlineOptions ?? []}
-          onChange={(headlineOptions) =>
-            draftDispatch(updateProfile({ headlineOptions }))
-          }
-        />
-        <Autocomplete
-          multiple
-          options={[...NATIONALITIES]}
-          value={draft.profile.nationalities ?? []}
-          onChange={(_event, nationalities) =>
-            draftDispatch(updateProfile({ nationalities }))
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Nationality (optional)"
-              placeholder="Start typing, e.g. British"
-              helperText="Pick one or more. Shown under your name when turned on in Templates > Design."
-              slotProps={{
-                ...params.slotProps,
-                inputLabel: { ...params.slotProps?.inputLabel, shrink: true },
-              }}
-            />
-          )}
-        />
-        {(
-          [
-            ["maritalStatus", "Marital status (optional)", MARITAL_STATUSES],
-            ["gender", "Gender (optional)", GENDERS],
-          ] as const
-        ).map(([key, label, choices]) => (
-          <TextField
-            key={key}
-            select
-            label={label}
-            value={draft.profile[key] ?? ""}
-            onChange={(event) =>
-              draftDispatch(updateProfile({ [key]: event.target.value }))
-            }
-            helperText="Shown under your name when turned on in Templates > Design."
-            slotProps={{
-              inputLabel: { shrink: true },
-              select: { displayEmpty: true },
-            }}
-          >
-            <MenuItem value="">Not stated</MenuItem>
-            {choices.map((choice) => (
-              <MenuItem key={choice} value={choice}>
-                {choice}
-              </MenuItem>
-            ))}
-          </TextField>
-        ))}
-        <Autocomplete
-          freeSolo
-          options={[...RIGHT_TO_WORK_OPTIONS]}
-          value={draft.profile.rightToWork ?? ""}
-          inputValue={draft.profile.rightToWork ?? ""}
-          onInputChange={(_event, rightToWork) =>
-            draftDispatch(updateProfile({ rightToWork }))
-          }
-          filterOptions={(options) => options}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Right to work (optional)"
-              placeholder="Type your own, or open the list for ready-made wordings"
-              helperText="Shown under your name when turned on in Templates > Design."
-              slotProps={{
-                ...params.slotProps,
-                inputLabel: { ...params.slotProps?.inputLabel, shrink: true },
-                input: {
-                  ...params.slotProps?.input,
-                  startAdornment: (
-                    <Tooltip title="Type any wording you like, or pick a ready-made one from the list (UK situations). A picked wording is only text: you can edit it afterwards, and replace anything in [brackets].">
-                      <InfoOutlinedIcon
-                        fontSize="small"
-                        aria-label="About right to work"
-                        sx={{ mr: 0.5, color: "text.secondary" }}
-                      />
-                    </Tooltip>
-                  ),
-                },
-              }}
-            />
-          )}
-        />
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <TextField
-          label="Email"
-          placeholder="jane.doe@example.com"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AlternateEmailIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          variant="outlined"
-          value={draft.profile.email ?? ""}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ email: event.target.value }))
-          }
-        />
-        <TextField
-          label="Phone"
-          placeholder="+44 7700 900123"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SmartphoneIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
-          variant="outlined"
-          value={draft.profile.phone ?? ""}
-          onChange={(event) =>
-            draftDispatch(updateProfile({ phone: event.target.value }))
-          }
-        />
-        <LocationAutocomplete
-          label="Location (city, country)"
-          placeholder="London, United Kingdom"
-          startAdornment={
-            <InputAdornment position="start">
-              <LocationOnIcon />
-            </InputAdornment>
-          }
-          value={draft.profile.location ?? ""}
-          onChange={(location) => draftDispatch(updateProfile({ location }))}
-        />
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 760,
+        mx: "auto",
+        // Never shrink: the page scrolls and the sticky footer stays below all of it
+        flex: "none",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Box>
+        <Typography variant="h6" component="h1">
+          Main info
+        </Typography>
+        <Typography variant="body2" sx={{ color: WORKSPACE_COLORS.muted }}>
+          Facts about you. Written once, reused by every job. What a CV shows is
+          decided by its template and job.
+        </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6">Links</Typography>
-      </Box>
-      {draft.links.map((link) => (
+      <InfoCard title="Identity">
+        <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+          <Box
+            sx={{
+              width: 120,
+              flex: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            <ButtonBase
+              onClick={() => setIsPhotoDialogOpen(true)}
+              aria-label={p.photo ? "Edit photo" : "Add photo"}
+              sx={{
+                width: 120,
+                height: 150,
+                borderRadius: "6px",
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                bgcolor: "action.hover",
+                overflow: "hidden",
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              {p.photo ? (
+                <Box
+                  component="img"
+                  src={p.photo}
+                  alt="Your photo"
+                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <PersonOutlineIcon sx={{ fontSize: 56 }} />
+              )}
+            </ButtonBase>
+            <Box sx={{ display: "flex", gap: 0.5 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ flex: 1 }}
+                onClick={() => setIsPhotoDialogOpen(true)}
+              >
+                {p.photo ? "Edit photo" : "Add photo"}
+              </Button>
+              <Tooltip title="Optional. Always cropped to a 4:5 frame so any picture fits.">
+                <InfoOutlinedIcon
+                  fontSize="small"
+                  aria-label="About the photo"
+                  sx={{ alignSelf: "center", color: "text.secondary" }}
+                />
+              </Tooltip>
+            </Box>
+            <PhotoDialog
+              isOpen={isPhotoDialogOpen}
+              photo={p.photo}
+              photoSource={p.photoSource}
+              photoCrop={p.photoCrop}
+              onClose={() => setIsPhotoDialogOpen(false)}
+              onApply={(result) => {
+                draftDispatch(updateProfile(result));
+                setIsPhotoDialogOpen(false);
+              }}
+            />
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <TextField
+              size="small"
+              slotProps={{ inputLabel: { shrink: true } }}
+              label="Full Name"
+              placeholder="Jane Doe"
+              value={p.fullName}
+              onChange={(event) =>
+                draftDispatch(updateProfile({ fullName: event.target.value }))
+              }
+              fullWidth
+            />
+            <TextField
+              size="small"
+              slotProps={{ inputLabel: { shrink: true } }}
+              label="Job Title"
+              placeholder="Senior Software Engineer"
+              value={p.headline ?? ""}
+              onChange={(event) =>
+                draftDispatch(updateProfile({ headline: event.target.value }))
+              }
+              fullWidth
+            />
+            <JobTitleOptions
+              options={p.headlineOptions ?? []}
+              onChange={(headlineOptions) =>
+                draftDispatch(updateProfile({ headlineOptions }))
+              }
+            />
+          </Box>
+        </Box>
+      </InfoCard>
+
+      <InfoCard title="Contact">
         <Box
-          key={link.id}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            my: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 2,
           }}
         >
-          <LinkTypeSelect
-            value={linkTypeOfLabel(link.label).id}
-            takenTypeIds={draft.links
-              .filter((other) => other.id !== link.id)
-              .map((other) => linkTypeOfLabel(other.label).id)}
-            onChange={(typeId) =>
-              draftDispatch(
-                updateLink({
-                  id: link.id,
-                  update: {
-                    // Other keeps a typed label; a known type writes its name
-                    label:
-                      typeId === OTHER_LINK_TYPE_ID
-                        ? ""
-                        : linkTypeById(typeId).label,
-                  },
-                })
-              )
+          <TextField
+            size="small"
+            label="Email"
+            placeholder="jane.doe@example.com"
+            slotProps={{ inputLabel: { shrink: true } }}
+            value={p.email ?? ""}
+            onChange={(event) =>
+              draftDispatch(updateProfile({ email: event.target.value }))
             }
           />
-          {linkTypeOfLabel(link.label).id === OTHER_LINK_TYPE_ID && (
-            <TextField
-              label="Label"
-              slotProps={{ inputLabel: { shrink: true } }}
-              placeholder="Portfolio"
-              value={link.label}
-              onChange={(event) =>
+          <TextField
+            size="small"
+            label="Phone"
+            placeholder="+44 7700 900123"
+            slotProps={{ inputLabel: { shrink: true } }}
+            value={p.phone ?? ""}
+            onChange={(event) =>
+              draftDispatch(updateProfile({ phone: event.target.value }))
+            }
+          />
+          <Box sx={{ gridColumn: "span 2" }}>
+            <LocationAutocomplete
+              label="Location (city, country)"
+              placeholder="London, United Kingdom"
+              startAdornment={
+                <InputAdornment position="start">
+                  <LocationOnIcon />
+                </InputAdornment>
+              }
+              value={p.location ?? ""}
+              onChange={(location) =>
+                draftDispatch(updateProfile({ location }))
+              }
+            />
+          </Box>
+        </Box>
+      </InfoCard>
+
+      <InfoCard title="Links">
+        {draft.links.map((link) => (
+          <Box
+            key={link.id}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              my: 1,
+            }}
+          >
+            <LinkTypeSelect
+              value={linkTypeOfLabel(link.label).id}
+              takenTypeIds={draft.links
+                .filter((other) => other.id !== link.id)
+                .map((other) => linkTypeOfLabel(other.label).id)}
+              onChange={(typeId) =>
                 draftDispatch(
                   updateLink({
                     id: link.id,
-                    update: { label: event.target.value },
+                    update: {
+                      // Other keeps a typed label; a known type writes its name
+                      label:
+                        typeId === OTHER_LINK_TYPE_ID
+                          ? ""
+                          : linkTypeById(typeId).label,
+                    },
                   })
                 )
               }
-              sx={{ width: "25%" }}
             />
-          )}
-          <TextField
-            label="URL"
-            slotProps={{ inputLabel: { shrink: true } }}
-            placeholder={linkTypeOfLabel(link.label).urlHint}
-            value={link.url}
-            onChange={(event) => {
-              const url = event.target.value;
-              const update: { url: string; label?: string } = { url };
-              // A pasted address of a known site picks the type if none is chosen yet
-              if (link.label.trim() === "" && link.url.trim() === "") {
-                const guess = guessLinkTypeFromUrl(url);
-                if (guess.id !== OTHER_LINK_TYPE_ID) {
-                  update.label = guess.label;
+            {linkTypeOfLabel(link.label).id === OTHER_LINK_TYPE_ID && (
+              <TextField
+                label="Label"
+                slotProps={{ inputLabel: { shrink: true } }}
+                placeholder="Portfolio"
+                value={link.label}
+                onChange={(event) =>
+                  draftDispatch(
+                    updateLink({
+                      id: link.id,
+                      update: { label: event.target.value },
+                    })
+                  )
                 }
-              }
-              draftDispatch(updateLink({ id: link.id, update }));
-            }}
-            fullWidth
-          />
-          <IconButton
-            aria-label="Remove link"
-            onClick={() => draftDispatch(removeLink({ id: link.id }))}
+                sx={{ width: "25%" }}
+              />
+            )}
+            <TextField
+              label="URL"
+              slotProps={{ inputLabel: { shrink: true } }}
+              placeholder={linkTypeOfLabel(link.label).urlHint}
+              value={link.url}
+              onChange={(event) => {
+                const url = event.target.value;
+                const update: { url: string; label?: string } = { url };
+                // A pasted address of a known site picks the type if none is chosen yet
+                if (link.label.trim() === "" && link.url.trim() === "") {
+                  const guess = guessLinkTypeFromUrl(url);
+                  if (guess.id !== OTHER_LINK_TYPE_ID) {
+                    update.label = guess.label;
+                  }
+                }
+                draftDispatch(updateLink({ id: link.id, update }));
+              }}
+              fullWidth
+            />
+            <IconButton
+              aria-label="Remove link"
+              onClick={() => draftDispatch(removeLink({ id: link.id }))}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        ))}
+        <Box>
+          <Button
+            startIcon={<AddIcon />}
+            onClick={() => draftDispatch(addLink({}))}
           >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+            Add new link
+          </Button>
         </Box>
-      ))}
-      <Button
-        startIcon={<AddIcon />}
-        onClick={() => draftDispatch(addLink({}))}
-        sx={{ mt: 1 }}
+      </InfoCard>
+
+      <InfoCard
+        title="Optional details"
+        note="Shown under your name only when a template turns them on, in Templates > Design."
       >
-        Add new link
-      </Button>
-    </>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 2,
+          }}
+        >
+          <Box sx={{ gridColumn: "span 2" }}>
+            <Autocomplete
+              multiple
+              size="small"
+              options={[...NATIONALITIES]}
+              value={p.nationalities ?? []}
+              onChange={(_event, nationalities) =>
+                draftDispatch(updateProfile({ nationalities }))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Nationality"
+                  placeholder="Start typing, e.g. British"
+                  slotProps={{
+                    ...params.slotProps,
+                    inputLabel: {
+                      ...params.slotProps?.inputLabel,
+                      shrink: true,
+                    },
+                  }}
+                />
+              )}
+            />
+          </Box>
+          {(
+            [
+              ["maritalStatus", "Marital status", MARITAL_STATUSES],
+              ["gender", "Gender", GENDERS],
+            ] as const
+          ).map(([key, label, choices]) => (
+            <TextField
+              key={key}
+              select
+              size="small"
+              label={label}
+              value={p[key] ?? ""}
+              onChange={(event) =>
+                draftDispatch(updateProfile({ [key]: event.target.value }))
+              }
+              slotProps={{
+                inputLabel: { shrink: true },
+                select: { displayEmpty: true },
+              }}
+            >
+              <MenuItem value="">Not stated</MenuItem>
+              {choices.map((choice) => (
+                <MenuItem key={choice} value={choice}>
+                  {choice}
+                </MenuItem>
+              ))}
+            </TextField>
+          ))}
+          <Box sx={{ gridColumn: "span 2" }}>
+            <Autocomplete
+              freeSolo
+              size="small"
+              options={[...RIGHT_TO_WORK_OPTIONS]}
+              value={p.rightToWork ?? ""}
+              inputValue={p.rightToWork ?? ""}
+              onInputChange={(_event, rightToWork) =>
+                draftDispatch(updateProfile({ rightToWork }))
+              }
+              filterOptions={(options) => options}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Right to work"
+                  placeholder="Type your own, or open the list for ready-made wordings"
+                  slotProps={{
+                    ...params.slotProps,
+                    inputLabel: {
+                      ...params.slotProps?.inputLabel,
+                      shrink: true,
+                    },
+                    input: {
+                      ...params.slotProps?.input,
+                      startAdornment: (
+                        <Tooltip title="Type any wording you like, or pick a ready-made one from the list (UK situations). A picked wording is only text: you can edit it afterwards, and replace anything in [brackets].">
+                          <InfoOutlinedIcon
+                            fontSize="small"
+                            aria-label="About right to work"
+                            sx={{ mr: 0.5, color: "text.secondary" }}
+                          />
+                        </Tooltip>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
+          </Box>
+        </Box>
+      </InfoCard>
+
+      {aside &&
+        createPortal(
+          <MainInfoPreview profile={draft.profile} links={draft.links} />,
+          aside
+        )}
+    </Box>
+  );
+}
+
+/** One titled group of fields on the Main Info page */
+function InfoCard({
+  title,
+  note,
+  children,
+}: {
+  title: string;
+  note?: string;
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <Box
+      component="section"
+      aria-label={title}
+      sx={{
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: `1px solid ${WORKSPACE_COLORS.border}`,
+        borderRadius: "6px",
+        p: 2.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Box>
+        <Typography
+          component="h2"
+          sx={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.07em",
+            textTransform: "uppercase",
+            color: WORKSPACE_COLORS.muted,
+          }}
+        >
+          {title}
+        </Typography>
+        {note && (
+          <Typography
+            variant="caption"
+            sx={{ color: WORKSPACE_COLORS.muted, display: "block", mt: 0.5 }}
+          >
+            {note}
+          </Typography>
+        )}
+      </Box>
+      {children}
+    </Box>
   );
 }
