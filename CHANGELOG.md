@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Apply tutorial (6 steps: the advert, template and sections, page limit, choosing entries, wording, export and mark as applied) in the Tutorials dialog; the (i) next to "Job application" in the top bar opens it.
+
 ## [0.5.0] - 2026-11-11
 
 ### Changed
