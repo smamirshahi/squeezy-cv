@@ -17,6 +17,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
+import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   MainInfoPreview,
@@ -309,12 +310,19 @@ export function EditorMainInfo(): JSX.Element | null {
               }}
               fullWidth
             />
-            <IconButton
-              aria-label="Remove link"
-              onClick={() => draftDispatch(removeLink({ id: link.id }))}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
+            {/* The buttons have 8 px of padding of their own: pull them right so the icons line up with the card's 20 px edge */}
+            <Box sx={{ display: "flex", flex: "none", gap: 0, mr: -1 }}>
+              <OpenInNewTabButton
+                url={link.url}
+                label={`Open ${link.label || "link"} in a new tab`}
+              />
+              <IconButton
+                aria-label="Remove link"
+                onClick={() => draftDispatch(removeLink({ id: link.id }))}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           </Box>
         ))}
         <Box>
