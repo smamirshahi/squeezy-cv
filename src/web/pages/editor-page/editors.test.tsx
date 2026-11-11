@@ -145,18 +145,16 @@ describe("EditorMainInfo", () => {
     const store = createStore();
     renderWith(store, <EditorMainInfo />);
     expect(screen.getByLabelText("Why keep other job titles")).toBeTruthy();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Add another job title" })
-    );
-    fireEvent.change(screen.getByLabelText("Other job title 1"), {
-      target: { value: "Frontend Engineer" },
-    });
+    // the other titles are chips: type one and press Enter
+    const box = screen.getByLabelText("Other job titles");
+    fireEvent.change(box, { target: { value: "Frontend Engineer" } });
+    fireEvent.keyDown(box, { key: "Enter" });
     click(setShouldApplyChanges, store);
     expect(store.getState().vault.profile.headlineOptions).toEqual([
       "Frontend Engineer",
     ]);
-    fireEvent.click(screen.getByLabelText("Remove job title 1"));
-    expect(screen.queryByLabelText("Other job title 1")).toBeNull();
+    fireEvent.click(screen.getByTestId("CancelIcon"));
+    expect(screen.queryByText("Frontend Engineer")).toBeNull();
   });
 
   it("has no sort buttons for the links (order belongs to the job)", () => {
@@ -181,7 +179,7 @@ describe("EditorMainInfo", () => {
     for (const label of [
       "Full Name",
       "Job Title",
-      "Right to work (optional)",
+      "Right to work",
       "Email",
       "Phone",
       "Location (city, country)",

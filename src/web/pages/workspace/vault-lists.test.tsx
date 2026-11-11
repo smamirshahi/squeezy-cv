@@ -64,14 +64,20 @@ describe("publication list", () => {
     expect(screen.queryByLabelText(/Move .* up/)).toBeNull();
   });
 
-  it("reverses the order with the arrow and sorts by title from the menu", () => {
+  it("reverses the order by clicking the active column and sorts by title from its header", () => {
     setup(PAPERS);
-    fireEvent.click(screen.getByRole("button", { name: /^Reverse the order/ }));
+    // the column headers are the sort controls; Year is active (newest first)
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sort by Year (now newest first)" })
+    );
     expect(rows()[0]).toContain("Old paper");
 
-    fireEvent.click(screen.getByRole("button", { name: /Sort by: Year/ }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "Title" }));
-    expect(screen.getByRole("button", { name: /Sort by: Title/ })).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: /^Sort by Publication/ })
+    );
+    expect(
+      screen.getByRole("button", { name: "Sort by Publication (now A to Z)" })
+    ).toBeTruthy();
     expect(rows().map((row) => row.split("20")[0].trim())).toEqual([
       "Middle paper",
       "New paper",
