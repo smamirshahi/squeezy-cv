@@ -13,7 +13,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** The tutorials in the dialog's left list */
-export type TutorialId = "overview" | "vault" | "template";
+export type TutorialId = "overview" | "vault" | "template" | "apply";
 
 interface HowItWorksDialogProps {
   isOpen: boolean;
@@ -1473,6 +1473,854 @@ function TemplatePicture({ step }: { step: number }): JSX.Element {
   );
 }
 
+interface ApplyStep {
+  title: string;
+  lead: string;
+  body: JSX.Element[];
+  note: JSX.Element | string;
+}
+
+const APPLY_STEPS: ApplyStep[] = [
+  {
+    title: "Start with the advert",
+    lead: "The rest of the form is easy. The advert is what matters.",
+    body: [
+      <>
+        Paste the advert text, or choose a PDF, and press <b>Analyse</b>. The AI
+        reads it once and lists what the job <b>must have</b>, what is{" "}
+        <b>nice to have</b>, and its <b>keywords</b>.
+      </>,
+      <>Everything after this is measured against that list.</>,
+    ],
+    note: (
+      <>
+        <b>Privacy:</b> this step sends only the advert text. Then press{" "}
+        <b>Save and continue</b>.
+      </>
+    ),
+  },
+  {
+    title: "Pick a template, then go section by section",
+    lead: "The panel walks you through your CV one section at a time.",
+    body: [
+      <>
+        Choose a <b>template</b> for the look. Then use <b>Back</b> and{" "}
+        <b>Next</b> to move through General, Header and links, Professional
+        Summary, Experience and the rest.
+      </>,
+      <>The real CV sits beside the panel and updates as you change things.</>,
+    ],
+    note: "The section name at the top is a menu, so you can jump straight to any section.",
+  },
+  {
+    title: "Fit it to your page limit",
+    lead: "It is the first thing in General, because it shapes the rest.",
+    body: [
+      <>
+        Choose 1 page, 2 pages or a custom limit. The app tells you how far over
+        you are and <b>where the next page starts</b>.
+      </>,
+      <>
+        <b>Auto-fit</b> shrinks spacing, then margins, then text size, and never
+        below a readable size. It <b>never hides items</b>. To remove items,
+        choose them yourself or ask the AI to pick.
+      </>,
+    ],
+    note: (
+      <>
+        The AI only suggests. <b>Nothing is hidden until you confirm.</b> It
+        sees short item labels, line counts and the job&apos;s must-haves, not
+        your name or contact details.
+      </>
+    ),
+  },
+  {
+    title: "Choose what shows, entry by entry",
+    lead: "This is where the job decides which vault items to use.",
+    body: [
+      <>
+        The <b>eye</b> shows or hides an entry, or just one of its fields. The{" "}
+        <b>star</b> emphasises it. The <b>arrows</b> change its order.
+      </>,
+      <>
+        <b>Score entries</b> rates each one against the advert, for example
+        Relevancy 85%, to help you decide. It never hides or moves anything by
+        itself, and undo works.
+      </>,
+    ],
+    note: (
+      <>
+        Hiding affects <b>this job only</b>. It never deletes anything from the
+        vault.
+      </>
+    ),
+  },
+  {
+    title: "Polish the words, only here",
+    lead: "Your vault text stays exactly as you wrote it.",
+    body: [
+      <>
+        Open an entry and the AI helps with its description in two steps.{" "}
+        <b>1 · Lean on:</b> pick the points from the advert to stress.{" "}
+        <b>2 · Then:</b> shorten it, rephrase it, make it longer, or{" "}
+        <b>make bullets</b>.
+      </>,
+      <>
+        Not happy with the result? <b>Use the vault text</b> puts your original
+        words back.
+      </>,
+    ],
+    note: "This is the bullet-points and rephrase option from the vault, and it works per job.",
+  },
+  {
+    title: "Check, export, mark as applied",
+    lead: "The last step has a safety net.",
+    body: [
+      <>
+        <b>Export PDF</b> runs checks first: page limit, contact details,
+        selectable text, no photo or date of birth, and how many items you hid.
+      </>,
+      <>
+        Tick <b>Then mark this as applied</b> and the CV is{" "}
+        <b>saved exactly as sent</b>. Later changes to the vault or the template
+        never alter it.
+      </>,
+    ],
+    note: (
+      <>
+        Stuck? <b>Chat</b> in the left menu changes things in words, such as
+        &ldquo;Fit to 1 page&rdquo;. You approve each change.
+      </>
+    ),
+  },
+];
+
+function ApplyText({ step }: { step: number }): JSX.Element {
+  const current = APPLY_STEPS[step];
+  return (
+    <>
+      <Typography
+        id="how-it-works-title"
+        component="h2"
+        sx={{ m: 0, fontSize: 26, fontWeight: 700, lineHeight: 1.2 }}
+      >
+        {current.title}
+      </Typography>
+      <Typography
+        sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted, mb: 0.75 }}
+      >
+        {current.lead}
+      </Typography>
+      {current.body.map((paragraph, index) => (
+        <Typography key={index} sx={{ fontSize: 14 }}>
+          {paragraph}
+        </Typography>
+      ))}
+      <Box
+        sx={{
+          mt: 1.75,
+          px: 1.5,
+          py: 1.25,
+          borderRadius: "4px",
+          bgcolor: WORKSPACE_COLORS.canvas,
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          fontSize: 13,
+        }}
+      >
+        {current.note}
+      </Box>
+    </>
+  );
+}
+
+const AI_COLOR = "#5B3FD0";
+const AI_TEXT = "#4B31B5";
+const AI_SOFT = "#EEEAFB";
+const GREEN_SOFT = { bgcolor: "#E3F3EA", color: "#175F37" };
+const AMBER_SOFT = { bgcolor: "#FFF3DA", color: "#7A4C00" };
+const RED_SOFT = { border: "1px solid #D9A5A0", color: "#8C1D18" };
+
+/** A purple outlined "button" of the picture (AI actions are always purple) */
+function AiPill({
+  children,
+  isFilled,
+}: {
+  children: string;
+  isFilled?: boolean;
+}): JSX.Element {
+  return (
+    <Chip
+      sx={{
+        height: 26,
+        borderRadius: "4px",
+        border: `1px solid ${AI_COLOR}`,
+        bgcolor: isFilled ? AI_COLOR : "#fff",
+        color: isFilled ? "#fff" : AI_TEXT,
+        fontWeight: isFilled ? 600 : 400,
+      }}
+    >
+      {children}
+    </Chip>
+  );
+}
+
+/** A white card of the picture */
+function PicCard({
+  children,
+  borderColor = WORKSPACE_COLORS.border,
+}: {
+  children: React.ReactNode;
+  borderColor?: string;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: `${borderColor === WORKSPACE_COLORS.border ? 1 : 2}px solid ${borderColor}`,
+        borderRadius: 2,
+        p: 1.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Caption({ children }: { children: string }): JSX.Element {
+  return (
+    <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+      {children}
+    </Typography>
+  );
+}
+
+/** One entry row of the "choose what shows" picture */
+function ApplyEntry({
+  name,
+  company,
+  score,
+  tone,
+  isHidden,
+  isStarred,
+}: {
+  name: string;
+  company: string;
+  score: string;
+  tone: SxProps<Theme>;
+  isHidden?: boolean;
+  isStarred?: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.25,
+        px: 1.5,
+        py: 1.1,
+        borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+        opacity: isHidden ? 0.55 : 1,
+      }}
+    >
+      <span
+        style={{ color: isHidden ? WORKSPACE_COLORS.muted : TEMPLATE_COLOR }}
+      >
+        {isHidden ? "◌" : "◉"}
+      </span>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <b style={{ fontSize: 13 }}>{name}</b>
+        <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+          {company}
+        </Typography>
+      </Box>
+      <Chip sx={tone}>{score}</Chip>
+      <span
+        style={{ color: isStarred ? TEMPLATE_COLOR : WORKSPACE_COLORS.muted }}
+      >
+        {isStarred ? "★" : "☆"}
+      </span>
+      <span style={{ color: WORKSPACE_COLORS.muted }}>↑↓</span>
+    </Box>
+  );
+}
+
+function ApplyPictureContent({ step }: { step: number }): JSX.Element {
+  if (step === 0) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <PicCard borderColor={WORKSPACE_COLORS.borderStrong}>
+          <Caption>Advert text</Caption>
+          <PictureLines count={4} />
+        </PicCard>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <AiPill>✦ Analyse</AiPill>
+          <Caption>Sends only the advert text.</Caption>
+        </Box>
+        <PicCard borderColor={AI_COLOR}>
+          <b>React Front-End Developer · mid</b>
+          <Caption>Must have (4)</Caption>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {[
+              "React (v18+)",
+              "TypeScript (v5+)",
+              "Azure DevOps",
+              "REST APIs",
+            ].map((text) => (
+              <Chip key={text} sx={GREEN_SOFT}>
+                {text}
+              </Chip>
+            ))}
+          </Box>
+          <Caption>Nice to have (3)</Caption>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {["Vite", "Webpack", "GraphQL"].map((text) => (
+              <Chip
+                key={text}
+                sx={{
+                  bgcolor: WORKSPACE_COLORS.canvas,
+                  border: `1px solid ${WORKSPACE_COLORS.border}`,
+                }}
+              >
+                {text}
+              </Chip>
+            ))}
+          </Box>
+          <Caption>Keywords (27)</Caption>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {["React", "Jest", "Figma", "Agile", "+ 23"].map((text) => (
+              <Chip key={text} sx={{ bgcolor: AI_SOFT, color: AI_TEXT }}>
+                {text}
+              </Chip>
+            ))}
+          </Box>
+        </PicCard>
+      </Box>
+    );
+  }
+  if (step === 1) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <b style={{ fontSize: 14 }}>Select template</b>
+          <Box
+            component="span"
+            sx={{
+              height: 34,
+              px: 1.5,
+              bgcolor: WORKSPACE_COLORS.panel,
+              border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              borderRadius: "4px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 3,
+              fontSize: 14,
+            }}
+          >
+            Single Column CV <span style={{ fontSize: 10 }}>▾</span>
+          </Box>
+        </Box>
+        <PicCard borderColor={TEMPLATE_COLOR}>
+          <Caption>Section 4 of 7</Caption>
+          <Typography sx={{ fontSize: 20, fontWeight: 700 }}>
+            Experience ▾
+          </Typography>
+          <Box sx={{ display: "flex", gap: 0.6 }}>
+            {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+              <Box
+                key={index}
+                sx={{
+                  flex: 1,
+                  height: 4,
+                  bgcolor: index < 4 ? TEMPLATE_COLOR : WORKSPACE_COLORS.border,
+                }}
+              />
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", gap: 0.6, fontSize: 10.5 }}>
+            {[
+              "General",
+              "Header",
+              "Summary",
+              "Experience",
+              "Education",
+              "…",
+              "…",
+            ].map((name, index) => (
+              <span
+                key={index}
+                style={{
+                  flex: 1,
+                  color: index === 3 ? "#8A2F08" : WORKSPACE_COLORS.muted,
+                  fontWeight: index === 3 ? 700 : 400,
+                }}
+              >
+                {name}
+              </span>
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
+            <Chip
+              sx={{
+                height: 32,
+                borderRadius: "4px",
+                border: `1px solid ${TEMPLATE_COLOR}`,
+                color: "#8A2F08",
+                fontSize: 13,
+              }}
+            >
+              Back: Professional Summary
+            </Chip>
+            <Chip
+              sx={{
+                height: 32,
+                borderRadius: "4px",
+                bgcolor: TEMPLATE_COLOR,
+                color: "#fff",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Next: Education
+            </Chip>
+          </Box>
+        </PicCard>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <Box
+            component="span"
+            sx={{
+              flex: "none",
+              width: 42,
+              height: 56,
+              bgcolor: WORKSPACE_COLORS.panel,
+              border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              boxShadow: "0 1px 4px rgba(0,0,0,.15)",
+            }}
+          />
+          <Caption>
+            The real CV stays on the left of the panel and updates as you go.
+          </Caption>
+        </Box>
+      </Box>
+    );
+  }
+  if (step === 2) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <PicCard>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              sx={{
+                flex: 1,
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: ".05em",
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              PAGE LIMIT
+            </Typography>
+            <Chip sx={{ ...AMBER_SOFT, height: 22, fontWeight: 600 }}>
+              Over by 65 lines
+            </Chip>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              borderRadius: "4px",
+              overflow: "hidden",
+              fontSize: 13,
+              textAlign: "center",
+            }}
+          >
+            {["1 page", "2 pages", "Custom"].map((text, index) => (
+              <Box
+                key={text}
+                sx={{
+                  flex: 1,
+                  py: 0.9,
+                  borderLeft:
+                    index > 0
+                      ? `1px solid ${WORKSPACE_COLORS.borderStrong}`
+                      : "none",
+                  bgcolor: index === 0 ? "#FBEBE2" : "transparent",
+                  color: index === 0 ? "#8A2F08" : "inherit",
+                  fontWeight: index === 0 ? 700 : 400,
+                }}
+              >
+                {text}
+              </Box>
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="span"
+              sx={{
+                width: 30,
+                height: 40,
+                bgcolor: WORKSPACE_COLORS.canvas,
+                border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              }}
+            />
+            <Box
+              component="span"
+              sx={{ height: 44, borderLeft: "2px dashed #B3261E" }}
+            />
+            {[0, 1].map((index) => (
+              <Box
+                key={index}
+                component="span"
+                sx={{
+                  width: 30,
+                  height: 40,
+                  bgcolor: "#FFF3DA",
+                  border: "1px dashed #B58A2E",
+                }}
+              />
+            ))}
+            <Box sx={{ ml: 0.75 }}>
+              <b style={{ fontSize: 13 }}>3 pages now, limit is 1</b>
+              <Caption>Page 2 starts at “Education”.</Caption>
+            </Box>
+          </Box>
+        </PicCard>
+        <PicCard>
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+            <Box
+              component="span"
+              sx={{
+                flex: "none",
+                width: 34,
+                height: 18,
+                mt: "3px",
+                borderRadius: "9px",
+                bgcolor: WORKSPACE_COLORS.borderStrong,
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  left: 2,
+                  top: 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: "7px",
+                  bgcolor: "#fff",
+                },
+              }}
+            />
+            <Box>
+              <b style={{ fontSize: 13.5 }}>Auto-fit to the limit</b>
+              <Caption>
+                Spacing first, then margins, then text size. Items are never
+                hidden by it.
+              </Caption>
+            </Box>
+          </Box>
+        </PicCard>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Chip
+            sx={{
+              height: 32,
+              borderRadius: "4px",
+              border: `1px solid ${TEMPLATE_COLOR}`,
+              color: "#8A2F08",
+              fontSize: 13,
+            }}
+          >
+            Choose items to hide
+          </Chip>
+          <Chip
+            sx={{
+              height: 32,
+              borderRadius: "4px",
+              border: `1px solid ${AI_COLOR}`,
+              bgcolor: AI_SOFT,
+              color: AI_TEXT,
+              fontSize: 13,
+            }}
+          >
+            ✦ Ask AI to pick what to hide
+          </Chip>
+        </Box>
+        <Typography sx={{ fontSize: 12, color: AI_TEXT }}>
+          AI lists the least relevant items. Nothing is hidden until you
+          confirm.
+        </Typography>
+      </Box>
+    );
+  }
+  if (step === 3) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `1px solid ${WORKSPACE_COLORS.border}`,
+            borderRadius: 2,
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: 1,
+              px: 1.75,
+              py: 1.25,
+              bgcolor: "#ECEBE8",
+            }}
+          >
+            <b>Experience</b>
+            <Caption>3 of 4 shown</Caption>
+          </Box>
+          <ApplyEntry
+            name="Software Engineer"
+            company="AMETEK"
+            score="Relevancy 15%"
+            tone={RED_SOFT}
+          />
+          <ApplyEntry
+            name="Software Engineer"
+            company="Faro Technologies"
+            score="Relevancy 85%"
+            tone={{ ...GREEN_SOFT, border: "1px solid #B7DFC6" }}
+            isStarred
+          />
+          <ApplyEntry
+            name="Software Engineer"
+            company="HoloBuilder"
+            score="Relevancy 50%"
+            tone={{ ...AMBER_SOFT, border: "1px solid #E8CF98" }}
+          />
+          <ApplyEntry
+            name="Researcher"
+            company="University of Bremen"
+            score="Relevancy 5%"
+            tone={RED_SOFT}
+            isHidden
+          />
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <AiPill>✦ Score entries again</AiPill>
+          <Typography sx={{ fontSize: 12, color: AI_TEXT }}>
+            Nothing is hidden or moved.
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+  if (step === 4) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+            borderRadius: "6px 6px 0 0",
+            p: 1.5,
+            fontSize: 12.5,
+            lineHeight: 1.45,
+          }}
+        >
+          <Caption>Description (your vault text)</Caption>
+          Contributed to the HoloBuilder WebEditor and Dashboard, building React
+          components that improved construction project data management. Built a
+          standalone React application for internal management of subscriptions
+          and sales workflows.
+        </Box>
+        <Box
+          sx={{
+            bgcolor: AI_SOFT,
+            border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+            borderTop: 0,
+            borderRadius: "0 0 6px 6px",
+            p: 1.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: 12,
+              color: AI_TEXT,
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ flex: 1 }}>✦ AI for React Front-End Developer</span>
+            <Chip
+              sx={{
+                height: 24,
+                borderRadius: "4px",
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+                bgcolor: WORKSPACE_COLORS.canvas,
+                color: WORKSPACE_COLORS.muted,
+                fontWeight: 500,
+              }}
+            >
+              Use the vault text
+            </Chip>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              fontSize: 12.5,
+            }}
+          >
+            <b>1 · Lean on</b>
+            <AiPill>✦ Pick points from the advert</AiPill>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 0.75,
+              fontSize: 12.5,
+            }}
+          >
+            <b>2 · Then</b>
+            <AiPill>Shorten</AiPill>
+            <AiPill>Rephrase</AiPill>
+            <AiPill>Make longer</AiPill>
+            <AiPill isFilled>Make bullets</AiPill>
+          </Box>
+        </Box>
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: WORKSPACE_COLORS.muted,
+            textAlign: "center",
+            mt: 1.25,
+          }}
+        >
+          Your original words stay in the vault.
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+      <PicCard borderColor={TEMPLATE_COLOR}>
+        <b style={{ fontSize: 14 }}>Export PDF · React Front-End Developer</b>
+        <Typography
+          sx={{
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: ".05em",
+            color: WORKSPACE_COLORS.muted,
+          }}
+        >
+          CHECKS
+        </Typography>
+        {[
+          ["⚠", "#7A4C00", "Does not fit 1 page", " · 65 lines are over"],
+          ["✓", "#175F37", "Name, email and phone are there", ""],
+          ["✓", "#175F37", "Text is selectable", ""],
+          ["✓", "#175F37", "No photo or date of birth", ""],
+          [
+            "✓",
+            "#175F37",
+            "3 items hidden in this job",
+            " · still in your vault",
+          ],
+        ].map(([mark, color, bold, rest]) => (
+          <Box key={bold} sx={{ fontSize: 12.5, display: "flex", gap: 1 }}>
+            <span style={{ color, fontWeight: 700 }}>{mark}</span>
+            <span>
+              <b>{bold}</b>
+              {rest}
+            </span>
+          </Box>
+        ))}
+        <Box
+          sx={{
+            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+            pt: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.75,
+            fontSize: 12.5,
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box
+              component="span"
+              sx={{
+                width: 15,
+                height: 15,
+                border: `1.5px solid ${WORKSPACE_COLORS.muted}`,
+                borderRadius: "3px",
+              }}
+            />
+            Also save the data (.json) with the PDF
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box
+              component="span"
+              sx={{
+                width: 15,
+                height: 15,
+                bgcolor: TEMPLATE_COLOR,
+                color: "#fff",
+                borderRadius: "3px",
+                fontSize: 10,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✓
+            </Box>
+            <b>Then mark this as applied</b>
+          </Box>
+        </Box>
+      </PicCard>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          fontSize: 12.5,
+          color: WORKSPACE_COLORS.muted,
+        }}
+      >
+        <Chip sx={{ ...AMBER_SOFT, height: 22, fontWeight: 600 }}>Draft</Chip>
+        <span>→</span>
+        <Chip sx={{ ...GREEN_SOFT, height: 22, fontWeight: 600 }}>Applied</Chip>
+        <span>saved exactly as sent</span>
+      </Box>
+    </Box>
+  );
+}
+
+/** The picture of an apply tutorial step */
+function ApplyPicture({ step }: { step: number }): JSX.Element {
+  return (
+    <Box
+      aria-hidden="true"
+      sx={{
+        width: 420,
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.canvas,
+        p: 3,
+        display: { xs: "none", md: "flex" },
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <ApplyPictureContent step={step} />
+    </Box>
+  );
+}
+
 interface Tutorial {
   id: TutorialId;
   name: string;
@@ -1502,6 +2350,13 @@ const TUTORIALS: Tutorial[] = [
     summary: "How a CV looks: layout, sections and style",
     stepNames: TEMPLATE_STEPS.map((s) => s.title),
     lastLabel: "Start designing",
+  },
+  {
+    id: "apply",
+    name: "Applying for a job",
+    summary: "From the advert to a saved application",
+    stepNames: APPLY_STEPS.map((s) => s.title),
+    lastLabel: "Start applying",
   },
 ];
 
@@ -1634,6 +2489,8 @@ export function HowItWorksDialog({
           <Diagram step={step} />
         ) : tutorialId === "vault" ? (
           <VaultPicture step={step} />
+        ) : tutorialId === "apply" ? (
+          <ApplyPicture step={step} />
         ) : (
           <TemplatePicture step={step} />
         )}
@@ -1655,6 +2512,8 @@ export function HowItWorksDialog({
               <OverviewText step={step} />
             ) : tutorialId === "vault" ? (
               <VaultText step={step} />
+            ) : tutorialId === "apply" ? (
+              <ApplyText step={step} />
             ) : (
               <TemplateText step={step} />
             )}

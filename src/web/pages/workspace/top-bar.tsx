@@ -213,8 +213,13 @@ export function TopBar(): JSX.Element {
     tutorial: TutorialId;
     step: number;
   } | null>(null);
+  // The (i) of "Job application" opens its own tutorial, the others the overview
   const openHelp = (step: number): void =>
-    setHelp({ tutorial: "overview", step });
+    setHelp(
+      step === 2
+        ? { tutorial: "apply", step: 0 }
+        : { tutorial: "overview", step }
+    );
   const route = useRoute();
 
   // The first time the Vault is opened, its tutorial shows; after that only the ? button does
