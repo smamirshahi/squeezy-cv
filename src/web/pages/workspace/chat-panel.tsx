@@ -29,6 +29,7 @@ import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 import { useStore } from "react-redux";
 import { RootState } from "@store/store-helper";
+import { AiButton } from "@components/ai-button";
 
 const MAX_SENT_TURNS = 6;
 
@@ -342,13 +343,13 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
             }}
             slotProps={{ htmlInput: { "aria-label": "Message" } }}
           />
-          <Button
+          <AiButton
             variant="contained"
             disabled={!canAsk || isBusy || !text.trim()}
             onClick={() => void send()}
           >
             Send
-          </Button>
+          </AiButton>
         </Box>
       </Box>
     </ResizableAside>

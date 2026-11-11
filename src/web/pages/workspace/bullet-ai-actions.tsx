@@ -18,6 +18,7 @@ import {
   setBulletSelection,
 } from "@store/jobs/jobs-slice";
 import { setBulletAlt, vaultSelector } from "@store/vault/vault-slice";
+import { AiButton } from "@components/ai-button";
 
 const MODES: { mode: RewriteMode; label: string }[] = [
   { mode: "shorten", label: "Shorten" },
@@ -104,7 +105,7 @@ export function BulletAiActions({ item, bullet }: Props): JSX.Element {
     <Box sx={{ width: "100%" }}>
       <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
         {MODES.map(({ mode, label }) => (
-          <Button
+          <AiButton
             key={mode}
             size="small"
             variant="outlined"
@@ -119,7 +120,7 @@ export function BulletAiActions({ item, bullet }: Props): JSX.Element {
             sx={{ py: 0, px: 0.75, fontSize: 11.5, minWidth: 0 }}
           >
             {busy === mode ? `${label}…` : label}
-          </Button>
+          </AiButton>
         ))}
       </Box>
       {error && (

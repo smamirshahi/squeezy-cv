@@ -19,6 +19,7 @@ import {
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { moveItemToSection, vaultSelector } from "@store/vault/vault-slice";
+import { AiButton } from "@components/ai-button";
 
 /** The item's words for the AI: every field value and bullet, nothing else */
 function itemText(section: Section["items"][number]): string {
@@ -108,7 +109,7 @@ export function UnsortedPlacement({
       </Typography>
       {ai?.isConfigured && (
         <>
-          <Button
+          <AiButton
             size="small"
             variant="outlined"
             sx={{ alignSelf: "flex-start" }}
@@ -116,7 +117,7 @@ export function UnsortedPlacement({
             onClick={() => void ask()}
           >
             Ask AI where these belong
-          </Button>
+          </AiButton>
           <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
             {ai.info.isOnline
               ? `Sends item titles and text and section names to ${ai.info.recipient}; not your name or contact details.`

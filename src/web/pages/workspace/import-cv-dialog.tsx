@@ -27,6 +27,7 @@ import {
 } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { setVault, vaultSelector } from "@store/vault/vault-slice";
+import { AiButton } from "@components/ai-button";
 
 interface Props {
   isOpen: boolean;
@@ -294,13 +295,13 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
         <Button onClick={onClose}>Cancel</Button>
         <Tooltip title={analyseBlockedReason} arrow>
           <span>
-            <Button
+            <AiButton
               variant={result ? "outlined" : "contained"}
               disabled={analyseBlockedReason !== ""}
               onClick={() => void analyse()}
             >
               Analyze with AI
-            </Button>
+            </AiButton>
           </span>
         </Tooltip>
         <Tooltip title={addBlockedReason} arrow>

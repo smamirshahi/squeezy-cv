@@ -24,6 +24,7 @@ import {
   activeVariantSelector,
   setItemSelection,
 } from "@store/jobs/jobs-slice";
+import { AiButton } from "@components/ai-button";
 
 /** The free texts the AI can reword (the summary and the descriptions) */
 const REWORDABLE = ["description", "text"];
@@ -101,7 +102,7 @@ function TextActions({ item, field, keywords }: TextActionsProps): JSX.Element {
     <Box sx={{ display: "grid", gap: 0.75, mt: 0.5 }}>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
         {MODES.map(({ mode, label, needsKeywords }) => (
-          <Button
+          <AiButton
             key={mode}
             size="small"
             variant="outlined"
@@ -121,13 +122,17 @@ function TextActions({ item, field, keywords }: TextActionsProps): JSX.Element {
             onClick={() => void ask(mode)}
           >
             {busy === mode ? "Working…" : label}
-          </Button>
+          </AiButton>
         ))}
-        {isReworded && (
-          <Button size="small" onClick={() => setText(undefined)}>
-            Use the vault text
-          </Button>
-        )}
+        <Button
+          size="small"
+          variant="outlined"
+          disabled={!isReworded || busy !== null}
+          sx={{ ml: "auto" }}
+          onClick={() => setText(undefined)}
+        >
+          Use the vault text
+        </Button>
       </Box>
       {isReworded && !proposal && (
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>

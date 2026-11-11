@@ -25,6 +25,7 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
 ## 3. Implement
 
 - Do only what the issue asks for; follow the conventions in `CLAUDE.md` (path aliases, no relative imports, `useAppDispatch`/`useAppSelector`, Prettier style).
+- **Anything that uses AI is marked:** every button that calls an `/api/ai/*` route uses `AiButton`/`AiIcon` (`@components/ai-button`: sparkle icon + the AI purple), and AI panels use the purple AI card style (see "AI is always marked" in `CLAUDE.md`). Check this before opening the PR.
 - Commit in small, meaningful steps with messages that mention the issue (`... (#<id>)`).
 
 ## 4. Test and check

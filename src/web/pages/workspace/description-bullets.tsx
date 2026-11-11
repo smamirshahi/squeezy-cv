@@ -24,6 +24,7 @@ import {
   activeVariantSelector,
   setItemSelection,
 } from "@store/jobs/jobs-slice";
+import { AiButton } from "@components/ai-button";
 
 interface Props {
   item: Item;
@@ -142,7 +143,7 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
             Nothing changes until you pick “Use these bullets”.
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            <Button
+            <AiButton
               size="small"
               variant="outlined"
               disabled={busy !== null}
@@ -154,9 +155,9 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
               onClick={() => void ask("make")}
             >
               {busy === "make" ? "Making…" : MODE_LABELS.make}
-            </Button>
+            </AiButton>
             {currentTexts.length > 0 && (
-              <Button
+              <AiButton
                 size="small"
                 variant="outlined"
                 disabled={busy !== null}
@@ -168,10 +169,10 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 onClick={() => void ask("shorten")}
               >
                 {busy === "shorten" ? "Shortening…" : MODE_LABELS.shorten}
-              </Button>
+              </AiButton>
             )}
             {currentTexts.length > 0 && requirements.length > 0 && (
-              <Button
+              <AiButton
                 size="small"
                 variant="outlined"
                 disabled={busy !== null}
@@ -183,7 +184,7 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 onClick={() => void ask("rephrase")}
               >
                 {busy === "rephrase" ? "Rephrasing…" : MODE_LABELS.rephrase}
-              </Button>
+              </AiButton>
             )}
           </Box>
           {currentTexts.length > 0 && requirements.length > 0 && (
@@ -202,7 +203,7 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                   </MenuItem>
                 ))}
               </TextField>
-              <Button
+              <AiButton
                 size="small"
                 variant="outlined"
                 disabled={busy !== null || focus === ""}
@@ -214,7 +215,7 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
                 onClick={() => void ask("emphasise")}
               >
                 {busy === "emphasise" ? "Working…" : MODE_LABELS.emphasise}
-              </Button>
+              </AiButton>
             </Box>
           )}
         </>
