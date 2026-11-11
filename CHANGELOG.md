@@ -19,6 +19,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Everything that uses AI is now marked with a sparkle icon and the AI purple: the Score, Analyse, reword, rewrite, make-bullets, place and import buttons, Chat's Send button and the Chat entry in the Apply sidebar (#355). "Use the vault text" is always shown, disabled when the text is already the vault's, outlined and on the right.
+
 - Send to AI: links, emails and phone numbers found in the text are now hidden automatically as [Link n], [Email n] and [Phone n] (you can still switch one off in the window), instead of being only suggested; year ranges like "2018 - 2021" are no longer mistaken for phone numbers. Schools, universities and colleges are now [Institution n] (#354).
 
 - New vault sections are no longer added to templates by themselves (#351): a section a template does not place is not drawn. Use "Add section to template" on the Layout page to place it.

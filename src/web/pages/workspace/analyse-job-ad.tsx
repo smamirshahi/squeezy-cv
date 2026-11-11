@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
 import { Job } from "@custom-types/job-types";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -17,6 +10,7 @@ import {
 } from "@store/persistence/api-client";
 import { setJobAnalysis } from "@store/jobs/jobs-slice";
 import { useAppDispatch } from "@store/store-helper";
+import { AiButton } from "@components/ai-button";
 
 function Keywords({
   title,
@@ -97,13 +91,13 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
       sx={{ display: "grid", gap: 1 }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Button
+        <AiButton
           variant="outlined"
           disabled={isRunning || advert === "" || !ai?.isConfigured}
           onClick={() => void analyse()}
         >
           {analysis ? "Analyse again" : "Analyse job description"}
-        </Button>
+        </AiButton>
         {isRunning && <CircularProgress size={18} />}
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           {ai?.isConfigured

@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
+import { AiIcon } from "@components/ai-button";
 import { Route, formatRoute } from "@shared/routing/routes";
 
 interface Entry {
@@ -14,6 +15,9 @@ interface Entry {
 
   /** Needs a job application to work on */
   needsJob?: boolean;
+
+  /** Uses AI: shown with the AI icon and colour */
+  isAi?: boolean;
 }
 
 const MAIN: Entry[] = [
@@ -43,6 +47,7 @@ const ASSISTANTS: Entry[] = [
     to: (jobId) => ({ kind: "chat", jobId }),
     isOn: (r) => r.kind === "chat",
     needsJob: true,
+    isAi: true,
   },
 ];
 
@@ -122,7 +127,17 @@ function Group({
               "&:hover": { bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover },
             }}
           >
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+            <Typography
+              sx={{
+                fontSize: 14,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                color: entry.isAi ? WORKSPACE_COLORS.aiText : undefined,
+              }}
+            >
+              {entry.isAi && <AiIcon fontSize="inherit" />}
               {entry.label}
             </Typography>
             <Typography

@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**AI is always marked (house rule).** Everything that uses AI is shown with the sparkle icon and the AI colour (purple = the theme's `secondary`, tokens `ai`/`ais`/`ait`/`aib`/`aix`), so the user can see at a glance when a model is involved. Use `AiButton` / `AiIcon` from `@components/ai-button` for every button that sends text to a model (score, analyse, reword, rewrite, make bullets, ask where items belong, pick what to hide, chat Send, AI import) and the AI card style (`WORKSPACE_COLORS.aiSoft`, border `aib`) for panels that group AI actions; rail/sidebar entries that are AI (Chat) carry the icon too. When you add or change a feature that calls an `/api/ai/*` route, apply this in the same change. Buttons that only apply or undo an AI result (Use these bullets, Apply selected) stay in the normal colours.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Overview
