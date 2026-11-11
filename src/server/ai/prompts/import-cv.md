@@ -21,7 +21,8 @@ Fields by section type (use only these keys, and only when the text gives the va
 - skills: one item per group with { "category": the group name }; bullets are the individual skills, one each.
 - awards: { "title", "subtitle" (issuer), "startDate" (date), "description" }.
 - interests: { "title" (the interests as one short line), "description" (optional detail) }.
-- projects, certifications, publications, volunteering, custom: { "title", "subtitle", "location", "startDate", "endDate", "description" }.
+- projects: { "title", "subtitle" (the person's role), "projectType" (personal, professional, academic, open source ...), "technologies" (comma separated), "startDate", "endDate", "link", "description" }.
+- certifications, publications, volunteering, custom: { "title", "subtitle", "location", "startDate", "endDate", "description" }.
 
 Rules:
 

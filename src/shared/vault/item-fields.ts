@@ -5,8 +5,11 @@ export interface FieldSpec {
   key: string;
   label: string;
 
-  /** "month" is a date stored as ISO "YYYY-MM-DD" (the day is always 01 when typed) */
-  kind: "text" | "month" | "multiline";
+  /**
+   * "month" is a date stored as ISO "YYYY-MM-DD" (the day is always 01 when typed); "chips" is a
+   * list typed as separate entries (chips) and stored as one comma separated text
+   */
+  kind: "text" | "month" | "multiline" | "chips";
 
   /** Columns it spans in a three-column grid */
   span: 1 | 2 | 3;
@@ -38,6 +41,16 @@ const END: FieldSpec = {
   span: 1,
   isEnd: true,
 };
+
+/** Kinds of project offered while typing; any other text is still allowed */
+const PROJECT_TYPES = [
+  "Personal",
+  "Professional",
+  "Academic",
+  "Open source",
+  "Freelance",
+  "Volunteer",
+];
 
 /**
  * The fields of an item in the vault editor, by section type. The keys are the ones the page
@@ -156,6 +169,47 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           kind: "multiline",
           span: 3,
           hint: 'One phrase, e.g. "Club cyclist, rides 100 km on weekends"',
+        },
+      ];
+    case "projects":
+      return [
+        { key: "title", label: "Title", kind: "text", span: 2 },
+        {
+          key: "subtitle",
+          label: "Role",
+          kind: "text",
+          span: 1,
+          hint: 'e.g. "Sole developer", "Lead" or "Principal investigator"',
+        },
+        {
+          key: "projectType",
+          label: "Type",
+          kind: "text",
+          span: 1,
+          suggestions: PROJECT_TYPES,
+        },
+        {
+          key: "technologies",
+          label: "Technologies",
+          kind: "chips",
+          span: 2,
+          hint: "Type one and press Enter (or comma). Useful for matching job adverts.",
+        },
+        START,
+        { ...END, hint: "Leave empty for a project that is still going." },
+        {
+          key: "link",
+          label: "Link (optional)",
+          kind: "text",
+          span: 3,
+          hint: "GitHub repository, live demo, store page or package page. A working demo is stronger than a repository alone.",
+        },
+        {
+          key: "description",
+          label: "Description",
+          kind: "multiline",
+          span: 3,
+          hint: DESCRIPTION_HINT,
         },
       ];
     case "skills":

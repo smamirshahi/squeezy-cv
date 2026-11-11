@@ -48,6 +48,12 @@ export const ADD_SECTION_OPTIONS: {
     description: "Groups of skills with an optional level",
   },
   {
+    type: "projects",
+    label: "Projects",
+    description:
+      "Apps, research or other work: role, technologies, link, description",
+  },
+  {
     type: "publications",
     label: "Publications",
     description:
@@ -66,8 +72,7 @@ export const ADD_SECTION_OPTIONS: {
   {
     type: "custom",
     label: "Other section",
-    description:
-      "Any list of entries, e.g. Certifications, Projects, Volunteering",
+    description: "Any list of entries, e.g. Certifications, Volunteering",
   },
 ];
 

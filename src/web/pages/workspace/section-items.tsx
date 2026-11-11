@@ -334,6 +334,19 @@ function tableOf(
         ],
       };
     case "projects":
+      return {
+        template: THREE_COLUMNS,
+        columns: [
+          { key: "title", label: "Title", value: (p) => p.title },
+          { key: "role", label: "Role", value: (p) => p.organisation },
+          {
+            key: "dates",
+            label: "Dates",
+            value: (p) => p.dates,
+            isMuted: true,
+          },
+        ],
+      };
     case "certifications":
     case "volunteering":
     case "custom":

@@ -56,11 +56,7 @@ export function PersonalInfoPreviewPage({
 }
 
 /** The photo of the header: a 4:5 frame, already cropped to fit */
-export function HeaderPhoto({
-  profile,
-}: {
-  profile: Profile;
-}): JSX.Element | null {
+function HeaderPhoto({ profile }: { profile: Profile }): JSX.Element | null {
   if (!profile.photo) {
     return null;
   }
