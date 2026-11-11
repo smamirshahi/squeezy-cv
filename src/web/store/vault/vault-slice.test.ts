@@ -135,14 +135,19 @@ describe("reconcileStructure", () => {
     });
   });
 
-  it("places a new section in the default column, in order", () => {
+  it("leaves a new section out unless asked to add missing ones", () => {
     const valid = ["header", "summary", "exp", "edu", "proj", "cert"];
-    expect(reconcileStructure(base, valid).left).toEqual([
+    expect(reconcileStructure(base, valid)).toEqual(base);
+  });
+
+  it("places a new section in the default column, in order, when asked", () => {
+    const valid = ["header", "summary", "exp", "edu", "proj", "cert"];
+    expect(reconcileStructure(base, valid, "left", true).left).toEqual([
       "exp",
       "proj",
       "cert",
     ]);
-    expect(reconcileStructure(base, valid, "right").right).toEqual([
+    expect(reconcileStructure(base, valid, "right", true).right).toEqual([
       "edu",
       "proj",
       "cert",
@@ -160,7 +165,7 @@ describe("reconcileStructure", () => {
   it("builds a full structure from an empty one", () => {
     const empty = { fullWidth: [], left: [], right: [] };
     expect(
-      reconcileStructure(empty, ["x", "y"], "fullWidth").fullWidth
+      reconcileStructure(empty, ["x", "y"], "fullWidth", true).fullWidth
     ).toEqual(["x", "y"]);
   });
 

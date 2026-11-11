@@ -90,6 +90,9 @@ export const StyleSchema = Object({
   /** Whether the gender (from the profile) is shown under the name; missing = hidden */
   shouldShowGender: Boolean.optional(),
 
+  /** Whether the profile photo is drawn in the header; missing = shown */
+  shouldShowPhoto: Boolean.optional(),
+
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 

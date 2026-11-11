@@ -9,14 +9,16 @@ const SIDES: Side[] = ["fullWidth", "left", "right"];
 
 /**
  * Makes the page structure consistent with the sections that exist: ids that no
- * longer exist (e.g. a deleted section) and duplicates are dropped, and ids that are
- * not placed yet (e.g. a new section) are appended to `defaultSide` in `validIds`
- * order. Existing placement and order are otherwise kept. Returns a new object.
+ * longer exist (e.g. a deleted section) and duplicates are dropped. Ids that are not
+ * placed yet (e.g. a new section) are left out: a template only shows what was added to
+ * it on purpose. With `shouldAddMissing` they are appended to `defaultSide` in `validIds`
+ * order instead. Existing placement and order are otherwise kept. Returns a new object.
  */
 export function reconcileStructure(
   structure: SectionColumns,
   validIds: string[],
-  defaultSide: Side = "left"
+  defaultSide: Side = "left",
+  shouldAddMissing = false
 ): SectionColumns {
   const valid = new Set(validIds);
   const seen = new Set<string>();
@@ -31,8 +33,11 @@ export function reconcileStructure(
     }
   }
 
+  // The header always has a place; other sections only when asked to
+  const isHeader = (id: string): boolean =>
+    (HEADER_IDS as readonly string[]).includes(id);
   for (const id of validIds) {
-    if (!seen.has(id)) {
+    if (!seen.has(id) && (shouldAddMissing || isHeader(id))) {
       seen.add(id);
       result[defaultSide].push(id);
     }

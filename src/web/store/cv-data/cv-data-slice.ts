@@ -51,6 +51,10 @@ const cvDataSlice = createSlice({
       state.style.shouldShowRightToWork = action.payload;
     },
 
+    setShouldShowPhoto(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowPhoto = action.payload;
+    },
+
     setShouldShowNationality(state, action: PayloadAction<boolean>) {
       state.style.shouldShowNationality = action.payload;
     },
@@ -161,6 +165,7 @@ export const {
   setStyle,
   setDateFormat,
   setShouldShowRightToWork,
+  setShouldShowPhoto,
   setShouldShowLinks,
   setShouldShowNationality,
   setShouldShowMaritalStatus,

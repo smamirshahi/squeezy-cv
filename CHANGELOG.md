@@ -19,6 +19,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- New vault sections are no longer added to templates by themselves (#351): a section a template does not place is not drawn. Use "Add section to template" on the Layout page to place it.
 - Main Info is now four cards (Identity, Contact, Links, Optional details), other job titles are chips, and the right panel shows a live preview of the header with a note that it is only a preview of the vault. The Apply / Discard bar is a fixed row at the bottom of the page and no longer covers the content (#345).
 - Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).
 - Apply: each entry can show or hide its parts (title, dissertation, description ...), Start and End are one "Dates" part, and hiding the dates no longer shows "Present". The summary and descriptions get Shorten, Rephrase for this job and Make longer (#323).

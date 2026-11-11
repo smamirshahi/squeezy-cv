@@ -1,4 +1,6 @@
 import { Box } from "@mui/material";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
 import {
   HeaderWithPhoto,
   PersonalInfoPreviewPage,
@@ -52,9 +54,16 @@ function renderPart(part: RenderedPart): JSX.Element | null {
 }
 
 /** The parts of one column; the header parts share a row with the photo when there is one */
-function renderParts(parts: RenderedPart[]): (JSX.Element | null)[] {
+function renderParts(
+  parts: RenderedPart[],
+  shouldShowPhoto: boolean
+): (JSX.Element | null)[] {
   const personal = parts.find((part) => part.kind === "personalInfo");
-  if (personal?.kind !== "personalInfo" || !personal.profile.photo) {
+  if (
+    personal?.kind !== "personalInfo" ||
+    !personal.profile.photo ||
+    !shouldShowPhoto
+  ) {
     return parts.map(renderPart);
   }
   const isHeader = (part: RenderedPart): boolean =>
@@ -77,6 +86,8 @@ export function RenderedColumns({
   rendered,
   columnWidth,
 }: ColumnsProps): JSX.Element {
+  const shouldShowPhoto =
+    useAppSelector(styleSelector).shouldShowPhoto !== false;
   return (
     <Box>
       {/* Full-width top row */}
@@ -86,7 +97,7 @@ export function RenderedColumns({
           mb: 2,
         }}
       >
-        {renderParts(rendered.columns.fullWidth)}
+        {renderParts(rendered.columns.fullWidth, shouldShowPhoto)}
       </Box>
 
       {/* Second row: left and right with percentages */}
@@ -104,7 +115,7 @@ export function RenderedColumns({
             flexShrink: 1,
           }}
         >
-          {renderParts(rendered.columns.left)}
+          {renderParts(rendered.columns.left, shouldShowPhoto)}
         </Box>
         <Box
           sx={{
@@ -113,7 +124,7 @@ export function RenderedColumns({
             flexShrink: 1,
           }}
         >
-          {renderParts(rendered.columns.right)}
+          {renderParts(rendered.columns.right, shouldShowPhoto)}
         </Box>
       </Box>
     </Box>

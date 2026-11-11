@@ -7,8 +7,8 @@ import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
  * Keeps the page structure (which part of the CV sits in which column) consistent with
- * the sections in the vault: deleted sections disappear from it, new or imported
- * sections get a place. Mount it once.
+ * the sections in the vault: deleted sections disappear from it. New or imported
+ * sections are NOT placed: the user adds them to a template on purpose. Mount it once.
  */
 export function useSyncStructure(): void {
   const dispatch = useAppDispatch();

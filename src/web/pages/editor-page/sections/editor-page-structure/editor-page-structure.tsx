@@ -1,5 +1,6 @@
 import { Box, ButtonBase, Chip, Typography } from "@mui/material";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { AddToTemplateButton } from "@pages/editor-page/section-placement/add-to-template-button";
 import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";
 import { IncludeSectionButton } from "@pages/editor-page/section-placement/include-section-button";
 import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
@@ -201,7 +202,8 @@ export function EditorPageStructure(): JSX.Element {
           <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
             Drag the sections (or use the arrows) to set their order and place.
             The bin removes a section from this job; Add section brings back one
-            you removed. New sections are made in the Vault. Which entries
+            you removed. New sections are made in the Vault and are not added
+            here by themselves: use Add section to template. Which entries
             appear inside a section is set on the Content tab. Your name and
             contact details always stay at the top.{" "}
             <Box component="strong">
@@ -212,6 +214,7 @@ export function EditorPageStructure(): JSX.Element {
         </Box>
         {hasColumns && <PageStructureSlider />}
         <SectionPlacement />
+        <AddToTemplateButton />
         <IncludeSectionButton />
       </Box>
     </Box>

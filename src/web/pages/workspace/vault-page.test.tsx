@@ -190,7 +190,7 @@ describe("VaultPage", () => {
 });
 
 describe("App", () => {
-  it("adds new and imported sections to the page structure", () => {
+  it("does not add new sections to the page structure, but drops deleted ones", () => {
     const store = createStore();
     render(
       <Provider store={store}>
@@ -206,7 +206,12 @@ describe("App", () => {
         addSection({ id: "proj", type: "projects", title: "Projects" })
       );
     });
-    expect(store.getState().app.structure.left).toContain("proj");
+    const placed = store.getState().app.structure;
+    expect([
+      ...placed.fullWidth,
+      ...placed.left,
+      ...placed.right,
+    ]).not.toContain("proj");
 
     act(() => {
       store.dispatch(removeSection({ id: "skills" }));
