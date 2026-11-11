@@ -22,7 +22,7 @@ export const AI_TASK_DESCRIPTIONS: Record<
   tailor: {
     what: "Reads a job advert and proposes what to show, hide and reword for it. Also scores items against an advert. Nothing changes until you accept.",
     sends:
-      "The advert and the text of your saved entries (titles, bullets, dates), masked: no name or contact details, employers and schools as [Company n] / [School n].",
+      "The advert and the text of your saved entries (titles, bullets, dates), masked: no name or contact details, employers and schools as [Company n] / [Institution n].",
   },
   import: {
     what: "Sorts CV text you paste (or take from a PDF) into vault sections and items. You review it before anything is added.",

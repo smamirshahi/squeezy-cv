@@ -34,7 +34,7 @@ import { toReadableParts } from "@shared/ai/readable-text";
 
 const KIND_LABELS: Record<MaskKind, string> = {
   company: "Company",
-  school: "School",
+  school: "Institution",
   person: "Person",
   location: "Location",
   date: "Date",

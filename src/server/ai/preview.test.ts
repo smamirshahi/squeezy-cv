@@ -44,6 +44,6 @@ describe("previewTailorRequest", () => {
       expect(everything).not.toContain(name);
     }
     expect(everything).toContain("[Company 1]");
-    expect(everything).toContain("[School 1]");
+    expect(everything).toContain("[Institution 1]");
   });
 });

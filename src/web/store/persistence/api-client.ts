@@ -197,7 +197,7 @@ export interface ApiClient {
   /** Chooses the provider for some tasks. The server refuses one that is not set up. */
   setAiChoice: (change: Partial<AiChoice>) => Promise<AiChoice>;
 
-  /** Also hide employer and school names ([Company 1], [School 1]) in what is sent to a model */
+  /** Also hide employer and school names ([Company 1], [Institution 1]) in what is sent to a model */
 
   /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
   tailor: (request: TailorRequest) => Promise<TailorResult>;

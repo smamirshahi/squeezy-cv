@@ -9,7 +9,12 @@ import {
   MessageSender,
 } from "@server/ai/ai-types";
 import { loadPrompt } from "@server/ai/prompts";
-import { PersonalData, restore, scrub } from "@shared/ai/redact-personal";
+import {
+  PersonalData,
+  restore,
+  scrub,
+  withDetectedMasks,
+} from "@shared/ai/redact-personal";
 
 const DEFAULT_ATTEMPTS = 3;
 const MAX_OUTPUT_TOKENS = 16_000;
@@ -44,7 +49,7 @@ function withScrubbing<T>(
   if (!personal) {
     return send;
   }
-  const data: PersonalData = personal;
+  const data: PersonalData = withDetectedMasks(request.input, personal);
   const warned = new Set<string>();
   return async (system, messages) => {
     const { map } = scrub("", data);
