@@ -130,10 +130,12 @@ describe("ChatPanel", () => {
   it("says where the text goes", async () => {
     stub();
     setup();
+    fireEvent.click(
+      await screen.findByRole("button", { name: /What is sent to/ })
+    );
+    expect(await screen.findByText(/What is sent to Anthropic/)).toBeTruthy();
     expect(
-      await screen.findByText(
-        /not your name or contact details\) go to Anthropic/
-      )
+      screen.getByText(/Never sent: your name or contact details/)
     ).toBeTruthy();
   });
 
@@ -156,9 +158,7 @@ describe("ChatPanel", () => {
     expect(screen.getByText("Set the tone to formal")).toBeTruthy();
     const boxes = screen.getAllByRole<HTMLInputElement>("checkbox");
     expect(boxes.map((b) => b.checked)).toEqual([true, true, false]);
-    expect(
-      screen.getByText(/Check this one, not ticked automatically/)
-    ).toBeTruthy();
+    expect(screen.getByText(/Not ticked: /)).toBeTruthy();
     expect(screen.getByText("A rewording needs your check.")).toBeTruthy();
   });
 
@@ -174,7 +174,7 @@ describe("ChatPanel", () => {
     // the flagged rewording was not ticked, so nothing was added to the vault
     expect(variant.selection[jobs[0].id]).toBeUndefined();
     expect(store.getState().history.past).toHaveLength(1);
-    await screen.findByText("Applied 2 changes.");
+    await screen.findByText("Applied 2 changes");
 
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(activeVariantSelector(store.getState()).tone).toBe("neutral");
@@ -241,11 +241,14 @@ describe("ChatPanel", () => {
     // applied/undo state of an earlier visit is not offered, the choices still are
     expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Clear conversation" }));
-    expect(screen.queryByText("Hide the oldest job")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Clear conversation" })
+    );
+    expect(screen.queryByText(answer.reply)).toBeNull();
     cleanup();
     setup();
     await screen.findByLabelText("Message");
-    expect(screen.queryByText("Hide the oldest job")).toBeNull();
+    expect(screen.queryByText(answer.reply)).toBeNull();
   });
 });
