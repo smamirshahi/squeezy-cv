@@ -11,6 +11,9 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Apply, Template & content: the right panel is now a step-by-step wizard with a step bar and Back/Next buttons that name the next step. Its first step, "General", has the page limit (1 page, 2 pages or a number from 3, with a tooltip, a status chip, small page drawings and where the overflow starts), an auto-fit switch, "Choose items to hide" (nothing is hidden until you press Hide selected) and one purple AI card with Score sections, "Ask AI to pick what to hide" and a choice of AI for each action (#357).
+- Job titles are a table in "Header and links": pick the title this job shows, with the AI's relevance and reason for each, best first. "Score job titles" and "Score all sections" score them (#358).
+
 - A photo on the CV (#345, #255): add it in Vault > Main Info, then move it in a fixed 4:5 frame and zoom in a dialog (the original is kept, so it can be adjusted again). It shows top right in the header, with the name and contact details together on the left, and in the PDF. The export window warns that a photo is included. It is never sent to AI.
 - A Projects section with its own fields (#347): Title, Role, Type (Personal, Open source, Academic ...), Technologies, Start, End, Link and Description. "Projects" is now a choice in the New section dialog. Technologies is a chip input in the vault (Enter or comma ends an entry) and shows as one "Technologies:" line on the CV, with the type next to the role and the link on its own line. AI import knows these fields. Existing projects keep their data (the role is the old Subtitle).
 - A "Coffee" button above Settings in the left rail that opens the Ko-fi page (#345).
@@ -18,6 +21,9 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - A "Send to AI" window before any text goes to an online model: it shows the exact masked text as a readable outline, lets you switch automatic masks off, hide any selected word as Company, School, Person, Location, Date or Other, and mark a job advert as private; the model's answer gets the real words back. Local models skip it, and "Score all sections" asks once and lists every section (#332).
 
 ### Changed
+
+- The page limit now belongs to the job, not the template, and a new job starts at 1 page (#356). The overflow warning above the page names the limit, links to the General step and is split over three lines. The page-limit buttons are gone from the inspector and the Jobs page.
+- "Score entries" and "Score all sections" say "again" and turn outlined once there are scores; the result line is bold green text with a check (#358).
 
 - Everything that uses AI is now marked with a sparkle icon and the AI purple: the Score, Analyse, reword, rewrite, make-bullets, place and import buttons, Chat's Send button and the Chat entry in the Apply sidebar (#355). "Use the vault text" is always shown, disabled when the text is already the vault's, outlined and on the right.
 

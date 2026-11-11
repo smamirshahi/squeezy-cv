@@ -15,6 +15,7 @@ import {
   activeVariantSelector,
   setItemSelection,
   setPageLimit,
+  setSkillStyle,
   setTemplateAppearance,
   setVariants,
 } from "@store/jobs/jobs-slice";
@@ -72,15 +73,15 @@ describe("undo and redo: templates and jobs", () => {
       })
     );
     tick(COALESCE_MS + 1);
-    store.dispatch(setPageLimit({ id, pageLimit: 1 }));
+    store.dispatch(setSkillStyle({ id, display: "dots", columns: 2 }));
     expect(store.getState().history.past).toHaveLength(2);
     const edited = store.getState().jobs;
     expect(edited.jobs).not.toBe(before.jobs);
     expect(edited.templates).not.toBe(before.templates);
 
     store.dispatch(undo());
-    expect(activeVariantSelector(store.getState()).pageLimit).toBe(
-      activeVariantSelector({ jobs: before }).pageLimit
+    expect(activeVariantSelector(store.getState()).skillDisplay).toBe(
+      activeVariantSelector({ jobs: before }).skillDisplay
     );
     expect(
       activeVariantSelector(store.getState()).selection[item.id]?.isVisible
@@ -170,7 +171,7 @@ describe("undo and redo", () => {
     const { store } = setup();
     const id = activeVariantSelector(store.getState()).id;
     store.dispatch(rename("A"));
-    store.dispatch(setPageLimit({ id, pageLimit: 1 }));
+    store.dispatch(setPageLimit({ id, pageLimit: 2 }));
     expect(store.getState().history.past).toHaveLength(2);
   });
 
@@ -220,7 +221,7 @@ describe("undo and redo", () => {
     store.dispatch(
       batch("Chat: hide and shorten", [
         rename("Batch"),
-        setPageLimit({ id, pageLimit: 1 }),
+        setPageLimit({ id, pageLimit: 2 }),
       ])
     );
     expect(store.getState().history.past).toHaveLength(1);

@@ -427,11 +427,13 @@ describe("inspector and style settings say what they change", () => {
       screen.getByText("Changes template “Template 1”, used by 2 jobs.")
     ).toBeTruthy();
 
-    // page limit really is the template's: both jobs follow
-    fireEvent.click(screen.getByRole("button", { name: "1 page" }));
-    expect(variantsSelector(store.getState()).map((v) => v.pageLimit)).toEqual([
-      1, 1,
-    ]);
+    // the layout buttons change the template, so both jobs follow
+    fireEvent.click(screen.getByRole("button", { name: "Two columns" }));
+    expect(
+      new Set(
+        variantsSelector(store.getState()).map((v) => JSON.stringify(v.layout))
+      ).size
+    ).toBe(1);
     // moving the job to its own template changes the wording
     act(() => {
       store.dispatch(addTemplate({ id: "own", name: "Own" }));

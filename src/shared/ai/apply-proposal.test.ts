@@ -403,7 +403,7 @@ describe("createTailoredJob", () => {
   it("makes a job that shares the template and carries selection, relevance and the tailor record", () => {
     const before = structuredClone({ template, baseJob, vault });
     const result = tailored(proposal(), defaultDecisions(proposal()), {
-      pageLimit: template.pageLimit,
+      pageLimit: 2,
       tone: "formal",
     });
     expect(result.template).toBeUndefined();
@@ -457,16 +457,13 @@ describe("createTailoredJob", () => {
     expect(result.job.templateId).toBe("t1");
   });
 
-  it("copies the template for a page limit that differs, and only then", () => {
-    const d = defaultDecisions(proposal());
-    expect(
-      tailored(proposal(), d, { pageLimit: template.pageLimit }).template
-    ).toBeUndefined();
-    const other = template.pageLimit === 1 ? 2 : 1;
-    const result = tailored(proposal(), d, { pageLimit: other });
-    expect(result.template?.pageLimit).toBe(other);
-    expect(result.job.templateId).toBe("t2");
-    expect(template.pageLimit).not.toBe(other);
+  it("writes the chosen page limit to the job and never copies the template for it", () => {
+    const result = tailored(proposal(), defaultDecisions(proposal()), {
+      pageLimit: 2,
+    });
+    expect(result.template).toBeUndefined();
+    expect(result.job.templateId).toBe("t1");
+    expect(result.job.pageLimit).toBe(2);
   });
 
   it("returns the alternative wordings for the vault and the export checks still use the tailor record", () => {

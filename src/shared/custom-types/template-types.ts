@@ -39,9 +39,6 @@ export const TemplateSchema = Object({
   /** Day the template was made (YYYY-MM-DD); missing in templates from before this field */
   createdAt: String.optional(),
 
-  /** The number of pages the CV should fit on */
-  pageLimit: Number,
-
   layout: VariantLayoutSchema,
 
   style: StyleSchema,

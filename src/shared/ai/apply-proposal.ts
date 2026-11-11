@@ -243,7 +243,7 @@ export interface TailoredJobInput {
   copyTemplateId: string;
   tailor: TailorRecord;
 
-  /** The page limit chosen in the Tailor page; applied (via a template copy) only if it differs */
+  /** The page limit chosen in the Tailor page; written to the job */
   pageLimit?: number;
 
   /** The tone chosen in the Tailor page; written to the job */
@@ -259,15 +259,15 @@ export interface TailoredJob {
   /** The new job. It uses `template` when given, else the source template. */
   job: Job;
 
-  /** A copy of the source template ("<name> (tailored)"), only when the accepted section order or the page limit differ from it */
+  /** A copy of the source template ("<name> (tailored)"), only when the accepted section order differs from it */
   template?: Template;
   altUpdates: AltUpdate[];
 }
 
 /**
  * Makes the new job for the accepted part of the proposal: selection, relevance, tone and the
- * tailor record belong to the job. The layout (section order) and the page limit belong to the
- * template, so they only change on a NEW copy of `template` that the job then uses; the source
+ * tailor record and page limit belong to the job. The layout (section order) belongs to the
+ * template, so it only changes on a NEW copy of `template` that the job then uses; the source
  * template, the base job and the vault are never changed.
  */
 export function createTailoredJob(
@@ -288,23 +288,24 @@ export function createTailoredJob(
   );
   const isLayoutChanged =
     JSON.stringify(variant.layout) !== JSON.stringify(template.layout);
-  const isPageLimitChanged =
-    input.pageLimit !== undefined && input.pageLimit !== template.pageLimit;
-  const copy =
-    isLayoutChanged || isPageLimitChanged
-      ? {
-          ...duplicateTemplate(
-            template,
-            input.copyTemplateId,
-            `${template.name} (tailored)`
-          ),
-          layout: variant.layout,
-          pageLimit: input.pageLimit ?? template.pageLimit,
-        }
-      : undefined;
+  const copy = isLayoutChanged
+    ? {
+        ...duplicateTemplate(
+          template,
+          input.copyTemplateId,
+          `${template.name} (tailored)`
+        ),
+        layout: variant.layout,
+      }
+    : undefined;
   const target = copy ?? template;
   const { job } = splitVariant(
-    { ...variant, tone: input.tone ?? variant.tone, tailor: input.tailor },
+    {
+      ...variant,
+      tone: input.tone ?? variant.tone,
+      tailor: input.tailor,
+      pageLimit: input.pageLimit ?? variant.pageLimit,
+    },
     target.id,
     input.createdAt ?? today()
   );

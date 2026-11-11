@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Box, Button, LinearProgress, Typography } from "@mui/material";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import { cssVar } from "@custom-styles/theme";
 import { navigate } from "@hooks/navigation";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -13,9 +15,16 @@ import {
   activeJobSelector,
   activeVariantSelector,
   setSectionScores,
+  setTitleScores,
 } from "@store/jobs/jobs-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { sectionsSelector } from "@store/vault/vault-slice";
+import {
+  JOB_TITLES_SECTION,
+  MIN_TITLES_TO_CHOOSE,
+  jobTitlesOf,
+} from "@shared/vault/job-titles";
+import { sectionsSelector, vaultSelector } from "@store/vault/vault-slice";
+import { AiButton } from "@components/ai-button";
 
 /**
  * "Score all sections": the same scoring as each section's Score entries button, run for every
@@ -23,13 +32,27 @@ import { sectionsSelector } from "@store/vault/vault-slice";
  * is done, so the results still show per section; the bar shows how many sections are done.
  * It can be stopped between sections. Only scores are stored; nothing is hidden or moved.
  */
-export function TailorAll(): JSX.Element {
+export function TailorAll({
+  isEmbedded = false,
+  status: givenStatus,
+  picker,
+}: {
+  /** Inside the purple AI card: no card of its own */
+  isEmbedded?: boolean;
+
+  /** The AI status when the parent already holds it (so a provider change shows here at once) */
+  status?: AiStatus | null;
+
+  /** Shown under the title: where the provider of this task is chosen */
+  picker?: ReactNode;
+}): JSX.Element {
   const dispatch = useAppDispatch();
   const job = useAppSelector(activeJobSelector);
   const removed = useAppSelector(activeVariantSelector).hiddenSections ?? [];
   const sections = useAppSelector(sectionsSelector);
   const api = useMemo(() => createApiClient(), []);
-  const [status, setStatus] = useState<AiStatus | null>(null);
+  const [ownStatus, setOwnStatus] = useState<AiStatus | null>(null);
+  const status = givenStatus === undefined ? ownStatus : givenStatus;
   const [current, setCurrent] = useState<{
     done: number;
     title: string;
@@ -37,20 +60,39 @@ export function TailorAll(): JSX.Element {
   const [error, setError] = useState<string>("");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [summary, setSummary] = useState<string>("");
+  const [isSummaryDone, setIsSummaryDone] = useState<boolean>(false);
   const isStopping = useRef<boolean>(false);
   const ai = status ? taskProvider(status, "tailor") : null;
   const analysis = job.analysis;
-  const targets = sections.filter(
-    (section) => !removed.includes(section.id) && section.items.length > 0
-  );
+  const vault = useAppSelector(vaultSelector);
+  // The job titles are scored first, as one more "section", when there is a choice to make
+  const titleTarget =
+    jobTitlesOf(vault.profile).length >= MIN_TITLES_TO_CHOOSE
+      ? [{ id: JOB_TITLES_SECTION, title: "Job titles" }]
+      : [];
+  const targets = [
+    ...titleTarget,
+    ...sections
+      .filter(
+        (section) => !removed.includes(section.id) && section.items.length > 0
+      )
+      .map((section) => ({ id: section.id, title: section.title })),
+  ];
   const isRunning = current !== null;
+  // Scores are kept in the job, so this is also true after a reload
+  const hasScores = Object.values(job.selection).some(
+    (choice) => choice.relevance !== undefined
+  );
 
   useEffect(() => {
+    if (givenStatus !== undefined) {
+      return;
+    }
     api
       .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
-  }, [api]);
+      .then(setOwnStatus)
+      .catch(() => setOwnStatus(null));
+  }, [api, givenStatus]);
 
   async function run(): Promise<void> {
     if (!analysis) {
@@ -60,6 +102,7 @@ export function TailorAll(): JSX.Element {
     setError("");
     setWarnings([]);
     setSummary("");
+    setIsSummaryDone(false);
     let scored = 0;
     let done = 0;
     try {
@@ -76,15 +119,29 @@ export function TailorAll(): JSX.Element {
             }
             setCurrent({ done, title: section.title });
             const result = await api.scoreSection(section.id, analysis);
-            dispatch(
-              setSectionScores({ jobId: job.id, scores: result.scores })
-            );
+            if (section.id === JOB_TITLES_SECTION) {
+              dispatch(
+                setTitleScores({
+                  jobId: job.id,
+                  scores: result.scores.map((score) => ({
+                    title: score.itemId,
+                    relevance: score.relevance,
+                    reason: score.reason,
+                  })),
+                })
+              );
+            } else {
+              dispatch(
+                setSectionScores({ jobId: job.id, scores: result.scores })
+              );
+            }
             setWarnings((before) => [...before, ...result.warnings]);
             scored += result.scores.length;
             done += 1;
           }
         }
       );
+      setIsSummaryDone(!isStopping.current);
       setSummary(
         isStopping.current
           ? `Stopped after ${done} of ${targets.length} sections.`
@@ -106,21 +163,36 @@ export function TailorAll(): JSX.Element {
       sx={{
         display: "grid",
         gap: 0.75,
-        p: 1.5,
-        border: `1px solid ${WORKSPACE_COLORS.border}`,
-        borderRadius: 1.5,
-        bgcolor: WORKSPACE_COLORS.panel,
+        ...(isEmbedded
+          ? {}
+          : {
+              p: 1.5,
+              border: `1px solid ${WORKSPACE_COLORS.border}`,
+              borderRadius: 1.5,
+              bgcolor: WORKSPACE_COLORS.panel,
+            }),
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Button
-          variant="contained"
+      {isEmbedded && (
+        <Typography sx={{ fontWeight: 600 }}>Score sections</Typography>
+      )}
+      {picker}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: isEmbedded ? "wrap" : "nowrap",
+        }}
+      >
+        <AiButton
+          variant={hasScores ? "outlined" : "contained"}
           size="small"
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void run()}
         >
-          Score all sections
-        </Button>
+          {hasScores ? "Score all sections again" : "Score all sections"}
+        </AiButton>
         {isRunning && (
           <Button
             size="small"
@@ -161,7 +233,20 @@ export function TailorAll(): JSX.Element {
         </Box>
       )}
       {summary && (
-        <Typography role="status" sx={{ fontSize: 12.5 }}>
+        <Typography
+          role="status"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            fontSize: 13,
+            fontWeight: 700,
+            color: isSummaryDone ? cssVar("ok") : WORKSPACE_COLORS.text,
+          }}
+        >
+          {isSummaryDone && (
+            <CheckCircleOutlinedIcon aria-hidden="true" sx={{ fontSize: 18 }} />
+          )}
           {summary}
         </Typography>
       )}

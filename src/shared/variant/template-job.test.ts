@@ -86,7 +86,9 @@ describe("splitVariant and resolveVariant", () => {
     expect(template).not.toHaveProperty("tailor");
     expect(job).not.toHaveProperty("layout");
     expect(job).not.toHaveProperty("style");
-    expect(job).not.toHaveProperty("pageLimit");
+    // the page limit belongs to the job, not the template
+    expect(template).not.toHaveProperty("pageLimit");
+    expect(job.pageLimit).toBe(fullVariant().pageLimit);
     expect(job).not.toHaveProperty("skillDisplay");
     expect(job.templateId).toBe("t1");
     expect(job.id).toBe("job-1");
@@ -116,8 +118,8 @@ describe("splitVariant and resolveVariant", () => {
   it("takes the job's name and id, and the template's look", () => {
     const { template, job } = splitVariant(fullVariant(), "t1");
     const resolved = resolveVariant(
-      { ...template, name: "Other", pageLimit: 2 },
-      { ...job, name: "Beta Ltd" }
+      { ...template, name: "Other" },
+      { ...job, name: "Beta Ltd", pageLimit: 2 }
     );
     expect(resolved.name).toBe("Beta Ltd");
     expect(resolved.id).toBe("job-1");
@@ -194,7 +196,7 @@ describe("duplicates and helpers", () => {
 describe("schemas", () => {
   it("reject a template or job with missing or wrong fields", () => {
     const { template, job } = splitVariant(fullVariant(), "t1");
-    expect(TemplateSchema.guard({ ...template, pageLimit: "2" })).toBe(false);
+    expect(JobSchema.guard({ ...job, pageLimit: "2" })).toBe(false);
     expect(
       TemplateSchema.guard(Object.assign({}, template, { layout: null }))
     ).toBe(false);
@@ -219,5 +221,32 @@ describe("hidden sections", () => {
     expect(job.hiddenSections).toEqual(["education"]);
     expect("hiddenSections" in template).toBe(false);
     expect(resolveVariant(template, job).hiddenSections).toEqual(["education"]);
+  });
+});
+
+describe("the page limit belongs to the job", () => {
+  it("is 1 page for a job that has none", () => {
+    const { template, job } = splitVariant(fullVariant(), "t1");
+    const { pageLimit: _unused, ...withoutLimit } = job;
+    expect(resolveVariant(template, withoutLimit).pageLimit).toBe(1);
+  });
+
+  it("comes from the job, whatever template it uses", () => {
+    const { template, job } = splitVariant(fullVariant(), "t1");
+    const resolved = resolveVariant(
+      { ...template, name: "Other" },
+      { ...job, pageLimit: 3 }
+    );
+    expect(resolved.pageLimit).toBe(3);
+  });
+
+  it("two jobs on one template can have different limits", () => {
+    const { template, job } = splitVariant(fullVariant(), "t1");
+    expect(resolveVariant(template, { ...job, pageLimit: 1 }).pageLimit).toBe(
+      1
+    );
+    expect(resolveVariant(template, { ...job, pageLimit: 2 }).pageLimit).toBe(
+      2
+    );
   });
 });

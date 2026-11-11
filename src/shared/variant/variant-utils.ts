@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_LIMIT } from "@custom-types/job-types";
 import { Style } from "@custom-types/styles-types";
 import {
   BulletSelection,
@@ -12,8 +13,6 @@ import {
   sortItemsByVariant,
 } from "@shared/variant/render";
 import { singleColumnLayout } from "@shared/vault/page-structure";
-
-const DEFAULT_PAGE_LIMIT = 2;
 
 /** Anything with per-item choices: a variant or a job */
 interface HasSelection {

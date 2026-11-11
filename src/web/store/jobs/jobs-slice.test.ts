@@ -23,6 +23,7 @@ import {
   setLinkOrder,
   setJobHeadline,
   setSkillStyle,
+  setTitleScores,
   setTuning,
   setBulletOrders,
   setBulletSelection,
@@ -255,15 +256,13 @@ describe("templates and jobs: who owns what", () => {
     expect(after.templates[0]).toBe(before.templates[0]);
   });
 
-  it("page limit and skill style go to the template, tone and tuning to the job", () => {
+  it("skill style goes to the template, page limit, tone and tuning to the job", () => {
     const before = withTwo();
     const templateEdits = [
-      setPageLimit({ id: "second", pageLimit: 1 }),
       setSkillStyle({ id: "second", display: "dots", columns: 2 }),
     ];
     const afterTemplate = templateEdits.reduce(jobsReducer, before);
     expect(afterTemplate.jobs).toBe(before.jobs);
-    expect(afterTemplate.templates[1].pageLimit).toBe(1);
     expect(afterTemplate.templates[1].skillDisplay).toBe("dots");
 
     const afterJob = [
@@ -459,7 +458,7 @@ describe("selectors", () => {
     expect(activeVariantSelector({ jobs: jobEdited })).not.toBe(first);
     const templateEdited = jobsReducer(
       state,
-      setPageLimit({ id: "second", pageLimit: 1 })
+      setSkillStyle({ id: "second", display: "dots", columns: 2 })
     );
     expect(activeVariantSelector({ jobs: templateEdited })).not.toBe(first);
   });
@@ -609,6 +608,71 @@ describe("setJobHeadline", () => {
     );
     expect(cleared.jobs.find((j) => j.id === "second")?.headline).toBe(
       undefined
+    );
+  });
+});
+
+describe("page limit and job title scores belong to the job", () => {
+  function twoOnOneTemplate(): JobsState {
+    return jobsReducer(
+      initialState,
+      createJob({
+        vault,
+        style,
+        name: "Second",
+        id: "second",
+        templateId: initialState.jobs[0].templateId,
+      })
+    );
+  }
+
+  it("changing one job's page limit leaves the other job and the template alone", () => {
+    const before = twoOnOneTemplate();
+    const after = jobsReducer(
+      before,
+      setPageLimit({ id: "second", pageLimit: 2 })
+    );
+    expect(after.templates).toBe(before.templates);
+    const limits = Object.fromEntries(
+      variantsSelector({ jobs: after }).map((v) => [v.id, v.pageLimit])
+    );
+    expect(limits.second).toBe(2);
+    expect(limits[before.jobs[0].id]).toBe(1);
+  });
+
+  it("a new job starts at one page", () => {
+    expect(
+      variantsSelector({ jobs: twoOnOneTemplate() }).every(
+        (v) => v.pageLimit === 1
+      )
+    ).toBe(true);
+  });
+
+  it("stores the score of each job title, and a later score replaces it", () => {
+    const first = jobsReducer(
+      initialState,
+      setTitleScores({
+        jobId: initialState.jobs[0].id,
+        scores: [
+          { title: "Frontend developer", relevance: 90, reason: "Matches" },
+          { title: "Designer", relevance: 20, reason: "Other field" },
+        ],
+      })
+    );
+    expect(first.jobs[0].titleScores?.["Frontend developer"]).toEqual({
+      relevance: 90,
+      reason: "Matches",
+    });
+    const again = jobsReducer(
+      first,
+      setTitleScores({
+        jobId: initialState.jobs[0].id,
+        scores: [{ title: "Designer", relevance: 35, reason: "Closer" }],
+      })
+    );
+    expect(again.jobs[0].titleScores?.Designer.relevance).toBe(35);
+    expect(again.jobs[0].titleScores?.["Frontend developer"].relevance).toBe(
+      90
     );
   });
 });

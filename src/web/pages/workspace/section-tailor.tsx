@@ -14,8 +14,17 @@ import {
   createApiClient,
   taskProvider,
 } from "@store/persistence/api-client";
-import { activeJobSelector, setSectionScores } from "@store/jobs/jobs-slice";
+import {
+  activeJobSelector,
+  setSectionScores,
+  setTitleScores,
+} from "@store/jobs/jobs-slice";
+import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { AiButton } from "@components/ai-button";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import { cssVar } from "@custom-styles/theme";
+import { sectionsSelector } from "@store/vault/vault-slice";
 
 /**
  * The "Score entries" button of one section: the AI scores every entry of the section (for skills
@@ -30,6 +39,7 @@ export function SectionTailor({
 }): JSX.Element {
   const dispatch = useAppDispatch();
   const job = useAppSelector(activeJobSelector);
+  const sections = useAppSelector(sectionsSelector);
   const api = useMemo(() => createApiClient(), []);
   const [status, setStatus] = useState<AiStatus | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -38,6 +48,18 @@ export function SectionTailor({
   const [done, setDone] = useState<string>("");
   const ai = status ? taskProvider(status, "tailor") : null;
   const analysis = job.analysis;
+  const isTitles = sectionId === JOB_TITLES_SECTION;
+  // Scores are kept in the job, so this is also true after a reload
+  const section = sections.find((entry) => entry.id === sectionId);
+  const hasScores = isTitles
+    ? Object.keys(job.titleScores ?? {}).length > 0
+    : (section?.items ?? []).some(
+        (item) => job.selection[item.id]?.relevance !== undefined
+      );
+  const action = isTitles ? "Score job titles" : "Score entries";
+  const explanation = isTitles
+    ? "Scores each job title against the job description, so the best one is easy to pick."
+    : "Scores every entry against the job description. Nothing is hidden or moved; undo works.";
 
   useEffect(() => {
     api
@@ -63,10 +85,27 @@ export function SectionTailor({
     setDone("");
     try {
       const result = await api.scoreSection(sectionId, analysis);
-      dispatch(setSectionScores({ jobId: job.id, scores: result.scores }));
+      if (isTitles) {
+        dispatch(
+          setTitleScores({
+            jobId: job.id,
+            scores: result.scores.map((score) => ({
+              title: score.itemId,
+              relevance: score.relevance,
+              reason: score.reason,
+            })),
+          })
+        );
+      } else {
+        dispatch(setSectionScores({ jobId: job.id, scores: result.scores }));
+      }
       setWarnings(result.warnings);
       const count = result.scores.length;
-      setDone(`Scored ${count} ${count === 1 ? "entry" : "entries"}.`);
+      setDone(
+        isTitles
+          ? `Scored ${count} job ${count === 1 ? "title" : "titles"}.`
+          : `Scored ${count} ${count === 1 ? "entry" : "entries"}.`
+      );
     } catch (caught) {
       setError(
         caught instanceof ApiError || caught instanceof Error
@@ -92,26 +131,35 @@ export function SectionTailor({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Button
-          variant="contained"
+        <AiButton
+          variant={hasScores ? "outlined" : "contained"}
           size="small"
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void tailor()}
         >
-          Score entries
-        </Button>
+          {hasScores ? `${action} again` : action}
+        </AiButton>
         {isRunning && <CircularProgress size={18} />}
         {done && (
-          <Typography role="status" sx={{ fontSize: 12.5 }}>
+          <Typography
+            role="status"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              fontSize: 13,
+              fontWeight: 700,
+              color: cssVar("ok"),
+            }}
+          >
+            <CheckCircleOutlinedIcon aria-hidden="true" sx={{ fontSize: 18 }} />
             {done}
           </Typography>
         )}
         <Typography
           sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
         >
-          {analysis
-            ? "Scores every entry against the job description. Nothing is hidden or moved; undo works."
-            : "Analyse the job description first."}
+          {analysis ? explanation : "Analyse the job description first."}
         </Typography>
         {!analysis && (
           <Button

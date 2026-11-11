@@ -9,6 +9,7 @@ import { Item, Section, Vault } from "@custom-types/vault-types";
 import { AiClient } from "@server/ai/ai-types";
 import { cleanRequirementList } from "@server/ai/tailor";
 import { personalOf } from "@shared/ai/redact-personal";
+import { jobTitlesOf } from "@shared/vault/job-titles";
 import { getItemLabel } from "@shared/variant/item-label";
 
 const MAX_SCORE = 100;
@@ -146,6 +147,63 @@ export async function scoreSection(
         `${missed} ${missed === 1 ? "entry" : "entries"} in "${section.title}" got no score.`
       );
     }
+  }
+  return { scores, warnings };
+}
+
+/**
+ * Scores the job titles (the vault's Job Title and its alternatives) against what the advert asks
+ * for, so the user can pick the best one. Same prompt and rules as a section: each title is one
+ * entry, and the result has the title's own text as `itemId`. Nothing is applied here.
+ */
+export async function scoreJobTitles(
+  ai: AiClient,
+  vault: Vault,
+  requirements: Requirements,
+  options: Options = {}
+): Promise<ScoreResult> {
+  const warnings: string[] = [];
+  const titles = jobTitlesOf(vault.profile);
+  if (titles.length === 0) {
+    return { scores: [], warnings };
+  }
+  const byRef = new Map(titles.map((title, index) => [`i${index + 1}`, title]));
+  const raw = await ai.generate({
+    promptName: "score-section",
+    input: JSON.stringify({
+      requirements,
+      items: [...byRef].map(([ref, title]) => ({
+        id: ref,
+        label: title,
+        section: "Job titles",
+        fields: { title },
+        bullets: [],
+      })),
+    }),
+    schema: RawScoreSchema,
+    personal: personalOf(vault, options.isMaskingOrganisations === true),
+    onWarning: (message) => warnings.push(message),
+  });
+  const scores: ScoreResult["scores"] = [];
+  const seen = new Set<string>();
+  for (const entry of raw.scores) {
+    const title = byRef.get(entry.id.trim());
+    if (!title || seen.has(title) || !Number.isFinite(entry.relevance)) {
+      continue;
+    }
+    seen.add(title);
+    scores.push({
+      itemId: title,
+      relevance: clampScore(entry.relevance),
+      reason: (entry.reason ?? "").trim().slice(0, MAX_REASON),
+      bullets: [],
+    });
+  }
+  const missed = titles.length - scores.length;
+  if (missed > 0) {
+    warnings.push(
+      `${missed} job ${missed === 1 ? "title" : "titles"} got no score.`
+    );
   }
   return { scores, warnings };
 }

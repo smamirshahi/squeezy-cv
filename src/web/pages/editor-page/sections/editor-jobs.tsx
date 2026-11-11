@@ -13,8 +13,6 @@ import {
   MenuItem,
   Switch,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -37,7 +35,6 @@ import {
   copyJob,
   renameJob,
   setAutoFit,
-  setPageLimit,
   variantsSelector,
 } from "@store/jobs/jobs-slice";
 
@@ -323,29 +320,6 @@ export function EditorJobs(): JSX.Element {
               </MenuItem>
             ))}
           </TextField>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-            <Typography id="page-limit-label" sx={LABEL_SX}>
-              Page limit
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              aria-labelledby="page-limit-label"
-              value={variant.pageLimit}
-              onChange={(_event, value: number | null) => {
-                if (value) {
-                  dispatch(setPageLimit({ id: variant.id, pageLimit: value }));
-                }
-              }}
-            >
-              <ToggleButton value={1} sx={{ px: 2 }}>
-                1 page
-              </ToggleButton>
-              <ToggleButton value={2} sx={{ px: 2 }}>
-                2 pages
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <FormControlLabel
               label="Auto-fit to the page limit"

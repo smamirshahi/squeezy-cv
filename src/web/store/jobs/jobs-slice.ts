@@ -570,6 +570,27 @@ const jobsSlice = createSlice({
       });
     },
 
+    /** How well each job title fits one job (from "Score job titles"); only the scores change */
+    setTitleScores(
+      state,
+      action: PayloadAction<{
+        jobId: string;
+        scores: { title: string; relevance: number; reason: string }[];
+      }>
+    ) {
+      editJob(state, action.payload.jobId, (job) => {
+        job.titleScores = {
+          ...job.titleScores,
+          ...Object.fromEntries(
+            action.payload.scores.map((score) => [
+              score.title,
+              { relevance: score.relevance, reason: score.reason },
+            ])
+          ),
+        };
+      });
+    },
+
     /** The order of the links for one job (link ids); the vault list is not touched */
     setLinkOrder(
       state,
@@ -637,8 +658,8 @@ const jobsSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; pageLimit: number }>
     ) {
-      editTemplate(state, action.payload.id, (template) => {
-        template.pageLimit = action.payload.pageLimit;
+      editJob(state, action.payload.id, (job) => {
+        job.pageLimit = action.payload.pageLimit;
       });
     },
 
@@ -803,6 +824,7 @@ export const {
   setLinkOrder,
   setLinkShown,
   setJobHeadline,
+  setTitleScores,
   setPageLimit,
   setSkillStyle,
   setAutoFit,

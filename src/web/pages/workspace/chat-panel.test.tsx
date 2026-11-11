@@ -144,7 +144,7 @@ describe("ChatPanel", () => {
     const call = fetchMock.mock.calls.find(([url]) => url === "/api/ai/chat")!;
     const body = JSON.parse(call[1].body);
     expect(body.message).toBe("Hide the oldest job");
-    expect(body.context).toMatchObject({ tone: "neutral", pageLimit: 2 });
+    expect(body.context).toMatchObject({ tone: "neutral", pageLimit: 1 });
     expect(JSON.stringify(body)).not.toContain("jane.doe");
   });
 

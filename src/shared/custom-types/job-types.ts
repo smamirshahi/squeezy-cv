@@ -24,6 +24,9 @@ export const JOB_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 /** The current version of the job format. Bump it together with a migration. */
 export const CURRENT_JOB_VERSION = 1;
 
+/** The page limit of a job that has none of its own */
+export const DEFAULT_PAGE_LIMIT = 1;
+
 /**
  * One target (a company and role): which template it uses and what it shows.
  * Hiding or reordering here never touches the vault or the template.
@@ -40,6 +43,12 @@ export const JobSchema = Object({
 
   /** The template this job is drawn with */
   templateId: String,
+
+  /**
+   * How many pages this CV may use. The job decides it (it is what auto-fit and hiding aim
+   * for); missing = `DEFAULT_PAGE_LIMIT`. Recruiters expect 1 page, 2 at most.
+   */
+  pageLimit: Number.optional(),
 
   company: String.optional(),
 
@@ -105,6 +114,12 @@ export const JobSchema = Object({
 
   /** The job title this job shows (one of the vault's Job Title and options). Missing = the vault's Job Title. */
   headline: String.optional(),
+
+  /** How well each job title fits this job (0-100, from "Score job titles"), by the title's text */
+  titleScores: Record(
+    String,
+    Object({ relevance: Number, reason: String })
+  ).optional(),
 
   /** Link ids in the order this job shows them; links not listed come last. Missing = vault order. */
   linkOrder: Array(String).optional(),
