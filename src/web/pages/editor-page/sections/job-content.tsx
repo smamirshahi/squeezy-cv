@@ -1,3 +1,4 @@
+import { AiBadge } from "@components/ai-button";
 import { useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -222,7 +223,7 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                             : WORKSPACE_COLORS.muted,
                       }}
                     >
-                      {shorten(bullet.text)}
+                      {bullet.text}
                     </Typography>
                     {choice?.relevance !== undefined && (
                       <RelevanceBadge
@@ -264,7 +265,11 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                       </TextField>
                     )}
                   </Box>
-                  <span />
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    {variant.selection[item.id]?.generated?.some(
+                      (made) => made.id === bullet.id
+                    ) && <AiBadge />}
+                  </Box>
                   <SortingIcons
                     index={index}
                     swapFunction={(_from, toIndex) =>
@@ -674,7 +679,9 @@ export function JobContent({
             isOn={!hidden.includes(section.id)}
           />
         ))}
-      {(only === undefined || only === "header") && <JobHeadline />}
+      {(only === undefined || only === "header") && (
+        <JobHeadline hasScoring={only === undefined} />
+      )}
       {(only === undefined || only === "header") && <JobLinks />}
     </Box>
   );

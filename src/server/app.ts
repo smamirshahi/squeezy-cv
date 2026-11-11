@@ -189,6 +189,16 @@ export interface ServerOptions {
 }
 
 /** Builds the API. It does not listen; `main.ts` (or a test) decides how to run it. */
+/** The requirement(s) to emphasise, each cut to a sensible length (one text stays one text) */
+function limitFocus(
+  focus: string | string[] | undefined
+): string | string[] | undefined {
+  if (Array.isArray(focus)) {
+    return focus.slice(0, 10).map((text) => text.slice(0, 200));
+  }
+  return focus?.slice(0, 200);
+}
+
 export function buildServer({
   storage,
   pdf,
@@ -569,7 +579,7 @@ export function buildServer({
         {
           ...body,
           requirements,
-          focus: body.focus?.slice(0, 200),
+          focus: limitFocus(body.focus),
           current: (body.current ?? []).map((text) => text.slice(0, 600)),
         },
         { isMaskingOrganisations: registry.isMaskingOrganisations() }
@@ -612,6 +622,7 @@ export function buildServer({
           requirements: (body.requirements ?? []).map((text) =>
             text.slice(0, 200)
           ),
+          focus: limitFocus(body.focus),
         },
         { isMaskingOrganisations: registry.isMaskingOrganisations() }
       );

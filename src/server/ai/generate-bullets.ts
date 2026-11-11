@@ -58,7 +58,8 @@ export async function generateBullets(
       item: context,
       current: request.mode === "make" ? [] : current,
       requirements: request.requirements ?? [],
-      ...(request.mode === "emphasise" && request.focus
+      // the points the user picked to lean on (any mode)
+      ...(request.focus && request.focus.length > 0
         ? { focus: request.focus }
         : {}),
     }),

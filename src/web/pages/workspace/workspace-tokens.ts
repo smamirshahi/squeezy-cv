@@ -22,6 +22,7 @@ export const WORKSPACE_COLORS = {
   ai: cssVar("ai"),
   aiSoft: cssVar("ais"),
   aiText: cssVar("ait"),
+  aiBorder: cssVar("aib"),
   aiContrast: cssVar("aix"),
   /** Fit chip on the dark bar */
   okBg: "#1F4D32",

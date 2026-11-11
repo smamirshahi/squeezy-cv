@@ -11,6 +11,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- AI settings are a dialog now, opened by the rail's Settings button and by "Settings…" next to an AI action (it opens on that task). Left: All tasks, each task and "Set up the providers"; middle: what it does and what is sent and masked; right: the provider choice, saved at once. The Settings page is gone (the old /settings address opens the dialog).
+- Apply, Experience step: the AI strip of a description works in two steps. "1 · Lean on": pick points from the advert (the table opens in a dialog, the picks show as removable chips with Clear and stay until cleared). "2 · Then": Shorten, Rephrase, Make longer and Make bullets (one filled button, after a divider) all use the picked points; Shorten keeps them instead of putting them first. The separate bullets card is gone from this page (the inspector keeps it), and "Replace the description with these bullets" now sits above the proposed bullets.
+- One table for what the job asks for (Must have, Nice to have, Keywords, one row per point). It is read-only in the "Advert added" dialog and in a new "See results" dialog under Analyse job description (which no longer lists the keywords inline), and clickable in the Emphasise dialog.
+- Apply, Experience step: "Emphasise…" opens a dialog with the advert's Must have, Nice to have and Keywords in three columns. Click the points to lean on, then Emphasise: AI words the bullets (or the description text, which has the same button in its AI strip) so those points come first, only where they already say it. It replaces the single-requirement dropdown. "Replace the description with these bullets" (on by default) sits next to Make bullets.
+- Apply, Experience step: the AI actions now say which job they work for. A purple "AI works for this job" card names the job, whether an advert is attached and the provider; an (i) button explains what the AI considers and what is never sent. The description sits in a bordered box with an attached AI strip (Shorten, Rephrase, Make longer) and a neutral "Use the vault text" button, and "Make bullets" has its own purple card.
 - Apply, Template & content: the right panel is now a step-by-step wizard with a step bar and Back/Next buttons that name the next step. Its first step, "General", has the page limit (1 page, 2 pages or a number from 3, with a tooltip, a status chip, small page drawings and where the overflow starts), an auto-fit switch, "Choose items to hide" (nothing is hidden until you press Hide selected) and one purple AI card with Score sections, "Ask AI to pick what to hide" and a choice of AI for each action (#357).
 - Job titles are a table in "Header and links": pick the title this job shows, with the AI's relevance and reason for each, best first. "Score job titles" and "Score all sections" score them (#358).
 
@@ -21,6 +26,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - A "Send to AI" window before any text goes to an online model: it shows the exact masked text as a readable outline, lets you switch automatic masks off, hide any selected word as Company, School, Person, Location, Date or Other, and mark a job advert as private; the model's answer gets the real words back. Local models skip it, and "Score all sections" asks once and lists every section (#332).
 
 ### Changed
+
+- The Ko-fi button in the tool rail is labelled "Support me" instead of "Coffee".
 
 - The page limit now belongs to the job, not the template, and a new job starts at 1 page (#356). The overflow warning above the page names the limit, links to the General step and is split over three lines. The page-limit buttons are gone from the inspector and the Jobs page.
 - "Score entries" and "Score all sections" say "again" and turn outlined once there are scores; the result line is bold green text with a check (#358).

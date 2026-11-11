@@ -13,6 +13,7 @@ import { Route, formatRoute } from "@shared/routing/routes";
 import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 interface RailItem {
@@ -56,13 +57,6 @@ const ITEMS: RailItem[] = [
 /** Where the "Buy me a coffee" button goes. */
 const SUPPORT_URL = "https://ko-fi.com/mohammadamirshahi";
 
-const SETTINGS: RailItem = {
-  label: "Settings",
-  icon: <MemoryIcon fontSize="small" />,
-  kind: "ai",
-  to: () => ({ kind: "ai" }),
-};
-
 /** The left rail: switches between the tools of the workspace */
 export function ToolRail(): JSX.Element {
   const route = useRoute();
@@ -85,82 +79,71 @@ export function ToolRail(): JSX.Element {
         gap: 0.25,
       }}
     >
-      {[...ITEMS, null, "coffee" as const, SETTINGS, "theme" as const].map(
-        (item) => {
-          if (item === null) {
-            return <Box key="spacer" sx={{ flex: 1 }} />;
-          }
-          if (item === "coffee") {
-            return (
-              <ButtonBase
-                key="coffee"
-                component="a"
-                href={SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Buy me a coffee (opens Ko-fi)"
-                sx={{
-                  width: 60,
-                  py: 0.9,
-                  borderRadius: 1,
-                  flexDirection: "column",
-                  gap: 0.25,
-                  color: WORKSPACE_COLORS.muted,
-                  "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
-                }}
-              >
-                <LocalCafeOutlinedIcon fontSize="small" />
-                <Typography sx={{ fontSize: 10.5 }}>Coffee</Typography>
-              </ButtonBase>
-            );
-          }
-          if (item === "theme") {
-            return (
-              <ButtonBase
-                key="theme"
-                onClick={toggle}
-                aria-label={
-                  mode === "dark"
-                    ? "Switch to light theme"
-                    : "Switch to dark theme"
-                }
-                sx={{
-                  width: 60,
-                  py: 0.9,
-                  borderRadius: 1,
-                  flexDirection: "column",
-                  gap: 0.25,
-                  color: WORKSPACE_COLORS.muted,
-                  "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
-                }}
-              >
-                {mode === "dark" ? (
-                  <LightModeOutlinedIcon fontSize="small" />
-                ) : (
-                  <DarkModeOutlinedIcon fontSize="small" />
-                )}
-                <Typography sx={{ fontSize: 10.5 }}>
-                  {mode === "dark" ? "Light" : "Dark"}
-                </Typography>
-              </ButtonBase>
-            );
-          }
-          const target = item.to(activeJobId);
-          const href = target ? formatRoute(target) : undefined;
-          const isOn =
-            item.kind === route.kind ||
-            (item.kind === "jobs" && route.kind === "chat");
+      {[
+        ...ITEMS,
+        null,
+        "coffee" as const,
+        "settings" as const,
+        "theme" as const,
+      ].map((item) => {
+        if (item === null) {
+          return <Box key="spacer" sx={{ flex: 1 }} />;
+        }
+        if (item === "coffee") {
           return (
             <ButtonBase
-              key={item.label}
+              key="coffee"
               component="a"
-              href={href}
-              aria-current={isOn ? "page" : undefined}
-              onClick={
-                target
-                  ? (event: MouseEvent<HTMLElement>) =>
-                      onAppLinkClick(event, target)
-                  : undefined
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Buy me a coffee (opens Ko-fi)"
+              sx={{
+                width: 60,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              <LocalCafeOutlinedIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>Support me</Typography>
+            </ButtonBase>
+          );
+        }
+        if (item === "settings") {
+          return (
+            <ButtonBase
+              key="settings"
+              onClick={() => openAiSettings()}
+              aria-haspopup="dialog"
+              aria-label="Settings"
+              sx={{
+                width: 60,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              <MemoryIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>Settings</Typography>
+            </ButtonBase>
+          );
+        }
+        if (item === "theme") {
+          return (
+            <ButtonBase
+              key="theme"
+              onClick={toggle}
+              aria-label={
+                mode === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
               }
               sx={{
                 width: 60,
@@ -168,21 +151,58 @@ export function ToolRail(): JSX.Element {
                 borderRadius: 1,
                 flexDirection: "column",
                 gap: 0.25,
-                color: isOn
-                  ? WORKSPACE_COLORS.accentText
-                  : WORKSPACE_COLORS.muted,
-                bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
-                "&:hover": {
-                  bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover,
-                },
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
               }}
             >
-              {item.icon}
-              <Typography sx={{ fontSize: 10.5 }}>{item.label}</Typography>
+              {mode === "dark" ? (
+                <LightModeOutlinedIcon fontSize="small" />
+              ) : (
+                <DarkModeOutlinedIcon fontSize="small" />
+              )}
+              <Typography sx={{ fontSize: 10.5 }}>
+                {mode === "dark" ? "Light" : "Dark"}
+              </Typography>
             </ButtonBase>
           );
         }
-      )}
+        const target = item.to(activeJobId);
+        const href = target ? formatRoute(target) : undefined;
+        const isOn =
+          item.kind === route.kind ||
+          (item.kind === "jobs" && route.kind === "chat");
+        return (
+          <ButtonBase
+            key={item.label}
+            component="a"
+            href={href}
+            aria-current={isOn ? "page" : undefined}
+            onClick={
+              target
+                ? (event: MouseEvent<HTMLElement>) =>
+                    onAppLinkClick(event, target)
+                : undefined
+            }
+            sx={{
+              width: 60,
+              py: 0.9,
+              borderRadius: 1,
+              flexDirection: "column",
+              gap: 0.25,
+              color: isOn
+                ? WORKSPACE_COLORS.accentText
+                : WORKSPACE_COLORS.muted,
+              bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
+              "&:hover": {
+                bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover,
+              },
+            }}
+          >
+            {item.icon}
+            <Typography sx={{ fontSize: 10.5 }}>{item.label}</Typography>
+          </ButtonBase>
+        );
+      })}
       <Typography
         aria-label={`Version ${APP_VERSION}`}
         sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}

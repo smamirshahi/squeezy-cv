@@ -1,5 +1,5 @@
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import { Button, ButtonProps } from "@mui/material";
+import { Box, Button, ButtonProps, Tooltip } from "@mui/material";
 
 /**
  * The sparkle icon that marks everything that uses AI. Purple always means AI (the theme's
@@ -21,5 +21,43 @@ export function AiIcon({
 export function AiButton({ startIcon, ...props }: ButtonProps): JSX.Element {
   return (
     <Button color="secondary" startIcon={startIcon ?? <AiIcon />} {...props} />
+  );
+}
+
+/**
+ * A small "AI" mark for text the AI wrote (a reworded description, bullets made from it), so it is
+ * clear at a glance. It says so in a tooltip; the vault's own text never gets it.
+ */
+export function AiBadge({
+  label = "Written by AI for this job",
+}: {
+  label?: string;
+}): JSX.Element {
+  return (
+    <Tooltip title={label}>
+      <Box
+        component="span"
+        role="img"
+        aria-label={label}
+        sx={{
+          flex: "none",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.25,
+          height: 18,
+          px: 0.5,
+          borderRadius: 9,
+          border: "1px solid var(--aib)",
+          bgcolor: "var(--ais)",
+          color: "var(--ait)",
+          fontSize: 10.5,
+          fontWeight: 700,
+          lineHeight: 1,
+        }}
+      >
+        <AutoAwesomeOutlinedIcon aria-hidden="true" sx={{ fontSize: 11 }} />
+        AI
+      </Box>
+    </Tooltip>
   );
 }

@@ -7,6 +7,7 @@ import { Inspector } from "@pages/workspace/inspector";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { OPEN_GENERAL_EVENT } from "@pages/workspace/general-settings-event";
+import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
 import { activeVariantSelector } from "@store/jobs/jobs-slice";
 import { useAppSelector } from "@store/store-helper";
 import { sectionsSelector } from "@store/vault/vault-slice";
@@ -148,9 +149,12 @@ export function ContentPanel(): JSX.Element {
             <GeneralStep />
           ) : (
             <>
-              {current.id !== HEADER_STEP && (
-                <SectionTailor sectionId={current.id} />
-              )}
+              {/* On top in every step; in "Header and links" it scores the job titles */}
+              <SectionTailor
+                sectionId={
+                  current.id === HEADER_STEP ? JOB_TITLES_SECTION : current.id
+                }
+              />
               <JobContent only={current.id} />
             </>
           )}

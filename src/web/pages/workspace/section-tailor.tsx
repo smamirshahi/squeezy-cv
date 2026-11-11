@@ -3,9 +3,13 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Typography,
 } from "@mui/material";
+import { RequirementsDialog } from "@pages/workspace/requirements-dialog";
+import { groupsOfRequirements } from "@pages/workspace/requirements-table";
+import { AiJobChip, AiSettingsButton } from "@pages/workspace/ai-job-context";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { navigate } from "@hooks/navigation";
 import {
@@ -21,7 +25,7 @@ import {
 } from "@store/jobs/jobs-slice";
 import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { AiButton } from "@components/ai-button";
+import { AiButton, AiIcon } from "@components/ai-button";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import { cssVar } from "@custom-styles/theme";
 import { sectionsSelector } from "@store/vault/vault-slice";
@@ -46,6 +50,7 @@ export function SectionTailor({
   const [error, setError] = useState<string>("");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [done, setDone] = useState<string>("");
+  const [isAdvertOpen, setIsAdvertOpen] = useState<boolean>(false);
   const ai = status ? taskProvider(status, "tailor") : null;
   const analysis = job.analysis;
   const isTitles = sectionId === JOB_TITLES_SECTION;
@@ -125,14 +130,68 @@ export function SectionTailor({
         display: "grid",
         gap: 0.75,
         p: 1.5,
-        border: `1px solid ${WORKSPACE_COLORS.border}`,
+        border: `1px solid ${WORKSPACE_COLORS.aiBorder}`,
         borderRadius: 1.5,
-        bgcolor: WORKSPACE_COLORS.panel,
+        bgcolor: WORKSPACE_COLORS.aiSoft,
       }}
     >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          color: WORKSPACE_COLORS.aiText,
+        }}
+      >
+        <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+          <AiIcon />
+          <Typography sx={{ fontSize: 14, fontWeight: 700 }}>
+            AI works for this job
+          </Typography>
+        </Box>
+        <AiJobChip />
+        {analysis ? (
+          <Chip
+            size="small"
+            clickable
+            onClick={() => setIsAdvertOpen(true)}
+            aria-haspopup="dialog"
+            label={`Advert added · ${analysis.mustHave.length} must-have · ${analysis.niceToHave.length} nice-to-have · ${analysis.keywords.length} keywords`}
+            sx={{
+              bgcolor: cssVar("oks"),
+              color: cssVar("okt"),
+              fontWeight: 700,
+              "&:hover": { bgcolor: cssVar("oks") },
+            }}
+          />
+        ) : (
+          <Chip
+            size="small"
+            color="warning"
+            variant="outlined"
+            label="No advert yet · results will be generic"
+          />
+        )}
+        <Box sx={{ flex: 1 }} />
+        {ai?.info && (
+          <Chip
+            size="small"
+            variant="outlined"
+            label={`${ai.info.label} · ${ai.info.isOnline ? "online" : "local"}`}
+            sx={{
+              bgcolor: WORKSPACE_COLORS.panel,
+              borderColor: WORKSPACE_COLORS.aiBorder,
+              color: WORKSPACE_COLORS.aiText,
+            }}
+          />
+        )}
+        <AiSettingsButton task="tailor" />
+      </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
         <AiButton
           variant={hasScores ? "outlined" : "contained"}
+          sx={hasScores ? { bgcolor: WORKSPACE_COLORS.panel } : undefined}
           size="small"
           disabled={isRunning || !analysis || !ai?.isConfigured}
           onClick={() => void tailor()}
@@ -157,7 +216,7 @@ export function SectionTailor({
           </Typography>
         )}
         <Typography
-          sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
+          sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.aiText }}
         >
           {analysis ? explanation : "Analyse the job description first."}
         </Typography>
@@ -178,11 +237,18 @@ export function SectionTailor({
         </Alert>
       )}
       {analysis && ai?.isConfigured && (
-        <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+        <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.aiText }}>
           {ai.info.isOnline
             ? `Sends this section's saved text and the keywords to ${ai.info.recipient}; not your name or contact details. Save first so new entries are included.`
             : "This section's text and the keywords go to your local model only. Save first so new entries are included."}
         </Typography>
+      )}
+      {analysis && (
+        <RequirementsDialog
+          isOpen={isAdvertOpen}
+          onClose={() => setIsAdvertOpen(false)}
+          groups={groupsOfRequirements(analysis)}
+        />
       )}
       {error && <Alert severity="error">{error}</Alert>}
       {warnings.map((warning) => (

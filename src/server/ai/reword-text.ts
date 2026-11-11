@@ -56,6 +56,10 @@ export async function rewordText(
         0,
         MAX_REWORD_REQUIREMENTS
       ),
+      // the points the user picked to lean on (any mode)
+      ...(request.focus && request.focus.length > 0
+        ? { focus: request.focus }
+        : {}),
     }),
     schema: RawRewordSchema,
     personal: personalOf(vault, options.isMaskingOrganisations === true),
