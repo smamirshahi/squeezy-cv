@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import { ExportDialog } from "@pages/workspace/export-dialog";
 import { JobContent } from "@pages/editor-page/sections/job-content";
 import { GeneralStep } from "@pages/workspace/general-step";
 import { SectionTailor } from "@pages/workspace/section-tailor";
@@ -8,16 +10,22 @@ import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { OPEN_GENERAL_EVENT } from "@pages/workspace/general-settings-event";
 import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
-import { activeVariantSelector } from "@store/jobs/jobs-slice";
-import { useAppSelector } from "@store/store-helper";
+import {
+  activeVariantSelector,
+  isPlaceholderSelector,
+  jobsSelector,
+  setJobDetails,
+} from "@store/jobs/jobs-slice";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
 const GENERAL_STEP = "general";
 const HEADER_STEP = "header";
 
 /**
- * The right panel of "Template & content": go through the job one step at a time (the
- * header, then each section). Only what the job shows is decided here; the layout and the
+ * The right panel of "Template & content": pick a part of the job (General, the header, then
+ * each section; they are independent, not a sequence). The header also has the job's status
+ * and Export PDF. Only what the job shows is decided here; the layout and the
  * order of sections belong to the template. Clicking an item on the paper still opens that
  * item's own settings, like before.
  */
@@ -25,6 +33,14 @@ export function ContentPanel(): JSX.Element {
   const block = useAppSelector((s) => s.app.selectedBlock);
   const sections = useAppSelector(sectionsSelector);
   const hidden = useAppSelector(activeVariantSelector).hiddenSections ?? [];
+  const dispatch = useAppDispatch();
+  const jobs = useAppSelector(jobsSelector);
+  const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
+  const isPlaceholder = useAppSelector(isPlaceholderSelector);
+  const job = isPlaceholder
+    ? undefined
+    : jobs.find((entry) => entry.id === activeJobId);
+  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [step, setStep] = useState<string>(GENERAL_STEP);
   const steps = [
     { id: GENERAL_STEP, label: "General" },
@@ -76,30 +92,59 @@ export function ContentPanel(): JSX.Element {
             borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 1.5,
-            }}
-          >
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-                Step {index + 1} of {steps.length}
-              </Typography>
-              <Typography
-                component="h1"
-                sx={{ fontSize: 18, fontWeight: 600, mt: 0.25 }}
-              >
-                {current.label}
-              </Typography>
-            </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              component="h1"
+              noWrap
+              sx={{ fontSize: 18, fontWeight: 600, flex: 1, minWidth: 0 }}
+            >
+              {current.label}
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              disabled={!job}
+              aria-label={
+                job?.stage === "ready"
+                  ? "Status: Ready to apply. Back to draft"
+                  : "Status: Draft. Mark as ready"
+              }
+              onClick={() => {
+                if (job) {
+                  dispatch(
+                    setJobDetails({
+                      id: job.id,
+                      details: {
+                        stage: job.stage === "ready" ? "draft" : "ready",
+                      },
+                    })
+                  );
+                }
+              }}
+            >
+              {job?.stage === "ready"
+                ? "Ready · back to draft"
+                : "Draft · mark ready"}
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              disabled={!job}
+              startIcon={<PictureAsPdfOutlinedIcon />}
+              onClick={() => setIsExportOpen(true)}
+            >
+              Export PDF
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+              Section
+            </Typography>
             <Select
               size="small"
+              fullWidth
               value={current.id}
-              inputProps={{ "aria-label": "Go to step" }}
-              sx={{ minWidth: 150, maxWidth: 220 }}
+              inputProps={{ "aria-label": "Go to section" }}
               onChange={(event) => setStep(event.target.value)}
             >
               {steps.map((entry) => (
@@ -108,26 +153,6 @@ export function ContentPanel(): JSX.Element {
                 </MenuItem>
               ))}
             </Select>
-          </Box>
-          <Box
-            role="img"
-            aria-label={`Step ${index + 1} of ${steps.length}`}
-            sx={{ display: "flex", gap: 0.5 }}
-          >
-            {steps.map((entry, position) => (
-              <Box
-                key={entry.id}
-                sx={{
-                  flex: 1,
-                  height: 4,
-                  borderRadius: "2px",
-                  bgcolor:
-                    position <= index
-                      ? WORKSPACE_COLORS.accent
-                      : WORKSPACE_COLORS.border,
-                }}
-              />
-            ))}
           </Box>
         </Box>
 
@@ -160,38 +185,10 @@ export function ContentPanel(): JSX.Element {
           )}
         </Box>
 
-        <Box
-          component="footer"
-          sx={{
-            flex: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-            px: 2.5,
-            py: 1.5,
-            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-          }}
-        >
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={index === 0}
-            onClick={() => setStep(steps[index - 1].id)}
-          >
-            {index === 0 ? "Back" : `Back: ${steps[index - 1].label}`}
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            disabled={index === steps.length - 1}
-            onClick={() => setStep(steps[index + 1].id)}
-          >
-            {index === steps.length - 1
-              ? "Next"
-              : `Next: ${steps[index + 1].label}`}
-          </Button>
-        </Box>
+        <ExportDialog
+          isOpen={isExportOpen}
+          onClose={() => setIsExportOpen(false)}
+        />
       </Box>
     </ResizableAside>
   );
