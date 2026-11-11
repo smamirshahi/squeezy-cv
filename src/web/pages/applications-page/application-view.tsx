@@ -49,6 +49,9 @@ interface Props {
 
   /** Shown in the side panel of the list: no back link, no page margins */
   isEmbedded?: boolean;
+
+  /** When the job was created: shown as the first step of the timeline */
+  draftCreatedAt?: string;
 }
 
 function messageOf(error: unknown): string {
@@ -64,6 +67,7 @@ function goBackToList(event: React.MouseEvent<HTMLElement>): void {
 export function ApplicationView({
   applicationId,
   isEmbedded = false,
+  draftCreatedAt,
 }: Props): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -367,6 +371,11 @@ export function ApplicationView({
           Timeline
         </Typography>
         <Box component="ol" sx={{ m: 0, pl: 3 }}>
+          {draftCreatedAt && (
+            <li>
+              <strong>{formatDay(draftCreatedAt)}</strong> - Draft created
+            </li>
+          )}
           {application.history.map((change) => (
             <li key={`${change.at}-${change.status}`}>
               <strong>{formatDay(change.at)}</strong> -{" "}
