@@ -173,13 +173,14 @@ describe("render", () => {
     expect(parts.some((p) => p.id === "gone")).toBe(false);
   });
 
-  it("places a section that is missing from the layout", () => {
+  it("keeps the header but does not draw sections the layout does not place", () => {
     const variant = {
       ...base(),
       layout: { fullWidth: [], left: [], right: [] },
     };
     const ids = allParts(render(vault, variant)).map((p) => p.id);
     expect(ids).toContain("personalInfo");
+    expect(ids).not.toContain(firstSectionWithItems(1).id);
   });
 
   it("gives a duplicate new ids but the same output", () => {
@@ -702,7 +703,16 @@ describe("awards and interests", () => {
         },
       ],
     };
-    const parts = allParts(render(extra, createDefaultVariant(file, "main")));
+    const variant = createDefaultVariant(file, "main");
+    const parts = allParts(
+      render(extra, {
+        ...variant,
+        layout: {
+          ...variant.layout,
+          fullWidth: [...variant.layout.fullWidth, "aw", "in"],
+        },
+      })
+    );
     expect(sectionPart(parts, "aw")?.type).toBe("awards");
     expect(sectionPart(parts, "in")?.type).toBe("interests");
   });

@@ -23,6 +23,7 @@ import {
   setShouldShowIcons,
   setSectionSpacing,
   setShouldShowRightToWork,
+  setShouldShowPhoto,
   setShouldShowLinks,
   setShouldShowNationality,
   setShouldShowMaritalStatus,
@@ -39,6 +40,7 @@ export function EditorTypography(): JSX.Element {
   const dispatch = useAppDispatch();
   const {
     shouldShowRightToWork,
+    shouldShowPhoto,
     shouldShowLinks,
     shouldShowNationality,
     shouldShowMaritalStatus,
@@ -60,6 +62,12 @@ export function EditorTypography(): JSX.Element {
       checked: shouldShowLinks !== false,
       onChange: (value) => dispatch(setShouldShowLinks(value)),
       info: "This turns links on or off for the whole template. Which links appear, and in what order, is chosen separately for each job, on the job's Content tab.",
+    },
+    {
+      label: "Profile photo",
+      checked: shouldShowPhoto !== false,
+      onChange: (value) => dispatch(setShouldShowPhoto(value)),
+      info: "Only has an effect when a photo is added in Main Info.",
     },
     {
       label: "Nationality",

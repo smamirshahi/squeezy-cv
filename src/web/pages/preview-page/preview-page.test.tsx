@@ -151,8 +151,8 @@ describe("PreviewPage (rendered from the vault)", () => {
     expect(html.indexOf("University of Example")).toBeLessThan(
       html.indexOf("Senior Software Developer")
     );
-    // a section the structure does not place yet is added to the left column
-    expect(html).toContain("Front-end developer with six years");
+    // a section the structure does not place is not drawn: it is added on purpose
+    expect(html).not.toContain("Front-end developer with six years");
   });
 
   it("is not affected by the order of sections in the vault", () => {

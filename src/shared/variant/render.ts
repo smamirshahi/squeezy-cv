@@ -235,16 +235,16 @@ export function orderLinks(
 
 /**
  * Resolves a vault and a variant into the document to draw. Pure: same input, same output.
- * The layout is reconciled with the vault, so a section added later still appears and a
- * deleted one is dropped. Sections without any visible item are left out.
+ * The layout is reconciled with the vault: a deleted section is dropped, and a section
+ * the layout does not place is not drawn (the user adds it to the template on purpose).
+ * Sections without any visible item are left out.
  */
 export function render(vault: Vault, variant: Variant): RenderedDocument {
   const sections = new Map(vault.sections.map((s) => [s.id, s]));
-  const layout = reconcileStructure(
-    variant.layout,
-    [...HEADER_IDS, ...sections.keys()],
-    "left"
-  );
+  const layout = reconcileStructure(variant.layout, [
+    ...HEADER_IDS,
+    ...sections.keys(),
+  ]);
 
   function renderPart(id: string): RenderedPart[] {
     if (id === "personalInfo") {
