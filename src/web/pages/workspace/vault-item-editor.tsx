@@ -10,6 +10,7 @@ import {
   MenuItem,
   Tooltip,
   Autocomplete,
+  Chip,
   TextField,
   Typography,
 } from "@mui/material";
@@ -20,6 +21,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { isRatingAcceptable } from "@custom-types/type-guards";
+import { splitList } from "@shared/vault/split-list";
 import { parseBibtex } from "@shared/vault/bibtex";
 import { getItemLabel } from "@shared/variant/item-label";
 import { setDraftFields } from "@pages/workspace/draft-fields";
@@ -67,6 +69,77 @@ function isUsed(option: string, used: string[] | undefined): boolean {
   );
 }
 
+/** A list typed as separate entries: Enter, a comma or leaving the field ends an entry */
+function ChipsField({
+  spec,
+  value,
+  onChange,
+  onBlur,
+}: FieldProps): JSX.Element {
+  const [text, setText] = useState("");
+  const entries = splitList(value);
+
+  function commit(raw: string): void {
+    const entry = raw.trim();
+    if (entry !== "" && !entries.includes(entry)) {
+      onChange([...entries, entry].join(", "));
+    }
+    setText("");
+  }
+
+  return (
+    <Autocomplete
+      multiple
+      freeSolo
+      options={[]}
+      value={entries}
+      inputValue={text}
+      onInputChange={(_event, next, reason) => {
+        if (reason === "input") {
+          if (next.endsWith(",")) {
+            commit(next.slice(0, -1));
+          } else {
+            setText(next);
+          }
+        }
+      }}
+      onChange={(_event, next) => {
+        const list = next.map((entry) => entry.trim()).filter(Boolean);
+        onChange([...new Set(list)].join(", "));
+        setText("");
+      }}
+      renderValue={(chips, getItemProps) =>
+        chips.map((chip, index) => {
+          const { key, ...itemProps } = getItemProps({ index });
+          return <Chip key={key} label={chip} size="small" {...itemProps} />;
+        })
+      }
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={spec.label}
+          onBlur={() => {
+            commit(text);
+            onBlur?.();
+          }}
+          slotProps={{
+            ...params.slotProps,
+            input: {
+              ...params.slotProps.input,
+              endAdornment: spec.hint ? (
+                <HintAdornment hint={spec.hint} isMultiline={false} />
+              ) : (
+                params.slotProps.input.endAdornment
+              ),
+            },
+          }}
+        />
+      )}
+      sx={{ gridColumn: `span ${spec.span}` }}
+    />
+  );
+}
+
 function Field({
   spec,
   value,
@@ -74,6 +147,16 @@ function Field({
   onBlur,
   usedValues,
 }: FieldProps): JSX.Element {
+  if (spec.kind === "chips") {
+    return (
+      <ChipsField
+        spec={spec}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+      />
+    );
+  }
   if (spec.suggestions) {
     return (
       <Autocomplete

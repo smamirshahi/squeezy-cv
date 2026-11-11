@@ -12,6 +12,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Added
 
 - A photo on the CV (#345, #255): add it in Vault > Main Info, then move it in a fixed 4:5 frame and zoom in a dialog (the original is kept, so it can be adjusted again). It shows top right in the header, with the name and contact details together on the left, and in the PDF. The export window warns that a photo is included. It is never sent to AI.
+- A Projects section with its own fields (#347): Title, Role, Type (Personal, Open source, Academic ...), Technologies, Start, End, Link and Description. "Projects" is now a choice in the New section dialog. Technologies is a chip input in the vault (Enter or comma ends an entry) and shows as one "Technologies:" line on the CV, with the type next to the role and the link on its own line. AI import knows these fields. Existing projects keep their data (the role is the old Subtitle).
 - A "Coffee" button above Settings in the left rail that opens the Ko-fi page (#345).
 - A third tutorial, "Your templates" (layout, arranging sections, style, and where items are chosen), in the Tutorials list.
 - A "Send to AI" window before any text goes to an online model: it shows the exact masked text as a readable outline, lets you switch automatic masks off, hide any selected word as Company, School, Person, Location, Date or Other, and mark a job advert as private; the model's answer gets the real words back. Local models skip it, and "Score all sections" asks once and lists every section (#332).

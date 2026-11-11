@@ -85,43 +85,82 @@ export function ToolRail(): JSX.Element {
         gap: 0.25,
       }}
     >
-      {[...ITEMS, null, "coffee" as const, SETTINGS, "theme" as const].map((item) => {
-        if (item === null) {
-          return <Box key="spacer" sx={{ flex: 1 }} />;
-        }
-        if (item === "coffee") {
+      {[...ITEMS, null, "coffee" as const, SETTINGS, "theme" as const].map(
+        (item) => {
+          if (item === null) {
+            return <Box key="spacer" sx={{ flex: 1 }} />;
+          }
+          if (item === "coffee") {
+            return (
+              <ButtonBase
+                key="coffee"
+                component="a"
+                href={SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Buy me a coffee (opens Ko-fi)"
+                sx={{
+                  width: 60,
+                  py: 0.9,
+                  borderRadius: 1,
+                  flexDirection: "column",
+                  gap: 0.25,
+                  color: WORKSPACE_COLORS.muted,
+                  "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+                }}
+              >
+                <LocalCafeOutlinedIcon fontSize="small" />
+                <Typography sx={{ fontSize: 10.5 }}>Coffee</Typography>
+              </ButtonBase>
+            );
+          }
+          if (item === "theme") {
+            return (
+              <ButtonBase
+                key="theme"
+                onClick={toggle}
+                aria-label={
+                  mode === "dark"
+                    ? "Switch to light theme"
+                    : "Switch to dark theme"
+                }
+                sx={{
+                  width: 60,
+                  py: 0.9,
+                  borderRadius: 1,
+                  flexDirection: "column",
+                  gap: 0.25,
+                  color: WORKSPACE_COLORS.muted,
+                  "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+                }}
+              >
+                {mode === "dark" ? (
+                  <LightModeOutlinedIcon fontSize="small" />
+                ) : (
+                  <DarkModeOutlinedIcon fontSize="small" />
+                )}
+                <Typography sx={{ fontSize: 10.5 }}>
+                  {mode === "dark" ? "Light" : "Dark"}
+                </Typography>
+              </ButtonBase>
+            );
+          }
+          const target = item.to(activeJobId);
+          const href = target ? formatRoute(target) : undefined;
+          const isOn =
+            item.kind === route.kind ||
+            (item.kind === "jobs" && route.kind === "chat");
           return (
             <ButtonBase
-              key="coffee"
+              key={item.label}
               component="a"
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Buy me a coffee (opens Ko-fi)"
-              sx={{
-                width: 60,
-                py: 0.9,
-                borderRadius: 1,
-                flexDirection: "column",
-                gap: 0.25,
-                color: WORKSPACE_COLORS.muted,
-                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
-              }}
-            >
-              <LocalCafeOutlinedIcon fontSize="small" />
-              <Typography sx={{ fontSize: 10.5 }}>Coffee</Typography>
-            </ButtonBase>
-          );
-        }
-        if (item === "theme") {
-          return (
-            <ButtonBase
-              key="theme"
-              onClick={toggle}
-              aria-label={
-                mode === "dark"
-                  ? "Switch to light theme"
-                  : "Switch to dark theme"
+              href={href}
+              aria-current={isOn ? "page" : undefined}
+              onClick={
+                target
+                  ? (event: MouseEvent<HTMLElement>) =>
+                      onAppLinkClick(event, target)
+                  : undefined
               }
               sx={{
                 width: 60,
@@ -129,56 +168,21 @@ export function ToolRail(): JSX.Element {
                 borderRadius: 1,
                 flexDirection: "column",
                 gap: 0.25,
-                color: WORKSPACE_COLORS.muted,
-                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+                color: isOn
+                  ? WORKSPACE_COLORS.accentText
+                  : WORKSPACE_COLORS.muted,
+                bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
+                "&:hover": {
+                  bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover,
+                },
               }}
             >
-              {mode === "dark" ? (
-                <LightModeOutlinedIcon fontSize="small" />
-              ) : (
-                <DarkModeOutlinedIcon fontSize="small" />
-              )}
-              <Typography sx={{ fontSize: 10.5 }}>
-                {mode === "dark" ? "Light" : "Dark"}
-              </Typography>
+              {item.icon}
+              <Typography sx={{ fontSize: 10.5 }}>{item.label}</Typography>
             </ButtonBase>
           );
         }
-        const target = item.to(activeJobId);
-        const href = target ? formatRoute(target) : undefined;
-        const isOn =
-          item.kind === route.kind ||
-          (item.kind === "jobs" && route.kind === "chat");
-        return (
-          <ButtonBase
-            key={item.label}
-            component="a"
-            href={href}
-            aria-current={isOn ? "page" : undefined}
-            onClick={
-              target
-                ? (event: MouseEvent<HTMLElement>) =>
-                    onAppLinkClick(event, target)
-                : undefined
-            }
-            sx={{
-              width: 60,
-              py: 0.9,
-              borderRadius: 1,
-              flexDirection: "column",
-              gap: 0.25,
-              color: isOn
-                ? WORKSPACE_COLORS.accentText
-                : WORKSPACE_COLORS.muted,
-              bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
-              "&:hover": { bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover },
-            }}
-          >
-            {item.icon}
-            <Typography sx={{ fontSize: 10.5 }}>{item.label}</Typography>
-          </ButtonBase>
-        );
-      })}
+      )}
       <Typography
         aria-label={`Version ${APP_VERSION}`}
         sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
