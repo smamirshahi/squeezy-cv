@@ -1,3 +1,4 @@
+import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
@@ -333,16 +334,10 @@ export function JobDetailsPage(): JSX.Element {
                 value={job?.url ?? ""}
                 onChange={(event) => edit({ url: event.target.value })}
               />
-              {/^https?:\/\//.test(job?.url ?? "") && (
-                <Button
-                  component="a"
-                  href={job?.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open
-                </Button>
-              )}
+              <OpenInNewTabButton
+                url={job?.url ?? ""}
+                label="Open the job advert in a new tab"
+              />
             </Box>
             <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
               <Typography sx={{ fontWeight: 600 }}>Advert</Typography>

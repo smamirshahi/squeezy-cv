@@ -20,6 +20,12 @@ interface SelectedBlock {
 }
 
 /** State of the App slice */
+/** One item the AI would hide, with its reason */
+export interface HidePick {
+  itemId: string;
+  reason: string;
+}
+
 interface AppState {
   selectedTypography: AvailableFonts | null;
 
@@ -52,6 +58,12 @@ interface AppState {
 
   /** What the preview measured, for the top bar and the overflow banner */
   fit: FitInfo;
+
+  /**
+   * What "Ask AI to pick what to hide" answered for a job, kept until it is used or discarded, so
+   * leaving the step and coming back does not lose it (or ask, and send, again)
+   */
+  hidePicks: { jobId: string; picks: HidePick[]; ticked: string[] } | null;
 
   shouldApplyChanges: boolean;
   shouldDiscardChanges: boolean;
@@ -87,6 +99,7 @@ export const initialState: AppState = {
     lineHeightPx: 16,
     overflowStartsWith: "",
   },
+  hidePicks: null,
   shouldApplyChanges: false,
   shouldDiscardChanges: false,
 };
@@ -140,6 +153,10 @@ const appSlice = createSlice({
       state.fit = action.payload;
     },
 
+    setHidePicks(state, action: PayloadAction<AppState["hidePicks"]>) {
+      state.hidePicks = action.payload;
+    },
+
     setColumnWidth(state, action: PayloadAction<AppState["columnWidth"]>) {
       state.columnWidth = action.payload;
     },
@@ -170,6 +187,7 @@ export const {
   setSelectedBlock,
   setCanvasZoom,
   setFit,
+  setHidePicks,
   setColumnWidth,
 
   setShouldApplyChanges,

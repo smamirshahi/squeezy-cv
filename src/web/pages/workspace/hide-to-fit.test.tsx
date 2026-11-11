@@ -6,15 +6,10 @@ import {
   fireEvent,
   render,
   screen,
-  waitFor,
 } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { HideToFit } from "@pages/workspace/hide-to-fit";
-import {
-  bodyOf,
-  sampleStore,
-  stubAiServer,
-} from "@pages/workspace/ai-test-helpers";
+import { sampleStore } from "@pages/workspace/ai-test-helpers";
 import { setFit } from "@store/app/app-slice";
 import {
   activeVariantSelector,
@@ -39,10 +34,7 @@ function hiddenCount(store: AppStore): number {
   ).filter((choice) => choice.isVisible === false).length;
 }
 
-function setup(askSignal = 0): {
-  store: AppStore;
-  rerender: (n: number) => void;
-} {
+function setup(): { store: AppStore } {
   Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
     configurable: true,
     get: () => LINE * 3,
@@ -60,18 +52,17 @@ function setup(askSignal = 0): {
   const items = vaultSelector(store.getState()).sections.flatMap(
     (s) => s.items
   );
-  const ui = (signal: number): JSX.Element => (
+  render(
     <Provider store={store}>
       <div data-cv-paper>
         {items.map((item) => (
           <div key={item.id} data-cv-item={item.id} />
         ))}
       </div>
-      <HideToFit askSignal={signal} />
+      <HideToFit />
     </Provider>
   );
-  const view = render(ui(askSignal));
-  return { store, rerender: (n) => view.rerender(ui(n)) };
+  return { store };
 }
 
 describe("HideToFit", () => {
@@ -123,36 +114,5 @@ describe("HideToFit", () => {
       );
     });
     expect(screen.getAllByRole("checkbox")).toHaveLength(count - 1);
-  });
-
-  it("the AI only ticks boxes, with reasons; nothing is hidden until confirmed", async () => {
-    const itemsAsked: string[] = [];
-    const { store, rerender } = setup();
-    const hiddenBefore = hiddenCount(store);
-    // the server is stubbed after the page is drawn
-    stubAiServer((url, init) => {
-      if (url !== "/api/ai/hide") {
-        return undefined;
-      }
-      const body = bodyOf<{ candidates: { itemId: string }[] }>(init);
-      itemsAsked.push(...body.candidates.map((c) => c.itemId));
-      return new Response(
-        JSON.stringify({
-          suggestions: [
-            { itemId: body.candidates[0].itemId, reason: "Least relevant" },
-          ],
-          warnings: [],
-        })
-      );
-    });
-    rerender(1);
-    expect(await screen.findByText("Least relevant")).toBeTruthy();
-    expect(itemsAsked.length).toBeGreaterThan(0);
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: /Hide selected \(1/ })
-      ).toBeTruthy()
-    );
-    expect(hiddenCount(store)).toBe(hiddenBefore);
   });
 });

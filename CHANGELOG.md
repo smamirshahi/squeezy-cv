@@ -11,6 +11,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Links in Main info (vault) and the job advert link in Job application have an "open in a new tab" icon (left of the delete icon) instead of the "Open" text button.
+- Apply, General step: "Ask AI to pick what to hide" shows its answer in the AI card (each item with its lines and reason, ticked; untick to keep one, then "Hide ticked", one undo step). The answer is kept when you change step. Cancelling the Send to AI window is no longer shown as an error.
+
+### Changed
+
+- Apply, General step: removed the "Allow n pages" and "Auto-fit now" buttons (the page limit choice and the switch do the same); the auto-fit switch explains what it does and says when the CV is over the limit; removed "Applies to this job only".
 - About dialog: the rail's coffee button is now "About". It shows who made CV Builder and why, how data and AI are handled, a "Support this project" box with the coffee link, and the app version (the texts and photo are tracked in #368).
 - AI settings are a dialog now, opened by the rail's Settings button and by "Settings…" next to an AI action (it opens on that task). Left: All tasks, each task and "Set up the providers"; middle: what it does and what is sent and masked; right: the provider choice, saved at once. The Settings page is gone (the old /settings address opens the dialog).
 - Apply, Experience step: the AI strip of a description works in two steps. "1 · Lean on": pick points from the advert (the table opens in a dialog, the picks show as removable chips with Clear and stay until cleared). "2 · Then": Shorten, Rephrase, Make longer and Make bullets (one filled button, after a divider) all use the picked points; Shorten keeps them instead of putting them first. The separate bullets card is gone from this page (the inspector keeps it), and "Replace the description with these bullets" now sits above the proposed bullets.

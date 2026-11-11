@@ -12,6 +12,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { AiProviderId, AiTask } from "@shared/ai/providers";
 import { cssVar } from "@custom-styles/theme";
 import { AiProviderPicker } from "@pages/workspace/ai-provider-picker";
+import { AiHidePicks } from "@pages/workspace/ai-hide-picks";
 import { HideToFit } from "@pages/workspace/hide-to-fit";
 import { TailorAll } from "@pages/workspace/tailor-all";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -26,7 +27,6 @@ import {
   setPageLimit,
 } from "@store/jobs/jobs-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { AiButton } from "@components/ai-button";
 
 /** 1 and 2 have buttons; the number field starts at the next page count */
 const PRESET_LIMITS = [1, 2];
@@ -158,7 +158,6 @@ export function GeneralStep(): JSX.Element {
   const [draft, setDraft] = useState<string>("");
   const [isHideOpen, setIsHideOpen] = useState<boolean>(false);
   const [aiError, setAiError] = useState<string>("");
-  const [askSignal, setAskSignal] = useState<number>(0);
   const limit = variant.pageLimit;
   const isOver = pageCount > limit || linesOver > 0;
   const isAutoFit = variant.isAutoFit ?? false;
@@ -348,35 +347,26 @@ export function GeneralStep(): JSX.Element {
               Auto-fit to the limit
             </Typography>
             <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-              Off: nothing is shrunk or hidden. On: spacing, margins, then text
-              shrink to fit.
+              Shrinks the CV to fit the page limit: first the spacing, then the
+              margins, then the text size (never below a readable size). It
+              keeps fitting as you edit. Items are never hidden by it.
             </Typography>
+            {isOver && !isAutoFit && (
+              <Typography
+                role="status"
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: WORKSPACE_COLORS.accentText,
+                }}
+              >
+                The CV is over the limit. Turn this on to shrink it to fit.
+              </Typography>
+            )}
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {isOver && !isAutoFit && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() =>
-                dispatch(setAutoFit({ id: variant.id, isAutoFit: true }))
-              }
-            >
-              Auto-fit now
-            </Button>
-          )}
-          {isOver && limit < MAX_PAGES && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                changeLimit(limit + 1);
-              }}
-            >
-              Allow {limit + 1} pages
-            </Button>
-          )}
           <Button
             variant="outlined"
             size="small"
@@ -386,10 +376,7 @@ export function GeneralStep(): JSX.Element {
             Choose items to hide
           </Button>
         </Box>
-        {isHideOpen && <HideToFit askSignal={askSignal} />}
-        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          Applies to this job only.
-        </Typography>
+        {isHideOpen && <HideToFit />}
       </Box>
 
       <Box
@@ -475,19 +462,10 @@ export function GeneralStep(): JSX.Element {
             label="AI to use:"
             onChange={(task, provider) => void chooseProvider(task, provider)}
           />
-          <Box>
-            <AiButton
-              size="small"
-              variant="outlined"
-              disabled={!isOver || !ai?.isConfigured}
-              onClick={() => {
-                setIsHideOpen(true);
-                setAskSignal((count) => count + 1);
-              }}
-            >
-              Ask AI to pick what to hide
-            </AiButton>
-          </Box>
+          <AiHidePicks
+            isDisabled={!isOver || !ai?.isConfigured}
+            linesOver={linesOver}
+          />
           {ai?.isConfigured && (
             <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.aiText }}>
               {ai.info.isOnline
