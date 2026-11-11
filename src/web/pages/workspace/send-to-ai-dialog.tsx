@@ -306,44 +306,28 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 gap: 0.75,
-                flexWrap: "wrap",
                 minHeight: 36,
-                mb: 0.5,
               }}
               aria-live="polite"
             >
-              {selected ? (
-                <>
-                  <Typography variant="body2">
-                    Hide “
-                    {selected.length > 30
-                      ? `${selected.slice(0, 30)}…`
-                      : selected}
-                    ” as
-                  </Typography>
-                  {MASK_KINDS.map((kind) => (
-                    <Button
-                      key={kind}
-                      size="small"
-                      variant="outlined"
-                      // Keep the text selected while the button is pressed
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => addMask(selected, kind)}
-                    >
-                      {KIND_LABELS[kind]}
-                    </Button>
-                  ))}
-                </>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Select a name or phrase in the text to hide it everywhere it
-                  appears.
-                </Typography>
-              )}
+              <Typography
+                variant="body2"
+                color={selected ? "text.primary" : "text.secondary"}
+                noWrap
+                sx={{ minWidth: 0 }}
+              >
+                {selected
+                  ? `Hide “${
+                      selected.length > 30
+                        ? `${selected.slice(0, 30)}…`
+                        : selected
+                    }” as`
+                  : "Select a name or phrase in the text to hide it everywhere it appears."}
+              </Typography>
               {isLoading && <CircularProgress size={16} />}
               <Box sx={{ flex: 1 }} />
               <FormControlLabel
-                sx={{ m: 0 }}
+                sx={{ m: 0, flexShrink: 0, whiteSpace: "nowrap" }}
                 control={
                   <Checkbox
                     size="small"
@@ -355,6 +339,34 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
                   <Typography variant="caption">Show exact text</Typography>
                 }
               />
+            </Box>
+            {/* The kinds sit on their own line (always there, so nothing jumps when text is
+                selected); if they are wider than the panel only this line scrolls sideways */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 0.75,
+                minHeight: 36,
+                mb: 0.5,
+                overflowX: "auto",
+                alignItems: "center",
+                pb: 0.25,
+              }}
+            >
+              {selected &&
+                MASK_KINDS.map((kind) => (
+                  <Button
+                    key={kind}
+                    size="small"
+                    variant="outlined"
+                    sx={{ flexShrink: 0 }}
+                    // Keep the text selected while the button is pressed
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addMask(selected, kind)}
+                  >
+                    {KIND_LABELS[kind]}
+                  </Button>
+                ))}
             </Box>
             <Box
               ref={viewer}

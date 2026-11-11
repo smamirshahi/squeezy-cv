@@ -1,3 +1,4 @@
+import { AiBadge } from "@components/ai-button";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Box,
@@ -235,6 +236,9 @@ export function ItemBullets({ item, isCard }: BulletsProps): JSX.Element {
                       >
                         {bullet.text}
                       </Typography>
+                      {variant.selection[item.id]?.generated?.some(
+                        (made) => made.id === bullet.id
+                      ) && <AiBadge />}
                       <SortingIcons
                         index={index}
                         swapFunction={(_from, toIndex) =>

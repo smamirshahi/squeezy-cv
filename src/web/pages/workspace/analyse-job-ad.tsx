@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { Job } from "@custom-types/job-types";
+import { AiSettingsButton } from "@pages/workspace/ai-job-context";
+import { RequirementsDialog } from "@pages/workspace/requirements-dialog";
+import { groupsOfRequirements } from "@pages/workspace/requirements-table";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   AiStatus,
@@ -11,30 +20,6 @@ import {
 import { setJobAnalysis } from "@store/jobs/jobs-slice";
 import { useAppDispatch } from "@store/store-helper";
 import { AiButton } from "@components/ai-button";
-
-function Keywords({
-  title,
-  words,
-}: {
-  title: string;
-  words: string[];
-}): JSX.Element | null {
-  if (words.length === 0) {
-    return null;
-  }
-  return (
-    <Box>
-      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mb: 0.5 }}>
-        {title}
-      </Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-        {words.map((word) => (
-          <Chip key={word} size="small" variant="outlined" label={word} />
-        ))}
-      </Box>
-    </Box>
-  );
-}
 
 /**
  * "Analyse job description": the AI reads the advert once and the keywords and requirements
@@ -48,6 +33,7 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [isResultOpen, setIsResultOpen] = useState<boolean>(false);
   const ai = status ? taskProvider(status, "tailor") : null;
   const advert = (job.jobAd ?? "").trim();
   const analysis = job.analysis;
@@ -106,6 +92,7 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
               : "The advert goes to your local model only. Then use Tailor in each section."
             : "AI is not set up. Choose a provider in Settings."}
         </Typography>
+        <AiSettingsButton task="tailor" />
       </Box>
       {error && (
         <Alert severity="error">
@@ -120,15 +107,37 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
         </Typography>
       ))}
       {analysis && (
-        <Box sx={{ display: "grid", gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1.5,
+          }}
+        >
           <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
             {[analysis.jobTitle, analysis.seniority]
               .filter(Boolean)
               .join(" · ")}
           </Typography>
-          <Keywords title="Must have" words={analysis.mustHave} />
-          <Keywords title="Nice to have" words={analysis.niceToHave} />
-          <Keywords title="Keywords" words={analysis.keywords} />
+          <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
+            {analysis.mustHave.length} must have · {analysis.niceToHave.length}{" "}
+            nice to have · {analysis.keywords.length} keywords
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            color="inherit"
+            sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
+            onClick={() => setIsResultOpen(true)}
+          >
+            See results
+          </Button>
+          <RequirementsDialog
+            isOpen={isResultOpen}
+            onClose={() => setIsResultOpen(false)}
+            groups={groupsOfRequirements(analysis)}
+          />
         </Box>
       )}
     </Box>

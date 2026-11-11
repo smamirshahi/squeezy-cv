@@ -29,7 +29,12 @@ import { vaultSelector } from "@store/vault/vault-slice";
  * relevance for each title (after "Score job titles" or "Score all sections"), the best first,
  * so the right one is easy to pick.
  */
-export function JobHeadline(): JSX.Element | null {
+/** `hasScoring`: show the "Score job titles" card here (the Apply wizard puts it at the top of the step instead) */
+export function JobHeadline({
+  hasScoring = true,
+}: {
+  hasScoring?: boolean;
+}): JSX.Element | null {
   const dispatch = useAppDispatch();
   const { profile } = useAppSelector(vaultSelector);
   const variant = useAppSelector(activeVariantSelector);
@@ -70,7 +75,7 @@ export function JobHeadline(): JSX.Element | null {
           (Main Info).
         </Typography>
       </Box>
-      <SectionTailor sectionId={JOB_TITLES_SECTION} />
+      {hasScoring && <SectionTailor sectionId={JOB_TITLES_SECTION} />}
       <Table
         size="small"
         aria-label="Job titles for this job"

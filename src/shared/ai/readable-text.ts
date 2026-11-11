@@ -30,6 +30,18 @@ function objectLines(object: Record<string, unknown>, depth: number): string[] {
   return lines;
 }
 
+function isEmpty(value: unknown): boolean {
+  if (value === undefined) {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return typeof value === "object" && value !== null
+    ? Object.keys(value).length === 0
+    : false;
+}
+
 function valueLines(value: unknown, depth: number): string[] {
   const pad = INDENT.repeat(depth);
   if (Array.isArray(value)) {
@@ -79,12 +91,19 @@ export function toReadableParts(text: string): {
       typeof parsed === "object" &&
       parsed !== null &&
       !Array.isArray(parsed) &&
-      "requirements" in parsed
+      ("requirements" in parsed || "mode" in parsed)
     ) {
-      const { requirements, ...rest } = parsed as Record<string, unknown>;
+      const { requirements, mode, ...rest } = parsed as Record<string, unknown>;
+      // Wording requests (shorten, rephrase ...): the task is one line, empty parts are not listed
+      const shown = Object.fromEntries(
+        Object.entries(rest).filter(([, value]) => !isEmpty(value))
+      );
+      const task = typeof mode === "string" ? [`Task: ${mode}`] : [];
       return {
-        main: valueLines(rest, 0).join("\n"),
-        context: valueLines({ requirements }, 0).join("\n"),
+        main: [...task, ...valueLines(shown, 0)].join("\n"),
+        context: isEmpty(requirements)
+          ? ""
+          : valueLines({ requirements }, 0).join("\n"),
       };
     }
   } catch {

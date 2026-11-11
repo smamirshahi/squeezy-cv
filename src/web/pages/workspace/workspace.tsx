@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Button } from "@mui/material";
-import { SettingsPage } from "@pages/workspace/settings-page";
+import { navigate } from "@hooks/navigation";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useUndoShortcuts } from "@pages/workspace/use-undo-shortcuts";
@@ -66,6 +67,13 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   }, [route, activeJobName, missing]);
   const zoom = useAppSelector((s) => s.app.canvasZoom);
   useCanvasShortcuts(tool === "jobs");
+  // The old Settings address (/settings) has no page any more: it opens the dialog and goes back
+  useEffect(() => {
+    if (tool === "ai") {
+      openAiSettings();
+      navigate({ kind: "jobs", view: "details" }, { replace: true });
+    }
+  }, [tool]);
   useUndoShortcuts();
   const jobsView = route.kind === "jobs" ? route.view : "page";
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
@@ -190,7 +198,6 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
         {!missing && tool === "templates" && <TemplatesPage />}
         {!missing && isEmpty && <NoJobs />}
         {!missing && tool === "vault" && <VaultPage />}
-        {!missing && tool === "ai" && <SettingsPage />}
         {!missing && route.kind === "applications" && <ApplicationsPage />}
         {!missing && route.kind === "application" && (
           <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>

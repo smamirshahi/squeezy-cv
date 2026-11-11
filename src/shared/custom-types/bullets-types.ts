@@ -18,8 +18,8 @@ export const BulletsRequestSchema = Object({
   /** What the job asks for (from the job's tailor record) */
   requirements: Array(String).optional(),
 
-  /** "emphasise": the one requirement to lean on */
-  focus: String.optional(),
+  /** "emphasise": the requirement (or several) to lean on */
+  focus: Union(String, Array(String)).optional(),
 
   /** The job's current bullets of the item, for every mode but "make" */
   current: Array(String).optional(),

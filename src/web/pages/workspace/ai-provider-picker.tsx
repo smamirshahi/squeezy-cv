@@ -1,11 +1,11 @@
 import { Box, MenuItem, Select, Typography } from "@mui/material";
-import { navigate } from "@hooks/navigation";
+import { AiSettingsButton } from "@pages/workspace/ai-job-context";
 import { AiProviderId, AiTask } from "@shared/ai/providers";
 import { AiStatus, taskProvider } from "@store/persistence/api-client";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /**
- * Which AI a task uses, chosen where the task is. The same choice as the Settings page (the
+ * Which AI a task uses, chosen where the task is. The same choice as in the AI settings dialog (the
  * server remembers it per task); a provider that is not set up is listed but cannot be picked.
  */
 export function AiProviderPicker({
@@ -24,7 +24,6 @@ export function AiProviderPicker({
     return null;
   }
   const current = taskProvider(status, task).info.id;
-  const isAnyMissing = providers.some((provider) => !provider.isConfigured);
   return (
     <Box
       sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}
@@ -53,26 +52,8 @@ export function AiProviderPicker({
           </MenuItem>
         ))}
       </Select>
-      {isAnyMissing && (
-        <Box
-          component="button"
-          type="button"
-          onClick={() => navigate({ kind: "ai" })}
-          sx={{
-            border: 0,
-            bgcolor: "transparent",
-            p: 0,
-            color: WORKSPACE_COLORS.aiText,
-            font: "inherit",
-            fontSize: 12,
-            fontWeight: 600,
-            textDecoration: "underline",
-            cursor: "pointer",
-          }}
-        >
-          Set up in Settings
-        </Box>
-      )}
+      <Box sx={{ flex: 1 }} />
+      <AiSettingsButton task={task} />
     </Box>
   );
 }

@@ -4,7 +4,8 @@ import { Array, Literal, Object, Static, String, Union } from "runtypes";
 const RewordModeSchema = Union(
   Literal("shorten"),
   Literal("rephrase"),
-  Literal("longer")
+  Literal("longer"),
+  Literal("emphasise")
 );
 
 export const RewordRequestSchema = Object({
@@ -16,6 +17,9 @@ export const RewordRequestSchema = Object({
 
   /** What the job asks for (from "Analyse job description"); "rephrase" uses it */
   requirements: Array(String).optional(),
+
+  /** "emphasise": the requirement(s) to lean on */
+  focus: Union(String, Array(String)).optional(),
 });
 
 /** What the model sends back (loose) */
