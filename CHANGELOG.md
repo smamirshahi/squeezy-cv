@@ -19,6 +19,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Send to AI: links, emails and phone numbers found in the text are now hidden automatically as [Link n], [Email n] and [Phone n] (you can still switch one off in the window), instead of being only suggested; year ranges like "2018 - 2021" are no longer mistaken for phone numbers. Schools, universities and colleges are now [Institution n] (#354).
+
 - New vault sections are no longer added to templates by themselves (#351): a section a template does not place is not drawn. Use "Add section to template" on the Layout page to place it.
 - Main Info is now four cards (Identity, Contact, Links, Optional details), other job titles are chips, and the right panel shows a live preview of the header with a note that it is only a preview of the vault. The Apply / Discard bar is a fixed row at the bottom of the page and no longer covers the content (#345).
 - Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).

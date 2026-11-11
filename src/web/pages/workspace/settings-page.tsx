@@ -253,10 +253,10 @@ export function SettingsPage(): JSX.Element {
             <br />
             <b>Masked:</b> your name → [Candidate Name], email → [Email], phone
             → [Phone Number], address → [Address], links → [Link n], employers →
-            [Company n], schools → [School n]. Employer and school names are
-            always hidden this way and put back in the answer, so the AI cannot
-            tell that “Google” is a strong name; a placeholder it changes is
-            shown as a warning.
+            [Company n], schools and universities → [Institution n]. Employer
+            and school names are always hidden this way and put back in the
+            answer, so the AI cannot tell that “Google” is a strong name; a
+            placeholder it changes is shown as a warning.
             <br />
             <b>Never sent:</b> PDF files, your saved data files
             <br />

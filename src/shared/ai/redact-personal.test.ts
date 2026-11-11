@@ -5,6 +5,8 @@ import {
   personalOf,
   restore,
   scrub,
+  suggestMasks,
+  withDetectedMasks,
 } from "@shared/ai/redact-personal";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -147,7 +149,7 @@ describe("masking employers and schools (#133)", () => {
       withOrgs
     );
     expect(text).toBe(
-      "Built things at [Company 1], then [Company 2]. Studied at the [School 1]."
+      "Built things at [Company 1], then [Company 2]. Studied at the [Institution 1]."
     );
   });
 
@@ -175,7 +177,7 @@ describe("masking employers and schools (#133)", () => {
   it("reports a company placeholder the model invented or mangled", () => {
     const { map } = scrub("", withOrgs);
     const { text, unresolved } = restore(
-      "Led [Company 1] and [Company 9], taught at [school 1]",
+      "Led [Company 1] and [Company 9], taught at [institution 1]",
       map
     );
     expect(text).toBe(
@@ -195,5 +197,59 @@ describe("masking employers and schools (#133)", () => {
     expect(found.schools).toEqual(["University of Example"]);
     expect(personalOf(vault, false).organisations).toBeUndefined();
     expect(personalOf(vault, true).organisations).toEqual(found);
+  });
+});
+
+describe("automatic masks for what the text contains", () => {
+  const text =
+    "See https://acme.example/careers and https://other.example/team. " +
+    "Write to hr@acme.example or call +44 20 7946 0958. Worked 2018 - 2021, from 2026-03-01.";
+
+  it("hides links, emails and phone numbers the profile does not list", () => {
+    const data = withDetectedMasks(text, person);
+    const { text: masked, map } = scrub(text, data);
+    expect(masked).not.toContain("acme.example");
+    expect(masked).not.toContain("other.example");
+    expect(masked).not.toContain("hr@");
+    expect(masked).not.toContain("7946");
+    // links continue after the profile's two links
+    expect(masked).toContain("[Link 3]");
+    expect(masked).toContain("[Link 4]");
+    expect(masked).toContain("[Email 1]");
+    expect(masked).toContain("[Phone 1]");
+    expect(restore(masked, map).text).toBe(text);
+  });
+
+  it("never takes a date or a year range for a phone number", () => {
+    const data = withDetectedMasks(text, person);
+    const { text: masked } = scrub(text, data);
+    expect(masked).toContain("2018 - 2021");
+    expect(masked).toContain("2026-03-01");
+    expect(suggestMasks("Worked 2018 - 2021", person)).toEqual([]);
+  });
+
+  it("leaves a value alone when the user switched it off", () => {
+    const data = withDetectedMasks(text, {
+      ...person,
+      masking: { custom: [], skip: ["hr@acme.example"] },
+    });
+    const { text: masked } = scrub(text, data);
+    expect(masked).toContain("hr@acme.example");
+    expect(masked).not.toContain("acme.example/careers");
+  });
+
+  it("does nothing when there is no CV owner, so an import keeps its contact details", () => {
+    const none: PersonalData = { profile: { fullName: "" }, links: [] };
+    expect(withDetectedMasks(text, none)).toBe(none);
+  });
+
+  it("names schools, universities and colleges [Institution n]", () => {
+    const data: PersonalData = {
+      ...person,
+      organisations: { companies: [], schools: ["University of Example"] },
+    };
+    expect(scrub("Studied at University of Example", data).text).toBe(
+      "Studied at [Institution 1]"
+    );
   });
 });

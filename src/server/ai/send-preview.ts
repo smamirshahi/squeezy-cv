@@ -7,6 +7,7 @@ import {
   describeMasking,
   scrub,
   suggestMasks,
+  withDetectedMasks,
 } from "@shared/ai/redact-personal";
 
 /** One message as it would leave this computer: masked, exactly as the model would see it */
@@ -106,6 +107,7 @@ export function createRecorder(options: {
     finish,
     generate<T>(request: GenerateRequest<T>): Promise<T> {
       data = withUserMasking(request.personal, options.masking) ?? NO_ONE;
+      data = withDetectedMasks(request.input, data);
       calls.push({
         promptName: request.promptName,
         system: scrub(loadPrompt(request.promptName), data).text,

@@ -8,12 +8,24 @@ export interface PersonalData {
 
   /**
    * Employer and school names to hide as well (optional mode, #133). Each name gets its own
-   * placeholder, `[Company 1]` or `[School 1]`, numbered by its place in the list.
+   * placeholder, `[Company 1]` or `[Institution 1]` (school, university, any place of study), numbered by its place in the list.
    */
   organisations?: Organisations;
 
   /** The user's own choices: extra text to hide, and automatic masks to leave off */
   masking?: Masking;
+
+  /**
+   * Emails, links and phone numbers found in the text being sent that the profile does not list
+   * (other people's, a company site). They are hidden automatically; see `withDetectedMasks`.
+   */
+  detected?: DetectedMask[];
+}
+
+/** Something private-looking found in the text; its kind decides the placeholder */
+interface DetectedMask {
+  text: string;
+  kind: "link" | "email" | "phone";
 }
 
 /** Names of employers and schools as written in the CV */
@@ -79,6 +91,7 @@ const PLACEHOLDER_STARTS = [
   "link",
   "company",
   "school",
+  "institution",
   "person",
   "location",
   "date",
@@ -174,7 +187,7 @@ function organisationRules(organisations: Organisations | undefined): Rule[] {
   const rules: Rule[] = [];
   const groups: [string, string[]][] = [
     ["Company", organisations.companies],
-    ["School", organisations.schools],
+    ["Institution", organisations.schools],
   ];
   for (const [label, names] of groups) {
     names.forEach((raw, index) => {
@@ -268,7 +281,7 @@ function normaliseTerm(text: string): string {
 
 const KIND_LABELS: Record<MaskKind, string> = {
   company: "Company",
-  school: "School",
+  school: "Institution",
   person: "Person",
   location: "Location",
   date: "Date",
@@ -320,6 +333,16 @@ function buildAutomaticRules(data: PersonalData): Rule[] {
   });
   if (isUsable(profile.phone)) {
     add("[Phone Number]", profile.phone.trim(), phonePattern(profile.phone));
+  }
+  const counters = { link: links.length, email: 0, phone: 0 };
+  const labels = { link: "Link", email: "Email", phone: "Phone" };
+  for (const { text, kind } of data.detected ?? []) {
+    counters[kind] += 1;
+    add(
+      `[${labels[kind]} ${counters[kind]}]`,
+      text,
+      kind === "link" ? urlPattern(text) : literalPattern(text)
+    );
   }
   for (const rule of organisationRules(data.organisations)) {
     rules.push(rule);
@@ -456,33 +479,73 @@ const PHONE_IN_TEXT =
 const MIN_SUGGESTED_PHONE_DIGITS = 8;
 const DATE_SHAPE = /^\d{1,4}[-./\s]\d{1,2}[-./\s]\d{1,4}$/;
 
+const YEAR_ONLY = /^(?:19|20)\d{2}$/;
+
+/** True for dates and year ranges ("2018 - 2021", "2026-03-01"), which have the shape of a phone number */
+function isDateLike(value: string): boolean {
+  if (DATE_SHAPE.test(value)) {
+    return true;
+  }
+  const groups = value.split(/\D+/).filter(Boolean);
+  return groups.length > 0 && groups.every((group) => YEAR_ONLY.test(group));
+}
+
 /**
  * Emails, links and phone numbers still in the text after masking (other people's, or ones the
- * profile does not list): the dialog offers to mask them. Names of people and firms inside
- * sentences cannot be found reliably without an AI, so those are left for the user to select.
+ * profile does not list). Names of people and firms inside sentences cannot be found reliably
+ * without an AI, so those are left for the user to select.
  */
-export function suggestMasks(text: string, data: PersonalData): string[] {
+function findPrivateLooking(text: string, data: PersonalData): DetectedMask[] {
   const masked = scrub(text, data).text;
-  const found = new Set<string>();
-  for (const pattern of [EMAIL_IN_TEXT, URL_IN_TEXT, PHONE_IN_TEXT]) {
+  const found = new Map<string, DetectedMask>();
+  const patterns: [RegExp, DetectedMask["kind"]][] = [
+    [EMAIL_IN_TEXT, "email"],
+    [URL_IN_TEXT, "link"],
+    [PHONE_IN_TEXT, "phone"],
+  ];
+  for (const [pattern, kind] of patterns) {
     for (const [match] of masked.matchAll(pattern)) {
       const value = match.trim().replace(/[.,;:]+$/, "");
-      const isPhone = pattern === PHONE_IN_TEXT;
-      // A date such as 2026-03-01 or 01/03/2026 has the shape of a phone number but is not one
-      if (isPhone && DATE_SHAPE.test(value)) {
-        continue;
+      if (kind === "phone") {
+        if (
+          isDateLike(value) ||
+          value.replace(/\D/g, "").length < MIN_SUGGESTED_PHONE_DIGITS
+        ) {
+          continue;
+        }
       }
-      if (
-        isPhone &&
-        value.replace(/\D/g, "").length < MIN_SUGGESTED_PHONE_DIGITS
-      ) {
-        continue;
+      if (!found.has(value)) {
+        found.set(value, { text: value, kind });
       }
-      found.add(value);
     }
   }
   const alreadyCustom = new Set(
     (data.masking?.custom ?? []).map((entry) => normaliseTerm(entry.text))
   );
-  return [...found].filter((value) => !alreadyCustom.has(normaliseTerm(value)));
+  return [...found.values()].filter(
+    (entry) => !alreadyCustom.has(normaliseTerm(entry.text))
+  );
+}
+
+/** What still looks private after masking: the dialog offers to mask it by hand */
+export function suggestMasks(text: string, data: PersonalData): string[] {
+  return findPrivateLooking(text, data).map((entry) => entry.text);
+}
+
+/**
+ * `data` plus the emails, links and phone numbers found in `text`, so they are hidden
+ * automatically as `[Link 2]`, `[Email 1]`, `[Phone 1]` (the user can still switch one off in
+ * the "Send to AI" dialog). Only when the CV's owner is known: with no profile (a pasted text to
+ * import) the text is the data and is left as it is.
+ */
+export function withDetectedMasks(
+  text: string,
+  data: PersonalData
+): PersonalData {
+  const isOwnerKnown =
+    data.profile.fullName.trim() !== "" || data.organisations !== undefined;
+  if (!isOwnerKnown) {
+    return data;
+  }
+  return { ...data, detected: findPrivateLooking(text, data) };
 }
