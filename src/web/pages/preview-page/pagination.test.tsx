@@ -9,7 +9,7 @@ import {
   measureBlocks,
   measurePagination,
 } from "@pages/preview-page/use-pagination";
-import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
+import { GeneralStep } from "@pages/workspace/general-step";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
@@ -93,7 +93,7 @@ describe("page status in the preview", () => {
         <PreviewPage contentRef={{ current: null }} />
       </Provider>
     );
-    expect(screen.getByText(/^1 page \(limit 2\)/)).toBeTruthy();
+    expect(screen.getByText(/^1 page \(limit 1\)/)).toBeTruthy();
   });
 
   it("warns when the CV is longer than the limit and shows the page start", () => {
@@ -124,14 +124,15 @@ describe("page status in the preview", () => {
     }
   });
 
-  it("lets the page limit be changed per variant", () => {
+  it("lets the page limit be changed per job, from the General step", () => {
     const store = makeStore();
+    expect(variantsSelector(store.getState())[0].pageLimit).toBe(1);
     render(
       <Provider store={store}>
-        <EditorJobs />
+        <GeneralStep />
       </Provider>
     );
-    fireEvent.click(screen.getByRole("button", { name: "1 page" }));
-    expect(variantsSelector(store.getState())[0].pageLimit).toBe(1);
+    fireEvent.click(screen.getByRole("button", { name: "2 pages" }));
+    expect(variantsSelector(store.getState())[0].pageLimit).toBe(2);
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Alert, Box, Button, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Link, Paper, Typography } from "@mui/material";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
@@ -12,6 +12,7 @@ import {
   setPageLimit,
   setTuning,
 } from "@store/jobs/jobs-slice";
+import { OPEN_GENERAL_EVENT } from "@pages/workspace/general-settings-event";
 import { FitTuning } from "@custom-types/variant-types";
 import { useAutoFit } from "@pages/preview-page/use-auto-fit";
 import { computeFitMetrics } from "@shared/layout/fit-metrics";
@@ -203,18 +204,37 @@ export function PreviewPage({
                 </>
               }
             >
-              This CV is {pageCount} pages long; this job's template is set to{" "}
-              {pageLimit}. Shorten it, hide items or change the limit.
-              {linesOver > 0 && (
-                <>
-                  {" "}
-                  {linesOver} {linesOver === 1 ? "line is" : "lines are"} over
-                  {overflowStartsWith
-                    ? `; page ${pageLimit + 1} starts at “${overflowStartsWith}”`
-                    : ""}
-                  . Nothing has been hidden or shrunk unless auto-fit is on.
-                </>
-              )}
+              <Box sx={{ display: "grid", gap: 0.5 }}>
+                <Box>
+                  This CV is {pageCount} pages long, but the page limit is{" "}
+                  {pageLimit}.{" "}
+                  <Link
+                    component="button"
+                    type="button"
+                    color="inherit"
+                    underline="always"
+                    onClick={() => {
+                      dispatch(setSelectedBlock(null));
+                      window.dispatchEvent(new Event(OPEN_GENERAL_EVENT));
+                    }}
+                  >
+                    Change the limit
+                  </Link>
+                  , shorten the CV or hide items.
+                </Box>
+                {linesOver > 0 && (
+                  <Box>
+                    {linesOver} {linesOver === 1 ? "line is" : "lines are"} over
+                    {overflowStartsWith
+                      ? `; page ${pageLimit + 1} starts at “${overflowStartsWith}”`
+                      : ""}
+                    .
+                  </Box>
+                )}
+                <Box>
+                  Nothing has been hidden or shrunk unless auto-fit is on.
+                </Box>
+              </Box>
             </Alert>
           ) : (
             <Typography variant="body2">

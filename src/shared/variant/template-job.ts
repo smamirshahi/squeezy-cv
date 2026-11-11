@@ -1,4 +1,8 @@
-import { Job, CURRENT_JOB_VERSION } from "@custom-types/job-types";
+import {
+  Job,
+  CURRENT_JOB_VERSION,
+  DEFAULT_PAGE_LIMIT,
+} from "@custom-types/job-types";
 import {
   CURRENT_TEMPLATE_VERSION,
   Template,
@@ -7,7 +11,6 @@ import { CURRENT_VARIANT_VERSION, Variant } from "@custom-types/variant-types";
 
 /** Fields that belong to the template; everything else of a variant belongs to the job */
 const TEMPLATE_KEYS = [
-  "pageLimit",
   "layout",
   "style",
   "isAutoFit",
@@ -21,6 +24,7 @@ const TEMPLATE_KEYS = [
 
 /** Optional fields of a job that are copied only when set */
 const JOB_OPTIONAL_KEYS = [
+  "pageLimit",
   "hiddenSections",
   "headline",
   "linkOrder",
@@ -64,6 +68,7 @@ export function resolveVariant(template: Template, job: Job): Variant {
     selection: structuredClone(job.selection),
     ...pick(template, TEMPLATE_KEYS),
     ...pick(job, JOB_OPTIONAL_KEYS),
+    pageLimit: job.pageLimit ?? DEFAULT_PAGE_LIMIT,
   };
 }
 

@@ -162,7 +162,7 @@ describe("operationsToActions", () => {
     run(store, [
       { op: "hideItem", itemId: job1.id, isHidden: true },
       { op: "setTone", tone: "formal" },
-      { op: "setPageLimit", pages: templateBefore.pageLimit === 1 ? 2 : 1 },
+      { op: "setPageLimit", pages: 2 },
       { op: "moveSection", sectionId, position: 99 },
     ]);
     const state = store.getState();
@@ -173,8 +173,9 @@ describe("operationsToActions", () => {
     expect(other.selection[job1.id]).toBeUndefined();
     expect(other.tone).not.toBe("formal");
     expect(activeJobSelector(state).templateId).toBe(templateBefore.id);
-    expect(other.pageLimit).toBe(activeTemplateSelector(state).pageLimit);
-    expect(other.pageLimit).not.toBe(templateBefore.pageLimit);
+    expect(main.pageLimit).toBe(2);
+    // the page limit belongs to the job, so the other job keeps its own
+    expect(other.pageLimit).not.toBe(2);
     expect(other.layout).toEqual(main.layout);
   });
 });

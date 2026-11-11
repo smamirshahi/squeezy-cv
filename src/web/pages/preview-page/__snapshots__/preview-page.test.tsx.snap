@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`UK single-column template > is the default: header first, then each section in order 1`] = `
-"1 page (limit 2) · 0% used
+"1 page (limit 1) · 0% used
 Jane Doe
 Software Developer
 jane.doe@example.com

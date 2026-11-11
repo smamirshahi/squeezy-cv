@@ -173,7 +173,7 @@ describe("jobs API", () => {
     expect(response.json()).toEqual(
       createVariant(file.vault, file.style, "acme", "Acme")
     );
-    await call("PUT", "/api/templates/tpl1", { ...template, pageLimit: 2 });
+    await call("PUT", "/api/jobs/acme", { ...job, pageLimit: 2 });
     expect(
       (await call("GET", "/api/jobs/acme/resolved")).json().pageLimit
     ).toBe(2);
@@ -344,7 +344,6 @@ describe("applications are frozen copies", () => {
     const editedTemplate = {
       ...template,
       name: "Renamed look",
-      pageLimit: template.pageLimit === 1 ? 2 : 1,
     };
     expect(
       (await call("PUT", "/api/templates/tpl1", editedTemplate)).statusCode

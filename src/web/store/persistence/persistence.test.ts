@@ -33,6 +33,7 @@ import {
   deleteJob,
   setItemSelection,
   setPageLimit,
+  setSkillStyle,
   variantsSelector,
 } from "@store/jobs/jobs-slice";
 import { updateProfile } from "@store/vault/vault-slice";
@@ -328,9 +329,15 @@ describe("load and save through the server", () => {
 
     // a look change touches job b's template only
     writes.length = 0;
-    store.dispatch(setPageLimit({ id: "b", pageLimit: 1 }));
+    store.dispatch(setSkillStyle({ id: "b", display: "dots", columns: 2 }));
     await saveToServer(recording, store.dispatch, store.getState);
     expect(writes).toEqual(["template:template-b"]);
+
+    // the page limit belongs to the job: it touches job b only
+    writes.length = 0;
+    store.dispatch(setPageLimit({ id: "b", pageLimit: 2 }));
+    await saveToServer(recording, store.dispatch, store.getState);
+    expect(writes).toEqual(["job:b"]);
 
     // nothing changed: nothing is written
     writes.length = 0;
@@ -397,7 +404,7 @@ describe("load and save through the server", () => {
     store.dispatch(setPageLimit({ id: "old", pageLimit: 1 }));
     await saveToServer(api, store.dispatch, store.getState);
     expect(store.getState().persistence.saveError).toBe("");
-    expect((await api.loadTemplate("template-old")).pageLimit).toBe(1);
+    expect((await api.loadJob("old")).pageLimit).toBe(1);
   });
 
   it("blocks saving and does not overwrite when the saved vault cannot be read", async () => {

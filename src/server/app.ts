@@ -16,7 +16,12 @@ import { TemplateSchema } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
 import { tailor } from "@server/ai/tailor";
-import { analyseJobAd, scoreSection } from "@server/ai/analyse-job-ad";
+import {
+  analyseJobAd,
+  scoreJobTitles,
+  scoreSection,
+} from "@server/ai/analyse-job-ad";
+import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
 import {
   AnalyseRequestSchema,
   ScoreSectionRequestSchema,
@@ -457,6 +462,11 @@ export function buildServer({
     }
     const body = ScoreSectionRequestSchema.check(request.body);
     const { vault } = await storage.loadVault();
+    if (body.sectionId === JOB_TITLES_SECTION) {
+      return scoreJobTitles(ai, vault, body.requirements, {
+        isMaskingOrganisations: registry.isMaskingOrganisations(),
+      });
+    }
     const section = vault.sections.find((entry) => entry.id === body.sectionId);
     if (!section) {
       return sendError(

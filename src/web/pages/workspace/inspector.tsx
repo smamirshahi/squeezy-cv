@@ -39,7 +39,6 @@ import {
   setAutoFit,
   setFitLimits,
   setItemSelection,
-  setPageLimit,
   setSkillStyle,
 } from "@store/jobs/jobs-slice";
 import {
@@ -159,20 +158,6 @@ function PageInspector(): JSX.Element {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <TemplateScopeNote />
-      <Heading>Page limit</Heading>
-      <ToggleButtonGroup
-        exclusive
-        size="small"
-        value={variant.pageLimit}
-        onChange={(_event, value: number | null) => {
-          if (value) {
-            dispatch(setPageLimit({ id: variant.id, pageLimit: value }));
-          }
-        }}
-      >
-        <ToggleButton value={1}>1 page</ToggleButton>
-        <ToggleButton value={2}>2 pages</ToggleButton>
-      </ToggleButtonGroup>
       <Heading>Layout</Heading>
       <Box sx={{ display: "flex", gap: 1 }}>
         <Button
