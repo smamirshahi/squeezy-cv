@@ -32,6 +32,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - "Score entries" is a filled button like "Score all sections"; Back and Next are outlined (#336).
 - AI buttons (Shorten, Rephrase for this job, Make longer, Make bullets, Emphasise and the per-bullet buttons) show a spinner until the result is there (#335).
 - The relevance badge reads "Relevancy 85%" and a tooltip explains what the number means and its bands (#334).
+- A list with a single item no longer shows sort buttons in its column headers; outdated unit tests (routes, Main Info, vault lists) were brought in line with the current screens (#359).
 
 ### Fixed
 

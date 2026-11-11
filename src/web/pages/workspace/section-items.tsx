@@ -174,6 +174,9 @@ const SORT_OPTIONS: Partial<Record<Section["type"], SortOption[]>> = {
 const sortOptionsOf = (section: Section): SortOption[] =>
   SORT_OPTIONS[section.type] ?? [];
 
+/** A list is only sortable from this many items */
+const MIN_ITEMS_TO_SORT = 2;
+
 /** What the direction arrow means: [default, reversed] */
 const SORT_DIRECTION_HINTS: Record<SortOption["kind"], [string, string]> = {
   date: ["newest first", "oldest first"],
@@ -454,7 +457,8 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
               const isActive = option !== undefined && option === sort;
               const isDescending =
                 option?.kind === "date" ? !isReversed : isReversed;
-              if (!option) {
+              // Sorting needs at least two items; with fewer the header is only a heading
+              if (!option || section.items.length < MIN_ITEMS_TO_SORT) {
                 return (
                   <Box
                     key={column.key}

@@ -51,7 +51,8 @@ describe("parseRoute", () => {
     // the earlier Page layout and Style settings addresses no longer exist
     expect(parseRoute("/templates/t1/layout").kind).toBe("notFound");
     expect(parseRoute("/templates/style").kind).toBe("notFound");
-    expect(parseRoute("/tailor")).toEqual({ kind: "tailor" });
+    // Tailor is now part of the job pages (Score sections), it has no address of its own
+    expect(parseRoute("/tailor").kind).toBe("notFound");
     expect(parseRoute("/chat/main")).toEqual({ kind: "chat", jobId: "main" });
     expect(parseRoute("/ai")).toEqual({ kind: "ai" });
     expect(parseRoute("/print/main")).toEqual({ kind: "print", jobId: "main" });
