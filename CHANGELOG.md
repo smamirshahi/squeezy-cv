@@ -9,6 +9,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-11
+
 ### Changed
 
 - Applications page redesigned (#384): one list of unsent jobs and sent applications with a Sort dropdown, a merged "Role · Template" column (the template is now always shown, also for older applications and unsent jobs), status as a dropdown of pills with a coloured dot, "CV sent · View" under the date, and an open-job icon in the last column that opens the job in a new tab. The sidebar is grouped (All jobs, Before sending, Sent, Needs a nudge). The side panel has a close button, a Next step card, Progress, and a Job data table with the extra job fields (URL, location, work mode, employment, salary, feeling, chance); for a sent application "Draft created" starts its Timeline.
@@ -328,7 +330,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.2.0...v0.3.0
