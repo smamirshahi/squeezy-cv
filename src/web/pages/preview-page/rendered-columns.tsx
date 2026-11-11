@@ -1,5 +1,8 @@
 import { Box } from "@mui/material";
-import { PersonalInfoPreviewPage } from "@pages/preview-page/personal-info-preview-page";
+import {
+  HeaderWithPhoto,
+  PersonalInfoPreviewPage,
+} from "@pages/preview-page/personal-info-preview-page";
 import { ContactInfoPreviewPage } from "@pages/preview-page/contact-info-preview-page";
 import { SummaryPreviewPage } from "@pages/preview-page/summary-preview-page";
 import { ExperiencesPreviewPage } from "@pages/preview-page/experiences-preview-page";
@@ -48,6 +51,22 @@ function renderPart(part: RenderedPart): JSX.Element | null {
   }
 }
 
+/** The parts of one column; the header parts share a row with the photo when there is one */
+function renderParts(parts: RenderedPart[]): (JSX.Element | null)[] {
+  const personal = parts.find((part) => part.kind === "personalInfo");
+  if (personal?.kind !== "personalInfo" || !personal.profile.photo) {
+    return parts.map(renderPart);
+  }
+  const isHeader = (part: RenderedPart): boolean =>
+    part.kind === "personalInfo" || part.kind === "contactInfo";
+  return [
+    <HeaderWithPhoto key="header" profile={personal.profile}>
+      {parts.filter(isHeader).map(renderPart)}
+    </HeaderWithPhoto>,
+    ...parts.filter((part) => !isHeader(part)).map(renderPart),
+  ];
+}
+
 interface ColumnsProps {
   rendered: RenderedDocument;
   columnWidth: { left: number; right: number };
@@ -67,7 +86,7 @@ export function RenderedColumns({
           mb: 2,
         }}
       >
-        {rendered.columns.fullWidth.map(renderPart)}
+        {renderParts(rendered.columns.fullWidth)}
       </Box>
 
       {/* Second row: left and right with percentages */}
@@ -85,7 +104,7 @@ export function RenderedColumns({
             flexShrink: 1,
           }}
         >
-          {rendered.columns.left.map(renderPart)}
+          {renderParts(rendered.columns.left)}
         </Box>
         <Box
           sx={{
@@ -94,7 +113,7 @@ export function RenderedColumns({
             flexShrink: 1,
           }}
         >
-          {rendered.columns.right.map(renderPart)}
+          {renderParts(rendered.columns.right)}
         </Box>
       </Box>
     </Box>

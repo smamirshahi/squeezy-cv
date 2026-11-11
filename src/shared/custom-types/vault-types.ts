@@ -128,6 +128,15 @@ export const ProfileSchema = Object({
 
   /** Gender, picked from a list. Shown under the name when the style asks for it. */
   gender: String.optional(),
+
+  /** A small photo as a data URL (cropped to 4:5 in the browser). Drawn in the header; never sent to AI. */
+  photo: String.optional(),
+
+  /** The picture as chosen (scaled down, not cropped), so the crop can be adjusted again later */
+  photoSource: String.optional(),
+
+  /** How `photoSource` was cropped: zoom (1 = just covers the frame) and the middle of the frame as a fraction (0-1) of the picture */
+  photoCrop: Object({ zoom: Number, cx: Number, cy: Number }).optional(),
 });
 
 export const VaultSchema = Object({

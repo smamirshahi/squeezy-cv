@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { Profile } from "@custom-types/vault-types";
 import { useAppSelector } from "@store/store-helper";
@@ -52,5 +52,54 @@ export function PersonalInfoPreviewPage({
         <CvTypography variant="bodySm" text={profile.rightToWork} />
       )}
     </Grid>
+  );
+}
+
+/** The photo of the header: a 4:5 frame, already cropped to fit */
+export function HeaderPhoto({
+  profile,
+}: {
+  profile: Profile;
+}): JSX.Element | null {
+  if (!profile.photo) {
+    return null;
+  }
+  return (
+    <Box
+      component="img"
+      src={profile.photo}
+      alt={`Photo of ${profile.fullName}`}
+      sx={{
+        width: "28mm",
+        height: "35mm",
+        objectFit: "cover",
+        borderRadius: "2px",
+        flex: "none",
+        breakInside: "avoid",
+      }}
+    />
+  );
+}
+
+/** The header parts (name, contact) on the left and the photo on the right, side by side */
+export function HeaderWithPhoto({
+  profile,
+  children,
+}: {
+  profile: Profile;
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 2,
+      }}
+    >
+      <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+      <HeaderPhoto profile={profile} />
+    </Box>
   );
 }

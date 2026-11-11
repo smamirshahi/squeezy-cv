@@ -11,11 +11,14 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- A photo on the CV (#345, #255): add it in Vault > Main Info, then move it in a fixed 4:5 frame and zoom in a dialog (the original is kept, so it can be adjusted again). It shows top right in the header, with the name and contact details together on the left, and in the PDF. The export window warns that a photo is included. It is never sent to AI.
+- A "Coffee" button above Settings in the left rail that opens the Ko-fi page (#345).
 - A third tutorial, "Your templates" (layout, arranging sections, style, and where items are chosen), in the Tutorials list.
 - A "Send to AI" window before any text goes to an online model: it shows the exact masked text as a readable outline, lets you switch automatic masks off, hide any selected word as Company, School, Person, Location, Date or Other, and mark a job advert as private; the model's answer gets the real words back. Local models skip it, and "Score all sections" asks once and lists every section (#332).
 
 ### Changed
 
+- Main Info is now four cards (Identity, Contact, Links, Optional details), other job titles are chips, and the right panel shows a live preview of the header with a note that it is only a preview of the vault. The Apply / Discard bar is a fixed row at the bottom of the page and no longer covers the content (#345).
 - Tailoring is now per section: the Tailor page is gone. "Analyse job description" on the job application page keeps the keywords on the job, and each section's Tailor button scores its entries (for skills each category and each skill) against them (#320).
 - Apply: each entry can show or hide its parts (title, dissertation, description ...), Start and End are one "Dates" part, and hiding the dates no longer shows "Present". The summary and descriptions get Shorten, Rephrase for this job and Make longer (#323).
 - Apply: "Score all sections" scores every section in one go with a progress bar (#324).
