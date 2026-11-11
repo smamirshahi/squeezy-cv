@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Chat panel redesigned (#380): a provider chip with what is sent, a gear that opens the AI settings for chat, a "…" menu with Clear conversation, "Try" chips and Chat can / can't in the empty state, and each proposal as one AI card (tick the changes, flagged rewordings start unticked, Dismiss or Apply). The checkbox is aligned with its text and the message box takes several lines.
+
 ## [0.4.0] - 2026-11-11
 
 ### Fixed
