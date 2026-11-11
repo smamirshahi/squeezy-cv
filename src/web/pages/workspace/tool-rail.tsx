@@ -1,11 +1,11 @@
-import { MouseEvent } from "react";
+import { MouseEvent, useState } from "react";
 import { Box, ButtonBase, Typography } from "@mui/material";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import LayersIcon from "@mui/icons-material/Layers";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
@@ -13,6 +13,7 @@ import { Route, formatRoute } from "@shared/routing/routes";
 import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
+import { AboutDialog } from "@pages/workspace/about-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
@@ -54,14 +55,12 @@ const ITEMS: RailItem[] = [
   },
 ];
 
-/** Where the "Buy me a coffee" button goes. */
-const SUPPORT_URL = "https://ko-fi.com/mohammadamirshahi";
-
 /** The left rail: switches between the tools of the workspace */
 export function ToolRail(): JSX.Element {
   const route = useRoute();
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const { mode, toggle } = useThemeMode();
+  const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
 
   return (
     <Box
@@ -82,22 +81,20 @@ export function ToolRail(): JSX.Element {
       {[
         ...ITEMS,
         null,
-        "coffee" as const,
+        "about" as const,
         "settings" as const,
         "theme" as const,
       ].map((item) => {
         if (item === null) {
           return <Box key="spacer" sx={{ flex: 1 }} />;
         }
-        if (item === "coffee") {
+        if (item === "about") {
           return (
             <ButtonBase
-              key="coffee"
-              component="a"
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Buy me a coffee (opens Ko-fi)"
+              key="about"
+              onClick={() => setIsAboutOpen(true)}
+              aria-haspopup="dialog"
+              aria-label="About CV Builder and its author"
               sx={{
                 width: 60,
                 py: 0.9,
@@ -108,8 +105,8 @@ export function ToolRail(): JSX.Element {
                 "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
               }}
             >
-              <LocalCafeOutlinedIcon fontSize="small" />
-              <Typography sx={{ fontSize: 10.5 }}>Support me</Typography>
+              <InfoOutlinedIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>About</Typography>
             </ButtonBase>
           );
         }
@@ -209,6 +206,7 @@ export function ToolRail(): JSX.Element {
       >
         v{APP_VERSION}
       </Typography>
+      <AboutDialog isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </Box>
   );
 }
