@@ -11,7 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
-- Apply tutorial (6 steps: the advert, template and sections, page limit, choosing entries, wording, export and mark as applied) in the Tutorials dialog; the (i) next to "Job application" in the top bar opens it.
+- Apply tutorial (6 steps: the advert, template and sections, page limit, choosing entries, wording, export and mark as applied) in the Tutorials dialog; the (i) next to "Job application" in the top bar opens it. Each tutorial (Vault, Template, Apply) opens by itself the first time you visit its page.
 
 ## [0.5.0] - 2026-11-11
 
