@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- About dialog: the rail's coffee button is now "About". It shows who made CV Builder and why, how data and AI are handled, a "Support this project" box with the coffee link, and the app version (the texts and photo are tracked in #368).
 - AI settings are a dialog now, opened by the rail's Settings button and by "Settings…" next to an AI action (it opens on that task). Left: All tasks, each task and "Set up the providers"; middle: what it does and what is sent and masked; right: the provider choice, saved at once. The Settings page is gone (the old /settings address opens the dialog).
 - Apply, Experience step: the AI strip of a description works in two steps. "1 · Lean on": pick points from the advert (the table opens in a dialog, the picks show as removable chips with Clear and stay until cleared). "2 · Then": Shorten, Rephrase, Make longer and Make bullets (one filled button, after a divider) all use the picked points; Shorten keeps them instead of putting them first. The separate bullets card is gone from this page (the inspector keeps it), and "Replace the description with these bullets" now sits above the proposed bullets.
 - One table for what the job asks for (Must have, Nice to have, Keywords, one row per point). It is read-only in the "Advert added" dialog and in a new "See results" dialog under Analyse job description (which no longer lists the keywords inline), and clickable in the Emphasise dialog.
