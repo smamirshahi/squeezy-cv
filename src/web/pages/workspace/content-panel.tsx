@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import { Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { ExportDialog } from "@pages/workspace/export-dialog";
 import { JobContent } from "@pages/editor-page/sections/job-content";
 import { GeneralStep } from "@pages/workspace/general-step";
@@ -23,9 +24,8 @@ const GENERAL_STEP = "general";
 const HEADER_STEP = "header";
 
 /**
- * The right panel of "Template & content": pick a part of the job (General, the header, then
- * each section; they are independent, not a sequence). The header also has the job's status
- * and Export PDF. Only what the job shows is decided here; the layout and the
+ * The right panel of "Template & content": go through the job one step at a time (the
+ * header, then each section). Only what the job shows is decided here; the layout and the
  * order of sections belong to the template. Clicking an item on the paper still opens that
  * item's own settings, like before.
  */
@@ -40,6 +40,8 @@ export function ContentPanel(): JSX.Element {
   const job = isPlaceholder
     ? undefined
     : jobs.find((entry) => entry.id === activeJobId);
+  const [sectionMenu, setSectionMenu] = useState<HTMLElement | null>(null);
+  const [statusMenu, setStatusMenu] = useState<HTMLElement | null>(null);
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [step, setStep] = useState<string>(GENERAL_STEP);
   const steps = [
@@ -92,67 +94,171 @@ export function ContentPanel(): JSX.Element {
             borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography
-              component="h1"
-              noWrap
-              sx={{ fontSize: 18, fontWeight: 600, flex: 1, minWidth: 0 }}
-            >
-              {current.label}
-            </Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              disabled={!job}
-              aria-label={
-                job?.stage === "ready"
-                  ? "Status: Ready to apply. Back to draft"
-                  : "Status: Draft. Mark as ready"
-              }
-              onClick={() => {
-                if (job) {
-                  dispatch(
-                    setJobDetails({
-                      id: job.id,
-                      details: {
-                        stage: job.stage === "ready" ? "draft" : "ready",
-                      },
-                    })
-                  );
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1.5,
+            }}
+          >
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+                Section {index + 1} of {steps.length}
+              </Typography>
+              <Button
+                color="inherit"
+                aria-label="Go to section"
+                aria-haspopup="menu"
+                onClick={(event) => setSectionMenu(event.currentTarget)}
+                endIcon={<KeyboardArrowDownIcon />}
+                sx={{
+                  mt: 0.25,
+                  ml: -1,
+                  px: 1,
+                  py: 0,
+                  fontSize: 18,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  maxWidth: "100%",
+                  whiteSpace: "nowrap",
+                  justifyContent: "flex-start",
+                  "& .MuiButton-endIcon": { color: WORKSPACE_COLORS.muted },
+                }}
+              >
+                <Box component="span" sx={{ overflow: "hidden" }}>
+                  {current.label}
+                </Box>
+              </Button>
+              <Menu
+                anchorEl={sectionMenu}
+                open={Boolean(sectionMenu)}
+                onClose={() => setSectionMenu(null)}
+                slotProps={{ paper: { sx: { minWidth: 280 } } }}
+              >
+                {steps.map((entry, position) => (
+                  <MenuItem
+                    key={entry.id}
+                    selected={entry.id === current.id}
+                    onClick={() => {
+                      setStep(entry.id);
+                      setSectionMenu(null);
+                    }}
+                    sx={{ gap: 1.5 }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: "50%",
+                        display: "grid",
+                        placeItems: "center",
+                        fontSize: 12,
+                        flex: "none",
+                        ...(entry.id === current.id
+                          ? {
+                              bgcolor: WORKSPACE_COLORS.accent,
+                              color: "#fff",
+                            }
+                          : {
+                              border: `1px solid ${WORKSPACE_COLORS.border}`,
+                              color: WORKSPACE_COLORS.muted,
+                            }),
+                      }}
+                    >
+                      {position + 1}
+                    </Box>
+                    <Box component="span" sx={{ flex: 1 }}>
+                      {entry.label}
+                    </Box>
+                    {entry.id === current.id && (
+                      <Typography
+                        component="span"
+                        sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+                      >
+                        Here
+                      </Typography>
+                    )}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1, flex: "none" }}>
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={!job}
+                aria-haspopup="menu"
+                aria-label="Job status"
+                onClick={(event) => setStatusMenu(event.currentTarget)}
+                startIcon={
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      bgcolor: job?.stage === "ready" ? "#2e7d32" : "#b7791f",
+                    }}
+                  />
                 }
-              }}
-            >
-              {job?.stage === "ready"
-                ? "Ready · back to draft"
-                : "Draft · mark ready"}
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              disabled={!job}
-              startIcon={<PictureAsPdfOutlinedIcon />}
-              onClick={() => setIsExportOpen(true)}
-            >
-              Export PDF
-            </Button>
+                endIcon={<KeyboardArrowDownIcon />}
+              >
+                {job?.stage === "ready" ? "Ready" : "Draft"}
+              </Button>
+              <Menu
+                anchorEl={statusMenu}
+                open={Boolean(statusMenu)}
+                onClose={() => setStatusMenu(null)}
+              >
+                {(["draft", "ready"] as const).map((stage) => (
+                  <MenuItem
+                    key={stage}
+                    selected={(job?.stage ?? "draft") === stage}
+                    onClick={() => {
+                      if (job) {
+                        dispatch(
+                          setJobDetails({ id: job.id, details: { stage } })
+                        );
+                      }
+                      setStatusMenu(null);
+                    }}
+                  >
+                    {stage === "ready" ? "Ready to apply" : "Draft"}
+                  </MenuItem>
+                ))}
+              </Menu>
+              <Button
+                size="small"
+                variant="contained"
+                disabled={!job}
+                startIcon={<FileDownloadOutlinedIcon />}
+                onClick={() => setIsExportOpen(true)}
+              >
+                Export PDF
+              </Button>
+            </Box>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-              Section
-            </Typography>
-            <Select
-              size="small"
-              fullWidth
-              value={current.id}
-              inputProps={{ "aria-label": "Go to section" }}
-              onChange={(event) => setStep(event.target.value)}
-            >
-              {steps.map((entry) => (
-                <MenuItem key={entry.id} value={entry.id}>
-                  {entry.label}
-                </MenuItem>
-              ))}
-            </Select>
+          <Box
+            role="img"
+            aria-label={`Section ${index + 1} of ${steps.length}`}
+            sx={{ display: "flex", gap: 0.5 }}
+          >
+            {steps.map((entry, position) => (
+              <Box
+                key={entry.id}
+                sx={{
+                  flex: 1,
+                  height: 4,
+                  borderRadius: "2px",
+                  bgcolor:
+                    position <= index
+                      ? WORKSPACE_COLORS.accent
+                      : WORKSPACE_COLORS.border,
+                }}
+              />
+            ))}
           </Box>
         </Box>
 
@@ -185,6 +291,38 @@ export function ContentPanel(): JSX.Element {
           )}
         </Box>
 
+        <Box
+          component="footer"
+          sx={{
+            flex: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            px: 2.5,
+            py: 1.5,
+            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+          }}
+        >
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={index === 0}
+            onClick={() => setStep(steps[index - 1].id)}
+          >
+            {index === 0 ? "Back" : `Back: ${steps[index - 1].label}`}
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            disabled={index === steps.length - 1}
+            onClick={() => setStep(steps[index + 1].id)}
+          >
+            {index === steps.length - 1
+              ? "Next"
+              : `Next: ${steps[index + 1].label}`}
+          </Button>
+        </Box>
         <ExportDialog
           isOpen={isExportOpen}
           onClose={() => setIsExportOpen(false)}
