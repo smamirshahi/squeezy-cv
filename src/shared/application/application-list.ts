@@ -5,7 +5,7 @@ import {
 } from "@custom-types/application-types";
 import { isNoReply } from "@shared/application/application-utils";
 
-export type SortKey = "appliedAt" | "company";
+type SortKey = "appliedAt" | "company";
 type SortDirection = "asc" | "desc";
 
 export interface ListView {

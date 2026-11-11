@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Applications page redesigned (#384): one list of unsent jobs and sent applications with a Sort dropdown, a merged "Role · Template" column (the template is now always shown, also for older applications and unsent jobs), status as a dropdown of pills with a coloured dot, "CV sent · View" under the date, and an open-job icon in the last column that opens the job in a new tab. The sidebar is grouped (All jobs, Before sending, Sent, Needs a nudge). The side panel has a close button, a Next step card, Progress, and a Job data table with the extra job fields (URL, location, work mode, employment, salary, feeling, chance); for a sent application "Draft created" starts its Timeline.
+
 ### Added
 
 - Apply tutorial (6 steps: the advert, template and sections, page limit, choosing entries, wording, export and mark as applied) in the Tutorials dialog; the (i) next to "Job application" in the top bar opens it. Each tutorial (Vault, Template, Apply) opens by itself the first time you visit its page.
