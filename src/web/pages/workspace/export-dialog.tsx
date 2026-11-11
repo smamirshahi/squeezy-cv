@@ -27,6 +27,7 @@ import {
   activeTemplateSelector,
   activeVariantSelector,
 } from "@store/jobs/jobs-slice";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 interface Props {
@@ -94,8 +95,12 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
   const hiddenItemCount = Object.values(variant.selection).filter(
     (choice) => choice.isVisible === false
   ).length;
+  const isPhotoShown = useAppSelector(styleSelector).shouldShowPhoto !== false;
   const checks = exportChecks({
-    profile: vault.profile,
+    // A photo that is switched off in the style is not in the PDF, so it is not a warning
+    profile: isPhotoShown
+      ? vault.profile
+      : { ...vault.profile, photo: undefined },
     pageCount: fit.pageCount,
     pageLimit: variant.pageLimit,
     usedPercent: fit.usedPercent,
@@ -129,11 +134,12 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
         <DialogTitle>
           Export PDF · {variant.name} · {template.name}
         </DialogTitle>
-        <DialogContent sx={{ display: "flex", gap: 3 }}>
+        <DialogContent sx={{ display: "flex", gap: 3, pt: "8px !important" }}>
           <Box
             sx={{
-              width: 360,
-              height: 500,
+              width: 400,
+              minHeight: 500,
+              alignSelf: "stretch",
               flex: "none",
               bgcolor: WORKSPACE_COLORS.canvas,
               display: "flex",
@@ -144,7 +150,7 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
             {pdf ? (
               <iframe
                 title="PDF preview"
-                src={pdf.url}
+                src={`${pdf.url}#toolbar=0&navpanes=0&view=FitH`}
                 style={{ width: "100%", height: "100%", border: 0 }}
               />
             ) : (
