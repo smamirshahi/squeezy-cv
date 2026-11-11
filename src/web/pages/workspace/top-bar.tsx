@@ -11,8 +11,9 @@ import {
   type TutorialId,
 } from "@pages/workspace/how-it-works-dialog";
 import {
-  hasSeenVaultTutorial,
-  markVaultTutorialSeen,
+  hasSeenTutorial,
+  markTutorialSeen,
+  type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
@@ -207,6 +208,21 @@ function FlowSteps({
   );
 }
 
+/** The tutorial that belongs to a page (Apply covers the job and the chat), if it has one */
+function tutorialOfRoute(kind: Route["kind"]): FirstVisitTutorial | null {
+  switch (kind) {
+    case "vault":
+      return "vault";
+    case "templates":
+      return "template";
+    case "jobs":
+    case "chat":
+      return "apply";
+    default:
+      return null;
+  }
+}
+
 /** The dark bar on top: the app flow, save state and the main actions */
 export function TopBar(): JSX.Element {
   const [help, setHelp] = useState<{
@@ -222,14 +238,14 @@ export function TopBar(): JSX.Element {
     );
   const route = useRoute();
 
-  // The first time the Vault is opened, its tutorial shows; after that only the ? button does
-  const isInVault = route.kind === "vault";
+  // The first time a page is opened, its tutorial shows; after that only the buttons do
+  const visited = tutorialOfRoute(route.kind);
   useEffect(() => {
-    if (isInVault && !hasSeenVaultTutorial()) {
-      markVaultTutorialSeen();
-      setHelp({ tutorial: "vault", step: 0 });
+    if (visited && !hasSeenTutorial(visited)) {
+      markTutorialSeen(visited);
+      setHelp({ tutorial: visited, step: 0 });
     }
-  }, [isInVault]);
+  }, [visited]);
 
   return (
     <Box
