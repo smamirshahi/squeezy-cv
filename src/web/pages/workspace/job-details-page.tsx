@@ -95,7 +95,7 @@ export function JobDetailsPage(): JSX.Element {
   }
 
   async function saveForLater(input: NewCandidate): Promise<void> {
-    await createApiClient().createCandidate(input);
+    await createApiClient().createCandidate({ ...input, jobId: job?.id });
     setNote("Saved to Candidates.");
   }
 

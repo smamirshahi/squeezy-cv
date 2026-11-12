@@ -586,13 +586,13 @@ export class FileCvStorage implements CvStorage {
     try {
       raw = await readJsonFile(filePath);
     } catch (error) {
-      if (isMissing(error)) {
-        throw new StorageError("not_found", `There is no candidate ${id}.`);
-      }
       throw new StorageError(
         "corrupt",
         `Candidate ${id} cannot be read: ${describe(error)}. The file was left untouched.`
       );
+    }
+    if (raw === undefined) {
+      throw new StorageError("not_found", `There is no candidate ${id}.`);
     }
     if (!CandidateSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(

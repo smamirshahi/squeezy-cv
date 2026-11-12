@@ -55,6 +55,9 @@ export const NewCandidateSchema = Object({
   jobAd: String.optional(),
   note: String.optional(),
   applyBy: String.optional(),
+
+  /** Set when saved from a job that already exists: Continue then opens that job */
+  jobId: String.optional(),
 });
 
 export const CandidatePatchSchema = Object({

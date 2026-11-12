@@ -37,6 +37,7 @@ export function createCandidate(
   const jobAd = trimmed(input.jobAd);
   const note = trimmed(input.note);
   const applyBy = trimmed(input.applyBy);
+  const jobId = trimmed(input.jobId);
   return {
     id,
     version: CURRENT_CANDIDATE_VERSION,
@@ -46,6 +47,7 @@ export function createCandidate(
     ...(jobAd === undefined ? {} : { jobAd }),
     ...(note === undefined ? {} : { note }),
     ...(applyBy === undefined ? {} : { applyBy }),
+    ...(jobId === undefined ? {} : { jobId }),
     status: "open",
     createdAt: today,
   };
