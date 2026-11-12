@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -22,6 +22,8 @@ import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
+import { ApplicationSummary } from "@custom-types/application-types";
+import { createApiClient } from "@store/persistence/api-client";
 import { Template } from "@custom-types/template-types";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { Route, TemplatesTab, formatRoute } from "@shared/routing/routes";
@@ -34,6 +36,7 @@ import {
   nextTemplateName,
   sortTemplates,
 } from "@pages/workspace/template-scope";
+import { TemplateJobsTable } from "@pages/workspace/template-jobs-table";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { TemplateSample } from "@pages/workspace/template-section-styles";
 import {
@@ -215,6 +218,14 @@ export function TemplatesPage(): JSX.Element {
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
   const [sort, setSort] = useState<TemplateSort>("newest");
+  const api = useMemo(() => createApiClient(), []);
+  const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+  useEffect(() => {
+    api
+      .listApplications()
+      .then(setApplications)
+      .catch(() => setApplications([]));
+  }, [api]);
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
   const [isReversed, setIsReversed] = useState<boolean>(false);
   const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
@@ -572,14 +583,10 @@ export function TemplatesPage(): JSX.Element {
                                 in={isExpanded}
                                 id={`template-jobs-${template.id}`}
                               >
-                                <Box
-                                  component="ul"
-                                  sx={{ m: 0, pl: 4, fontSize: 13, pt: 0.5 }}
-                                >
-                                  {users.map((job) => (
-                                    <li key={job.id}>{job.name}</li>
-                                  ))}
-                                </Box>
+                                <TemplateJobsTable
+                                  jobs={users}
+                                  applications={applications}
+                                />
                               </Collapse>
                             </>
                           )}

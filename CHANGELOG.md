@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Templates page (#280): the jobs of a template are a table (job linked to `/jobs/<id>` in a new tab, company · role, created, application status, PDF of the sent application or of the saved job, sortable) with an empty state.
+
 ### Fixed
 
 - Opening a job by its address (for example `/jobs/<id>`) could end on the first job instead: the saved data was loaded twice at the same time (React's development mode starts the first load twice) and the second load put the first job back. A load that is running is no longer started again.
