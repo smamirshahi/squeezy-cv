@@ -50,11 +50,6 @@ import {
   ApplicationSummary,
   NewApplication,
 } from "@custom-types/application-types";
-import {
-  TailorRequest,
-  TailorResult,
-  TailorResultSchema,
-} from "@custom-types/tailor-types";
 import { Job, JobSchema } from "@custom-types/job-types";
 import { Template, TemplateSchema } from "@custom-types/template-types";
 import { Variant, VariantSchema } from "@custom-types/variant-types";
@@ -149,12 +144,6 @@ export interface ImportedCv {
   warnings: string[];
 }
 
-/** The messages tailoring would send, see the server's `previewTailorRequest` */
-interface TailorPreview {
-  provider: AiProviderId;
-  calls: { promptName: string; system: string; input: string }[];
-}
-
 /** What the server says about AI. `isConfigured` and `provider` are tailoring's; the rest is for the chooser. */
 export interface AiStatus {
   isConfigured: boolean;
@@ -199,9 +188,6 @@ export interface ApiClient {
 
   /** Also hide employer and school names ([Company 1], [Institution 1]) in what is sent to a model */
 
-  /** Asks the AI how to present the saved CV for a job advert. Sends CV text to Anthropic. */
-  tailor: (request: TailorRequest) => Promise<TailorResult>;
-
   /** The text layer of a PDF, read by the local server (the file is not stored). Nothing is sent to an AI here. */
   extractPdfText: (file: Blob) => Promise<{ text: string; pages: number }>;
 
@@ -232,9 +218,6 @@ export interface ApiClient {
 
   /** Asks the AI which section each unsorted item belongs in. Sends item words and section names. Nothing is moved. */
   suggestPlacement: (request: PlaceRequest) => Promise<PlaceResult>;
-
-  /** What tailoring would send to the AI for this advert, with personal details masked. Sends nothing. */
-  previewTailor: (request: TailorRequest) => Promise<TailorPreview>;
 
   /** The PDF of a saved job (its id is also a variant id), made by the server */
   createPdf: (jobId: string) => Promise<Blob>;
@@ -338,11 +321,6 @@ export function createApiClient(
       )) as { choice: AiChoice };
       return answer.choice;
     },
-    async tailor(body) {
-      return TailorResultSchema.check(
-        await request(fetchImpl, "POST", "/api/ai/tailor", body)
-      );
-    },
     async extractPdfText(file) {
       let response: Response;
       try {
@@ -420,14 +398,6 @@ export function createApiClient(
       return PlaceResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/place", body)
       );
-    },
-    async previewTailor(body) {
-      return (await request(
-        fetchImpl,
-        "POST",
-        "/api/ai/tailor/preview",
-        body
-      )) as TailorPreview;
     },
     async createPdf(jobId) {
       return (await request(

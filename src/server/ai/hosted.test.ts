@@ -10,7 +10,7 @@ import {
   isAiAvailable,
 } from "@server/ai/ai-provider";
 import { AiError } from "@server/ai/ai-types";
-import { tailor } from "@server/ai/tailor";
+import { analyseJobAd } from "@server/ai/analyse-job-ad";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 interface Seen {
@@ -293,16 +293,13 @@ describe("what leaves the machine", () => {
   const file = migrateCvFile(sample);
   const { profile, links } = file.vault;
 
-  const answers = (count: number): unknown =>
-    count === 1
-      ? {
-          jobTitle: "Dev",
-          seniority: "",
-          mustHave: [],
-          niceToHave: [],
-          keywords: [],
-        }
-      : { items: [], bullets: [], statement: "", gaps: [] };
+  const answers = (): unknown => ({
+    jobTitle: "Dev",
+    seniority: "",
+    mustHave: [],
+    niceToHave: [],
+    keywords: [],
+  });
 
   it.each([
     ["Gemini", geminiConfig, (text: unknown) => gemini(JSON.stringify(text))],
@@ -310,13 +307,13 @@ describe("what leaves the machine", () => {
   ])(
     "%s: nothing from the profile is in the request body",
     async (_name, makeConfig, wrap) => {
-      const fake = await startFake((_s, count, res) =>
-        json(res, 200, wrap(answers(count)))
+      const fake = await startFake((_s, _count, res) =>
+        json(res, 200, wrap(answers()))
       );
       const ai = createConfiguredAi(makeConfig(fake.url))!;
       const advert = `Hiring a developer. Contact ${profile.fullName} at ${profile.email}.`;
-      await tailor(ai, file.vault, { jobAd: advert, tone: "neutral" });
-      expect(fake.requests).toHaveLength(2);
+      await analyseJobAd(ai, file.vault, advert);
+      expect(fake.requests).toHaveLength(1);
       const sent = fake.requests.map((r) => r.raw).join("\n");
       for (const secret of [
         profile.fullName,
