@@ -1,6 +1,6 @@
 import { UnknownAction, combineReducers } from "@reduxjs/toolkit";
 import { Operation } from "@custom-types/chat-types";
-import { reorderLayoutSections } from "@shared/ai/apply-proposal";
+import { reorderLayoutSections } from "@shared/variant/reorder-layout";
 import { sortItemsByVariant } from "@shared/variant/render";
 import { computeItemOrders } from "@shared/variant/variant-utils";
 import { appReducer, updatePageStructure } from "@store/app/app-slice";

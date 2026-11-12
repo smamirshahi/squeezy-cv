@@ -23,7 +23,7 @@ interface RenderedBullet {
   rating?: number;
 }
 
-export interface RenderedItem {
+interface RenderedItem {
   id: string;
   fields: Record<string, string>;
   bullets: RenderedBullet[];
