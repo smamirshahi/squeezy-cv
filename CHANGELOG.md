@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- CI (#399) saves GitHub Actions minutes: it runs only on pull requests that are not drafts (not on branch pushes and not again after the merge), cancels the older run when a new commit arrives, skips docs-only changes, caches the Playwright browser and stops after 15 minutes. It can be started by hand from the Actions tab.
+
 ### Added
 
 - The app adapts to the window size (#348): four classes (phone under 600 px, tablet 600-899, small laptop 900-1199, desktop 1200 and up; desktop is unchanged). On a phone the tool rail becomes a bottom tab bar and About, Settings and the theme move into a More menu in the top bar; the Apply menu becomes a tab strip above the page; the CV panel, chat and previews dock under the canvas (a collapsed Preview row on the Templates pages); the Vault tree becomes chips and items open on their own screen; tables become cards; the Applications detail is a slide-over; dialogs are full screen; the canvas zoom fits the width on first view (lowest zoom 40%). The paper and the PDF never depend on the window size. `src/e2e/responsive.e2e.ts` checks six sizes (1920 to 390) for sideways page scroll, unreachable controls and the paper size.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cleanRequirementList, isGapCoveredByCv } from "@server/ai/tailor";
+import { cleanRequirementList } from "@server/ai/tailor";
+import { isGapCoveredByCv } from "@shared/ai/gap-coverage";
 
 describe("cleanRequirementList", () => {
   it("drops one-word advert headings but keeps real requirements", () => {

@@ -16,7 +16,6 @@ import { JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
 import { TemplateSchema } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
-import { tailor } from "@server/ai/tailor";
 import {
   analyseJobAd,
   scoreJobTitles,
@@ -27,7 +26,6 @@ import {
   AnalyseRequestSchema,
   ScoreSectionRequestSchema,
 } from "@custom-types/score-types";
-import { previewTailorRequest } from "@server/ai/preview";
 import { importCv } from "@server/ai/import-cv";
 import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
 import { pickHide } from "@server/ai/pick-hide";
@@ -69,10 +67,7 @@ import {
   BulletsRequestSchema,
   MAX_BULLETS_REQUIREMENTS,
 } from "@custom-types/bullets-types";
-import {
-  MAX_JOB_AD_LENGTH,
-  TailorRequestSchema,
-} from "@custom-types/tailor-types";
+import { MAX_JOB_AD_LENGTH } from "@custom-types/tailor-types";
 import {
   ImportRequestSchema,
   MAX_IMPORT_LENGTH,
@@ -393,43 +388,6 @@ export function buildServer({
     return { choice: registry.choice() };
   });
 
-  app.post("/api/ai/tailor", async (request, reply) => {
-    const ai = aiFor("tailor", request, {
-      callsToRecord: 2,
-      standIn: {
-        jobTitle: "(answer of the first call)",
-        mustHave: [],
-        niceToHave: [],
-        keywords: [],
-      },
-    });
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const body = TailorRequestSchema.check(request.body);
-    const jobAd = body.jobAd.trim();
-    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
-      );
-    }
-    const { vault } = await storage.loadVault();
-    return tailor(
-      ai,
-      vault,
-      { jobAd, tone: body.tone },
-      { isMaskingOrganisations: registry.isMaskingOrganisations() }
-    );
-  });
-
   // Reads an advert once: keywords and requirements for the job (the user stores them; nothing is changed here)
   app.post("/api/ai/analyse", async (request, reply) => {
     const ai = aiFor("tailor", request);
@@ -736,29 +694,6 @@ export function buildServer({
       );
     }
     return importCv(ai, text);
-  });
-
-  // What tailoring would send, without sending it (works without a key)
-  app.post("/api/ai/tailor/preview", async (request, reply) => {
-    const body = TailorRequestSchema.check(request.body);
-    const jobAd = body.jobAd.trim();
-    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
-      );
-    }
-    const { vault } = await storage.loadVault();
-    return {
-      provider: registry.forTask("tailor").provider,
-      calls: await previewTailorRequest(
-        vault,
-        { jobAd, tone: body.tone },
-        { isMaskingOrganisations: registry.isMaskingOrganisations() }
-      ),
-    };
   });
 
   app.get("/api/vault", () => storage.loadVault());

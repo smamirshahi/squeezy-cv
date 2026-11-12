@@ -329,25 +329,6 @@ const jobsSlice = createSlice({
       state.templates = state.templates.filter((t) => t.id !== id);
     },
 
-    /**
-     * A job made by tailoring (#170): it uses an existing template, or the template copy that
-     * comes with it. Nothing existing is changed. The job becomes the active one.
-     */
-    insertTailoredJob(
-      state,
-      action: PayloadAction<{ job: Job; template?: Template }>
-    ) {
-      const { job, template } = action.payload;
-      if (template) {
-        state.templates.push(template);
-      }
-      if (state.templates.some((t) => t.id === job.templateId)) {
-        dropPlaceholderJob(state);
-        state.jobs.push(job);
-        state.activeJobId = job.id;
-      }
-    },
-
     /** A new job that shows what the source shows and shares its template (changing the look changes both) */
     copyJob: {
       reducer(
@@ -801,7 +782,6 @@ export const {
   setVariants,
   setTemplatesAndJobs,
   createJob,
-  insertTailoredJob,
   copyJob,
   renameJob,
   setJobDetails,

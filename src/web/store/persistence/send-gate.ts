@@ -34,10 +34,6 @@ type SendHost = (request: SendApprovalRequest) => Promise<SendApproval | null>;
 
 /** The AI requests that send text to a model, and what each sends */
 const GATED: Record<string, { scope: string; hasAdvert: boolean }> = {
-  "/api/ai/tailor": {
-    scope: "Your whole CV and the job advert",
-    hasAdvert: true,
-  },
   "/api/ai/analyse": { scope: "The job advert only", hasAdvert: true },
   "/api/ai/score-section": {
     scope: "One section of your CV",
