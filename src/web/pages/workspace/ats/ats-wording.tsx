@@ -34,12 +34,16 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 export function AtsWording({
   missing,
   reworded,
+  leading,
 }: {
   /** Keywords the CV lacks */
   missing: string[];
 
   /** Keywords the CV has, worded differently from the advert */
   reworded: string[];
+
+  /** The button shown beside "Suggest wording" (Update score) */
+  leading: JSX.Element;
 }): JSX.Element {
   const terms = [...missing, ...reworded];
   const api = useMemo(() => createApiClient(), []);
@@ -95,45 +99,35 @@ export function AtsWording({
   }
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gap: 1,
-        p: 1.25,
-        borderRadius: 1,
-        bgcolor: WORKSPACE_COLORS.aiSoft,
-        border: `1px solid ${WORKSPACE_COLORS.aiBorder}`,
-      }}
-    >
-      <Box
+    <Box sx={{ display: "grid", gap: 1 }}>
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 0, display: "flex" }}>{leading}</Box>
+        <AiButton
+          variant="outlined"
+          sx={{ flex: 1, minWidth: 0 }}
+          disabled={isBusy || terms.length === 0}
+          startIcon={
+            isBusy ? (
+              <CircularProgress size={16} color="secondary" />
+            ) : undefined
+          }
+          onClick={() => void ask()}
+        >
+          Suggest wording
+        </AiButton>
+      </Box>
+      <Typography
         sx={{
+          fontSize: 12,
+          color: WORKSPACE_COLORS.aiText,
           display: "flex",
           alignItems: "center",
-          gap: 0.75,
-          fontWeight: 700,
-          fontSize: 13.5,
-          color: WORKSPACE_COLORS.aiText,
+          gap: 0.5,
         }}
       >
-        <AiIcon />
-        AI assist
-      </Box>
-      <Typography sx={{ fontSize: 12.5 }}>
-        Works the advert&apos;s keywords into your own texts, only where they
-        already say it. You review it before anything changes.
+        <AiIcon fontSize="inherit" /> Suggestions are reviewed by you before
+        anything changes.
       </Typography>
-      <AiButton
-        variant="outlined"
-        size="small"
-        fullWidth
-        disabled={isBusy || terms.length === 0}
-        startIcon={
-          isBusy ? <CircularProgress size={16} color="secondary" /> : undefined
-        }
-        onClick={() => void ask()}
-      >
-        Suggest natural wording
-      </AiButton>
       {terms.length === 0 && (
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           Nothing to work in: no keyword is missing or worded differently.

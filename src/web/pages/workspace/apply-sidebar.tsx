@@ -5,7 +5,8 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { useViewport } from "@hooks/use-viewport";
 import { AiIcon } from "@components/ai-button";
-import { AtsPanel } from "@pages/workspace/ats/ats-panel";
+import { PAGE_RING_SIZE, sinceText } from "@pages/workspace/ats/ats-panel";
+import { ScoreRing } from "@pages/workspace/ats/score-ring";
 import { useAts } from "@pages/workspace/ats/use-ats";
 import { Route, formatRoute } from "@shared/routing/routes";
 
@@ -66,7 +67,9 @@ function Group({
   jobId,
   hasJob,
   isStrip,
+  children,
 }: {
+  children?: JSX.Element;
   title?: string;
   entries: Entry[];
   jobId?: string;
@@ -180,15 +183,23 @@ function Group({
           </Box>
         );
       })}
+      {children}
     </Box>
   );
 }
 
 /**
- * "ATS score" as a tab, below a desktop (on a desktop the score is a section of the sidebar,
- * see `AtsPanel`). Needs a job. It shows the latest score as a number, never colour alone.
+ * "ATS score": the entry that opens the ATS page (a tab in the strip below a desktop, a button
+ * under Chat in the desktop menu). Needs a job. In the strip it shows the latest score as a
+ * number, never colour alone; on a desktop the summary below the menu shows it.
  */
-function AtsTab({ jobId }: { jobId?: string }): JSX.Element {
+function AtsTab({
+  jobId,
+  isScoreShown,
+}: {
+  jobId?: string;
+  isScoreShown: boolean;
+}): JSX.Element {
   const route = useRoute();
   const ats = useAts();
   const target: Route = { kind: "jobs", jobId, view: "ats" };
@@ -257,10 +268,12 @@ function AtsTab({ jobId }: { jobId?: string }): JSX.Element {
           display: "flex",
           alignItems: "center",
           gap: 0.75,
+          color: WORKSPACE_COLORS.aiText,
         }}
       >
+        <AiIcon fontSize="inherit" />
         ATS score
-        {ats.now && (
+        {isScoreShown && ats.now && (
           <Chip
             size="small"
             label={ats.now.total}
@@ -279,6 +292,53 @@ function AtsTab({ jobId }: { jobId?: string }): JSX.Element {
       >
         How a parser reads the CV
       </Typography>
+    </Box>
+  );
+}
+
+/** The general number under the desktop menu; the details are on the ATS page */
+function AtsSummary(): JSX.Element | null {
+  const ats = useAts();
+  if (!ats.hasJob) {
+    return null;
+  }
+  const total = ats.now?.total ?? null;
+  let status = "Up to date";
+  if (ats.isStale) {
+    status = "CV changed";
+  } else if (total === null) {
+    status = "Not scanned yet";
+  }
+  return (
+    <Box
+      component="section"
+      aria-label="ATS score summary"
+      sx={{
+        display: "grid",
+        justifyItems: "center",
+        textAlign: "center",
+        gap: 1,
+        p: 1.5,
+      }}
+    >
+      <ScoreRing
+        score={total}
+        firstScore={ats.first?.total ?? null}
+        size={PAGE_RING_SIZE}
+        label={
+          total === null
+            ? "ATS score: not analysed yet"
+            : `ATS score ${total} out of 100`
+        }
+      />
+      <Box sx={{ minWidth: 0 }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{status}</Typography>
+        {ats.now && (
+          <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+            Analysed {sinceText(ats.now.at)}
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
@@ -303,7 +363,9 @@ export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
         jobId={jobId}
         hasJob={jobId !== undefined}
         isStrip={isStrip}
-      />
+      >
+        {isStrip ? undefined : <AtsTab jobId={jobId} isScoreShown={false} />}
+      </Group>
     </>
   );
   if (isStrip) {
@@ -323,7 +385,7 @@ export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
       >
         {groups}
         <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-        <AtsTab jobId={jobId} />
+        <AtsTab jobId={jobId} isScoreShown />
       </Box>
     );
   }
@@ -342,7 +404,7 @@ export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
           {groups}
         </Box>
         <Divider />
-        <AtsPanel variant="section" />
+        <AtsSummary />
       </Box>
     </ResizableAside>
   );

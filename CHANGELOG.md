@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- The ATS score (#415) has its own page: an "ATS score" button under Chat in the Apply menu opens it, and the sidebar keeps only the score ring and its status. "Update score" is only on when the CV changed since the last scan (the score is calculated on this computer, so the same CV always gives the same number) and sits beside the purple "Suggest wording" button. "A guide, not a target" is always shown on top, the advert's keywords are chips with a Missing / On your CV switch, and each category opens to list its issues.
 - The Tutorials dialog (#413) fits every screen size: a contents sidebar with ticks on desktop and small laptops, tabs on a tablet, and on a phone a full page with a Tutorial dropdown that opens a bottom list. A tutorial is ticked once you reach its last step, and a "Don't show on start" switch stops tutorials opening by themselves on a first visit.
 - CI (#399) saves GitHub Actions minutes: it runs only on pull requests that are not drafts (not on branch pushes and not again after the merge), cancels the older run when a new commit arrives, skips docs-only changes, caches the Playwright browser and stops after 15 minutes. It can be started by hand from the Actions tab.
 
