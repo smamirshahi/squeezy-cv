@@ -1,4 +1,4 @@
-import { assertNotNewer, FileKind } from "@shared/migration/export-meta";
+import { FileKind } from "@shared/migration/export-meta";
 
 /** One step that upgrades a file of `kind` from format version `fromVersion` to `toVersion` */
 export interface MigrationStep {
@@ -36,7 +36,7 @@ export function runMigrations(
     );
     if (!step) {
       throw new Error(
-        `No migration for ${kind} from version ${version} to ${version + 1}.`
+        `No migration from ${kind === "cv-file" ? "vault" : kind} version ${version} to ${version + 1}.`
       );
     }
     const next = step.migrate(current);
@@ -49,9 +49,4 @@ export function runMigrations(
     version = step.toVersion;
   }
   return current;
-}
-
-/** Refuses a file made by a newer app, then returns it unchanged (the format chain does the rest) */
-export function checkReadable(raw: unknown): void {
-  assertNotNewer(raw);
 }

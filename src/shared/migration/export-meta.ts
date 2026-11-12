@@ -16,20 +16,22 @@ export interface ExportMeta {
   kind: FileKind;
 }
 
-export const META_KEY = "meta";
+const META_KEY = "meta";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /** Parses "1.2.3" into numbers; undefined when it is not a plain SemVer */
-export function parseVersion(text: string): [number, number, number] | undefined {
+function parseVersion(text: string): [number, number, number] | undefined {
   const match = /^(\d+)\.(\d+)\.(\d+)/.exec(text);
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : undefined;
+  return match
+    ? [Number(match[1]), Number(match[2]), Number(match[3])]
+    : undefined;
 }
 
 /** -1, 0 or 1; undefined when either is not a version */
-export function compareVersions(a: string, b: string): number | undefined {
+function compareVersions(a: string, b: string): number | undefined {
   const pa = parseVersion(a);
   const pb = parseVersion(b);
   if (!pa || !pb) {
@@ -44,7 +46,7 @@ export function compareVersions(a: string, b: string): number | undefined {
 }
 
 /** Builds the metadata for a file about to be written */
-export function createExportMeta(
+function createExportMeta(
   kind: FileKind,
   formatVersion: number,
   now: Date = new Date()
@@ -68,7 +70,7 @@ export function withExportMeta<T extends object>(
 }
 
 /** The metadata of a file, or undefined for a file without (the oldest known format) */
-export function readExportMeta(raw: unknown): ExportMeta | undefined {
+function readExportMeta(raw: unknown): ExportMeta | undefined {
   if (!isRecord(raw) || !isRecord(raw[META_KEY])) {
     return undefined;
   }
@@ -99,4 +101,10 @@ export function assertNotNewer(
       `This file was made by CV Builder ${meta.appVersion}, but this app is ${currentVersion}. Update the app to open it.`
     );
   }
+}
+
+/** The file without its `meta`, so what is read back equals what the app works with */
+export function withoutExportMeta<T extends object>(file: T): T {
+  const { [META_KEY]: _meta, ...rest } = file as Record<string, unknown>;
+  return rest as T;
 }
