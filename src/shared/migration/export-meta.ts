@@ -70,7 +70,7 @@ export function withExportMeta<T extends object>(
 }
 
 /** The metadata of a file, or undefined for a file without (the oldest known format) */
-function readExportMeta(raw: unknown): ExportMeta | undefined {
+export function readExportMeta(raw: unknown): ExportMeta | undefined {
   if (!isRecord(raw) || !isRecord(raw[META_KEY])) {
     return undefined;
   }
