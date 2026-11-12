@@ -220,13 +220,13 @@ function DateFields({
       aria-label="Dates"
       sx={{
         gridColumn: "span 3",
-        // Start, End and Current share a line only when it fits: they wrap below the desktop size
-        display: { xs: "flex", lg: "grid" },
+        // Start, End and Current share a line only when it fits: they wrap only on a phone
+        display: { xs: "flex", sm: "grid" },
         flexWrap: "wrap",
         gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) auto",
         gap: 1.5,
         alignItems: "center",
-        "& > .MuiTextField-root": { flex: { xs: "1 1 140px", lg: "none" } },
+        "& > .MuiTextField-root": { flex: { xs: "1 1 140px", sm: "none" } },
       }}
     >
       <TextField
@@ -236,7 +236,7 @@ function DateFields({
         value={toMonthValue(startValue)}
         onChange={(event) => onStartChange(fromMonthValue(event.target.value))}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 0, width: { xs: "auto", lg: "100%" } }}
+        sx={{ minWidth: 0, width: { xs: "auto", sm: "100%" } }}
       />
       <TextField
         size="medium"
@@ -246,7 +246,7 @@ function DateFields({
         disabled={isCurrent}
         onChange={(event) => onEndChange(fromMonthValue(event.target.value))}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 0, width: { xs: "auto", lg: "100%" } }}
+        sx={{ minWidth: 0, width: { xs: "auto", sm: "100%" } }}
       />
       <FormControlLabel
         label="Current"
