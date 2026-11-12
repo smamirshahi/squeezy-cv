@@ -4,11 +4,11 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 const SPONSOR_REGISTER_URL =
   "https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers";
-const SPONSOR_LICENCE_CHECK_URL = "https://sponsorlicencecheck.co.uk/";
+const SPONSOR_LICENSE_CHECK_URL = "https://sponsorlicensecheck.co.uk/";
 
 /**
  * An optional helper on the job details page: explains what a sponsor licence means and links to
- * the official register and to SponsorLicenceCheck.co.uk. It makes no claim about the company and
+ * the official register and to SponsorLicenseCheck.co.uk. It makes no claim about the company and
  * sends nothing anywhere; the user checks the company there.
  */
 export function SponsorshipCheck({
@@ -86,11 +86,11 @@ export function SponsorshipCheck({
               Official register of licensed sponsors (GOV.UK)
             </Link>
             <Link
-              href={SPONSOR_LICENCE_CHECK_URL}
+              href={SPONSOR_LICENSE_CHECK_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
-              SponsorLicenceCheck.co.uk
+              SponsorLicenseCheck.co.uk
             </Link>
           </Box>
         </Box>

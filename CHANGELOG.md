@@ -31,6 +31,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Fixed
 
+- The SponsorLicenseCheck link on the job details page (#419) opens its site: the address was spelled "licence" and did not resolve; it is `sponsorlicensecheck.co.uk`.
 - Opening a job by its address (for example `/jobs/<id>`) could end on the first job instead: the saved data was loaded twice at the same time (React's development mode starts the first load twice) and the second load put the first job back. A load that is running is no longer started again.
 - "All applications" on an application's page shows the list with the same search and filter again, and the Applications page says "1 job" for a single job.
 - Test suites brought up to date with the Apply layout, the new Applications page and the first-visit tutorials (unit, component and Playwright end-to-end); the tests of the removed Tailor page were deleted with it.
