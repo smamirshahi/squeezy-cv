@@ -7,6 +7,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { Route, formatRoute } from "@shared/routing/routes";
@@ -47,6 +48,12 @@ const ITEMS: RailItem[] = [
     icon: <WorkOutlineIcon fontSize="small" />,
     kind: "jobs",
     to: (jobId) => ({ kind: "jobs", jobId, view: "details" }),
+  },
+  {
+    label: "Candidates",
+    icon: <BookmarkBorderIcon fontSize="small" />,
+    kind: "candidates",
+    to: () => ({ kind: "candidates" }),
   },
   {
     label: "Applications",

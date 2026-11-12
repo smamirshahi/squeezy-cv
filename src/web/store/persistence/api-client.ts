@@ -44,6 +44,12 @@ import {
   PlaceResultSchema,
 } from "@custom-types/place-types";
 import {
+  Candidate,
+  CandidatePatch,
+  CandidateSchema,
+  NewCandidate,
+} from "@custom-types/candidate-types";
+import {
   Application,
   ApplicationPatch,
   ApplicationSchema,
@@ -232,6 +238,11 @@ export interface ApiClient {
     patch: ApplicationPatch
   ) => Promise<Application>;
   deleteApplication: (id: string) => Promise<void>;
+
+  listCandidates: () => Promise<Candidate[]>;
+  createCandidate: (input: NewCandidate) => Promise<Candidate>;
+  updateCandidate: (id: string, patch: CandidatePatch) => Promise<Candidate>;
+  deleteCandidate: (id: string) => Promise<void>;
 }
 
 /** Where the browser can show or download the PDF that was sent with an application */
@@ -444,6 +455,32 @@ export function createApiClient(
         fetchImpl,
         "DELETE",
         `/api/applications/${encodeURIComponent(id)}`
+      );
+    },
+    async listCandidates() {
+      const raw = await request(fetchImpl, "GET", "/api/candidates");
+      return Array.isArray(raw) ? raw.map((c) => CandidateSchema.check(c)) : [];
+    },
+    async createCandidate(input) {
+      return CandidateSchema.check(
+        await request(fetchImpl, "POST", "/api/candidates", input)
+      );
+    },
+    async updateCandidate(id, patch) {
+      return CandidateSchema.check(
+        await request(
+          fetchImpl,
+          "PATCH",
+          `/api/candidates/${encodeURIComponent(id)}`,
+          patch
+        )
+      );
+    },
+    async deleteCandidate(id) {
+      await request(
+        fetchImpl,
+        "DELETE",
+        `/api/candidates/${encodeURIComponent(id)}`
       );
     },
   };

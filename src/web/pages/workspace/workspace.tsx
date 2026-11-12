@@ -39,6 +39,7 @@ import {
 } from "@store/jobs/jobs-slice";
 import { JobDetailsPage } from "@pages/workspace/job-details-page";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
+import { CandidatesPage } from "@pages/candidates-page/candidates-page";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { ContentPanel } from "@pages/workspace/content-panel";
 import { TemplateBar } from "@pages/workspace/template-bar";
@@ -260,6 +261,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
           {!missing && tool === "templates" && <TemplatesPage />}
           {!missing && isEmpty && <NoJobs />}
           {!missing && tool === "vault" && <VaultPage />}
+          {!missing && route.kind === "candidates" && <CandidatesPage />}
           {!missing && route.kind === "applications" && <ApplicationsPage />}
           {!missing && route.kind === "application" && (
             <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>
@@ -340,6 +342,8 @@ function titleOf(route: ShellRoute, jobName: string): string {
       return `Chat${jobName ? ` · ${jobName}` : ""}`;
     case "ai":
       return "Settings";
+    case "candidates":
+      return "Candidates";
     case "applications":
     case "application":
       return "Applications";

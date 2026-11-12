@@ -11,6 +11,7 @@ export type Route =
   | { kind: "templates"; tab: TemplatesTab; templateId?: string }
   | { kind: "chat"; jobId?: string }
   | { kind: "ai" }
+  | { kind: "candidates" }
   | { kind: "applications"; search: string }
   | { kind: "application"; id: string }
   | { kind: "print"; jobId: string }
@@ -26,13 +27,15 @@ export type WorkspaceRoute = Extract<
 
 /** Everything that is drawn inside the workspace shell: the tools and the applications pages */
 export type ShellRoute =
-  WorkspaceRoute | Extract<Route, { kind: "applications" | "application" }>;
+  | WorkspaceRoute
+  | Extract<Route, { kind: "applications" | "application" | "candidates" }>;
 
 export function isShellRoute(route: Route): route is ShellRoute {
   return (
     isWorkspaceRoute(route) ||
     route.kind === "applications" ||
-    route.kind === "application"
+    route.kind === "application" ||
+    route.kind === "candidates"
   );
 }
 
@@ -96,6 +99,8 @@ export function parseRoute(pathname: string, search = ""): Route {
     case "settings":
     case "ai":
       return second === undefined ? { kind: "ai" } : notFound;
+    case "candidates":
+      return second === undefined ? { kind: "candidates" } : notFound;
     case "applications":
       if (third !== undefined) {
         return notFound;
@@ -141,6 +146,8 @@ export function formatRoute(route: Route): string {
       return `/chat${segment(route.jobId)}`;
     case "ai":
       return "/settings";
+    case "candidates":
+      return "/candidates";
     case "applications":
       return `/applications${route.search}`;
     case "application":
