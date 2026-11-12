@@ -7,6 +7,7 @@ import { JobContent } from "@pages/editor-page/sections/job-content";
 import { GeneralStep } from "@pages/workspace/general-step";
 import { SectionTailor } from "@pages/workspace/section-tailor";
 import { Inspector } from "@pages/workspace/inspector";
+import { useViewport } from "@hooks/use-viewport";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { OPEN_GENERAL_EVENT } from "@pages/workspace/general-settings-event";
@@ -30,6 +31,7 @@ const HEADER_STEP = "header";
  * item's own settings, like before.
  */
 export function ContentPanel(): JSX.Element {
+  const viewport = useViewport();
   const block = useAppSelector((s) => s.app.selectedBlock);
   const sections = useAppSelector(sectionsSelector);
   const hidden = useAppSelector(activeVariantSelector).hiddenSections ?? [];
@@ -70,7 +72,13 @@ export function ContentPanel(): JSX.Element {
   const current = steps[index];
 
   return (
-    <ResizableAside side="right" label="the content panel" defaultWidth={480}>
+    <ResizableAside
+      side="right"
+      label="the content panel"
+      defaultWidth={viewport === "desktop" ? 480 : 320}
+      stackBelow="md"
+      stackedHeight={{ xs: "34vh", sm: "38vh" }}
+    >
       <Box
         component="aside"
         aria-label="Content"
@@ -82,6 +90,7 @@ export function ContentPanel(): JSX.Element {
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
+          "& .MuiButton-root": { minHeight: { xs: 44, md: "auto" } },
         }}
       >
         <Box
@@ -100,10 +109,11 @@ export function ContentPanel(): JSX.Element {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              flexWrap: "wrap",
               gap: 1.5,
             }}
           >
-            <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Box sx={{ minWidth: 0, flex: { xs: "1 1 140px", lg: 1 } }}>
               <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
                 Section {index + 1} of {steps.length}
               </Typography>

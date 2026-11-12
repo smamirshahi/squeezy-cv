@@ -98,7 +98,7 @@ function IntroStep({
   return (
     <Box
       sx={{
-        flex: 1,
+        flex: { xs: "none", md: 1 },
         minWidth: 0,
         p: isHere ? "11px 13px" : "12px 14px",
         borderRadius: 1.5,
@@ -131,6 +131,7 @@ function JobsIntro({ onClose }: { onClose: () => void }): JSX.Element {
         display: "grid",
         placeItems: "center",
         color: WORKSPACE_COLORS.accentText,
+        transform: { xs: "rotate(90deg)", md: "none" },
       }}
     >
       <ArrowForwardIcon fontSize="small" />
@@ -155,7 +156,14 @@ function JobsIntro({ onClose }: { onClose: () => void }): JSX.Element {
           Got it
         </Button>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "stretch", gap: 1.25 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: "stretch",
+          gap: 1.25,
+        }}
+      >
         <IntroStep
           label="1 · Vault"
           title="All your facts, written once"

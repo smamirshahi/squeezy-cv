@@ -439,14 +439,18 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 40px",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr) 44px",
+              sm: "minmax(0, 1fr) 40px",
+            },
             borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
             borderLeft: "3px solid transparent",
           }}
         >
           <Box
             sx={{
-              display: "grid",
+              display: { xs: "flex", sm: "grid" },
+              flexWrap: "wrap",
               gridTemplateColumns: table?.template,
               columnGap: 1.5,
               px: 1.5,
@@ -580,10 +584,14 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
                   fontWeight: isSelected ? 600 : 400,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  whiteSpace: { xs: "normal", sm: "nowrap" },
                   ...(table && {
                     display: "grid",
-                    gridTemplateColumns: table.template,
+                    gridTemplateColumns: {
+                      xs: "minmax(0, 1fr)",
+                      sm: table.template,
+                    },
+                    rowGap: { xs: 0.25, sm: 0 },
                     columnGap: 1.5,
                     alignItems: "center",
                   }),
@@ -597,7 +605,8 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
                         sx={{
                           minWidth: 0,
                           overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          textOverflow: { xs: "clip", sm: "ellipsis" },
+                          overflowWrap: { xs: "anywhere", sm: "normal" },
                           ...(position > 0 && { fontWeight: 400 }),
                           ...(column.isMuted && {
                             fontSize: 13,
@@ -613,6 +622,10 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
               <IconButton
                 aria-label={`Delete ${title}`}
                 onClick={() => setRemovingId(item.id)}
+                sx={{
+                  minWidth: { xs: 44, sm: 0 },
+                  minHeight: { xs: 44, sm: 0 },
+                }}
               >
                 <DeleteIcon />
               </IconButton>

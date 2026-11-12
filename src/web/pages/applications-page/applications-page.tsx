@@ -1,9 +1,11 @@
+import { useViewport } from "@hooks/use-viewport";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
   Box,
   Button,
+  Drawer,
   IconButton,
   InputAdornment,
   Link,
@@ -344,6 +346,7 @@ export function ApplicationsPage(): JSX.Element {
       isCancelled = true;
     };
   }, [api, jobIdOfSelected]);
+  const isSideBySide = useViewport() === "desktop";
   const interviews = readable.filter((a) => a.status === "interview").length;
   const subtitle = [
     `${jobs.length + readable.length} ${jobs.length + readable.length === 1 ? "job" : "jobs"}`,
@@ -351,9 +354,91 @@ export function ApplicationsPage(): JSX.Element {
     ...(interviews > 0 ? [`${interviews} interview`] : []),
   ].join(" · ");
 
+  const detail = (
+    <Box
+      component="aside"
+      aria-label="Application detail"
+      sx={{
+        width: "100%",
+        flex: "none",
+        height: "100%",
+        overflow: "auto",
+        borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+        boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
+        bgcolor: WORKSPACE_COLORS.panel,
+        color: WORKSPACE_COLORS.text,
+      }}
+    >
+      {selectedJob ? (
+        <JobPanel
+          key={selectedJob.id}
+          job={selectedJob}
+          templateName={templateNames[selectedJob.templateId]}
+          extra={extraRows(fullJob)}
+          onStage={(stage) => void setStage(selectedJob.id, stage)}
+          onClose={() => setSelectedId("")}
+        />
+      ) : (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "start",
+              p: 2.5,
+              pb: 0,
+            }}
+          >
+            <Box>
+              <Typography variant="h6">{selectedApplication?.role}</Typography>
+              <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
+                {selectedApplication?.company}
+              </Typography>
+            </Box>
+            <IconButton aria-label="Close" onClick={() => setSelectedId("")}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          {selectedApplication && (
+            <Box sx={{ px: 2.5, pt: 2 }}>
+              <JobData
+                rows={[
+                  ["Job", selectedApplication.jobName || "-"],
+                  ["Company", selectedApplication.company],
+                  ["Role", selectedApplication.role],
+                  [
+                    "Template",
+                    selectedApplication.templateName ||
+                      templateNames[jobOfSelected?.templateId ?? ""] ||
+                      "-",
+                  ],
+                  ...extraRows(fullJob),
+                ]}
+              />
+            </Box>
+          )}
+          <ApplicationView
+            key={selectedId}
+            applicationId={selectedId}
+            draftCreatedAt={jobOfSelected?.createdAt}
+            isEmbedded
+          />
+        </>
+      )}
+    </Box>
+  );
+
   return (
     <Box sx={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
-      <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+        }}
+      >
         <CategoriesSidebar
           applications={readable}
           jobs={jobs}
@@ -365,8 +450,9 @@ export function ApplicationsPage(): JSX.Element {
           sx={{
             flex: 1,
             minWidth: 0,
+            minHeight: 0,
             overflow: "auto",
-            p: 3,
+            p: { xs: 2, md: 3 },
             display: "flex",
             flexDirection: "column",
             gap: 2,
@@ -405,87 +491,27 @@ export function ApplicationsPage(): JSX.Element {
             />
           )}
         </Box>
-        {selectedId && (
+        {selectedId && !isSideBySide && (
+          <Drawer
+            anchor="right"
+            open
+            onClose={() => setSelectedId("")}
+            slotProps={{
+              paper: {
+                sx: { width: { xs: "100%", sm: 520 }, maxWidth: "100%" },
+              },
+            }}
+          >
+            {detail}
+          </Drawer>
+        )}
+        {selectedId && isSideBySide && (
           <ResizableAside
             side="right"
             label="the application panel"
             defaultWidth={560}
           >
-            <Box
-              component="aside"
-              aria-label="Application detail"
-              sx={{
-                width: "100%",
-                flex: "none",
-                overflow: "auto",
-                borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
-                boxShadow: "-6px 0 20px rgba(0,0,0,.10)",
-                bgcolor: WORKSPACE_COLORS.panel,
-                color: WORKSPACE_COLORS.text,
-              }}
-            >
-              {selectedJob ? (
-                <JobPanel
-                  key={selectedJob.id}
-                  job={selectedJob}
-                  templateName={templateNames[selectedJob.templateId]}
-                  extra={extraRows(fullJob)}
-                  onStage={(stage) => void setStage(selectedJob.id, stage)}
-                  onClose={() => setSelectedId("")}
-                />
-              ) : (
-                <>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                      p: 2.5,
-                      pb: 0,
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="h6">
-                        {selectedApplication?.role}
-                      </Typography>
-                      <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
-                        {selectedApplication?.company}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      aria-label="Close"
-                      onClick={() => setSelectedId("")}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                  {selectedApplication && (
-                    <Box sx={{ px: 2.5, pt: 2 }}>
-                      <JobData
-                        rows={[
-                          ["Job", selectedApplication.jobName || "-"],
-                          ["Company", selectedApplication.company],
-                          ["Role", selectedApplication.role],
-                          [
-                            "Template",
-                            selectedApplication.templateName ||
-                              templateNames[jobOfSelected?.templateId ?? ""] ||
-                              "-",
-                          ],
-                          ...extraRows(fullJob),
-                        ]}
-                      />
-                    </Box>
-                  )}
-                  <ApplicationView
-                    key={selectedId}
-                    applicationId={selectedId}
-                    draftCreatedAt={jobOfSelected?.createdAt}
-                    isEmbedded
-                  />
-                </>
-              )}
-            </Box>
+            {detail}
           </ResizableAside>
         )}
       </Box>
@@ -782,17 +808,25 @@ function CategoriesSidebar({
           alignItems: "center",
           gap: 1.25,
           textAlign: "left",
+          flex: "none",
+          whiteSpace: "nowrap",
           px: 1.5,
-          py: 0.9,
+          py: { xs: 1.1, md: 0.9 },
+          minHeight: { xs: 44, md: 0 },
           cursor: "pointer",
           font: "inherit",
           fontSize: 14,
           fontWeight: isOn ? 700 : 400,
           color: isOn ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.text,
           bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
-          border: 0,
-          borderLeft: `3px solid ${isOn ? DOT_COLORS.ready : "transparent"}`,
-          borderRadius: 1,
+          border: {
+            xs: `1px solid ${isOn ? DOT_COLORS.ready : WORKSPACE_COLORS.border}`,
+            md: 0,
+          },
+          borderLeft: {
+            md: `3px solid ${isOn ? DOT_COLORS.ready : "transparent"}`,
+          },
+          borderRadius: { xs: 5, md: 1 },
           "&:hover": { bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover },
         }}
       >
@@ -811,7 +845,13 @@ function CategoriesSidebar({
   }
 
   return (
-    <ResizableAside side="left" label="the status list" defaultWidth={230}>
+    <ResizableAside
+      side="left"
+      label="the status list"
+      defaultWidth={230}
+      stackBelow="md"
+      stackedHeight={64}
+    >
       <Box
         component="nav"
         aria-label="Filter by status"
@@ -820,11 +860,14 @@ function CategoriesSidebar({
           flex: "none",
           overflow: "auto",
           bgcolor: WORKSPACE_COLORS.panel,
-          borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
           p: 1.5,
           display: "flex",
-          flexDirection: "column",
-          gap: 0.25,
+          // Below a small laptop the list of filters is one row of chips that scrolls inside itself
+          flexDirection: { xs: "row", md: "column" },
+          alignItems: { xs: "center", md: "stretch" },
+          gap: { xs: 1, md: 0.25 },
+          borderRight: { xs: 0, md: `1px solid ${WORKSPACE_COLORS.border}` },
+          borderBottom: { xs: `1px solid ${WORKSPACE_COLORS.border}`, md: 0 },
         }}
       >
         {renderTile({
@@ -833,8 +876,16 @@ function CategoriesSidebar({
           count: readable + jobs.length,
         })}
         {groups.map((group) => (
-          <Box key={group.title} sx={{ display: "grid", gap: 0.25 }}>
-            <SmallHeading>{group.title}</SmallHeading>
+          <Box
+            key={group.title}
+            sx={{
+              display: { xs: "contents", md: "grid" },
+              gap: 0.25,
+            }}
+          >
+            <Box sx={{ display: { xs: "none", md: "block" } }}>
+              <SmallHeading>{group.title}</SmallHeading>
+            </Box>
             {group.tiles.map(renderTile)}
           </Box>
         ))}
@@ -842,6 +893,35 @@ function CategoriesSidebar({
     </ResizableAside>
   );
 }
+
+/**
+ * On a phone the table is a list of cards, drawn by the same cells: each row becomes a grid
+ * (company and status, role and template, date and the open button), the header goes away.
+ */
+const PHONE_TABLE_SX = {
+  display: { xs: "block", sm: "table" },
+  "& tbody": { display: { xs: "block", sm: "table-row-group" } },
+  "& tbody tr": {
+    display: { xs: "grid", sm: "table-row" },
+    gridTemplateColumns: "1fr auto",
+    columnGap: 1,
+    alignItems: "center",
+    padding: { xs: "10px 14px", sm: 0 },
+    borderBottom: { xs: `1px solid ${WORKSPACE_COLORS.border}`, sm: 0 },
+  },
+  "& tbody tr > td": {
+    display: { xs: "block", sm: "table-cell" },
+    border: { xs: 0, sm: undefined },
+    minWidth: 0,
+  },
+  // Grid placement only matters when the row is a grid; a table cell ignores it
+  "& tbody tr > td:nth-of-type(1)": { gridColumn: 1, gridRow: 1 },
+  "& tbody tr > td:nth-of-type(2)": { gridColumn: "1 / -1", gridRow: 2 },
+  "& tbody tr > td:nth-of-type(3)": { gridColumn: 2, gridRow: 1 },
+  "& tbody tr > td:nth-of-type(4)": { gridColumn: 1, gridRow: 3 },
+  "& tbody tr > td:nth-of-type(5)": { gridColumn: 2, gridRow: 3 },
+  "& tbody tr > td[colspan]": { gridColumn: "1 / -1", gridRow: "auto" },
+} as const;
 
 type Row =
   | { kind: "job"; id: string; job: JobSummary }
@@ -928,7 +1008,14 @@ function ApplicationsTable({
 
   return (
     <>
-      <Box sx={{ display: "flex", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1.5,
+          flexWrap: { xs: "wrap", lg: "nowrap" },
+          alignItems: "flex-start",
+        }}
+      >
         <TextField
           size="small"
           placeholder="Search company, role or template"
@@ -936,7 +1023,7 @@ function ApplicationsTable({
           onChange={(event) =>
             onViewChange({ ...view, query: event.target.value })
           }
-          sx={{ flex: 1 }}
+          sx={{ flex: { xs: "1 1 100%", sm: "1 1 220px", lg: 1 }, minWidth: 0 }}
           slotProps={{
             htmlInput: { "aria-label": "Search company, role or template" },
             input: {
@@ -962,7 +1049,7 @@ function ApplicationsTable({
                 choice === "company" || choice === "oldest" ? "asc" : "desc",
             });
           }}
-          sx={{ minWidth: 170 }}
+          sx={{ minWidth: 170, flex: { xs: 1, sm: "none" } }}
         >
           {(Object.keys(SORT_LABELS) as SortChoice[]).map((choice) => (
             <MenuItem key={choice} value={choice}>
@@ -973,9 +1060,12 @@ function ApplicationsTable({
         <ExportAllButton count={applications.length} />
       </Box>
 
-      <Paper variant="outlined" sx={{ overflow: "hidden" }}>
-        <Table>
-          <TableHead>
+      <Paper
+        variant="outlined"
+        sx={{ overflow: { xs: "visible", sm: "auto" } }}
+      >
+        <Table sx={PHONE_TABLE_SX}>
+          <TableHead sx={{ display: { xs: "none", sm: "table-header-group" } }}>
             <TableRow>
               {["Company", "Role · Template", "Status", "Applied"].map(
                 (title) => (
@@ -1032,7 +1122,11 @@ function ApplicationsTable({
                   hover
                   sx={{
                     cursor: "pointer",
-                    "& td": { py: 1.5, verticalAlign: "middle" },
+                    "& td": {
+                      py: { xs: 0.5, sm: 1.5 },
+                      px: { xs: 0, sm: 1, lg: 2 },
+                      verticalAlign: "middle",
+                    },
                     "& td:first-of-type": {
                       borderLeft: `3px solid ${
                         isOn ? DOT_COLORS.ready : "transparent"

@@ -39,7 +39,7 @@ export function TypographyTable(): JSX.Element {
         overflow: "auto",
       }}
     >
-      <Box sx={{ p: 2.5, pb: 1.75 }}>
+      <Box sx={{ p: { xs: 1.75, md: 2.5 }, pb: 1.75 }}>
         <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
           3 · Typography
         </Typography>

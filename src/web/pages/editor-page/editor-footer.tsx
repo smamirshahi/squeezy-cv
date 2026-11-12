@@ -25,8 +25,9 @@ export function EditorFooter(): JSX.Element | null {
         display: "flex",
         justifyContent: "flex-end",
         gap: 2,
-        px: 3,
+        px: { xs: 1.5, sm: 3 },
         py: 1.5,
+        "& .MuiButton-root": { minHeight: { xs: 44, lg: 0 } },
         bgcolor: cssVar("bg"),
         borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
       }}

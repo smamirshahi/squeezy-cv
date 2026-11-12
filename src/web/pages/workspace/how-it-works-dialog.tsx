@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Box,
   Button,
@@ -2392,9 +2393,15 @@ export function HowItWorksDialog({
       open={isOpen}
       onClose={onClose}
       maxWidth={false}
+      fullScreen={useViewport() === "phone"}
       aria-labelledby="how-it-works-title"
       slotProps={{
-        paper: { sx: { width: 1180, maxWidth: "calc(100% - 32px)" } },
+        paper: {
+          sx: {
+            width: { xs: "100%", sm: 1180 },
+            maxWidth: { xs: "none", sm: "calc(100% - 32px)" },
+          },
+        },
       }}
     >
       <Box
@@ -2424,7 +2431,7 @@ export function HowItWorksDialog({
         </IconButton>
       </Box>
 
-      <Box sx={{ display: "flex", minHeight: 520 }}>
+      <Box sx={{ display: "flex", minHeight: 520, minWidth: 0 }}>
         <Box
           component="nav"
           aria-label="Tutorials"

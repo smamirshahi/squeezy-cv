@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Alert,
   Box,
@@ -87,6 +88,7 @@ function AiSettingsDialog({
   initial: EntryId;
   onClose: () => void;
 }): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const api = useMemo(() => createApiClient(), []);
   const [status, setStatus] = useState<AiStatus | null>(null);
   const [error, setError] = useState<string>("");
@@ -190,9 +192,12 @@ function AiSettingsDialog({
       open={isOpen}
       onClose={onClose}
       fullWidth
+      fullScreen={isPhone}
       maxWidth="lg"
       aria-labelledby="ai-settings-title"
-      slotProps={{ paper: { sx: { height: "min(720px, 90vh)" } } }}
+      slotProps={{
+        paper: { sx: { height: { xs: "100%", sm: "min(720px, 90vh)" } } },
+      }}
     >
       <DialogTitle
         id="ai-settings-title"
@@ -215,19 +220,32 @@ function AiSettingsDialog({
           <CloseOutlinedIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
-      <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          // stacked below a laptop: the whole body scrolls, each part keeps its natural height
+          overflowY: { xs: "auto", md: "visible" },
+        }}
+      >
         <Box
           component="nav"
           aria-label="AI settings list"
           sx={{
-            width: 250,
+            width: { xs: "auto", md: 250 },
             flex: "none",
             p: 1,
             overflow: "auto",
             display: "grid",
             gap: 0.5,
             alignContent: "start",
-            borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+            borderRight: { md: `1px solid ${WORKSPACE_COLORS.border}` },
+            borderBottom: {
+              xs: `1px solid ${WORKSPACE_COLORS.border}`,
+              md: "none",
+            },
           }}
         >
           {entries.map((entry) => (
@@ -258,9 +276,9 @@ function AiSettingsDialog({
           component="main"
           aria-label={title}
           sx={{
-            flex: 1,
+            flex: { xs: "none", md: 1 },
             minWidth: 0,
-            overflow: "auto",
+            overflow: { xs: "visible", md: "auto" },
             p: 2.5,
             display: "flex",
             flexDirection: "column",
@@ -399,11 +417,15 @@ function AiSettingsDialog({
           component="aside"
           aria-label="Provider"
           sx={{
-            width: 340,
+            width: { xs: "auto", md: 340 },
             flex: "none",
             p: 2,
-            overflow: "auto",
-            borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+            overflow: { xs: "visible", md: "auto" },
+            borderLeft: { md: `1px solid ${WORKSPACE_COLORS.border}` },
+            borderTop: {
+              xs: `1px solid ${WORKSPACE_COLORS.border}`,
+              md: "none",
+            },
           }}
         >
           {status && isChoice && (

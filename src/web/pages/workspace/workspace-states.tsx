@@ -11,6 +11,17 @@ import { startDemo } from "@store/persistence/persistence-actions";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { vaultSelector } from "@store/vault/vault-slice";
 
+/** On a phone the message and its buttons stack instead of squeezing each other */
+const BANNER_WRAP_SX = {
+  flexWrap: { xs: "wrap", sm: "nowrap" },
+  "& .MuiAlert-message": { minWidth: 0, overflowWrap: "anywhere" },
+  "& .MuiAlert-action": {
+    ml: { xs: 4.5, sm: "auto" },
+    pt: { xs: 0, sm: 0.5 },
+    flexWrap: "wrap",
+  },
+} as const;
+
 const HiddenInput = styled("input")({ display: "none" });
 
 /** Under the top bar when the local server cannot be reached or its data cannot be read */
@@ -27,7 +38,7 @@ export function ConnectionBanner(): JSX.Element | null {
   return (
     <Alert
       severity="error"
-      sx={{ borderRadius: 0 }}
+      sx={{ borderRadius: 0, ...BANNER_WRAP_SX }}
       action={
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button color="inherit" size="small" onClick={retry}>
@@ -69,7 +80,7 @@ export function DemoBanner(): JSX.Element | null {
   return (
     <Alert
       severity="info"
-      sx={{ borderRadius: 0 }}
+      sx={{ borderRadius: 0, ...BANNER_WRAP_SX }}
       action={
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
@@ -110,15 +121,19 @@ export function FirstRun(): JSX.Element | null {
         zIndex: 2,
         bgcolor: WORKSPACE_COLORS.canvas,
         display: "flex",
-        alignItems: "center",
+        alignItems: { xs: "flex-start", sm: "center" },
         justifyContent: "center",
+        overflow: "auto",
+        p: { xs: 2, sm: 0 },
       }}
     >
       <Box
         sx={{
           maxWidth: 420,
+          width: { xs: "100%", sm: "auto" },
+          boxSizing: "border-box",
           bgcolor: WORKSPACE_COLORS.panel,
-          p: 4,
+          p: { xs: 3, sm: 4 },
           borderRadius: 2,
           display: "flex",
           flexDirection: "column",

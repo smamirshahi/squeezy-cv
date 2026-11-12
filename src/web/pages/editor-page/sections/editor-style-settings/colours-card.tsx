@@ -164,7 +164,7 @@ function ColorPicker({
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Box
-          sx={{ p: 1.5, width: 248 }}
+          sx={{ p: 1.5, width: 248, maxWidth: "calc(100vw - 32px)" }}
           role="dialog"
           aria-label={`${label} colours`}
         >
@@ -236,7 +236,7 @@ export function ColoursCard(): JSX.Element {
         border: `1px solid ${WORKSPACE_COLORS.border}`,
         borderRadius: 1.5,
         bgcolor: WORKSPACE_COLORS.panel,
-        p: 2.5,
+        p: { xs: 1.75, md: 2.5 },
       }}
     >
       <Box sx={{ mb: 1.75 }}>
@@ -251,7 +251,10 @@ export function ColoursCard(): JSX.Element {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            sm: "repeat(3, minmax(0, 1fr))",
+          },
           gap: 2,
         }}
       >

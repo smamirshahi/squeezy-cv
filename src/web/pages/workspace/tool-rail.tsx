@@ -16,6 +16,7 @@ import { APP_VERSION } from "@shared/version";
 import { AboutDialog } from "@pages/workspace/about-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { useViewport } from "@hooks/use-viewport";
 
 interface RailItem {
   label: string;
@@ -61,30 +62,38 @@ export function ToolRail(): JSX.Element {
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const { mode, toggle } = useThemeMode();
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
+  // On a phone the rail is a bottom tab bar with the four tools; the rest is in the top bar's menu
+  const isPhone = useViewport() === "phone";
 
   return (
     <Box
       component="nav"
       aria-label="Tools"
       sx={{
-        width: 72,
+        width: { xs: "100%", sm: 72 },
         flex: "none",
         bgcolor: WORKSPACE_COLORS.panel,
-        borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+        borderRight: { xs: "none", sm: `1px solid ${WORKSPACE_COLORS.border}` },
+        borderTop: { xs: `1px solid ${WORKSPACE_COLORS.border}`, sm: "none" },
         display: "flex",
-        flexDirection: "column",
+        flexDirection: { xs: "row", sm: "column" },
         alignItems: "center",
-        py: 1,
+        pt: { xs: 0.5, sm: 1 },
+        pb: { xs: "calc(4px + env(safe-area-inset-bottom))", sm: 1 },
+        px: { xs: 0.5, sm: 0 },
         gap: 0.25,
       }}
     >
-      {[
-        ...ITEMS,
-        null,
-        "about" as const,
-        "settings" as const,
-        "theme" as const,
-      ].map((item) => {
+      {(isPhone
+        ? ITEMS
+        : [
+            ...ITEMS,
+            null,
+            "about" as const,
+            "settings" as const,
+            "theme" as const,
+          ]
+      ).map((item) => {
         if (item === null) {
           return <Box key="spacer" sx={{ flex: 1 }} />;
         }
@@ -181,7 +190,10 @@ export function ToolRail(): JSX.Element {
                 : undefined
             }
             sx={{
-              width: 60,
+              width: { xs: "auto", sm: 60 },
+              flex: { xs: 1, sm: "none" },
+              minWidth: 0,
+              minHeight: { xs: 48, sm: 0 },
               py: 0.9,
               borderRadius: 1,
               flexDirection: "column",
@@ -200,13 +212,20 @@ export function ToolRail(): JSX.Element {
           </ButtonBase>
         );
       })}
-      <Typography
-        aria-label={`Version ${APP_VERSION}`}
-        sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
-      >
-        v{APP_VERSION}
-      </Typography>
-      <AboutDialog isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+      {!isPhone && (
+        <Typography
+          aria-label={`Version ${APP_VERSION}`}
+          sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
+        >
+          v{APP_VERSION}
+        </Typography>
+      )}
+      {!isPhone && (
+        <AboutDialog
+          isOpen={isAboutOpen}
+          onClose={() => setIsAboutOpen(false)}
+        />
+      )}
     </Box>
   );
 }

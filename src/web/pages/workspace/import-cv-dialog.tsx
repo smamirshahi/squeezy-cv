@@ -1,4 +1,5 @@
 import { DragEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Alert,
   Box,
@@ -40,6 +41,7 @@ interface Props {
  * vault. Nothing is saved until the user presses Save.
  */
 export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const dispatch = useAppDispatch();
   const vault = useAppSelector(vaultSelector);
   const api = useMemo(() => createApiClient(), []);
@@ -148,7 +150,13 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
       : "Step 2 of 3: press Analyze with AI.";
 
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      fullScreen={isPhone}
+    >
       <DialogTitle>Paste CV text, AI sorts it</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Alert severity={target && !target.info.isOnline ? "info" : "warning"}>

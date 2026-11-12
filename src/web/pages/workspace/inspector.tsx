@@ -28,6 +28,7 @@ import { ItemBullets } from "@pages/editor-page/sections/job-section-items";
 import { DescriptionBullets } from "@pages/workspace/description-bullets";
 import { SkillList } from "@pages/workspace/skill-list";
 import { TemplateScopeNote } from "@pages/workspace/template-scope";
+import { useViewport } from "@hooks/use-viewport";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { setSelectedBlock, updatePageStructure } from "@store/app/app-slice";
@@ -505,9 +506,16 @@ function BlockInspector(): JSX.Element | null {
 
 /** The right panel: follows what is selected on the canvas */
 export function Inspector(): JSX.Element {
+  const viewport = useViewport();
   const block = useAppSelector((s) => s.app.selectedBlock);
   return (
-    <ResizableAside side="right" label="the inspector" defaultWidth={340}>
+    <ResizableAside
+      side="right"
+      label="the inspector"
+      defaultWidth={viewport === "desktop" ? 340 : 300}
+      stackBelow="md"
+      stackedHeight="42vh"
+    >
       <Box
         component="aside"
         aria-label="Inspector"

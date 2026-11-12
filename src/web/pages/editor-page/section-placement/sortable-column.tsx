@@ -36,7 +36,12 @@ export function SortableColumn({
   const { setNodeRef, isOver } = useDroppable({ id: side });
 
   return (
-    <Box sx={{ flex: hasColumns ? "1 1 0" : "1 1 100%", minWidth: 0 }}>
+    <Box
+      sx={{
+        flex: hasColumns ? { xs: "1 1 100%", lg: "1 1 0" } : "1 1 100%",
+        minWidth: 0,
+      }}
+    >
       <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.75 }}>
         <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{title}</Typography>
         {hint && (

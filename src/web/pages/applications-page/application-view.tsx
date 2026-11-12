@@ -1,5 +1,6 @@
 import { recallListSearch } from "@pages/applications-page/last-search";
 import { onAppLinkClick } from "@hooks/navigation";
+import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   Alert,
@@ -71,6 +72,7 @@ export function ApplicationView({
   draftCreatedAt,
 }: Props): JSX.Element {
   const api = useMemo(() => createApiClient(), []);
+  const isPhone = useViewport() === "phone";
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -227,7 +229,8 @@ export function ApplicationView({
       sx={{
         maxWidth: isEmbedded ? undefined : 960,
         mx: "auto",
-        p: isEmbedded ? 2 : 3,
+        p: isEmbedded ? 2 : { xs: 2, md: 3 },
+        minWidth: 0,
         display: "flex",
         flexDirection: "column",
         gap: 3,
@@ -248,7 +251,7 @@ export function ApplicationView({
           flexWrap: "wrap",
         }}
       >
-        <Box>
+        <Box sx={{ minWidth: 0, overflowWrap: "anywhere" }}>
           <Typography variant="h4" component="h1">
             {application.company}
           </Typography>
@@ -278,6 +281,7 @@ export function ApplicationView({
           sx={{
             display: "flex",
             alignItems: "center",
+            flexWrap: "wrap",
             gap: 1,
           }}
         >
@@ -323,6 +327,7 @@ export function ApplicationView({
           <Box
             sx={{
               display: "flex",
+              flexWrap: "wrap",
               gap: 1,
             }}
           >
@@ -360,7 +365,8 @@ export function ApplicationView({
             src={applicationPdfUrl(application.id)}
             sx={{
               width: "100%",
-              height: 900,
+              height: { xs: "70vh", md: 900 },
+              minHeight: 360,
               border: `1px solid ${WORKSPACE_COLORS.border}`,
             }}
           />
@@ -428,6 +434,7 @@ export function ApplicationView({
       <Dialog
         open={nextStatus !== null}
         onClose={() => setNextStatus(null)}
+        fullScreen={isPhone}
         fullWidth
         maxWidth="xs"
       >
@@ -469,7 +476,11 @@ export function ApplicationView({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={isDeleting} onClose={() => setIsDeleting(false)}>
+      <Dialog
+        open={isDeleting}
+        onClose={() => setIsDeleting(false)}
+        fullScreen={isPhone}
+      >
         <DialogTitle>Delete this application?</DialogTitle>
         <DialogContent>
           <DialogContentText>

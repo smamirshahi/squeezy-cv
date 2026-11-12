@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Box,
   Button,
@@ -65,6 +66,7 @@ export function EmphasiseDialog({
   confirmLabel = "Use these points",
   onConfirm,
 }: Props): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const job = useAppSelector(activeJobSelector);
   const groups = useRequirementGroups();
   const isAi = confirmLabel === "Emphasise";
@@ -106,6 +108,7 @@ export function EmphasiseDialog({
       open={isOpen}
       onClose={onClose}
       fullWidth
+      fullScreen={isPhone}
       maxWidth="lg"
       aria-labelledby="emphasise-title"
     >

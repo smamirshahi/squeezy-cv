@@ -26,6 +26,7 @@ import { buildChatContext } from "@shared/chat/chat-context";
 import { describeOperation } from "@shared/chat/describe-operation";
 import { shorten } from "@shared/variant/item-label";
 import { Turn, loadChat, saveChat } from "@pages/workspace/chat-memory";
+import { useViewport } from "@hooks/use-viewport";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { operationsToActions } from "@store/chat/operations-to-actions";
@@ -76,6 +77,7 @@ export function ChatPanel(): JSX.Element {
 }
 
 function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
+  const viewport = useViewport();
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
@@ -213,7 +215,13 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
         ]
       : EXAMPLES;
   return (
-    <ResizableAside side="right" label="the chat panel" defaultWidth={360}>
+    <ResizableAside
+      side="right"
+      label="the chat panel"
+      defaultWidth={viewport === "desktop" ? 360 : 320}
+      stackBelow="md"
+      stackedHeight={{ xs: "34vh", sm: "38vh" }}
+    >
       <Box
         component="aside"
         aria-label="Chat"
@@ -226,6 +234,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
           bgcolor: WORKSPACE_COLORS.panel,
           color: WORKSPACE_COLORS.text,
           borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          "& .MuiButton-root": { minHeight: { xs: 44, md: "auto" } },
         }}
       >
         <Box

@@ -45,14 +45,20 @@ export function TemplateBar({
         flex: "none",
         display: "flex",
         alignItems: "center",
-        gap: 1.5,
+        flexWrap: { xs: "wrap", lg: "nowrap" },
+        gap: { xs: 1, lg: 1.5 },
         px: 2,
         py: 1,
         bgcolor: WORKSPACE_COLORS.panel,
         borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
       }}
     >
-      <Button size="small" variant="contained" onClick={onToggleOutline}>
+      <Button
+        size="small"
+        variant="contained"
+        onClick={onToggleOutline}
+        sx={{ minHeight: { xs: 44, md: "auto" } }}
+      >
         {isOutlineOpen ? "Hide outline" : "Outline (O)"}
       </Button>
       <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
@@ -69,7 +75,11 @@ export function TemplateBar({
           }
         }}
         renderValue={() => template.name}
-        sx={{ minWidth: 220 }}
+        sx={{
+          minWidth: { xs: 0, sm: 220 },
+          flex: { xs: "1 1 160px", sm: "none" },
+          "& .MuiSelect-select": { minHeight: { xs: 28, md: "auto" } },
+        }}
       >
         {templates.map((t) => (
           <MenuItem key={t.id} value={t.id}>

@@ -97,7 +97,10 @@ describe("routing in a real browser", () => {
   it("asks before Back throws away an unapplied edit", async () => {
     await page.goto(`${app.webUrl}/vault/mainInfo`);
     await expect
-      .poll(async () => page.getByLabel("Full Name").inputValue())
+      .poll(async () => page.getByLabel("Full Name").inputValue(), {
+        // The default 1 s is shorter than a cold load of the page (it failed on an idle machine too)
+        timeout: 10_000,
+      })
       .toBe("Jane Doe");
     await page.getByLabel("Full Name").fill("Changed Name");
     let message = "";

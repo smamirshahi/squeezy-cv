@@ -134,14 +134,25 @@ export function JobDetailsPage(): JSX.Element {
           flex: 1,
           minWidth: 0,
           overflow: "auto",
-          p: 3,
+          p: { xs: 2, lg: 3 },
+          // 44 px touch targets on a phone and a tablet
+          "& .MuiInputBase-root, & .MuiButton-root": {
+            minHeight: { xs: 44, md: "auto" },
+          },
           ...MIDDLE_AREA_SX,
         }}
       >
         {
           <Box sx={{ maxWidth: 800, mx: "auto", display: "grid", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="h6" sx={{ flex: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Typography variant="h6" sx={{ flex: 1, minWidth: 160 }}>
                 {job ? "Job application" : "Apply for a job"}
               </Typography>
               {job && (
@@ -167,7 +178,11 @@ export function JobDetailsPage(): JSX.Element {
               onChange={(event) => edit({ name: event.target.value })}
             />
             <Box
-              sx={{ display: "grid", gap: 2, gridTemplateColumns: "1fr 1fr" }}
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              }}
             >
               <TextField
                 label="Company"
@@ -184,7 +199,7 @@ export function JobDetailsPage(): JSX.Element {
               sx={{
                 display: "grid",
                 gap: 2,
-                gridTemplateColumns: "2fr 1fr 1fr",
+                gridTemplateColumns: { xs: "1fr", md: "2fr 1fr 1fr" },
               }}
             >
               <TextField
@@ -284,7 +299,11 @@ export function JobDetailsPage(): JSX.Element {
               />
             </Box>
             <Box
-              sx={{ display: "grid", gap: 2, gridTemplateColumns: "1fr 1fr" }}
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              }}
             >
               <TextField
                 select
@@ -380,13 +399,19 @@ export function JobDetailsPage(): JSX.Element {
               sx={{
                 display: "flex",
                 alignItems: "center",
+                flexWrap: "wrap",
                 gap: 1.5,
                 pt: 1,
                 borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
               }}
             >
               <Typography
-                sx={{ flex: 1, fontSize: 13, color: WORKSPACE_COLORS.muted }}
+                sx={{
+                  flex: 1,
+                  minWidth: 200,
+                  fontSize: 13,
+                  color: WORKSPACE_COLORS.muted,
+                }}
               >
                 {job
                   ? "Next: pick a template and choose what the CV shows."
