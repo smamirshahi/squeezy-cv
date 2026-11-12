@@ -1,6 +1,7 @@
 import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
 import { CandidateDialog } from "@pages/candidates-page/candidate-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
+import { SponsorshipCheck } from "@pages/workspace/sponsorship-check";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
   Box,
@@ -208,6 +209,7 @@ export function JobDetailsPage(): JSX.Element {
                 onChange={(event) => edit({ role: event.target.value })}
               />
             </Box>
+            <SponsorshipCheck company={job?.company} />
             <Box
               sx={{
                 display: "grid",
