@@ -329,7 +329,12 @@ export function ApplicationsPage(): JSX.Element {
   }
 
   async function continueWith(candidate: Candidate): Promise<void> {
-    const jobId = continueCandidate(candidate);
+    // saved from a job that still exists: open it instead of making a second one
+    const existing = allJobs.some((j) => j.id === candidate.jobId);
+    const jobId =
+      existing && candidate.jobId
+        ? candidate.jobId
+        : continueCandidate(candidate);
     await runCandidateAction(() =>
       api.updateCandidate(candidate.id, { status: "started", jobId })
     );
