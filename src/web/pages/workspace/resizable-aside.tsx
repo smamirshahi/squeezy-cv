@@ -11,6 +11,10 @@ import {
 
 const KEY_STEP = 16;
 
+/** One height, or one per breakpoint (a phone usually gets less than a tablet) */
+type StackedHeight =
+  string | number | Partial<Record<Breakpoint, string | number>>;
+
 interface Props {
   side: PanelSide;
   label: string;
@@ -23,7 +27,7 @@ interface Props {
   stackBelow?: Breakpoint;
 
   /** Height of the stacked panel (a CSS length), needed because a panel fills its parent */
-  stackedHeight?: string | number;
+  stackedHeight?: StackedHeight;
   children: ReactNode;
 }
 
@@ -109,7 +113,12 @@ export function ResizableAside({
           maxWidth: stackBelow ? { xs: "none", [stackBelow]: "45vw" } : "45vw",
           height:
             stackBelow && stackedHeight !== undefined
-              ? { xs: stackedHeight, [stackBelow]: "auto" }
+              ? {
+                  ...(typeof stackedHeight === "object"
+                    ? stackedHeight
+                    : { xs: stackedHeight }),
+                  [stackBelow]: "auto",
+                }
               : undefined,
           flex: "none",
           display: "flex",

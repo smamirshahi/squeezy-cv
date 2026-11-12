@@ -130,7 +130,7 @@ function JobsIntro({ onClose }: { onClose: () => void }): JSX.Element {
       sx={{
         display: "grid",
         placeItems: "center",
-        color: WORKSPACE_COLORS.accentText,,
+        color: WORKSPACE_COLORS.accentText,
         transform: { xs: "rotate(90deg)", md: "none" },
       }}
     >

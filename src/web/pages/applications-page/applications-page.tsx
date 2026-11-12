@@ -346,7 +346,7 @@ export function ApplicationsPage(): JSX.Element {
       isCancelled = true;
     };
   }, [api, jobIdOfSelected]);
-  const isSideBySide = ["laptop", "desktop"].includes(useViewport());
+  const isSideBySide = useViewport() === "desktop";
   const interviews = readable.filter((a) => a.status === "interview").length;
   const subtitle = [
     `${jobs.length + readable.length} ${jobs.length + readable.length === 1 ? "job" : "jobs"}`,

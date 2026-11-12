@@ -37,6 +37,7 @@ import {
   sortTemplates,
 } from "@pages/workspace/template-scope";
 import { TemplateJobsTable } from "@pages/workspace/template-jobs-table";
+import { usePhonePreview } from "@pages/workspace/phone-preview";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { TemplateSample } from "@pages/workspace/template-section-styles";
 import {
@@ -226,6 +227,7 @@ function TemplatesNav({
  * and on the Style Settings page, which say which template they change.
  */
 export function TemplatesPage(): JSX.Element {
+  const phone = usePhonePreview();
   const dispatch = useAppDispatch();
   const isTemplatePlaceholder = useAppSelector(isTemplatePlaceholderSelector);
   const isJobPlaceholder = useAppSelector(isPlaceholderSelector);
@@ -758,7 +760,7 @@ export function TemplatesPage(): JSX.Element {
             label="the sample CV"
             defaultWidth={380}
             stackBelow="md"
-            stackedHeight="clamp(150px, 28vh, 320px)"
+            stackedHeight={phone.stackedHeight}
           >
             <Box
               component="aside"
@@ -773,27 +775,37 @@ export function TemplatesPage(): JSX.Element {
                   md: 0,
                 },
                 p: 2,
+                py: phone.isPhone ? 0 : 2,
                 overflow: "auto",
               }}
             >
-              <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
-                Sample
-                {tab === "templates" && shownTemplate
-                  ? `: ${shownTemplate.name}`
-                  : ""}
-              </Typography>
-              <Typography
-                sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, mb: 1.5 }}
-              >
-                Your vault with everything shown, in this template.
-                {tab === "templates"
-                  ? " Click a template to preview it."
-                  : ""}{" "}
-                Drag the edge to make it larger.
-              </Typography>
-              <TemplateSample
-                templateId={tab === "templates" ? shownId : undefined}
-              />
+              {phone.toggle}
+              {!phone.isCollapsed && (
+                <>
+                  <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
+                    Sample
+                    {tab === "templates" && shownTemplate
+                      ? `: ${shownTemplate.name}`
+                      : ""}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      color: WORKSPACE_COLORS.muted,
+                      mb: 1.5,
+                    }}
+                  >
+                    Your vault with everything shown, in this template.
+                    {tab === "templates"
+                      ? " Click a template to preview it."
+                      : ""}{" "}
+                    Drag the edge to make it larger.
+                  </Typography>
+                  <TemplateSample
+                    templateId={tab === "templates" ? shownId : undefined}
+                  />
+                </>
+              )}
             </Box>
           </ResizableAside>
         )}

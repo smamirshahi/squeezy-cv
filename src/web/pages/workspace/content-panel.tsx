@@ -77,7 +77,7 @@ export function ContentPanel(): JSX.Element {
       label="the content panel"
       defaultWidth={viewport === "desktop" ? 480 : 320}
       stackBelow="md"
-      stackedHeight="42vh"
+      stackedHeight={{ xs: "34vh", sm: "38vh" }}
     >
       <Box
         component="aside"

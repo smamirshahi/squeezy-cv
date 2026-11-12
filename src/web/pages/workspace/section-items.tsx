@@ -439,7 +439,10 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "minmax(0, 1fr) 44px", sm: "minmax(0, 1fr) 40px" },
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr) 44px",
+              sm: "minmax(0, 1fr) 40px",
+            },
             borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
             borderLeft: "3px solid transparent",
           }}
@@ -619,7 +622,10 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
               <IconButton
                 aria-label={`Delete ${title}`}
                 onClick={() => setRemovingId(item.id)}
-                sx={{ minWidth: { xs: 44, sm: 0 }, minHeight: { xs: 44, sm: 0 } }}
+                sx={{
+                  minWidth: { xs: 44, sm: 0 },
+                  minHeight: { xs: 44, sm: 0 },
+                }}
               >
                 <DeleteIcon />
               </IconButton>

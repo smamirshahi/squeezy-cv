@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Box, Button } from "@mui/material";
 import { navigate } from "@hooks/navigation";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
@@ -87,6 +87,8 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   const jobsView = route.kind === "jobs" ? route.view : "page";
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const barHeight = useElementHeight(barRef, isOutlineOpen);
   // "O" opens and closes the outline, unless the user is typing
   useEffect(() => {
     function onKey(event: KeyboardEvent): void {
@@ -174,7 +176,23 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                 }}
               >
                 {isOutlineOpen && (
-                  <Outline onClose={() => setIsOutlineOpen(false)} />
+                  <Box
+                    sx={{
+                      // Below a desktop the outline lies over the canvas, but under the template
+                      // bar, so its "Hide outline" button stays reachable
+                      display: { xs: "block", lg: "contents" },
+                      position: { xs: "absolute", lg: "static" },
+                      top: barHeight,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      zIndex: 6,
+                      pointerEvents: { xs: "none", lg: "auto" },
+                      "& > *": { pointerEvents: "auto" },
+                    }}
+                  >
+                    <Outline onClose={() => setIsOutlineOpen(false)} />
+                  </Box>
                 )}
                 <Box
                   sx={{
@@ -186,12 +204,14 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                   }}
                 >
                   {tool === "jobs" && (
-                    <TemplateBar
-                      isOutlineOpen={isOutlineOpen}
-                      onToggleOutline={() =>
-                        setIsOutlineOpen((wasOpen) => !wasOpen)
-                      }
-                    />
+                    <Box ref={barRef} sx={{ flex: "none" }}>
+                      <TemplateBar
+                        isOutlineOpen={isOutlineOpen}
+                        onToggleOutline={() =>
+                          setIsOutlineOpen((wasOpen) => !wasOpen)
+                        }
+                      />
+                    </Box>
                   )}
                   <Box
                     component="main"
@@ -324,4 +344,24 @@ function titleOf(route: ShellRoute, jobName: string): string {
     case "application":
       return "Applications";
   }
+}
+
+/** The height of an element (0 while it is not drawn), followed while `isActive` */
+function useElementHeight(
+  ref: RefObject<HTMLElement | null>,
+  isActive: boolean
+): number {
+  const [height, setHeight] = useState<number>(0);
+  useEffect(() => {
+    const element = ref.current;
+    if (!isActive || !element || typeof ResizeObserver === "undefined") {
+      setHeight(0);
+      return undefined;
+    }
+    const observer = new ResizeObserver(() => setHeight(element.offsetHeight));
+    observer.observe(element);
+    setHeight(element.offsetHeight);
+    return () => observer.disconnect();
+  }, [ref, isActive]);
+  return height;
 }

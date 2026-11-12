@@ -220,7 +220,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
       label="the chat panel"
       defaultWidth={viewport === "desktop" ? 360 : 320}
       stackBelow="md"
-      stackedHeight="42vh"
+      stackedHeight={{ xs: "34vh", sm: "38vh" }}
     >
       <Box
         component="aside"
