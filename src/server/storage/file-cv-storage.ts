@@ -20,6 +20,10 @@ import {
 } from "@custom-types/variant-types";
 import { summariseApplication } from "@shared/application/application-utils";
 import { splitVariant } from "@shared/variant/template-job";
+import {
+  withExportMeta,
+  withoutExportMeta,
+} from "@shared/migration/export-meta";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   CvStorage,
@@ -113,7 +117,7 @@ export class FileCvStorage implements CvStorage {
       throw new StorageError("not_found", "No CV has been saved yet.");
     }
     try {
-      return migrateCvFile(raw);
+      return withoutExportMeta(migrateCvFile(raw));
     } catch (error) {
       throw new StorageError(
         "corrupt",
@@ -125,7 +129,11 @@ export class FileCvStorage implements CvStorage {
   async saveVault(file: CvFile): Promise<void> {
     const filePath = this.vaultPath();
     await this.queue.run(filePath, () =>
-      writeJsonAtomic(filePath, file, isReadableVault)
+      writeJsonAtomic(
+        filePath,
+        withExportMeta(file, "vault", file.vault.version),
+        isReadableVault
+      )
     );
   }
 
@@ -238,11 +246,19 @@ export class FileCvStorage implements CvStorage {
     for (const { template, job } of await this.legacyPairs()) {
       const templatePath = this.templatePath(template.id);
       await this.queue.run(templatePath, () =>
-        writeJsonAtomic(templatePath, template, isReadableTemplate)
+        writeJsonAtomic(
+          templatePath,
+          withExportMeta(template, "template", template.version),
+          isReadableTemplate
+        )
       );
       const jobPath = this.jobPath(job.id);
       await this.queue.run(jobPath, () =>
-        writeJsonAtomic(jobPath, job, isReadableJob)
+        writeJsonAtomic(
+          jobPath,
+          withExportMeta(job, "job", job.version),
+          isReadableJob
+        )
       );
     }
   }
@@ -294,14 +310,18 @@ export class FileCvStorage implements CvStorage {
         `Template ${id} is not a valid template file. The file was left untouched.`
       );
     }
-    return raw;
+    return withoutExportMeta(raw);
   }
 
   async saveTemplate(template: Template): Promise<void> {
     const filePath = this.templatePath(template.id);
     await this.materialiseLegacy();
     await this.queue.run(filePath, () =>
-      writeJsonAtomic(filePath, template, isReadableTemplate)
+      writeJsonAtomic(
+        filePath,
+        withExportMeta(template, "template", template.version),
+        isReadableTemplate
+      )
     );
   }
 
@@ -378,14 +398,18 @@ export class FileCvStorage implements CvStorage {
         `Job ${id} is not a valid job file. The file was left untouched.`
       );
     }
-    return raw;
+    return withoutExportMeta(raw);
   }
 
   async saveJob(job: Job): Promise<void> {
     const filePath = this.jobPath(job.id);
     await this.materialiseLegacy();
     await this.queue.run(filePath, () =>
-      writeJsonAtomic(filePath, job, isReadableJob)
+      writeJsonAtomic(
+        filePath,
+        withExportMeta(job, "job", job.version),
+        isReadableJob
+      )
     );
   }
 
@@ -473,7 +497,7 @@ export class FileCvStorage implements CvStorage {
         `Application ${id} is not a valid application file. The file was left untouched.`
       );
     }
-    return raw;
+    return withoutExportMeta(raw);
   }
 
   async loadApplicationPdf(id: string): Promise<Buffer> {
@@ -499,7 +523,11 @@ export class FileCvStorage implements CvStorage {
       if (pdf) {
         await writeBytesAtomic(path.join(dir, APPLICATION_PDF), pdf);
       }
-      await writeJsonAtomic(filePath, application, isReadableApplication);
+      await writeJsonAtomic(
+        filePath,
+        withExportMeta(application, "application", application.version),
+        isReadableApplication
+      );
     });
   }
 

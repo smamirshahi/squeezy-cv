@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Every JSON file the app exports or saves records the app version, the format version, the time and its kind under `meta` (#391). Opening a file made by a newer app is refused with a clear message; migrations run through a shared registry.
 - Templates page (#280): the jobs of a template are a table (job linked to `/jobs/<id>` in a new tab, company · role, created, application status, PDF of the sent application or of the saved job, sortable) with an empty state.
 
 ### Fixed

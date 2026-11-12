@@ -1,5 +1,10 @@
 import { nanoid } from "nanoid";
 import { Array, Boolean, Object, String, Union, Static } from "runtypes";
+import { assertNotNewer } from "@shared/migration/export-meta";
+import {
+  MigrationStep,
+  runMigrations,
+} from "@shared/migration/migration-registry";
 import { MetaDataSchema } from "@custom-types/json-types";
 import { SkillItemSchema } from "@custom-types/skill-types";
 import { StyleSchema } from "@custom-types/styles-types";
@@ -326,6 +331,8 @@ export function migrateCvFile(
     throw new Error("CV file must be a JSON object.");
   }
 
+  assertNotNewer(raw);
+
   if (!("vault" in raw)) {
     return migrateCvFile(migrateLegacyFile(raw, newId), options);
   }
@@ -345,18 +352,15 @@ export function migrateCvFile(
     );
   }
 
-  let current: Record<string, unknown> = raw;
-  for (let v = version; v < currentVersion; v++) {
-    const step = migrations[v];
-    if (!step) {
-      throw new Error(`No migration from vault version ${v} to ${v + 1}.`);
-    }
-    const next = step(current);
-    if (!isRecord(next)) {
-      throw new Error(`Migration ${v} to ${v + 1} did not return an object.`);
-    }
-    current = next;
-  }
+  const steps: MigrationStep[] = globalThis.Object.entries(migrations).map(
+    ([from, migrate]) => ({
+      kind: "cv-file",
+      fromVersion: Number(from),
+      toVersion: Number(from) + 1,
+      migrate: (json) => migrate(json) as Record<string, unknown>,
+    })
+  );
+  const current = runMigrations(raw, "cv-file", version, currentVersion, steps);
 
   return CvFileSchema.check(current);
 }

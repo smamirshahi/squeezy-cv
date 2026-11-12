@@ -1,6 +1,7 @@
 import { MetaData } from "@custom-types/json-types";
 import { Style } from "@custom-types/styles-types";
 import { CvFile, Vault } from "@custom-types/vault-types";
+import { withExportMeta } from "@shared/migration/export-meta";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 /** Reads the text of a CV file (any supported version) into the current format. Throws if it cannot. */
@@ -19,5 +20,9 @@ export function createCvFile(
 
 /** The text that gets saved to disk */
 export function serializeCvFile(file: CvFile): string {
-  return JSON.stringify(file, null, 2);
+  return JSON.stringify(
+    withExportMeta(file, "cv-file", file.vault.version),
+    null,
+    2
+  );
 }
