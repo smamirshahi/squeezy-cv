@@ -1,10 +1,12 @@
-import { MouseEvent } from "react";
-import { Box, Typography } from "@mui/material";
+import { MouseEvent, useEffect, useRef } from "react";
+import { Box, Chip, Divider, Typography } from "@mui/material";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { useViewport } from "@hooks/use-viewport";
 import { AiIcon } from "@components/ai-button";
+import { AtsPanel } from "@pages/workspace/ats/ats-panel";
+import { useAts } from "@pages/workspace/ats/use-ats";
 import { Route, formatRoute } from "@shared/routing/routes";
 
 interface Entry {
@@ -51,6 +53,9 @@ const ASSISTANTS: Entry[] = [
     isAi: true,
   },
 ];
+
+/** 44 px touch targets in the tab strip */
+const TOUCH_TARGET = 44;
 
 /** In the tab strip the hint lines only fit from a tablet up */
 const hintDisplay = { xs: "none", sm: "block" };
@@ -107,7 +112,7 @@ function Group({
               sx={{
                 px: 1.25,
                 py: 0.9,
-                minHeight: isStrip ? 44 : undefined,
+                minHeight: isStrip ? TOUCH_TARGET : undefined,
                 flex: isStrip ? "none" : undefined,
                 opacity: 0.45,
                 cursor: "not-allowed",
@@ -139,7 +144,7 @@ function Group({
               display: "block",
               px: 1.25,
               py: 0.9,
-              minHeight: isStrip ? 44 : undefined,
+              minHeight: isStrip ? TOUCH_TARGET : undefined,
               flex: isStrip ? "none" : undefined,
               whiteSpace: isStrip ? "nowrap" : undefined,
               borderRadius: 1,
@@ -175,6 +180,105 @@ function Group({
           </Box>
         );
       })}
+    </Box>
+  );
+}
+
+/**
+ * "ATS score" as a tab, below a desktop (on a desktop the score is a section of the sidebar,
+ * see `AtsPanel`). Needs a job. It shows the latest score as a number, never colour alone.
+ */
+function AtsTab({ jobId }: { jobId?: string }): JSX.Element {
+  const route = useRoute();
+  const ats = useAts();
+  const target: Route = { kind: "jobs", jobId, view: "ats" };
+  const isOn = route.kind === "jobs" && route.view === "ats";
+  const linkRef = useRef<HTMLElement>(null);
+  // On a phone the strip scrolls: bring the open tab into view
+  useEffect(() => {
+    if (isOn) {
+      linkRef.current?.scrollIntoView?.({
+        inline: "nearest",
+        block: "nearest",
+      });
+    }
+  }, [isOn]);
+  if (jobId === undefined) {
+    return (
+      <Box
+        aria-disabled="true"
+        title="Start a job application first"
+        sx={{
+          px: 1.25,
+          py: 0.9,
+          minHeight: TOUCH_TARGET,
+          flex: "none",
+          opacity: 0.45,
+          cursor: "not-allowed",
+          color: WORKSPACE_COLORS.muted,
+        }}
+      >
+        <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+          ATS score
+        </Typography>
+        <Typography sx={{ fontSize: 12, display: hintDisplay }} noWrap>
+          Start a job application first
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <Box
+      component="a"
+      ref={linkRef}
+      href={formatRoute(target)}
+      aria-current={isOn ? "page" : undefined}
+      onClick={(event: MouseEvent<HTMLElement>) =>
+        onAppLinkClick(event, target)
+      }
+      sx={{
+        display: "block",
+        px: 1.25,
+        py: 0.9,
+        minHeight: TOUCH_TARGET,
+        flex: "none",
+        whiteSpace: "nowrap",
+        borderRadius: 1,
+        textDecoration: "none",
+        color: isOn ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.text,
+        bgcolor: isOn ? WORKSPACE_COLORS.accentSoft : "transparent",
+        "&:hover": { bgcolor: isOn ? undefined : WORKSPACE_COLORS.hover },
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: 14,
+          fontWeight: 600,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+        }}
+      >
+        ATS score
+        {ats.now && (
+          <Chip
+            size="small"
+            label={ats.now.total}
+            aria-label={`score ${ats.now.total}`}
+            sx={{ height: 20, fontSize: 12, fontWeight: 700 }}
+          />
+        )}
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: 12,
+          color: WORKSPACE_COLORS.muted,
+          display: hintDisplay,
+        }}
+        noWrap
+      >
+        How a parser reads the CV
+      </Typography>
     </Box>
   );
 }
@@ -218,24 +322,27 @@ export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
         }}
       >
         {groups}
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+        <AtsTab jobId={jobId} />
       </Box>
     );
   }
   return (
-    <ResizableAside side="left" label="the job menu" defaultWidth={210}>
+    <ResizableAside side="left" label="the job menu" defaultWidth={272}>
       <Box
-        component="nav"
-        aria-label="Job application"
         sx={{
           width: "100%",
           flex: "none",
           overflow: "auto",
           bgcolor: WORKSPACE_COLORS.panel,
           borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
-          p: 1,
         }}
       >
-        {groups}
+        <Box component="nav" aria-label="Job application" sx={{ p: 1 }}>
+          {groups}
+        </Box>
+        <Divider />
+        <AtsPanel variant="section" />
       </Box>
     </ResizableAside>
   );

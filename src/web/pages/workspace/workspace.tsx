@@ -25,6 +25,8 @@ import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useSyncStructure } from "@hooks/use-sync-structure";
+import { useViewport } from "@hooks/use-viewport";
+import { AtsPanel } from "@pages/workspace/ats/ats-panel";
 import { usePersistence } from "@hooks/use-persistence";
 import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { useAppSelector } from "@store/store-helper";
@@ -41,6 +43,7 @@ import { JobDetailsPage } from "@pages/workspace/job-details-page";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { ContentPanel } from "@pages/workspace/content-panel";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { TemplateBar } from "@pages/workspace/template-bar";
 import { ApplySidebar } from "@pages/workspace/apply-sidebar";
 import { NoJobs } from "@pages/workspace/no-jobs";
@@ -84,7 +87,12 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
     }
   }, [tool]);
   useUndoShortcuts();
-  const jobsView = route.kind === "jobs" ? route.view : "page";
+  const isDesktop = useViewport() === "desktop";
+  const requestedView = route.kind === "jobs" ? route.view : "page";
+  // On a desktop the ATS score is a section of the Apply sidebar, so its own view is the CV page
+  const isAtsView = requestedView === "ats" && !isDesktop;
+  const jobsView =
+    requestedView === "ats" && isDesktop ? "page" : requestedView;
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   const barRef = useRef<HTMLDivElement>(null);
@@ -163,7 +171,8 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
           {!missing &&
             !isEmpty &&
             !isJobsWithoutJobs &&
-            ((tool === "jobs" && jobsView === "page") || tool === "chat") && (
+            ((tool === "jobs" && (jobsView === "page" || isAtsView)) ||
+              tool === "chat") && (
               <Box
                 sx={{
                   flex: 1,
@@ -201,6 +210,14 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                     minHeight: 0,
                     display: "flex",
                     flexDirection: "column",
+                    // The ATS score fills a phone. The CV stays laid out (the page count it is
+                    // scored on is measured from it) but takes no room
+                    ...(isAtsView && {
+                      height: { xs: 0, sm: "auto" },
+                      flex: { xs: "none", sm: 1 },
+                      overflow: { xs: "hidden", sm: "visible" },
+                      visibility: { xs: "hidden", sm: "visible" },
+                    }),
                   }}
                 >
                   {tool === "jobs" && (
@@ -254,7 +271,13 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                     <BlockToolbar canvasRef={canvasRef} />
                   </Box>
                 </Box>
-                {tool === "chat" ? <ChatPanel /> : <ContentPanel />}
+                {tool === "chat" ? (
+                  <ChatPanel />
+                ) : isAtsView ? (
+                  <AtsAside />
+                ) : (
+                  <ContentPanel />
+                )}
               </Box>
             )}
           {!missing && tool === "templates" && <TemplatesPage />}
@@ -269,6 +292,38 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
         </Box>
       </Box>
     </Box>
+  );
+}
+
+/**
+ * The ATS score as a panel next to (laptop) or under (tablet, phone) the CV, below a desktop
+ * where the sidebar has no room for it. Same sizes as the content panel it replaces.
+ */
+function AtsAside(): JSX.Element {
+  return (
+    <ResizableAside
+      side="right"
+      label="the ATS score"
+      defaultWidth={320}
+      stackBelow="md"
+      stackedHeight={{ xs: "100%", sm: 500 }}
+    >
+      <Box
+        component="aside"
+        aria-label="ATS score"
+        sx={{
+          overflow: "auto",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderLeft: { md: `1px solid ${WORKSPACE_COLORS.border}` },
+          borderTop: {
+            xs: `1px solid ${WORKSPACE_COLORS.border}`,
+            md: "none",
+          },
+        }}
+      >
+        <AtsPanel variant="page" />
+      </Box>
+    </ResizableAside>
   );
 }
 
@@ -333,7 +388,7 @@ function titleOf(route: ShellRoute, jobName: string): string {
     case "vault":
       return "Vault";
     case "jobs":
-      return `${route.view === "settings" ? "Content" : route.view === "details" ? "Job application" : "Apply"}${jobName ? ` · ${jobName}` : ""}`;
+      return `${titleOfJobsView(route.view)}${jobName ? ` · ${jobName}` : ""}`;
     case "templates":
       return `Templates${route.tab === "templates" ? "" : " · Design"}`;
     case "chat":
@@ -343,6 +398,21 @@ function titleOf(route: ShellRoute, jobName: string): string {
     case "applications":
     case "application":
       return "Applications";
+  }
+}
+
+function titleOfJobsView(
+  view: "page" | "settings" | "details" | "ats"
+): string {
+  switch (view) {
+    case "settings":
+      return "Content";
+    case "details":
+      return "Job application";
+    case "ats":
+      return "ATS score";
+    case "page":
+      return "Apply";
   }
 }
 

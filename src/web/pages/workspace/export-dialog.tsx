@@ -19,6 +19,8 @@ import { useStore } from "react-redux";
 import { documentText } from "@shared/variant/document-text";
 import { render } from "@shared/variant/render";
 import { exportChecks, suggestFileName } from "@shared/export/export-checks";
+import { fixList } from "@shared/ats/ats-score";
+import { useAts } from "@pages/workspace/ats/use-ats";
 import { MarkAsAppliedDialog } from "@pages/applications-page/mark-as-applied";
 import { saveActiveJob } from "@hooks/save-active-job";
 import { useImportExportJson } from "@hooks/use-import-export-json";
@@ -30,6 +32,8 @@ import {
 } from "@store/jobs/jobs-slice";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { vaultSelector } from "@store/vault/vault-slice";
+
+const EXPORT_FIX_COUNT = 3;
 
 interface Props {
   isOpen: boolean;
@@ -49,6 +53,8 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
   const template = useAppSelector(activeTemplateSelector);
   const fit = useAppSelector((s) => s.app.fit);
   const { handleExport } = useImportExportJson();
+  const ats = useAts();
+  const atsFixes = fixList(ats.live.issues).slice(0, EXPORT_FIX_COUNT);
 
   const [pdf, setPdf] = useState<{ blob: Blob; url: string } | null>(null);
   const [error, setError] = useState<string>("");
@@ -215,6 +221,40 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
                   </Typography>
                 </Box>
               ))}
+            </Box>
+            <Box data-testid="export-ats">
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                }}
+              >
+                ATS score
+              </Typography>
+              <Box
+                sx={{
+                  py: 0.75,
+                  borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+                }}
+              >
+                <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
+                  {ats.live.total} of 100 · Your CV {ats.live.cv.score}
+                  {ats.live.match ? ` · Match ${ats.live.match.score}` : ""}
+                </Typography>
+                {atsFixes.map((fix) => (
+                  <Typography
+                    key={fix.key}
+                    sx={{ fontSize: 12, color: "text.secondary" }}
+                  >
+                    ⚠ {fix.title}
+                  </Typography>
+                ))}
+                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                  A guide, not a guarantee: real ATS systems differ. Open the
+                  ATS score in Apply for all the reasons.
+                </Typography>
+              </Box>
             </Box>
             <FormControlLabel
               control={

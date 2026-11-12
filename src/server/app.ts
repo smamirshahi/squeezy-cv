@@ -58,6 +58,8 @@ import {
 import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
 import { rewordText } from "@server/ai/reword-text";
 import { RewordRequestSchema } from "@custom-types/reword-types";
+import { suggestAtsWording } from "@server/ai/ats-wording";
+import { AtsWordingRequestSchema } from "@custom-types/ats-wording-types";
 import {
   generateBullets,
   ItemNotFoundError,
@@ -601,6 +603,42 @@ export function buildServer({
       if (error instanceof ItemNotFoundError) {
         return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
       }
+      if (error instanceof NothingToWorkFromError) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "nothing_to_work_from",
+          error.message
+        );
+      }
+      throw error;
+    }
+  });
+
+  // The advert's words worked into the CV's own texts, where they already say it (the user reviews it; nothing is changed here)
+  app.post("/api/ai/ats-wording", async (request, reply) => {
+    const ai = aiFor("chat", request);
+    if (!ai) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "ai_not_configured",
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
+      );
+    }
+    const body = AtsWordingRequestSchema.check(request.body);
+    const { vault } = await storage.loadVault();
+    try {
+      return await suggestAtsWording(
+        ai,
+        vault,
+        {
+          terms: body.terms.map((term) => term.slice(0, 100)),
+          reworded: (body.reworded ?? []).map((term) => term.slice(0, 100)),
+        },
+        { isMaskingOrganisations: registry.isMaskingOrganisations() }
+      );
+    } catch (error) {
       if (error instanceof NothingToWorkFromError) {
         return sendError(
           reply,

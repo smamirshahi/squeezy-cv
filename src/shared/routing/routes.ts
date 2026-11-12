@@ -1,5 +1,9 @@
-/** How the Jobs tool shows a job: the CV page, or the settings of the job */
-type JobsView = "page" | "settings" | "details";
+/**
+ * How the Jobs tool shows a job: the CV page, the settings of the job, its details, or the ATS
+ * score (#258: on a desktop the score lives in the Apply sidebar, so this view is only a tab
+ * below a desktop)
+ */
+type JobsView = "page" | "settings" | "details" | "ats";
 
 /** The pages of the Templates tool */
 export type TemplatesTab = "templates" | "design";
@@ -55,7 +59,9 @@ function decode(segment: string): string {
 }
 
 function jobsViewOf(value: string | null): JobsView {
-  return value === "settings" || value === "details" ? value : "page";
+  return value === "settings" || value === "details" || value === "ats"
+    ? value
+    : "page";
 }
 
 /** Turns an address (`window.location.pathname` and `.search`) into a route */
