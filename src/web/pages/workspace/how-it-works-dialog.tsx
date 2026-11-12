@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useViewport } from "@hooks/use-viewport";
 import {
   Box,
   Button,
   Dialog,
+  Drawer,
   IconButton,
   Typography,
   type SxProps,
   type Theme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import {
+  isAutoStartOff,
+  isTutorialDone,
+  markTutorialDone,
+  setAutoStartOff,
+} from "@pages/workspace/tutorial-seen";
 
 /** The tutorials in the dialog's left list */
 export type TutorialId =
@@ -205,22 +214,28 @@ function Link({
   );
 }
 
+/**
+ * The picture of a tutorial step. Desktop: a column beside the text (`width` px); small laptop:
+ * 80% of that; tablet and phone: the full width above the text, its content centred.
+ */
+function pictureSx(width: number) {
+  return {
+    flex: "none",
+    width: { xs: "auto", md: Math.round(width * 0.8), lg: width },
+    bgcolor: WORKSPACE_COLORS.canvas,
+    p: { xs: 2, md: 3 },
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    "& > *": { width: "100%", maxWidth: 560, mx: "auto" },
+  };
+}
+
 /** The picture on the left: the three layers; the ones in use for the step are lit */
 function Diagram({ step }: { step: number }): JSX.Element {
   const isJob = step === 2;
   return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        width: 340,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.canvas,
-        p: 3,
-        display: { xs: "none", sm: "flex" },
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
+    <Box aria-hidden="true" sx={pictureSx(340)}>
       <Layer
         isOn={step === 0 || isJob}
         color={STEPS[0].color}
@@ -547,19 +562,7 @@ function Chip({
 function VaultPicture({ step }: { step: number }): JSX.Element {
   const isList = step !== 1;
   return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        width: 380,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.canvas,
-        p: 3,
-        display: { xs: "none", md: "flex" },
-        flexDirection: "column",
-        justifyContent: "center",
-        gap: 1.25,
-      }}
-    >
+    <Box aria-hidden="true" sx={{ ...pictureSx(380), gap: 1.25 }}>
       <Box
         sx={{
           bgcolor: WORKSPACE_COLORS.panel,
@@ -1458,18 +1461,7 @@ function TemplatePictureContent({ step }: { step: number }): JSX.Element {
 /** The picture of a template tutorial step */
 function TemplatePicture({ step }: { step: number }): JSX.Element {
   return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        width: 380,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.canvas,
-        p: 3,
-        display: { xs: "none", md: "flex" },
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
+    <Box aria-hidden="true" sx={pictureSx(380)}>
       <TemplatePictureContent step={step} />
     </Box>
   );
@@ -2306,18 +2298,7 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
 /** The picture of an apply tutorial step */
 function ApplyPicture({ step }: { step: number }): JSX.Element {
   return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        width: 420,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.canvas,
-        p: 3,
-        display: { xs: "none", md: "flex" },
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
+    <Box aria-hidden="true" sx={pictureSx(420)}>
       <ApplyPictureContent step={step} />
     </Box>
   );
@@ -2778,18 +2759,7 @@ function ApplicationsPictureContent({ step }: { step: number }): JSX.Element {
 /** The picture of an applications tutorial step */
 function ApplicationsPicture({ step }: { step: number }): JSX.Element {
   return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        width: 380,
-        flex: "none",
-        bgcolor: WORKSPACE_COLORS.canvas,
-        p: 3,
-        display: { xs: "none", md: "flex" },
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
+    <Box aria-hidden="true" sx={pictureSx(380)}>
       <ApplicationsPictureContent step={step} />
     </Box>
   );
@@ -2798,6 +2768,8 @@ function ApplicationsPicture({ step }: { step: number }): JSX.Element {
 interface Tutorial {
   id: TutorialId;
   name: string;
+  /** The short name in the list of tutorials */
+  shortName: string;
   summary: string;
   stepNames: string[];
   lastLabel: string;
@@ -2807,6 +2779,7 @@ const TUTORIALS: Tutorial[] = [
   {
     id: "overview",
     name: "How CV Builder works",
+    shortName: "Welcome",
     summary: "Vault, template and job in three steps",
     stepNames: STEPS.map((s) => s.name),
     lastLabel: "Start building",
@@ -2814,6 +2787,7 @@ const TUTORIALS: Tutorial[] = [
   {
     id: "vault",
     name: "Your vault",
+    shortName: "Vault",
     summary: "What to put in it and how it is used",
     stepNames: VAULT_STEPS.map((s) => s.title),
     lastLabel: "Start filling my vault",
@@ -2821,6 +2795,7 @@ const TUTORIALS: Tutorial[] = [
   {
     id: "template",
     name: "Your templates",
+    shortName: "Template",
     summary: "How a CV looks: layout, sections and style",
     stepNames: TEMPLATE_STEPS.map((s) => s.title),
     lastLabel: "Start designing",
@@ -2828,6 +2803,7 @@ const TUTORIALS: Tutorial[] = [
   {
     id: "apply",
     name: "Applying for a job",
+    shortName: "Apply",
     summary: "From the advert to a saved application",
     stepNames: APPLY_STEPS.map((s) => s.title),
     lastLabel: "Start applying",
@@ -2835,22 +2811,429 @@ const TUTORIALS: Tutorial[] = [
   {
     id: "applications",
     name: "Your applications",
+    shortName: "Applications",
     summary: "Statuses, what you sent and follow up",
     stepNames: APPLICATIONS_STEPS.map((s) => s.name),
     lastLabel: "Got it",
   },
 ];
 
-/** Tutorials with a list on the left to choose between them, each a few steps with a picture */
+/** The round mark in front of a tutorial: a tick when done, a ring for the one that is open */
+function DoneMark({
+  isDone,
+  isCurrent,
+}: {
+  isDone: boolean;
+  isCurrent: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      component="span"
+      aria-hidden="true"
+      sx={{
+        flex: "none",
+        width: 20,
+        height: 20,
+        borderRadius: "50%",
+        boxSizing: "border-box",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        ...(isDone
+          ? { bgcolor: JOB_COLOR, color: "#fff" }
+          : {
+              border: `2px solid ${
+                isCurrent
+                  ? WORKSPACE_COLORS.accent
+                  : WORKSPACE_COLORS.borderStrong
+              }`,
+            }),
+      }}
+    >
+      {isDone && <CheckIcon sx={{ fontSize: 14 }} />}
+    </Box>
+  );
+}
+
+/** "4 steps", "4 steps · done" or, for the open one, "Step 2 of 4" */
+function tutorialStatus(
+  tutorial: Tutorial,
+  isDone: boolean,
+  currentStep: number | null
+): string {
+  const count = tutorial.stepNames.length;
+  if (currentStep !== null) {
+    return `Step ${currentStep + 1} of ${count}`;
+  }
+  return isDone ? `${count} steps · done` : `${count} steps`;
+}
+
+interface NavProps {
+  tutorialId: TutorialId;
+  step: number;
+  doneIds: ReadonlySet<TutorialId>;
+  onChoose: (id: TutorialId) => void;
+}
+
+/** One row of the list of tutorials (sidebar on a laptop or desktop, bottom sheet on a phone) */
+function NavRow({
+  tutorial,
+  isCurrent,
+  isDone,
+  step,
+  minHeight,
+  onChoose,
+}: {
+  tutorial: Tutorial;
+  isCurrent: boolean;
+  isDone: boolean;
+  step: number;
+  minHeight: number;
+  onChoose: () => void;
+}): JSX.Element {
+  return (
+    <Box
+      component="button"
+      type="button"
+      title={tutorial.summary}
+      aria-label={`${tutorial.name}, ${tutorialStatus(tutorial, isDone, null)}`}
+      aria-current={isCurrent ? "true" : undefined}
+      onClick={onChoose}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.25,
+        width: "100%",
+        minHeight,
+        textAlign: "left",
+        font: "inherit",
+        cursor: "pointer",
+        px: 2,
+        py: 1,
+        border: 0,
+        borderLeft: "3px solid",
+        borderLeftColor: isCurrent ? WORKSPACE_COLORS.accent : "transparent",
+        bgcolor: isCurrent ? WORKSPACE_COLORS.accentSoft : "transparent",
+        color: isCurrent ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.text,
+        "&:hover": { bgcolor: WORKSPACE_COLORS.accentSoft },
+      }}
+    >
+      <DoneMark isDone={isDone} isCurrent={isCurrent} />
+      <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          component="span"
+          sx={{ display: "block", fontSize: 14, fontWeight: 600 }}
+        >
+          {tutorial.shortName}
+        </Typography>
+        <Typography
+          component="span"
+          sx={{
+            display: "block",
+            fontSize: 12,
+            color: isCurrent
+              ? WORKSPACE_COLORS.accentText
+              : WORKSPACE_COLORS.muted,
+          }}
+        >
+          {tutorialStatus(tutorial, isDone, isCurrent ? step : null)}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+/** Desktop and small laptop: the contents sidebar */
+function NavSidebar({
+  tutorialId,
+  step,
+  doneIds,
+  onChoose,
+}: NavProps): JSX.Element {
+  return (
+    <Box
+      component="nav"
+      aria-label="Tutorials"
+      sx={{
+        width: { md: 196, lg: 232 },
+        flex: "none",
+        pt: 2,
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: WORKSPACE_COLORS.panelAlt,
+        borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
+      }}
+    >
+      <Typography
+        sx={{
+          px: 2,
+          pb: 1,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: ".05em",
+          textTransform: "uppercase",
+          color: WORKSPACE_COLORS.muted,
+        }}
+      >
+        Tutorials
+      </Typography>
+      {TUTORIALS.map((t) => (
+        <NavRow
+          key={t.id}
+          tutorial={t}
+          isCurrent={t.id === tutorialId}
+          isDone={doneIds.has(t.id)}
+          step={step}
+          minHeight={52}
+          onChoose={() => onChoose(t.id)}
+        />
+      ))}
+      <Box sx={{ flex: 1 }} />
+      <Typography
+        sx={{ px: 2, py: 1.5, fontSize: 13, color: WORKSPACE_COLORS.muted }}
+      >
+        {doneIds.size} of {TUTORIALS.length} tutorials done
+      </Typography>
+    </Box>
+  );
+}
+
+/** Tablet: the contents as a row of tabs on top */
+function NavTabs({
+  tutorialId,
+  step,
+  doneIds,
+  onChoose,
+}: NavProps): JSX.Element {
+  return (
+    <Box
+      component="nav"
+      aria-label="Tutorials"
+      sx={{
+        flex: "none",
+        display: "flex",
+        gap: 1,
+        px: 3,
+        py: 1,
+        overflowX: "auto",
+        borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+      }}
+    >
+      {TUTORIALS.map((t) => {
+        const isCurrent = t.id === tutorialId;
+        return (
+          <Box
+            component="button"
+            key={t.id}
+            type="button"
+            aria-label={`${t.name}, ${tutorialStatus(t, doneIds.has(t.id), null)}`}
+            aria-current={isCurrent ? "true" : undefined}
+            onClick={() => onChoose(t.id)}
+            sx={{
+              flex: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.75,
+              height: 44,
+              px: 1.75,
+              font: "inherit",
+              fontSize: 14,
+              whiteSpace: "nowrap",
+              cursor: "pointer",
+              borderRadius: 22,
+              border: "1px solid",
+              borderColor: isCurrent
+                ? WORKSPACE_COLORS.accent
+                : WORKSPACE_COLORS.borderStrong,
+              bgcolor: isCurrent ? WORKSPACE_COLORS.accentSoft : "transparent",
+              color: isCurrent
+                ? WORKSPACE_COLORS.accentText
+                : WORKSPACE_COLORS.text,
+              fontWeight: isCurrent ? 600 : 400,
+            }}
+          >
+            {doneIds.has(t.id) && <DoneMark isDone isCurrent={false} />}
+            {t.shortName}
+            {isCurrent && (
+              <Box
+                component="span"
+                sx={{ color: WORKSPACE_COLORS.muted, fontSize: 12 }}
+              >
+                · {step + 1} of {t.stepNames.length}
+              </Box>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
+/** "Don't show on start": tutorials stop opening by themselves on a first visit */
+function AutoStartSwitch({
+  isOff,
+  onChange,
+  size,
+}: {
+  isOff: boolean;
+  onChange: (isOff: boolean) => void;
+  size: number;
+}): JSX.Element {
+  return (
+    <Box
+      component="label"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        fontSize: 13,
+        color: WORKSPACE_COLORS.muted,
+        minHeight: size === 20 ? 48 : undefined,
+        cursor: "pointer",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={isOff}
+        onChange={(event) => onChange(event.target.checked)}
+        style={{ width: size, height: size, margin: 0 }}
+      />
+      {size === 20
+        ? "Don\u2019t show tutorials on start"
+        : "Don\u2019t show on start"}
+    </Box>
+  );
+}
+
+/** Phone: a "Tutorial: name" button that opens a bottom sheet with the list */
+function NavPicker({
+  tutorialId,
+  step,
+  doneIds,
+  onChoose,
+  isAutoOff,
+  onAutoOff,
+}: NavProps & {
+  isAutoOff: boolean;
+  onAutoOff: (isOff: boolean) => void;
+}): JSX.Element {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const current = TUTORIALS.find((t) => t.id === tutorialId) ?? TUTORIALS[0];
+  return (
+    <>
+      <Box
+        sx={{
+          flex: "none",
+          px: 1.5,
+          py: 1.25,
+          borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+        }}
+      >
+        <Button
+          fullWidth
+          variant="outlined"
+          color="inherit"
+          aria-haspopup="dialog"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen(true)}
+          endIcon={<ExpandMoreIcon />}
+          sx={{
+            minHeight: 48,
+            justifyContent: "space-between",
+            textTransform: "none",
+            fontSize: 15,
+            borderColor: WORKSPACE_COLORS.borderStrong,
+          }}
+        >
+          <span>
+            <Box
+              component="span"
+              sx={{ color: WORKSPACE_COLORS.muted, fontWeight: 400 }}
+            >
+              Tutorial
+            </Box>
+            &nbsp; <b>{current.shortName}</b>
+          </span>
+        </Button>
+      </Box>
+      <Drawer
+        anchor="bottom"
+        // A drawer sits below dialogs by default, and this one opens above the full-screen dialog
+        sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        slotProps={{
+          paper: { sx: { borderRadius: "12px 12px 0 0", maxHeight: "85%" } },
+        }}
+      >
+        <Box role="dialog" aria-label="Choose a tutorial" sx={{ pb: 1.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              pl: 2,
+              pr: 0.5,
+              pt: 0.5,
+            }}
+          >
+            <Typography sx={{ flex: 1, fontSize: 16, fontWeight: 700 }}>
+              Choose a tutorial
+            </Typography>
+            <IconButton
+              aria-label="Close list"
+              onClick={() => setIsOpen(false)}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Box component="nav" aria-label="Tutorials" sx={{ mt: 0.5 }}>
+            {TUTORIALS.map((t) => (
+              <NavRow
+                key={t.id}
+                tutorial={t}
+                isCurrent={t.id === tutorialId}
+                isDone={doneIds.has(t.id)}
+                step={step}
+                minHeight={56}
+                onChoose={() => {
+                  onChoose(t.id);
+                  setIsOpen(false);
+                }}
+              />
+            ))}
+          </Box>
+          <Box
+            sx={{
+              px: 2,
+              mt: 0.5,
+              borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+            }}
+          >
+            <AutoStartSwitch isOff={isAutoOff} onChange={onAutoOff} size={20} />
+          </Box>
+        </Box>
+      </Drawer>
+    </>
+  );
+}
+
+/** Tutorials with a list to choose between them, each a few steps with a picture */
 export function HowItWorksDialog({
   isOpen,
   startTutorial = "overview",
   startStep = 0,
   onClose,
 }: HowItWorksDialogProps): JSX.Element {
+  const viewport = useViewport();
+  const isPhone = viewport === "phone";
   const [tutorialId, setTutorialId] = useState<TutorialId>(startTutorial);
   const [step, setStep] = useState<number>(startStep);
   const [wasOpen, setWasOpen] = useState<boolean>(isOpen);
+  const [doneIds, setDoneIds] = useState<ReadonlySet<TutorialId>>(
+    () =>
+      new Set(TUTORIALS.filter((t) => isTutorialDone(t.id)).map((t) => t.id))
+  );
+  const [isAutoOff, setIsAutoOff] = useState<boolean>(isAutoStartOff);
   // Every time it opens it starts again: at the tutorial and step that were asked for
   if (isOpen !== wasOpen) {
     setWasOpen(isOpen);
@@ -2863,171 +3246,182 @@ export function HowItWorksDialog({
   const count = tutorial.stepNames.length;
   const isLast = step === count - 1;
 
+  // Reaching the last step ticks the tutorial in the list
+  useEffect(() => {
+    if (isOpen && isLast) {
+      markTutorialDone(tutorialId);
+      setDoneIds((ids) =>
+        ids.has(tutorialId) ? ids : new Set([...ids, tutorialId])
+      );
+    }
+  }, [isOpen, isLast, tutorialId]);
+
   const choose = (id: TutorialId): void => {
     setTutorialId(id);
     setStep(0);
   };
+  const changeAutoOff = (isOff: boolean): void => {
+    setAutoStartOff(isOff);
+    setIsAutoOff(isOff);
+  };
+  const navProps: NavProps = { tutorialId, step, doneIds, onChoose: choose };
+
+  const picture =
+    tutorialId === "overview" ? (
+      <Diagram step={step} />
+    ) : tutorialId === "vault" ? (
+      <VaultPicture step={step} />
+    ) : tutorialId === "apply" ? (
+      <ApplyPicture step={step} />
+    ) : tutorialId === "applications" ? (
+      <ApplicationsPicture step={step} />
+    ) : (
+      <TemplatePicture step={step} />
+    );
 
   return (
     <Dialog
       open={isOpen}
       onClose={onClose}
       maxWidth={false}
-      fullScreen={useViewport() === "phone"}
+      fullScreen={isPhone}
       aria-labelledby="how-it-works-title"
       slotProps={{
         paper: {
           sx: {
-            width: { xs: "100%", sm: 1180 },
+            width: { xs: "100%", sm: "calc(100% - 32px)", md: 960, lg: 1120 },
             maxWidth: { xs: "none", sm: "calc(100% - 32px)" },
+            height: { sm: "min(1000px, calc(100% - 32px))", md: 660, lg: 700 },
+            maxHeight: { md: "calc(100% - 32px)" },
           },
         },
       }}
     >
       <Box
         sx={{
+          flex: "none",
           display: "flex",
           alignItems: "center",
-          pl: 3,
+          pl: { xs: 2, sm: 3 },
           pr: 1,
           py: 0.5,
-          borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderBottom: isPhone
+            ? `1px solid ${WORKSPACE_COLORS.border}`
+            : { sm: 0, md: `1px solid ${WORKSPACE_COLORS.border}` },
         }}
       >
         <Typography
           sx={{
             flex: 1,
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: ".05em",
-            textTransform: "uppercase",
-            color: WORKSPACE_COLORS.muted,
+            fontSize: isPhone ? 16 : 12,
+            fontWeight: isPhone ? 700 : 600,
+            letterSpacing: isPhone ? 0 : ".05em",
+            textTransform: isPhone ? "none" : "uppercase",
+            color: isPhone ? WORKSPACE_COLORS.text : WORKSPACE_COLORS.muted,
           }}
         >
-          Tutorials
+          {isPhone || viewport === "tablet"
+            ? "Tutorials"
+            : `${tutorial.shortName} tutorial`}
         </Typography>
-        <IconButton aria-label="Close" onClick={onClose}>
+        <IconButton
+          aria-label="Close"
+          onClick={onClose}
+          sx={{ width: 44, height: 44 }}
+        >
           <CloseIcon />
         </IconButton>
       </Box>
 
-      <Box sx={{ display: "flex", minHeight: 520, minWidth: 0 }}>
-        <Box
-          component="nav"
-          aria-label="Tutorials"
-          sx={{
-            width: 220,
-            flex: "none",
-            p: 1.5,
-            display: { xs: "none", sm: "flex" },
-            flexDirection: "column",
-            gap: 0.5,
-            borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
-          }}
-        >
-          {TUTORIALS.map((t) => {
-            const isCurrent = t.id === tutorialId;
-            return (
-              <Box
-                component="button"
-                key={t.id}
-                type="button"
-                aria-current={isCurrent ? "true" : undefined}
-                onClick={() => choose(t.id)}
-                sx={{
-                  textAlign: "left",
-                  font: "inherit",
-                  cursor: "pointer",
-                  px: 1.5,
-                  py: 1,
-                  borderRadius: "4px",
-                  border: "1px solid",
-                  borderColor: isCurrent
-                    ? WORKSPACE_COLORS.accent
-                    : "transparent",
-                  bgcolor: isCurrent
-                    ? WORKSPACE_COLORS.accentSoft
-                    : "transparent",
-                  color: isCurrent
-                    ? WORKSPACE_COLORS.accentText
-                    : WORKSPACE_COLORS.text,
-                  "&:hover": { bgcolor: WORKSPACE_COLORS.accentSoft },
-                }}
-              >
-                <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                  {t.name}
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    color: isCurrent
-                      ? WORKSPACE_COLORS.accentText
-                      : WORKSPACE_COLORS.muted,
-                  }}
-                >
-                  {t.summary}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
+      {viewport === "tablet" && <NavTabs {...navProps} />}
+      {isPhone && (
+        <NavPicker
+          {...navProps}
+          isAutoOff={isAutoOff}
+          onAutoOff={changeAutoOff}
+        />
+      )}
 
-        {tutorialId === "overview" ? (
-          <Diagram step={step} />
-        ) : tutorialId === "vault" ? (
-          <VaultPicture step={step} />
-        ) : tutorialId === "apply" ? (
-          <ApplyPicture step={step} />
-        ) : tutorialId === "applications" ? (
-          <ApplicationsPicture step={step} />
-        ) : (
-          <TemplatePicture step={step} />
+      <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+        {(viewport === "desktop" || viewport === "laptop") && (
+          <NavSidebar {...navProps} />
         )}
         <Box
-          sx={{ flex: 1, minWidth: 0, px: 4.5, pt: 3.5, pb: 2.5 }}
-          aria-live="polite"
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            // Below a laptop the picture and the text scroll together
+            overflowY: { xs: "auto", md: "visible" },
+          }}
         >
-          <Typography
+          {picture}
+          <Box
             sx={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: WORKSPACE_COLORS.muted,
+              flex: 1,
+              minWidth: 0,
+              px: { xs: 2, sm: 4, md: 3.5, lg: 4.5 },
+              pt: { xs: 2.25, md: 3.5 },
+              pb: 2.5,
+              overflowY: { md: "auto" },
             }}
+            aria-live="polite"
           >
-            {tutorial.name} · Step {step + 1} of {count}
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
-            {tutorialId === "overview" ? (
-              <OverviewText step={step} />
-            ) : tutorialId === "vault" ? (
-              <VaultText step={step} />
-            ) : tutorialId === "apply" ? (
-              <ApplyText step={step} />
-            ) : tutorialId === "applications" ? (
-              <ApplicationsText step={step} />
-            ) : (
-              <TemplateText step={step} />
-            )}
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              {tutorial.name} · Step {step + 1} of {count}
+            </Typography>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}
+            >
+              {tutorialId === "overview" ? (
+                <OverviewText step={step} />
+              ) : tutorialId === "vault" ? (
+                <VaultText step={step} />
+              ) : tutorialId === "apply" ? (
+                <ApplyText step={step} />
+              ) : tutorialId === "applications" ? (
+                <ApplicationsText step={step} />
+              ) : (
+                <TemplateText step={step} />
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
 
       <Box
         sx={{
+          flex: "none",
           display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          pl: 3,
-          pr: 2.5,
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { sm: "center" },
+          gap: { xs: 0.5, sm: 1.5 },
+          pl: { xs: 1.5, sm: 2 },
+          pr: { xs: 1.5, sm: 2.5 },
           py: 1,
           borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
-        <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: { xs: "center", sm: "flex-start" },
+          }}
+        >
           {tutorial.stepNames.map((name, index) => (
             <IconButton
               key={name}
               aria-label={`Step ${index + 1}: ${name}`}
+              aria-current={index === step ? "step" : undefined}
               onClick={() => setStep(index)}
             >
               <Box
@@ -3047,18 +3441,36 @@ export function HowItWorksDialog({
             </IconButton>
           ))}
         </Box>
-        <Button
-          onClick={() => setStep(Math.max(0, step - 1))}
-          sx={{ visibility: step === 0 ? "hidden" : "visible" }}
+        {!isPhone && (
+          <AutoStartSwitch
+            isOff={isAutoOff}
+            onChange={changeAutoOff}
+            size={16}
+          />
+        )}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            "& > button": {
+              flex: { xs: 1, sm: "none" },
+              minHeight: { xs: 48, sm: 44, lg: 36 },
+            },
+          }}
         >
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => (isLast ? onClose() : setStep(step + 1))}
-        >
-          {isLast ? tutorial.lastLabel : "Next"}
-        </Button>
+          <Button
+            onClick={() => setStep(Math.max(0, step - 1))}
+            sx={{ visibility: step === 0 ? "hidden" : "visible" }}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => (isLast ? onClose() : setStep(step + 1))}
+          >
+            {isLast ? tutorial.lastLabel : "Next"}
+          </Button>
+        </Box>
       </Box>
     </Dialog>
   );

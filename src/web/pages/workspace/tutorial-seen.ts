@@ -27,3 +27,47 @@ export function markTutorialSeen(id: FirstVisitTutorial): void {
     // Nothing to do: the tutorial then simply stays hidden
   }
 }
+
+/** Every tutorial in the dialog (the overview does not open by itself) */
+export type TutorialKey = "overview" | FirstVisitTutorial;
+
+const DONE_PREFIX = "cv-builder-tutorial-done-";
+const NO_AUTO_START_KEY = "cv-builder-tutorials-no-autostart";
+
+/** Whether the user has read this tutorial to its last step (it gets a tick in the list) */
+export function isTutorialDone(id: TutorialKey): boolean {
+  try {
+    return localStorage.getItem(DONE_PREFIX + id) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markTutorialDone(id: TutorialKey): void {
+  try {
+    localStorage.setItem(DONE_PREFIX + id, "1");
+  } catch {
+    // Nothing to do: the tick is only a convenience
+  }
+}
+
+/** Whether tutorials are kept from opening by themselves on a first visit ("Don't show on start") */
+export function isAutoStartOff(): boolean {
+  try {
+    return localStorage.getItem(NO_AUTO_START_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setAutoStartOff(isOff: boolean): void {
+  try {
+    if (isOff) {
+      localStorage.setItem(NO_AUTO_START_KEY, "1");
+    } else {
+      localStorage.removeItem(NO_AUTO_START_KEY);
+    }
+  } catch {
+    // Nothing to do: the choice then only lasts until the page is reloaded
+  }
+}
