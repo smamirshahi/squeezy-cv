@@ -1,13 +1,28 @@
 name: CI
 
+# Minutes are limited (#399): CI runs only on pull requests that are ready to merge, never on
+# plain branch pushes and not again after the merge. Open a PR as a draft to keep it from
+# running; "Ready for review" starts it. A stale run is cancelled by the next push. It can
+# also be started by hand from the Actions tab (Run workflow).
 on:
   pull_request:
-  push:
-    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "data.example/**"
+      - ".claude/**"
+      - ".githooks/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
+    if: github.event_name == 'workflow_dispatch' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,5 +38,9 @@ jobs:
       # TESTS PAUSED: only UI changes for now. Re-enable once the UI work is done.
       # - run: pnpm test
       # Real browser: the PDF and the editor end to end (see src/e2e)
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e

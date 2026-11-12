@@ -28,7 +28,7 @@ Package manager is **pnpm**.
 - `pnpm test:e2e` — real-browser tests in `src/e2e/*.e2e.ts` (separate Vitest config, not part of `pnpm test`): they start the API on a temp data folder, Vite and Chromium; `pdf.e2e.ts` checks PDFs (page count, A4, text layer via `unpdf`, hidden/ordered content) and `editor.e2e.ts` drives the UI (hide an item, keyboard-reorder a section, save, export PDF, reload). Needs `pnpm exec playwright install chromium` once; CI does it. Use these for anything about real layout, which jsdom cannot show (they already caught a page-count rounding bug).
 - `pnpm lint:check` — ESLint on `src`, no changes (what CI runs); `pnpm lint` does the same with `--fix`
 - `pnpm knip` — dead-code check (unused files, exports, types, dependencies); exits non-zero when something is unused. Config in `knip.json` (entries: tests and e2e; `main.tsx`, `main.ts` and the Vite config come from the plugins). Remove what it reports instead of ignoring it.
-- CI (`.github/workflows/ci.yml`) runs build, lint:check, format-check, knip and test on every PR.
+- CI (`.github/workflows/ci.yml`) runs build, lint:check, format-check, knip and e2e on every non-draft PR only (#399: not on branch pushes, not after the merge, docs-only changes skipped, older runs cancelled; also startable by hand), to save Actions minutes; open a PR as a draft to hold CI back.
 - `pnpm format-check` / `pnpm format-fix` — Prettier (`.prettierrc`: `trailingComma: es5`; keep that style)
 
 ## Versioning
