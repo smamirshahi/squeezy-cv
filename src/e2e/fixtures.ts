@@ -57,6 +57,7 @@ export async function skipTutorials(page: Page): Promise<void> {
       "cv-builder-vault-tutorial-seen",
       "cv-builder-template-tutorial-seen",
       "cv-builder-apply-tutorial-seen",
+      "cv-builder-applications-tutorial-seen",
     ]) {
       localStorage.setItem(key, "1");
     }

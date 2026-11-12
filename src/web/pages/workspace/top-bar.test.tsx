@@ -57,15 +57,46 @@ describe("tutorials on the first visit of a page", () => {
     expect(hasSeenTutorial("template")).toBe(true);
   });
 
-  it("shows no tutorial by itself on a page that has none, such as Applications", () => {
+  it("opens the Applications tutorial the first time the Applications page is visited, and not again", () => {
+    show("/applications");
+    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(hasSeenTutorial("applications")).toBe(true);
+    expect(hasSeenTutorial("apply")).toBe(false);
+    cleanup();
+
     show("/applications");
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("opens the Applications tutorial on an opened application too", () => {
+    show("/applications/abc");
+    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(hasSeenTutorial("applications")).toBe(true);
+  });
+
+  it("shows no tutorial by itself on a page that has none, such as Settings", () => {
+    show("/settings");
+    expect(screen.queryByRole("dialog", { name: "Applications" })).toBeNull();
+    expect(hasSeenTutorial("applications")).toBe(false);
+  });
+
+  it("lists the Applications tutorial when the Tutorials button is used", () => {
+    markTutorialSeen("applications");
+    show("/jobs");
+    markTutorialSeen("apply");
+    cleanup();
+    show("/jobs");
+    fireEvent.click(screen.getByRole("button", { name: "Tutorials" }));
+    fireEvent.click(screen.getByRole("button", { name: /Your applications/ }));
+    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(screen.getByText("Your applications · Step 1 of 4")).toBeTruthy();
   });
 
   it("the Tutorials button opens one again after it was seen", () => {
     markTutorialSeen("vault");
     markTutorialSeen("template");
     markTutorialSeen("apply");
+    markTutorialSeen("applications");
     show("/jobs");
     expect(screen.queryByRole("dialog")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Tutorials" }));

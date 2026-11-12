@@ -1,11 +1,13 @@
 /** The tutorials that open by themselves the first time their page is visited */
-export type FirstVisitTutorial = "vault" | "template" | "apply";
+export type FirstVisitTutorial =
+  "vault" | "template" | "apply" | "applications";
 
 // The vault key is the one used before there were several tutorials, so nobody sees it twice
 const KEYS: Record<FirstVisitTutorial, string> = {
   vault: "cv-builder-vault-tutorial-seen",
   template: "cv-builder-template-tutorial-seen",
   apply: "cv-builder-apply-tutorial-seen",
+  applications: "cv-builder-applications-tutorial-seen",
 };
 
 /** Whether this tutorial has already been shown in this browser */

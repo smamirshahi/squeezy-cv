@@ -222,7 +222,7 @@ function FlowSteps({
   );
 }
 
-/** The tutorial that belongs to a page (Apply covers the job and the chat), if it has one */
+/** The tutorial that belongs to a page (Apply covers the job and the chat, Applications the list and one application), if it has one */
 function tutorialOfRoute(kind: Route["kind"]): FirstVisitTutorial | null {
   switch (kind) {
     case "vault":
@@ -232,6 +232,9 @@ function tutorialOfRoute(kind: Route["kind"]): FirstVisitTutorial | null {
     case "jobs":
     case "chat":
       return "apply";
+    case "applications":
+    case "application":
+      return "applications";
     default:
       return null;
   }

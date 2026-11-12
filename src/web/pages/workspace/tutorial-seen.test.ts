@@ -27,6 +27,15 @@ describe("tutorials seen", () => {
     expect(hasSeenTutorial("apply")).toBe(false);
   });
 
+  it("remembers the Applications tutorial under its own key", () => {
+    markTutorialSeen("applications");
+    expect(localStorage.getItem("cv-builder-applications-tutorial-seen")).toBe(
+      "1"
+    );
+    expect(hasSeenTutorial("applications")).toBe(true);
+    expect(hasSeenTutorial("apply")).toBe(false);
+  });
+
   it("keeps the key the vault tutorial always used, so nobody sees it twice", () => {
     localStorage.setItem("cv-builder-vault-tutorial-seen", "1");
     expect(hasSeenTutorial("vault")).toBe(true);
