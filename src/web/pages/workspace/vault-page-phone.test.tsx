@@ -61,7 +61,9 @@ describe("VaultPage on a phone", () => {
   it("opens an item as its own screen with a link back to the section", () => {
     renderVault("/vault/experience/exp-1");
     expect(screen.getByLabelText("Edit item")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Work Experience/ })).toBeTruthy();
+    expect(
+      screen.getAllByRole("link", { name: /Work Experience/ }).length
+    ).toBeGreaterThan(1);
     expect(screen.queryByText("Add new experience")).toBeNull();
   });
 });
