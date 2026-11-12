@@ -1,3 +1,4 @@
+import { buildApplicationsExport } from "@server/export/applications-export";
 import { APP_VERSION } from "@shared/version";
 import { randomBytes } from "node:crypto";
 import Fastify, {
@@ -882,6 +883,27 @@ export function buildServer({
   }
 
   app.get("/api/applications", () => storage.listApplications());
+
+  // Every application with its PDF in one ZIP; damaged ones are listed in index.json
+  app.get("/api/applications/export", async (_request, reply) => {
+    const result = await buildApplicationsExport(storage, now());
+    if (result.exportedCount === 0 && result.problems.length === 0) {
+      return sendError(
+        reply,
+        HTTP_NOT_FOUND,
+        "not_found",
+        "There are no applications to export."
+      );
+    }
+    return reply
+      .header("Content-Type", "application/zip")
+      .header(
+        "Content-Disposition",
+        `attachment; filename="${result.fileName}"`
+      )
+      .header("X-Export-Problems", String(result.problems.length))
+      .send(result.zip);
+  });
 
   app.get<{ Params: { id: string } }>("/api/applications/:id", (request) =>
     storage.loadApplication(request.params.id)
