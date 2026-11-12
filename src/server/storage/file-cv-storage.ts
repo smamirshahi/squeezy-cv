@@ -6,6 +6,11 @@ import {
   ApplicationSchema,
   ApplicationSummary,
 } from "@custom-types/application-types";
+import {
+  CANDIDATE_ID_PATTERN,
+  Candidate,
+  CandidateSchema,
+} from "@custom-types/candidate-types";
 import { CvFile } from "@custom-types/vault-types";
 import { Job, JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
 import {
@@ -44,6 +49,7 @@ const VARIANTS_DIR = "variants";
 const TEMPLATES_DIR = "templates";
 const JOBS_DIR = "jobs";
 const LEGACY_TEMPLATE_PREFIX = "template-";
+const CANDIDATES_DIR = "candidates";
 const APPLICATIONS_DIR = "applications";
 const APPLICATION_FILE = "application.json";
 const APPLICATION_PDF = "cv.pdf";
@@ -76,6 +82,10 @@ function isMissing(error: unknown): boolean {
 
 function isReadableApplication(raw: unknown): boolean {
   return ApplicationSchema.guard(raw);
+}
+
+function isReadableCandidate(raw: unknown): boolean {
+  return CandidateSchema.guard(raw);
 }
 
 function describe(error: unknown): string {
@@ -541,6 +551,77 @@ export class FileCvStorage implements CvStorage {
       // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option names
       await fs.rm(`${dir}.deleted`, { recursive: true, force: true });
       await fs.rename(dir, `${dir}.deleted`);
+    });
+  }
+
+  private candidatePath(id: string): string {
+    if (!CANDIDATE_ID_PATTERN.test(id)) {
+      throw new StorageError(
+        "invalid_id",
+        "A candidate id may only contain letters, digits, - and _ (at most 64)."
+      );
+    }
+    return path.join(this.dataDir, CANDIDATES_DIR, `${id}.json`);
+  }
+
+  async listCandidates(): Promise<Candidate[]> {
+    const result: Candidate[] = [];
+    for (const id of await this.idsIn(CANDIDATES_DIR, CANDIDATE_ID_PATTERN)) {
+      try {
+        result.push(await this.loadCandidate(id));
+      } catch (error) {
+        if (error instanceof StorageError) {
+          // a damaged or vanished file is left untouched and not listed
+          continue;
+        }
+        throw error;
+      }
+    }
+    return result;
+  }
+
+  async loadCandidate(id: string): Promise<Candidate> {
+    const filePath = this.candidatePath(id);
+    let raw: unknown;
+    try {
+      raw = await readJsonFile(filePath);
+    } catch (error) {
+      if (isMissing(error)) {
+        throw new StorageError("not_found", `There is no candidate ${id}.`);
+      }
+      throw new StorageError(
+        "corrupt",
+        `Candidate ${id} cannot be read: ${describe(error)}. The file was left untouched.`
+      );
+    }
+    if (!CandidateSchema.guard(raw) || raw.id !== id) {
+      throw new StorageError(
+        "corrupt",
+        `Candidate ${id} is not a valid candidate file. The file was left untouched.`
+      );
+    }
+    return withoutExportMeta(raw);
+  }
+
+  async saveCandidate(candidate: Candidate): Promise<void> {
+    const filePath = this.candidatePath(candidate.id);
+    await this.queue.run(filePath, () =>
+      writeJsonAtomic(
+        filePath,
+        withExportMeta(candidate, "candidate", candidate.version),
+        isReadableCandidate
+      )
+    );
+  }
+
+  async deleteCandidate(id: string): Promise<void> {
+    const filePath = this.candidatePath(id);
+    await this.queue.run(filePath, async () => {
+      if (!(await fileExists(filePath))) {
+        throw new StorageError("not_found", `There is no candidate ${id}.`);
+      }
+      await fs.copyFile(filePath, `${filePath}.deleted`);
+      await fs.rm(filePath);
     });
   }
 }

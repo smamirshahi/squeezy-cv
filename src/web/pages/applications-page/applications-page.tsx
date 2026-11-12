@@ -50,6 +50,13 @@ import { onAppLinkClick } from "@hooks/navigation";
 import { ExportAllButton } from "@pages/applications-page/export-all-button";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { Job } from "@custom-types/job-types";
+import { Candidate, NewCandidate } from "@custom-types/candidate-types";
+import { isOverdue } from "@shared/candidate/candidate-utils";
+import { CandidateDialog } from "@pages/candidates-page/candidate-dialog";
+import {
+  openCandidateJob,
+  useContinueCandidate,
+} from "@pages/candidates-page/use-continue-candidate";
 import {
   CHANCE_LABELS,
   FEELING_LABELS,
@@ -68,7 +75,8 @@ type LoadState =
 type Stage = "draft" | "ready";
 
 /** The colour of the dot in front of a status or stage */
-const DOT_COLORS: Record<ApplicationStatus | Stage, string> = {
+const DOT_COLORS: Record<ApplicationStatus | Stage | "candidate", string> = {
+  candidate: "#7B5EA7",
   draft: "#9AA0A6",
   ready: "#C2410C",
   applied: "#1976D2",
@@ -242,6 +250,11 @@ export function ApplicationsPage(): JSX.Element {
   const [jobs, setJobs] = useState<JobSummary[]>([]);
   // Every job and template by id, to name the template of a row and to open its job
   const [allJobs, setAllJobs] = useState<JobSummary[]>([]);
+  // Jobs parked to apply for later, not yet continued into a job
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [isSavingLater, setIsSavingLater] = useState<boolean>(false);
+  const [actionError, setActionError] = useState<string>("");
+  const continueCandidate = useContinueCandidate();
   const [templateNames, setTemplateNames] = useState<Record<string, string>>(
     {}
   );
@@ -255,7 +268,9 @@ export function ApplicationsPage(): JSX.Element {
         // Jobs that were never sent are drafts; failing to list them must not hide the rest
         const unsentJobs = await api.listJobs().catch(() => []);
         const templates = await api.listTemplates().catch(() => []);
+        const parked = await api.listCandidates().catch(() => []);
         if (!isCancelled) {
+          setCandidates(parked.filter((c) => c.status === "open"));
           setAllJobs(unsentJobs.filter((j) => !j.isCorrupt));
           setTemplateNames(
             Object.fromEntries(
@@ -290,6 +305,36 @@ export function ApplicationsPage(): JSX.Element {
   }, [view]);
 
   const readable = state.status === "ready" ? state.applications : [];
+
+  async function reloadCandidates(): Promise<void> {
+    const parked = await api.listCandidates();
+    setCandidates(parked.filter((c) => c.status === "open"));
+  }
+
+  async function saveForLater(input: NewCandidate): Promise<void> {
+    await api.createCandidate(input);
+    await reloadCandidates();
+  }
+
+  async function runCandidateAction(
+    action: () => Promise<unknown>
+  ): Promise<void> {
+    setActionError("");
+    try {
+      await action();
+      await reloadCandidates();
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : String(caught));
+    }
+  }
+
+  async function continueWith(candidate: Candidate): Promise<void> {
+    const jobId = continueCandidate(candidate);
+    await runCandidateAction(() =>
+      api.updateCandidate(candidate.id, { status: "started", jobId })
+    );
+    openCandidateJob(jobId);
+  }
 
   async function setStage(jobId: string, stage: Stage): Promise<void> {
     const job = await api.loadJob(jobId);
@@ -442,6 +487,7 @@ export function ApplicationsPage(): JSX.Element {
         <CategoriesSidebar
           applications={readable}
           jobs={jobs}
+          candidateCount={candidates.length}
           status={view.status}
           today={today}
           onChange={(status) => setView({ ...view, status })}
@@ -459,16 +505,22 @@ export function ApplicationsPage(): JSX.Element {
             bgcolor: "var(--bg)",
           }}
         >
-          <Box>
-            <Typography variant="h4" component="h1">
-              Applications
-            </Typography>
-            {state.status === "ready" && (
-              <Typography sx={{ color: "text.secondary" }}>
-                {subtitle}
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h4" component="h1">
+                Applications
               </Typography>
-            )}
+              {state.status === "ready" && (
+                <Typography sx={{ color: "text.secondary" }}>
+                  {subtitle}
+                </Typography>
+              )}
+            </Box>
+            <Button variant="outlined" onClick={() => setIsSavingLater(true)}>
+              Save for later
+            </Button>
           </Box>
+          {actionError !== "" && <Alert severity="error">{actionError}</Alert>}
 
           {state.status === "loading" && <Typography>Loading…</Typography>}
           {state.status === "error" && (
@@ -479,6 +531,16 @@ export function ApplicationsPage(): JSX.Element {
             <ApplicationsTable
               applications={state.applications}
               jobs={jobs}
+              candidates={candidates}
+              onContinue={(candidate) => void continueWith(candidate)}
+              onDrop={(candidate) =>
+                void runCandidateAction(() =>
+                  api.updateCandidate(candidate.id, { status: "dropped" })
+                )
+              }
+              onDelete={(candidate) =>
+                void runCandidateAction(() => api.deleteCandidate(candidate.id))
+              }
               view={view}
               onViewChange={setView}
               today={today}
@@ -491,6 +553,11 @@ export function ApplicationsPage(): JSX.Element {
             />
           )}
         </Box>
+        <CandidateDialog
+          isOpen={isSavingLater}
+          onClose={() => setIsSavingLater(false)}
+          onSave={saveForLater}
+        />
         {selectedId && !isSideBySide && (
           <Drawer
             anchor="right"
@@ -729,6 +796,7 @@ function JobPanel({
 interface SidebarProps {
   applications: ApplicationSummary[];
   jobs: JobSummary[];
+  candidateCount: number;
   status: ListView["status"];
   today: string;
   onChange: (status: ListView["status"]) => void;
@@ -744,6 +812,7 @@ interface Tile {
 function CategoriesSidebar({
   applications,
   jobs,
+  candidateCount,
   status,
   today,
   onChange,
@@ -755,6 +824,7 @@ function CategoriesSidebar({
     {
       title: "Before sending",
       tiles: [
+        { key: "candidate", label: "Candidates", count: candidateCount },
         {
           key: "draft",
           label: "Draft",
@@ -873,7 +943,7 @@ function CategoriesSidebar({
         {renderTile({
           key: "all",
           label: "All jobs",
-          count: readable + jobs.length,
+          count: readable + jobs.length + candidateCount,
         })}
         {groups.map((group) => (
           <Box
@@ -925,11 +995,16 @@ const PHONE_TABLE_SX = {
 
 type Row =
   | { kind: "job"; id: string; job: JobSummary }
-  | { kind: "application"; id: string; application: ApplicationSummary };
+  | { kind: "application"; id: string; application: ApplicationSummary }
+  | { kind: "candidate"; id: string; candidate: Candidate };
 
 interface TableProps {
   applications: ApplicationSummary[];
   jobs: JobSummary[];
+  candidates: Candidate[];
+  onContinue: (candidate: Candidate) => void;
+  onDrop: (candidate: Candidate) => void;
+  onDelete: (candidate: Candidate) => void;
   view: ListView;
   onViewChange: (view: ListView) => void;
   today: string;
@@ -944,6 +1019,10 @@ interface TableProps {
 function ApplicationsTable({
   applications,
   jobs,
+  candidates,
+  onContinue,
+  onDrop,
+  onDelete,
   view,
   onViewChange,
   today,
@@ -981,7 +1060,20 @@ function ApplicationsTable({
     );
   });
   const sent = arrangeApplications([...applications], view, today);
+  const parked = candidates.filter(
+    (candidate) =>
+      (view.status === "all" || view.status === "candidate") &&
+      (query === "" ||
+        [candidate.company, candidate.role, candidate.note ?? ""].some((text) =>
+          text.toLowerCase().includes(query)
+        ))
+  );
   const rows: Row[] = [
+    ...parked.map((candidate) => ({
+      kind: "candidate" as const,
+      id: `candidate:${candidate.id}`,
+      candidate,
+    })),
     ...unsent.map((job) => ({
       kind: "job" as const,
       id: `${JOB_PREFIX}${job.id}`,
@@ -995,11 +1087,17 @@ function ApplicationsTable({
   ];
   const sign = view.sortDirection === "asc" ? 1 : -1;
   const dateOf = (row: Row): string =>
-    row.kind === "job" ? row.job.createdAt : row.application.appliedAt;
+    row.kind === "job"
+      ? row.job.createdAt
+      : row.kind === "candidate"
+        ? row.candidate.createdAt
+        : row.application.appliedAt;
   const companyOf = (row: Row): string =>
     row.kind === "job"
       ? row.job.company || row.job.name
-      : row.application.company;
+      : row.kind === "candidate"
+        ? row.candidate.company
+        : row.application.company;
   rows.sort((a, b) =>
     view.sortKey === "company"
       ? companyOf(a).localeCompare(companyOf(b), "en", { sensitivity: "base" })
@@ -1088,6 +1186,93 @@ function ApplicationsTable({
           </TableHead>
           <TableBody>
             {rows.map((row) => {
+              if (row.kind === "candidate") {
+                const { candidate } = row;
+                const overdue = isOverdue(candidate, today);
+                return (
+                  <TableRow
+                    key={row.id}
+                    sx={{
+                      "& td": {
+                        py: { xs: 0.5, sm: 1.5 },
+                        px: { xs: 0, sm: 1, lg: 2 },
+                        verticalAlign: "middle",
+                      },
+                      "& td:first-of-type": {
+                        borderLeft: `3px solid ${DOT_COLORS.candidate}`,
+                      },
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      {candidate.company || "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Typography>{candidate.role || "-"}</Typography>
+                      <Typography
+                        sx={{ color: WORKSPACE_COLORS.muted, fontSize: 13 }}
+                      >
+                        {candidate.note ?? ""}
+                        {candidate.jobUrl && (
+                          <>
+                            {candidate.note ? " · " : ""}
+                            <Link
+                              href={candidate.jobUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Advert
+                            </Link>
+                          </>
+                        )}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.75,
+                        }}
+                      >
+                        <Dot color={DOT_COLORS.candidate} />
+                        <Typography>Candidate</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      {candidate.applyBy ? (
+                        <Typography
+                          sx={{ color: overdue ? "error.main" : undefined }}
+                        >
+                          {overdue ? "Overdue · " : "Apply by "}
+                          {formatDay(candidate.applyBy)}
+                        </Typography>
+                      ) : (
+                        <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
+                          No apply-by day
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                      <Button
+                        size="small"
+                        onClick={() => onContinue(candidate)}
+                      >
+                        Continue
+                      </Button>
+                      <Button size="small" onClick={() => onDrop(candidate)}>
+                        Drop
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => onDelete(candidate)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              }
               if (row.kind === "application" && row.application.isCorrupt) {
                 return (
                   <TableRow key={row.id}>

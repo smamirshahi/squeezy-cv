@@ -1,7 +1,8 @@
 import { APP_VERSION } from "@shared/version";
 
 /** The kinds of JSON file the app writes */
-export type FileKind = "cv-file" | "vault" | "job" | "template" | "application";
+export type FileKind =
+  "cv-file" | "vault" | "job" | "template" | "application" | "candidate";
 
 /**
  * Written into every JSON file the app exports or saves, under the key `meta`. It says which
