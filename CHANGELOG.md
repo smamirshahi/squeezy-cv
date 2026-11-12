@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- CI (#399) saves GitHub Actions minutes: it runs only on pull requests that are not drafts (not on branch pushes and not again after the merge), cancels the older run when a new commit arrives, skips docs-only changes, caches the Playwright browser and stops after 15 minutes. It can be started by hand from the Actions tab.
+
 ### Added
 
 - Tests for the export metadata and migration registry, the Export all ZIP and route, the demo data and the template jobs table (#391, #392, #353, #280).
