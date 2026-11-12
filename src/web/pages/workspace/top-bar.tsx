@@ -12,6 +12,7 @@ import {
 } from "@pages/workspace/how-it-works-dialog";
 import {
   hasSeenTutorial,
+  isAutoStartOff,
   markTutorialSeen,
   type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
@@ -259,7 +260,7 @@ export function TopBar(): JSX.Element {
   // The first time a page is opened, its tutorial shows; after that only the buttons do
   const visited = tutorialOfRoute(route.kind);
   useEffect(() => {
-    if (visited && !hasSeenTutorial(visited)) {
+    if (visited && !isAutoStartOff() && !hasSeenTutorial(visited)) {
       markTutorialSeen(visited);
       setHelp({ tutorial: visited, step: 0 });
     }

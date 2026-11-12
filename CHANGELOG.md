@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- The Tutorials dialog (#413) fits every screen size: a contents sidebar with ticks on desktop and small laptops, tabs on a tablet, and on a phone a full page with a Tutorial dropdown that opens a bottom list. A tutorial is ticked once you reach its last step, and a "Don't show on start" switch stops tutorials opening by themselves on a first visit.
 - CI (#399) saves GitHub Actions minutes: it runs only on pull requests that are not drafts (not on branch pushes and not again after the merge), cancels the older run when a new commit arrives, skips docs-only changes, caches the Playwright browser and stops after 15 minutes. It can be started by hand from the Actions tab.
 
 ### Added
