@@ -22,6 +22,10 @@ import {
   RewordResult,
   RewordResultSchema,
 } from "@custom-types/reword-types";
+import {
+  AtsWordingResult,
+  AtsWordingResultSchema,
+} from "@custom-types/ats-wording-types";
 import { Requirements } from "@custom-types/requirements-types";
 import {
   RewriteRequest,
@@ -203,6 +207,10 @@ export interface ApiClient {
 
   /** One text (summary, description) shortened, lengthened or fitted to the keywords. Sends that item's saved text (no name or contact details) to the chosen provider. Nothing is changed. */
   rewordText: (request: RewordRequest) => Promise<RewordResult>;
+  suggestAtsWording: (
+    terms: string[],
+    reworded: string[]
+  ) => Promise<AtsWordingResult>;
 
   /** Reads an advert once: what it asks for. Sends only the advert text to the chosen provider. Nothing is changed. */
   analyseJobAd: (jobAd: string) => Promise<AnalyseResult>;
@@ -379,6 +387,14 @@ export function createApiClient(
     async rewordText(body) {
       return RewordResultSchema.check(
         await request(fetchImpl, "POST", "/api/ai/reword", body)
+      );
+    },
+    async suggestAtsWording(terms, reworded) {
+      return AtsWordingResultSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/ats-wording", {
+          terms,
+          reworded,
+        })
       );
     },
     async scoreSection(sectionId, requirements) {

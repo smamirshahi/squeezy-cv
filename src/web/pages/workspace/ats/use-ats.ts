@@ -40,13 +40,13 @@ function isSnapshot(value: unknown): value is AtsSnapshot {
     Array.isArray(entry.issues) &&
     Array.isArray(entry.covered) &&
     Array.isArray(entry.missing) &&
+    Array.isArray(entry.reworded) &&
     typeof entry.categories === "object"
   );
 }
 
-function readScans(jobId: string): StoredScans | null {
+function parseScans(text: string | null): StoredScans | null {
   try {
-    const text = window.localStorage.getItem(`${STORAGE_PREFIX}${jobId}`);
     const parsed = text ? (JSON.parse(text) as Partial<StoredScans>) : null;
     return parsed && isSnapshot(parsed.first) && isSnapshot(parsed.last)
       ? { first: parsed.first, last: parsed.last }
@@ -57,27 +57,41 @@ function readScans(jobId: string): StoredScans | null {
 }
 
 /**
- * The scans are kept in this browser's local storage and mirrored here, so every part of the
- * page that shows them (the panel, the tab's number, the Export dialog) sees the same ones at
- * once and `useSyncExternalStore` gets a stable object between changes.
+ * The scans live in this browser's local storage. `useSyncExternalStore` needs the same object
+ * until something changes, so the parsed scans are kept per job together with the stored text
+ * they came from: the text is read again each time, and a change made elsewhere (another tab,
+ * cleared site data) is seen at once. Where storage is blocked the scans only last in memory.
  */
-const cache = new Map<string, StoredScans | null>();
+const cache = new Map<
+  string,
+  { text: string | null; scans: StoredScans | null }
+>();
 const listeners = new Set<() => void>();
 
-function getScans(jobId: string): StoredScans | null {
-  if (!cache.has(jobId)) {
-    cache.set(jobId, readScans(jobId));
+function storedText(jobId: string): string | null {
+  try {
+    return window.localStorage.getItem(`${STORAGE_PREFIX}${jobId}`);
+  } catch {
+    return cache.get(jobId)?.text ?? null;
   }
-  return cache.get(jobId) ?? null;
+}
+
+function getScans(jobId: string): StoredScans | null {
+  const text = storedText(jobId);
+  const known = cache.get(jobId);
+  if (known && known.text === text) {
+    return known.scans;
+  }
+  const scans = parseScans(text);
+  cache.set(jobId, { text, scans });
+  return scans;
 }
 
 function setScans(jobId: string, scans: StoredScans): void {
-  cache.set(jobId, scans);
+  const text = JSON.stringify(scans);
+  cache.set(jobId, { text, scans });
   try {
-    window.localStorage.setItem(
-      `${STORAGE_PREFIX}${jobId}`,
-      JSON.stringify(scans)
-    );
+    window.localStorage.setItem(`${STORAGE_PREFIX}${jobId}`, text);
   } catch {
     // Private mode or a full store: the scan still shows for this visit
   }

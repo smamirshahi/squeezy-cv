@@ -30,6 +30,14 @@ describe("parseRoute", () => {
       jobId: "main",
       view: "settings",
     });
+    expect(parseRoute("/jobs/main", "?view=ats")).toEqual({
+      kind: "jobs",
+      jobId: "main",
+      view: "ats",
+    });
+    expect(formatRoute({ kind: "jobs", jobId: "main", view: "ats" })).toBe(
+      "/jobs/main?view=ats"
+    );
     expect(parseRoute("/templates")).toEqual({
       kind: "templates",
       tab: "templates",

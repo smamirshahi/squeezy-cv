@@ -72,6 +72,9 @@ export interface AtsResult {
   covered: string[];
   missing: string[];
 
+  /** Terms the CV has, but worded differently from the advert ("React" for "React.js") */
+  reworded: string[];
+
   /** Changes when the words of the CV or the requirements change: tells a stale scan */
   contentKey: string;
 }
@@ -549,11 +552,16 @@ function stateOf(term: string, cvText: string): TermState {
 function hardSkillResult(
   requirements: Requirements,
   cvText: string
-): CategoryResult & { covered: string[]; missing: string[] } {
+): CategoryResult & {
+  covered: string[];
+  missing: string[];
+  reworded: string[];
+} {
   const { mustHave, others } = termsOf(requirements);
   const issues: AtsIssue[] = [];
   const covered: string[] = [];
   const missing: string[] = [];
+  const reworded: string[] = [];
   const weights = new Map<string, number>();
   for (const term of mustHave) {
     weights.set(term, 2);
@@ -561,10 +569,10 @@ function hardSkillResult(
   for (const term of others) {
     weights.set(term, 1);
   }
-  let total = 0;
+  const total = [...weights.values()].reduce((sum, weight) => sum + weight, 0);
   let got = 0;
   for (const [term, weight] of weights) {
-    total += weight;
+    const share = Math.round((weight / total) * 100);
     const state = stateOf(term, cvText);
     if (state === "missing") {
       missing.push(term);
@@ -572,7 +580,8 @@ function hardSkillResult(
         issue("hardSkills", `missing:${term.toLowerCase()}`, {
           title: `"${term}" is not on the CV`,
           hint: "Add the keywords where they are true, in the advert's words. Never add what you have not done.",
-          penalty: 0,
+          // the points of the category this keyword is worth: it orders the fix list
+          penalty: share,
           target: "vault",
           fixKey: "missing-keywords",
         })
@@ -581,11 +590,12 @@ function hardSkillResult(
       covered.push(term);
       got += state === "exact" ? weight : weight * 0.8;
       if (state === "variant") {
+        reworded.push(term);
         issues.push(
           issue("hardSkills", `wording:${term.toLowerCase()}`, {
             title: `The advert says "${term}", the CV words it differently`,
             hint: "Where it is true, use the advert's exact wording once. Some systems match words literally.",
-            penalty: 0,
+            penalty: Math.round(share * 0.2),
             target: "vault",
             fixKey: "wording",
           })
@@ -598,6 +608,7 @@ function hardSkillResult(
     issues,
     covered,
     missing,
+    reworded,
   };
 }
 
@@ -626,7 +637,7 @@ function softSkillResult(
       issue("softSkills", entry.label, {
         title: `"${entry.label}" is in the advert, not in the CV`,
         hint: "Show it with an example in a bullet or the summary rather than by listing the word.",
-        penalty: 0,
+        penalty: Math.round(100 / asked.length),
         target: "vault",
         fixKey: "soft-skills",
       })
@@ -812,6 +823,7 @@ export function scoreAts(input: AtsInput): AtsResult {
   let match: AtsGroup | null = null;
   let covered: string[] = [];
   let missing: string[] = [];
+  let reworded: string[] = [];
   const requirements = hasRequirements(input.requirements)
     ? input.requirements
     : undefined;
@@ -820,6 +832,7 @@ export function scoreAts(input: AtsInput): AtsResult {
     const hard = hardSkillResult(requirements, searchable);
     covered = hard.covered;
     missing = hard.missing;
+    reworded = hard.reworded;
     const soft = softSkillResult(requirements, jobAd, searchable);
     const title = titleResult(input, requirements, sections, jobAd);
     const categories = [
@@ -841,6 +854,7 @@ export function scoreAts(input: AtsInput): AtsResult {
     issues: categories.flatMap((entry) => entry.issues),
     covered,
     missing,
+    reworded,
     contentKey: hashOf(
       `${searchable}\n${JSON.stringify(requirements ?? null)}\n${input.pageCount}\n${input.document.columns.left.length}/${input.document.columns.right.length}`
     ),
@@ -924,6 +938,7 @@ export interface AtsSnapshot {
   issues: AtsIssue[];
   covered: string[];
   missing: string[];
+  reworded: string[];
   contentKey: string;
 }
 
@@ -944,6 +959,7 @@ export function snapshotOf(result: AtsResult, at: Date): AtsSnapshot {
     issues: result.issues,
     covered: result.covered,
     missing: result.missing,
+    reworded: result.reworded,
     contentKey: result.contentKey,
   };
 }

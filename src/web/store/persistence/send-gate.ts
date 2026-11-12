@@ -49,6 +49,10 @@ const GATED: Record<string, { scope: string; hasAdvert: boolean }> = {
     hasAdvert: false,
   },
   "/api/ai/reword": { scope: "One text of your CV", hasAdvert: false },
+  "/api/ai/ats-wording": {
+    scope: "Your summary and descriptions, and the advert's keywords",
+    hasAdvert: false,
+  },
   "/api/ai/hide": { scope: "Short labels of items", hasAdvert: false },
   "/api/ai/place": {
     scope: "Unsorted items and section names",

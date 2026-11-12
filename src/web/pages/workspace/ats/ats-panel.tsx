@@ -29,6 +29,7 @@ import {
   ATS_DISCLAIMER,
   AtsHelpDialog,
 } from "@pages/workspace/ats/ats-help-dialog";
+import { AtsWording } from "@pages/workspace/ats/ats-wording";
 import { ScoreRing } from "@pages/workspace/ats/score-ring";
 import { routeForFix, useAts } from "@pages/workspace/ats/use-ats";
 
@@ -611,6 +612,9 @@ export function AtsPanel({
               </Button>
             )}
           </Box>
+        )}
+        {now && now.match !== null && (
+          <AtsWording missing={now.missing} reworded={now.reworded} />
         )}
       </Box>
 
