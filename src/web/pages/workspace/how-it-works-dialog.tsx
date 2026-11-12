@@ -14,7 +14,8 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** The tutorials in the dialog's left list */
-export type TutorialId = "overview" | "vault" | "template" | "apply";
+export type TutorialId =
+  "overview" | "vault" | "template" | "apply" | "applications";
 
 interface HowItWorksDialogProps {
   isOpen: boolean;
@@ -2322,6 +2323,478 @@ function ApplyPicture({ step }: { step: number }): JSX.Element {
   );
 }
 
+const APPLICATIONS_COLOR = "#1F1D1B";
+const SENT_COLOR = "#B8400D";
+const GOOD_COLOR = "#1E7A46";
+
+interface ApplicationsStep {
+  name: string;
+  question: string;
+  color: string;
+  body: JSX.Element[];
+  note: JSX.Element | string;
+  /** Only the third step: the numbered steps in the green box */
+  numbered?: JSX.Element[];
+}
+
+const APPLICATIONS_STEPS: ApplicationsStep[] = [
+  {
+    name: "Applications",
+    question: "Where does each job stand?",
+    color: APPLICATIONS_COLOR,
+    body: [
+      <>
+        Every job you create is listed here with its <b>status</b>, the role,
+        the template and the day you applied.
+      </>,
+      <>
+        The sidebar groups the statuses into <b>Before sending</b> and{" "}
+        <b>Sent</b>, with a count for each. Click one to filter the list.
+      </>,
+      <>
+        Click a row to open the <b>application</b>: the CV you sent, its status
+        and its history.
+      </>,
+    ],
+    note: "Search by company, role or template, or sort by newest.",
+  },
+  {
+    name: "Statuses",
+    question: "How does a job move forward?",
+    color: SENT_COLOR,
+    body: [
+      <>
+        A job moves through these stages <b>in order</b>: Candidate, Draft,
+        Ready to apply, Applied, Interview, Offer, Accepted.
+      </>,
+      <>
+        <b>Rejected</b> (they said no) and <b>Withdrawn</b> (you pulled out) can
+        happen from several points. They are not a step in the order.
+      </>,
+      <>
+        A <b>Candidate</b> is a job you saved for later, with no CV yet. It can
+        also be <b>dropped</b> (taken off the list) or deleted.
+      </>,
+    ],
+    note: "Only Draft and Ready to apply are set on the job itself. Applied and everything after belong to the application.",
+  },
+  {
+    name: "Applied",
+    question: "What exactly did I send?",
+    color: GOOD_COLOR,
+    body: [
+      <>
+        <b>Mark as applied</b> turns a job into an application and{" "}
+        <b>freezes a copy</b> of the CV you sent.
+      </>,
+      <>
+        Later edits to the vault, the template or the job never change that
+        copy. Open the application to <b>download the PDF</b> again, or{" "}
+        <b>create a new job from it</b>.
+      </>,
+    ],
+    numbered: [
+      <>
+        Finish the CV and set <b>Ready to apply</b>.
+      </>,
+      <>
+        Export the PDF and send it, then choose <b>Mark as applied</b>.
+      </>,
+      <>The frozen copy stays with the application.</>,
+    ],
+    note: "You can also tick “Then mark this as applied” when you export the PDF.",
+  },
+  {
+    name: "Follow up",
+    question: "What happens after I send it?",
+    color: "#8A5A00",
+    body: [
+      <>
+        Change the status as news arrives: <b>Interview</b>, <b>Offer</b>,{" "}
+        <b>Accepted</b>, or <b>Rejected</b> and <b>Withdrawn</b> at any time.
+      </>,
+      <>
+        Each status change is saved <b>with its day</b> in the application’s
+        history.
+      </>,
+      <>
+        <b>No reply</b> is not a status. It is a flag the app adds in the
+        sidebar to an applied job with no news for 30 days, so you know when to
+        nudge.
+      </>,
+    ],
+    note: "Update the status on the day it changes, so the history stays accurate.",
+  },
+];
+
+function ApplicationsText({ step }: { step: number }): JSX.Element {
+  const current = APPLICATIONS_STEPS[step];
+  return (
+    <>
+      <Typography id="how-it-works-title" component="h2" sx={{ m: 0 }}>
+        <Box
+          component="span"
+          sx={{
+            display: "inline-block",
+            px: 1.5,
+            py: 0.25,
+            borderRadius: 3.5,
+            bgcolor: current.color,
+            color: "#fff",
+            fontSize: 24,
+            fontWeight: 700,
+          }}
+        >
+          {current.name}
+        </Box>
+      </Typography>
+      <Typography sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted, mb: 1.5 }}>
+        {current.question}
+      </Typography>
+      {current.body.map((paragraph, index) => (
+        <Box key={index} sx={BULLET_SX}>
+          <span>{paragraph}</span>
+        </Box>
+      ))}
+      {current.numbered && (
+        <Box
+          component="ol"
+          sx={{
+            mt: 1.25,
+            mb: 0,
+            p: 0,
+            listStyle: "none",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            px: 1.75,
+            py: 1.5,
+            borderRadius: "4px",
+            bgcolor: "#E3F3EA",
+            border: "1px solid #B7DFC6",
+          }}
+        >
+          {current.numbered.map((text, index) => (
+            <Box
+              component="li"
+              key={index}
+              sx={{ display: "flex", gap: 1.25, fontSize: 14 }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  flex: "none",
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  bgcolor: GOOD_COLOR,
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {index + 1}
+              </Box>
+              <span>{text}</span>
+            </Box>
+          ))}
+        </Box>
+      )}
+      <Box
+        sx={{
+          mt: 1.75,
+          px: 1.5,
+          py: 1.25,
+          borderRadius: "4px",
+          bgcolor: WORKSPACE_COLORS.canvas,
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          fontSize: 13,
+        }}
+      >
+        {current.note}
+      </Box>
+    </>
+  );
+}
+
+interface StageRow {
+  /** A small heading instead of a stage */
+  heading?: string;
+  name?: string;
+  hint?: string;
+  color?: string;
+  /** The steps (0-based) in which this stage is lit */
+  litIn?: number[];
+}
+
+const STAGE_ROWS: StageRow[] = [
+  { heading: "Saved for later" },
+  {
+    name: "Candidate",
+    hint: "no CV yet",
+    color: "#7B5EA7",
+    litIn: [1],
+  },
+  { heading: "On the job" },
+  { name: "Draft", hint: "preparing the CV", color: "#1F1D1B", litIn: [1] },
+  {
+    name: "Ready to apply",
+    hint: "CV done, waiting",
+    color: "#1F1D1B",
+    litIn: [1, 2],
+  },
+  { heading: "On the application" },
+  { name: "Applied", hint: "CV sent", color: SENT_COLOR, litIn: [1, 2, 3] },
+  { name: "Interview", hint: "invited", color: GOOD_COLOR, litIn: [1, 3] },
+  {
+    name: "Offer",
+    hint: "received an offer",
+    color: GOOD_COLOR,
+    litIn: [1, 3],
+  },
+  { name: "Accepted", hint: "you took it", color: GOOD_COLOR, litIn: [1, 3] },
+  { heading: "From several points" },
+  { name: "Rejected", hint: "they said no", color: "#B3261E", litIn: [1, 3] },
+  {
+    name: "Withdrawn",
+    hint: "you pulled out",
+    color: "#6A655D",
+    litIn: [1, 3],
+  },
+];
+
+/** The sidebar filters of the first step, as small pills with their count */
+function SidebarGroup({
+  title,
+  items,
+}: {
+  title: string;
+  items: [string, number, boolean?][];
+}): JSX.Element {
+  return (
+    <>
+      <Typography
+        sx={{
+          mt: 1.25,
+          fontSize: 10.5,
+          fontWeight: 700,
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          color: WORKSPACE_COLORS.muted,
+        }}
+      >
+        {title}
+      </Typography>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+        {items.map(([name, count, isOn]) => (
+          <Chip
+            key={name}
+            sx={{
+              bgcolor: isOn
+                ? WORKSPACE_COLORS.accentSoft
+                : WORKSPACE_COLORS.hover,
+              color: isOn ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.text,
+              border: `1px solid ${isOn ? "#E0A98E" : WORKSPACE_COLORS.borderStrong}`,
+            }}
+          >
+            {`${name} ${count}`}
+          </Chip>
+        ))}
+      </Box>
+    </>
+  );
+}
+
+function ApplicationsPictureContent({ step }: { step: number }): JSX.Element {
+  if (step === 0) {
+    return (
+      <Box>
+        <PicCard borderColor={APPLICATIONS_COLOR}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="span"
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                bgcolor: APPLICATIONS_COLOR,
+              }}
+            />
+            <b style={{ flex: 1 }}>All jobs</b>
+            <Caption>2</Caption>
+          </Box>
+          <Box>
+            <SidebarGroup
+              title="Before sending"
+              items={[
+                ["Candidates", 0],
+                ["Draft", 1],
+                ["Ready to apply", 0],
+              ]}
+            />
+            <SidebarGroup
+              title="Sent"
+              items={[
+                ["Applied", 1, true],
+                ["Interview", 0],
+                ["Offer", 0],
+                ["Accepted", 0],
+                ["Rejected", 0],
+                ["Withdrawn", 0],
+              ]}
+            />
+          </Box>
+        </PicCard>
+        <Box
+          sx={{
+            height: 26,
+            ml: 3,
+            borderLeft: `2px dashed ${WORKSPACE_COLORS.borderStrong}`,
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              ml: 1.5,
+              fontSize: 11,
+              position: "relative",
+              top: 5,
+              color: WORKSPACE_COLORS.muted,
+            }}
+          >
+            click a row to open it
+          </Box>
+        </Box>
+        <PicCard borderColor={SENT_COLOR}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="span"
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                bgcolor: SENT_COLOR,
+              }}
+            />
+            <b style={{ flex: 1 }}>Acme Ltd</b>
+            <Chip
+              sx={{
+                bgcolor: WORKSPACE_COLORS.accentSoft,
+                color: WORKSPACE_COLORS.accentText,
+              }}
+            >
+              Applied
+            </Chip>
+          </Box>
+          <Caption>Frontend Engineer · Sample CV</Caption>
+          <Caption>The CV you sent · status · history</Caption>
+        </PicCard>
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      {STAGE_ROWS.map((row) => {
+        if (row.heading) {
+          return (
+            <Typography
+              key={row.heading}
+              sx={{
+                pt: 0.75,
+                fontSize: 10.5,
+                fontWeight: 700,
+                letterSpacing: ".06em",
+                textTransform: "uppercase",
+                color: WORKSPACE_COLORS.muted,
+              }}
+            >
+              {row.heading}
+            </Typography>
+          );
+        }
+        const color = row.color ?? APPLICATIONS_COLOR;
+        const isLit = row.litIn?.includes(step) ?? false;
+        return (
+          <Box
+            key={row.name}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.25,
+              px: 1.25,
+              py: 0.5,
+              borderRadius: "6px",
+              bgcolor: WORKSPACE_COLORS.panel,
+              border: `2px solid ${isLit ? color : WORKSPACE_COLORS.border}`,
+              opacity: isLit ? 1 : 0.45,
+              boxShadow: isLit ? `0 0 0 3px ${color}22` : "none",
+              transition: "opacity .2s, box-shadow .2s",
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                flex: "none",
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                bgcolor: color,
+              }}
+            />
+            <b style={{ flex: "none" }}>{row.name}</b>
+            <Box
+              component="span"
+              sx={{
+                flex: 1,
+                textAlign: "right",
+                fontSize: 12,
+                color: WORKSPACE_COLORS.muted,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {row.hint}
+            </Box>
+            {step === 2 && row.name === "Applied" && (
+              <Chip
+                sx={{
+                  bgcolor: WORKSPACE_COLORS.accentSoft,
+                  color: WORKSPACE_COLORS.accentText,
+                  fontWeight: 600,
+                }}
+              >
+                Frozen copy
+              </Chip>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
+/** The picture of an applications tutorial step */
+function ApplicationsPicture({ step }: { step: number }): JSX.Element {
+  return (
+    <Box
+      aria-hidden="true"
+      sx={{
+        width: 380,
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.canvas,
+        p: 3,
+        display: { xs: "none", md: "flex" },
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <ApplicationsPictureContent step={step} />
+    </Box>
+  );
+}
+
 interface Tutorial {
   id: TutorialId;
   name: string;
@@ -2358,6 +2831,13 @@ const TUTORIALS: Tutorial[] = [
     summary: "From the advert to a saved application",
     stepNames: APPLY_STEPS.map((s) => s.title),
     lastLabel: "Start applying",
+  },
+  {
+    id: "applications",
+    name: "Your applications",
+    summary: "Statuses, what you sent and follow up",
+    stepNames: APPLICATIONS_STEPS.map((s) => s.name),
+    lastLabel: "Got it",
   },
 ];
 
@@ -2498,6 +2978,8 @@ export function HowItWorksDialog({
           <VaultPicture step={step} />
         ) : tutorialId === "apply" ? (
           <ApplyPicture step={step} />
+        ) : tutorialId === "applications" ? (
+          <ApplicationsPicture step={step} />
         ) : (
           <TemplatePicture step={step} />
         )}
@@ -2521,6 +3003,8 @@ export function HowItWorksDialog({
               <VaultText step={step} />
             ) : tutorialId === "apply" ? (
               <ApplyText step={step} />
+            ) : tutorialId === "applications" ? (
+              <ApplicationsText step={step} />
             ) : (
               <TemplateText step={step} />
             )}
