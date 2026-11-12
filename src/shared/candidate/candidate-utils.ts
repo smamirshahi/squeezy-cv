@@ -91,24 +91,3 @@ export function isOverdue(candidate: Candidate, today: string): boolean {
     candidate.applyBy < today
   );
 }
-
-const STATUS_ORDER = { open: 0, started: 1, dropped: 2 } as const;
-
-/** Open ones first, the earliest apply-by day first (none last), then the oldest saved */
-export function arrangeCandidates(candidates: Candidate[]): Candidate[] {
-  return [...candidates].sort((a, b) => {
-    if (a.status !== b.status) {
-      return STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
-    }
-    if (a.applyBy !== b.applyBy) {
-      if (a.applyBy === undefined) {
-        return 1;
-      }
-      if (b.applyBy === undefined) {
-        return -1;
-      }
-      return a.applyBy < b.applyBy ? -1 : 1;
-    }
-    return a.createdAt.localeCompare(b.createdAt);
-  });
-}
