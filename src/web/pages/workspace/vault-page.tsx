@@ -225,6 +225,9 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
   );
 }
 
+const PANEL_WIDTH = 340;
+const PANEL_WIDTH_LAPTOP = 260;
+
 /** Phone: the vault tree as a row of chips above the content (same links, scrolls sideways) */
 function VaultChips({ selectedPage }: { selectedPage: string }): JSX.Element {
   const pages = useEditorPages();
@@ -349,7 +352,7 @@ function ItemPanel({
     <ResizableAside
       side="right"
       label="the item panel"
-      defaultWidth={viewport === "laptop" ? 260 : 340}
+      defaultWidth={viewport === "laptop" ? PANEL_WIDTH_LAPTOP : PANEL_WIDTH}
     >
       <Box
         component="aside"
