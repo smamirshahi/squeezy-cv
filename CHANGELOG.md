@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Tests for the export metadata and migration registry, the Export all ZIP and route, the demo data and the template jobs table (#391, #392, #353, #280).
 - Demo mode (#353): "Try with demo data" on the first-run screen shows a made-up CV with two templates and a job, kept in memory only. A Demo banner has "Reset demo" and "Leave demo"; nothing is saved or written to the data folder, and PDF export, Mark as applied and AI actions are off.
 - Applications page (#392): an "Export all" button above the table downloads one ZIP with every application (`application.json` and the PDF that was sent), `summary.csv` and `index.json`; search and filters do not change it, and a damaged application is listed in `index.json` instead of hiding the others.
 - Every JSON file the app exports or saves records the app version, the format version, the time and its kind under `meta` (#391). Opening a file made by a newer app is refused with a clear message; migrations run through a shared registry.
