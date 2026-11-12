@@ -29,6 +29,7 @@ import {
   setTemplatesAndJobs,
   setVariants,
 } from "@store/jobs/jobs-slice";
+import { buildDemo } from "@shared/demo/demo-data";
 import { setVault } from "@store/vault/vault-slice";
 
 /** The templates and jobs of a CV, or variants that are split into one template and one job each */
@@ -62,6 +63,14 @@ export function loadCvFileIntoStore(
   activateVariant(dispatch, first);
   // a loaded file starts a new history: undo never goes back to the file before it
   dispatch(clearHistory());
+}
+
+/** Shows the built-in demo CV instead of the saved data. Saving is off and nothing is written. */
+export function startDemo(dispatch: AppDispatch): void {
+  const { file, templates, jobs } = buildDemo();
+  loadCvFileIntoStore(dispatch, file, { templates, jobs });
+  dispatch(setSavedState(null));
+  dispatch(setStorageStatus({ status: "demo" }));
 }
 
 function errorText(error: unknown): string {
