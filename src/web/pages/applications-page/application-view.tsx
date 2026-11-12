@@ -1,3 +1,4 @@
+import { recallListSearch } from "@pages/applications-page/last-search";
 import { onAppLinkClick } from "@hooks/navigation";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -60,7 +61,7 @@ function messageOf(error: unknown): string {
 
 /** Back to the list, inside the app (no page load) */
 function goBackToList(event: React.MouseEvent<HTMLElement>): void {
-  onAppLinkClick(event, { kind: "applications", search: "" });
+  onAppLinkClick(event, { kind: "applications", search: recallListSearch() });
 }
 
 /** One application: where it stands, its timeline, and the exact CV that was sent */

@@ -37,7 +37,7 @@ function numberOrUndefined(value: string): number | undefined {
 
 type Chance = NonNullable<Job["chance"]>;
 
-const CHANCE_LABELS: Record<Chance, string> = {
+export const CHANCE_LABELS: Record<Chance, string> = {
   veryLow: "Very low",
   low: "Low",
   medium: "Medium",
@@ -45,7 +45,7 @@ const CHANCE_LABELS: Record<Chance, string> = {
   veryHigh: "Very high",
 };
 
-const FEELING_LABELS: Record<JobOpinion, string> = {
+export const FEELING_LABELS: Record<JobOpinion, string> = {
   wantIt: "I really want this job",
   goodMatch: "Good match",
   optimistic: "Optimistic",

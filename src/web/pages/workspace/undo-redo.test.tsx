@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   act,
   cleanup,
@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { TopBar } from "@pages/workspace/top-bar";
+import { markTutorialSeen } from "@pages/workspace/tutorial-seen";
 import { useUndoShortcuts } from "@pages/workspace/use-undo-shortcuts";
 import { undoableReducer } from "@store/store";
 import { clearHistory } from "@store/history/history";
@@ -18,6 +19,13 @@ import { setVault, updateItemFields } from "@store/vault/vault-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 afterEach(cleanup);
+
+beforeEach(() => {
+  // A tutorial would open over the top bar the first time; these tests are about undo
+  markTutorialSeen("vault");
+  markTutorialSeen("template");
+  markTutorialSeen("apply");
+});
 
 const file = migrateCvFile(sample);
 const section = file.vault.sections.find((s) => s.type === "experience")!;

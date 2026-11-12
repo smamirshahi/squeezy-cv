@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { sampleFile } from "@e2e/fixtures";
+import { openCvPage, sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -14,6 +14,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -78,7 +79,9 @@ describe("editing an item in the vault (inline editor)", () => {
       .click();
     await page.getByLabel("Edit item").waitFor();
 
-    await page.getByLabel("Job title").fill("Principal Engineer");
+    await page
+      .getByRole("textbox", { name: "Job title" })
+      .fill("Principal Engineer");
     await page
       .getByLabel("Description")
       .fill("Led the migration to TypeScript");
@@ -86,10 +89,7 @@ describe("editing an item in the vault (inline editor)", () => {
     await page.getByText("Unsaved changes").waitFor();
 
     // the page shows the vault's new facts
-    await page
-      .getByRole("navigation", { name: "Tools" })
-      .getByRole("link", { name: "Jobs" })
-      .click();
+    await openCvPage(page);
     await page
       .locator("[data-cv-item]")
       .filter({ hasText: "Principal Engineer" })
@@ -124,10 +124,7 @@ describe("editing an item in the vault (inline editor)", () => {
       .getByLabel("Description")
       .fill("Owned the billing platform\nMentored two engineers");
     await page.getByRole("button", { name: "Apply" }).click();
-    await page
-      .getByRole("navigation", { name: "Tools" })
-      .getByRole("link", { name: "Jobs" })
-      .click();
+    await openCvPage(page);
     await page.getByText("Owned the billing platform").first().waitFor();
     await page.getByText("Mentored two engineers").first().waitFor();
   });

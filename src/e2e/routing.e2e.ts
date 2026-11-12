@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { sampleFile } from "@e2e/fixtures";
+import { sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -14,6 +14,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage();
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -35,7 +36,7 @@ describe("routing in a real browser", () => {
     await page.reload();
     await page.getByText("Jane Doe").first().waitFor();
     expect(new URL(page.url()).pathname).toBe("/jobs/main");
-    expect(await page.title()).toBe("Jobs · Sample CV · CV Builder");
+    expect(await page.title()).toBe("Apply · Sample CV · CV Builder");
   });
 
   it("goes Back and Forward between sections without leaving the app", async () => {

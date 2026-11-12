@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { longFile } from "@e2e/fixtures";
+import { longFile, skipTutorials } from "@e2e/fixtures";
 
 const EXTRA_JOBS = 8;
 
@@ -18,6 +18,7 @@ beforeAll(async () => {
   await app.seed(file, [variant]);
   browser = await chromium.launch();
   page = await browser.newPage();
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -26,27 +27,40 @@ afterAll(async () => {
 });
 
 describe("overflow and hiding to fit (measured in a real browser)", () => {
-  it("says how many lines are over, then hides the least relevant items until it fits", async () => {
-    await page.goto(app.webUrl);
+  it("says how many lines are over, then hides the chosen items until it fits", async () => {
+    await page.goto(`${app.webUrl}/jobs/main`);
     await page.getByText("Jane Doe").first().waitFor();
 
     // The banner says how far over it is
-    await page.getByText(/lines? (is|are) over; page 2 starts at/).waitFor();
+    const banner = page.getByText(/lines? (is|are) over; page 2 starts at/);
+    await banner.waitFor();
+    // and so does the General step of the content panel
+    await page.getByText(/^Over by \d+ lines?$/).waitFor();
 
-    // The inspector offers the least relevant items and a one-click fix
-    await page
-      .getByRole("button", { name: "Hide the least relevant until it fits" })
-      .click();
-    await page
-      .getByText(/lines? (is|are) over; page 2 starts at/)
-      .waitFor({ state: "detached" });
-    expect(
-      await page.getByText(/lines? (is|are) over; page 2 starts at/).count()
-    ).toBe(0);
+    // The panel lists the least relevant items with the lines each saves; tick some, then hide
+    await page.getByRole("button", { name: "Choose items to hide" }).click();
+    const hide = page.getByRole("button", { name: /^Hide selected/ });
+    expect(await hide.isDisabled()).toBe(true);
+    const boxes = page.getByRole("checkbox", { name: /^Hide / });
+    await boxes.first().waitFor();
+    const count = Math.min(await boxes.count(), EXTRA_JOBS);
+    for (let index = 0; index < count; index += 1) {
+      await boxes.nth(index).check();
+    }
+    expect(await hide.isDisabled()).toBe(false);
+    await hide.click();
+    await banner.waitFor({ state: "detached" });
 
-    // Items were hidden in the variant only: the vault still has them (they are listed, ticked)
-    expect(
-      await page.getByRole("checkbox", { checked: true }).count()
-    ).toBeGreaterThan(0);
+    // Items were hidden in the job only: the vault still has every one of them
+    const vault = await (
+      await page.request.get(`${app.webUrl}/api/vault`)
+    ).text();
+    for (let n = 1; n <= EXTRA_JOBS; n += 1) {
+      expect(vault).toContain(`Engineer Number ${n}`);
+    }
+    const job = await (
+      await page.request.get(`${app.webUrl}/api/jobs/main`)
+    ).text();
+    expect(job).toContain('"isVisible":false');
   });
 });

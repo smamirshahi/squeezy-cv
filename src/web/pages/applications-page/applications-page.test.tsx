@@ -5,10 +5,20 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
+import sample from "@fixtures/sample-cv.json";
 import { ApplicationSummary } from "@custom-types/application-types";
 import { ApplicationsPage } from "@pages/applications-page/applications-page";
+import { recallListSearch } from "@pages/applications-page/last-search";
+import { createApplication } from "@shared/application/application-utils";
+import { createDefaultVariant } from "@shared/variant/variant-utils";
+import { splitVariant } from "@shared/variant/template-job";
+import { migrateCvFile } from "@shared/vault/migrate-vault";
+
+const file = migrateCvFile(sample);
+const variant = createDefaultVariant(file, "v1");
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/applications");
@@ -41,18 +51,93 @@ function entry(
   };
 }
 
-/** The applications answer `body`; the jobs list (drafts) is `jobs` */
-function stubList(body: unknown, status = 200, jobs: unknown[] = []): void {
+interface Stub {
+  applications: unknown;
+  status?: number;
+  jobs?: unknown[];
+  templates?: { id: string; name: string; isCorrupt: boolean }[];
+  /** A job by id, as `GET /api/jobs/:id` answers it */
+  job?: unknown;
+}
+
+interface Call {
+  url: string;
+  method: string;
+  body: string;
+}
+
+/** A server that answers the lists the page reads; every call is recorded */
+function stubServer(stub: Stub): Call[] {
+  const calls: Call[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: string) =>
-      Promise.resolve(
-        String(url).includes("/api/jobs")
-          ? new Response(JSON.stringify(jobs), { status: 200 })
-          : new Response(JSON.stringify(body), { status })
-      )
-    )
+    vi.fn((url: string, init?: RequestInit) => {
+      const path = String(url);
+      const method = init?.method ?? "GET";
+      calls.push({
+        url: path,
+        method,
+        body: typeof init?.body === "string" ? init.body : "",
+      });
+      const json = (body: unknown, status = 200): Promise<Response> =>
+        Promise.resolve(new Response(JSON.stringify(body), { status }));
+      if (path === "/api/applications") {
+        return json(stub.applications, stub.status ?? 200);
+      }
+      if (path === "/api/jobs") {
+        return json(stub.jobs ?? []);
+      }
+      if (path === "/api/templates") {
+        return json(stub.templates ?? []);
+      }
+      if (path.startsWith("/api/jobs/") && stub.job) {
+        return json(stub.job);
+      }
+      if (path.startsWith("/api/applications/") && method === "PATCH") {
+        const patch = JSON.parse(
+          typeof init?.body === "string" ? init.body : "{}"
+        ) as {
+          status: string;
+        };
+        const id = path.split("/").pop();
+        const summary = (stub.applications as ApplicationSummary[]).find(
+          (a) => a.id === id
+        )!;
+        return json({
+          ...createApplication(
+            {
+              jobId: summary.jobId,
+              company: summary.company,
+              role: summary.role,
+            },
+            file.vault,
+            variant,
+            summary.appliedAt,
+            summary.id
+          ),
+          status: patch.status,
+        });
+      }
+      // the application panel's own requests (not what these tests are about)
+      return json({ code: "not_found", message: "Not found." }, 404);
+    })
   );
+  return calls;
+}
+
+function jobEntry(
+  id: string,
+  name: string,
+  extra: Record<string, unknown> = {}
+): Record<string, unknown> {
+  return {
+    id,
+    name,
+    templateId: "t1",
+    createdAt: "2026-11-06",
+    isCorrupt: false,
+    ...extra,
+  };
 }
 
 const list = [
@@ -61,6 +146,7 @@ const list = [
   entry("c", "Core", "Tech Lead", "applied", "2026-11-02"),
 ];
 
+/** The first cell of every row, in order */
 function companies(): string[] {
   return screen
     .getAllByRole("row")
@@ -68,216 +154,648 @@ function companies(): string[] {
     .map((row) => within(row).queryAllByRole("cell")[0]?.textContent ?? "");
 }
 
-describe("Applications page", () => {
+function rowOf(company: string): HTMLElement {
+  return screen.getByRole("row", { name: new RegExp(company) });
+}
+
+function sidebar(): ReturnType<typeof within> {
+  return within(screen.getByRole("navigation", { name: "Filter by status" }));
+}
+
+/** A real saved job, as the server would send it */
+function savedJob(id: string, extra: Record<string, unknown>): unknown {
+  const jobVariant = createDefaultVariant(file, id);
+  return { ...splitVariant(jobVariant, "t1", "2026-11-06").job, ...extra };
+}
+
+describe("Applications page: the list", () => {
   it("lists every application, newest first, with status and date", async () => {
-    stubList(list);
+    stubServer({ applications: list });
     render(<ApplicationsPage />);
     await screen.findByText("Beta Labs");
     expect(companies()).toEqual(["Beta Labs", "Core", "Acme Ltd"]);
     expect(screen.getByText("5 Nov 2026")).toBeTruthy();
-    expect(
-      screen.getByText("3 applications: 1 waiting, 1 interview, 1 rejected")
-    ).toBeTruthy();
+    expect(screen.getByText("3 jobs · 3 sent · 1 interview")).toBeTruthy();
     // the company is a link to the application
     expect(
       screen.getByRole("link", { name: "Beta Labs" }).getAttribute("href")
     ).toBe("/applications/b");
   });
 
-  it("has a View CV and a download button per row that open the sent PDF without opening the side panel", async () => {
-    stubList(list);
+  it("says '1 job' for a single job", async () => {
+    stubServer({ applications: [list[0]] });
     render(<ApplicationsPage />);
-    await screen.findByText("Beta Labs");
-    const view = screen.getByRole("link", {
-      name: "View CV sent to Beta Labs",
-    });
-    expect(view.getAttribute("href")).toBe("/api/applications/b/pdf");
-    expect(view.getAttribute("target")).toBe("_blank");
-    const download = screen.getByRole("link", {
-      name: "Download CV sent to Beta Labs",
-    });
-    expect(download.getAttribute("href")).toBe("/api/applications/b/pdf");
-    expect(download.hasAttribute("download")).toBe(true);
-    fireEvent.click(view);
-    expect(screen.queryByTitle("The CV you sent")).toBeNull();
+    await screen.findByText("Acme Ltd");
+    expect(screen.getByText("1 job · 1 sent")).toBeTruthy();
   });
 
-  it("shows the job and template each application was sent with, and searches them", async () => {
-    stubList([
-      {
-        ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
-        jobName: "Acme - Dev",
-        templateName: "Classic",
-      },
-      {
-        ...entry("b", "Beta", "QA", "applied", "2026-11-02"),
-        jobName: "Beta - QA",
-        templateName: "Compact",
-      },
-      {
-        ...entry("c", "Old", "Ops", "applied", "2026-11-03"),
-        jobName: "",
-        templateName: "",
-      },
+  it("remembers its search for 'All applications' on an application's page", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    fireEvent.change(
+      screen.getByLabelText("Search company, role or template"),
+      { target: { value: "acme" } }
+    );
+    expect(recallListSearch()).toBe("?q=acme");
+  });
+
+  it("has the columns Company, Role · Template, Status, Applied and an open column", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const headers = screen
+      .getAllByRole("columnheader")
+      .map((header) => header.textContent);
+    expect(headers).toEqual([
+      "Company",
+      "Role · Template",
+      "Status",
+      "Applied",
+      "",
     ]);
+  });
+
+  it("shows the role with its template under it", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const cell = within(rowOf("Beta Labs")).getAllByRole("cell")[1];
+    expect(cell.textContent).toBe("Frontend EngineerTemplate 1");
+  });
+
+  it("explains the next step when there are none", async () => {
+    stubServer({ applications: [] });
+    render(<ApplicationsPage />);
+    await screen.findByText(/No jobs yet\./);
+    expect(screen.getByText(/mark it as applied/)).toBeTruthy();
+  });
+
+  it("shows an error instead of an empty list when the data cannot be read", async () => {
+    stubServer({
+      applications: {
+        code: "corrupt",
+        message: "The data could not be read.",
+      },
+      status: 500,
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("The data could not be read.");
+    expect(screen.queryByText(/No jobs yet\./)).toBeNull();
+  });
+
+  it("shows a damaged application as a warning, not as a missing one", async () => {
+    stubServer({
+      applications: [
+        ...list,
+        {
+          id: "broken",
+          company: "",
+          role: "",
+          status: "applied",
+          appliedAt: "",
+          updatedAt: "",
+          isCorrupt: true,
+        },
+      ],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText(/Cannot read the application/);
+    sidebar()
+      .getByRole("button", { name: /^Rejected/ })
+      .click();
+    await waitFor(() =>
+      expect(screen.getByText(/Cannot read the application/)).toBeTruthy()
+    );
+  });
+});
+
+describe("Applications page: the Template column", () => {
+  it("shows the template saved with the application", async () => {
+    stubServer({
+      applications: [
+        {
+          ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
+          templateName: "Classic",
+        },
+      ],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Acme Ltd");
+    expect(within(rowOf("Acme Ltd")).getByText("Classic")).toBeTruthy();
+  });
+
+  it("falls back to the template its job uses today, for an application saved before templates", async () => {
+    stubServer({
+      applications: [
+        {
+          ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
+          templateId: "",
+          templateName: "",
+        },
+      ],
+      jobs: [jobEntry("v1", "Main job", { templateId: "t9" })],
+      templates: [{ id: "t9", name: "Compact", isCorrupt: false }],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Acme Ltd");
+    expect(await screen.findByText("Compact")).toBeTruthy();
+  });
+
+  it("shows a dash when no template can be found", async () => {
+    stubServer({
+      applications: [
+        {
+          ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
+          jobId: "gone",
+          templateId: "",
+          templateName: "",
+        },
+      ],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Acme Ltd");
+    const cell = within(rowOf("Acme Ltd")).getAllByRole("cell")[1];
+    expect(cell.textContent).toBe("Dev-");
+  });
+
+  it("shows the template of a job that was not sent", async () => {
+    stubServer({
+      applications: [],
+      jobs: [jobEntry("j1", "Gamma", { company: "Gamma Co" })],
+      templates: [{ id: "t1", name: "Single Column CV", isCorrupt: false }],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma Co");
+    expect(await screen.findByText("Single Column CV")).toBeTruthy();
+  });
+});
+
+describe("Applications page: search and sort", () => {
+  it("searches company, role and template", async () => {
+    stubServer({
+      applications: [
+        {
+          ...entry("a", "Acme Ltd", "Dev", "applied", "2026-11-01"),
+          templateName: "Classic",
+        },
+        {
+          ...entry("b", "Beta", "QA Lead", "applied", "2026-11-02"),
+          templateName: "Compact",
+        },
+      ],
+    });
     render(<ApplicationsPage />);
     await screen.findByText("Beta");
-    expect(screen.getByRole("columnheader", { name: "Job" })).toBeTruthy();
-    expect(screen.getByRole("columnheader", { name: "Template" })).toBeTruthy();
-    expect(screen.getByText("Acme - Dev")).toBeTruthy();
-    expect(screen.getByText("Classic")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Search company or role"), {
-      target: { value: "compact" },
-    });
+    const search = screen.getByLabelText("Search company, role or template");
+    fireEvent.change(search, { target: { value: "compact" } });
     expect(companies()).toEqual(["Beta"]);
-  });
-
-  it("searches company and role", async () => {
-    stubList(list);
-    render(<ApplicationsPage />);
-    await screen.findByText("Beta Labs");
-    fireEvent.change(screen.getByLabelText("Search company or role"), {
-      target: { value: "lead" },
-    });
-    expect(companies()).toEqual(["Core"]);
-    fireEvent.change(screen.getByLabelText("Search company or role"), {
-      target: { value: "zzz" },
-    });
+    fireEvent.change(search, { target: { value: "lead" } });
+    expect(companies()).toEqual(["Beta"]);
+    fireEvent.change(search, { target: { value: "acme" } });
+    expect(companies()).toEqual(["Acme Ltd"]);
+    fireEvent.change(search, { target: { value: "zzz" } });
     expect(
-      screen.getByText("No application matches this search.")
+      screen.getByText("No job or application matches this search.")
     ).toBeTruthy();
   });
 
-  it("filters by status and keeps it in the address", async () => {
-    stubList(list);
+  it("sorts newest first, and by Oldest or Company A-Z from the dropdown", async () => {
+    stubServer({ applications: list });
     render(<ApplicationsPage />);
     await screen.findByText("Beta Labs");
-    fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
-    expect(companies()).toEqual(["Acme Ltd"]);
-    expect(window.location.search).toBe("?status=rejected");
-    fireEvent.click(screen.getByRole("button", { name: /^All/ }));
-    expect(companies()).toHaveLength(3);
-  });
+    const sort = screen.getByRole("combobox", { name: "Sort" });
+    expect(sort.textContent).toBe("Sort: Newest");
+    expect(companies()).toEqual(["Beta Labs", "Core", "Acme Ltd"]);
 
-  it("shows a tile per status with its count, and a tile is a filter", async () => {
-    const old = entry("d", "Old Co", "Dev", "applied", "2026-01-01");
-    stubList([...list, old]);
-    render(<ApplicationsPage />);
-    await screen.findByText("Beta Labs");
-    const tiles = within(
-      screen.getByRole("navigation", { name: "Filter by status" })
+    fireEvent.mouseDown(sort);
+    fireEvent.click(screen.getByRole("option", { name: "Oldest" }));
+    expect(companies()).toEqual(["Acme Ltd", "Core", "Beta Labs"]);
+
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Sort" }));
+    fireEvent.click(screen.getByRole("option", { name: "Company A-Z" }));
+    expect(companies()).toEqual(["Acme Ltd", "Beta Labs", "Core"]);
+    expect(screen.getByRole("combobox", { name: "Sort" }).textContent).toBe(
+      "Sort: Company A-Z"
     );
-    const tile = (name: RegExp): HTMLElement =>
-      tiles.getByRole("button", { name });
-    expect(tile(/^All/).textContent).toBe("All4");
-    expect(tile(/^Draft/).textContent).toBe("Draft0");
-    expect(tile(/^Ready to apply/).textContent).toBe("Ready to apply0");
-    expect(tile(/^Applied/).textContent).toBe("Applied2");
-    expect(tile(/^Interview/).textContent).toBe("Interview1");
-    expect(tile(/^Rejected/).textContent).toBe("Rejected1");
-    expect(tile(/^Withdrawn/).textContent).toBe("Withdrawn0");
-    // only the 2026-01-01 one has had no news for a month
-    expect(tile(/^No reply/).textContent).toBe("No reply1");
-    expect(tile(/^All/).getAttribute("aria-pressed")).toBe("true");
-
-    fireEvent.click(tile(/^No reply/));
-    expect(companies()).toEqual(["Old Co"]);
-    expect(tile(/^No reply/).getAttribute("aria-pressed")).toBe("true");
-    expect(window.location.search).toBe("?status=noReply");
   });
 
   it("starts from the filters in the address (coming back from an application)", async () => {
     window.history.replaceState(null, "", "/applications?status=applied&q=co");
-    stubList(list);
+    stubServer({ applications: list });
     render(<ApplicationsPage />);
     await screen.findByText("Core");
     expect(companies()).toEqual(["Core"]);
     expect(
-      screen.getByLabelText<HTMLInputElement>("Search company or role").value
+      screen.getByLabelText<HTMLInputElement>(
+        "Search company, role or template"
+      ).value
     ).toBe("co");
   });
+});
 
-  it("sorts by company when the column is clicked", async () => {
-    stubList(list);
+describe("Applications page: the grouped sidebar", () => {
+  it("groups the filters and shows the count of each", async () => {
+    const old = entry("d", "Old Co", "Dev", "applied", "2026-01-01");
+    stubServer({
+      applications: [...list, old],
+      jobs: [
+        jobEntry("j1", "Gamma draft"),
+        jobEntry("j2", "Delta ready", { stage: "ready" }),
+      ],
+    });
     render(<ApplicationsPage />);
     await screen.findByText("Beta Labs");
-    fireEvent.click(screen.getByText("Company"));
-    expect(companies()).toEqual(["Acme Ltd", "Beta Labs", "Core"]);
-    fireEvent.click(screen.getByText("Company"));
-    expect(companies()).toEqual(["Core", "Beta Labs", "Acme Ltd"]);
+    const nav = screen.getByRole("navigation", { name: "Filter by status" });
+    for (const title of ["Before sending", "Sent", "Needs a nudge"]) {
+      expect(within(nav).getByText(title)).toBeTruthy();
+    }
+    const count = (name: RegExp): string | null =>
+      sidebar().getByRole("button", { name }).textContent;
+    expect(count(/^All jobs/)).toBe("All jobs6");
+    expect(count(/^Draft/)).toBe("Draft1");
+    expect(count(/^Ready to apply/)).toBe("Ready to apply1");
+    expect(count(/^Applied/)).toBe("Applied2");
+    expect(count(/^Interview/)).toBe("Interview1");
+    expect(count(/^Rejected/)).toBe("Rejected1");
+    expect(count(/^Withdrawn/)).toBe("Withdrawn0");
+    // only the 2026-01-01 one has had no news for a month
+    expect(count(/^No reply/)).toBe("No reply1");
+    expect(
+      sidebar()
+        .getByRole("button", { name: /^All jobs/ })
+        .getAttribute("aria-pressed")
+    ).toBe("true");
   });
 
-  it("shows No reply for an old Applied application", async () => {
-    stubList([entry("o", "Old Co", "Dev", "applied", "2020-01-01")]);
+  it("leaves the 'Needs a nudge' group out when nothing needs one", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    expect(screen.queryByText("Needs a nudge")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^No reply/ })).toBeNull();
+  });
+
+  it("filters by a status and keeps it in the address", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    fireEvent.click(sidebar().getByRole("button", { name: /^Rejected/ }));
+    expect(companies()).toEqual(["Acme Ltd"]);
+    expect(window.location.search).toBe("?status=rejected");
+    fireEvent.click(sidebar().getByRole("button", { name: /^All jobs/ }));
+    expect(companies()).toHaveLength(3);
+  });
+
+  it("No reply filters the applications that had no news for a month", async () => {
+    stubServer({
+      applications: [
+        ...list,
+        entry("d", "Old Co", "Dev", "applied", "2026-01-01"),
+      ],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    fireEvent.click(sidebar().getByRole("button", { name: /^No reply/ }));
+    expect(companies()).toEqual(["Old Co"]);
+    expect(window.location.search).toBe("?status=noReply");
+  });
+
+  it("shows No reply in the row of an old Applied application", async () => {
+    stubServer({
+      applications: [entry("o", "Old Co", "Dev", "applied", "2020-01-01")],
+    });
     render(<ApplicationsPage />);
     await screen.findByText("Old Co");
-    // the chip in the row (the tile of the same name is in the filter group)
     expect(
       within(screen.getByRole("table")).getByText("No reply")
     ).toBeTruthy();
   });
+});
 
-  it("explains the next step when there are none", async () => {
-    stubList([]);
-    render(<ApplicationsPage />);
-    await screen.findByText(/No applications yet\./);
-    expect(screen.getByText(/Mark a job as applied/)).toBeTruthy();
-  });
+describe("Applications page: jobs that were not sent", () => {
+  const unsent = [
+    jobEntry("j1", "Gamma draft"),
+    jobEntry("j2", "Delta ready", { stage: "ready", company: "Delta Inc" }),
+    // this job was sent already (application "a" is for job "v1"), so it is not a draft
+    jobEntry("v1", "Already sent"),
+  ];
 
-  it("shows an error instead of an empty list when the data cannot be read", async () => {
-    stubList({ code: "corrupt", message: "The data could not be read." }, 500);
-    render(<ApplicationsPage />);
-    await screen.findByText("The data could not be read.");
-    expect(screen.queryByText(/No applications yet\./)).toBeNull();
-  });
-
-  it("shows a damaged application as a warning, not as a missing one", async () => {
-    stubList([
-      ...list,
-      {
-        id: "broken",
-        company: "",
-        role: "",
-        status: "applied",
-        appliedAt: "",
-        updatedAt: "",
-        isCorrupt: true,
-      },
-    ]);
-    render(<ApplicationsPage />);
-    await screen.findByText(/Cannot read the application/);
-    fireEvent.click(screen.getByRole("button", { name: /^Rejected/ }));
-    expect(screen.getByText(/Cannot read the application/)).toBeTruthy();
-  });
-
-  it("lists jobs that were not sent as Draft or Ready to apply, and filters them", async () => {
-    const job = (id: string, name: string, stage?: "draft" | "ready") => ({
-      id,
-      name,
-      templateId: "t1",
-      createdAt: "2026-11-06",
-      isCorrupt: false,
-      ...(stage ? { stage } : {}),
-    });
-    stubList(list, 200, [
-      job("j1", "Gamma draft"),
-      job("j2", "Delta ready", "ready"),
-      // this job was sent already (application "a" is for job "v1"), so it is not a draft
-      job("v1", "Already sent"),
-    ]);
+  it("lists them with their stage and 'Not sent yet', named by company or, without one, by job", async () => {
+    stubServer({ applications: list, jobs: unsent });
     render(<ApplicationsPage />);
     await screen.findByText("Gamma draft");
-    expect(screen.getByText("Delta ready")).toBeTruthy();
+    expect(screen.getByText("Delta Inc")).toBeTruthy();
     expect(screen.queryByText("Already sent")).toBeNull();
-    const nav = within(
-      screen.getByRole("navigation", { name: "Filter by status" })
-    );
-    expect(nav.getByRole("button", { name: /^Draft/ }).textContent).toBe(
+    expect(within(rowOf("Gamma draft")).getByText("Not sent yet")).toBeTruthy();
+    expect(
+      within(rowOf("Gamma draft")).getByRole("combobox", {
+        name: "Stage of Gamma draft",
+      }).textContent
+    ).toBe("Draft");
+    expect(
+      within(rowOf("Delta Inc")).getByRole("combobox", {
+        name: "Stage of Delta ready",
+      }).textContent
+    ).toBe("Ready to apply");
+  });
+
+  it("filters them by Draft and Ready to apply", async () => {
+    stubServer({ applications: list, jobs: unsent });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma draft");
+    expect(sidebar().getByRole("button", { name: /^Draft/ }).textContent).toBe(
       "Draft1"
     );
-    fireEvent.click(nav.getByRole("button", { name: /^Ready to apply/ }));
+    fireEvent.click(sidebar().getByRole("button", { name: /^Ready to apply/ }));
     expect(screen.queryByText("Gamma draft")).toBeNull();
-    expect(screen.getByText("Delta ready")).toBeTruthy();
+    expect(screen.getByText("Delta Inc")).toBeTruthy();
     expect(screen.queryByText("Beta Labs")).toBeNull();
+  });
+
+  it("puts jobs and applications in one list, by date", async () => {
+    stubServer({
+      applications: list,
+      jobs: [jobEntry("j1", "Gamma draft", { createdAt: "2026-11-03" })],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma draft");
+    // 5 Nov (Beta), 3 Nov (the draft), 2 Nov (Core), 1 Oct (Acme)
+    expect(companies()).toEqual([
+      "Beta Labs",
+      "Gamma draft",
+      "Core",
+      "Acme Ltd",
+    ]);
+  });
+
+  it("changes the stage of a job from the dropdown and saves it", async () => {
+    const calls = stubServer({
+      applications: [],
+      jobs: [jobEntry("j1", "Gamma draft")],
+      job: savedJob("j1", { name: "Gamma draft" }),
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma draft");
+    fireEvent.mouseDown(
+      screen.getByRole("combobox", { name: "Stage of Gamma draft" })
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Ready to apply" }));
+    await waitFor(() =>
+      expect(
+        calls.some(
+          (call) =>
+            call.method === "PUT" &&
+            call.url === "/api/jobs/j1" &&
+            JSON.parse(call.body).stage === "ready"
+        )
+      ).toBe(true)
+    );
+    expect(
+      await screen.findByRole("combobox", { name: "Stage of Gamma draft" })
+    ).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("combobox", { name: "Stage of Gamma draft" })
+          .textContent
+      ).toBe("Ready to apply")
+    );
+  });
+});
+
+describe("Applications page: status, open and PDF", () => {
+  it("shows the status as a pill with a dropdown of all statuses", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const status = within(rowOf("Beta Labs")).getByRole("combobox", {
+      name: "Status of Beta Labs",
+    });
+    expect(status.textContent).toBe("Interview");
+    fireEvent.mouseDown(status);
+    const options = screen
+      .getAllByRole("option")
+      .map((option) => option.textContent);
+    expect(options).toEqual([
+      "Applied",
+      "Interview",
+      "Offer",
+      "Accepted",
+      "Rejected",
+      "Withdrawn",
+    ]);
+  });
+
+  it("changing the status saves it with today's date and updates the row and the counts", async () => {
+    const calls = stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Core");
+    fireEvent.mouseDown(
+      within(rowOf("Core")).getByRole("combobox", { name: "Status of Core" })
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Offer" }));
+    await waitFor(() =>
+      expect(
+        calls.some(
+          (call) =>
+            call.method === "PATCH" &&
+            call.url === "/api/applications/c" &&
+            JSON.parse(call.body).status === "offer" &&
+            /^\d{4}-\d{2}-\d{2}$/.test(JSON.parse(call.body).statusAt)
+        )
+      ).toBe(true)
+    );
+    await waitFor(() =>
+      expect(
+        within(rowOf("Core")).getByRole("combobox", { name: "Status of Core" })
+          .textContent
+      ).toBe("Offer")
+    );
+    expect(sidebar().getByRole("button", { name: /^Offer/ }).textContent).toBe(
+      "Offer1"
+    );
+    // changing the status does not open the side panel
+    expect(screen.queryByRole("complementary")).toBeNull();
+  });
+
+  it("has 'CV sent · View' under the date, opening the sent PDF in a new tab without opening the side panel", async () => {
+    stubServer({ applications: list });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    const cell = within(rowOf("Beta Labs")).getAllByRole("cell")[3];
+    expect(cell.textContent).toBe("5 Nov 2026CV sent · View");
+    const view = within(cell).getByRole("link", { name: "View" });
+    expect(view.getAttribute("href")).toBe("/api/applications/b/pdf");
+    expect(view.getAttribute("target")).toBe("_blank");
+    fireEvent.click(view);
+    expect(screen.queryByRole("complementary")).toBeNull();
+    // the old separate Sent CV column and its download button are gone
+    expect(screen.queryByRole("columnheader", { name: "Sent CV" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /Download CV sent/ })).toBeNull();
+  });
+
+  it("has an open icon in the last column that opens the job in a new tab", async () => {
+    stubServer({
+      applications: list,
+      jobs: [jobEntry("v1", "Main job"), jobEntry("j1", "Gamma draft")],
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma draft");
+    await waitFor(() =>
+      expect(screen.getAllByRole("link", { name: /^Open job/ }).length).toBe(4)
+    );
+    const open = within(rowOf("Beta Labs")).getByRole("link", {
+      name: "Open job Main job",
+    });
+    expect(open.getAttribute("href")).toBe("/jobs/v1?view=details");
+    expect(open.getAttribute("target")).toBe("_blank");
+    const last = within(rowOf("Beta Labs")).getAllByRole("cell").at(-1)!;
+    expect(last.contains(open)).toBe(true);
+    // the unsent job opens its own page
+    expect(
+      within(rowOf("Gamma draft"))
+        .getByRole("link", { name: "Open job Gamma draft" })
+        .getAttribute("href")
+    ).toBe("/jobs/j1?view=details");
+    // opening does not select the row
+    fireEvent.click(open);
+    expect(screen.queryByRole("complementary")).toBeNull();
+  });
+
+  it("has no open icon when the job of an application was deleted", async () => {
+    stubServer({ applications: list, jobs: [] });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    expect(screen.queryByRole("link", { name: /^Open job/ })).toBeNull();
+  });
+});
+
+describe("Applications page: the side panel", () => {
+  it("shows an unsent job with its next step, progress and job data, and closes", async () => {
+    stubServer({
+      applications: [],
+      jobs: [
+        jobEntry("j1", "Gamma draft", {
+          company: "Gamma Co",
+          role: "Designer",
+        }),
+      ],
+      templates: [{ id: "t1", name: "Single Column CV", isCorrupt: false }],
+      job: savedJob("j1", {
+        name: "Gamma draft",
+        company: "Gamma Co",
+        role: "Designer",
+        url: "https://example.com/job",
+        location: "London",
+        workMode: "hybrid",
+        employmentType: "fullTime",
+        salaryMin: 50000,
+        salaryMax: 60000,
+        expectedSalary: 55000,
+        chance: "veryHigh",
+        feeling: "wantIt",
+      }),
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma Co");
+    fireEvent.click(rowOf("Gamma Co"));
+
+    const panel = within(screen.getByRole("complementary"));
+    expect(panel.getByText("Next step")).toBeTruthy();
+    expect(panel.getByText("Mark as applied")).toBeTruthy();
+    expect(
+      panel.getByRole("link", { name: "Open job" }).getAttribute("href")
+    ).toBe("/jobs/j1?view=details");
+    // progress: Draft done, Ready to apply not yet, Applied not sent
+    expect(panel.getByText("Progress")).toBeTruthy();
+    expect(panel.getByText("Created 6 Nov 2026")).toBeTruthy();
+    expect(panel.getByText("Not sent yet")).toBeTruthy();
+    // job data, including the template and what the list has no room for
+    expect(panel.getByText("Job data")).toBeTruthy();
+    expect(panel.getByText("Single Column CV")).toBeTruthy();
+    expect(await panel.findByText("https://example.com/job")).toBeTruthy();
+    expect(panel.getByText("London")).toBeTruthy();
+    expect(panel.getByText("Hybrid")).toBeTruthy();
+    expect(panel.getByText("Full time")).toBeTruthy();
+    expect(panel.getByText("Very high")).toBeTruthy();
+    expect(panel.getByText("I really want this job")).toBeTruthy();
+    expect(panel.getByText("50,000 - 60,000")).toBeTruthy();
+    expect(panel.getByText("55,000")).toBeTruthy();
+
+    fireEvent.click(panel.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("complementary")).toBeNull();
+  });
+
+  it("leaves out the job data rows that are empty", async () => {
+    stubServer({
+      applications: [],
+      jobs: [jobEntry("j1", "Gamma draft", { company: "Gamma Co" })],
+      job: savedJob("j1", { name: "Gamma draft", company: "Gamma Co" }),
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma Co");
+    fireEvent.click(rowOf("Gamma Co"));
+    const panel = within(screen.getByRole("complementary"));
+    await panel.findByText("Job data");
+    for (const label of ["URL", "Location", "Salary", "Expected salary"]) {
+      expect(panel.queryByText(label)).toBeNull();
+    }
+  });
+
+  it("changes the stage of the job from the panel", async () => {
+    const calls = stubServer({
+      applications: [],
+      jobs: [jobEntry("j1", "Gamma draft", { company: "Gamma Co" })],
+      job: savedJob("j1", { name: "Gamma draft" }),
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Gamma Co");
+    fireEvent.click(rowOf("Gamma Co"));
+    fireEvent.click(screen.getByRole("button", { name: "Mark as ready" }));
+    await waitFor(() =>
+      expect(
+        calls.some(
+          (call) =>
+            call.method === "PUT" && JSON.parse(call.body).stage === "ready"
+        )
+      ).toBe(true)
+    );
+    expect(
+      await screen.findByRole("button", { name: "Back to draft" })
+    ).toBeTruthy();
+  });
+
+  it("shows the job data of a sent application, with the template and the job's extra fields", async () => {
+    stubServer({
+      applications: [
+        {
+          ...entry(
+            "b",
+            "Beta Labs",
+            "Frontend Engineer",
+            "interview",
+            "2026-11-05"
+          ),
+          jobName: "Beta - Frontend",
+        },
+      ],
+      jobs: [jobEntry("v1", "Beta - Frontend")],
+      job: savedJob("v1", { location: "Leeds" }),
+    });
+    render(<ApplicationsPage />);
+    await screen.findByText("Beta Labs");
+    fireEvent.click(rowOf("Beta Labs"));
+    const panel = within(screen.getByRole("complementary"));
+    expect(
+      panel.getByRole("heading", { name: "Frontend Engineer" })
+    ).toBeTruthy();
+    expect(panel.getByText("Job data")).toBeTruthy();
+    expect(panel.getByText("Beta - Frontend")).toBeTruthy();
+    expect(panel.getByText("Template 1")).toBeTruthy();
+    expect(await panel.findByText("Leeds")).toBeTruthy();
+    // the timeline is at the bottom (in the application view), not a Progress block on top
+    expect(panel.queryByText("Progress")).toBeNull();
+    fireEvent.click(panel.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("complementary")).toBeNull();
   });
 });

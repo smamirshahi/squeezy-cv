@@ -12,6 +12,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
+import { rememberListSearch } from "@pages/applications-page/last-search";
 import { createApplication } from "@shared/application/application-utils";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -174,6 +175,37 @@ describe("Application page", () => {
     expect(
       frame.compareDocumentPosition(timeline) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+  });
+
+  it("starts the timeline with 'Draft created' when it knows when the job was created", async () => {
+    stubServer(() => application);
+    render(
+      <ApplicationView
+        applicationId={application.id}
+        draftCreatedAt="2026-11-02"
+      />
+    );
+    await screen.findByText("Timeline");
+    const [first] = screen.getAllByRole("listitem");
+    expect(first.textContent).toBe("2 Nov 2026 - Draft created");
+  });
+
+  it("has no 'Draft created' line without that date", async () => {
+    stubServer(() => application);
+    render(<ApplicationView applicationId={application.id} />);
+    await screen.findByText("Timeline");
+    expect(screen.queryByText(/Draft created/)).toBeNull();
+  });
+
+  it("'All applications' goes back to the list with the search that was there", async () => {
+    stubServer(() => application);
+    rememberListSearch("?q=acme&status=interview");
+    render(<ApplicationView applicationId={application.id} />);
+    fireEvent.click(
+      await screen.findByRole("link", { name: /All applications/ })
+    );
+    expect(window.location.pathname).toBe("/applications");
+    expect(window.location.search).toBe("?q=acme&status=interview");
   });
 
   it("says so when the stored PDF is missing", async () => {

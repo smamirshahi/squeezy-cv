@@ -15,6 +15,7 @@ import sample from "@fixtures/sample-cv.json";
 // eslint-disable-next-line no-restricted-imports -- App.tsx is the only module outside the aliased folders
 import { App } from "../../App";
 import { navigate } from "@hooks/navigation";
+import { markTutorialSeen } from "@pages/workspace/tutorial-seen";
 import { createJob } from "@store/jobs/jobs-slice";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
@@ -64,6 +65,10 @@ async function open(path: string, loads = true): Promise<AppStore> {
 }
 
 beforeEach(() => {
+  // A tutorial opens over the page the first time it is visited; these tests are about the pages
+  markTutorialSeen("vault");
+  markTutorialSeen("template");
+  markTutorialSeen("apply");
   vi.stubGlobal("fetch", () => Promise.reject(new Error("no server")));
 });
 

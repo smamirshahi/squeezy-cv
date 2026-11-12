@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
+import { skipTutorials, stubAiRoute } from "@e2e/fixtures";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { sampleFileWithBullets } from "@fixtures/sample-with-bullets";
 import { readPdf } from "@e2e/read-pdf";
@@ -21,6 +22,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -33,17 +35,13 @@ describe("bullets made from the description (AI answer stubbed)", () => {
     await page.route("**/api/ai/status", (route) =>
       route.fulfill({ json: { isConfigured: true, provider: "ollama" } })
     );
-    await page.route("**/api/ai/bullets", (route) =>
-      route.fulfill({
-        json: {
-          itemId: target.id,
-          bullets: [
-            { text: "Led the platform team", flags: [] },
-            { text: "Cut deploy time by 97%", flags: ["number 97"] },
-          ],
-        },
-      })
-    );
+    await stubAiRoute(page, "**/api/ai/bullets", {
+      itemId: target.id,
+      bullets: [
+        { text: "Led the platform team", flags: [] },
+        { text: "Cut deploy time by 97%", flags: ["number 97"] },
+      ],
+    });
     await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
 
@@ -58,8 +56,10 @@ describe("bullets made from the description (AI answer stubbed)", () => {
     const boxes = page
       .getByRole("group", { name: "Proposed bullets" })
       .getByRole("checkbox");
+    // the first box is "Replace the description with these bullets" (on by default)
     expect(await boxes.nth(0).isChecked()).toBe(true);
-    expect(await boxes.nth(1).isChecked()).toBe(false);
+    expect(await boxes.nth(1).isChecked()).toBe(true);
+    expect(await boxes.nth(2).isChecked()).toBe(false);
     expect(await page.getByText(vaultBulletText).count()).toBeGreaterThan(0);
 
     await page.getByRole("button", { name: "Use these bullets" }).click();
@@ -71,6 +71,13 @@ describe("bullets made from the description (AI answer stubbed)", () => {
       await page
         .locator(`[data-cv-item="${target.id}"]`)
         .getByText(vaultBulletText)
+        .count()
+    ).toBe(0);
+    // replacing hides the description in this job too
+    expect(
+      await page
+        .locator(`[data-cv-item="${target.id}"]`)
+        .getByText("Ran the platform team.")
         .count()
     ).toBe(0);
 
@@ -85,5 +92,6 @@ describe("bullets made from the description (AI answer stubbed)", () => {
     const pdf = await readPdf(await app.pdf("main"));
     expect(pdf.text).toContain("Led the platform team");
     expect(pdf.text).not.toContain(vaultBulletText);
+    expect(pdf.text).not.toContain("Ran the platform team.");
   });
 });
