@@ -45,6 +45,7 @@ import {
 } from "@shared/application/application-utils";
 import { rememberListSearch } from "@pages/applications-page/last-search";
 import { onAppLinkClick } from "@hooks/navigation";
+import { ExportAllButton } from "@pages/applications-page/export-all-button";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { Job } from "@custom-types/job-types";
 import {
@@ -969,6 +970,7 @@ function ApplicationsTable({
             </MenuItem>
           ))}
         </Select>
+        <ExportAllButton count={applications.length} />
       </Box>
 
       <Paper variant="outlined" sx={{ overflow: "hidden" }}>
