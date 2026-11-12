@@ -33,10 +33,14 @@ async function openTool(name: string): Promise<void> {
 async function expectFullHeight(
   label: string,
   handle: string,
-  role: "complementary" | "navigation" = "complementary"
+  role: "complementary" | "navigation" = "complementary",
+  // The named element is only part of the panel (the Apply menu sits above the score summary):
+  // measure the box around it, which is the panel that fills the height
+  isInsidePanel = false
 ): Promise<void> {
-  const panel = page.getByRole(role, { name: label });
-  await panel.waitFor();
+  const named = page.getByRole(role, { name: label });
+  await named.waitFor();
+  const panel = isInsidePanel ? named.locator("xpath=..") : named;
   // a panel that was just opened can still be settling for a moment
   await expect.poll(() => panel.boundingBox()).not.toBeNull();
   const box = await panel.boundingBox();
@@ -74,7 +78,8 @@ describe("sidebars fill the window height", () => {
     await expectFullHeight(
       "Job application",
       "Resize the job menu",
-      "navigation"
+      "navigation",
+      true
     );
     await expectFullHeight("Content", "Resize the content panel");
   });
