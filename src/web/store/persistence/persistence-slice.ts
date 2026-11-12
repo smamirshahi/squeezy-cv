@@ -6,8 +6,9 @@ import { SavedState } from "@store/persistence/persistence-logic";
  * - ready: loaded (or nothing saved yet); saving is allowed
  * - offline: the server cannot be reached; working locally, saving is blocked
  * - error: the saved data could not be read; saving is blocked so nothing is overwritten
+ * - demo: showing the built-in fake CV from memory; nothing is saved or sent anywhere
  */
-type StorageStatus = "loading" | "ready" | "offline" | "error";
+type StorageStatus = "loading" | "ready" | "offline" | "error" | "demo";
 
 interface PersistenceState {
   status: StorageStatus;

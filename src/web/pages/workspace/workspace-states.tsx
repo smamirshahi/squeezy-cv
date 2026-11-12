@@ -7,7 +7,8 @@ import { useImportExportJson } from "@hooks/use-import-export-json";
 import { useHasUnsavedChanges, useSaveActions } from "@hooks/use-persistence";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { navigate } from "@hooks/navigation";
-import { useAppSelector } from "@store/store-helper";
+import { startDemo } from "@store/persistence/persistence-actions";
+import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { vaultSelector } from "@store/vault/vault-slice";
 
 const HiddenInput = styled("input")({ display: "none" });
@@ -56,10 +57,46 @@ export function ConnectionBanner(): JSX.Element | null {
   );
 }
 
+/** Under the top bar while the built-in demo CV is shown: fake data, nothing is saved */
+export function DemoBanner(): JSX.Element | null {
+  const status = useAppSelector((s) => s.persistence.status);
+  const dispatch = useAppDispatch();
+  const { retry } = useSaveActions();
+
+  if (status !== "demo") {
+    return null;
+  }
+  return (
+    <Alert
+      severity="info"
+      sx={{ borderRadius: 0 }}
+      action={
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => startDemo(dispatch)}
+          >
+            Reset demo
+          </Button>
+          <Button color="inherit" size="small" onClick={retry}>
+            Leave demo
+          </Button>
+        </Box>
+      }
+    >
+      <b>Demo.</b> This is made-up data kept in this tab only. Nothing is saved,
+      your own data is not touched, and PDF export and AI actions are not
+      available. Leave the demo to go back to your own data.
+    </Alert>
+  );
+}
+
 /** Shown on the canvas when there is nothing in the vault yet */
 export function FirstRun(): JSX.Element | null {
   const vault = useAppSelector(vaultSelector);
   const { handleImport } = useImportExportJson();
+  const dispatch = useAppDispatch();
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
   if (!isVaultEmpty(vault)) {
@@ -113,6 +150,9 @@ export function FirstRun(): JSX.Element | null {
         <Button component="label" variant="outlined">
           Import JSON
           <HiddenInput type="file" accept=".json" onChange={handleImport} />
+        </Button>
+        <Button variant="outlined" onClick={() => startDemo(dispatch)}>
+          Try with demo data
         </Button>
         <Button
           variant="outlined"

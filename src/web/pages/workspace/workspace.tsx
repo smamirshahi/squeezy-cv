@@ -10,7 +10,11 @@ import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
 import { ChatPanel } from "@pages/workspace/chat-panel";
 import { BlockToolbar } from "@pages/workspace/block-toolbar";
-import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
+import {
+  ConnectionBanner,
+  DemoBanner,
+  FirstRun,
+} from "@pages/workspace/workspace-states";
 import { JobSettingsPage } from "@pages/workspace/job-settings-page";
 import { TemplatesPage } from "@pages/workspace/templates-page";
 import { ToolRail } from "@pages/workspace/tool-rail";
@@ -114,6 +118,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
     >
       <TopBar />
       <ConnectionBanner />
+      <DemoBanner />
       <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
         <ToolRail />
         {missing && <NotFound what={missing.what} backTo={missing.backTo} />}

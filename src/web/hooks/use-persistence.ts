@@ -60,7 +60,7 @@ export function usePersistence(): void {
   }, []);
 
   useEffect(() => {
-    if (!hasUnsavedChanges || status === "loading") {
+    if (!hasUnsavedChanges || status === "loading" || status === "demo") {
       return undefined;
     }
     function warn(event: BeforeUnloadEvent): void {
