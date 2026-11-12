@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { ApplicationSummary } from "@custom-types/application-types";
 import { Job } from "@custom-types/job-types";
 import { TemplateJobsTable } from "@pages/workspace/template-jobs-table";
@@ -40,9 +40,23 @@ describe("TemplateJobsTable", () => {
         .getByRole("link", { name: "Open the sent PDF of Acme dev" })
         .getAttribute("href")
     ).toBe("/api/applications/a1/pdf");
+    // a sent job has one PDF button (the sent one); only the job that was not sent can make one
+    expect(
+      screen.queryByRole("button", { name: "Make a PDF of Acme dev" })
+    ).toBeNull();
     expect(
       screen.getAllByRole("button", { name: /Make a PDF of/ })
-    ).toHaveLength(2);
+    ).toHaveLength(1);
+  });
+
+  it("shows exactly one PDF button for every job", () => {
+    render(<TemplateJobsTable jobs={jobs} applications={[application]} />);
+    for (const row of screen.getAllByRole("row").slice(1)) {
+      const pdfButtons = within(row)
+        .queryAllByRole("button", { name: /PDF/ })
+        .concat(within(row).queryAllByRole("link", { name: /PDF/ }));
+      expect(pdfButtons).toHaveLength(1);
+    }
   });
 
   it("lists the newest job first", () => {
