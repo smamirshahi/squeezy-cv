@@ -25,6 +25,7 @@ export function NotFound({ what, backTo }: Props): JSX.Element {
         justifyContent: "center",
         gap: 1.5,
         p: 3,
+        textAlign: "center",
         bgcolor: WORKSPACE_COLORS.canvas,
       }}
     >

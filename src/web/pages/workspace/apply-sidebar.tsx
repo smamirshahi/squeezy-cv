@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
+import { useViewport } from "@hooks/use-viewport";
 import { AiIcon } from "@components/ai-button";
 import { Route, formatRoute } from "@shared/routing/routes";
 
@@ -51,21 +52,34 @@ const ASSISTANTS: Entry[] = [
   },
 ];
 
+/** In the tab strip the hint lines only fit from a tablet up */
+const hintDisplay = { xs: "none", sm: "block" };
+
 function Group({
   title,
   entries,
   jobId,
   hasJob,
+  isStrip,
 }: {
   title?: string;
   entries: Entry[];
   jobId?: string;
   hasJob: boolean;
+
+  /** A row of tabs (below a desktop) instead of a column */
+  isStrip: boolean;
 }): JSX.Element {
   const route = useRoute();
   return (
-    <Box sx={{ display: "grid", gap: 0.25 }}>
-      {title && (
+    <Box
+      sx={
+        isStrip
+          ? { display: "flex", gap: 0.5, flex: "none" }
+          : { display: "grid", gap: 0.25 }
+      }
+    >
+      {title && !isStrip && (
         <Typography
           sx={{
             fontSize: 11,
@@ -93,6 +107,8 @@ function Group({
               sx={{
                 px: 1.25,
                 py: 0.9,
+                minHeight: isStrip ? 44 : undefined,
+                flex: isStrip ? "none" : undefined,
                 opacity: 0.45,
                 cursor: "not-allowed",
                 color: WORKSPACE_COLORS.muted,
@@ -101,7 +117,10 @@ function Group({
               <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
                 {entry.label}
               </Typography>
-              <Typography sx={{ fontSize: 12 }} noWrap>
+              <Typography
+                sx={{ fontSize: 12, display: isStrip ? hintDisplay : "block" }}
+                noWrap
+              >
                 Start a job application first
               </Typography>
             </Box>
@@ -120,6 +139,9 @@ function Group({
               display: "block",
               px: 1.25,
               py: 0.9,
+              minHeight: isStrip ? 44 : undefined,
+              flex: isStrip ? "none" : undefined,
+              whiteSpace: isStrip ? "nowrap" : undefined,
               borderRadius: 1,
               textDecoration: "none",
               color: isOn ? WORKSPACE_COLORS.accentText : WORKSPACE_COLORS.text,
@@ -141,7 +163,11 @@ function Group({
               {entry.label}
             </Typography>
             <Typography
-              sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
+              sx={{
+                fontSize: 12,
+                color: WORKSPACE_COLORS.muted,
+                display: isStrip ? hintDisplay : "block",
+              }}
               noWrap
             >
               {entry.hint}
@@ -153,8 +179,48 @@ function Group({
   );
 }
 
-/** The left sidebar of the Apply tool: the pages of one job application */
+/**
+ * The menu of the Apply tool: the pages of one job application. A resizable left panel on a
+ * desktop; a horizontal tab strip above the page below that (scrolls inside itself on a phone).
+ */
 export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
+  const isStrip = useViewport() !== "desktop";
+  const groups = (
+    <>
+      <Group
+        entries={MAIN}
+        jobId={jobId}
+        hasJob={jobId !== undefined}
+        isStrip={isStrip}
+      />
+      <Group
+        title="Assistants"
+        entries={ASSISTANTS}
+        jobId={jobId}
+        hasJob={jobId !== undefined}
+        isStrip={isStrip}
+      />
+    </>
+  );
+  if (isStrip) {
+    return (
+      <Box
+        component="nav"
+        aria-label="Job application"
+        sx={{
+          flex: "none",
+          display: "flex",
+          gap: 0.5,
+          overflowX: "auto",
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+          p: 1,
+        }}
+      >
+        {groups}
+      </Box>
+    );
+  }
   return (
     <ResizableAside side="left" label="the job menu" defaultWidth={210}>
       <Box
@@ -169,13 +235,7 @@ export function ApplySidebar({ jobId }: { jobId?: string }): JSX.Element {
           p: 1,
         }}
       >
-        <Group entries={MAIN} jobId={jobId} hasJob={jobId !== undefined} />
-        <Group
-          title="Assistants"
-          entries={ASSISTANTS}
-          jobId={jobId}
-          hasJob={jobId !== undefined}
-        />
+        {groups}
       </Box>
     </ResizableAside>
   );

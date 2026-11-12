@@ -1,4 +1,5 @@
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { useViewport } from "@hooks/use-viewport";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -40,6 +41,7 @@ interface Props {
  * is downloaded, with the checks that matter for sending a CV.
  */
 export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
   const vault = useAppSelector(vaultSelector);
@@ -130,15 +132,28 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog
+        open={isOpen}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        fullScreen={isPhone}
+      >
         <DialogTitle>
           Export PDF · {variant.name} · {template.name}
         </DialogTitle>
-        <DialogContent sx={{ display: "flex", gap: 3, pt: "8px !important" }}>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 3,
+            pt: "8px !important",
+          }}
+        >
           <Box
             sx={{
-              width: 400,
-              minHeight: 500,
+              width: { xs: "100%", md: 400 },
+              minHeight: { xs: 360, md: 500 },
               alignSelf: "stretch",
               flex: "none",
               bgcolor: WORKSPACE_COLORS.canvas,
@@ -158,7 +173,13 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
             )}
           </Box>
           <Box
-            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
           >
             {error && <Alert severity="error">{error}</Alert>}
             <TextField

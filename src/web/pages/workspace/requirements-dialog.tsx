@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { useViewport } from "@hooks/use-viewport";
 import {
   RequirementGroup,
   RequirementsTable,
@@ -20,11 +21,13 @@ export function RequirementsDialog({
   onClose: () => void;
   groups: RequirementGroup[];
 }): JSX.Element {
+  const isPhone = useViewport() === "phone";
   return (
     <Dialog
       open={isOpen}
       onClose={onClose}
       fullWidth
+      fullScreen={isPhone}
       maxWidth="lg"
       aria-labelledby="advert-requirements-title"
     >

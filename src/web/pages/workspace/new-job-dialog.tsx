@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Button,
   Dialog,
@@ -140,11 +141,13 @@ function NewJobForm({ onClose }: { onClose: () => void }): JSX.Element {
  * is mounted only while open, so it always starts from the job being edited now.
  */
 export function NewJobDialog({ isOpen, onClose }: Props): JSX.Element {
+  const isPhone = useViewport() === "phone";
   return (
     <Dialog
       open={isOpen}
       onClose={onClose}
       fullWidth
+      fullScreen={isPhone}
       maxWidth="xs"
       aria-labelledby="new-job-title"
     >

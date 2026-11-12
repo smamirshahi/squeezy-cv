@@ -1,10 +1,18 @@
-import { ReactNode, useLayoutEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  RefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ZOOM_STEP, clampZoom, setCanvasZoom } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
+import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /* eslint-disable @typescript-eslint/no-magic-numbers -- CSS: 96 px per 25.4 mm */
@@ -13,9 +21,62 @@ const A4_WIDTH_PX = (A4_DIMENSION_MM.width * 96) / 25.4;
 const CANVAS_PADDING_PX = 48;
 const PERCENT = 100;
 
+/** 44 px touch targets on a phone and a tablet */
+const TOUCH_SX = {
+  minWidth: { xs: 44, md: "auto" },
+  minHeight: { xs: 44, md: "auto" },
+};
+
 /** The zoom that makes the page as wide as a canvas of `canvasWidth` px */
 export function fitWidthZoom(canvasWidth: number): number {
   return clampZoom((canvasWidth - CANVAS_PADDING_PX) / A4_WIDTH_PX);
+}
+
+/** The first-view fit is done once per page load: later zoom changes are the user's */
+let hasFittedOnce = false;
+
+/**
+ * On a screen narrower than a desktop the A4 page (794 px) does not fit the canvas: the first time
+ * the canvas is measured, the zoom is set so the page fits its width. Screen only; the page
+ * itself and a zoom the user already changed are left alone. Renders nothing.
+ */
+export function FitWidthOnFirstView({
+  canvasRef,
+}: {
+  canvasRef: RefObject<HTMLElement | null>;
+}): null {
+  const dispatch = useAppDispatch();
+  const zoom = useAppSelector((s) => s.app.canvasZoom);
+  const viewport = useViewport();
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const isNarrow = viewport !== "desktop";
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (
+      hasFittedOnce ||
+      !isNarrow ||
+      !canvas ||
+      typeof ResizeObserver === "undefined"
+    ) {
+      return undefined;
+    }
+    const observer = new ResizeObserver(() => {
+      const width = canvas.clientWidth;
+      if (width === 0 || hasFittedOnce) {
+        return;
+      }
+      hasFittedOnce = true;
+      observer.disconnect();
+      const fit = fitWidthZoom(width);
+      if (zoomRef.current === 1 && fit < 1) {
+        dispatch(setCanvasZoom(fit));
+      }
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [canvasRef, dispatch, isNarrow]);
+  return null;
 }
 
 /**
@@ -102,6 +163,7 @@ export function ZoomControls({
         <IconButton
           size="small"
           aria-label="Zoom out"
+          sx={TOUCH_SX}
           onClick={() => dispatch(setCanvasZoom(zoom - ZOOM_STEP))}
         >
           <RemoveIcon fontSize="inherit" />
@@ -114,6 +176,7 @@ export function ZoomControls({
           onClick={() => dispatch(setCanvasZoom(1))}
           sx={{
             minWidth: 44,
+            minHeight: { xs: 44, md: "auto" },
             fontSize: 12,
             border: 0,
             bgcolor: "transparent",
@@ -128,6 +191,7 @@ export function ZoomControls({
         <IconButton
           size="small"
           aria-label="Zoom in"
+          sx={TOUCH_SX}
           onClick={() => dispatch(setCanvasZoom(zoom + ZOOM_STEP))}
         >
           <AddIcon fontSize="inherit" />
@@ -142,6 +206,7 @@ export function ZoomControls({
           }
           sx={{
             fontSize: 12,
+            minHeight: { xs: 44, md: "auto" },
             px: 0.75,
             border: 0,
             bgcolor: "transparent",

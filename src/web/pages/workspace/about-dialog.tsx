@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Avatar,
   Box,
@@ -84,11 +85,13 @@ export function AboutDialog({
   isOpen: boolean;
   onClose: () => void;
 }): JSX.Element {
+  const isPhone = useViewport() === "phone";
   return (
     <Dialog
       open={isOpen}
       onClose={onClose}
       fullWidth
+      fullScreen={isPhone}
       maxWidth="sm"
       aria-labelledby="about-title"
     >

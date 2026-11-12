@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useViewport } from "@hooks/use-viewport";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
@@ -84,6 +85,7 @@ export function MarkAsAppliedDialog({
   onClose,
   initialRole = "",
 }: DialogProps): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const store = useStore<RootState>();
   const api = useMemo(() => createApiClient(), []);
   const job = useAppSelector(activeJobSelector);
@@ -152,6 +154,7 @@ export function MarkAsAppliedDialog({
         open={isOpen}
         onClose={isBusy ? undefined : onClose}
         fullWidth
+        fullScreen={isPhone}
         maxWidth="sm"
       >
         <DialogTitle>Mark as applied</DialogTitle>

@@ -20,6 +20,8 @@ import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { MoreMenu } from "@pages/workspace/more-menu";
+import { useViewport } from "@hooks/use-viewport";
 
 /** Label of a history step for a tooltip: the action name without its slice prefix */
 function stepLabel(type: string | undefined): string {
@@ -46,6 +48,7 @@ function UndoRedo(): JSX.Element {
             disabled={past.length === 0}
             onClick={() => dispatch(undo())}
             sx={{
+              p: { xs: 1, lg: "5px" },
               color: WORKSPACE_COLORS.barText,
               "&.Mui-disabled": {
                 opacity: 0.35,
@@ -71,6 +74,7 @@ function UndoRedo(): JSX.Element {
             disabled={future.length === 0}
             onClick={() => dispatch(redo())}
             sx={{
+              p: { xs: 1, lg: "5px" },
               color: WORKSPACE_COLORS.barText,
               "&.Mui-disabled": {
                 opacity: 0.35,
@@ -126,13 +130,15 @@ function FlowSteps({
       component="nav"
       aria-label="How the app works"
       sx={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
+        // Centred on the bar on a wide screen; in the flow (so it cannot collide) below that
+        position: { xs: "static", lg: "absolute" },
+        left: { lg: "50%" },
+        top: { lg: "50%" },
+        transform: { xs: "none", lg: "translate(-50%, -50%)" },
         display: "flex",
         alignItems: "center",
-        gap: 1,
+        gap: { xs: 0.5, lg: 1 },
+        minWidth: 0,
       }}
     >
       {FLOW_STEPS.map((step, index) => {
@@ -140,12 +146,20 @@ function FlowSteps({
         return (
           <Box
             key={step.label}
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.5, lg: 1 },
+            }}
           >
             {index > 0 && (
               <ArrowForwardIcon
                 aria-hidden
-                sx={{ fontSize: 18, opacity: 0.55 }}
+                sx={{
+                  fontSize: 18,
+                  opacity: 0.55,
+                  display: { xs: "none", md: "block" },
+                }}
               />
             )}
             <Box
@@ -153,7 +167,7 @@ function FlowSteps({
                 display: "flex",
                 alignItems: "center",
                 height: 32,
-                pl: 1.75,
+                pl: { xs: 1.25, lg: 1.75 },
                 pr: 0.5,
                 gap: 0.5,
                 borderRadius: 999,
@@ -237,6 +251,7 @@ export function TopBar(): JSX.Element {
         : { tutorial: "overview", step }
     );
   const route = useRoute();
+  const isPhone = useViewport() === "phone";
 
   // The first time a page is opened, its tutorial shows; after that only the buttons do
   const visited = tutorialOfRoute(route.kind);
@@ -256,8 +271,9 @@ export function TopBar(): JSX.Element {
         flex: "none",
         display: "flex",
         alignItems: "center",
-        gap: 1.5,
-        px: 1.5,
+        gap: { xs: 0.5, md: 1.5 },
+        px: { xs: 1, md: 1.5 },
+        minWidth: 0,
         bgcolor: WORKSPACE_COLORS.bar,
         color: WORKSPACE_COLORS.barText,
         "& .MuiButton-root": {
@@ -267,21 +283,36 @@ export function TopBar(): JSX.Element {
         },
       }}
     >
-      <Typography sx={{ fontWeight: 700, fontSize: 14 }}>CV Builder</Typography>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          fontSize: 14,
+          whiteSpace: "nowrap",
+          // The pills need the room on a tablet; the name returns on a laptop
+          display: { xs: "block", sm: "none", md: "block" },
+        }}
+      >
+        CV Builder
+      </Typography>
       <IconButton
         size="small"
         aria-label="Tutorials"
         onClick={() => openHelp(0)}
-        sx={{ color: WORKSPACE_COLORS.barText, ml: -0.5 }}
+        sx={{
+          color: WORKSPACE_COLORS.barText,
+          ml: -0.5,
+          p: { xs: 1, lg: "5px" },
+        }}
       >
         <HelpOutlineIcon fontSize="small" />
       </IconButton>
       <Box sx={{ flex: 1 }} />
-      <FlowSteps onInfo={openHelp} />
+      {!isPhone && <FlowSteps onInfo={openHelp} />}
       <Box sx={{ flex: 1 }} />
       {/* The status grows to the left, so undo and redo never move */}
       <SaveStatus />
       <UndoRedo />
+      {isPhone && <MoreMenu />}
       <HowItWorksDialog
         isOpen={help !== null}
         startTutorial={help?.tutorial}

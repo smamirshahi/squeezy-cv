@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useViewport } from "@hooks/use-viewport";
 import {
   Alert,
   Box,
@@ -165,6 +166,7 @@ interface DialogState {
  * request go; the model's answer gets the real words back on the server.
  */
 function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
+  const isPhone = useViewport() === "phone";
   const [masking, setMasking] = useState<Masking>(request.initial);
   const [preview, setPreview] = useState<SendPreviewData>(request.preview);
   const [isLoading, setIsLoading] = useState(false);
@@ -280,6 +282,7 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
       onClose={() => resolve(null)}
       maxWidth="lg"
       fullWidth
+      fullScreen={isPhone}
       aria-labelledby="send-to-ai-title"
     >
       <DialogTitle id="send-to-ai-title">

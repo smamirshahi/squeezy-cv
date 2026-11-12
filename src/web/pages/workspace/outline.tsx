@@ -204,7 +204,11 @@ export function Outline({ onClose }: Props): JSX.Element {
       component="aside"
       aria-label="Outline"
       sx={{
-        width: 330,
+        // Below a desktop the outline lies over the canvas instead of squeezing it
+        width: { xs: "100%", sm: 330, lg: 330 },
+        position: { xs: "absolute", lg: "static" },
+        inset: { xs: 0, lg: "auto" },
+        zIndex: { xs: 6, lg: "auto" },
         flex: "none",
         bgcolor: WORKSPACE_COLORS.panel,
         borderRight: `1px solid ${WORKSPACE_COLORS.border}`,
@@ -228,7 +232,15 @@ export function Outline({ onClose }: Props): JSX.Element {
         >
           what shows, in what order
         </Typography>
-        <IconButton size="small" aria-label="Close outline" onClick={onClose}>
+        <IconButton
+          size="small"
+          aria-label="Close outline"
+          onClick={onClose}
+          sx={{
+            minWidth: { xs: 44, md: "auto" },
+            minHeight: { xs: 44, md: "auto" },
+          }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>

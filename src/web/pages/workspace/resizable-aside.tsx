@@ -1,5 +1,6 @@
 import { KeyboardEvent, PointerEvent, ReactNode, useState } from "react";
 import { Box } from "@mui/material";
+import type { Breakpoint } from "@mui/material/styles";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   normalisePanelWidth,
@@ -14,6 +15,15 @@ interface Props {
   side: PanelSide;
   label: string;
   defaultWidth: number;
+
+  /**
+   * Below this breakpoint the panel is not a side panel any more: it takes the full width, the
+   * handle is hidden and the parent decides where it goes (it must stack its children).
+   */
+  stackBelow?: Breakpoint;
+
+  /** Height of the stacked panel (a CSS length), needed because a panel fills its parent */
+  stackedHeight?: string | number;
   children: ReactNode;
 }
 
@@ -25,6 +35,8 @@ export function ResizableAside({
   side,
   label,
   defaultWidth,
+  stackBelow,
+  stackedHeight,
   children,
 }: Props): JSX.Element {
   const [width, setWidth] = useState<number>(() =>
@@ -78,6 +90,7 @@ export function ResizableAside({
         flex: "none",
         alignSelf: "stretch",
         width: 6,
+        display: stackBelow ? { xs: "none", [stackBelow]: "block" } : "block",
         cursor: "col-resize",
         touchAction: "none",
         "&:hover, &:focus-visible": { bgcolor: WORKSPACE_COLORS.border },
@@ -90,7 +103,14 @@ export function ResizableAside({
       {!isLeft && handle}
       <Box
         sx={{
-          width,
+          // Never more than 45% of the window, so a width saved on a big screen cannot squeeze the
+          // content on a small one
+          width: stackBelow ? { xs: "100%", [stackBelow]: width } : width,
+          maxWidth: stackBelow ? { xs: "none", [stackBelow]: "45vw" } : "45vw",
+          height:
+            stackBelow && stackedHeight !== undefined
+              ? { xs: stackedHeight, [stackBelow]: "auto" }
+              : undefined,
           flex: "none",
           display: "flex",
           flexDirection: "column",

@@ -40,13 +40,15 @@ export function SaveStatus(): JSX.Element {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1,
+        gap: { xs: 0.5, md: 1 },
+        minWidth: 0,
       }}
     >
       <Chip
         size="small"
         color={color}
         label={label}
+        sx={{ maxWidth: { xs: 132, md: "none" } }}
         title={saveError || message}
       />
       {(status === "offline" || status === "error") && (

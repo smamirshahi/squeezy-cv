@@ -220,10 +220,13 @@ function DateFields({
       aria-label="Dates"
       sx={{
         gridColumn: "span 3",
-        display: "grid",
+        // Start, End and Current share a line only when it fits: they wrap below the desktop size
+        display: { xs: "flex", lg: "grid" },
+        flexWrap: "wrap",
         gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) auto",
         gap: 1.5,
         alignItems: "center",
+        "& > .MuiTextField-root": { flex: { xs: "1 1 140px", lg: "none" } },
       }}
     >
       <TextField
@@ -233,7 +236,7 @@ function DateFields({
         value={toMonthValue(startValue)}
         onChange={(event) => onStartChange(fromMonthValue(event.target.value))}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 0, width: "100%" }}
+        sx={{ minWidth: 0, width: { xs: "auto", lg: "100%" } }}
       />
       <TextField
         size="medium"
@@ -243,11 +246,16 @@ function DateFields({
         disabled={isCurrent}
         onChange={(event) => onEndChange(fromMonthValue(event.target.value))}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 0, width: "100%" }}
+        sx={{ minWidth: 0, width: { xs: "auto", lg: "100%" } }}
       />
       <FormControlLabel
         label="Current"
-        sx={{ m: 0, justifySelf: "end", whiteSpace: "nowrap" }}
+        sx={{
+          m: 0,
+          justifySelf: "end",
+          whiteSpace: "nowrap",
+          minHeight: { xs: 44, lg: "auto" },
+        }}
         control={
           <Checkbox
             size="small"
@@ -287,7 +295,13 @@ function LocationField({
       sx={{
         gridColumn: "span 3",
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) 200px",
+        // One above the other where the room is narrow (phone, small laptop panel)
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          sm: "minmax(0, 1fr) 200px",
+          md: "minmax(0, 1fr)",
+          lg: "minmax(0, 1fr) 200px",
+        },
         gap: 1.5,
         alignItems: "center",
       }}
@@ -361,8 +375,13 @@ function SkillCard({
         bgcolor: WORKSPACE_COLORS.panel,
         p: 1,
         display: "flex",
+        flexWrap: { xs: "wrap", lg: "nowrap" },
         alignItems: "center",
         gap: 1,
+        "& .MuiIconButton-root": {
+          minWidth: { xs: 44, lg: 0 },
+          minHeight: { xs: 44, lg: 0 },
+        },
       }}
     >
       <Box sx={{ display: "flex" }}>
@@ -406,7 +425,7 @@ function SkillCard({
                 option.toLowerCase().includes(state.inputValue.toLowerCase())
               )
         }
-        sx={{ flex: 1 }}
+        sx={{ flex: { xs: "1 1 160px", lg: 1 }, minWidth: 0 }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -442,7 +461,7 @@ function SkillCard({
             dispatch(updateBullet({ ...ref, update: { rating: chosen } }));
           }
         }}
-        sx={{ width: 150 }}
+        sx={{ width: 150, flex: { xs: "1 1 130px", lg: "none" } }}
       >
         {LEVEL_STEPS.map((step) => (
           <MenuItem key={step} value={String(step)}>
@@ -473,7 +492,7 @@ function SkillCard({
             "aria-label": `${skillName} years`,
           },
         }}
-        sx={{ width: 80 }}
+        sx={{ width: 80, flex: { xs: "1 1 80px", lg: "none" } }}
       />
       <IconButton
         size="small"
@@ -492,6 +511,9 @@ interface Props {
 
   /** Select another item of the vault ("" = none) */
   onSelectItem: (itemId: string) => void;
+
+  /** Tablet and phone: the editor is not in a side panel, its Apply row stays in view */
+  isStacked?: boolean;
 }
 
 /**
@@ -503,6 +525,7 @@ export function VaultItemEditor({
   section,
   item,
   onSelectItem,
+  isStacked = false,
 }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
@@ -630,8 +653,16 @@ export function VaultItemEditor({
         }
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: { xs: "wrap", lg: "nowrap" },
+          gap: 1,
+          "& .MuiButton-root": { minHeight: { xs: 44, lg: 0 } },
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: { xs: 160, lg: 0 } }}>
           <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
             {section.title} › Item {index + 1} of {section.items.length}
           </Typography>
@@ -813,7 +844,22 @@ export function VaultItemEditor({
           ))}
         </>
       )}
-      <Box sx={{ display: "flex", gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          ...(isStacked && {
+            // Stays above the bottom bar while the form scrolls
+            position: "sticky",
+            bottom: 0,
+            zIndex: 1,
+            py: 1,
+            bgcolor: WORKSPACE_COLORS.panel,
+            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+          }),
+          "& .MuiButton-root": { minHeight: { xs: 44, lg: 0 } },
+        }}
+      >
         <Box sx={{ flex: 1 }} />
         {isSkills && (
           <Button

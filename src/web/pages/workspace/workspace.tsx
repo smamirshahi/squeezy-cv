@@ -6,7 +6,11 @@ import { VaultPage } from "@pages/workspace/vault-page";
 import { PreviewPage } from "@pages/preview-page/preview-page";
 import { useUndoShortcuts } from "@pages/workspace/use-undo-shortcuts";
 import { useCanvasShortcuts } from "@pages/workspace/use-canvas-shortcuts";
-import { ZoomControls, ZoomFrame } from "@pages/workspace/canvas-zoom";
+import {
+  FitWidthOnFirstView,
+  ZoomControls,
+  ZoomFrame,
+} from "@pages/workspace/canvas-zoom";
 import { Outline } from "@pages/workspace/outline";
 import { ChatPanel } from "@pages/workspace/chat-panel";
 import { BlockToolbar } from "@pages/workspace/block-toolbar";
@@ -64,6 +68,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   const isJobsWithoutJobs =
     isPlaceholder && route.kind === "jobs" && route.view === "details";
   const isLoading = useAppSelector((s) => s.persistence.status === "loading");
+  const isApplyTool = tool === "jobs" || tool === "chat";
   useRouteSync(route);
   const missing = missingThing(route, isLoading, jobs, sections, templates);
   useEffect(() => {
@@ -109,8 +114,9 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   return (
     <Box
       sx={{
-        width: "100vw",
+        width: "100%",
         height: "100vh",
+        "@supports (height: 100dvh)": { height: "100dvh" },
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -119,96 +125,128 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
       <TopBar />
       <ConnectionBanner />
       <DemoBanner />
-      <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          // On a phone the rail (first in the DOM) is a bottom tab bar
+          flexDirection: { xs: "column-reverse", sm: "row" },
+        }}
+      >
         <ToolRail />
-        {missing && <NotFound what={missing.what} backTo={missing.backTo} />}
-        {!missing && ["jobs", "chat"].includes(tool) && (
-          <ApplySidebar jobId={isPlaceholder ? undefined : activeJobId} />
-        )}
-        {!missing &&
-          tool === "jobs" &&
-          (isJobsWithoutJobs || jobsView === "details") && <JobDetailsPage />}
-        {!missing &&
-          !isEmpty &&
-          !isJobsWithoutJobs &&
-          tool === "jobs" &&
-          jobsView === "settings" && <JobSettingsPage />}
-        {!missing &&
-          !isEmpty &&
-          !isJobsWithoutJobs &&
-          ((tool === "jobs" && jobsView === "page") || tool === "chat") && (
-            <>
-              {isOutlineOpen && (
-                <Outline onClose={() => setIsOutlineOpen(false)} />
-              )}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            display: "flex",
+            // Apply: the job menu is a tab strip above the page below a desktop; the other tools
+            // keep one row
+            flexDirection: isApplyTool ? { xs: "column", lg: "row" } : "row",
+          }}
+        >
+          {missing && <NotFound what={missing.what} backTo={missing.backTo} />}
+          {!missing && ["jobs", "chat"].includes(tool) && (
+            <ApplySidebar jobId={isPlaceholder ? undefined : activeJobId} />
+          )}
+          {!missing &&
+            tool === "jobs" &&
+            (isJobsWithoutJobs || jobsView === "details") && <JobDetailsPage />}
+          {!missing &&
+            !isEmpty &&
+            !isJobsWithoutJobs &&
+            tool === "jobs" &&
+            jobsView === "settings" && <JobSettingsPage />}
+          {!missing &&
+            !isEmpty &&
+            !isJobsWithoutJobs &&
+            ((tool === "jobs" && jobsView === "page") || tool === "chat") && (
               <Box
                 sx={{
                   flex: 1,
                   minWidth: 0,
+                  minHeight: 0,
                   display: "flex",
-                  flexDirection: "column",
+                  // The panel goes under the canvas below a laptop
+                  flexDirection: { xs: "column", md: "row" },
+                  position: "relative",
                 }}
               >
-                {tool === "jobs" && (
-                  <TemplateBar
-                    isOutlineOpen={isOutlineOpen}
-                    onToggleOutline={() =>
-                      setIsOutlineOpen((wasOpen) => !wasOpen)
-                    }
-                  />
+                {isOutlineOpen && (
+                  <Outline onClose={() => setIsOutlineOpen(false)} />
                 )}
                 <Box
-                  component="main"
-                  aria-label="Canvas"
-                  ref={canvasRef}
                   sx={{
                     flex: 1,
                     minWidth: 0,
-                    overflow: "auto",
-                    bgcolor: WORKSPACE_COLORS.canvas,
-                    py: 3,
+                    minHeight: 0,
                     display: "flex",
-                    justifyContent: "safe center",
-                    position: "relative",
+                    flexDirection: "column",
                   }}
                 >
-                  <FirstRun />
-                  {tool === "chat" && (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
-                      sx={{
-                        position: "absolute",
-                        left: 12,
-                        top: 12,
-                        zIndex: 3,
-                      }}
-                    >
-                      {isOutlineOpen ? "Hide outline" : "Outline (O)"}
-                    </Button>
+                  {tool === "jobs" && (
+                    <TemplateBar
+                      isOutlineOpen={isOutlineOpen}
+                      onToggleOutline={() =>
+                        setIsOutlineOpen((wasOpen) => !wasOpen)
+                      }
+                    />
                   )}
-                  <ZoomControls
-                    getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
-                  />
-                  <ZoomFrame zoom={zoom}>
-                    <PreviewPage contentRef={contentRef} />
-                  </ZoomFrame>
-                  <BlockToolbar canvasRef={canvasRef} />
+                  <Box
+                    component="main"
+                    aria-label="Canvas"
+                    ref={canvasRef}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      overflow: "auto",
+                      bgcolor: WORKSPACE_COLORS.canvas,
+                      py: 3,
+                      display: "flex",
+                      justifyContent: "safe center",
+                      position: "relative",
+                    }}
+                  >
+                    <FirstRun />
+                    {tool === "chat" && (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => setIsOutlineOpen((wasOpen) => !wasOpen)}
+                        sx={{
+                          position: "absolute",
+                          left: 12,
+                          top: 12,
+                          zIndex: 3,
+                        }}
+                      >
+                        {isOutlineOpen ? "Hide outline" : "Outline (O)"}
+                      </Button>
+                    )}
+                    <FitWidthOnFirstView canvasRef={canvasRef} />
+                    <ZoomControls
+                      getCanvasWidth={() => canvasRef.current?.clientWidth ?? 0}
+                    />
+                    <ZoomFrame zoom={zoom}>
+                      <PreviewPage contentRef={contentRef} />
+                    </ZoomFrame>
+                    <BlockToolbar canvasRef={canvasRef} />
+                  </Box>
                 </Box>
+                {tool === "chat" ? <ChatPanel /> : <ContentPanel />}
               </Box>
-              {tool === "chat" ? <ChatPanel /> : <ContentPanel />}
-            </>
+            )}
+          {!missing && tool === "templates" && <TemplatesPage />}
+          {!missing && isEmpty && <NoJobs />}
+          {!missing && tool === "vault" && <VaultPage />}
+          {!missing && route.kind === "applications" && <ApplicationsPage />}
+          {!missing && route.kind === "application" && (
+            <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+              <ApplicationView applicationId={route.id} />
+            </Box>
           )}
-        {!missing && tool === "templates" && <TemplatesPage />}
-        {!missing && isEmpty && <NoJobs />}
-        {!missing && tool === "vault" && <VaultPage />}
-        {!missing && route.kind === "applications" && <ApplicationsPage />}
-        {!missing && route.kind === "application" && (
-          <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>
-            <ApplicationView applicationId={route.id} />
-          </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );
