@@ -45,7 +45,6 @@ describe("General step: page limit", () => {
     ).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "2 pages" }));
     expect(limit(store)).toBe(2);
-    expect(screen.getByText("Applies to this job only.")).toBeTruthy();
   });
 
   it("has no 3 pages button; Custom opens a number field that starts at 3", () => {
@@ -90,11 +89,13 @@ describe("General step: page limit", () => {
     expect(screen.getByText("Over by 31 lines")).toBeTruthy();
     expect(screen.getByText("3 pages now, limit is 2")).toBeTruthy();
     expect(screen.getByText("Page 3 starts at “Projects”.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Auto-fit now" })).toBeTruthy();
+    expect(
+      screen.getByRole("switch", { name: "Auto-fit to the page limit" })
+    ).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "Choose items to hide" })
     ).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Allow 3 pages" }));
+    fireEvent.click(screen.getByRole("button", { name: "Custom" }));
     expect(limit(store)).toBe(3);
     // 3 is a Custom value now
     expect(screen.getByLabelText<HTMLInputElement>("Pages").value).toBe("3");
@@ -115,7 +116,7 @@ describe("General step: page limit", () => {
     });
     expect(screen.getByText("Fits")).toBeTruthy();
     expect(screen.getByText("1 page, limit is 1")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Auto-fit now" })).toBeNull();
+    expect(screen.queryByText(/^Over by/)).toBeNull();
   });
 
   it("the auto-fit switch changes the template's auto-fit", () => {
@@ -170,7 +171,10 @@ describe("General step: AI assist card", () => {
         )
       ).toBe(true)
     );
-    expect(screen.getAllByText(/Set up in Settings/).length).toBeGreaterThan(0);
+    // each picker has its own AI settings button
+    expect(
+      screen.getAllByRole("button", { name: "AI settings" }).length
+    ).toBeGreaterThan(0);
   });
 
   it("asking the AI to pick what to hide needs the CV to be over its limit", async () => {

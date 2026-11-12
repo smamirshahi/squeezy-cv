@@ -43,9 +43,14 @@ import {
   isNoReply,
   toIsoDay,
 } from "@shared/application/application-utils";
+import { rememberListSearch } from "@pages/applications-page/last-search";
 import { onAppLinkClick } from "@hooks/navigation";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { Job } from "@custom-types/job-types";
+import {
+  CHANCE_LABELS,
+  FEELING_LABELS,
+} from "@pages/workspace/job-details-page";
 import {
   JobSummary,
   applicationPdfUrl,
@@ -107,12 +112,13 @@ function sortChoiceOf(view: ListView): SortChoice {
   return view.sortDirection === "asc" ? "oldest" : "newest";
 }
 
+/** The same words as the Job application form uses */
 const WORD_LABELS: Record<string, string> = {
-  onsite: "On-site",
+  onsite: "Onsite",
   hybrid: "Hybrid",
   remote: "Remote",
-  "full-time": "Full-time",
-  "part-time": "Part-time",
+  fullTime: "Full time",
+  partTime: "Part time",
   contract: "Contract",
   freelance: "Freelance",
   internship: "Internship",
@@ -140,8 +146,8 @@ function extraRows(job: Job | undefined): [string, string][] {
     ["Employment", label(job.employmentType)],
     ["Salary", salary],
     ["Expected salary", money(job.expectedSalary)],
-    ["Feeling", job.feeling ?? ""],
-    ["My chance", job.chance ?? ""],
+    ["Feeling", job.feeling ? FEELING_LABELS[job.feeling] : ""],
+    ["My chance", job.chance ? CHANCE_LABELS[job.chance] : ""],
   ];
   return rows.filter(([, value]) => value !== "");
 }
@@ -207,7 +213,7 @@ function ChipSelect<T extends Stage | ApplicationStatus>({
       disableUnderline
       value={current.value}
       IconComponent={() => null}
-      inputProps={{ "aria-label": label }}
+      SelectDisplayProps={{ "aria-label": label }}
       sx={{ "& .MuiSelect-select": { p: "0 !important" } }}
       onClick={(event) => event.stopPropagation()}
       onChange={(event) => onChange(event.target.value as T)}
@@ -277,6 +283,7 @@ export function ApplicationsPage(): JSX.Element {
   // The address keeps the search and filters, so "back" from an application finds them again
   useEffect(() => {
     window.history.replaceState(null, "", `/applications${viewToQuery(view)}`);
+    rememberListSearch(viewToQuery(view));
   }, [view]);
 
   const readable = state.status === "ready" ? state.applications : [];
@@ -338,7 +345,7 @@ export function ApplicationsPage(): JSX.Element {
   }, [api, jobIdOfSelected]);
   const interviews = readable.filter((a) => a.status === "interview").length;
   const subtitle = [
-    `${jobs.length + readable.length} jobs`,
+    `${jobs.length + readable.length} ${jobs.length + readable.length === 1 ? "job" : "jobs"}`,
     `${readable.length} sent`,
     ...(interviews > 0 ? [`${interviews} interview`] : []),
   ].join(" · ");
@@ -909,7 +916,9 @@ function ApplicationsTable({
   const dateOf = (row: Row): string =>
     row.kind === "job" ? row.job.createdAt : row.application.appliedAt;
   const companyOf = (row: Row): string =>
-    row.kind === "job" ? (row.job.company ?? "") : row.application.company;
+    row.kind === "job"
+      ? row.job.company || row.job.name
+      : row.application.company;
   rows.sort((a, b) =>
     view.sortKey === "company"
       ? companyOf(a).localeCompare(companyOf(b), "en", { sensitivity: "base" })
@@ -1004,7 +1013,9 @@ function ApplicationsTable({
               const application =
                 row.kind === "application" ? row.application : undefined;
               const jobId = job?.id ?? application?.jobId ?? "";
-              const company = job?.company || application?.company || "-";
+              // A job without a company yet is known by its name
+              const company =
+                job?.company || job?.name || application?.company || "-";
               const role = job?.role || application?.role || "-";
               const template = job
                 ? templateOf(job.templateId, job.id)

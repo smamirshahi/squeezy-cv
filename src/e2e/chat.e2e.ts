@@ -3,7 +3,7 @@ import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { ChatResponse } from "@custom-types/chat-types";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { sampleFile } from "@e2e/fixtures";
+import { stubAiRoute, sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -16,6 +16,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage();
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -62,9 +63,8 @@ describe("chat edits (the AI's answers are stubbed)", () => {
       })
     );
     let seen: unknown;
-    await page.route("**/api/ai/chat", (route) => {
-      seen = route.request().postDataJSON();
-      return route.fulfill({ json: answer });
+    await stubAiRoute(page, "**/api/ai/chat", answer, (body) => {
+      seen = body;
     });
 
     await page.goto(app.webUrl);
@@ -82,9 +82,10 @@ describe("chat edits (the AI's answers are stubbed)", () => {
         );
     const before = await sections();
 
+    // Chat is an assistant in the Apply menu
     await page
-      .getByRole("navigation", { name: "Tools" })
-      .getByRole("link", { name: "Chat" })
+      .getByRole("navigation", { name: "Job application" })
+      .getByRole("link", { name: /^Chat/ })
       .click();
     await page
       .getByLabel("Message")

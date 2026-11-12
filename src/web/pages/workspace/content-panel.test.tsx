@@ -18,6 +18,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/** The title of the current step is the button that opens the list of steps */
+function currentStep(): string {
+  return (
+    screen.getByRole("button", { name: "Go to section" }).textContent ?? ""
+  );
+}
+
 function setup() {
   stubAiServer();
   const store = sampleStore();
@@ -33,12 +40,11 @@ describe("ContentPanel as a step-by-step wizard", () => {
   it("opens on the General step, with the step count and a progress bar", () => {
     const store = setup();
     const total = 2 + sectionsSelector(store.getState()).length;
-    expect(screen.getByText(`Step 1 of ${total}`)).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "General" })).toBeTruthy();
+    expect(screen.getByText(`Section 1 of ${total}`)).toBeTruthy();
+    expect(currentStep()).toBe("General");
     expect(
-      screen.getByRole("img", { name: `Step 1 of ${total}` })
+      screen.getByRole("img", { name: `Section 1 of ${total}` })
     ).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "General" })).toBeTruthy();
   });
 
   it("names the step that Next and Back go to", () => {
@@ -48,9 +54,7 @@ describe("ContentPanel as a step-by-step wizard", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Next: Header and links" })
     );
-    expect(
-      screen.getByRole("heading", { name: "Header and links" })
-    ).toBeTruthy();
+    expect(currentStep()).toBe("Header and links");
     expect(screen.getByRole("button", { name: "Back: General" })).toBeTruthy();
     // the next step after the header is the first section
     const next = screen.getByRole("button", { name: /^Next: / });
@@ -77,15 +81,13 @@ describe("ContentPanel as a step-by-step wizard", () => {
     act(() => {
       window.dispatchEvent(new Event(OPEN_GENERAL_EVENT));
     });
-    expect(screen.getByRole("heading", { name: "General" })).toBeTruthy();
+    expect(currentStep()).toBe("General");
   });
 
-  it("the Go to step menu jumps to any step", () => {
+  it("the Go to section menu jumps to any step", () => {
     setup();
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Go to step" }));
-    fireEvent.click(screen.getByRole("option", { name: "Header and links" }));
-    expect(
-      screen.getByRole("heading", { name: "Header and links" })
-    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Go to section" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Header and links/ }));
+    expect(currentStep()).toBe("Header and links");
   });
 });

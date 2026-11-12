@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { longFile } from "@e2e/fixtures";
+import { longFile, skipTutorials } from "@e2e/fixtures";
 
 const EXTRA_JOBS = 8;
 
@@ -18,6 +18,7 @@ beforeAll(async () => {
   await app.seed(file, [variant]);
   browser = await chromium.launch();
   page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await skipTutorials(page);
 });
 
 afterAll(async () => {

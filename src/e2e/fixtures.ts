@@ -1,3 +1,4 @@
+import { Page } from "playwright";
 import sample from "@fixtures/sample-cv.json";
 import { Item, CvFile } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
@@ -43,4 +44,58 @@ export function longFile(count: number): CvFile {
     experience.items.push(makeExperience(n));
   }
   return file;
+}
+
+/**
+ * A tutorial opens over a page the first time it is visited and blocks every click under it.
+ * Tests are about the pages, so they start with all the tutorials seen (the tutorials have
+ * their own tests).
+ */
+export async function skipTutorials(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    for (const key of [
+      "cv-builder-vault-tutorial-seen",
+      "cv-builder-template-tutorial-seen",
+      "cv-builder-apply-tutorial-seen",
+    ]) {
+      localStorage.setItem(key, "1");
+    }
+  });
+}
+
+/**
+ * Answers an AI route. Every AI request is asked first what it would send (the header
+ * `x-ai-preview`); for a local model that answer is all the app needs, then the real request
+ * follows and gets `answer`. `onRequest` sees the body of the real one.
+ */
+export async function stubAiRoute(
+  page: Page,
+  url: string,
+  answer: unknown,
+  onRequest?: (body: unknown) => void
+): Promise<void> {
+  await page.route(url, (route) => {
+    if (route.request().headers()["x-ai-preview"]) {
+      return route.fulfill({
+        json: { provider: "ollama", calls: [], terms: [], suggestions: [] },
+      });
+    }
+    onRequest?.(route.request().postDataJSON());
+    return route.fulfill({ json: answer });
+  });
+}
+
+/**
+ * Opens the CV page of the Apply tool ("Template & content") through the links, without
+ * reloading the page (so unsaved edits stay).
+ */
+export async function openCvPage(page: Page): Promise<void> {
+  await page
+    .getByRole("navigation", { name: "Tools" })
+    .getByRole("link", { name: "Apply" })
+    .click();
+  await page
+    .getByRole("navigation", { name: "Job application" })
+    .getByRole("link", { name: /^Template & content/ })
+    .click();
 }

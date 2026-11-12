@@ -68,13 +68,36 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
 
+const loadsInFlight = new WeakMap<AppDispatch, Promise<void>>();
+
 /**
  * Reads what is saved on the server into the store. If nothing is saved yet, the
  * optional `loadFallback` (the sample CV in development) is shown, unsaved. When the
  * saved data cannot be read, saving is blocked (status "error") so it is never
  * overwritten by the empty default.
+ *
+ * A load that is already running is not started again (React's development mode starts
+ * the first load twice): a second one would finish after the address had picked its job
+ * and put the first job back.
  */
-export async function loadFromServer(
+export function loadFromServer(
+  api: ApiClient,
+  dispatch: AppDispatch,
+  getState: () => RootState,
+  loadFallback?: () => Promise<CvFile | null>
+): Promise<void> {
+  const running = loadsInFlight.get(dispatch);
+  if (running) {
+    return running;
+  }
+  const load = readFromServer(api, dispatch, getState, loadFallback).finally(
+    () => loadsInFlight.delete(dispatch)
+  );
+  loadsInFlight.set(dispatch, load);
+  return load;
+}
+
+async function readFromServer(
   api: ApiClient,
   dispatch: AppDispatch,
   getState: () => RootState,

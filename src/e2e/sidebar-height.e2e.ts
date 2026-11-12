@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
-import { sampleFile } from "@e2e/fixtures";
+import { sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -14,6 +14,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -36,6 +37,8 @@ async function expectFullHeight(
 ): Promise<void> {
   const panel = page.getByRole(role, { name: label });
   await panel.waitFor();
+  // a panel that was just opened can still be settling for a moment
+  await expect.poll(() => panel.boundingBox()).not.toBeNull();
   const box = await panel.boundingBox();
   const grip = await page
     .getByRole("separator", { name: handle })
@@ -66,9 +69,14 @@ describe("sidebars fill the window height", () => {
     await expectFullHeight("Item panel", "Resize the item panel");
   });
 
-  it("Jobs: the inspector", async () => {
-    await openTool("Jobs");
-    await expectFullHeight("Inspector", "Resize the inspector");
+  it("Apply: the job menu and the content panel", async () => {
+    await page.goto(`${app.webUrl}/jobs/main`);
+    await expectFullHeight(
+      "Job application",
+      "Resize the job menu",
+      "navigation"
+    );
+    await expectFullHeight("Content", "Resize the content panel");
   });
 
   it("Templates: the menu and the sample CV panel", async () => {
@@ -82,8 +90,24 @@ describe("sidebars fill the window height", () => {
   });
 
   it("Chat: the chat panel", async () => {
-    await openTool("Chat");
+    await page.goto(`${app.webUrl}/chat/main`);
+    await page.getByText("Ask for changes. You approve each one.").waitFor();
     await expectFullHeight("Chat", "Resize the chat panel");
+  });
+
+  it("Applications: the status list and the side panel", async () => {
+    await openTool("Applications");
+    await expectFullHeight(
+      "Filter by status",
+      "Resize the status list",
+      "navigation"
+    );
+    // a job that was not sent opens in the side panel
+    await page.getByRole("row").nth(1).getByRole("cell").nth(1).click();
+    await expectFullHeight(
+      "Application detail",
+      "Resize the application panel"
+    );
   });
 
   it("stays full height in a short window", async () => {

@@ -3,7 +3,7 @@ import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { readPdf } from "@e2e/read-pdf";
-import { sampleFile } from "@e2e/fixtures";
+import { sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -15,6 +15,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage();
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -45,11 +46,16 @@ describe("an application is a frozen copy, nothing is locked", () => {
   let pdfBefore: Buffer;
 
   it("Mark as applied names the job and template; the sent CV is stored", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs/main?view=page`);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Mark as applied" }).click();
+    // Mark as applied is part of the export: tick it, download, then fill in the form
+    await page.getByRole("button", { name: "Export PDF" }).first().click();
+    await page.getByLabel("Then mark this as applied").check();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download PDF" }).click();
+    await download;
     await page.getByText(/Job: .* · Template: /).waitFor();
     await page.getByRole("textbox", { name: /^Company/ }).fill("Acme Ltd");
     await page.getByRole("textbox", { name: /^Role/ }).fill("Senior Dev");
@@ -120,7 +126,10 @@ describe("an application is a frozen copy, nothing is locked", () => {
 
   it("one click in the list opens the sent PDF, unchanged by later edits", async () => {
     await page.goto(`${app.webUrl}/applications`);
-    const view = page.getByRole("link", { name: /^View CV sent to Acme Ltd/ });
+    const view = page
+      .getByRole("row")
+      .filter({ hasText: "Acme Ltd" })
+      .getByRole("link", { name: "View" });
     await view.waitFor();
     const href = await view.getAttribute("href");
     expect(href).toMatch(/^\/api\/applications\/.+\/pdf$/);
@@ -132,7 +141,7 @@ describe("an application is a frozen copy, nothing is locked", () => {
 
   it("the list and the application page show job and template; Create new job from this", async () => {
     await page.goto(`${app.webUrl}/applications`);
-    await page.getByRole("columnheader", { name: "Template" }).waitFor();
+    await page.getByRole("columnheader", { name: "Role · Template" }).waitFor();
     const application = await onlyApplication();
     await page
       .getByRole("row")
@@ -163,5 +172,67 @@ describe("an application is a frozen copy, nothing is locked", () => {
       (await (await page.request.get(`${app.webUrl}/api/jobs/main`)).json())
         .selection
     );
+  });
+});
+
+describe("the Applications page, as a user sees it", () => {
+  it("groups the filters, shows a pill status and opens the job in a new tab", async () => {
+    await page.goto(`${app.webUrl}/applications`);
+    const nav = page.getByRole("navigation", { name: "Filter by status" });
+    await nav.getByText("Before sending").waitFor();
+    await nav.getByText("Sent", { exact: true }).waitFor();
+    const row = page
+      .getByRole("row")
+      .filter({ hasText: "Acme Ltd" })
+      .filter({ hasText: "CV sent" });
+    await row.getByRole("combobox", { name: "Status of Acme Ltd" }).waitFor();
+
+    // the open icon is a link to the job that opens in a new tab
+    const open = row.getByRole("link", { name: /^Open job/ });
+    await open.waitFor();
+    expect(await open.getAttribute("target")).toBe("_blank");
+    expect(await open.getAttribute("href")).toBe("/jobs/main?view=details");
+  });
+
+  it("a row opens the side panel with the job data, and the panel closes", async () => {
+    await page.goto(`${app.webUrl}/applications`);
+    // the middle of a row can be the status dropdown, so click the role cell
+    await page
+      .getByRole("row")
+      .filter({ hasText: "Acme Ltd" })
+      .filter({ hasText: "CV sent" })
+      .getByRole("cell")
+      .nth(1)
+      .click();
+    const panel = page.getByRole("complementary", {
+      name: "Application detail",
+    });
+    await panel.getByText("Job data").waitFor();
+    await panel.getByText("Template", { exact: true }).waitFor();
+    await panel.getByRole("button", { name: "Close" }).click();
+    await panel.waitFor({ state: "detached" });
+  });
+
+  it("changing the status in the list is saved on the server", async () => {
+    await page.goto(`${app.webUrl}/applications`);
+    const row = page
+      .getByRole("row")
+      .filter({ hasText: "Acme Ltd" })
+      .filter({ hasText: "CV sent" });
+    await row.getByRole("combobox", { name: "Status of Acme Ltd" }).click();
+    await page.getByRole("option", { name: "Interview" }).click();
+    const application = await onlyApplication();
+    await expect
+      .poll(
+        async () =>
+          (
+            (await (
+              await page.request.get(
+                `${app.webUrl}/api/applications/${application.id}`
+              )
+            ).json()) as { status: string }
+          ).status
+      )
+      .toBe("interview");
   });
 });

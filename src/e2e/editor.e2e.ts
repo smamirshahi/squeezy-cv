@@ -4,7 +4,7 @@ import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { readPdf } from "@e2e/read-pdf";
-import { sampleFile } from "@e2e/fixtures";
+import { openCvPage, sampleFile, skipTutorials } from "@e2e/fixtures";
 
 let app: RunningApp;
 let browser: Browser;
@@ -16,6 +16,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   browser = await chromium.launch();
   page = await browser.newPage({ acceptDownloads: true });
+  await skipTutorials(page);
 });
 
 afterAll(async () => {
@@ -25,13 +26,13 @@ afterAll(async () => {
 
 describe("editing in the browser, saving, and exporting a PDF", () => {
   it("loads the saved vault, hides an item, reorders a section, saves and exports", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs/main`);
 
     // The saved CV is loaded from the server
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
     // measured by the real browser: the short sample is one page, no warning
-    await page.getByText(/^1 page \(limit 2\)/).waitFor();
+    await page.getByText(/^1 page \(limit 1\)/).waitFor();
 
     // Hide an item in this variant: click it on the page, use the inspector
     await page
@@ -41,16 +42,24 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByRole("button", { name: "Shown", exact: true }).click();
     await page.getByText("Unsaved changes").waitFor();
 
-    // Reorder: Education above Work Experience (sections list in the page inspector)
-    await page.getByRole("button", { name: "Back to page settings" }).click();
+    // Reorder: Education above Work Experience (the layout belongs to the template: Design)
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Templates" })
+      .click();
+    await page
+      .getByRole("navigation", { name: "Template sections" })
+      .getByRole("link", { name: "Design" })
+      .click();
     await page.getByRole("button", { name: "Move Education up" }).click();
 
     // Save to the server
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await page.getByText("Saved", { exact: true }).waitFor();
 
-    // Export the PDF
-    await page.getByRole("button", { name: "Export PDF" }).click();
+    // Export the PDF (from the CV page of the Apply tool)
+    await openCvPage(page);
+    await page.getByRole("button", { name: "Export PDF" }).first().click();
     await page.getByText("Text is selectable").waitFor();
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "Download PDF" }).click();
@@ -76,10 +85,7 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByText("Saved", { exact: true }).waitFor();
 
     // the preview shows the hidden item as hidden and the new order
-    const preview = await page
-      .locator(".MuiPaper-root", { hasText: "Jane Doe" })
-      .last()
-      .innerText();
+    const preview = await page.locator("[data-cv-paper]").innerText();
     expect(preview).not.toContain("Sample Systems");
     expect(preview.indexOf("University of Example")).toBeLessThan(
       preview.indexOf("Example Ltd")
@@ -87,11 +93,16 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
   });
 
   it("marks the CV as applied, keeps what was sent, and tracks the status", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs/main`);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
 
-    await page.getByRole("button", { name: "Mark as applied" }).click();
+    // Mark as applied is part of the export
+    await page.getByRole("button", { name: "Export PDF" }).first().click();
+    await page.getByLabel("Then mark this as applied").check();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download PDF" }).click();
+    await download;
     await page.getByRole("textbox", { name: /^Company/ }).fill("Acme Ltd");
     await page.getByRole("textbox", { name: /^Role/ }).fill("Senior Dev");
     await page.getByRole("button", { name: "Save application" }).click();
@@ -125,19 +136,31 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
   it("lists the applications, opens one, and goes back to the same search", async () => {
     await page.goto(`${app.webUrl}/applications`);
     await page.getByRole("heading", { name: "Applications" }).waitFor();
-    await page.getByText("1 application: 1 interview").waitFor();
+    await page.getByText("1 job · 1 sent · 1 interview").waitFor();
     const row = page.getByRole("row").filter({ hasText: "Acme Ltd" });
-    await row.getByText("Interview").waitFor();
+    await row
+      .getByRole("combobox", { name: "Status of Acme Ltd" })
+      .filter({ hasText: "Interview" })
+      .waitFor();
 
     // search narrows the list and the address remembers it
-    await page.getByLabel("Search company or role").fill("senior");
+    await page.getByLabel("Search company, role or template").fill("senior");
     await page.getByRole("row").filter({ hasText: "Acme Ltd" }).waitFor();
-    await page.getByLabel("Search company or role").fill("nothing like this");
-    await page.getByText("No application matches this search.").waitFor();
-    await page.getByLabel("Search company or role").fill("acme");
+    await page
+      .getByLabel("Search company, role or template")
+      .fill("nothing like this");
+    await page
+      .getByText("No job or application matches this search.")
+      .waitFor();
+    await page.getByLabel("Search company, role or template").fill("acme");
 
     // click the row: the application opens in the side panel, the list stays
-    await page.getByRole("row").filter({ hasText: "Acme Ltd" }).click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: "Acme Ltd" })
+      .getByRole("cell")
+      .nth(1)
+      .click();
     await page
       .getByRole("complementary", { name: "Application detail" })
       .getByRole("heading", { name: "Acme Ltd" })
@@ -151,8 +174,8 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     // back keeps the search
     await page.getByRole("link", { name: "← All applications" }).click();
     await page.getByRole("heading", { name: "Applications" }).waitFor();
-    expect(await page.getByLabel("Search company or role").inputValue()).toBe(
-      "acme"
-    );
+    expect(
+      await page.getByLabel("Search company, role or template").inputValue()
+    ).toBe("acme");
   });
 });

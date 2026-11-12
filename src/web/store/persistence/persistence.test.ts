@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { configureStore } from "@reduxjs/toolkit";
 import { FastifyInstance } from "fastify";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import sample from "@fixtures/sample-cv.json";
 import { buildServer } from "@server/app";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
@@ -149,6 +149,26 @@ describe("load and save through the server", () => {
     expect(state.persistence.status).toBe("ready");
     expect(state.persistence.saved).toBeNull();
     expect(state.vault.profile.fullName).toBe(file.vault.profile.fullName);
+  });
+
+  it("does not start a second load while one is running (the first job must not come back over the address's job)", async () => {
+    const store = newStore();
+    const api = clientFor(app);
+    const loadVault = vi.spyOn(api, "loadVault");
+    const first = loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    const second = loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    expect(second).toBe(first);
+    await Promise.all([first, second]);
+    expect(loadVault).toHaveBeenCalledTimes(1);
+    // once it is done a new load (Retry) runs again
+    await loadFromServer(api, store.dispatch, store.getState, () =>
+      Promise.resolve(file)
+    );
+    expect(loadVault).toHaveBeenCalledTimes(2);
   });
 
   it("keeps vault and variant edits across a restart of server and browser", async () => {
