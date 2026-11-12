@@ -1,4 +1,5 @@
 import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
+import { CandidateDialog } from "@pages/candidates-page/candidate-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Job } from "@custom-types/job-types";
+import { NewCandidate } from "@custom-types/candidate-types";
 import { JOB_OPINIONS, JobOpinion } from "@custom-types/json-types";
 import { navigate } from "@hooks/navigation";
 import { useSaveActions } from "@hooks/use-persistence";
@@ -78,6 +80,7 @@ export function JobDetailsPage(): JSX.Element {
   const [note, setNote] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isReading, setIsReading] = useState<boolean>(false);
+  const [isSavingLater, setIsSavingLater] = useState<boolean>(false);
 
   function edit(details: Parameters<typeof setJobDetails>[0]["details"]): void {
     if (job) {
@@ -89,6 +92,11 @@ export function JobDetailsPage(): JSX.Element {
     const typed = details.name ?? details.company ?? details.role;
     dispatch(createJob({ vault, style, name: typed?.trim() || "New job", id }));
     dispatch(setJobDetails({ id, details }));
+  }
+
+  async function saveForLater(input: NewCandidate): Promise<void> {
+    await createApiClient().createCandidate({ ...input, jobId: job?.id });
+    setNote("Saved to Candidates.");
   }
 
   function startAnother(): void {
@@ -155,6 +163,11 @@ export function JobDetailsPage(): JSX.Element {
               <Typography variant="h6" sx={{ flex: 1, minWidth: 160 }}>
                 {job ? "Job application" : "Apply for a job"}
               </Typography>
+              {job && (
+                <Button size="small" onClick={() => setIsSavingLater(true)}>
+                  Save for later
+                </Button>
+              )}
               {job && (
                 <Button size="small" onClick={startAnother}>
                   Start another job
@@ -431,6 +444,19 @@ export function JobDetailsPage(): JSX.Element {
           </Box>
         }
       </Box>
+      {job && (
+        <CandidateDialog
+          isOpen={isSavingLater}
+          onClose={() => setIsSavingLater(false)}
+          onSave={saveForLater}
+          initial={{
+            company: job.company ?? "",
+            role: job.role ?? "",
+            ...(job.url === undefined ? {} : { jobUrl: job.url }),
+            ...(job.jobAd === undefined ? {} : { jobAd: job.jobAd }),
+          }}
+        />
+      )}
     </>
   );
 }

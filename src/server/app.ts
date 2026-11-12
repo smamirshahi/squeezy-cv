@@ -76,6 +76,15 @@ import {
   MAX_IMPORT_PDF_BYTES,
 } from "@custom-types/import-types";
 import {
+  CandidateInputError,
+  createCandidate,
+  updateCandidate,
+} from "@shared/candidate/candidate-utils";
+import {
+  CandidatePatchSchema,
+  NewCandidateSchema,
+} from "@custom-types/candidate-types";
+import {
   ApplicationInputError,
   ApplicationSource,
   createApplication,
@@ -293,7 +302,10 @@ export function buildServer({
         error.message
       );
     }
-    if (error instanceof ApplicationInputError) {
+    if (
+      error instanceof ApplicationInputError ||
+      error instanceof CandidateInputError
+    ) {
       return sendError(reply, HTTP_BAD_REQUEST, "invalid", error.message);
     }
     if (error instanceof ValidationError) {
@@ -949,6 +961,41 @@ export function buildServer({
     "/api/applications/:id",
     async (request) => {
       await storage.deleteApplication(request.params.id);
+      return { status: "deleted" };
+    }
+  );
+
+  // Jobs parked to apply for later (no CV yet)
+  app.get("/api/candidates", () => storage.listCandidates());
+
+  app.post("/api/candidates", async (request) => {
+    const input = NewCandidateSchema.check(request.body);
+    const candidate = createCandidate(
+      input,
+      randomBytes(ID_SUFFIX_BYTES).toString("hex"),
+      toIsoDay(now())
+    );
+    await storage.saveCandidate(candidate);
+    return candidate;
+  });
+
+  app.patch<{ Params: { id: string } }>(
+    "/api/candidates/:id",
+    async (request) => {
+      const patch = CandidatePatchSchema.check(request.body);
+      const updated = updateCandidate(
+        await storage.loadCandidate(request.params.id),
+        patch
+      );
+      await storage.saveCandidate(updated);
+      return updated;
+    }
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    "/api/candidates/:id",
+    async (request) => {
+      await storage.deleteCandidate(request.params.id);
       return { status: "deleted" };
     }
   );

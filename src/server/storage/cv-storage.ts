@@ -3,6 +3,7 @@ import {
   ApplicationSummary,
 } from "@custom-types/application-types";
 import { CvFile } from "@custom-types/vault-types";
+import { Candidate } from "@custom-types/candidate-types";
 import { Job } from "@custom-types/job-types";
 import { Template } from "@custom-types/template-types";
 
@@ -74,4 +75,11 @@ export interface CvStorage {
 
   /** Throws StorageError "not_found" if there is no such application */
   deleteApplication(id: string): Promise<void>;
+
+  /** Jobs parked to apply for later. A damaged file is skipped in the list. */
+  listCandidates(): Promise<Candidate[]>;
+  loadCandidate(id: string): Promise<Candidate>;
+  saveCandidate(candidate: Candidate): Promise<void>;
+  /** Throws StorageError "not_found" if there is no such candidate */
+  deleteCandidate(id: string): Promise<void>;
 }

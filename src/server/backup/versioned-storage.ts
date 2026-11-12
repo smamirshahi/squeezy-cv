@@ -1,3 +1,4 @@
+import { Candidate } from "@custom-types/candidate-types";
 import {
   Application,
   ApplicationSummary,
@@ -88,5 +89,23 @@ export class VersionedCvStorage implements CvStorage {
   async deleteApplication(id: string): Promise<void> {
     await this.inner.deleteApplication(id);
     await this.backup.commit(`Delete: application ${id}`);
+  }
+
+  listCandidates(): Promise<Candidate[]> {
+    return this.inner.listCandidates();
+  }
+
+  loadCandidate(id: string): Promise<Candidate> {
+    return this.inner.loadCandidate(id);
+  }
+
+  async saveCandidate(candidate: Candidate): Promise<void> {
+    await this.inner.saveCandidate(candidate);
+    await this.backup.commit(`Save: candidate ${candidate.id}`);
+  }
+
+  async deleteCandidate(id: string): Promise<void> {
+    await this.inner.deleteCandidate(id);
+    await this.backup.commit(`Delete: candidate ${id}`);
   }
 }
