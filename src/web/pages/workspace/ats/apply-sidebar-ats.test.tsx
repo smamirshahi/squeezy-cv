@@ -53,23 +53,37 @@ afterEach(() => {
 });
 
 describe("the ATS score in the Apply menu", () => {
-  it("is a section under the menu on a desktop, below a divider", () => {
+  it("is a button under Chat on a desktop, with a summary below the menu", () => {
     useWidth(1440);
     show();
     const menu = screen.getByRole("navigation", { name: "Job application" });
+    const chat = within(menu).getByRole("link", { name: /Chat/ });
+    const ats = within(menu).getByRole("link", { name: /ATS score/ });
+    expect(ats.getAttribute("href")).toBe("/jobs/main?view=ats");
     expect(
-      within(menu).getByRole("link", { name: /Job application/ })
+      chat.compareDocumentPosition(ats) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
-    expect(within(menu).getByRole("link", { name: /Chat/ })).toBeTruthy();
-    // the score is not one of the menu's links: it is its own section after them
-    expect(within(menu).queryByText("ATS score")).toBeNull();
-    const section = screen.getByRole("region", { name: "ATS score" });
-    expect(section).toBeTruthy();
+    // both are AI entries: sparkle icon and AI colour
+    expect(
+      ats.querySelector('[data-testid="AutoAwesomeOutlinedIcon"]')
+    ).toBeTruthy();
+    // the big panel is on its own page; the sidebar keeps the number and the status
+    expect(screen.queryByRole("region", { name: "ATS score" })).toBeNull();
+    const summary = screen.getByRole("region", { name: "ATS score summary" });
+    expect(within(summary).getByText("Not scanned yet")).toBeTruthy();
+    expect(
+      within(summary).getByRole("img", { name: "ATS score: not analysed yet" })
+    ).toBeTruthy();
     expect(screen.getByRole("separator", { name: /Resize/ })).toBeTruthy();
+    expect(within(summary).queryByRole("button")).toBeNull();
+  });
+
+  it("does not repeat the score in the menu button on a desktop", () => {
+    useWidth(1440);
+    show();
     expect(
-      menu.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(screen.queryByRole("link", { name: /ATS score/ })).toBeNull();
+      screen.getByRole("link", { name: /ATS score/ }).textContent
+    ).not.toMatch(/\d/);
   });
 
   it("is a tab below a desktop, with the latest score beside it", () => {
@@ -78,6 +92,9 @@ describe("the ATS score in the Apply menu", () => {
     const tab = screen.getByRole("link", { name: /ATS score/ });
     expect(tab.getAttribute("href")).toBe("/jobs/main?view=ats");
     expect(screen.queryByRole("region", { name: "ATS score" })).toBeNull();
+    expect(
+      screen.queryByRole("region", { name: "ATS score summary" })
+    ).toBeNull();
     expect(tab.textContent).not.toMatch(/\d/);
   });
 

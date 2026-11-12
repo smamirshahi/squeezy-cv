@@ -73,7 +73,8 @@ export function AtsHelpDialog({
           recruiters then search and filter those fields by keyword. There is no
           one universal score: sites that show one use their own rules. This is
           a guide built on common advice. It runs on this computer, uses no AI
-          and sends nothing anywhere.
+          and sends nothing anywhere. The same CV always gives the same score,
+          so the button only updates the saved scan after you change something.
         </Typography>
 
         <Box>

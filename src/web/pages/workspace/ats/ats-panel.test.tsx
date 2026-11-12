@@ -96,7 +96,9 @@ describe("AtsPanel", () => {
     expect(ring).toBeTruthy();
     const formatting = screen.getByTestId("ats-category-formatting");
     expect(formatting.textContent).toMatch(/\d+ · (No issues|\d+ issues?)/);
-    expect(screen.getByRole("button", { name: "Analyse again" })).toBeTruthy();
+    // the score is the same until the CV changes, so there is nothing to update yet
+    const update = screen.getByRole("button", { name: "Up to date" });
+    expect((update as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/First scan · just now/)).toBeTruthy();
     // kept in this browser for the job
     expect(localStorage.getItem("cvb.ats.main")).toContain('"first"');
@@ -106,12 +108,14 @@ describe("AtsPanel", () => {
     setup(true, analysis);
     fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
     expect(screen.getByTestId("ats-category-hardSkills")).toBeTruthy();
-    expect(screen.getByText(/On the CV:/).parentElement?.textContent).toContain(
-      "React"
-    );
-    const missing = screen.getByText(/Not on the CV:/).parentElement;
-    expect(missing?.textContent).toContain("GraphQL");
-    expect(missing?.textContent).toContain("Jest");
+    // the keywords are chips; the switch picks the missing ones or the ones on the CV
+    expect(screen.getByRole("button", { name: /^Missing \d+$/ })).toBeTruthy();
+    expect(screen.getByText("GraphQL")).toBeTruthy();
+    expect(screen.getByText("Jest")).toBeTruthy();
+    expect(screen.queryByText("React")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^On your CV \d+$/ }));
+    expect(screen.getByText("React")).toBeTruthy();
+    expect(screen.queryByText("GraphQL")).toBeNull();
     expect(
       screen.getByText(/Add the keywords .* where they are true/)
     ).toBeTruthy();
@@ -133,11 +137,15 @@ describe("AtsPanel", () => {
       );
     });
     expect(screen.getByRole("status").textContent).toMatch(/CV changed/);
-    fireEvent.click(screen.getByRole("button", { name: "Analyse again" }));
+    // now there is something to update, so the button is on
+    const update = screen.getByRole("button", { name: "Update score" });
+    expect((update as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(update);
     expect(screen.queryByRole("status")).toBeNull();
     expect(screen.getByText(/^First scan \d+$/)).toBeTruthy();
     expect(screen.getByText(/^Now \d+ · [+-]?\d+$/)).toBeTruthy();
-    expect(screen.getByText("Since the first scan")).toBeTruthy();
+    expect(screen.getByText("To fix")).toBeTruthy();
+    expect(screen.getByText(/\d+ fixed · \d+ to fix/)).toBeTruthy();
     expect(
       screen.getByRole("img", { name: /from the first scan of/ })
     ).toBeTruthy();
@@ -150,7 +158,7 @@ describe("AtsPanel", () => {
         name: "Use this scan as the new first scan",
       })
     );
-    expect(screen.queryByText("Since the first scan")).toBeNull();
+    expect(screen.queryByText(/\d+ fixed ·/)).toBeNull();
   });
 
   it("shows a saved scan again when the page is opened later", () => {
@@ -158,7 +166,56 @@ describe("AtsPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
     cleanup();
     setup();
-    expect(screen.getByRole("button", { name: "Analyse again" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Up to date" })).toBeTruthy();
+    expect(screen.getByText(/First scan ·/)).toBeTruthy();
+  });
+
+  it("always shows the note that the score is a guide, with no way to dismiss it", () => {
+    setup();
+    expect(screen.getByRole("note").textContent).toMatch(
+      /A guide, not a target\..*Aim for 75–90/
+    );
+    expect(screen.queryByRole("button", { name: /Dismiss/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
+    expect(screen.getByRole("note")).toBeTruthy();
+  });
+
+  it("says in a hint that the score is calculated here and repeatable", () => {
+    setup();
+    expect(screen.getByLabelText("How the score is calculated")).toBeTruthy();
+  });
+
+  it("opens and closes the issues of a category", () => {
+    setup(true, analysis);
+    fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
+    const hard = screen.getByTestId("ats-category-hardSkills");
+    const toggle = within(hard).getByRole("button", {
+      name: /Show the issues in/,
+    });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(within(hard).queryByRole("link")).toBeNull();
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    expect(toggle.getAttribute("aria-label")).toMatch(/^Hide the issues in/);
+    const links = within(hard).getAllByRole("link");
+    expect(
+      links.some((link) => /where they are true/.test(link.textContent ?? ""))
+    ).toBe(true);
+    fireEvent.click(toggle);
+    return waitFor(() => expect(within(hard).queryByRole("link")).toBeNull());
+  });
+
+  it("has no issues button on a category without issues", () => {
+    setup();
+    fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
+    const searchability = screen.getByTestId("ats-category-searchability");
+    if (/No issues/.test(searchability.textContent ?? "")) {
+      expect(
+        within(searchability).queryByRole("button", {
+          name: /the issues in/,
+        })
+      ).toBeNull();
+    }
   });
 
   it("explains how the score is calculated", () => {
@@ -198,22 +255,26 @@ describe("Suggest natural wording (AI)", () => {
   async function open(): Promise<void> {
     fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
     fireEvent.click(
-      await screen.findByRole("button", { name: "Suggest natural wording" })
+      await screen.findByRole("button", { name: "Suggest wording" })
     );
   }
 
-  it("is marked as AI: purple card, sparkle icon and AI colour", () => {
+  it("is marked as AI: purple button, sparkle icon and AI colour", () => {
     answer({ suggestions: [], unplaced: [] });
     setup(true, analysis);
     fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
-    const button = screen.getByRole("button", {
-      name: "Suggest natural wording",
-    });
+    const button = screen.getByRole("button", { name: "Suggest wording" });
     expect(
       button.querySelector('[data-testid="AutoAwesomeOutlinedIcon"]')
     ).toBeTruthy();
     expect(button.className).toMatch(/colorSecondary/);
-    expect(screen.getByText("AI assist")).toBeTruthy();
+    expect(
+      screen.getByText(/reviewed by you before anything changes/)
+    ).toBeTruthy();
+    // it sits beside Update score, which is not AI
+    const update = screen.getByRole("button", { name: "Up to date" });
+    expect(update.parentElement?.parentElement).toBe(button.parentElement);
+    expect(update.className).not.toMatch(/colorSecondary/);
   });
 
   it("is not offered without an advert to take words from", () => {
@@ -221,7 +282,7 @@ describe("Suggest natural wording (AI)", () => {
     setup();
     fireEvent.click(screen.getByRole("button", { name: "Analyse CV" }));
     expect(
-      screen.queryByRole("button", { name: "Suggest natural wording" })
+      screen.queryByRole("button", { name: "Suggest wording" })
     ).toBeNull();
   });
 

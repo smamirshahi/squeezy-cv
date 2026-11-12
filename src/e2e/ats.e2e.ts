@@ -49,19 +49,27 @@ async function open(width: number, height: number): Promise<Page> {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
   await skipTutorials(page);
-  const view = width >= 1200 ? "page" : "ats";
-  await page.goto(`${app.webUrl}/jobs/main?view=${view}`);
+  await page.goto(`${app.webUrl}/jobs/main?view=ats`);
   await page.getByRole("navigation", { name: "Tools" }).waitFor();
   await page.waitForLoadState("networkidle");
   return page;
 }
 
 describe("ATS score", () => {
-  it("is a section of the Apply sidebar on a desktop and scores the CV", async () => {
+  it("is its own page under Chat on a desktop and scores the CV", async () => {
     const page = await open(1440, 900);
-    const section = page.getByRole("region", { name: "ATS score" });
+    const section = page.getByRole("region", {
+      name: "ATS score",
+      exact: true,
+    });
     await section.waitFor();
+    // the menu has the ATS score button under Chat, and the sidebar a summary of the score
+    const menu = page.getByRole("navigation", { name: "Job application" });
+    expect(await menu.innerText()).toMatch(/Chat[\s\S]*ATS score/);
+    const summary = page.getByRole("region", { name: "ATS score summary" });
+    expect(await summary.innerText()).toContain("Not scanned yet");
     await section.getByRole("button", { name: "Analyse CV" }).click();
+    await summary.getByText("Up to date").waitFor();
     const ring = section.getByRole("img", {
       name: /^ATS score \d+ out of 100/,
     });
@@ -69,15 +77,22 @@ describe("ATS score", () => {
     expect(
       await section.getByTestId("ats-category-hardSkills").innerText()
     ).toMatch(/issues?/);
-    expect(await section.innerText()).toContain("Not on the CV: GraphQL");
+    expect(await section.getByText("GraphQL").first().isVisible()).toBe(true);
     expect(await section.innerText()).toContain("A guide, not a target");
+    // a category opens to show its issues
+    const hard = section.getByTestId("ats-category-hardSkills");
+    await hard.getByRole("button", { name: /Show the issues in/ }).click();
+    await hard.getByRole("link").first().waitFor();
     await page.context().close();
   });
 
   it("keeps the first scan and shows the change after the CV is edited", async () => {
     const page = await open(1440, 900);
-    const section = page.getByRole("region", { name: "ATS score" });
-    await section.getByRole("button", { name: /Analyse (CV|again)/ }).click();
+    const section = page.getByRole("region", {
+      name: "ATS score",
+      exact: true,
+    });
+    await section.getByRole("button", { name: "Analyse CV" }).click();
     const before = Number(
       (
         await section
@@ -101,20 +116,22 @@ describe("ATS score", () => {
     await page.reload();
     await page.waitForLoadState("networkidle");
     await section.getByRole("status").waitFor();
-    await section.getByRole("button", { name: "Analyse again" }).click();
-    await section.getByText("Since the first scan").waitFor();
+    await section.getByRole("button", { name: "Update score" }).click();
+    await section.getByText(/\d+ fixed · \d+ to fix/).waitFor();
     const label = await section
       .getByRole("img", { name: /from the first scan of/ })
       .getAttribute("aria-label");
     const after = Number(label?.match(/ATS score (\d+)/)?.[1]);
     expect(after).toBeGreaterThan(before);
     expect(label).toContain(`up ${after - before}`);
-    expect(await section.innerText()).toContain("Not on the CV: nothing");
+    await section.getByRole("button", { name: /^Missing \d+$/ }).click();
+    expect(await section.innerText()).toContain("Nothing missing.");
     await page.context().close();
   });
 
-  it("is a tab with its own panel on a laptop, a tablet and a phone", async () => {
+  it("has its own panel on a desktop, a laptop, a tablet and a phone", async () => {
     for (const [width, height] of [
+      [1440, 900],
       [1024, 768],
       [820, 1180],
       [390, 844],
@@ -122,8 +139,13 @@ describe("ATS score", () => {
       const page = await open(width, height);
       const tab = page.getByRole("link", { name: /ATS score/ });
       expect(await tab.getAttribute("aria-current")).toBe("page");
-      const panel = page.getByRole("region", { name: "ATS score" });
-      await panel.getByRole("button", { name: /Analyse (CV|again)/ }).click();
+      const panel = page.getByRole("region", {
+        name: "ATS score",
+        exact: true,
+      });
+      await panel
+        .getByRole("button", { name: /Analyse CV|Up to date/ })
+        .click();
       await panel.getByRole("img", { name: /^ATS score \d+/ }).waitFor();
       // no sideways scrolling of the window
       expect(

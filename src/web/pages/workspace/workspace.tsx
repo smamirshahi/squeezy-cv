@@ -25,7 +25,6 @@ import { ToolRail } from "@pages/workspace/tool-rail";
 import { TopBar } from "@pages/workspace/top-bar";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useSyncStructure } from "@hooks/use-sync-structure";
-import { useViewport } from "@hooks/use-viewport";
 import { AtsPanel } from "@pages/workspace/ats/ats-panel";
 import { usePersistence } from "@hooks/use-persistence";
 import { useSyncActiveJob } from "@hooks/use-sync-active-job";
@@ -87,12 +86,9 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
     }
   }, [tool]);
   useUndoShortcuts();
-  const isDesktop = useViewport() === "desktop";
   const requestedView = route.kind === "jobs" ? route.view : "page";
-  // On a desktop the ATS score is a section of the Apply sidebar, so its own view is the CV page
-  const isAtsView = requestedView === "ats" && !isDesktop;
-  const jobsView =
-    requestedView === "ats" && isDesktop ? "page" : requestedView;
+  const isAtsView = requestedView === "ats";
+  const jobsView = requestedView;
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
   const barRef = useRef<HTMLDivElement>(null);

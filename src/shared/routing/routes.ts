@@ -1,7 +1,6 @@
 /**
  * How the Jobs tool shows a job: the CV page, the settings of the job, its details, or the ATS
- * score (#258: on a desktop the score lives in the Apply sidebar, so this view is only a tab
- * below a desktop)
+ * score (#258: the "ATS score" button under Chat in the Apply menu, or a tab below a desktop)
  */
 type JobsView = "page" | "settings" | "details" | "ats";
 
