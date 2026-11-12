@@ -93,7 +93,18 @@ export function EditorMainInfo(): JSX.Element | null {
       </Box>
 
       <InfoCard title="Identity">
-        <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+        <Box
+          sx={{
+            display: "flex",
+            // The photo sits above the fields where the room is narrow (phone, small laptop)
+            flexDirection: { xs: "column", sm: "row", md: "column", lg: "row" },
+            gap: 3,
+            alignItems: "flex-start",
+            "& > :last-child": {
+              width: { xs: "100%", sm: "auto", md: "100%", lg: "auto" },
+            },
+          }}
+        >
           <Box
             sx={{
               width: 120,
@@ -201,7 +212,7 @@ export function EditorMainInfo(): JSX.Element | null {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: TWO_COLUMNS,
             gap: 2,
           }}
         >
@@ -225,7 +236,7 @@ export function EditorMainInfo(): JSX.Element | null {
               draftDispatch(updateProfile({ phone: event.target.value }))
             }
           />
-          <Box sx={{ gridColumn: "span 2" }}>
+          <Box sx={{ gridColumn: SPAN_TWO }}>
             <LocationAutocomplete
               label="Location (city, country)"
               placeholder="London, United Kingdom"
@@ -249,6 +260,7 @@ export function EditorMainInfo(): JSX.Element | null {
             key={link.id}
             sx={{
               display: "flex",
+              flexWrap: { xs: "wrap", lg: "nowrap" },
               alignItems: "center",
               gap: 1,
               my: 1,
@@ -288,7 +300,9 @@ export function EditorMainInfo(): JSX.Element | null {
                     })
                   )
                 }
-                sx={{ width: "25%" }}
+                sx={{
+                  width: { xs: "100%", sm: "25%", md: "100%", lg: "25%" },
+                }}
               />
             )}
             <TextField
@@ -308,7 +322,12 @@ export function EditorMainInfo(): JSX.Element | null {
                 }
                 draftDispatch(updateLink({ id: link.id, update }));
               }}
-              fullWidth
+              sx={{
+                // Takes what is left of the row; below the desktop size it wraps with its buttons
+                width: { xs: "auto", lg: "100%" },
+                flex: { xs: "1 1 120px", lg: "0 1 auto" },
+                minWidth: 0,
+              }}
             />
             {/* The buttons have 8 px of padding of their own: pull them right so the icons line up with the card's 20 px edge */}
             <Box sx={{ display: "flex", flex: "none", gap: 0, mr: -1 }}>
@@ -342,11 +361,11 @@ export function EditorMainInfo(): JSX.Element | null {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: TWO_COLUMNS,
             gap: 2,
           }}
         >
-          <Box sx={{ gridColumn: "span 2" }}>
+          <Box sx={{ gridColumn: SPAN_TWO }}>
             <Autocomplete
               multiple
               size="small"
@@ -399,7 +418,7 @@ export function EditorMainInfo(): JSX.Element | null {
               ))}
             </TextField>
           ))}
-          <Box sx={{ gridColumn: "span 2" }}>
+          <Box sx={{ gridColumn: SPAN_TWO }}>
             <Autocomplete
               freeSolo
               size="small"
@@ -449,6 +468,15 @@ export function EditorMainInfo(): JSX.Element | null {
     </Box>
   );
 }
+
+/** Two columns of fields on a tablet and a desktop, one on a phone and a small laptop (narrow) */
+const TWO_COLUMNS = {
+  xs: "minmax(0, 1fr)",
+  sm: "repeat(2, minmax(0, 1fr))",
+  md: "minmax(0, 1fr)",
+  lg: "repeat(2, minmax(0, 1fr))",
+};
+const SPAN_TWO = { xs: "auto", sm: "span 2", md: "auto", lg: "span 2" };
 
 /** One titled group of fields on the Main Info page */
 function InfoCard({

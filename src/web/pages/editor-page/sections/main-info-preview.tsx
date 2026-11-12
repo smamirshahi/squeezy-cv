@@ -46,7 +46,10 @@ export function MainInfoPreview({
           sx={{
             bgcolor: "#fff",
             color: "#222",
-            p: "20px 22px",
+            p: { xs: "20px 22px", md: "14px 12px", lg: "20px 22px" },
+            // A long address breaks instead of running out of a narrow panel
+            overflowWrap: { xs: "anywhere", lg: "normal" },
+            minWidth: 0,
             display: "flex",
             flexDirection: "column",
             gap: 1,

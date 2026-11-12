@@ -226,6 +226,8 @@ function AiSettingsDialog({
           minHeight: 0,
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
+          // stacked below a laptop: the whole body scrolls, each part keeps its natural height
+          overflowY: { xs: "auto", md: "visible" },
         }}
       >
         <Box
@@ -233,7 +235,6 @@ function AiSettingsDialog({
           aria-label="AI settings list"
           sx={{
             width: { xs: "auto", md: 250 },
-            maxHeight: { xs: 168, md: "none" },
             flex: "none",
             p: 1,
             overflow: "auto",
@@ -275,9 +276,9 @@ function AiSettingsDialog({
           component="main"
           aria-label={title}
           sx={{
-            flex: 1,
+            flex: { xs: "none", md: 1 },
             minWidth: 0,
-            overflow: "auto",
+            overflow: { xs: "visible", md: "auto" },
             p: 2.5,
             display: "flex",
             flexDirection: "column",
@@ -416,11 +417,15 @@ function AiSettingsDialog({
           component="aside"
           aria-label="Provider"
           sx={{
-            width: 340,
+            width: { xs: "auto", md: 340 },
             flex: "none",
             p: 2,
-            overflow: "auto",
-            borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+            overflow: { xs: "visible", md: "auto" },
+            borderLeft: { md: `1px solid ${WORKSPACE_COLORS.border}` },
+            borderTop: {
+              xs: `1px solid ${WORKSPACE_COLORS.border}`,
+              md: "none",
+            },
           }}
         >
           {status && isChoice && (

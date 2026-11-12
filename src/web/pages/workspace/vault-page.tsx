@@ -426,7 +426,6 @@ export function VaultPage(): JSX.Element {
         key={selectedItem.id}
         section={section}
         item={selectedItem}
-        isStacked={isStacked}
         onSelectItem={(itemId) =>
           navigate({
             kind: "vault",

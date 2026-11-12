@@ -511,9 +511,6 @@ interface Props {
 
   /** Select another item of the vault ("" = none) */
   onSelectItem: (itemId: string) => void;
-
-  /** Tablet and phone: the editor is not in a side panel, its Apply row stays in view */
-  isStacked?: boolean;
 }
 
 /**
@@ -525,7 +522,6 @@ export function VaultItemEditor({
   section,
   item,
   onSelectItem,
-  isStacked = false,
 }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const [focusBulletId, setFocusBulletId] = useState<string>("");
@@ -848,15 +844,16 @@ export function VaultItemEditor({
         sx={{
           display: "flex",
           gap: 1,
-          ...(isStacked && {
-            // Stays above the bottom bar while the form scrolls
-            position: "sticky",
-            bottom: 0,
-            zIndex: 1,
-            py: 1,
-            bgcolor: WORKSPACE_COLORS.panel,
-            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-          }),
+          // Below the desktop size the Apply row stays in view while the form scrolls
+          position: { xs: "sticky", lg: "static" },
+          bottom: 0,
+          zIndex: 1,
+          py: { xs: 1, lg: 0 },
+          bgcolor: { xs: WORKSPACE_COLORS.panel, lg: "transparent" },
+          borderTop: {
+            xs: `1px solid ${WORKSPACE_COLORS.border}`,
+            lg: "none",
+          },
           "& .MuiButton-root": { minHeight: { xs: 44, lg: 0 } },
         }}
       >

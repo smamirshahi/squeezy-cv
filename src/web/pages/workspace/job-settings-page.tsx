@@ -26,8 +26,11 @@ export function JobSettingsPage(): JSX.Element {
         flex: 1,
         minWidth: 0,
         overflow: "auto",
-        p: 3,
-        mx: 1,
+        p: { xs: 1.5, lg: 3 },
+        mx: { xs: 0, lg: 1 },
+        "& .MuiInputBase-root, & .MuiButton-root": {
+          minHeight: { xs: 44, md: "auto" },
+        },
         ...MIDDLE_AREA_SX,
       }}
     >

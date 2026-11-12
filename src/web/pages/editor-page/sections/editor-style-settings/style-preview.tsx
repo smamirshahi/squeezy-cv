@@ -14,7 +14,13 @@ export function StylePreviewPanel({
   templateId?: string;
 }): JSX.Element {
   return (
-    <ResizableAside side="right" label="the live preview" defaultWidth={420}>
+    <ResizableAside
+      side="right"
+      label="the live preview"
+      defaultWidth={420}
+      stackBelow="md"
+      stackedHeight="clamp(150px, 28vh, 320px)"
+    >
       <Box
         component="aside"
         aria-label="Live preview"
@@ -22,7 +28,8 @@ export function StylePreviewPanel({
           width: "100%",
           flex: "none",
           bgcolor: WORKSPACE_COLORS.panel,
-          borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderLeft: { md: `1px solid ${WORKSPACE_COLORS.border}` },
+          borderTop: { xs: `1px solid ${WORKSPACE_COLORS.border}`, md: 0 },
           p: 2,
           overflow: "auto",
         }}

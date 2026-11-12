@@ -36,6 +36,9 @@ interface Props {
   hasColumns: boolean;
 }
 
+/** Icon buttons are 44px on touch sizes and keep their small size from a desktop up */
+const TOUCH_BUTTON_SX = { p: { xs: "11px", lg: "5px" } } as const;
+
 const AREA_LABELS: Record<Side, string> = {
   fullWidth: "Full width",
   left: "Left",
@@ -91,6 +94,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         transition,
         display: "flex",
         alignItems: "center",
+        flexWrap: { xs: "wrap", lg: "nowrap" },
         gap: 0.5,
         minHeight: 48,
         pl: 0.5,
@@ -107,7 +111,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         size="small"
         ref={setActivatorNodeRef}
         aria-label={`Drag ${name} to reorder`}
-        sx={{ cursor: "grab", touchAction: "none" }}
+        sx={{ cursor: "grab", touchAction: "none", ...TOUCH_BUTTON_SX }}
         {...attributes}
         {...listeners}
       >
@@ -116,7 +120,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
       <Typography
         noWrap
         sx={{
-          flex: 1,
+          flex: { xs: "1 1 120px", lg: 1 },
           minWidth: 0,
           fontWeight: 500,
           fontSize: 14,
@@ -139,7 +143,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
               )
             )
           }
-          sx={{ width: 118 }}
+          sx={{ width: 118, ml: { xs: 6.5, lg: 0 }, order: { xs: 1, lg: 0 } }}
         >
           {(Object.keys(AREA_LABELS) as Side[]).map((key) => (
             <MenuItem key={key} value={key}>
@@ -152,6 +156,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         size="small"
         aria-label={`Move ${name} up`}
         disabled={index <= 0}
+        sx={TOUCH_BUTTON_SX}
         onClick={() => move(-1)}
       >
         <ArrowUpwardIcon fontSize="small" />
@@ -160,6 +165,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         size="small"
         aria-label={`Move ${name} down`}
         disabled={index < 0 || index === column.length - 1}
+        sx={TOUCH_BUTTON_SX}
         onClick={() => move(1)}
       >
         <ArrowDownwardIcon fontSize="small" />
@@ -169,6 +175,7 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
           size="small"
           aria-label={`Remove ${name} from this job`}
           title="Remove from this job (your vault keeps it)"
+          sx={TOUCH_BUTTON_SX}
           onClick={() =>
             dispatch(
               setSectionShown({

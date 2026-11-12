@@ -1012,7 +1012,7 @@ function ApplicationsTable({
         sx={{
           display: "flex",
           gap: 1.5,
-          flexWrap: { xs: "wrap", sm: "nowrap" },
+          flexWrap: { xs: "wrap", lg: "nowrap" },
           alignItems: "flex-start",
         }}
       >
@@ -1023,7 +1023,7 @@ function ApplicationsTable({
           onChange={(event) =>
             onViewChange({ ...view, query: event.target.value })
           }
-          sx={{ flex: { xs: "1 1 100%", sm: 1 }, minWidth: 0 }}
+          sx={{ flex: { xs: "1 1 100%", sm: "1 1 220px", lg: 1 }, minWidth: 0 }}
           slotProps={{
             htmlInput: { "aria-label": "Search company, role or template" },
             input: {
@@ -1123,7 +1123,7 @@ function ApplicationsTable({
                   sx={{
                     cursor: "pointer",
                     "& td": {
-                      py: 1.5,
+                      py: { xs: 0.5, sm: 1.5 },
                       px: { xs: 0, sm: 1, lg: 2 },
                       verticalAlign: "middle",
                     },

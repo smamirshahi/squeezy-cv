@@ -45,7 +45,7 @@ export function TemplateBar({
         flex: "none",
         display: "flex",
         alignItems: "center",
-        flexWrap: "wrap",
+        flexWrap: { xs: "wrap", lg: "nowrap" },
         gap: { xs: 1, lg: 1.5 },
         px: 2,
         py: 1,

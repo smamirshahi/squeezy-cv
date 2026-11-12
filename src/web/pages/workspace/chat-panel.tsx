@@ -234,6 +234,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
           bgcolor: WORKSPACE_COLORS.panel,
           color: WORKSPACE_COLORS.text,
           borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
+          "& .MuiButton-root": { minHeight: { xs: 44, md: "auto" } },
         }}
       >
         <Box

@@ -93,8 +93,15 @@ export function EditorTypography(): JSX.Element {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
-        <Box sx={{ flex: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          flexWrap: { xs: "wrap", sm: "nowrap" },
+          gap: 1.5,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography component="h2" sx={{ fontSize: 18, fontWeight: 700 }}>
             Style
           </Typography>
@@ -119,7 +126,7 @@ export function EditorTypography(): JSX.Element {
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           borderRadius: 1.5,
           bgcolor: WORKSPACE_COLORS.panel,
-          p: 2.5,
+          p: { xs: 1.75, md: 2.5 },
         }}
       >
         <Box sx={{ mb: 1.75 }}>
@@ -133,7 +140,11 @@ export function EditorTypography(): JSX.Element {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(4, minmax(0, 1fr))",
+            },
             gap: 1.5,
           }}
         >
@@ -220,7 +231,10 @@ export function EditorTypography(): JSX.Element {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                sm: "repeat(2, minmax(0, 1fr))",
+              },
               columnGap: 1.5,
             }}
           >

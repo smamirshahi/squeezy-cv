@@ -90,6 +90,7 @@ export function ContentPanel(): JSX.Element {
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
+          "& .MuiButton-root": { minHeight: { xs: 44, md: "auto" } },
         }}
       >
         <Box
