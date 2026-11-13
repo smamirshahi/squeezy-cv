@@ -9,6 +9,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-13
+
 ### Changed
 
 - The Job application page (#432) follows design v2: the form is five short steps (The job, Where and how, Pay, Your view, The advert) and the right side holds the job's status (Draft or Ready to apply, shown only; it is set on the CV page), Save and continue, Save for later (with an optional Apply by day and note), "I applied elsewhere", a "Ready to continue" list, the advert analysis (AI) and quick checks. Save for later and "I applied elsewhere" clear the form for the next job. Starting another job asks first when the current one is not in Saved for later. The Job name follows the role and company until you type your own.
@@ -366,7 +368,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.3.0...v0.4.0
