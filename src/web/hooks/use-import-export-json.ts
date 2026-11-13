@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 import {
   createCvFile,
-  parseCvFileText,
+  parseCvFileTextWithNotice,
   serializeCvFile,
 } from "@shared/vault/cv-file";
+import { notify } from "@components/notifications/notify";
+import { describeUpgrade } from "@shared/migration/migration-chains";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { loadCvFileIntoStore } from "@store/persistence/persistence-actions";
 import { metaDataSelector, styleSelector } from "@store/cv-data/cv-data-slice";
@@ -40,13 +42,22 @@ export function useImportExportJson(): ReturnProps {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          loadCvFileIntoStore(
-            dispatch,
-            parseCvFileText(event.target?.result as string)
+          const { file: cvFile, notice } = parseCvFileTextWithNotice(
+            event.target?.result as string
           );
-        } catch (_error: unknown) {
-          // eslint-disable-next-line no-alert
-          alert("Invalid file format.");
+          loadCvFileIntoStore(dispatch, cvFile);
+          if (notice) {
+            notify({ kind: "info", text: describeUpgrade(notice) });
+          }
+        } catch (error: unknown) {
+          // A file from a newer app says so; anything else is just not a CV file
+          notify({
+            kind: "error",
+            text:
+              error instanceof Error && error.message.includes("CV Builder")
+                ? error.message
+                : "Invalid file format.",
+          });
         }
       };
       reader.readAsText(file);
