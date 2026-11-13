@@ -90,7 +90,7 @@ describe("chat edits (the AI's answers are stubbed)", () => {
     await page
       .getByLabel("Message")
       .fill("Hide the oldest job and put skills first");
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Send", exact: true }).click();
     await page.getByText(answer.reply).waitFor();
     expect((seen as { message: string }).message).toBe(
       "Hide the oldest job and put skills first"

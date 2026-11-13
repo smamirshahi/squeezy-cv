@@ -42,8 +42,10 @@ describe("editing an item in the vault (inline editor)", () => {
     for (const width of [1440, 1000]) {
       await page.setViewportSize({ width, height: 900 });
       const row = await dateRow.boundingBox();
-      const start = await page.getByLabel("Start").boundingBox();
-      const end = await page.getByLabel("End").boundingBox();
+      const start = await page
+        .getByLabel("Start", { exact: true })
+        .boundingBox();
+      const end = await page.getByLabel("End", { exact: true }).boundingBox();
       const current = await currentLabel.boundingBox();
       const link = await page.getByLabel("Link (optional)").boundingBox();
       expect(row).not.toBeNull();

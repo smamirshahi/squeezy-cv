@@ -17,6 +17,8 @@ import {
   type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
+import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
+import { FeedbackDialog } from "@pages/workspace/feedback-dialog";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -254,6 +256,7 @@ export function TopBar(): JSX.Element {
         ? { tutorial: "apply", step: 0 }
         : { tutorial: "overview", step }
     );
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const route = useRoute();
   const isPhone = useViewport() === "phone";
 
@@ -310,6 +313,20 @@ export function TopBar(): JSX.Element {
       >
         <HelpOutlineIcon fontSize="small" />
       </IconButton>
+      <Tooltip title="Send feedback">
+        <IconButton
+          size="small"
+          aria-label="Send feedback"
+          onClick={() => setIsFeedbackOpen(true)}
+          sx={{
+            color: WORKSPACE_COLORS.barText,
+            ml: -1,
+            p: { xs: 1, lg: "5px" },
+          }}
+        >
+          <FeedbackOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Box sx={{ flex: 1 }} />
       {!isPhone && <FlowSteps onInfo={openHelp} />}
       <Box sx={{ flex: 1 }} />
@@ -317,6 +334,10 @@ export function TopBar(): JSX.Element {
       <SaveStatus />
       <UndoRedo />
       {isPhone && <MoreMenu />}
+      <FeedbackDialog
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
       <HowItWorksDialog
         isOpen={help !== null}
         startTutorial={help?.tutorial}

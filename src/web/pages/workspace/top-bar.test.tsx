@@ -103,3 +103,18 @@ describe("tutorials on the first visit of a page", () => {
     expect(screen.getByRole("dialog")).toBeTruthy();
   });
 });
+
+describe("the feedback button", () => {
+  it("sits right of the Tutorials button and opens the feedback dialog", () => {
+    show("/settings");
+    const buttons = screen.getAllByRole("button");
+    const tutorials = buttons.findIndex(
+      (b) => b.getAttribute("aria-label") === "Tutorials"
+    );
+    expect(buttons[tutorials + 1].getAttribute("aria-label")).toBe(
+      "Send feedback"
+    );
+    fireEvent.click(buttons[tutorials + 1]);
+    expect(screen.getByRole("dialog", { name: "Send feedback" })).toBeTruthy();
+  });
+});

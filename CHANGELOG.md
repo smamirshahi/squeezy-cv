@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- A "Send feedback" button on the top bar, right of the Tutorials icon (#390). Pick Feedback, Bug or Feature (Feedback also has a happy, no feeling or sad face), write one note and press Send. The note becomes a GitHub issue labelled `customer-created` and its kind when `FEEDBACK_GITHUB_TOKEN` is set in `.env`; otherwise a prefilled GitHub page opens. Bug and Feature notes need at least 10 characters. An optional "Include app info" box (on for bugs) adds the version, browser and page name (the box says so); nothing else is sent. After sending, the dialog shows the issue number and a link; if sending fails the text stays, with Try again, Open on GitHub and Copy. On a phone the dialog is full screen.
+
 ### Changed
 
 - Notifications: one shared toast replaces the old snackbars. It uses the theme's panel colour, shows an icon for its kind (success, info, warning, error, undo), has a close button, readable actions (View, View list) and a line for the time left. It closes after 6 s, pauses on hover or focus, errors stay until closed, Esc closes the newest, at most 3 are shown. It sits at the bottom centre of the page area (above the tab bar on a phone), never over the rail or the side panels (#433).
