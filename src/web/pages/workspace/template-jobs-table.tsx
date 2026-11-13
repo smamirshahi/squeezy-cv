@@ -182,7 +182,7 @@ export function TemplateJobsTable({ jobs, applications }: Props): JSX.Element {
                   )}
                 </TableCell>
                 <TableCell align="right">
-                  {application && (
+                  {application ? (
                     <Tooltip title="Open the PDF that was sent">
                       <IconButton
                         size="small"
@@ -196,25 +196,23 @@ export function TemplateJobsTable({ jobs, applications }: Props): JSX.Element {
                         <PictureAsPdfOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
+                  ) : (
+                    <Tooltip title="Make a PDF from the saved job">
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={busyId === job.id}
+                          aria-label={`Make a PDF of ${job.name}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void openJobPdf(job);
+                          }}
+                        >
+                          <PictureAsPdfOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   )}
-                  <Tooltip title="Make a PDF from the saved job">
-                    <span>
-                      <IconButton
-                        size="small"
-                        disabled={busyId === job.id}
-                        aria-label={`Make a PDF of ${job.name}`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          void openJobPdf(job);
-                        }}
-                      >
-                        <PictureAsPdfOutlinedIcon
-                          fontSize="small"
-                          sx={{ color: WORKSPACE_COLORS.muted }}
-                        />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
                 </TableCell>
               </TableRow>
             );

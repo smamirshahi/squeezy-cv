@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- The Templates page (#417) shows one PDF button per job: the PDF that was sent when the job has an application, otherwise one made from the saved job. It used to show two identical icons.
 - The ATS score (#415) has its own page: an "ATS score" button under Chat in the Apply menu opens it, and the sidebar keeps only the score ring and its status. "Update score" is only on when the CV changed since the last scan (the score is calculated on this computer, so the same CV always gives the same number) and sits beside the purple "Suggest wording" button. "A guide, not a target" is always shown on top, the advert's keywords are chips with a Missing / On your CV switch, and each category opens to list its issues.
 - The Tutorials dialog (#413) fits every screen size: a contents sidebar with ticks on desktop and small laptops, tabs on a tablet, and on a phone a full page with a Tutorial dropdown that opens a bottom list. A tutorial is ticked once you reach its last step, and a "Don't show on start" switch stops tutorials opening by themselves on a first visit.
 - CI (#399) saves GitHub Actions minutes: it runs only on pull requests that are not drafts (not on branch pushes and not again after the merge), cancels the older run when a new commit arrives, skips docs-only changes, caches the Playwright browser and stops after 15 minutes. It can be started by hand from the Actions tab.
@@ -32,6 +33,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Fixed
 
 - Dialogs that scroll, like "Save for later" (#421), show a scrollbar that stays visible. On a Mac the system hides its scrollbar until you scroll, so a long form looked cut off with no sign that there was more.
+- The SponsorLicenseCheck link on the job details page (#419) opens its site: the address was spelled "licence" and did not resolve; it is `sponsorlicensecheck.co.uk`.
 - Opening a job by its address (for example `/jobs/<id>`) could end on the first job instead: the saved data was loaded twice at the same time (React's development mode starts the first load twice) and the second load put the first job back. A load that is running is no longer started again.
 - "All applications" on an application's page shows the list with the same search and filter again, and the Applications page says "1 job" for a single job.
 - Test suites brought up to date with the Apply layout, the new Applications page and the first-visit tutorials (unit, component and Playwright end-to-end); the tests of the removed Tailor page were deleted with it.
