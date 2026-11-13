@@ -1,7 +1,7 @@
 import { APP_VERSION } from "@shared/version";
 import { withExportMeta } from "@shared/migration/export-meta";
 import { CURRENT_APPLICATION_VERSION } from "@custom-types/application-types";
-import { CvStorage } from "@server/storage/cv-storage";
+import { CvStorage } from "@shared/storage/cv-storage";
 import { createZip, ZipEntry } from "@server/export/zip";
 
 /** One application that could not be exported whole, and why */
@@ -87,7 +87,7 @@ export async function buildApplicationsExport(
     try {
       entries.push({
         name: `${summary.id}/cv.pdf`,
-        data: await storage.loadApplicationPdf(summary.id),
+        data: Buffer.from(await storage.loadApplicationPdf(summary.id)),
       });
     } catch (error: unknown) {
       // Applied elsewhere without a CV: having no PDF is normal

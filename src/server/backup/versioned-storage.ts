@@ -11,7 +11,7 @@ import {
   CvStorage,
   JobSummary,
   TemplateSummary,
-} from "@server/storage/cv-storage";
+} from "@shared/storage/cv-storage";
 
 /** Wraps a storage and commits the data folder after every successful change */
 export class VersionedCvStorage implements CvStorage {
@@ -73,11 +73,14 @@ export class VersionedCvStorage implements CvStorage {
     return this.inner.loadApplication(id);
   }
 
-  loadApplicationPdf(id: string): Promise<Buffer> {
+  loadApplicationPdf(id: string): Promise<Uint8Array> {
     return this.inner.loadApplicationPdf(id);
   }
 
-  async saveApplication(application: Application, pdf?: Buffer): Promise<void> {
+  async saveApplication(
+    application: Application,
+    pdf?: Uint8Array
+  ): Promise<void> {
     await this.inner.saveApplication(application, pdf);
     await this.backup.commit(
       pdf

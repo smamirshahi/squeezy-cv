@@ -13,7 +13,7 @@ import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { resolveVariant, splitVariant } from "@shared/variant/template-job";
 import { createVariant } from "@shared/variant/variant-utils";
-import { StorageError } from "@server/storage/cv-storage";
+import { StorageError } from "@shared/storage/cv-storage";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
 const file = migrateCvFile(sample);

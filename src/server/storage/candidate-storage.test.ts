@@ -11,7 +11,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Candidate } from "@custom-types/candidate-types";
 import { createCandidate } from "@shared/candidate/candidate-utils";
-import { StorageError } from "@server/storage/cv-storage";
+import { StorageError } from "@shared/storage/cv-storage";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
 let dir: string;

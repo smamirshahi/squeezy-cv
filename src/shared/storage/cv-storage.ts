@@ -68,10 +68,10 @@ export interface CvStorage {
   loadApplication(id: string): Promise<Application>;
 
   /** The PDF of the CV that was sent. Throws "not_found" if there is none. */
-  loadApplicationPdf(id: string): Promise<Buffer>;
+  loadApplicationPdf(id: string): Promise<Uint8Array>;
 
   /** `pdf` is given when an application is created and left out when it is only edited */
-  saveApplication(application: Application, pdf?: Buffer): Promise<void>;
+  saveApplication(application: Application, pdf?: Uint8Array): Promise<void>;
 
   /** Throws StorageError "not_found" if there is no such application */
   deleteApplication(id: string): Promise<void>;

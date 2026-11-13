@@ -14,7 +14,7 @@ import { CURRENT_VAULT_VERSION } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { createVariant } from "@shared/variant/variant-utils";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
-import { StorageError } from "@server/storage/cv-storage";
+import { StorageError } from "@shared/storage/cv-storage";
 import { KeyedQueue } from "@server/storage/file-utils";
 
 function makeVariant(
