@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Notifications: one shared toast replaces the old snackbars. It uses the theme's panel colour, shows an icon for its kind (success, info, warning, error, undo), has a close button, readable actions (View, View list) and a line for the time left. It closes after 6 s, pauses on hover or focus, errors stay until closed, Esc closes the newest, at most 3 are shown. It sits at the bottom centre of the page area (above the tab bar on a phone), never over the rail or the side panels (#433).
+
 ## [0.7.0] - 2026-11-13
 
 ### Changed
