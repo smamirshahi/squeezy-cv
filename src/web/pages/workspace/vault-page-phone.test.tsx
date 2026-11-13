@@ -7,7 +7,7 @@ import sample from "@fixtures/sample-cv.json";
 import { VaultPage } from "@pages/workspace/vault-page";
 import { rootReducer } from "@store/store";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { setVault } from "@store/vault/vault-slice";
+import { ensureUnsortedSection, setVault } from "@store/vault/vault-slice";
 
 /** A window as wide as a phone: only the queries that say "max-width" match */
 function usePhoneWidth(): void {
@@ -65,5 +65,20 @@ describe("VaultPage on a phone", () => {
       screen.getAllByRole("link", { name: /Work Experience/ }).length
     ).toBeGreaterThan(1);
     expect(screen.queryByText("Add new experience")).toBeNull();
+  });
+
+  it("lists an empty Unsorted section as an enabled chip", () => {
+    window.history.replaceState(null, "", "/vault");
+    const store = configureStore({ reducer: rootReducer });
+    store.dispatch(setVault(migrateCvFile(sample).vault));
+    store.dispatch(ensureUnsortedSection());
+    render(
+      <Provider store={store}>
+        <VaultPage />
+      </Provider>
+    );
+    const chip = screen.getByRole("link", { name: "Unsorted" });
+    expect(chip.className).not.toMatch(/Mui-disabled/);
+    expect(screen.queryByText("AI sorting")).toBeNull();
   });
 });

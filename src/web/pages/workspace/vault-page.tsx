@@ -10,7 +10,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -35,7 +34,11 @@ import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { setSelectedSectionInEditorPage } from "@store/app/app-slice";
 import { formatRoute } from "@shared/routing/routes";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
-import { sectionsSelector } from "@store/vault/vault-slice";
+import {
+  ensureUnsortedSection,
+  sectionsSelector,
+} from "@store/vault/vault-slice";
+import { UNSORTED_SECTION_ID } from "@shared/vault/unsorted";
 
 const HiddenInput = styled("input")({ display: "none" });
 
@@ -57,6 +60,7 @@ const TREE_WIDTH: Record<Viewport, number> = {
 
 /** Left: the vault as a tree, plus the settings pages and JSON import/export */
 function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
+  const dispatch = useAppDispatch();
   const pages = useEditorPages();
   const sections = useAppSelector(sectionsSelector);
   const { handleImport, handleExport } = useImportExportJson();
@@ -117,60 +121,49 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
                 (a, b) =>
                   Number(a.type === "unsorted") - Number(b.type === "unsorted")
               )
-              .map((section) => {
-                // The AI sorting section is switched off for now (issue: AI sorting) while it is empty
-                const isOff =
-                  section.type === "unsorted" && section.items.length === 0;
-                return (
-                  <Box key={section.id}>
-                    <Tooltip title={isOff ? "AI sorting: coming soon" : ""}>
-                      <span>
-                        <ListItemButton
-                          disabled={isOff}
-                          selected={selectedPage === section.id}
-                          component="a"
-                          href={formatRoute({
-                            kind: "vault",
-                            sectionId: section.id,
-                          })}
-                          onClick={(event: MouseEvent<HTMLElement>) =>
-                            onAppLinkClick(event, {
-                              kind: "vault",
-                              sectionId: section.id,
-                            })
-                          }
-                        >
-                          <ListItemText
-                            primary={isOff ? "AI sorting" : section.title}
-                            slotProps={{
-                              primary: { sx: { fontWeight: 600 } },
-                            }}
-                          />
-                          <Typography
-                            sx={{ fontSize: 12, color: "text.secondary" }}
-                          >
-                            {section.items.length}
-                          </Typography>
-                        </ListItemButton>
-                      </span>
-                    </Tooltip>
-                  </Box>
-                );
-              })}
-            {!sections.some((section) => section.type === "unsorted") && (
-              <Tooltip title="AI sorting: coming soon">
-                <span>
-                  <ListItemButton disabled>
+              .map((section) => (
+                <Box key={section.id}>
+                  <ListItemButton
+                    selected={selectedPage === section.id}
+                    component="a"
+                    href={formatRoute({
+                      kind: "vault",
+                      sectionId: section.id,
+                    })}
+                    onClick={(event: MouseEvent<HTMLElement>) =>
+                      onAppLinkClick(event, {
+                        kind: "vault",
+                        sectionId: section.id,
+                      })
+                    }
+                  >
                     <ListItemText
-                      primary="AI sorting"
-                      slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                      primary={section.title}
+                      slotProps={{
+                        primary: { sx: { fontWeight: 600 } },
+                      }}
                     />
                     <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                      0
+                      {section.items.length}
                     </Typography>
                   </ListItemButton>
-                </span>
-              </Tooltip>
+                </Box>
+              ))}
+            {!sections.some((section) => section.type === "unsorted") && (
+              <ListItemButton
+                onClick={() => {
+                  dispatch(ensureUnsortedSection());
+                  navigate({ kind: "vault", sectionId: UNSORTED_SECTION_ID });
+                }}
+              >
+                <ListItemText
+                  primary="Unsorted"
+                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                />
+                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                  0
+                </Typography>
+              </ListItemButton>
             )}
           </List>
           <Box sx={{ display: "flex", px: 1, pt: 1 }}>
@@ -258,11 +251,10 @@ function VaultChips({ selectedPage }: { selectedPage: string }): JSX.Element {
           isOff: false,
         })),
         ...ordered.map((section) => {
-          const isOff = section.type === "unsorted" && !section.items.length;
           return {
             id: section.id,
-            label: isOff ? "AI sorting" : section.title,
-            isOff,
+            label: section.title,
+            isOff: false,
           };
         }),
       ].map((entry) => (
