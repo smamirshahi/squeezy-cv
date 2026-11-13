@@ -1,6 +1,7 @@
 import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
-import { AiRegistry, FileAiSettings } from "@server/ai/ai-registry";
+import { AiRegistry } from "@server/ai/ai-registry";
+import { FileAiSettings } from "@server/ai/ai-settings-file";
 import { createAiClients } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
 import { readFeedbackSender } from "@server/feedback/github-feedback";

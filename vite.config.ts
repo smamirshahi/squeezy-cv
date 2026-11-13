@@ -1,10 +1,26 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { fileURLToPath } from "node:url";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  resolve: {
+    alias: [
+      {
+        // The prompts as bundled text instead of files read from disk, so the AI code can run in the
+        // browser version (the Node server, run without Vite, reads the files)
+        find: /^@server\/ai\/prompts$/,
+        replacement: fileURLToPath(
+          new URL(
+            "src/web/store/persistence/browser/ai/browser-prompts.ts",
+            import.meta.url
+          )
+        ),
+      },
+    ],
+  },
   server: {
     proxy: {
       // The local API server (pnpm dev:server)

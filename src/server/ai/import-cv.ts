@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { RawImportSchema } from "@custom-types/import-types";
 import { AiClient } from "@server/ai/ai-types";
 import { normaliseRawImport } from "@shared/vault/normalise-raw-import";
@@ -21,5 +20,5 @@ export async function importCv(
       check: (value) => RawImportSchema.check(normaliseRawImport(value)),
     },
   });
-  return importToVault(raw, text, randomUUID);
+  return importToVault(raw, text, () => crypto.randomUUID());
 }

@@ -22,6 +22,9 @@ import {
   createCandidate,
   updateCandidate,
 } from "@shared/candidate/candidate-utils";
+import { aiErrorResult } from "@server/ai/ai-routes";
+import { AiError } from "@server/ai/ai-types";
+import { handleBrowserAi } from "@store/persistence/browser/ai/browser-ai";
 import { buildBackup, restoreBackup } from "@shared/backup/full-backup";
 import { CvStorage, StorageError } from "@shared/storage/cv-storage";
 import { resolveVariant } from "@shared/variant/template-job";
@@ -66,7 +69,7 @@ function statusOf(error: StorageError): number {
   }
 }
 
-/** Features that need the server (AI, PDF, import) until they are ported to the browser */
+/** Features that need the server (reading a PDF to import) */
 function unavailable(): Response {
   return failure(
     HTTP_NOT_IMPLEMENTED,
@@ -79,7 +82,7 @@ function unavailable(): Response {
  * The server's storage routes, answered in the browser from a `CvStorage`. It has the same
  * addresses, bodies and error codes as the Fastify routes in `server/app.ts`, so the API client
  * (and everything above it) works the same in browser mode. Routes that need the server
- * (AI, PDF, PDF import) answer 501 `browser_unavailable`.
+ * (PDF import) answer 501 `browser_unavailable`.
  */
 export function createLocalFetch(
   storage: CvStorage,
@@ -106,7 +109,8 @@ export function createLocalFetch(
     method: string,
     path: string,
     body: unknown,
-    rawBody: BodyInit | null | undefined
+    rawBody: BodyInit | null | undefined,
+    isPreview: boolean
   ): Promise<Response> {
     const parts = path
       .split("/")
@@ -140,8 +144,17 @@ export function createLocalFetch(
         }
       }
     }
-    if (area === "ai" && id === "status" && method === "GET") {
-      return json(HTTP_OK, { isConfigured: false, provider: "claude" });
+    if (area === "ai") {
+      const result = await handleBrowserAi(
+        storage,
+        method,
+        path,
+        body,
+        isPreview
+      );
+      if (result) {
+        return json(result.status, result.body);
+      }
     }
 
     if (area === "vault" && !id) {
@@ -376,10 +389,15 @@ export function createLocalFetch(
       }
     }
     try {
-      return await route(method, path, body, rawBody);
+      const isPreview = new Headers(init?.headers).get("x-ai-preview") === "1";
+      return await route(method, path, body, rawBody, isPreview);
     } catch (error) {
       if (error instanceof StorageError) {
         return failure(statusOf(error), error.code, error.message);
+      }
+      if (error instanceof AiError) {
+        const result = aiErrorResult(error);
+        return json(result.status, result.body);
       }
       if (
         error instanceof ValidationError ||

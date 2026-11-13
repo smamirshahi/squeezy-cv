@@ -16,18 +16,8 @@ import { CvFileSchema } from "@custom-types/vault-types";
 import { JobSchema, JOB_ID_PATTERN } from "@custom-types/job-types";
 import { TemplateSchema } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
-import { AiClient, AiError, AiErrorCode } from "@server/ai/ai-types";
-import {
-  analyseJobAd,
-  scoreJobTitles,
-  scoreSection,
-} from "@server/ai/analyse-job-ad";
-import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
-import {
-  AnalyseRequestSchema,
-  ScoreSectionRequestSchema,
-} from "@custom-types/score-types";
-import { importCv } from "@server/ai/import-cv";
+import { AiClient, AiError } from "@server/ai/ai-types";
+import { aiErrorResult, createAiRoutes } from "@server/ai/ai-routes";
 import {
   FeedbackRequestSchema,
   MAX_FEEDBACK_APP_INFO_LENGTH,
@@ -39,53 +29,9 @@ import {
   FeedbackSender,
 } from "@server/feedback/github-feedback";
 import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
-import { pickHide } from "@server/ai/pick-hide";
-import { placeItems } from "@server/ai/place-items";
-import { personalOf } from "@shared/ai/redact-personal";
-import { MAX_PLACE_ITEMS, PlaceRequestSchema } from "@custom-types/place-types";
-import { chat } from "@server/ai/chat";
-import {
-  ChatRequestSchema,
-  MAX_CHAT_HISTORY,
-  MAX_CHAT_MESSAGE_LENGTH,
-} from "@custom-types/chat-types";
-import { AiChoiceError, AiRegistry } from "@server/ai/ai-registry";
-import { MaskingSchema } from "@custom-types/masking-types";
-import {
-  PreviewStop,
-  Recorder,
-  createRecorder,
-  maskedClient,
-} from "@server/ai/send-preview";
-import { AiProviderId, AiTask } from "@shared/ai/providers";
-import {
-  HideRequestSchema,
-  MAX_HIDE_CANDIDATES,
-} from "@custom-types/hide-types";
-import {
-  MAX_REWRITE_REQUIREMENTS,
-  RewriteRequestSchema,
-} from "@custom-types/rewrite-types";
-import { BulletNotFoundError, rewriteBullet } from "@server/ai/rewrite-bullet";
-import { rewordText } from "@server/ai/reword-text";
-import { RewordRequestSchema } from "@custom-types/reword-types";
-import { suggestAtsWording } from "@server/ai/ats-wording";
-import { AtsWordingRequestSchema } from "@custom-types/ats-wording-types";
-import {
-  generateBullets,
-  ItemNotFoundError,
-  NothingToWorkFromError,
-} from "@server/ai/generate-bullets";
-import {
-  BulletsRequestSchema,
-  MAX_BULLETS_REQUIREMENTS,
-} from "@custom-types/bullets-types";
-import { MAX_JOB_AD_LENGTH } from "@custom-types/tailor-types";
-import {
-  ImportRequestSchema,
-  MAX_IMPORT_LENGTH,
-  MAX_IMPORT_PDF_BYTES,
-} from "@custom-types/import-types";
+import { AiRegistry } from "@server/ai/ai-registry";
+import { AiProviderId } from "@shared/ai/providers";
+import { MAX_IMPORT_PDF_BYTES } from "@custom-types/import-types";
 import {
   CandidateInputError,
   createCandidate,
@@ -127,26 +73,9 @@ const HTTP_UNSUPPORTED_MEDIA = 415;
 const HTTP_CONFLICT = 409;
 const HTTP_SERVER_ERROR = 500;
 const HTTP_NOT_IMPLEMENTED = 501;
-const HTTP_UNPROCESSABLE = 422;
 const HTTP_BAD_GATEWAY = 502;
 const HTTP_UNAVAILABLE = 503;
-const HTTP_GATEWAY_TIMEOUT = 504;
 
-function statusOfAi(code: AiErrorCode): number {
-  switch (code) {
-    case "not_configured":
-      return HTTP_UNAVAILABLE;
-    case "timeout":
-      return HTTP_GATEWAY_TIMEOUT;
-    case "refused":
-      return HTTP_UNPROCESSABLE;
-    case "truncated":
-      return HTTP_UNPROCESSABLE;
-    case "api_error":
-    case "invalid_output":
-      return HTTP_BAD_GATEWAY;
-  }
-}
 const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
 function statusOf(code: StorageErrorCode): number {
@@ -213,16 +142,6 @@ export interface ServerOptions {
 }
 
 /** Builds the API. It does not listen; `main.ts` (or a test) decides how to run it. */
-/** The requirement(s) to emphasise, each cut to a sensible length (one text stays one text) */
-function limitFocus(
-  focus: string | string[] | undefined
-): string | string[] | undefined {
-  if (Array.isArray(focus)) {
-    return focus.slice(0, 10).map((text) => text.slice(0, 200));
-  }
-  return focus?.slice(0, 200);
-}
-
 export function buildServer({
   storage,
   pdf,
@@ -236,27 +155,6 @@ export function buildServer({
 }: ServerOptions): FastifyInstance {
   const registry = aiRegistry ?? AiRegistry.single(ai, aiProvider);
 
-  // The AI client for one request. With the header `x-ai-preview: 1` it only records what would be
-  // sent (answered as `PreviewStop`, see the error handler), and works without a key. A body
-  // `masking` (the user's choices in the "Send to AI" dialog) is added to whatever is sent.
-  const recorders = new WeakMap<FastifyRequest, Recorder>();
-  function aiFor(
-    task: AiTask,
-    request: FastifyRequest,
-    options: { callsToRecord?: number; standIn?: unknown } = {}
-  ): AiClient | undefined {
-    const { client, provider } = registry.forTask(task);
-    const rawMasking = (request.body as { masking?: unknown } | undefined)
-      ?.masking;
-    const masking =
-      rawMasking === undefined ? undefined : MaskingSchema.check(rawMasking);
-    if (request.headers["x-ai-preview"] === "1") {
-      const recorder = createRecorder({ provider, masking, ...options });
-      recorders.set(request, recorder);
-      return recorder;
-    }
-    return client ? maskedClient(client, masking) : undefined;
-  }
   const app = Fastify({
     // eslint-disable-next-line @typescript-eslint/naming-convention -- Fastify option name
     logger: isLoggingEnabled,
@@ -282,35 +180,13 @@ export function buildServer({
     done();
   });
 
-  // A preview of a task that ran to its end (it never reached a stop) is answered here
-  app.addHook("onSend", (request, reply, payload, done) => {
-    const recorder = recorders.get(request);
-    if (
-      recorder &&
-      !recorder.isStopped &&
-      reply.statusCode < HTTP_BAD_REQUEST
-    ) {
-      reply.type("application/json");
-      done(null, JSON.stringify(recorder.finish()));
-      return;
-    }
-    done(null, payload);
-  });
-
   app.setErrorHandler((error, _request, reply) => {
-    if (error instanceof PreviewStop) {
-      return reply.send(error.preview);
-    }
     if (error instanceof StorageError) {
       return sendError(reply, statusOf(error.code), error.code, error.message);
     }
     if (error instanceof AiError) {
-      return sendError(
-        reply,
-        statusOfAi(error.code),
-        `ai_${error.code}`,
-        error.message
-      );
+      const result = aiErrorResult(error);
+      return reply.status(result.status).send(result.body);
     }
     if (error instanceof PdfTextError) {
       return sendError(
@@ -462,342 +338,45 @@ export function buildServer({
     }
   );
 
-  // `isConfigured` and `provider` are those of tailoring (older pages read only these);
-  // `providers` and `choice` are for the chooser and for the other tasks' notices
-  app.get("/api/ai/status", () => {
-    const tailoring = registry.forTask("tailor");
-    return {
-      isConfigured: tailoring.client !== undefined,
-      provider: tailoring.provider,
-      providers: registry.providers(),
-      choice: registry.choice(),
-    };
+  // The AI routes (status, choice, analyse, score, chat, rewrite, bullets, reword, ats-wording, hide,
+  // place) are plain functions shared with the browser version, see `ai/ai-routes.ts`
+  const aiRoutes = createAiRoutes({
+    registry,
+    loadVault: () => storage.loadVault(),
+    notConfigured: {
+      tailoring:
+        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example).",
+      other:
+        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup.",
+    },
   });
-
-  // Which provider each task uses. Keys stay in .env; only the choice is stored.
-  app.put("/api/ai/choice", async (request, reply) => {
-    try {
-      await registry.choose(request.body as Record<string, string>);
-    } catch (error) {
-      if (error instanceof AiChoiceError) {
-        return sendError(
-          reply,
-          HTTP_BAD_REQUEST,
-          "provider_unavailable",
-          error.message
-        );
-      }
-      throw error;
-    }
-    return { choice: registry.choice() };
-  });
-
-  // Reads an advert once: keywords and requirements for the job (the user stores them; nothing is changed here)
-  app.post("/api/ai/analyse", async (request, reply) => {
-    const ai = aiFor("tailor", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const jobAd = AnalyseRequestSchema.check(request.body).jobAd.trim();
-    if (jobAd.length === 0 || jobAd.length > MAX_JOB_AD_LENGTH) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `The job advert must be 1 to ${MAX_JOB_AD_LENGTH} characters.`
-      );
-    }
-    const { vault } = await storage.loadVault();
-    return analyseJobAd(ai, vault, jobAd, {
-      isMaskingOrganisations: registry.isMaskingOrganisations(),
-    });
-  });
-
-  // A relevance score and reason for every entry (and skill) of ONE section (the user applies it; nothing is changed here)
-  app.post("/api/ai/score-section", async (request, reply) => {
-    // A preview records every batch of the section, answered with empty scores
-    const ai = aiFor("tailor", request, {
-      callsToRecord: Number.POSITIVE_INFINITY,
-      standIn: { scores: [] },
-    });
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const body = ScoreSectionRequestSchema.check(request.body);
-    const { vault } = await storage.loadVault();
-    if (body.sectionId === JOB_TITLES_SECTION) {
-      return scoreJobTitles(ai, vault, body.requirements, {
-        isMaskingOrganisations: registry.isMaskingOrganisations(),
-      });
-    }
-    const section = vault.sections.find((entry) => entry.id === body.sectionId);
-    if (!section) {
-      return sendError(
-        reply,
-        HTTP_NOT_FOUND,
-        "not_found",
-        "That section is not in the saved CV. Save first."
-      );
-    }
-    return scoreSection(ai, vault, section, body.requirements, {
-      isMaskingOrganisations: registry.isMaskingOrganisations(),
-    });
-  });
-
-  // One chat turn: a reply and typed operations for the user to approve (nothing is changed here)
-  app.post("/api/ai/chat", async (request, reply) => {
-    const ai = aiFor("chat", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
-      );
-    }
-    const body = ChatRequestSchema.check(request.body);
-    const message = body.message.trim();
-    if (message.length === 0 || message.length > MAX_CHAT_MESSAGE_LENGTH) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `The message must be 1 to ${MAX_CHAT_MESSAGE_LENGTH} characters.`
-      );
-    }
-    const { vault } = await storage.loadVault();
-    return chat(
-      ai,
-      vault,
-      {
-        ...body,
-        message,
-        history: (body.history ?? []).slice(-MAX_CHAT_HISTORY),
-      },
-      { isMaskingOrganisations: registry.isMaskingOrganisations() }
+  async function sendAi(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    const result = await aiRoutes.handle(
+      request.method,
+      request.url.split("?")[0],
+      request.body,
+      { isPreview: request.headers["x-ai-preview"] === "1" }
     );
-  });
-
-  // One bullet made shorter, longer or more formal (the user accepts it; nothing is changed here)
-  app.post("/api/ai/rewrite", async (request, reply) => {
-    const ai = aiFor("chat", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
-      );
-    }
-    const body = RewriteRequestSchema.check(request.body);
-    const requirements = (body.requirements ?? [])
-      .slice(0, MAX_REWRITE_REQUIREMENTS)
-      .map((text) => text.slice(0, 200));
-    const { vault } = await storage.loadVault();
-    try {
-      return await rewriteBullet(
-        ai,
-        vault,
-        { ...body, requirements },
-        { isMaskingOrganisations: registry.isMaskingOrganisations() }
-      );
-    } catch (error) {
-      if (error instanceof BulletNotFoundError) {
-        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
-      }
-      throw error;
-    }
-  });
-
-  // Bullets made from an item's description for a job (the user reviews them; nothing is changed here)
-  app.post("/api/ai/bullets", async (request, reply) => {
-    const ai = aiFor("chat", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
-      );
-    }
-    const body = BulletsRequestSchema.check(request.body);
-    const requirements = (body.requirements ?? [])
-      .slice(0, MAX_BULLETS_REQUIREMENTS)
-      .map((text) => text.slice(0, 200));
-    const { vault } = await storage.loadVault();
-    try {
-      return await generateBullets(
-        ai,
-        vault,
-        {
-          ...body,
-          requirements,
-          focus: limitFocus(body.focus),
-          current: (body.current ?? []).map((text) => text.slice(0, 600)),
-        },
-        { isMaskingOrganisations: registry.isMaskingOrganisations() }
-      );
-    } catch (error) {
-      if (error instanceof ItemNotFoundError) {
-        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
-      }
-      if (error instanceof NothingToWorkFromError) {
-        return sendError(
-          reply,
-          HTTP_BAD_REQUEST,
-          "nothing_to_work_from",
-          error.message
-        );
-      }
-      throw error;
-    }
-  });
-
-  // One text (summary, description) shortened, lengthened or fitted to the job's keywords (the user reviews it; nothing is changed here)
-  app.post("/api/ai/reword", async (request, reply) => {
-    const ai = aiFor("chat", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
-      );
-    }
-    const body = RewordRequestSchema.check(request.body);
-    const { vault } = await storage.loadVault();
-    try {
-      return await rewordText(
-        ai,
-        vault,
-        {
-          ...body,
-          requirements: (body.requirements ?? []).map((text) =>
-            text.slice(0, 200)
-          ),
-          focus: limitFocus(body.focus),
-        },
-        { isMaskingOrganisations: registry.isMaskingOrganisations() }
-      );
-    } catch (error) {
-      if (error instanceof ItemNotFoundError) {
-        return sendError(reply, HTTP_NOT_FOUND, "not_found", error.message);
-      }
-      if (error instanceof NothingToWorkFromError) {
-        return sendError(
-          reply,
-          HTTP_BAD_REQUEST,
-          "nothing_to_work_from",
-          error.message
-        );
-      }
-      throw error;
-    }
-  });
-
-  // The advert's words worked into the CV's own texts, where they already say it (the user reviews it; nothing is changed here)
-  app.post("/api/ai/ats-wording", async (request, reply) => {
-    const ai = aiFor("chat", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set a key (or use Ollama) in .env, see .env.example, then choose it in AI setup."
-      );
-    }
-    const body = AtsWordingRequestSchema.check(request.body);
-    const { vault } = await storage.loadVault();
-    try {
-      return await suggestAtsWording(
-        ai,
-        vault,
-        {
-          terms: body.terms.map((term) => term.slice(0, 100)),
-          reworded: (body.reworded ?? []).map((term) => term.slice(0, 100)),
-        },
-        { isMaskingOrganisations: registry.isMaskingOrganisations() }
-      );
-    } catch (error) {
-      if (error instanceof NothingToWorkFromError) {
-        return sendError(
-          reply,
-          HTTP_BAD_REQUEST,
-          "nothing_to_work_from",
-          error.message
-        );
-      }
-      throw error;
-    }
-  });
-
-  // Which items to hide so the CV fits (the user confirms; nothing is changed here)
-  app.post("/api/ai/hide", async (request, reply) => {
-    const ai = aiFor("hide", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const body = HideRequestSchema.check(request.body);
-    if (
-      body.candidates.length === 0 ||
-      body.candidates.length > MAX_HIDE_CANDIDATES
-    ) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `Send 1 to ${MAX_HIDE_CANDIDATES} items.`
-      );
-    }
-    return pickHide(ai, body);
-  });
-
-  // Where items in the Unsorted section belong (the user confirms; nothing is moved here)
-  app.post("/api/ai/place", async (request, reply) => {
-    const ai = aiFor("place", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const body = PlaceRequestSchema.check(request.body);
-    if (
-      body.items.length === 0 ||
-      body.items.length > MAX_PLACE_ITEMS ||
-      body.sections.length === 0
-    ) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `Send 1 to ${MAX_PLACE_ITEMS} items and at least one section.`
-      );
-    }
-    const { vault } = await storage.loadVault();
-    return placeItems(
-      ai,
-      body,
-      personalOf(vault, registry.isMaskingOrganisations())
-    );
-  });
+    return reply.status(result?.status ?? HTTP_NOT_FOUND).send(result?.body);
+  }
+  app.get("/api/ai/status", sendAi);
+  app.put("/api/ai/choice", sendAi);
+  for (const name of [
+    "analyse",
+    "score-section",
+    "chat",
+    "rewrite",
+    "bullets",
+    "reword",
+    "ats-wording",
+    "hide",
+    "place",
+  ]) {
+    app.post(`/api/ai/${name}`, sendAi);
+  }
 
   // Reads the text out of an uploaded PDF (in memory; the file is never stored).
   // The text goes back to the browser to be checked and edited before it is sorted.
@@ -813,28 +392,7 @@ export function buildServer({
   );
 
   // Sorts pasted CV text into a vault (shown for review; nothing is saved here)
-  app.post("/api/ai/import", async (request, reply) => {
-    const ai = aiFor("import", request);
-    if (!ai) {
-      return sendError(
-        reply,
-        HTTP_UNAVAILABLE,
-        "ai_not_configured",
-        "AI is not set up. Set ANTHROPIC_API_KEY, or AI_PROVIDER=ollama, in .env (see .env.example)."
-      );
-    }
-    const body = ImportRequestSchema.check(request.body);
-    const text = body.text.trim();
-    if (text.length === 0 || text.length > MAX_IMPORT_LENGTH) {
-      return sendError(
-        reply,
-        HTTP_BAD_REQUEST,
-        "invalid",
-        `The text must be 1 to ${MAX_IMPORT_LENGTH} characters.`
-      );
-    }
-    return importCv(ai, text);
-  });
+  app.post("/api/ai/import", sendAi);
 
   app.get("/api/vault", () => storage.loadVault());
 
