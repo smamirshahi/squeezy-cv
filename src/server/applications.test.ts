@@ -264,3 +264,42 @@ describe("/api/applications", () => {
     expect(get.statusCode).toBe(404);
   });
 });
+
+describe("backup file", () => {
+  it("downloads everything and restores it into an empty data folder", async () => {
+    const download = await app.inject({
+      method: "GET",
+      url: "/api/backup/file",
+    });
+    expect(download.statusCode).toBe(200);
+    expect(download.headers["content-disposition"]).toContain(
+      "cv-builder-backup-2026-11-06.json"
+    );
+    const other = await mkdtemp(path.join(os.tmpdir(), "cv-app-restore-"));
+    const target = buildServer({ storage: new FileCvStorage(other), pdf });
+    try {
+      const restored = await target.inject({
+        method: "POST",
+        url: "/api/backup/file",
+        payload: download.json(),
+      });
+      expect(restored.statusCode).toBe(200);
+      expect(restored.json()).toMatchObject({
+        vault: true,
+        templates: 1,
+        jobs: 1,
+      });
+      const vault = await target.inject({ method: "GET", url: "/api/vault" });
+      expect(vault.json().vault).toEqual(file.vault);
+      const refused = await target.inject({
+        method: "POST",
+        url: "/api/backup/file",
+        payload: { hello: "world" },
+      });
+      expect(refused.statusCode).toBe(400);
+    } finally {
+      await target.close();
+      await rm(other, { recursive: true, force: true });
+    }
+  });
+});

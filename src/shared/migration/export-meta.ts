@@ -2,7 +2,16 @@ import { APP_VERSION } from "@shared/version";
 
 /** The kinds of JSON file the app writes */
 export type FileKind =
-  "cv-file" | "vault" | "job" | "template" | "application" | "candidate";
+  | "cv-file"
+  | "vault"
+  | "job"
+  | "template"
+  | "application"
+  | "candidate"
+  | "backup";
+
+/** Format version of the full backup file (the records inside carry their own versions) */
+export const CURRENT_BACKUP_VERSION = 1;
 
 /**
  * Written into every JSON file the app exports or saves, under the key `meta`. It says which

@@ -22,6 +22,7 @@ import {
   createCandidate,
   updateCandidate,
 } from "@shared/candidate/candidate-utils";
+import { buildBackup, restoreBackup } from "@shared/backup/full-backup";
 import { CvStorage, StorageError } from "@shared/storage/cv-storage";
 import { resolveVariant } from "@shared/variant/template-job";
 
@@ -116,6 +117,28 @@ export function createLocalFetch(
 
     if (area === "health") {
       return json(HTTP_OK, { status: "ok" });
+    }
+    if (area === "backup" && id === "file") {
+      if (method === "GET") {
+        const { backup } = await buildBackup(storage, now());
+        return json(HTTP_OK, backup);
+      }
+      if (method === "POST") {
+        try {
+          return json(HTTP_OK, await restoreBackup(storage, body));
+        } catch (error) {
+          if (error instanceof StorageError) {
+            throw error;
+          }
+          return failure(
+            HTTP_BAD_REQUEST,
+            "invalid",
+            error instanceof Error
+              ? error.message
+              : "The backup cannot be read."
+          );
+        }
+      }
     }
     if (area === "ai" && id === "status" && method === "GET") {
       return json(HTTP_OK, { isConfigured: false, provider: "claude" });

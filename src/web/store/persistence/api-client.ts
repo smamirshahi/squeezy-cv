@@ -1,3 +1,4 @@
+import { RestoreSummary } from "@shared/backup/full-backup";
 import { gateAiFetch } from "@store/persistence/send-gate";
 import {
   browserFetch,
@@ -180,6 +181,12 @@ export function taskProvider(
 }
 
 export interface ApiClient {
+  /** Every record in one backup file (JSON) */
+  downloadBackup: () => Promise<Blob>;
+
+  /** Writes a backup file's records (same ids are replaced); refuses a file that is not a backup or is newer */
+  restoreBackup: (backup: unknown) => Promise<RestoreSummary>;
+
   loadVault: () => Promise<CvFile>;
   saveVault: (file: CvFile) => Promise<void>;
   listTemplates: () => Promise<TemplateSummary[]>;
@@ -272,6 +279,23 @@ export function createApiClient(
   )
 ): ApiClient {
   return {
+    async downloadBackup() {
+      return (await request(
+        fetchImpl,
+        "GET",
+        "/api/backup/file",
+        undefined,
+        "blob"
+      )) as Blob;
+    },
+    async restoreBackup(backup) {
+      return (await request(
+        fetchImpl,
+        "POST",
+        "/api/backup/file",
+        backup
+      )) as RestoreSummary;
+    },
     async loadVault() {
       return CvFileSchema.check(await request(fetchImpl, "GET", "/api/vault"));
     },

@@ -6,6 +6,7 @@ import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import BackupOutlinedIcon from "@mui/icons-material/BackupOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
@@ -14,6 +15,7 @@ import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { AboutDialog } from "@pages/workspace/about-dialog";
+import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useViewport } from "@hooks/use-viewport";
@@ -90,6 +92,7 @@ export function ToolRail(): JSX.Element {
             ...ITEMS,
             null,
             "about" as const,
+            "data" as const,
             "settings" as const,
             "theme" as const,
           ]
@@ -116,6 +119,28 @@ export function ToolRail(): JSX.Element {
             >
               <InfoOutlinedIcon fontSize="small" />
               <Typography sx={{ fontSize: 10.5 }}>About</Typography>
+            </ButtonBase>
+          );
+        }
+        if (item === "data") {
+          return (
+            <ButtonBase
+              key="data"
+              onClick={openDataDialog}
+              aria-haspopup="dialog"
+              aria-label="Your data: backup and restore"
+              sx={{
+                width: 60,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              <BackupOutlinedIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>Data</Typography>
             </ButtonBase>
           );
         }

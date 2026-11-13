@@ -4,6 +4,7 @@ import { Workspace } from "@pages/workspace/workspace";
 import { PrintView } from "@pages/print-page/print-view";
 import { NotFound } from "@pages/workspace/not-found";
 import { AiSettingsHost } from "@pages/workspace/ai-settings-dialog";
+import { DataDialogHost } from "@pages/workspace/data-dialog";
 import { Notifications } from "@components/notifications/notifications";
 import { SendToAiHost } from "@pages/workspace/send-to-ai-dialog";
 import { navigate, useRoute } from "@hooks/navigation";
@@ -42,6 +43,7 @@ export function App(): JSX.Element {
       <Notifications />
       <SendToAiHost />
       <AiSettingsHost />
+      <DataDialogHost />
     </AppThemeProvider>
   );
 }
