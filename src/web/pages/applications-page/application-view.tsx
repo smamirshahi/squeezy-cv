@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { nanoid } from "@reduxjs/toolkit";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   APPLICATION_STATUSES,
   Application,
@@ -37,9 +37,12 @@ import { splitVariant } from "@shared/variant/template-job";
 import { copyJob } from "@shared/variant/variant-utils";
 import { templateIdFor } from "@store/jobs/jobs-slice";
 import {
+  apiFetch,
+  applicationPdfApiUrl,
   applicationPdfUrl,
   createApiClient,
 } from "@store/persistence/api-client";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 
 type LoadState =
   | { status: "loading" }
@@ -81,7 +84,8 @@ export function ApplicationView({
   const [statusNote, setStatusNote] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>("");
-  const [isPdfMissing, setIsPdfMissing] = useState<boolean>(false);
+  const [isPdfStoredMissing, setIsPdfMissing] = useState<boolean>(false);
+  const cvFrame = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -107,7 +111,7 @@ export function ApplicationView({
   useEffect(() => {
     let isCancelled = false;
     setIsPdfMissing(false);
-    fetch(applicationPdfUrl(applicationId), { method: "HEAD" })
+    apiFetch(applicationPdfApiUrl(applicationId), { method: "HEAD" })
       .then((response) => {
         if (!isCancelled && !response.ok) {
           setIsPdfMissing(true);
@@ -155,11 +159,26 @@ export function ApplicationView({
   }
 
   const { application } = state;
+  // In browser mode a sent CV has no stored PDF: the page draws it from the frozen copy
+  const isPdfMissing =
+    isPdfStoredMissing && !(isBrowserMode() && application.submitted);
   const today = toIsoDay(new Date());
   const hasNoReply = isNoReply(
     { status: application.status, updatedAt: lastUpdateDay(application) },
     today
   );
+
+  /** The browser's "Save as PDF" for the CV shown in the frame */
+  function printCv(sent: Application): void {
+    const frame = cvFrame.current;
+    if (!frame?.contentWindow) {
+      return;
+    }
+    if (frame.contentDocument) {
+      frame.contentDocument.title = `${sent.company} - ${sent.role}`;
+    }
+    frame.contentWindow.print();
+  }
 
   async function confirmStatus(): Promise<void> {
     if (!nextStatus) {
@@ -342,13 +361,19 @@ export function ApplicationView({
                 gap: 1,
               }}
             >
-              <Button
-                href={applicationPdfUrl(application.id)}
-                download={`${application.id}.pdf`}
-                disabled={isPdfMissing}
-              >
-                Download PDF
-              </Button>
+              {isBrowserMode() ? (
+                <Button onClick={() => printCv(application)}>
+                  Save as PDF
+                </Button>
+              ) : (
+                <Button
+                  href={applicationPdfUrl(application.id)}
+                  download={`${application.id}.pdf`}
+                  disabled={isPdfMissing}
+                >
+                  Download PDF
+                </Button>
+              )}
               <Button onClick={() => void createJobFromThis()}>
                 Create new job from this
               </Button>
@@ -372,6 +397,7 @@ export function ApplicationView({
           ) : (
             <Box
               component="iframe"
+              ref={cvFrame}
               title="The CV you sent"
               src={applicationPdfUrl(application.id)}
               sx={{

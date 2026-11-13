@@ -64,6 +64,10 @@ describe("parseRoute", () => {
     expect(parseRoute("/chat/main")).toEqual({ kind: "chat", jobId: "main" });
     expect(parseRoute("/ai")).toEqual({ kind: "ai" });
     expect(parseRoute("/print/main")).toEqual({ kind: "print", jobId: "main" });
+    expect(parseRoute("/print-application/acme-1")).toEqual({
+      kind: "printApplication",
+      id: "acme-1",
+    });
   });
 
   it("reads the applications list with its query, and one application", () => {
@@ -122,6 +126,7 @@ describe("formatRoute", () => {
     { kind: "applications", search: "?status=offer" },
     { kind: "application", id: "abc" },
     { kind: "print", jobId: "main" },
+    { kind: "printApplication", id: "acme-1" },
   ];
 
   it("is the inverse of parseRoute", () => {

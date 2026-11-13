@@ -1,6 +1,6 @@
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useViewport } from "@hooks/use-viewport";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -25,6 +25,7 @@ import { MarkAsAppliedDialog } from "@pages/applications-page/mark-as-applied";
 import { saveActiveJob } from "@hooks/save-active-job";
 import { useImportExportJson } from "@hooks/use-import-export-json";
 import { createApiClient } from "@store/persistence/api-client";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { RootState, useAppSelector } from "@store/store-helper";
 import {
   activeTemplateSelector,
@@ -56,7 +57,9 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
   const ats = useAts();
   const atsFixes = fixList(ats.live.issues).slice(0, EXPORT_FIX_COUNT);
 
-  const [pdf, setPdf] = useState<{ blob: Blob; url: string } | null>(null);
+  // `blob` is missing in browser mode: the preview is the print page and the browser makes the PDF
+  const [pdf, setPdf] = useState<{ blob?: Blob; url: string } | null>(null);
+  const previewFrame = useRef<HTMLIFrameElement | null>(null);
   const [error, setError] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [isAlsoJson, setIsAlsoJson] = useState<boolean>(false);
@@ -77,6 +80,12 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
     void (async () => {
       try {
         const saved = await saveActiveJob(store, api);
+        if (isBrowserMode()) {
+          if (!isCancelled) {
+            setPdf({ url: `/print/${encodeURIComponent(saved.id)}` });
+          }
+          return;
+        }
         const blob = await api.createPdf(saved.id);
         url = URL.createObjectURL(blob);
         if (!isCancelled) {
@@ -122,10 +131,20 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
     if (!pdf) {
       return;
     }
-    const link = document.createElement("a");
-    link.href = pdf.url;
-    link.download = `${fileName || "CV"}.pdf`;
-    link.click();
+    if (isBrowserMode()) {
+      // The browser's own "Save as PDF": its print dialog, with the file name suggested
+      const frame = previewFrame.current;
+      if (!frame?.contentWindow) {
+        return;
+      }
+      frame.contentDocument!.title = fileName || "CV";
+      frame.contentWindow.print();
+    } else {
+      const link = document.createElement("a");
+      link.href = pdf.url;
+      link.download = `${fileName || "CV"}.pdf`;
+      link.click();
+    }
     if (isAlsoJson) {
       handleExport(fileName || "CV");
     }
@@ -170,8 +189,13 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
           >
             {pdf ? (
               <iframe
+                ref={previewFrame}
                 title="PDF preview"
-                src={`${pdf.url}#toolbar=0&navpanes=0&view=FitH`}
+                src={
+                  isBrowserMode()
+                    ? pdf.url
+                    : `${pdf.url}#toolbar=0&navpanes=0&view=FitH`
+                }
                 style={{ width: "100%", height: "100%", border: 0 }}
               />
             ) : (
@@ -193,7 +217,11 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
               size="small"
               value={fileName}
               onChange={(event) => setFileName(event.target.value)}
-              helperText="Saved with .pdf"
+              helperText={
+                isBrowserMode()
+                  ? 'In the print window choose "Save as PDF" as the printer'
+                  : "Saved with .pdf"
+              }
             />
             <Box>
               <Typography
@@ -275,8 +303,11 @@ export function ExportDialog({ isOpen, onClose }: Props): JSX.Element {
               label="Then mark this as applied"
             />
             <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-              Made on this computer. After downloading you are asked for the
-              company and role, and the CV is saved exactly as sent.
+              {isBrowserMode()
+                ? "Made in this browser."
+                : "Made on this computer."}{" "}
+              After downloading you are asked for the company and role, and the
+              CV is saved exactly as sent.
             </Typography>
           </Box>
         </DialogContent>

@@ -254,8 +254,27 @@ export function createLocalFetch(
       if (!id && method === "POST") {
         const input = NewApplicationSchema.check(body);
         if (!input.withoutCv) {
-          // Needs the PDF export, which comes to the browser later
-          return unavailable();
+          // The CV that was sent is frozen as data; the browser has no PDF to store, so the PDF
+          // is drawn from that frozen copy when it is opened (see `PrintApplicationView`)
+          if (!input.jobId) {
+            return failure(
+              HTTP_BAD_REQUEST,
+              "invalid_request",
+              "Choose the job whose CV was sent."
+            );
+          }
+          const { vault } = await storage.loadVault();
+          const { variant, source } = await loadSource(input.jobId);
+          const application = createApplication(
+            input,
+            vault,
+            variant,
+            toIsoDay(now()),
+            randomHex(),
+            source
+          );
+          await storage.saveApplication(application);
+          return json(HTTP_OK, application);
         }
         const source = input.jobId
           ? (await loadSource(input.jobId).catch(() => undefined))?.source

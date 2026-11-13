@@ -42,6 +42,11 @@ export function PrintView({ jobId }: Props): JSX.Element | null {
         // Wait for the fonts, so the text is laid out the way it will be printed
         await document.fonts?.ready;
         if (!isCancelled) {
+          // The name the browser suggests for "Save as PDF"
+          const name = new URLSearchParams(window.location.search).get("name");
+          if (name) {
+            document.title = name;
+          }
           setState({ status: "ready" });
         }
       } catch (error) {

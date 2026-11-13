@@ -267,16 +267,30 @@ export interface ApiClient {
   deleteCandidate: (id: string) => Promise<void>;
 }
 
-/** Where the browser can show or download the PDF that was sent with an application */
+/**
+ * Where the browser can show or download the PDF that was sent with an application. In browser
+ * mode there is no server to ask, so this is a page of the app that shows the frozen CV (or the
+ * uploaded PDF) and prints to PDF.
+ */
 export function applicationPdfUrl(id: string): string {
+  return isBrowserMode()
+    ? `/print-application/${encodeURIComponent(id)}`
+    : applicationPdfApiUrl(id);
+}
+
+/** The API address of an application's stored PDF (answered by the server or by the browser storage) */
+export function applicationPdfApiUrl(id: string): string {
   return `/api/applications/${encodeURIComponent(id)}/pdf`;
+}
+
+/** `fetch` for the app's own API addresses: the server, or the browser storage in browser mode */
+export function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+  return isBrowserMode() ? browserFetch()(url, init) : fetch(url, init);
 }
 
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
 export function createApiClient(
-  fetchImpl: FetchLike = gateAiFetch((input, init) =>
-    isBrowserMode() ? browserFetch()(input, init) : fetch(input, init)
-  )
+  fetchImpl: FetchLike = gateAiFetch((input, init) => apiFetch(input, init))
 ): ApiClient {
   return {
     async downloadBackup() {
