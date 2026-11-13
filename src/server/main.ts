@@ -3,6 +3,8 @@ import { readAiConfig } from "@server/ai/ai-config";
 import { AiRegistry, FileAiSettings } from "@server/ai/ai-registry";
 import { createAiClients } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
+import { readFeedbackSender } from "@server/feedback/github-feedback";
+import { FEEDBACK_REPO } from "@shared/feedback/feedback-issue";
 import { BackupService } from "@server/backup/backup-service";
 import { GitDataRepo } from "@server/backup/data-repo";
 import { VersionedCvStorage } from "@server/backup/versioned-storage";
@@ -32,6 +34,7 @@ const app = buildServer({
   backup,
   pdf: new PlaywrightPdfRenderer(config.webUrl),
   aiRegistry,
+  feedback: readFeedbackSender(process.env, FEEDBACK_REPO),
   isLoggingEnabled: true,
 });
 

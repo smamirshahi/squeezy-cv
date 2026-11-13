@@ -10,6 +10,7 @@ import {
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
+import { Notifications } from "@components/notifications/notifications";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { MarkAsApplied } from "@pages/applications-page/mark-as-applied";
 import { rememberListSearch } from "@pages/applications-page/last-search";
@@ -92,6 +93,7 @@ describe("Mark as applied", () => {
     render(
       <Provider store={readyStore()}>
         <MarkAsApplied />
+        <Notifications />
       </Provider>
     );
     fireEvent.click(screen.getByRole("button", { name: /mark as applied/i }));

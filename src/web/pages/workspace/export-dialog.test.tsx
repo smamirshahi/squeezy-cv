@@ -10,6 +10,7 @@ import {
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
+import { Notifications } from "@components/notifications/notifications";
 import { ExportDialog } from "@pages/workspace/export-dialog";
 import { createApplication } from "@shared/application/application-utils";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
@@ -94,6 +95,7 @@ async function openDialog(): Promise<void> {
   render(
     <Provider store={readyStore()}>
       <ExportDialog isOpen onClose={() => undefined} />
+      <Notifications />
     </Provider>
   );
   await waitFor(() =>

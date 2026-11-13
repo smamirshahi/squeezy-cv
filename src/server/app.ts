@@ -27,6 +27,16 @@ import {
   ScoreSectionRequestSchema,
 } from "@custom-types/score-types";
 import { importCv } from "@server/ai/import-cv";
+import {
+  FeedbackRequestSchema,
+  MAX_FEEDBACK_APP_INFO_LENGTH,
+  MAX_FEEDBACK_NOTE_LENGTH,
+} from "@custom-types/feedback-types";
+import { buildFeedbackIssue } from "@shared/feedback/feedback-issue";
+import {
+  FeedbackSendError,
+  FeedbackSender,
+} from "@server/feedback/github-feedback";
 import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
 import { pickHide } from "@server/ai/pick-hide";
 import { placeItems } from "@server/ai/place-items";
@@ -194,6 +204,9 @@ export interface ServerOptions {
   /** Versions the data folder. Without it, /api/backup says it is off. */
   backup?: BackupService;
   isLoggingEnabled?: boolean;
+
+  /** Creates GitHub issues from feedback. Without it (no token set), /api/feedback answers 503. */
+  feedback?: FeedbackSender;
 }
 
 /** Builds the API. It does not listen; `main.ts` (or a test) decides how to run it. */
@@ -214,6 +227,7 @@ export function buildServer({
   aiProvider = "claude",
   aiRegistry,
   backup,
+  feedback,
   now = () => new Date(),
   isLoggingEnabled = false,
 }: ServerOptions): FastifyInstance {
@@ -341,6 +355,45 @@ export function buildServer({
   });
 
   app.get("/api/health", () => ({ status: "ok", version: APP_VERSION }));
+
+  // A bug, feedback or feature note becomes a GitHub issue. Only the note, the kind and the mood are used.
+  app.post("/api/feedback", async (request, reply) => {
+    const body = FeedbackRequestSchema.check(request.body);
+    const note = body.note.trim();
+    if (
+      note.length === 0 ||
+      note.length > MAX_FEEDBACK_NOTE_LENGTH ||
+      (body.appInfo?.length ?? 0) > MAX_FEEDBACK_APP_INFO_LENGTH
+    ) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid",
+        `The note must be 1 to ${MAX_FEEDBACK_NOTE_LENGTH} characters.`
+      );
+    }
+    if (!feedback) {
+      return sendError(
+        reply,
+        HTTP_UNAVAILABLE,
+        "feedback_unavailable",
+        "Sending is not set up on this computer."
+      );
+    }
+    try {
+      return await feedback.create(buildFeedbackIssue({ ...body, note }));
+    } catch (error) {
+      if (error instanceof FeedbackSendError) {
+        return sendError(
+          reply,
+          HTTP_BAD_GATEWAY,
+          "feedback_failed",
+          error.message
+        );
+      }
+      throw error;
+    }
+  });
 
   app.get(
     "/api/backup",
