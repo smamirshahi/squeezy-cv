@@ -142,6 +142,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
       >
         <ToolRail />
         <Box
+          data-toast-area="page"
           sx={{
             flex: 1,
             minHeight: 0,
@@ -229,6 +230,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
                   <Box
                     component="main"
                     aria-label="Canvas"
+                    data-toast-area="canvas"
                     ref={canvasRef}
                     sx={{
                       flex: 1,

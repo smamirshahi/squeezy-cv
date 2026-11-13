@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { notify } from "@components/notifications/notify";
 import {
   Alert,
   Box,
@@ -13,12 +14,10 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { useViewport } from "@hooks/use-viewport";
-import { Application } from "@custom-types/application-types";
 import { toIsoDay } from "@shared/application/application-utils";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { createApiClient } from "@store/persistence/api-client";
@@ -71,7 +70,6 @@ export function AppliedElsewhereDialog({
   const fileRef = useRef<HTMLInputElement>(null);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [created, setCreated] = useState<Application | null>(null);
 
   // A fresh form each time the dialog opens
   useEffect(() => {
@@ -123,7 +121,14 @@ export function AppliedElsewhereDialog({
         }
       }
       onClose();
-      setCreated(application);
+      notify({
+        kind: "success",
+        text: `Saved: ${application.company}, ${application.role}`,
+        action: {
+          label: "View",
+          href: `/applications/${encodeURIComponent(application.id)}`,
+        },
+      });
       onSaved();
     } catch (caught) {
       setError(
@@ -276,30 +281,6 @@ export function AppliedElsewhereDialog({
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar
-        open={created !== null}
-        autoHideDuration={10_000}
-        onClose={() => setCreated(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Alert
-          severity="success"
-          onClose={() => setCreated(null)}
-          action={
-            created && (
-              <Button
-                color="inherit"
-                size="small"
-                href={`/applications/${encodeURIComponent(created.id)}`}
-              >
-                View
-              </Button>
-            )
-          }
-        >
-          Saved: {created?.company}, {created?.role}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

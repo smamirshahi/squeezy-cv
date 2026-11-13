@@ -1,4 +1,5 @@
 import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
+import { notify } from "@components/notifications/notify";
 import { AppliedElsewhereDialog } from "@pages/workspace/applied-elsewhere-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import {
@@ -27,7 +28,6 @@ import {
   DialogContentText,
   DialogTitle,
   MenuItem,
-  Snackbar,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -350,7 +350,6 @@ export function JobDetailsPage(): JSX.Element {
   const [isReading, setIsReading] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [justSavedId, setJustSavedId] = useState<string>("");
-  const [toast, setToast] = useState<string>("");
   const [isApplying, setIsApplying] = useState<boolean>(false);
   const [isLeaving, setIsLeaving] = useState<boolean>(false);
   const parkedEntry = job
@@ -419,17 +418,21 @@ export function JobDetailsPage(): JSX.Element {
         const saved = await parked.save({ ...fields, jobId: job.id });
         setJustSavedId(saved.id);
       }
-      setToast(
-        "Saved for later. Find it any time in Saved for later at the top of this page, or in Applications."
-      );
+      notify({
+        kind: "success",
+        text: "Saved for later. Find it any time in Saved for later at the top of this page, or in Applications.",
+        action: { label: "View list", onClick: () => setIsMenuOpen(true) },
+      });
       // the form is ready for the next job
       createAnother();
     } catch (caught) {
-      setToast(
-        caught instanceof Error
-          ? caught.message
-          : "The job could not be saved for later."
-      );
+      notify({
+        kind: "error",
+        text:
+          caught instanceof Error
+            ? caught.message
+            : "The job could not be saved for later.",
+      });
     }
   }
 
@@ -1121,28 +1124,6 @@ export function JobDetailsPage(): JSX.Element {
           </Box>
         )}
       </Box>
-      <Snackbar
-        open={toast !== ""}
-        autoHideDuration={8000}
-        onClose={() => setToast("")}
-        message={toast}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        sx={{ bottom: { xs: 88, lg: 24 } }}
-        action={
-          toast.startsWith("Saved for later") ? (
-            <Button
-              size="small"
-              onClick={() => {
-                setToast("");
-                setIsMenuOpen(true);
-              }}
-              sx={{ color: "var(--act)", fontWeight: 600 }}
-            >
-              View list
-            </Button>
-          ) : undefined
-        }
-      />
       <Dialog
         open={isLeaving}
         onClose={() => setIsLeaving(false)}
@@ -1180,7 +1161,6 @@ export function JobDetailsPage(): JSX.Element {
         role={job?.role ?? ""}
         jobUrl={job?.url ?? ""}
         onSaved={() => {
-          setToast("");
           createAnother();
         }}
       />

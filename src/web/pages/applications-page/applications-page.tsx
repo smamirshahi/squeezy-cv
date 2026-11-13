@@ -1,4 +1,5 @@
 import { useViewport } from "@hooks/use-viewport";
+import { notify } from "@components/notifications/notify";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -12,7 +13,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -261,12 +261,6 @@ export function ApplicationsPage(): JSX.Element {
   const [dropped, setDropped] = useState<Candidate[]>([]);
   const [isSavingLater, setIsSavingLater] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string>("");
-  // A short message at the bottom left after moving a job between lists, with a link to it
-  const [toast, setToast] = useState<{
-    text: string;
-    view: ListView["status"];
-    label: string;
-  } | null>(null);
   const continueCandidate = useContinueCandidate();
   const [templateNames, setTemplateNames] = useState<Record<string, string>>(
     {}
@@ -356,19 +350,21 @@ export function ApplicationsPage(): JSX.Element {
       const name = [candidate.role, candidate.company]
         .filter((part) => part !== "")
         .join(" · ");
-      setToast(
-        status === "open"
-          ? {
-              text: `${name || "The job"} is back in Candidates.`,
-              view: "candidate",
-              label: "View candidates",
-            }
-          : {
-              text: `${name || "The job"} was dropped.`,
-              view: "dropped",
-              label: "View dropped",
-            }
-      );
+      const isOpen = status === "open";
+      notify({
+        kind: "info",
+        text: `${name || "The job"} ${
+          isOpen ? "is back in Candidates." : "was dropped."
+        }`,
+        action: {
+          label: isOpen ? "View candidates" : "View dropped",
+          onClick: () =>
+            setView((current) => ({
+              ...current,
+              status: isOpen ? "candidate" : "dropped",
+            })),
+        },
+      });
     }
   }
 
@@ -601,31 +597,6 @@ export function ApplicationsPage(): JSX.Element {
             />
           )}
         </Box>
-        <Snackbar
-          open={toast !== null}
-          autoHideDuration={6000}
-          onClose={(_event, reason) => {
-            if (reason !== "clickaway") {
-              setToast(null);
-            }
-          }}
-          message={toast?.text}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          action={
-            toast ? (
-              <Button
-                size="small"
-                onClick={() => {
-                  setView({ ...view, status: toast.view });
-                  setToast(null);
-                }}
-                sx={{ color: "var(--act)", fontWeight: 600 }}
-              >
-                {toast.label}
-              </Button>
-            ) : undefined
-          }
-        />
         <CandidateDialog
           isOpen={isSavingLater}
           onClose={() => setIsSavingLater(false)}
