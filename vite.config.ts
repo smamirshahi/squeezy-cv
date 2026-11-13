@@ -2,10 +2,62 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath } from "node:url";
+import { VitePWA } from "vite-plugin-pwa";
+
+// The browser version (`pnpm build:browser`) is an installable app that works offline; the
+// server version is not (a service worker would only get in the way of the API)
+const isBrowserMode = process.env.VITE_STORAGE_MODE === "browser";
+const MAX_PRECACHED_BYTES = 6 * 1024 * 1024;
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    ...(isBrowserMode
+      ? [
+          VitePWA({
+            // A new version waits until the open tabs are closed, so open work is never
+            // interrupted; the next visit uses it
+            registerType: "prompt",
+            injectRegister: "script",
+            includeAssets: ["icon.svg", "apple-touch-icon.png", "cities.txt"],
+            manifest: {
+              name: "CV Builder",
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
+              short_name: "CV Builder",
+              description:
+                "Build and tailor your CV. Your data stays in your browser.",
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
+              start_url: "/jobs",
+              scope: "/",
+              display: "standalone",
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
+              theme_color: "#1e3a5f",
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
+              background_color: "#ffffff",
+              icons: [
+                { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+                { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+                {
+                  src: "/icon-maskable-512.png",
+                  sizes: "512x512",
+                  type: "image/png",
+                  purpose: "maskable",
+                },
+              ],
+            },
+            workbox: {
+              globPatterns: ["**/*.{js,css,html,svg,png,txt,woff,woff2}"],
+              maximumFileSizeToCacheInBytes: MAX_PRECACHED_BYTES,
+              // Every address of the app is index.html (see public/_redirects)
+              navigateFallback: "/index.html",
+              cleanupOutdatedCaches: true,
+            },
+          }),
+        ]
+      : []),
+  ],
   resolve: {
     alias: [
       {
