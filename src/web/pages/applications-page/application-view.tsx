@@ -178,9 +178,13 @@ export function ApplicationView({
   async function createJobFromThis(): Promise<void> {
     setError("");
     setMessage("");
+    const submitted = application.submitted;
+    if (!submitted) {
+      return;
+    }
     try {
       const copy = copyJob(
-        application.submitted.variant,
+        submitted.variant,
         nanoid(),
         `${application.company} - ${application.role} (copy)`
       );
@@ -268,9 +272,15 @@ export function ApplicationView({
             sx={{ color: "text.secondary" }}
             data-testid="application-sources"
           >
-            Job: {application.jobName ?? application.submitted.variant.name} ·
+            Job: {application.jobName ?? application.submitted?.variant.name} ·
             Template: {application.templateName ?? "unknown"}
           </Typography>
+          {application.appliedVia && (
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Applied via {application.appliedVia}
+              {application.submitted ? "" : " · no CV attached"}
+            </Typography>
+          )}
           {application.jobUrl && (
             <Link href={application.jobUrl} target="_blank" rel="noreferrer">
               Job ad
@@ -310,55 +320,77 @@ export function ApplicationView({
       {error && <Alert severity="error">{error}</Alert>}
       {message && <Alert severity="success">{message}</Alert>}
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 1,
-            mb: 1,
-          }}
-        >
-          <Typography variant="h6" component="h2">
-            The CV you sent
-          </Typography>
+      {application.submitted ? (
+        <Paper variant="outlined" sx={{ p: 2 }}>
           <Box
             sx={{
               display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               flexWrap: "wrap",
               gap: 1,
+              mb: 1,
             }}
           >
-            <Button
-              href={applicationPdfUrl(application.id)}
-              download={`${application.id}.pdf`}
-              disabled={isPdfMissing}
+            <Typography variant="h6" component="h2">
+              The CV you sent
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
             >
-              Download PDF
-            </Button>
-            <Button onClick={() => void createJobFromThis()}>
-              Create new job from this
-            </Button>
+              <Button
+                href={applicationPdfUrl(application.id)}
+                download={`${application.id}.pdf`}
+                disabled={isPdfMissing}
+              >
+                Download PDF
+              </Button>
+              <Button onClick={() => void createJobFromThis()}>
+                Create new job from this
+              </Button>
+            </Box>
           </Box>
-        </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 1,
-          }}
-        >
-          CV as sent on {formatDay(application.appliedAt)}. The sent CV is a
-          frozen copy; later edits to the template or job do not change it.
-        </Typography>
-        {isPdfMissing ? (
-          <Alert severity="warning">
-            The PDF of this application is missing, so the CV that was sent
-            cannot be shown.
-          </Alert>
-        ) : (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 1,
+            }}
+          >
+            CV as sent on {formatDay(application.appliedAt)}. The sent CV is a
+            frozen copy; later edits to the template or job do not change it.
+          </Typography>
+          {isPdfMissing ? (
+            <Alert severity="warning">
+              The PDF of this application is missing, so the CV that was sent
+              cannot be shown.
+            </Alert>
+          ) : (
+            <Box
+              component="iframe"
+              title="The CV you sent"
+              src={applicationPdfUrl(application.id)}
+              sx={{
+                width: "100%",
+                height: { xs: "70vh", md: 900 },
+                minHeight: 360,
+                border: `1px solid ${WORKSPACE_COLORS.border}`,
+              }}
+            />
+          )}
+        </Paper>
+      ) : !isPdfMissing ? (
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            The CV you sent
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
+            The PDF you uploaded when you recorded this application.
+          </Typography>
           <Box
             component="iframe"
             title="The CV you sent"
@@ -370,8 +402,18 @@ export function ApplicationView({
               border: `1px solid ${WORKSPACE_COLORS.border}`,
             }}
           />
-        )}
-      </Paper>
+        </Paper>
+      ) : (
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            No CV attached
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            This application was recorded as sent outside the app, without a CV
+            from here.
+          </Typography>
+        </Paper>
+      )}
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="h6" component="h2" gutterBottom>

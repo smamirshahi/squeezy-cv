@@ -113,10 +113,14 @@ export function RequirementsTable({
             xs: "1fr",
             md: "1.25fr 1fr 1.15fr",
           },
-          alignItems: "start",
+          // Columns stretch so the dividers run the full height; a long list scrolls inside the
+          // table while the column headings stay in view
+          alignItems: "stretch",
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           borderRadius: 1,
-          overflow: "hidden",
+          maxHeight: "min(62vh, 640px)",
+          overflowY: "auto",
+          overflowX: "hidden",
           bgcolor: WORKSPACE_COLORS.panel,
         }}
       >
@@ -150,6 +154,9 @@ export function RequirementsTable({
                   gap: 1,
                   px: 1.5,
                   py: 1,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
                   bgcolor: WORKSPACE_COLORS.panelAlt,
                 }}
               >
@@ -222,6 +229,10 @@ export function RequirementsTable({
                     listStyle: "none",
                     display: "grid",
                     gridTemplateColumns: isKeywords ? "1fr 1fr" : "1fr",
+                    "& > li": { minWidth: 0 },
+                    "& > li:nth-of-type(even)": isKeywords
+                      ? { borderLeft: `1px solid ${WORKSPACE_COLORS.border}` }
+                      : {},
                   }}
                 >
                   {shown.map((text) => (
@@ -233,6 +244,14 @@ export function RequirementsTable({
                       />
                     </li>
                   ))}
+                  {isKeywords && shown.length % 2 === 1 && (
+                    // Fills the empty cell so its top line is drawn
+                    <Box
+                      component="li"
+                      aria-hidden="true"
+                      sx={{ borderTop: `1px solid ${WORKSPACE_COLORS.border}` }}
+                    />
+                  )}
                 </Box>
               )}
             </Box>

@@ -60,8 +60,10 @@ export async function buildApplicationsExport(
       });
       continue;
     }
+    let hasCv = true;
     try {
       const application = await storage.loadApplication(summary.id);
+      hasCv = application.submitted !== undefined;
       entries.push({
         name: `${summary.id}/application.json`,
         data: Buffer.from(
@@ -88,10 +90,13 @@ export async function buildApplicationsExport(
         data: await storage.loadApplicationPdf(summary.id),
       });
     } catch (error: unknown) {
-      problems.push({
-        id: summary.id,
-        reason: `The PDF is missing: ${describe(error)}`,
-      });
+      // Applied elsewhere without a CV: having no PDF is normal
+      if (hasCv) {
+        problems.push({
+          id: summary.id,
+          reason: `The PDF is missing: ${describe(error)}`,
+        });
+      }
     }
     rows.push([
       summary.id,

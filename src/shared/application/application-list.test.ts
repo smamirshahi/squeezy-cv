@@ -171,6 +171,14 @@ describe("the list state in the address", () => {
     expect(queryToView(viewToQuery(view))).toEqual(view);
   });
 
+  it("knows the Candidates and Dropped views", () => {
+    for (const status of ["candidate", "dropped"] as const) {
+      const view = { ...DEFAULT_LIST_VIEW, status };
+      expect(queryToView(viewToQuery(view)).status).toBe(status);
+    }
+    expect(queryToView("?status=dropped").status).toBe("dropped");
+  });
+
   it("is short for the default view and ignores nonsense", () => {
     expect(viewToQuery(DEFAULT_LIST_VIEW)).toBe("");
     expect(queryToView("?status=hired&sort=x&dir=up")).toEqual(

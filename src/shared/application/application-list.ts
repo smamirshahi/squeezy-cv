@@ -14,7 +14,13 @@ export interface ListView {
 
   /** Only this status, only those with no reply ("noReply", needs `today`), or all */
   status:
-    ApplicationStatus | "all" | "noReply" | "draft" | "ready" | "candidate";
+    | ApplicationStatus
+    | "all"
+    | "noReply"
+    | "draft"
+    | "ready"
+    | "candidate"
+    | "dropped";
   sortKey: SortKey;
   sortDirection: SortDirection;
 }
@@ -167,7 +173,8 @@ export function queryToView(search: string): ListView {
       status === "noReply" ||
       status === "draft" ||
       status === "ready" ||
-      status === "candidate"
+      status === "candidate" ||
+      status === "dropped"
         ? status
         : (APPLICATION_STATUSES.find((s) => s === status) ?? "all"),
     sortKey: sort === "company" || sort === "appliedAt" ? sort : "appliedAt",

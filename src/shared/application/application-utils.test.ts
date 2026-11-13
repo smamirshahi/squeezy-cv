@@ -45,7 +45,37 @@ describe("createApplication", () => {
       history: [{ status: "applied", at: "2026-11-06" }],
     });
     expect(application.id).toBe("2026-11-06-acme-ltd-senior-dev-x7k2");
-    expect(application.submitted.variant).toEqual(variant);
+    expect(application.submitted?.variant).toEqual(variant);
+  });
+
+  it("records an application without a CV: how it was sent, nothing frozen", () => {
+    const application = createApplication(
+      {
+        company: "Acme Ltd",
+        role: "Senior Dev",
+        withoutCv: true,
+        via: " LinkedIn ",
+      },
+      undefined,
+      undefined,
+      "2026-11-06",
+      "x7k2"
+    );
+    expect(ApplicationSchema.guard(application)).toBe(true);
+    expect(application.submitted).toBeUndefined();
+    expect(application.appliedVia).toBe("LinkedIn");
+    expect(application.status).toBe("applied");
+    expect(summariseApplication(application)).toMatchObject({
+      jobId: "",
+      jobName: "",
+    });
+  });
+
+  it("accepts a long job link (a LinkedIn search link is far over 200 characters)", () => {
+    const jobUrl = `https://www.linkedin.com/jobs/search-results/?currentJobId=1&${"x=1&".repeat(100)}`;
+    expect(jobUrl.length).toBeGreaterThan(200);
+    expect(make({ jobUrl }).jobUrl).toBe(jobUrl);
+    expect(() => make({ jobUrl: "h".repeat(2001) })).toThrow();
   });
 
   it("is not changed by later edits to the vault or the variant", () => {

@@ -299,7 +299,7 @@ describe("Application page", () => {
         templateId: "tpl1",
         company: "Acme Ltd",
         role: "Senior Dev",
-        selection: sent.submitted.variant.selection,
+        selection: sent.submitted?.variant.selection,
       });
     });
 
