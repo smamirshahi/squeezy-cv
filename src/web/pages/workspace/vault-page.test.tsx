@@ -224,3 +224,16 @@ describe("App", () => {
     ]).not.toContain("skills");
   });
 });
+
+describe("VaultPage: AI import", () => {
+  it("has an enabled purple 'Paste CV text, AI sorts it' button that opens the import dialog", () => {
+    renderEditor(createStore());
+    const button = screen.getByRole("button", {
+      name: "Paste CV text, AI sorts it",
+    });
+    expect(button.hasAttribute("disabled")).toBe(false);
+    expect(button.className).toMatch(/colorSecondary/);
+    fireEvent.click(button);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+  });
+});

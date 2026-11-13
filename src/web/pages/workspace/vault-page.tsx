@@ -19,6 +19,7 @@ import { styled } from "@mui/material/styles";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { selectedItemOf } from "@pages/workspace/section-items";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
+import { AiButton } from "@components/ai-button";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
@@ -185,19 +186,14 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <Tooltip title="Coming soon">
-            <span style={{ flex: "1 1 100%", display: "flex" }}>
-              <Button
-                size="small"
-                variant="contained"
-                disabled
-                sx={{ flex: "1 1 100%", whiteSpace: "normal" }}
-                onClick={() => setIsImportOpen(true)}
-              >
-                Paste CV text, AI sorts it
-              </Button>
-            </span>
-          </Tooltip>
+          <AiButton
+            size="small"
+            variant="contained"
+            sx={{ flex: "1 1 100%", whiteSpace: "normal" }}
+            onClick={() => setIsImportOpen(true)}
+          >
+            Paste CV text, AI sorts it
+          </AiButton>
           <ImportCvDialog
             isOpen={isImportOpen}
             onClose={() => setIsImportOpen(false)}
