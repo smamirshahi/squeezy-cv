@@ -7,7 +7,7 @@ const SPONSOR_REGISTER_URL =
 const SPONSOR_LICENSE_CHECK_URL = "https://sponsorlicensecheck.co.uk/";
 
 /**
- * An optional helper on the job details page: explains what a sponsor licence means and links to
+ * An optional quick check on the job details page (its right panel): explains what a sponsor licence means and links to
  * the official register and to SponsorLicenseCheck.co.uk. It makes no claim about the company and
  * sends nothing anywhere; the user checks the company there.
  */
@@ -31,17 +31,28 @@ export function SponsorshipCheck({
 
   return (
     <>
-      <Button
-        size="small"
-        aria-haspopup="dialog"
-        onClick={(event) => {
-          setIsCopied(false);
-          setAnchor(event.currentTarget);
-        }}
-        sx={{ justifySelf: "start" }}
-      >
-        Check visa sponsorship
-      </Button>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ fontSize: 14 }}>Visa sponsorship</Typography>
+          <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+            Looks the company up for you.
+          </Typography>
+        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          color="inherit"
+          aria-haspopup="dialog"
+          aria-label="Check visa sponsorship"
+          onClick={(event) => {
+            setIsCopied(false);
+            setAnchor(event.currentTarget);
+          }}
+          sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
+        >
+          Check
+        </Button>
+      </Box>
       <Popover
         open={anchor !== null}
         anchorEl={anchor}
