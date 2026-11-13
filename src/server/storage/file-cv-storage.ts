@@ -29,6 +29,8 @@ import {
   withExportMeta,
   withoutExportMeta,
 } from "@shared/migration/export-meta";
+import { ChainKind, upgradeFile } from "@shared/migration/migration-chains";
+import { CURRENT_VAULT_VERSION } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   CvStorage,
@@ -88,6 +90,17 @@ function isReadableCandidate(raw: unknown): boolean {
   return CandidateSchema.guard(raw);
 }
 
+/** Always readable: an upgrade copies the old file to `.bak` whatever it looks like */
+function isAnyFile(): boolean {
+  return true;
+}
+
+/** The vault format version of a stored file; 0 when it has no vault yet (the oldest format) */
+function storedVaultFormat(raw: unknown): number {
+  const vault = (raw as { vault?: { version?: unknown } } | null)?.vault;
+  return typeof vault?.version === "number" ? vault.version : 0;
+}
+
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -112,6 +125,42 @@ export class FileCvStorage implements CvStorage {
     return path.join(this.dataDir, VARIANTS_DIR, `${id}.json`);
   }
 
+  /**
+   * Upgrades an old job, template, application or candidate file and writes the result back. The
+   * old file is kept as `.bak`. A file from a newer app is refused and left untouched.
+   */
+  private async upgradeOnDisk(
+    kind: ChainKind,
+    raw: unknown,
+    filePath: string,
+    label: string
+  ): Promise<unknown> {
+    let result: ReturnType<typeof upgradeFile>;
+    try {
+      result = upgradeFile(raw, kind);
+    } catch (error) {
+      throw new StorageError(
+        "corrupt",
+        `${label} cannot be opened: ${describe(error)} The file was left untouched.`
+      );
+    }
+    if (result.notice) {
+      const upgraded = withExportMeta(
+        result.file as object,
+        kind,
+        result.notice.toFormat
+      );
+      try {
+        await this.queue.run(filePath, () =>
+          writeJsonAtomic(filePath, upgraded, isAnyFile)
+        );
+      } catch {
+        // The upgraded copy is still returned; saving is tried again on the next change
+      }
+    }
+    return result.file;
+  }
+
   async loadVault(): Promise<CvFile> {
     const filePath = this.vaultPath();
     let raw: unknown;
@@ -127,7 +176,22 @@ export class FileCvStorage implements CvStorage {
       throw new StorageError("not_found", "No CV has been saved yet.");
     }
     try {
-      return withoutExportMeta(migrateCvFile(raw));
+      const file = withoutExportMeta(migrateCvFile(raw));
+      if (storedVaultFormat(raw) < CURRENT_VAULT_VERSION) {
+        // Write the upgraded file back; `.bak` keeps the old one
+        try {
+          await this.queue.run(filePath, () =>
+            writeJsonAtomic(
+              filePath,
+              withExportMeta(file, "vault", file.vault.version),
+              isAnyFile
+            )
+          );
+        } catch {
+          // The upgraded copy is still returned; saving is tried again on the next change
+        }
+      }
+      return file;
     } catch (error) {
       throw new StorageError(
         "corrupt",
@@ -314,6 +378,7 @@ export class FileCvStorage implements CvStorage {
       }
       throw new StorageError("not_found", `There is no template ${id}.`);
     }
+    raw = await this.upgradeOnDisk("template", raw, filePath, `Template ${id}`);
     if (!TemplateSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(
         "corrupt",
@@ -402,6 +467,7 @@ export class FileCvStorage implements CvStorage {
       }
       throw new StorageError("not_found", `There is no job ${id}.`);
     }
+    raw = await this.upgradeOnDisk("job", raw, filePath, `Job ${id}`);
     if (!JobSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(
         "corrupt",
@@ -501,6 +567,12 @@ export class FileCvStorage implements CvStorage {
     if (raw === undefined) {
       throw new StorageError("not_found", `There is no application ${id}.`);
     }
+    raw = await this.upgradeOnDisk(
+      "application",
+      raw,
+      filePath,
+      `Application ${id}`
+    );
     if (!ApplicationSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(
         "corrupt",
@@ -594,6 +666,12 @@ export class FileCvStorage implements CvStorage {
     if (raw === undefined) {
       throw new StorageError("not_found", `There is no candidate ${id}.`);
     }
+    raw = await this.upgradeOnDisk(
+      "candidate",
+      raw,
+      filePath,
+      `Candidate ${id}`
+    );
     if (!CandidateSchema.guard(raw) || raw.id !== id) {
       throw new StorageError(
         "corrupt",

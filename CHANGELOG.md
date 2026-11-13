@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Every saved file kind (job, template, application, candidate, as well as the CV file and vault) has its own migration chain, registered in `shared/migration/migration-chains.ts`. An older file is upgraded when it is imported or read from `data/` (the old file is kept as `.bak`), a notice says "This file was made with CV Builder x and has been updated to y", and a file from a newer app is refused with a clear message (#430).
 - The Profile picture dialog shows the person placeholder while there is no image, and its button says "Add image" (it says "Change image" once there is one) (#440).
 - The Unsorted section is back in the Vault sidebar (and the phone chips) (#306). Its "Ask AI where these belong" panel is a purple AI card that names the AI in use and has a "Change AI" button; it works with any provider. The answer is repaired when a small model returns it slightly wrong (a bare list, numbers, other key names).
 - "Paste CV text, AI sorts it" is back on the first-run screen and in the Vault tree (#297). It works with any AI you have set up (Claude, Ollama, Gemini, Groq), not only Ollama. The dialog has a purple AI card that names the AI in use, says whether the text stays on this computer, and has a "Change AI" button that opens the settings for this task.
