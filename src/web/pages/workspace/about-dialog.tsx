@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useViewport } from "@hooks/use-viewport";
 import {
   Avatar,
@@ -20,6 +20,8 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
 import { cssVar } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
+import { GuideDialog, GuideKind } from "@pages/workspace/guide-dialog";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /**
@@ -86,6 +88,7 @@ export function AboutDialog({
   onClose: () => void;
 }): JSX.Element {
   const isPhone = useViewport() === "phone";
+  const [guide, setGuide] = useState<GuideKind | null>(null);
   return (
     <Dialog
       open={isOpen}
@@ -177,7 +180,9 @@ export function AboutDialog({
               color={WORKSPACE_COLORS.accent}
               icon={<DesktopWindowsOutlinedIcon fontSize="small" />}
             >
-              Your data stays on your computer.
+              {isBrowserMode()
+                ? "Your data stays in this browser."
+                : "Your data stays on your computer."}
             </Point>
             <Point
               color={WORKSPACE_COLORS.ai}
@@ -192,6 +197,23 @@ export function AboutDialog({
               AI only proposes. You decide what goes on the CV.
             </Point>
           </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setGuide("guide")}
+          >
+            How to use
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setGuide("privacy")}
+          >
+            Privacy note
+          </Button>
         </Box>
 
         <Paper
@@ -256,6 +278,7 @@ export function AboutDialog({
           Close
         </Button>
       </Box>
+      <GuideDialog kind={guide} onClose={() => setGuide(null)} />
     </Dialog>
   );
 }
