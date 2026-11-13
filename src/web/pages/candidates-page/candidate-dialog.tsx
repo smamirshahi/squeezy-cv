@@ -56,9 +56,24 @@ function CandidateForm({
         {title ?? "Save for later"}
       </DialogTitle>
       <DialogContent
-        sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            sm: "repeat(2, minmax(0, 1fr))",
+          },
+          gap: 2,
+          // `&&`: MUI removes the top padding after a title with a more specific rule, and the
+          // first label sticks out above its field, so without this it is clipped
+          "&&": { pt: 1.5 },
+          alignContent: "start",
+        }}
       >
-        {error !== "" && <Alert severity="error">{error}</Alert>}
+        {error !== "" && (
+          <Alert severity="error" sx={{ gridColumn: "1 / -1" }}>
+            {error}
+          </Alert>
+        )}
         <TextField
           autoFocus
           label="Company"
@@ -86,14 +101,16 @@ function CandidateForm({
           label="Note"
           multiline
           minRows={2}
+          sx={{ gridColumn: "1 / -1" }}
           value={note}
           onChange={(event) => setNote(event.target.value)}
         />
         <TextField
           label="Advert text (optional)"
           multiline
-          minRows={4}
-          maxRows={10}
+          minRows={5}
+          maxRows={12}
+          sx={{ gridColumn: "1 / -1" }}
           value={jobAd}
           onChange={(event) => setJobAd(event.target.value)}
         />
@@ -121,8 +138,14 @@ export function CandidateDialog({ isOpen, ...rest }: Props): JSX.Element {
       onClose={rest.onClose}
       fullWidth
       fullScreen={isPhone}
-      maxWidth="sm"
+      maxWidth="md"
       aria-labelledby="candidate-title"
+      slotProps={{
+        paper: {
+          // The visible window, not the layout one, and a smaller margin than MUI's 32 px
+          sx: { m: 2, maxHeight: "calc(100dvh - 32px)" },
+        },
+      }}
     >
       {/* mounted only while open, so the form starts fresh each time */}
       {isOpen && <CandidateForm {...rest} />}
