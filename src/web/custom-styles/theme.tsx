@@ -136,6 +136,21 @@ function createAppTheme(mode: ThemeMode): ReturnType<typeof createTheme> {
     },
     components: {
       MuiButtonBase: { defaultProps: { disableRipple: true } },
+      // Dialog content scrolls when the window is short. macOS hides its overlay scrollbars until
+      // you scroll, so nothing shows that there is more below: draw a scrollbar that stays visible.
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            "&::-webkit-scrollbar": { width: 12 },
+            "&::-webkit-scrollbar-track": { backgroundColor: t.hv },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: t.mu,
+              borderRadius: 6,
+              border: `3px solid ${t.hv}`,
+            },
+          },
+        },
+      },
     },
   });
 }

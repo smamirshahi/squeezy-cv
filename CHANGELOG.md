@@ -32,6 +32,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Fixed
 
+- Dialogs that scroll, like "Save for later" (#421), show a scrollbar that stays visible. On a Mac the system hides its scrollbar until you scroll, so a long form looked cut off with no sign that there was more.
 - The SponsorLicenseCheck link on the job details page (#419) opens its site: the address was spelled "licence" and did not resolve; it is `sponsorlicensecheck.co.uk`.
 - Opening a job by its address (for example `/jobs/<id>`) could end on the first job instead: the saved data was loaded twice at the same time (React's development mode starts the first load twice) and the second load put the first job back. A load that is running is no longer started again.
 - "All applications" on an application's page shows the list with the same search and filter again, and the Applications page says "1 job" for a single job.
