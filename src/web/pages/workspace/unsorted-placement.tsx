@@ -4,8 +4,10 @@ import {
   Box,
   Button,
   CircularProgress,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import { Section } from "@custom-types/vault-types";
 import { PlaceResult } from "@custom-types/place-types";
 import { getItemLabel } from "@shared/variant/item-label";
@@ -19,7 +21,8 @@ import {
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { moveItemToSection, vaultSelector } from "@store/vault/vault-slice";
-import { AiButton } from "@components/ai-button";
+import { AiButton, AiIcon } from "@components/ai-button";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
 
 /** The item's words for the AI: every field value and bullet, nothing else */
 function itemText(section: Section["items"][number]): string {
@@ -107,24 +110,72 @@ export function UnsortedPlacement({
         &quot;Move to section&quot;, or ask the AI to suggest where each
         belongs. Unsorted is only on a CV if a job includes it.
       </Typography>
-      {ai?.isConfigured && (
-        <>
-          <AiButton
+      <Box
+        component="section"
+        aria-label="Ask AI where these belong"
+        sx={{
+          display: "grid",
+          gap: 0.75,
+          p: 1.5,
+          border: `1px solid ${WORKSPACE_COLORS.aiBorder}`,
+          borderRadius: 1.5,
+          bgcolor: WORKSPACE_COLORS.aiSoft,
+          color: WORKSPACE_COLORS.aiText,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <AiIcon />
+          <Typography sx={{ fontSize: 13, fontWeight: 700, flex: 1 }}>
+            {ai
+              ? `${ai.info.label} · ${ai.info.isOnline ? "online" : "on this computer"}`
+              : "AI"}
+          </Typography>
+          <Button
             size="small"
-            variant="outlined"
-            sx={{ alignSelf: "flex-start" }}
-            disabled={isAsking || section.items.length === 0}
-            onClick={() => void ask()}
+            color="secondary"
+            startIcon={<SettingsOutlined fontSize="small" />}
+            onClick={() => openAiSettings("place")}
           >
-            Ask AI where these belong
-          </AiButton>
-          <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+            Change AI
+          </Button>
+        </Box>
+        <Tooltip
+          title={
+            ai && !ai.isConfigured
+              ? `${ai.info.label} is not set up. Use Change AI to pick another or set it up.`
+              : section.items.length === 0
+                ? "There is nothing here to place."
+                : ""
+          }
+        >
+          <span style={{ alignSelf: "flex-start" }}>
+            <AiButton
+              size="small"
+              variant="outlined"
+              disabled={
+                isAsking || section.items.length === 0 || !ai?.isConfigured
+              }
+              onClick={() => void ask()}
+            >
+              Ask AI where these belong
+            </AiButton>
+          </span>
+        </Tooltip>
+        {ai && (
+          <Typography sx={{ fontSize: 11.5 }}>
             {ai.info.isOnline
               ? `Sends item titles and text and section names to ${ai.info.recipient}; not your name or contact details.`
               : "Item text goes to your local model only."}
           </Typography>
-        </>
-      )}
+        )}
+      </Box>
       {isAsking && <CircularProgress size={18} />}
       {error && <Alert severity="error">{error}</Alert>}
       {result && (

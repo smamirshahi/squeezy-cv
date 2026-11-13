@@ -137,14 +137,14 @@ describe("awards list", () => {
   });
 });
 
-describe("AI sorting entry", () => {
-  it("replaces the Unsorted entry and cannot be opened while empty", () => {
+describe("Unsorted entry", () => {
+  it("shows as Unsorted and can be opened while empty (no more 'AI sorting' placeholder)", () => {
     setup(PAPERS);
     const tree = screen.getByRole("complementary", { name: "Vault tree" });
-    expect(within(tree).getByText("AI sorting")).toBeTruthy();
-    expect(within(tree).queryByText("Unsorted")).toBeNull();
+    expect(within(tree).getByText("Unsorted")).toBeTruthy();
+    expect(within(tree).queryByText("AI sorting")).toBeNull();
     expect(
-      within(tree).getByText("AI sorting").closest("[aria-disabled='true']")
-    ).toBeTruthy();
+      within(tree).getByText("Unsorted").closest("[aria-disabled='true']")
+    ).toBeNull();
   });
 });

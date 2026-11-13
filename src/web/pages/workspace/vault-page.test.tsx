@@ -18,7 +18,12 @@ import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { addSection, removeSection, setVault } from "@store/vault/vault-slice";
+import {
+  addSection,
+  ensureUnsortedSection,
+  removeSection,
+  setVault,
+} from "@store/vault/vault-slice";
 
 beforeEach(() => window.history.replaceState(null, "", "/vault"));
 afterEach(cleanup);
@@ -222,6 +227,38 @@ describe("App", () => {
       ...structure.left,
       ...structure.right,
     ]).not.toContain("skills");
+  });
+});
+
+describe("VaultPage: Unsorted section", () => {
+  it("lists an empty Unsorted section as a normal, clickable link (no 'AI sorting: coming soon')", () => {
+    const store = createStore();
+    store.dispatch(ensureUnsortedSection());
+    renderEditor(store);
+    const tree = screen.getByRole("complementary", { name: "Vault tree" });
+    const link = within(tree).getByRole("link", { name: /^Unsorted/ });
+    expect(link.getAttribute("aria-disabled")).not.toBe("true");
+    expect(link.className).not.toMatch(/Mui-disabled/);
+    expect(within(tree).queryByText("AI sorting")).toBeNull();
+    fireEvent.click(link);
+    expect(store.getState().app.selectedSectionInEditorPage).toBe("unsorted");
+    expect(
+      screen.getByRole("region", { name: "Ask AI where these belong" })
+    ).toBeTruthy();
+  });
+
+  it("creates the Unsorted section when the vault has none and opens it", () => {
+    const store = createStore();
+    expect(
+      store.getState().vault.sections.some((s) => s.type === "unsorted")
+    ).toBe(false);
+    renderEditor(store);
+    const tree = screen.getByRole("complementary", { name: "Vault tree" });
+    fireEvent.click(within(tree).getByText("Unsorted"));
+    expect(
+      store.getState().vault.sections.some((s) => s.type === "unsorted")
+    ).toBe(true);
+    expect(window.location.pathname).toBe("/vault/unsorted");
   });
 });
 

@@ -5,11 +5,11 @@ import { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildServer } from "@server/app";
 import { AiClient, GenerateRequest } from "@server/ai/ai-types";
-import { placeItems } from "@server/ai/place-items";
+import { normaliseRawPlace, placeItems } from "@server/ai/place-items";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { PlaceRequest } from "@custom-types/place-types";
+import { PlaceRequest, RawPlaceSchema } from "@custom-types/place-types";
 
 const request: PlaceRequest = {
   items: [
@@ -112,5 +112,68 @@ describe("POST /api/ai/place", () => {
       payload: { ...request, items: [] },
     });
     expect(empty.statusCode).toBe(400);
+  });
+});
+
+describe("normaliseRawPlace (small models answer almost right)", () => {
+  const good = { placements: [{ id: "i1", section: "s1", reason: "Fits" }] };
+
+  it("leaves a correct answer as it is", () => {
+    expect(normaliseRawPlace(good)).toEqual(good);
+  });
+
+  it("accepts a bare list instead of { placements }", () => {
+    expect(normaliseRawPlace(good.placements)).toEqual(good);
+  });
+
+  it("accepts other key names and numbers for the ids", () => {
+    expect(
+      normaliseRawPlace({
+        placements: [
+          { item: "i1", sectionId: "s2" },
+          { itemId: 3, section_id: 4, reason: 5 },
+        ],
+      })
+    ).toEqual({
+      placements: [
+        { id: "i1", section: "s2" },
+        { id: "3", section: "4", reason: "5" },
+      ],
+    });
+  });
+
+  it("drops a null reason and entries without an id or section", () => {
+    expect(
+      normaliseRawPlace({
+        placements: [
+          { id: "i1", section: "s1", reason: null },
+          { id: "i2" },
+          { section: "s1" },
+          null,
+          "i3",
+        ],
+      })
+    ).toEqual({ placements: [{ id: "i1", section: "s1" }] });
+  });
+
+  it.each([null, undefined, 42, "text", {}, { placements: "none" }])(
+    "gives an empty list for %j, which the schema accepts",
+    (value) => {
+      const result = normaliseRawPlace(value);
+      expect(result).toEqual({ placements: [] });
+      expect(RawPlaceSchema.guard(result)).toBe(true);
+    }
+  );
+
+  it("is what placeItems uses, so a sloppy answer still gives suggestions", async () => {
+    const ai = new FakeAi([
+      { item: "i1", sectionId: "s1", reason: null },
+      { id: "i2", section: "s2", reason: "Volunteer work" },
+    ]);
+    const result = await placeItems(ai, request);
+    expect(result.suggestions).toEqual([
+      { itemId: "real-1", sectionId: "sec-a", reason: "" },
+      { itemId: "real-2", sectionId: "sec-b", reason: "Volunteer work" },
+    ]);
   });
 });

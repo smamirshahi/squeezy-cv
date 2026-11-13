@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- The Unsorted section is back in the Vault sidebar (and the phone chips) (#306). Its "Ask AI where these belong" panel is a purple AI card that names the AI in use and has a "Change AI" button; it works with any provider. The answer is repaired when a small model returns it slightly wrong (a bare list, numbers, other key names).
 - "Paste CV text, AI sorts it" is back on the first-run screen and in the Vault tree (#297). It works with any AI you have set up (Claude, Ollama, Gemini, Groq), not only Ollama. The dialog has a purple AI card that names the AI in use, says whether the text stays on this computer, and has a "Change AI" button that opens the settings for this task.
 - A "Send feedback" button on the top bar, right of the Tutorials icon (#390). Pick Feedback, Bug or Feature (Feedback also has a happy, no feeling or sad face), write one note and press Send. The note becomes a GitHub issue labelled `customer-created` and its kind when `FEEDBACK_GITHUB_TOKEN` is set in `.env`; otherwise a prefilled GitHub page opens. Bug and Feature notes need at least 10 characters. An optional "Include app info" box (on for bugs) adds the version, browser and page name (the box says so); nothing else is sent. After sending, the dialog shows the issue number and a link; if sending fails the text stays, with Try again, Open on GitHub and Copy. On a phone the dialog is full screen.
 

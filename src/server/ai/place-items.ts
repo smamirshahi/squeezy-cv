@@ -8,6 +8,35 @@ import { AiClient } from "@server/ai/ai-types";
 import { PersonalData } from "@shared/ai/redact-personal";
 
 /**
+ * Small models often answer almost right: a bare list instead of `{placements}`, numbers or
+ * `null` where text is expected, `item`/`itemId`/`sectionId` for `id`/`section`. Repair that
+ * so a good answer is not thrown away; anything unusable is dropped.
+ */
+export function normaliseRawPlace(value: unknown): unknown {
+  const record =
+    typeof value === "object" && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  const list = Array.isArray(value) ? value : record.placements;
+  const text = (v: unknown): string | undefined =>
+    typeof v === "string" || typeof v === "number" ? String(v) : undefined;
+  const placements = (Array.isArray(list) ? list : []).flatMap((entry) => {
+    const e =
+      typeof entry === "object" && entry !== null
+        ? (entry as Record<string, unknown>)
+        : {};
+    const id = text(e.id ?? e.item ?? e.itemId);
+    const section = text(e.section ?? e.sectionId ?? e.section_id);
+    if (!id || !section) {
+      return [];
+    }
+    const reason = text(e.reason);
+    return [reason === undefined ? { id, section } : { id, section, reason }];
+  });
+  return { placements };
+}
+
+/**
  * Asks the model which section each unsorted item belongs in, then makes the answer safe: only
  * items and sections that were offered, one suggestion per item. The model sees short ids and the
  * item words, never the real ids or the profile. Nothing is moved here.
@@ -37,7 +66,9 @@ export async function placeItems(
         type: section.type,
       })),
     }),
-    schema: RawPlaceSchema,
+    schema: {
+      check: (value) => RawPlaceSchema.check(normaliseRawPlace(value)),
+    },
     personal,
   });
 
