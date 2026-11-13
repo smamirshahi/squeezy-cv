@@ -1,19 +1,31 @@
 import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
-import { CandidateDialog } from "@pages/candidates-page/candidate-dialog";
-import { MarkAsAppliedDialog } from "@pages/applications-page/mark-as-applied";
+import { AppliedElsewhereDialog } from "@pages/workspace/applied-elsewhere-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import {
   JobStatus,
-  JobStatusSelect,
+  JobStatusChip,
   STATUS_HELP,
 } from "@pages/workspace/job-status-select";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { SavedForLaterMenu } from "@pages/workspace/saved-for-later-menu";
 import { SponsorshipCheck } from "@pages/workspace/sponsorship-check";
 import { useSavedForLater } from "@pages/workspace/use-saved-for-later";
-import { ChangeEvent, ReactNode, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   MenuItem,
   Snackbar,
   TextField,
@@ -23,10 +35,10 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorderOutlined";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
 import CheckIcon from "@mui/icons-material/CheckOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRightOutlined";
 import { Job } from "@custom-types/job-types";
-import { Candidate, NewCandidate } from "@custom-types/candidate-types";
 import { JOB_OPINIONS, JobOpinion } from "@custom-types/json-types";
 import { navigate } from "@hooks/navigation";
 import { useSaveActions } from "@hooks/use-persistence";
@@ -263,6 +275,49 @@ function ProgressList({ items }: { items: ProgressItem[] }): JSX.Element {
   );
 }
 
+/** The note and apply-by day kept with a job in Saved for later; sent by the Save for later button */
+function ReminderFields({
+  value,
+  onChange,
+}: {
+  value: { note: string; applyBy: string };
+  onChange: (next: { note: string; applyBy: string }) => void;
+}): JSX.Element {
+  return (
+    <>
+      <TextField
+        size="small"
+        type="date"
+        label="Apply by (optional)"
+        value={value.applyBy}
+        onChange={(event) =>
+          onChange({ ...value, applyBy: event.target.value })
+        }
+        slotProps={{ inputLabel: { shrink: true } }}
+      />
+      <TextField
+        size="small"
+        label="Note (optional)"
+        multiline
+        minRows={2}
+        value={value.note}
+        onChange={(event) => onChange({ ...value, note: event.target.value })}
+      />
+    </>
+  );
+}
+
+/** What a job is called until it has a role or a company (the model needs some name) */
+const DEFAULT_JOB_NAME = "New job";
+
+/** "Role · Company", or whichever of the two there is */
+function nameFrom(company?: string, role?: string): string {
+  return [role, company]
+    .map((part) => (part ?? "").trim())
+    .filter((part) => part !== "")
+    .join(" · ");
+}
+
 /**
  * The "Job application" view of the Apply tool (design "Job application v2"): what the job is for,
  * in five short steps: the job, where and how, pay, your private view and the advert (typed,
@@ -294,20 +349,50 @@ export function JobDetailsPage(): JSX.Element {
   const [error, setError] = useState<string>("");
   const [isReading, setIsReading] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [editing, setEditing] = useState<Candidate | null>(null);
   const [justSavedId, setJustSavedId] = useState<string>("");
   const [toast, setToast] = useState<string>("");
   const [isApplying, setIsApplying] = useState<boolean>(false);
+  const [isLeaving, setIsLeaving] = useState<boolean>(false);
+  const parkedEntry = job
+    ? parked.open.find((entry) => entry.jobId === job.id)
+    : undefined;
+  const [reminder, setReminder] = useState({ note: "", applyBy: "" });
+  // Start from what is saved when another job (or its saved entry) comes up
+  useEffect(() => {
+    setReminder({
+      note: parkedEntry?.note ?? "",
+      applyBy: parkedEntry?.applyBy ?? "",
+    });
+  }, [job?.id, parkedEntry?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function edit(details: Parameters<typeof setJobDetails>[0]["details"]): void {
     if (job) {
-      dispatch(setJobDetails({ id: job.id, details }));
+      // The name follows role and company until it is typed in by hand
+      const isFollowing =
+        job.name === DEFAULT_JOB_NAME ||
+        job.name === nameFrom(job.company, job.role);
+      const changesWho =
+        details.company !== undefined || details.role !== undefined;
+      const next =
+        details.name === undefined && isFollowing && changesWho
+          ? {
+              ...details,
+              name:
+                nameFrom(
+                  details.company ?? job.company,
+                  details.role ?? job.role
+                ) || DEFAULT_JOB_NAME,
+            }
+          : details;
+      dispatch(setJobDetails({ id: job.id, details: next }));
       return;
     }
     // No job yet: the first thing typed creates it (no dialog), on the current template
     const id = nanoid();
-    const typed = details.name ?? details.company ?? details.role;
-    dispatch(createJob({ vault, style, name: typed?.trim() || "New job", id }));
+    const typed = details.name ?? nameFrom(details.company, details.role);
+    dispatch(
+      createJob({ vault, style, name: typed.trim() || DEFAULT_JOB_NAME, id })
+    );
     dispatch(setJobDetails({ id, details }));
   }
 
@@ -321,6 +406,8 @@ export function JobDetailsPage(): JSX.Element {
       role: job.role ?? "",
       jobUrl: job.url ?? "",
       jobAd: job.jobAd ?? "",
+      note: reminder.note,
+      applyBy: reminder.applyBy,
     };
     try {
       // pressed again for the same job: update that entry instead of parking a second one
@@ -335,6 +422,8 @@ export function JobDetailsPage(): JSX.Element {
       setToast(
         "Saved for later. Find it any time in Saved for later at the top of this page, or in Applications."
       );
+      // the form is ready for the next job
+      createAnother();
     } catch (caught) {
       setToast(
         caught instanceof Error
@@ -344,33 +433,22 @@ export function JobDetailsPage(): JSX.Element {
     }
   }
 
-  async function saveEdited(input: NewCandidate): Promise<void> {
-    if (editing) {
-      await parked.change(editing.id, {
-        company: input.company,
-        role: input.role,
-        jobUrl: input.jobUrl ?? "",
-        jobAd: input.jobAd ?? "",
-        note: input.note ?? "",
-        applyBy: input.applyBy ?? "",
-      });
-    }
+  function createAnother(): void {
+    setIsLeaving(false);
+    dispatch(createJob({ vault, style, name: DEFAULT_JOB_NAME, id: nanoid() }));
   }
 
+  /** Asks first when the job has something typed in and is not parked in Saved for later */
   function startAnother(): void {
-    dispatch(createJob({ vault, style, name: "New job", id: nanoid() }));
-  }
-
-  function changeStatus(status: JobStatus): void {
-    if (status === "applied") {
-      if (isDemo) {
-        setToast("Mark as applied is not available in the demo.");
-        return;
-      }
-      setIsApplying(true);
+    const hasContent = [job?.company, job?.role, job?.url, job?.jobAd].some(
+      (text) => (text ?? "").trim() !== ""
+    );
+    const isParked = parked.open.some((entry) => entry.jobId === job?.id);
+    if (hasContent && !isParked) {
+      setIsLeaving(true);
       return;
     }
-    edit({ stage: status });
+    createAnother();
   }
 
   function saveAndContinue(): void {
@@ -434,8 +512,21 @@ export function JobDetailsPage(): JSX.Element {
   const firstLeft = progress.find((item) => !item.isDone);
   const status: JobStatus = job?.stage === "ready" ? "ready" : "draft";
 
-  const statusControl = (
-    <JobStatusSelect value={status} isDisabled={!job} onChange={changeStatus} />
+  const statusControl = <JobStatusChip value={status} />;
+
+  const appliedElsewhereButton = (
+    <Button
+      variant="outlined"
+      color="inherit"
+      fullWidth
+      startIcon={<WorkOutlineIcon />}
+      disabled={!job || isDemo}
+      title={isDemo ? "Not available in the demo" : undefined}
+      onClick={() => setIsApplying(true)}
+      sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
+    >
+      I applied elsewhere
+    </Button>
   );
 
   const progressCard = (
@@ -481,13 +572,17 @@ export function JobDetailsPage(): JSX.Element {
     </Card>
   );
 
+  const reminderFields = job ? (
+    <ReminderFields value={reminder} onChange={setReminder} />
+  ) : null;
+
   // Desktop: the whole right panel
   const rightPanel = (
     <Box
       component="aside"
       aria-label="Status and next steps"
       sx={{
-        width: 360,
+        width: "100%",
         flex: "none",
         display: "grid",
         gap: 1.5,
@@ -526,6 +621,7 @@ export function JobDetailsPage(): JSX.Element {
             ? "Next: pick a template and choose what the CV shows."
             : "Fill in something to start this job."}
         </Typography>
+        {reminderFields}
         <Button
           variant="outlined"
           color="inherit"
@@ -535,13 +631,15 @@ export function JobDetailsPage(): JSX.Element {
           onClick={() => void saveForLater()}
           sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
         >
-          Save for later
+          {parkedEntry ? "Update Saved for later" : "Save for later"}
         </Button>
         <Help>
-          Parks the company, role, link and advert in <b>Saved for later</b>,
-          without building a CV. Find it again in the menu at the top of this
-          page.
+          Parks the company, role, link, advert, note and date in{" "}
+          <b>Saved for later</b>, without building a CV. Find it again in the
+          menu at the top of this page. Jobs past their date are marked in
+          Applications.
         </Help>
+        {appliedElsewhereButton}
       </Card>
       {progressCard}
       {analysisCard}
@@ -585,6 +683,8 @@ export function JobDetailsPage(): JSX.Element {
           {firstLeft.isOptional ? " (optional)" : ""}
         </Button>
       )}
+      {reminderFields}
+      {appliedElsewhereButton}
     </Card>
   ) : (
     <Box
@@ -601,6 +701,8 @@ export function JobDetailsPage(): JSX.Element {
         </Typography>
         {statusControl}
         <Help>{STATUS_HELP[status]}</Help>
+        {reminderFields}
+        {appliedElsewhereButton}
       </Card>
       {progressCard}
     </Box>
@@ -669,11 +771,6 @@ export function JobDetailsPage(): JSX.Element {
           isOpen={isMenuOpen}
           onOpenChange={setIsMenuOpen}
           onContinue={(candidate) => void parked.continueWith(candidate)}
-          onEdit={(candidate) => {
-            setIsMenuOpen(false);
-            setEditing(candidate);
-          }}
-          onDrop={(candidate) => void parked.drop(candidate)}
         />
         {isPhone ? (
           <Button
@@ -735,9 +832,18 @@ export function JobDetailsPage(): JSX.Element {
         </Box>
         <TextField
           label="Job name"
-          value={job?.name ?? ""}
-          onChange={(event) => edit({ name: event.target.value })}
-          helperText="Shown in your lists. Starts as the role; rename it any time."
+          value={job?.name === DEFAULT_JOB_NAME ? "" : (job?.name ?? "")}
+          placeholder="Filled in from the role and company"
+          onChange={(event) =>
+            edit({
+              name:
+                event.target.value.trim() === ""
+                  ? DEFAULT_JOB_NAME
+                  : event.target.value,
+            })
+          }
+          slotProps={{ inputLabel: { shrink: true } }}
+          helperText="Shown in your lists. Follows the role and company until you type your own."
         />
       </Step>
       <Step
@@ -889,7 +995,7 @@ export function JobDetailsPage(): JSX.Element {
         help="Paste it or pick a PDF. It feeds the analysis, the tailoring and the ATS score."
         isDone={hasAdvert}
       >
-        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <TextField
             id="job-url"
             fullWidth
@@ -970,7 +1076,15 @@ export function JobDetailsPage(): JSX.Element {
       >
         <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
           <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>{form}</Box>
-          {isDesktop && rightPanel}
+          {isDesktop && (
+            <ResizableAside
+              side="right"
+              label="the status panel"
+              defaultWidth={360}
+            >
+              {rightPanel}
+            </ResizableAside>
+          )}
         </Box>
         {!isDesktop && (
           <Box
@@ -1029,17 +1143,46 @@ export function JobDetailsPage(): JSX.Element {
           ) : undefined
         }
       />
-      <MarkAsAppliedDialog
+      <Dialog
+        open={isLeaving}
+        onClose={() => setIsLeaving(false)}
+        aria-labelledby="leave-job-title"
+      >
+        <DialogTitle id="leave-job-title">Start another job?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This job is not in Saved for later. If you start another one now,
+            you will not find this one on this page again. Save it for later
+            first to keep it.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setIsLeaving(false)}>
+            Cancel
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => {
+              void saveForLater();
+            }}
+          >
+            Save for later, then start
+          </Button>
+          <Button color="error" onClick={createAnother}>
+            Start without saving
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <AppliedElsewhereDialog
         isOpen={isApplying}
         onClose={() => setIsApplying(false)}
-        initialRole={job?.role ?? ""}
-      />
-      <CandidateDialog
-        isOpen={editing !== null}
-        title="Edit saved job"
-        onClose={() => setEditing(null)}
-        onSave={saveEdited}
-        initial={editing ?? undefined}
+        company={job?.company ?? ""}
+        role={job?.role ?? ""}
+        jobUrl={job?.url ?? ""}
+        onSaved={() => {
+          setToast("");
+          createAnother();
+        }}
       />
     </>
   );

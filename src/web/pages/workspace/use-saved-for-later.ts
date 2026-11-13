@@ -21,7 +21,6 @@ export function useSavedForLater(): {
   error: string;
   save: (input: NewCandidate) => Promise<Candidate>;
   change: (id: string, patch: CandidatePatch) => Promise<void>;
-  drop: (candidate: Candidate) => Promise<void>;
   continueWith: (candidate: Candidate) => Promise<void>;
 } {
   const api = useMemo(() => createApiClient(), []);
@@ -59,10 +58,6 @@ export function useSavedForLater(): {
     await run(() => api.updateCandidate(id, patch));
   }
 
-  async function drop(candidate: Candidate): Promise<void> {
-    await run(() => api.updateCandidate(candidate.id, { status: "dropped" }));
-  }
-
   async function continueWith(candidate: Candidate): Promise<void> {
     // saved from a job that still exists: open that one instead of making a second one
     const existing = jobs.some((job) => job.id === candidate.jobId);
@@ -76,5 +71,5 @@ export function useSavedForLater(): {
     openCandidateJob(jobId);
   }
 
-  return { open, error, save, change, drop, continueWith };
+  return { open, error, save, change, continueWith };
 }

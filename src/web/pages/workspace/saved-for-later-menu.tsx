@@ -5,15 +5,12 @@ import {
   Chip,
   Drawer,
   IconButton,
-  Menu,
-  MenuItem,
   Popover,
   Typography,
 } from "@mui/material";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMoreOutlined";
-import MoreHorizIcon from "@mui/icons-material/MoreHorizOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRightOutlined";
 import { Candidate } from "@custom-types/candidate-types";
 import { navigate } from "@hooks/navigation";
@@ -31,8 +28,6 @@ interface Props {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onContinue: (candidate: Candidate) => void;
-  onEdit: (candidate: Candidate) => void;
-  onDrop: (candidate: Candidate) => void;
 }
 
 /** "React Front-End Developer · Ocean Technologies" */
@@ -56,16 +51,11 @@ function Row({
   candidate,
   isJustSaved,
   onContinue,
-  onEdit,
-  onDrop,
 }: {
   candidate: Candidate;
   isJustSaved: boolean;
   onContinue: () => void;
-  onEdit: () => void;
-  onDrop: () => void;
 }): JSX.Element {
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const title = titleOf(candidate);
   return (
     <Box
@@ -106,43 +96,13 @@ function Row({
       <Button size="small" variant="outlined" onClick={onContinue}>
         Continue
       </Button>
-      <IconButton
-        size="small"
-        aria-label={`More for ${title}`}
-        aria-haspopup="menu"
-        onClick={(event) => setAnchor(event.currentTarget)}
-      >
-        <MoreHorizIcon fontSize="small" />
-      </IconButton>
-      <Menu
-        open={anchor !== null}
-        anchorEl={anchor}
-        onClose={() => setAnchor(null)}
-      >
-        <MenuItem
-          onClick={() => {
-            setAnchor(null);
-            onEdit();
-          }}
-        >
-          Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchor(null);
-            onDrop();
-          }}
-        >
-          Drop
-        </MenuItem>
-      </Menu>
     </Box>
   );
 }
 
 /**
  * The "Saved for later" button at the top of the Job application page and the list it opens: every
- * job parked to do later, with Continue (turns it into a job) and Edit / Drop in the three dots.
+ * job parked to do later, with Continue (turns it into a job, where you edit it).
  * A popover on a tablet and up, a bottom sheet on a phone.
  */
 export function SavedForLaterMenu({
@@ -151,8 +111,6 @@ export function SavedForLaterMenu({
   isOpen,
   onOpenChange,
   onContinue,
-  onEdit,
-  onDrop,
 }: Props): JSX.Element {
   const isPhone = useViewport() === "phone";
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -201,8 +159,6 @@ export function SavedForLaterMenu({
                 close();
                 onContinue(candidate);
               }}
-              onEdit={() => onEdit(candidate)}
-              onDrop={() => onDrop(candidate)}
             />
           ))}
         </Box>
@@ -210,12 +166,12 @@ export function SavedForLaterMenu({
       <Button
         onClick={() => {
           close();
-          navigate({ kind: "applications", search: "" });
+          navigate({ kind: "applications", search: "?status=candidate" });
         }}
         endIcon={<ChevronRightIcon />}
         sx={{ justifyContent: "flex-start", px: 1.5, minHeight: 44 }}
       >
-        See all in Applications
+        See all in Candidates
       </Button>
     </>
   );

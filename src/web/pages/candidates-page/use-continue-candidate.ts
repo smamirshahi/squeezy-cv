@@ -18,7 +18,7 @@ export function useContinueCandidate(): (candidate: Candidate) => string {
   return (candidate) => {
     const id = nanoid();
     const name =
-      [candidate.company, candidate.role].filter((t) => t !== "").join(", ") ||
+      [candidate.role, candidate.company].filter((t) => t !== "").join(" · ") ||
       "New job";
     dispatch(createJob({ vault, style, name, id }));
     dispatch(

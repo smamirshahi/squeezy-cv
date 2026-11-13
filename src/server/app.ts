@@ -105,6 +105,7 @@ const MAX_BODY_BYTES = 10 * 1024 * 1024;
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 const ID_SUFFIX_BYTES = 3;
+const PDF_MAGIC = "%PDF";
 const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
@@ -910,6 +911,31 @@ export function buildServer({
 
   // Freezes the saved CV (data and PDF) as what was sent. Nothing is stored unless both work.
   app.post("/api/applications", async (request, reply) => {
+    const input = NewApplicationSchema.check(request.body);
+    if (input.withoutCv) {
+      // Applied elsewhere without a CV: only the facts are stored
+      const source = input.jobId
+        ? (await loadSource(input.jobId).catch(() => undefined))?.source
+        : undefined;
+      const application = createApplication(
+        input,
+        undefined,
+        undefined,
+        toIsoDay(now()),
+        randomBytes(ID_SUFFIX_BYTES).toString("hex"),
+        source
+      );
+      await storage.saveApplication(application);
+      return application;
+    }
+    if (!input.jobId) {
+      return sendError(
+        reply,
+        HTTP_BAD_REQUEST,
+        "invalid_request",
+        "Choose the job whose CV was sent."
+      );
+    }
     if (!pdf) {
       return sendError(
         reply,
@@ -918,7 +944,6 @@ export function buildServer({
         "PDF export is not set up on this server, so the CV cannot be saved with the application."
       );
     }
-    const input = NewApplicationSchema.check(request.body);
     const { vault } = await storage.loadVault();
     const { variant, source } = await loadSource(input.jobId);
     const application = createApplication(
@@ -945,6 +970,36 @@ export function buildServer({
     await storage.saveApplication(application, bytes);
     return application;
   });
+
+  // The PDF of a CV that was sent outside the app (applied elsewhere): stored next to the facts
+  app.put<{ Params: { id: string } }>(
+    "/api/applications/:id/pdf",
+    async (request, reply) => {
+      const bytes = Buffer.isBuffer(request.body) ? request.body : undefined;
+      if (
+        !bytes ||
+        bytes.subarray(0, PDF_MAGIC.length).toString() !== PDF_MAGIC
+      ) {
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "invalid_pdf",
+          "That file is not a PDF."
+        );
+      }
+      const existing = await storage.loadApplication(request.params.id);
+      if (existing.submitted) {
+        return sendError(
+          reply,
+          HTTP_CONFLICT,
+          "conflict",
+          "This application already has the CV that was sent."
+        );
+      }
+      await storage.saveApplication(existing, bytes);
+      return { status: "saved" };
+    }
+  );
 
   app.patch<{ Params: { id: string } }>(
     "/api/applications/:id",

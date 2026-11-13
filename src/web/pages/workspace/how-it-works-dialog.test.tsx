@@ -15,7 +15,8 @@ describe("the Applications tutorial", () => {
   it("is in the list of tutorials", () => {
     open();
     const list = screen.getByRole("navigation", { name: "Tutorials" });
-    expect(list.textContent).toContain("Your applications");
+    // the sidebar uses the short title; the heading of the tutorial has the full one
+    expect(list.textContent).toContain("Applications");
     expect(screen.getByText("Your applications · Step 1 of 4")).toBeTruthy();
   });
 

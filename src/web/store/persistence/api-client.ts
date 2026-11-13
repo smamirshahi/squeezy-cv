@@ -241,6 +241,9 @@ export interface ApiClient {
 
   /** Freezes the saved job (data and PDF) as an application. Save the variant first. */
   createApplication: (input: NewApplication) => Promise<Application>;
+
+  /** Stores the PDF of a CV sent outside the app next to an application that has no frozen CV */
+  uploadApplicationPdf: (id: string, file: Blob) => Promise<void>;
   updateApplication: (
     id: string,
     patch: ApplicationPatch
@@ -450,6 +453,33 @@ export function createApiClient(
           `/api/applications/${encodeURIComponent(id)}`
         )
       );
+    },
+    async uploadApplicationPdf(id, file) {
+      let response: Response;
+      try {
+        response = await fetchImpl(
+          `/api/applications/${encodeURIComponent(id)}/pdf`,
+          {
+            method: "PUT",
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+            headers: { "Content-Type": "application/pdf" },
+            body: file,
+          }
+        );
+      } catch {
+        throw new ApiError(
+          "unreachable",
+          "The local server cannot be reached."
+        );
+      }
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => undefined)) as
+          { code?: string; message?: string } | undefined;
+        throw new ApiError(
+          payload?.code ?? "unknown",
+          payload?.message ?? `The server answered ${response.status}.`
+        );
+      }
     },
     async createApplication(input) {
       return ApplicationSchema.check(

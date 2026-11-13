@@ -90,6 +90,68 @@ describe("/api/applications", () => {
     expect(download.rawPayload).toEqual(PDF);
   });
 
+  it("applied elsewhere without a CV: stores the facts, makes no PDF", async () => {
+    const response = await apply({
+      withoutCv: true,
+      via: "Glassdoor",
+      company: "Beta Ltd",
+      role: "Dev",
+      jobUrl: `https://example.com/?${"a=1&".repeat(100)}`,
+    });
+    expect(response.statusCode).toBe(200);
+    const application = response.json();
+    expect(application.appliedVia).toBe("Glassdoor");
+    expect(application.submitted).toBeUndefined();
+    expect(pdf.requested).toEqual([]);
+    const download = await app.inject({
+      method: "GET",
+      url: `/api/applications/${application.id}/pdf`,
+    });
+    expect(download.statusCode).toBe(404);
+  });
+
+  it("stores the PDF of a CV sent elsewhere, and refuses anything that is not a PDF", async () => {
+    const { id } = (
+      await apply({ withoutCv: true, via: "Email", company: "B", role: "D" })
+    ).json();
+    const url = `/api/applications/${id}/pdf`;
+    const headers = { "content-type": "application/pdf" };
+    const notPdf = await app.inject({
+      method: "PUT",
+      url,
+      headers,
+      payload: Buffer.from("hello"),
+    });
+    expect(notPdf.statusCode).toBe(400);
+    const saved = await app.inject({
+      method: "PUT",
+      url,
+      headers,
+      payload: PDF,
+    });
+    expect(saved.statusCode).toBe(200);
+    const download = await app.inject({ method: "GET", url });
+    expect(download.rawPayload).toEqual(PDF);
+  });
+
+  it("will not replace the frozen CV of an application made in the app", async () => {
+    const { id } = (
+      await apply({ jobId: "acme", company: "A", role: "B" })
+    ).json();
+    const response = await app.inject({
+      method: "PUT",
+      url: `/api/applications/${id}/pdf`,
+      headers: { "content-type": "application/pdf" },
+      payload: PDF,
+    });
+    expect(response.statusCode).toBe(409);
+  });
+
+  it("needs a job when a CV is sent", async () => {
+    const response = await apply({ company: "A", role: "B" });
+    expect(response.statusCode).toBe(400);
+  });
+
   it("keeps the sent CV when the vault changes afterwards", async () => {
     const { id } = (
       await apply({ jobId: "acme", company: "A", role: "B" })

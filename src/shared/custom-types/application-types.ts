@@ -1,5 +1,6 @@
 import {
   Array,
+  Boolean,
   Literal,
   Number,
   Object,
@@ -144,7 +145,11 @@ export const ApplicationSchema = Object({
   jobDescription: String.optional(),
   notes: String.optional(),
 
-  submitted: SubmittedCvSchema,
+  /** How it was sent ("LinkedIn", "Company website", ...); only when recorded as applied elsewhere */
+  appliedVia: String.optional(),
+
+  /** The CV as sent. Missing when no CV was attached (applied elsewhere, without a CV). */
+  submitted: SubmittedCvSchema.optional(),
 });
 
 export type ApplicationStatus = Static<typeof ApplicationStatusSchema>;
@@ -152,8 +157,14 @@ export type Application = Static<typeof ApplicationSchema>;
 
 /** The fields of an application that the user types in. Everything else is derived. */
 export const NewApplicationSchema = Object({
-  /** The saved job to freeze and send (an older variant id also works) */
-  jobId: String,
+  /** The saved job to freeze and send (an older variant id also works); optional without a CV */
+  jobId: String.optional(),
+
+  /** Applied elsewhere without a CV: nothing is frozen and no PDF is made */
+  withoutCv: Boolean.optional(),
+
+  /** How it was sent, when applied elsewhere */
+  via: String.optional(),
   company: String,
   role: String,
   jobUrl: String.optional(),

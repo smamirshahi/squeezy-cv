@@ -12,6 +12,7 @@ import {
   MenuItem,
   Paper,
   Select,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -75,8 +76,12 @@ type LoadState =
 type Stage = "draft" | "ready";
 
 /** The colour of the dot in front of a status or stage */
-const DOT_COLORS: Record<ApplicationStatus | Stage | "candidate", string> = {
+const DOT_COLORS: Record<
+  ApplicationStatus | Stage | "candidate" | "dropped",
+  string
+> = {
   candidate: "#7B5EA7",
+  dropped: "#9AA0A6",
   draft: "#9AA0A6",
   ready: "#C2410C",
   applied: "#1976D2",
@@ -252,8 +257,16 @@ export function ApplicationsPage(): JSX.Element {
   const [allJobs, setAllJobs] = useState<JobSummary[]>([]);
   // Jobs parked to apply for later, not yet continued into a job
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  // Jobs dropped from Saved for later: kept here so they can be restored or deleted for good
+  const [dropped, setDropped] = useState<Candidate[]>([]);
   const [isSavingLater, setIsSavingLater] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string>("");
+  // A short message at the bottom left after moving a job between lists, with a link to it
+  const [toast, setToast] = useState<{
+    text: string;
+    view: ListView["status"];
+    label: string;
+  } | null>(null);
   const continueCandidate = useContinueCandidate();
   const [templateNames, setTemplateNames] = useState<Record<string, string>>(
     {}
@@ -271,6 +284,7 @@ export function ApplicationsPage(): JSX.Element {
         const parked = await api.listCandidates().catch(() => []);
         if (!isCancelled) {
           setCandidates(parked.filter((c) => c.status === "open"));
+          setDropped(parked.filter((c) => c.status === "dropped"));
           setAllJobs(unsentJobs.filter((j) => !j.isCorrupt));
           setTemplateNames(
             Object.fromEntries(
@@ -309,6 +323,7 @@ export function ApplicationsPage(): JSX.Element {
   async function reloadCandidates(): Promise<void> {
     const parked = await api.listCandidates();
     setCandidates(parked.filter((c) => c.status === "open"));
+    setDropped(parked.filter((c) => c.status === "dropped"));
   }
 
   async function saveForLater(input: NewCandidate): Promise<void> {
@@ -318,13 +333,42 @@ export function ApplicationsPage(): JSX.Element {
 
   async function runCandidateAction(
     action: () => Promise<unknown>
-  ): Promise<void> {
+  ): Promise<boolean> {
     setActionError("");
     try {
       await action();
       await reloadCandidates();
+      return true;
     } catch (caught) {
       setActionError(caught instanceof Error ? caught.message : String(caught));
+      return false;
+    }
+  }
+
+  async function moveCandidate(
+    candidate: Candidate,
+    status: "open" | "dropped"
+  ): Promise<void> {
+    const isOk = await runCandidateAction(() =>
+      api.updateCandidate(candidate.id, { status })
+    );
+    if (isOk) {
+      const name = [candidate.role, candidate.company]
+        .filter((part) => part !== "")
+        .join(" · ");
+      setToast(
+        status === "open"
+          ? {
+              text: `${name || "The job"} is back in Candidates.`,
+              view: "candidate",
+              label: "View candidates",
+            }
+          : {
+              text: `${name || "The job"} was dropped.`,
+              view: "dropped",
+              label: "View dropped",
+            }
+      );
     }
   }
 
@@ -493,6 +537,7 @@ export function ApplicationsPage(): JSX.Element {
           applications={readable}
           jobs={jobs}
           candidateCount={candidates.length}
+          droppedCount={dropped.length}
           status={view.status}
           today={today}
           onChange={(status) => setView({ ...view, status })}
@@ -537,12 +582,10 @@ export function ApplicationsPage(): JSX.Element {
               applications={state.applications}
               jobs={jobs}
               candidates={candidates}
+              dropped={dropped}
+              onRestore={(candidate) => void moveCandidate(candidate, "open")}
               onContinue={(candidate) => void continueWith(candidate)}
-              onDrop={(candidate) =>
-                void runCandidateAction(() =>
-                  api.updateCandidate(candidate.id, { status: "dropped" })
-                )
-              }
+              onDrop={(candidate) => void moveCandidate(candidate, "dropped")}
               onDelete={(candidate) =>
                 void runCandidateAction(() => api.deleteCandidate(candidate.id))
               }
@@ -558,6 +601,31 @@ export function ApplicationsPage(): JSX.Element {
             />
           )}
         </Box>
+        <Snackbar
+          open={toast !== null}
+          autoHideDuration={6000}
+          onClose={(_event, reason) => {
+            if (reason !== "clickaway") {
+              setToast(null);
+            }
+          }}
+          message={toast?.text}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          action={
+            toast ? (
+              <Button
+                size="small"
+                onClick={() => {
+                  setView({ ...view, status: toast.view });
+                  setToast(null);
+                }}
+                sx={{ color: "var(--act)", fontWeight: 600 }}
+              >
+                {toast.label}
+              </Button>
+            ) : undefined
+          }
+        />
         <CandidateDialog
           isOpen={isSavingLater}
           onClose={() => setIsSavingLater(false)}
@@ -802,6 +870,7 @@ interface SidebarProps {
   applications: ApplicationSummary[];
   jobs: JobSummary[];
   candidateCount: number;
+  droppedCount: number;
   status: ListView["status"];
   today: string;
   onChange: (status: ListView["status"]) => void;
@@ -818,6 +887,7 @@ function CategoriesSidebar({
   applications,
   jobs,
   candidateCount,
+  droppedCount,
   status,
   today,
   onChange,
@@ -850,6 +920,21 @@ function CategoriesSidebar({
         count: counts[s],
       })),
     },
+    // Only when something was dropped
+    ...(droppedCount > 0
+      ? [
+          {
+            title: "Dropped",
+            tiles: [
+              {
+                key: "dropped" as const,
+                label: "Dropped",
+                count: droppedCount,
+              },
+            ],
+          },
+        ]
+      : []),
     // Nothing needs a nudge: the group stays out of the way
     ...(noReply > 0
       ? [
@@ -1001,12 +1086,19 @@ const PHONE_TABLE_SX = {
 type Row =
   | { kind: "job"; id: string; job: JobSummary }
   | { kind: "application"; id: string; application: ApplicationSummary }
-  | { kind: "candidate"; id: string; candidate: Candidate };
+  | {
+      kind: "candidate";
+      id: string;
+      candidate: Candidate;
+      isDropped: boolean;
+    };
 
 interface TableProps {
   applications: ApplicationSummary[];
   jobs: JobSummary[];
   candidates: Candidate[];
+  dropped: Candidate[];
+  onRestore: (candidate: Candidate) => void;
   onContinue: (candidate: Candidate) => void;
   onDrop: (candidate: Candidate) => void;
   onDelete: (candidate: Candidate) => void;
@@ -1025,6 +1117,8 @@ function ApplicationsTable({
   applications,
   jobs,
   candidates,
+  dropped,
+  onRestore,
   onContinue,
   onDrop,
   onDelete,
@@ -1073,11 +1167,26 @@ function ApplicationsTable({
           text.toLowerCase().includes(query)
         ))
   );
+  const droppedShown = dropped.filter(
+    (candidate) =>
+      view.status === "dropped" &&
+      (query === "" ||
+        [candidate.company, candidate.role, candidate.note ?? ""].some((text) =>
+          text.toLowerCase().includes(query)
+        ))
+  );
   const rows: Row[] = [
     ...parked.map((candidate) => ({
       kind: "candidate" as const,
       id: `candidate:${candidate.id}`,
       candidate,
+      isDropped: false,
+    })),
+    ...droppedShown.map((candidate) => ({
+      kind: "candidate" as const,
+      id: `candidate:${candidate.id}`,
+      candidate,
+      isDropped: true,
     })),
     ...unsent.map((job) => ({
       kind: "job" as const,
@@ -1192,8 +1301,8 @@ function ApplicationsTable({
           <TableBody>
             {rows.map((row) => {
               if (row.kind === "candidate") {
-                const { candidate } = row;
-                const overdue = isOverdue(candidate, today);
+                const { candidate, isDropped } = row;
+                const overdue = !isDropped && isOverdue(candidate, today);
                 return (
                   <TableRow
                     key={row.id}
@@ -1239,8 +1348,16 @@ function ApplicationsTable({
                           gap: 0.75,
                         }}
                       >
-                        <Dot color={DOT_COLORS.candidate} />
-                        <Typography>Candidate</Typography>
+                        <Dot
+                          color={
+                            isDropped
+                              ? DOT_COLORS.dropped
+                              : DOT_COLORS.candidate
+                          }
+                        />
+                        <Typography>
+                          {isDropped ? "Dropped" : "Candidate"}
+                        </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -1258,15 +1375,29 @@ function ApplicationsTable({
                       )}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                      <Button
-                        size="small"
-                        onClick={() => onContinue(candidate)}
-                      >
-                        Continue
-                      </Button>
-                      <Button size="small" onClick={() => onDrop(candidate)}>
-                        Drop
-                      </Button>
+                      {isDropped ? (
+                        <Button
+                          size="small"
+                          onClick={() => onRestore(candidate)}
+                        >
+                          Restore
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            size="small"
+                            onClick={() => onContinue(candidate)}
+                          >
+                            Continue
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() => onDrop(candidate)}
+                          >
+                            Drop
+                          </Button>
+                        </>
+                      )}
                       <Button
                         size="small"
                         color="error"

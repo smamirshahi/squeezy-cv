@@ -23,6 +23,8 @@ const MS_PER_DAY =
 const MAX_ID_LENGTH = 64;
 const MAX_SLUG_LENGTH = 20;
 const MAX_TEXT_LENGTH = 200;
+/** Job links (LinkedIn search links and the like) are long */
+const MAX_URL_LENGTH = 2000;
 const MAX_LONG_TEXT_LENGTH = 100_000;
 const DATE_LENGTH = 10;
 const ID_SUFFIX_LENGTH = 4;
@@ -138,8 +140,8 @@ export interface ApplicationSource {
  */
 export function createApplication(
   input: NewApplication,
-  vault: Vault,
-  variant: Variant,
+  vault: Vault | undefined,
+  variant: Variant | undefined,
   today: string,
   idSuffix: string,
   source: ApplicationSource = {}
@@ -147,10 +149,16 @@ export function createApplication(
   const company = requireText(input.company, "Company");
   const role = requireText(input.role, "Role");
   const appliedAt = requireDay(input.appliedAt ?? today, "Date applied");
-  const frozenVariant: Variant = structuredClone(variant);
+  // Without a CV (applied elsewhere) nothing is frozen
+  const frozenVariant: Variant | undefined =
+    variant && vault ? structuredClone(variant) : undefined;
   // render() shares objects with the vault (e.g. the profile), so copy them too
-  const document = structuredClone(render(vault, frozenVariant));
-  const jobUrl = optionalText(input.jobUrl, "Job link", MAX_TEXT_LENGTH);
+  const document =
+    frozenVariant && vault
+      ? structuredClone(render(vault, frozenVariant))
+      : undefined;
+  const via = optionalText(input.via, "How it was sent", MAX_TEXT_LENGTH);
+  const jobUrl = optionalText(input.jobUrl, "Job link", MAX_URL_LENGTH);
   const jobDescription = optionalText(
     input.jobDescription,
     "Job description",
@@ -163,7 +171,9 @@ export function createApplication(
     company,
     role,
     ...(jobUrl ? { jobUrl } : {}),
-    jobId: source.jobId ?? variant.id,
+    ...((source.jobId ?? variant?.id)
+      ? { jobId: source.jobId ?? variant?.id }
+      : {}),
     ...(source.templateId ? { templateId: source.templateId } : {}),
     ...(source.jobName ? { jobName: source.jobName } : {}),
     ...(source.templateName ? { templateName: source.templateName } : {}),
@@ -172,11 +182,16 @@ export function createApplication(
     history: [{ status: "applied", at: appliedAt }],
     ...(jobDescription ? { jobDescription } : {}),
     ...(notes ? { notes } : {}),
-    submitted: {
-      document,
-      variant: frozenVariant,
-      ...(frozenVariant.tuning ? { tuning: frozenVariant.tuning } : {}),
-    },
+    ...(via ? { appliedVia: via } : {}),
+    ...(frozenVariant && document
+      ? {
+          submitted: {
+            document,
+            variant: frozenVariant,
+            ...(frozenVariant.tuning ? { tuning: frozenVariant.tuning } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -204,7 +219,7 @@ export function updateApplication(
     );
   }
   const textPatches: [keyof ApplicationPatch, string, number][] = [
-    ["jobUrl", "Job link", MAX_TEXT_LENGTH],
+    ["jobUrl", "Job link", MAX_URL_LENGTH],
     ["jobDescription", "Job description", MAX_LONG_TEXT_LENGTH],
     ["notes", "Notes", MAX_LONG_TEXT_LENGTH],
   ];
@@ -267,9 +282,9 @@ export function summariseApplication(
     status: application.status,
     appliedAt: application.appliedAt,
     // Files from before jobs only know the variant they were sent from: that is the job
-    jobId: application.jobId ?? application.submitted.variant.id,
+    jobId: application.jobId ?? application.submitted?.variant.id ?? "",
     templateId: application.templateId ?? "",
-    jobName: application.jobName ?? application.submitted.variant.name,
+    jobName: application.jobName ?? application.submitted?.variant.name ?? "",
     templateName: application.templateName ?? "",
     updatedAt: lastUpdateDay(application),
     isCorrupt: false,
