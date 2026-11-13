@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import {
   MAX_IMPORT_LENGTH,
   MAX_IMPORT_PDF_BYTES,
@@ -28,7 +29,9 @@ import {
 } from "@store/persistence/api-client";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { setVault, vaultSelector } from "@store/vault/vault-slice";
-import { AiButton } from "@components/ai-button";
+import { AiButton, AiIcon } from "@components/ai-button";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 interface Props {
   isOpen: boolean;
@@ -159,18 +162,54 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
     >
       <DialogTitle>Paste CV text, AI sorts it</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Alert severity={target && !target.info.isOnline ? "info" : "warning"}>
-          {target && !target.info.isOnline
-            ? `Using ${target.info.label} on this computer: the text stays here.`
-            : `The whole text you paste or take from a PDF, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider in Settings if you do not want that.`}
-        </Alert>
-        {target && !target.isConfigured && (
-          <Alert severity="info">
-            AI is not set up. Put <code>ANTHROPIC_API_KEY=...</code> in{" "}
-            <code>.env</code>, or use <code>AI_PROVIDER=ollama</code>, then
-            restart the server.
-          </Alert>
-        )}
+        <Box
+          component="section"
+          aria-label="AI for sorting the CV text"
+          sx={{
+            display: "grid",
+            gap: 1,
+            p: 1.5,
+            border: `1px solid ${WORKSPACE_COLORS.aiBorder}`,
+            borderRadius: 1.5,
+            bgcolor: WORKSPACE_COLORS.aiSoft,
+            color: WORKSPACE_COLORS.aiText,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <AiIcon />
+            <Typography sx={{ fontSize: 14, fontWeight: 700, flex: 1 }}>
+              {target
+                ? `${target.info.label} · ${target.info.isOnline ? "online" : "on this computer"}`
+                : "AI"}
+            </Typography>
+            <Button
+              size="small"
+              color="secondary"
+              startIcon={<SettingsOutlined fontSize="small" />}
+              onClick={() => openAiSettings("import")}
+            >
+              Change AI
+            </Button>
+          </Box>
+          <Typography variant="body2">
+            {target && !target.info.isOnline
+              ? `The text stays on this computer (${target.info.label}).`
+              : `The whole text you paste or take from a PDF, including your name and contact details, is sent to ${target?.info.recipient ?? "the AI provider"}. Choose an offline provider with Change AI if you do not want that.`}
+          </Typography>
+          {target && !target.isConfigured && (
+            <Alert severity="info">
+              {target.info.label} is not set up. Choose another AI with Change
+              AI, or set it up (see Settings), then try again.
+            </Alert>
+          )}
+        </Box>
         <Box
           role="button"
           tabIndex={0}

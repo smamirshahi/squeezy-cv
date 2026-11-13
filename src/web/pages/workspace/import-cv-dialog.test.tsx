@@ -10,8 +10,11 @@ import {
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
+import sample from "@fixtures/sample-cv.json";
+import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { rootReducer } from "@store/store";
 import { MAX_IMPORT_PDF_BYTES } from "@custom-types/import-types";
+import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
 
 const fetchMock = vi.fn();
 
@@ -127,5 +130,100 @@ describe("ImportCvDialog with a PDF", () => {
     serve(() => reply({ text: "x", pages: 1 }));
     open();
     await screen.findByText(/paste or take from a PDF/);
+  });
+});
+
+describe("ImportCvDialog AI card", () => {
+  function serveStatus(status: unknown): void {
+    fetchMock.mockImplementation(() => Promise.resolve(reply(status)));
+  }
+
+  it("names the AI chosen for the import and says an online one gets the text", async () => {
+    serveStatus({
+      isConfigured: true,
+      provider: "claude",
+      choice: { import: "groq" },
+      providers: [
+        { id: "claude", isConfigured: true },
+        { id: "groq", isConfigured: true },
+      ],
+    });
+    open();
+    const card = screen.getByRole("region", {
+      name: "AI for sorting the CV text",
+    });
+    await waitFor(() => expect(card.textContent).toMatch(/Groq · online/));
+    expect(card.textContent).toMatch(/is sent to/);
+  });
+
+  it("says a local AI keeps the text on this computer", async () => {
+    serveStatus({ isConfigured: true, provider: "ollama" });
+    open();
+    const card = screen.getByRole("region", {
+      name: "AI for sorting the CV text",
+    });
+    await waitFor(() =>
+      expect(card.textContent).toMatch(/Ollama · on this computer/)
+    );
+    expect(card.textContent).toMatch(/stays on this computer/);
+  });
+
+  it("opens the AI settings on the import task with Change AI", () => {
+    serveStatus({ isConfigured: true, provider: "ollama" });
+    const heard = vi.fn();
+    window.addEventListener(OPEN_AI_SETTINGS_EVENT, heard);
+    open();
+    fireEvent.click(screen.getByRole("button", { name: "Change AI" }));
+    window.removeEventListener(OPEN_AI_SETTINGS_EVENT, heard);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(
+      (heard.mock.calls[0][0] as CustomEvent<{ task?: string }>).detail.task
+    ).toBe("import");
+  });
+
+  it("names the provider that is not set up (not only Claude) and blocks Analyze", async () => {
+    serveStatus({
+      isConfigured: false,
+      provider: "gemini",
+      providers: [{ id: "gemini", isConfigured: false }],
+    });
+    open();
+    await screen.findByText(/Gemini is not set up/);
+    expect(
+      screen
+        .getByRole("button", { name: "Analyze with AI" })
+        .hasAttribute("disabled")
+    ).toBe(true);
+  });
+
+  it("can analyse with any provider that is set up and shows the result", async () => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/api/ai/import"
+          ? reply({
+              vault: {
+                ...migrateCvFile(sample).vault,
+                profile: {
+                  ...migrateCvFile(sample).vault.profile,
+                  fullName: "Alex Morgan",
+                },
+              },
+              warnings: [],
+            })
+          : reply({
+              isConfigured: true,
+              provider: "groq",
+              providers: [{ id: "groq", isConfigured: true }],
+            })
+      )
+    );
+    open();
+    fireEvent.change(screen.getByLabelText("Your CV text"), {
+      target: { value: "Alex Morgan, developer" },
+    });
+    const analyse = screen.getByRole("button", { name: "Analyze with AI" });
+    await waitFor(() => expect(analyse.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(analyse);
+    await screen.findByText(/Found: Alex Morgan/);
   });
 });

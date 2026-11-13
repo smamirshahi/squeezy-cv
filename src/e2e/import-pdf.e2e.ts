@@ -24,8 +24,7 @@ afterAll(async () => {
 });
 
 describe("PDF import", () => {
-  // Skipped while the import button is disabled ("Coming soon"); see the issue to bring it back
-  it.skip("puts the text of an uploaded PDF in the import box", async () => {
+  it("puts the text of an uploaded PDF in the import box", async () => {
     await page.goto(app.webUrl);
     await page
       .getByRole("navigation", { name: "Tools" })
@@ -35,7 +34,7 @@ describe("PDF import", () => {
       .getByRole("button", { name: "Paste CV text, AI sorts it" })
       .click();
 
-    await page.getByLabel("PDF file").setInputFiles({
+    await page.getByLabel("PDF file", { exact: true }).setInputFiles({
       name: "cv.pdf",
       mimeType: "application/pdf",
       buffer: makeTestPdf(["Alex Morgan", "Developer at Acme"]),
@@ -51,7 +50,7 @@ describe("PDF import", () => {
     expect(await box.inputValue()).toBe("Edited text");
 
     // A file that is not a PDF is refused with a reason
-    await page.getByLabel("PDF file").setInputFiles({
+    await page.getByLabel("PDF file", { exact: true }).setInputFiles({
       name: "cv.pdf",
       mimeType: "application/pdf",
       buffer: Buffer.from("not really a pdf"),

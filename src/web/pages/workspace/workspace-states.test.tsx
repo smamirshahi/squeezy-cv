@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
@@ -11,7 +11,10 @@ import { setStorageStatus } from "@store/persistence/persistence-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 function makeStore(): AppStore {
   return configureStore({ reducer: rootReducer });
@@ -50,6 +53,32 @@ describe("FirstRun", () => {
       </Provider>
     );
     expect(screen.getByText("Your vault is empty")).toBeTruthy();
+  });
+
+  it("has an enabled AI button that opens the import dialog", () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({ isConfigured: true, provider: "ollama" })
+          )
+        )
+      )
+    );
+    render(
+      <Provider store={makeStore()}>
+        <FirstRun />
+      </Provider>
+    );
+    const button = screen.getByRole("button", {
+      name: "Paste CV text, AI sorts it",
+    });
+    expect(button.hasAttribute("disabled")).toBe(false);
+    expect(button.className).toMatch(/colorSecondary/);
+    fireEvent.click(button);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByLabelText("Your CV text")).toBeTruthy();
   });
 
   it("is gone once there is a CV", () => {

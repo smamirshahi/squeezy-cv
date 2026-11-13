@@ -1,6 +1,7 @@
-import { Alert, Box, Button, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
+import { AiButton } from "@components/ai-button";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { isVaultEmpty } from "@shared/vault/is-vault-empty";
 import { useImportExportJson } from "@hooks/use-import-export-json";
@@ -147,17 +148,9 @@ export function FirstRun(): JSX.Element | null {
         <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
           Add your facts once. Every CV is a view of them.
         </Typography>
-        <Tooltip title="Coming soon">
-          <span>
-            <Button
-              variant="contained"
-              disabled
-              onClick={() => setIsImportOpen(true)}
-            >
-              Paste CV text, AI sorts it
-            </Button>
-          </span>
-        </Tooltip>
+        <AiButton variant="contained" onClick={() => setIsImportOpen(true)}>
+          Paste CV text, AI sorts it
+        </AiButton>
         <ImportCvDialog
           isOpen={isImportOpen}
           onClose={() => setIsImportOpen(false)}
