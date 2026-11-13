@@ -1,6 +1,6 @@
 import { createLocalFetch } from "@store/persistence/browser/local-api";
 import { IdbCvStorage } from "@store/persistence/browser/idb-cv-storage";
-import { openKvStore } from "@store/persistence/browser/idb-kv";
+import { KvStore, openKvStore } from "@store/persistence/browser/idb-kv";
 
 /** True when the app was built to keep its data in the browser (`VITE_STORAGE_MODE=browser`) */
 export function isBrowserMode(): boolean {
@@ -8,11 +8,18 @@ export function isBrowserMode(): boolean {
 }
 
 let localFetch: ReturnType<typeof createLocalFetch> | undefined;
+let kv: KvStore | undefined;
 
 /** The fetch that answers the API from IndexedDB; one instance for the whole page */
 export function browserFetch(): ReturnType<typeof createLocalFetch> {
-  localFetch ??= createLocalFetch(new IdbCvStorage(openKvStore()));
+  kv ??= openKvStore();
+  localFetch ??= createLocalFetch(new IdbCvStorage(kv));
   return localFetch;
+}
+
+/** Lets go of the database (before it is deleted); the next call opens it again */
+export async function closeBrowserStorage(): Promise<void> {
+  await kv?.close();
 }
 
 /**
