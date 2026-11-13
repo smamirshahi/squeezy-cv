@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { resizePhoto } from "@hooks/resize-photo";
 import {
@@ -139,7 +140,7 @@ export function PhotoDialog({
           variant="outlined"
           startIcon={<ImageOutlinedIcon />}
         >
-          Change image
+          {source === "" ? "Add image" : "Change image"}
           <input
             hidden
             type="file"
@@ -226,11 +227,16 @@ export function PhotoDialog({
             bgcolor: "action.hover",
             border: "1px solid",
             borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "text.secondary",
             cursor: hasImage ? "grab" : "default",
             touchAction: "none",
             userSelect: "none",
           }}
         >
+          {source === "" && <PersonOutlineIcon sx={{ fontSize: 96 }} />}
           {source !== "" && (
             <Box
               component="img"
