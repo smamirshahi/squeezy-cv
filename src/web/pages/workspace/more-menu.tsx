@@ -8,12 +8,14 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import BackupOutlinedIcon from "@mui/icons-material/BackupOutlined";
 import MemoryIcon from "@mui/icons-material/Memory";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { AboutDialog } from "@pages/workspace/about-dialog";
+import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
@@ -53,6 +55,20 @@ export function MoreMenu(): JSX.Element {
             <InfoOutlinedIcon fontSize="small" />
           </ListItemIcon>
           About
+        </MenuItem>
+        <MenuItem
+          aria-label="Your data: backup and restore"
+          aria-haspopup="dialog"
+          sx={{ minHeight: 44 }}
+          onClick={() => {
+            close();
+            openDataDialog();
+          }}
+        >
+          <ListItemIcon>
+            <BackupOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          Your data
         </MenuItem>
         <MenuItem
           aria-label="Settings"

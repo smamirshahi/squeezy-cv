@@ -1,3 +1,4 @@
+import { buildBackup, restoreBackup } from "@shared/backup/full-backup";
 import { buildApplicationsExport } from "@server/export/applications-export";
 import { APP_VERSION } from "@shared/version";
 import { randomBytes } from "node:crypto";
@@ -112,6 +113,8 @@ import {
 
 /* eslint-disable @typescript-eslint/no-magic-numbers -- 10 MB, written out */
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
+/** A backup holds every application PDF as text */
+const MAX_BACKUP_BYTES = 500 * 1024 * 1024;
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 const ID_SUFFIX_BYTES = 3;
@@ -425,6 +428,39 @@ export function buildServer({
       );
     }
   });
+
+  // The whole dataset as one file (vault, templates, jobs, candidates, applications with PDFs), and
+  // the way back in. Records with the same id are replaced.
+  app.get("/api/backup/file", async (_request, reply) => {
+    const { backup } = await buildBackup(storage, now());
+    return reply
+      .header("Content-Type", "application/json")
+      .header(
+        "Content-Disposition",
+        `attachment; filename="cv-builder-backup-${toIsoDay(now())}.json"`
+      )
+      .send(JSON.stringify(backup));
+  });
+
+  app.post(
+    "/api/backup/file",
+    { bodyLimit: MAX_BACKUP_BYTES },
+    async (request, reply) => {
+      try {
+        return await restoreBackup(storage, request.body);
+      } catch (error) {
+        if (error instanceof StorageError) {
+          throw error;
+        }
+        return sendError(
+          reply,
+          HTTP_BAD_REQUEST,
+          "invalid",
+          error instanceof Error ? error.message : "The backup cannot be read."
+        );
+      }
+    }
+  );
 
   // `isConfigured` and `provider` are those of tailoring (older pages read only these);
   // `providers` and `choice` are for the chooser and for the other tasks' notices

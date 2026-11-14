@@ -4,6 +4,7 @@ import { CURRENT_JOB_VERSION } from "@custom-types/job-types";
 import { CURRENT_TEMPLATE_VERSION } from "@custom-types/template-types";
 import { CURRENT_VAULT_VERSION } from "@custom-types/vault-types";
 import {
+  CURRENT_BACKUP_VERSION,
   FileKind,
   assertNotNewer,
   readExportMeta,
@@ -43,6 +44,7 @@ export const CURRENT_FORMAT_VERSIONS: Record<FileKind, number> = {
   template: CURRENT_TEMPLATE_VERSION,
   application: CURRENT_APPLICATION_VERSION,
   candidate: CURRENT_CANDIDATE_VERSION,
+  backup: CURRENT_BACKUP_VERSION,
 };
 
 /** What happened to a file that was made by an older version */
