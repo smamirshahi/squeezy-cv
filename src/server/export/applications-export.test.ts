@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createZip } from "@server/export/zip";
 import { buildApplicationsExport } from "@server/export/applications-export";
-import { CvStorage } from "@server/storage/cv-storage";
+import { CvStorage } from "@shared/storage/cv-storage";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 import { buildServer } from "@server/app";
 import sample from "@fixtures/sample-cv.json";

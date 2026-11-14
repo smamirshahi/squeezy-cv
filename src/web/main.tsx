@@ -6,8 +6,16 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "@store/store";
+import {
+  isBrowserMode,
+  requestPersistentStorage,
+} from "@store/persistence/browser/storage-mode";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+
+if (isBrowserMode()) {
+  void requestPersistentStorage();
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

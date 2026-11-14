@@ -14,7 +14,7 @@ import sample from "@fixtures/sample-cv.json";
 import { createApplication } from "@shared/application/application-utils";
 import { createVariant } from "@shared/variant/variant-utils";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
-import { StorageError } from "@server/storage/cv-storage";
+import { StorageError } from "@shared/storage/cv-storage";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
 const file = migrateCvFile(sample);

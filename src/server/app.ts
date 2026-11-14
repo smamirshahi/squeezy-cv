@@ -108,7 +108,7 @@ import {
   CvStorage,
   StorageError,
   StorageErrorCode,
-} from "@server/storage/cv-storage";
+} from "@shared/storage/cv-storage";
 
 /* eslint-disable @typescript-eslint/no-magic-numbers -- 10 MB, written out */
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
@@ -958,7 +958,7 @@ export function buildServer({
           "Content-Disposition",
           `inline; filename="${request.params.id}.pdf"`
         )
-        .send(bytes);
+        .send(Buffer.from(bytes));
     }
   );
 
@@ -1129,7 +1129,7 @@ export function buildServer({
     return reply
       .header("Content-Type", "application/pdf")
       .header("Content-Disposition", `attachment; filename="${id}.pdf"`)
-      .send(bytes);
+      .send(Buffer.from(bytes));
   }
 
   app.post<{ Body: { jobId?: unknown } }>(

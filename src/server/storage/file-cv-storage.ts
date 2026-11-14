@@ -37,7 +37,7 @@ import {
   JobSummary,
   StorageError,
   TemplateSummary,
-} from "@server/storage/cv-storage";
+} from "@shared/storage/cv-storage";
 import {
   KeyedQueue,
   fileExists,
@@ -597,7 +597,10 @@ export class FileCvStorage implements CvStorage {
     }
   }
 
-  async saveApplication(application: Application, pdf?: Buffer): Promise<void> {
+  async saveApplication(
+    application: Application,
+    pdf?: Uint8Array
+  ): Promise<void> {
     const dir = this.applicationDir(application.id);
     const filePath = path.join(dir, APPLICATION_FILE);
     await this.queue.run(dir, async () => {

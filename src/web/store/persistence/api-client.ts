@@ -1,5 +1,9 @@
 import { gateAiFetch } from "@store/persistence/send-gate";
 import {
+  browserFetch,
+  isBrowserMode,
+} from "@store/persistence/browser/storage-mode";
+import {
   ChatRequest,
   ChatResponse,
   ChatResponseSchema,
@@ -263,7 +267,9 @@ export function applicationPdfUrl(id: string): string {
 
 /** Typed access to the local server. Everything it returns is checked against the shared schemas. */
 export function createApiClient(
-  fetchImpl: FetchLike = gateAiFetch((input, init) => fetch(input, init))
+  fetchImpl: FetchLike = gateAiFetch((input, init) =>
+    isBrowserMode() ? browserFetch()(input, init) : fetch(input, init)
+  )
 ): ApiClient {
   return {
     async loadVault() {
