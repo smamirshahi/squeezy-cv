@@ -13,8 +13,6 @@ import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
-export type GuideKind = "guide" | "privacy";
-
 function Section({
   title,
   children,
@@ -32,97 +30,6 @@ function Section({
       </Typography>
       <Box sx={{ fontSize: 14, lineHeight: 1.6 }}>{children}</Box>
     </Box>
-  );
-}
-
-function List({ items }: { items: ReactNode[] }): JSX.Element {
-  return (
-    <Box component="ul" sx={{ m: 0, pl: 2.5, display: "grid", gap: 0.5 }}>
-      {items.map((item, index) => (
-        <li key={index}>{item}</li>
-      ))}
-    </Box>
-  );
-}
-
-/** How to use the app, for someone who just opened the link */
-function UserGuide(): JSX.Element {
-  const isBrowser = isBrowserMode();
-  return (
-    <>
-      <Section title="The idea">
-        You keep every fact about your career once, in the <b>Vault</b>. For
-        each application you make a <b>job</b>: it picks a <b>template</b> (the
-        look) and chooses what to show and how it is worded. You see the A4 page
-        as you work and save it as a PDF.
-      </Section>
-      {isBrowser && (
-        <Section title="Get started">
-          <List
-            items={[
-              <>Open the link. There is nothing to install or sign up for.</>,
-              <>
-                Optional: install it as an app (the <b>Data</b> button, or your
-                browser's install icon). It then opens in its own window and
-                works offline.
-              </>,
-              <>
-                Fill in the Vault, or paste your old CV text to have it sorted
-                (that uses AI, see Privacy).
-              </>,
-              <>
-                Make a job for each application, then <b>Export PDF</b>. In the
-                print window choose <b>Save as PDF</b>.
-              </>,
-            ]}
-          />
-        </Section>
-      )}
-      <Section title="Back up your data">
-        {isBrowser ? (
-          <>
-            Your CV is stored <b>only in this browser on this device</b>. If you
-            clear the site data, use a private window or switch browser or
-            device, it is not there. Press <b>Data</b> and{" "}
-            <b>Download backup</b> now and then, and keep the file somewhere
-            safe. To move to another device, download a backup there and use{" "}
-            <b>Restore from backup</b> here.
-          </>
-        ) : (
-          <>
-            Your data is in the <code>data</code> folder. <b>Data</b> also lets
-            you download one backup file and restore it.
-          </>
-        )}
-      </Section>
-      <Section title="Good to know">
-        <List
-          items={[
-            <>
-              Applications keep a frozen copy of the CV you sent, so later edits
-              never change it.
-            </>,
-            <>
-              Everything that uses AI is marked with a purple sparkle. AI only
-              proposes; you decide what goes on the CV.
-            </>,
-            ...(isBrowser
-              ? [
-                  <>
-                    For AI, add your own key in <b>Settings</b>. It stays in
-                    this browser and is not part of a backup.
-                  </>,
-                  <>
-                    Safari on iPhone can delete the data of a website you have
-                    not opened for about a week unless it is added to the Home
-                    Screen. Install it and keep a backup.
-                  </>,
-                ]
-              : []),
-          ]}
-        />
-      </Section>
-    </>
   );
 }
 
@@ -186,19 +93,18 @@ function PrivacyNote(): JSX.Element {
   );
 }
 
-/** The user guide or the privacy note, opened from the About dialog */
+/** The privacy note, opened from the About dialog */
 export function GuideDialog({
-  kind,
+  isOpen,
   onClose,
 }: {
-  kind: GuideKind | null;
+  isOpen: boolean;
   onClose: () => void;
 }): JSX.Element {
   const isPhone = useViewport() === "phone";
-  const title = kind === "privacy" ? "Privacy note" : "How to use CV Builder";
   return (
     <Dialog
-      open={kind !== null}
+      open={isOpen}
       onClose={onClose}
       fullWidth
       fullScreen={isPhone}
@@ -216,14 +122,14 @@ export function GuideDialog({
           borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
-        {title}
+        Privacy note
         <Box sx={{ flex: 1 }} />
         <IconButton size="small" aria-label="Close" onClick={onClose}>
           <CloseOutlinedIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
       <DialogContent sx={{ pt: "20px !important" }}>
-        {kind === "privacy" ? <PrivacyNote /> : <UserGuide />}
+        <PrivacyNote />
       </DialogContent>
       <Box
         sx={{
