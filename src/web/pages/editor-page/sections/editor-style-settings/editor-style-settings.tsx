@@ -6,9 +6,9 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { DropdownCitationStyle } from "@pages/editor-page/sections/editor-style-settings/dropdown-citation-style";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import { InfoOutlined } from "@components/ui/icons";
 import { DropdownDateType } from "@pages/editor-page/sections/editor-style-settings/dropdown-date-type";
 import { DropdownSkillIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-skill-icon";
 import { DropdownMargin } from "@pages/editor-page/sections/editor-style-settings/dropdown-margin";

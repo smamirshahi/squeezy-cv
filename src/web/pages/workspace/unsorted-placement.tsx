@@ -6,8 +6,8 @@ import {
   CircularProgress,
   Tooltip,
   Typography,
-} from "@mui/material";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+} from "@components/ui";
+import { SettingsOutlined } from "@components/ui/icons";
 import { Section } from "@custom-types/vault-types";
 import { PlaceResult } from "@custom-types/place-types";
 import { getItemLabel } from "@shared/variant/item-label";

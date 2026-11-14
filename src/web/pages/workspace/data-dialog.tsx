@@ -8,9 +8,11 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+} from "@components/ui";
+import {
+  FileDownloadOutlined as FileDownloadOutlinedIcon,
+  FileUploadOutlined as FileUploadOutlinedIcon,
+} from "@components/ui/icons";
 import { createApiClient } from "@store/persistence/api-client";
 import { DeleteDataDialog } from "@pages/workspace/delete-data-dialog";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
@@ -139,7 +141,7 @@ function DataDialog({
                 severity="info"
                 action={
                   <Button
-                    color="inherit"
+                    color="neutral"
                     size="small"
                     onClick={() => void installApp.install()}
                   >
@@ -237,7 +239,7 @@ function DataDialog({
             sx={{ mt: 2 }}
             action={
               <Button
-                color="inherit"
+                color="neutral"
                 size="small"
                 onClick={() => window.location.reload()}
               >

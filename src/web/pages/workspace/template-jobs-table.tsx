@@ -12,9 +12,11 @@ import {
   TableSortLabel,
   Tooltip,
   Typography,
-} from "@mui/material";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+} from "@components/ui";
+import {
+  OpenInNewOutlined as OpenInNewOutlinedIcon,
+  PictureAsPdfOutlined as PictureAsPdfOutlinedIcon,
+} from "@components/ui/icons";
 import { Job } from "@custom-types/job-types";
 import { ApplicationSummary } from "@custom-types/application-types";
 import { formatRoute } from "@shared/routing/routes";

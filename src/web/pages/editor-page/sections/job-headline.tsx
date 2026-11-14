@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { RelevanceBadge } from "@pages/workspace/relevance-badge";
 import { SectionTailor } from "@pages/workspace/section-tailor";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";

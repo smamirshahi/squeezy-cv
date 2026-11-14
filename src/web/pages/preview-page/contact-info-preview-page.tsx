@@ -1,8 +1,10 @@
-import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import { Grid } from "@mui/material";
+import {
+  AlternateEmailOutlined as AlternateEmailIcon,
+  LocationOnOutlined as LocationOnIcon,
+  SmartphoneOutlined as SmartphoneIcon,
+} from "@components/ui/icons";
+import { Grid } from "@components/ui";
 import { IconWithText } from "@components/icon-with-text";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { LinkItem, Profile } from "@custom-types/vault-types";

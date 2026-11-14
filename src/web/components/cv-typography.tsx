@@ -1,6 +1,6 @@
 import { AvailableFonts } from "@custom-types/styles-types";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
-import { SxProps, Typography } from "@mui/material";
+import { SxProps, Typography } from "@components/ui";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { useMemo } from "react";

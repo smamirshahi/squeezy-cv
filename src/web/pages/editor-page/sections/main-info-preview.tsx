@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@components/ui";
 import { LinkItem, Profile } from "@custom-types/vault-types";
 import {
   HeaderWithPhoto,
@@ -13,6 +13,26 @@ export const MainInfoAsideContext = createContext<HTMLElement | null>(null);
 
 export function useMainInfoAside(): HTMLElement | null {
   return useContext(MainInfoAsideContext);
+}
+
+/** True when there is anything to draw: a typed value, a photo or a link */
+function hasPreviewContent(profile: Profile, links: LinkItem[]): boolean {
+  const texts = [
+    profile.fullName,
+    profile.headline,
+    profile.email,
+    profile.phone,
+    profile.location,
+    profile.rightToWork,
+    profile.maritalStatus,
+    profile.gender,
+    profile.photo,
+  ];
+  return (
+    texts.some((text) => (text ?? "").trim() !== "") ||
+    (profile.nationalities ?? []).length > 0 ||
+    links.length > 0
+  );
 }
 
 /** Right panel of Main Info: the CV header drawn from what is typed (before Apply) */
@@ -41,33 +61,35 @@ export function MainInfoPreview({
         Just a preview of what is in your vault. Nothing here goes on a job's CV
         unless you choose it.
       </Typography>
-      <Box sx={{ bgcolor: "action.hover", p: 2, borderRadius: "6px" }}>
-        <Box
-          sx={{
-            bgcolor: "#fff",
-            color: "#222",
-            p: { xs: "20px 22px", md: "14px 12px", lg: "20px 22px" },
-            // A long address breaks instead of running out of a narrow panel
-            overflowWrap: { xs: "anywhere", lg: "normal" },
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <HeaderWithPhoto profile={profile}>
-            <PersonalInfoPreviewPage profile={profile} />
-            <Box
-              sx={{
-                mt: 1,
-                "& .MuiGrid-container": { columnGap: 2, rowGap: 1.25 },
-              }}
-            >
-              <ContactInfoPreviewPage profile={profile} links={links} />
-            </Box>
-          </HeaderWithPhoto>
+      {hasPreviewContent(profile, links) && (
+        <Box sx={{ bgcolor: "action.hover", p: 2, borderRadius: "6px" }}>
+          <Box
+            sx={{
+              bgcolor: "#fff",
+              color: "#222",
+              p: { xs: "20px 22px", md: "14px 12px", lg: "20px 22px" },
+              // A long address breaks instead of running out of a narrow panel
+              overflowWrap: { xs: "anywhere", lg: "normal" },
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            <HeaderWithPhoto profile={profile}>
+              <PersonalInfoPreviewPage profile={profile} />
+              <Box
+                sx={{
+                  mt: 1,
+                  "& .MuiGrid-container": { columnGap: 2, rowGap: 1.25 },
+                }}
+              >
+                <ContactInfoPreviewPage profile={profile} links={links} />
+              </Box>
+            </HeaderWithPhoto>
+          </Box>
         </Box>
-      </Box>
+      )}
       <Typography variant="caption" sx={{ color: WORKSPACE_COLORS.muted }}>
         Everything you add here is kept in your vault. When you apply for a job,
         you decide which details to show (photo, links, nationality, marital

@@ -7,8 +7,8 @@ import {
   DialogTitle,
   IconButton,
   Typography,
-} from "@mui/material";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+} from "@components/ui";
+import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -140,7 +140,7 @@ export function GuideDialog({
           borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
-        <Button variant="outlined" color="inherit" onClick={onClose}>
+        <Button variant="outlined" color="neutral" onClick={onClose}>
           Close
         </Button>
       </Box>

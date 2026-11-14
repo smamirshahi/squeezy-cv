@@ -1,5 +1,5 @@
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import { Box, Button, ButtonProps, Tooltip } from "@mui/material";
+import { AutoAwesomeOutlined as AutoAwesomeOutlinedIcon } from "@components/ui/icons";
+import { Box, Button, ButtonProps, Tooltip } from "@components/ui";
 
 /**
  * The sparkle icon that marks everything that uses AI. Purple always means AI (the theme's

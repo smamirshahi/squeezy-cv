@@ -1,6 +1,8 @@
-import { Box, IconButton, Typography } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { Box, IconButton, Typography } from "@components/ui";
+import {
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { orderLinks } from "@shared/variant/render";

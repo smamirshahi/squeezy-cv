@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Typography } from "@components/ui";
 import { Template } from "@custom-types/template-types";
 import { Job } from "@custom-types/job-types";
 import { activateTemplateLook } from "@hooks/use-sync-active-job";

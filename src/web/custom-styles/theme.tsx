@@ -136,6 +136,15 @@ function createAppTheme(mode: ThemeMode): ReturnType<typeof createTheme> {
     },
     components: {
       MuiButtonBase: { defaultProps: { disableRipple: true } },
+      // The "neutral" button (MUI inherit) is outlined in grey: the least important action
+      MuiButton: {
+        variants: [
+          {
+            props: { variant: "outlined", color: "inherit" },
+            style: { borderColor: t.bd2 },
+          },
+        ],
+      },
       // Dialog content scrolls when the window is short. macOS hides its overlay scrollbars until
       // you scroll, so nothing shows that there is more below: draw a scrollbar that stays visible.
       MuiDialogContent: {

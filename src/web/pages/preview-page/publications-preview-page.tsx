@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid } from "@components/ui";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { formatCitation } from "@shared/vault/citation";

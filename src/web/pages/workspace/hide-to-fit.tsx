@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Checkbox, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Typography } from "@components/ui";
 import { rankHideCandidates } from "@shared/layout/hide-candidates";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {

@@ -1,14 +1,16 @@
 import { MouseEvent, useState } from "react";
-import { Box, ButtonBase, Typography } from "@mui/material";
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import LayersIcon from "@mui/icons-material/Layers";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import BackupOutlinedIcon from "@mui/icons-material/BackupOutlined";
-import MemoryIcon from "@mui/icons-material/Memory";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import { Box, ButtonBase, Typography } from "@components/ui";
+import {
+  BackupOutlined as BackupOutlinedIcon,
+  DarkModeOutlined as DarkModeOutlinedIcon,
+  DescriptionOutlined as DescriptionOutlinedIcon,
+  FolderOpenOutlined as FolderOpenIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  LayersOutlined as LayersIcon,
+  LightModeOutlined as LightModeOutlinedIcon,
+  MemoryOutlined as MemoryIcon,
+  WorkOutlineOutlined as WorkOutlineIcon,
+} from "@components/ui/icons";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { Route, formatRoute } from "@shared/routing/routes";
 import { useAppSelector } from "@store/store-helper";

@@ -5,7 +5,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { BulletsResult } from "@custom-types/bullets-types";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 

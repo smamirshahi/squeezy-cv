@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Box, Button, LinearProgress, Typography } from "@mui/material";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import { Alert, Box, Button, LinearProgress, Typography } from "@components/ui";
+import { CheckCircleOutlined as CheckCircleOutlinedIcon } from "@components/ui/icons";
 import { cssVar } from "@custom-styles/theme";
 import { navigate } from "@hooks/navigation";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";

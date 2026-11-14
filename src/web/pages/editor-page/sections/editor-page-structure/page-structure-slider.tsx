@@ -1,4 +1,4 @@
-import { Slider, Stack, Typography } from "@mui/material";
+import { Slider, Stack, Typography } from "@components/ui";
 import { appSelector, setColumnWidth } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 

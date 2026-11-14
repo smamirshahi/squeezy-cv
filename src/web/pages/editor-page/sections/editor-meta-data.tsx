@@ -1,6 +1,6 @@
 import { InformationTooltip } from "@components/information-tooltip";
 import { JOB_OPINIONS, JobOpinion, MetaData } from "@custom-types/json-types";
-import { Box, MenuItem, TextField, Typography } from "@mui/material";
+import { Box, MenuItem, TextField, Typography } from "@components/ui";
 import { metaDataSelector, setMetaData } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useEffect, useState } from "react";

@@ -1,4 +1,4 @@
-import { Box, Grid } from "@mui/material";
+import { Box, Grid } from "@components/ui";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { Profile } from "@custom-types/vault-types";
 import { useAppSelector } from "@store/store-helper";

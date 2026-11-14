@@ -10,10 +10,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+} from "@components/ui";
+import {
+  DragIndicatorOutlined as DragIndicatorIcon,
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 import {
   DndContext,
   DragEndEvent,

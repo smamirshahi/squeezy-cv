@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 
 interface Props {
   /** Keep this block on the same page as the one after it (e.g. an item header and its first bullet) */

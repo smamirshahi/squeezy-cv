@@ -6,7 +6,7 @@ import {
   Chip,
   CircularProgress,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { RequirementsDialog } from "@pages/workspace/requirements-dialog";
 import { groupsOfRequirements } from "@pages/workspace/requirements-table";
 import { AiJobChip, AiSettingsButton } from "@pages/workspace/ai-job-context";
@@ -26,7 +26,7 @@ import {
 import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { AiButton, AiIcon } from "@components/ai-button";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import { CheckCircleOutlined as CheckCircleOutlinedIcon } from "@components/ui/icons";
 import { cssVar } from "@custom-styles/theme";
 import { sectionsSelector } from "@store/vault/vault-slice";
 

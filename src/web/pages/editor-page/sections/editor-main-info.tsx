@@ -3,20 +3,22 @@ import {
   Box,
   Button,
   ButtonBase,
-  MenuItem,
   IconButton,
   InputAdornment,
+  MenuItem,
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
+} from "@components/ui";
+import {
+  AddOutlined as AddIcon,
+  DeleteOutlined as DeleteIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  LocationOnOutlined as LocationOnIcon,
+  PersonOutlined as PersonOutlineIcon,
+} from "@components/ui/icons";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
 import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {

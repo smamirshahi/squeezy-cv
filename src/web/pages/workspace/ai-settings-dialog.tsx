@@ -13,8 +13,8 @@ import {
   Radio,
   RadioGroup,
   Typography,
-} from "@mui/material";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+} from "@components/ui";
+import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
 import {
   AI_TASKS,
   AI_TASK_DESCRIPTIONS,

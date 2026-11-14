@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Chip, Typography } from "@mui/material";
+import { Box, ButtonBase, Chip, Typography } from "@components/ui";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { AddToTemplateButton } from "@pages/editor-page/section-placement/add-to-template-button";
 import { SectionPlacement } from "@pages/editor-page/section-placement/section-placement";

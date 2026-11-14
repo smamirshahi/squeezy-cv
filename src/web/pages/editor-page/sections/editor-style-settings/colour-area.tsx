@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Box, Slider } from "@mui/material";
+import { Box, Slider } from "@components/ui";
 import { hexToHsv, hsvToHex, Hsv } from "@shared/style/color-convert";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 

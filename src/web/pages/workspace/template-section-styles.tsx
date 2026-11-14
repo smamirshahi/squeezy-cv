@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 import { Job, CURRENT_JOB_VERSION } from "@custom-types/job-types";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";

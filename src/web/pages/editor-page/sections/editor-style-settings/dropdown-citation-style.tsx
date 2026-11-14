@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@components/ui";
 import {
   CITATION_STYLES,
   DEFAULT_CITATION_STYLE,

@@ -2,26 +2,28 @@ import { MouseEvent, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
-  List,
-  ListItemButton,
-  ListItemText,
-  Collapse,
-  Menu,
-  MenuItem,
-  Tooltip,
   ButtonBase,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  List,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
   TextField,
+  Tooltip,
   Typography,
-} from "@mui/material";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
-import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
+} from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardOutlinedIcon,
+  ArrowUpwardOutlined as ArrowUpwardOutlinedIcon,
+  ExpandMoreOutlined as ExpandMoreOutlinedIcon,
+  InfoOutlined as InfoOutlinedIcon,
+} from "@components/ui/icons";
 import { ApplicationSummary } from "@custom-types/application-types";
 import { createApiClient } from "@store/persistence/api-client";
 import { Template } from "@custom-types/template-types";

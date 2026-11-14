@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, Link, Popover, Typography } from "@mui/material";
+import { Box, Button, Link, Popover, Typography } from "@components/ui";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 const SPONSOR_REGISTER_URL =
@@ -41,7 +41,7 @@ export function SponsorshipCheck({
         <Button
           size="small"
           variant="outlined"
-          color="inherit"
+          color="neutral"
           aria-haspopup="dialog"
           aria-label="Check visa sponsorship"
           onClick={(event) => {

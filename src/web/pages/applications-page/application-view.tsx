@@ -17,7 +17,7 @@ import {
   Paper,
   TextField,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { nanoid } from "@reduxjs/toolkit";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

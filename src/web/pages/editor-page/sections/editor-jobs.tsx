@@ -14,8 +14,8 @@ import {
   Switch,
   TextField,
   Typography,
-} from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+} from "@components/ui";
+import { ArrowForwardOutlined as ArrowForwardIcon } from "@components/ui/icons";
 import { FitMode } from "@custom-types/variant-types";
 import { activateVariant } from "@hooks/use-sync-active-job";
 import { JobContent } from "@pages/editor-page/sections/job-content";

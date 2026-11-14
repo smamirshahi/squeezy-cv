@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "@mui/material";
+} from "@components/ui";
 import { useViewport } from "@hooks/use-viewport";
 import {
   RequirementGroup,

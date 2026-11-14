@@ -11,7 +11,7 @@ import {
   DialogTitle,
   FormControlLabel,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { AtsWordingResult } from "@custom-types/ats-wording-types";
 import { AiBadge, AiButton, AiIcon } from "@components/ai-button";
 import { useViewport } from "@hooks/use-viewport";

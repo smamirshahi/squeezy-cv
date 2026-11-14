@@ -1,5 +1,5 @@
 import { setPaperMargin, styleSelector } from "@store/cv-data/cv-data-slice";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@components/ui";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 export function DropdownMargin(): JSX.Element {

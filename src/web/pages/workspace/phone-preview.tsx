@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ButtonBase } from "@mui/material";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import { ButtonBase } from "@components/ui";
+import { ExpandMoreOutlined as ExpandMoreOutlinedIcon } from "@components/ui/icons";
 import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 

@@ -8,8 +8,8 @@ import {
   DialogTitle,
   TextField,
   Typography,
-} from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+} from "@components/ui";
+import { FileDownloadOutlined as FileDownloadOutlinedIcon } from "@components/ui/icons";
 import { deleteAllBrowserData } from "@store/persistence/browser/delete-all-data";
 import { useViewport } from "@hooks/use-viewport";
 

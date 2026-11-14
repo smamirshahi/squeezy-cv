@@ -14,17 +14,19 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
-import BugReportOutlinedIcon from "@mui/icons-material/BugReportOutlined";
-import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
-import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
-import SentimentNeutralOutlinedIcon from "@mui/icons-material/SentimentNeutralOutlined";
-import SentimentDissatisfiedOutlinedIcon from "@mui/icons-material/SentimentDissatisfiedOutlined";
+} from "@components/ui";
+import {
+  BugReportOutlined as BugReportOutlinedIcon,
+  CheckCircleOutlined as CheckCircleOutlinedIcon,
+  CloseOutlined as CloseOutlinedIcon,
+  ContentCopyOutlined as ContentCopyOutlinedIcon,
+  FeedbackOutlined as FeedbackOutlinedIcon,
+  LightbulbOutlined as LightbulbOutlinedIcon,
+  OpenInNewOutlined as OpenInNewOutlinedIcon,
+  SentimentDissatisfiedOutlined as SentimentDissatisfiedOutlinedIcon,
+  SentimentNeutralOutlined as SentimentNeutralOutlinedIcon,
+  SentimentSatisfiedAltOutlined as SentimentSatisfiedAltOutlinedIcon,
+} from "@components/ui/icons";
 import {
   FeedbackKind,
   FeedbackMood,
@@ -244,7 +246,7 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
             severity="error"
             action={
               <Button
-                color="inherit"
+                color="neutral"
                 size="small"
                 disabled={isBusy || isTooShort}
                 onClick={() => void handleSend()}
@@ -257,7 +259,7 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 1 }}>
               <Button
                 size="small"
-                color="inherit"
+                color="neutral"
                 startIcon={<OpenInNewOutlinedIcon />}
                 href={buildNewIssueUrl(report)}
                 target="_blank"
@@ -267,7 +269,7 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
               </Button>
               <Button
                 size="small"
-                color="inherit"
+                color="neutral"
                 startIcon={<ContentCopyOutlinedIcon />}
                 onClick={() => void handleCopy()}
               >

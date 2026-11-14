@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@components/ui";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick } from "@hooks/navigation";
 

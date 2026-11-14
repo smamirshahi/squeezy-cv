@@ -1,12 +1,12 @@
 import { normaliseLink } from "@shared/vault/link-utils";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid } from "@components/ui";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { LocationOnOutlined as LocationOnIcon } from "@components/ui/icons";
 import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";

@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
 import {

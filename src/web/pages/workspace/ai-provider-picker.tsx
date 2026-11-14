@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Typography } from "@components/ui";
 import { AiSettingsButton } from "@pages/workspace/ai-job-context";
 import { AiProviderId, AiTask } from "@shared/ai/providers";
 import { AiStatus, taskProvider } from "@store/persistence/api-client";

@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from "@mui/material";
+} from "@components/ui";
 import { useViewport } from "@hooks/use-viewport";
 import { Candidate, NewCandidate } from "@custom-types/candidate-types";
 

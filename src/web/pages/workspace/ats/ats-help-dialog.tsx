@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { useViewport } from "@hooks/use-viewport";
 import {
   AtsCategoryId,

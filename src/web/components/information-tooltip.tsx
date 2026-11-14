@@ -1,5 +1,5 @@
-import InfoOutlineIcon from "@mui/icons-material/InfoOutlined";
-import { IconButton, Tooltip } from "@mui/material";
+import { InfoOutlined as InfoOutlineIcon } from "@components/ui/icons";
+import { IconButton, Tooltip } from "@components/ui";
 
 interface Props {
   /** Text to show on hover */

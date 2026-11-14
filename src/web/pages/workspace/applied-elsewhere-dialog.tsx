@@ -16,7 +16,7 @@ import {
   RadioGroup,
   TextField,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { useViewport } from "@hooks/use-viewport";
 import { toIsoDay } from "@shared/application/application-utils";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
@@ -232,7 +232,7 @@ export function AppliedElsewhereDialog({
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Button
                   variant="outlined"
-                  color="inherit"
+                  color="neutral"
                   onClick={() => fileRef.current?.click()}
                 >
                   {cvFile ? "Choose another PDF" : "Choose the PDF"}

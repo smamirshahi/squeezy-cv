@@ -5,7 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@components/ui";
 import { SortableItem } from "@pages/editor-page/section-placement/sortable-item";
 import { PreviewSectionId } from "@store/app/app-slice-types";
 

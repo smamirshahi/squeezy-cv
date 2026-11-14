@@ -5,7 +5,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
-} from "@mui/material";
+} from "@components/ui";
 import { LinkTypeIcon } from "@pages/editor-page/link-type/link-type-icon";
 import {
   LINK_TYPES,

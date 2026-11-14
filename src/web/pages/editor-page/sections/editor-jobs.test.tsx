@@ -311,10 +311,15 @@ describe("reordering", () => {
     const label = shorten(item.bullets[0].text);
     // go up from the bullet's text to the row that holds its arrows
     let row: HTMLElement | null = screen.getByText(label);
-    while (row && !row.querySelector('[data-testid="ArrowDownwardIcon"]')) {
+    while (
+      row &&
+      !row.querySelector('[data-testid="ArrowDownwardOutlinedIcon"]')
+    ) {
       row = row.parentElement;
     }
-    const down = row?.querySelector('[data-testid="ArrowDownwardIcon"]');
+    const down = row?.querySelector(
+      '[data-testid="ArrowDownwardOutlinedIcon"]'
+    );
     fireEvent.click(down!.closest("button")!);
 
     const orders = variantsSelector(store.getState())[0].selection[item.id]

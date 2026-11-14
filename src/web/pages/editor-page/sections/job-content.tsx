@@ -7,10 +7,12 @@ import {
   MenuItem,
   TextField,
   Typography,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
-import StarIcon from "@mui/icons-material/Star";
+} from "@components/ui";
+import {
+  ExpandMoreOutlined as ExpandMoreIcon,
+  StarBorderOutlined as StarBorderOutlinedIcon,
+  StarOutlined as StarIcon,
+} from "@components/ui/icons";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,

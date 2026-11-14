@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Divider } from "@mui/material";
+import { Box, Divider } from "@components/ui";
 import { EditorJobs } from "@pages/editor-page/sections/editor-jobs";
 import { EditorMetaData } from "@pages/editor-page/sections/editor-meta-data";
 import { EditorFooter } from "@pages/editor-page/editor-footer";

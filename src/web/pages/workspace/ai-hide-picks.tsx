@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Checkbox, Typography } from "@mui/material";
+import { Alert, Box, Button, Checkbox, Typography } from "@components/ui";
 import { AiButton } from "@components/ai-button";
 import { useHideCandidates } from "@pages/workspace/hide-to-fit";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";

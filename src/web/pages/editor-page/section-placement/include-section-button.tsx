@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from "react";
-import { Button, Menu, MenuItem } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Button, Menu, MenuItem } from "@components/ui";
+import { AddOutlined as AddIcon } from "@components/ui/icons";
 import { getPreviewPartLabel } from "@store/vault/section-labels";
 import { sectionsSelector } from "@store/vault/vault-slice";
 import { activeVariantSelector, setSectionShown } from "@store/jobs/jobs-slice";

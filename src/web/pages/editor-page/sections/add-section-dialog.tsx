@@ -8,8 +8,8 @@ import {
   ListItemText,
   MenuItem,
   TextField,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+} from "@components/ui";
+import { AddOutlined as AddIcon } from "@components/ui/icons";
 import { SectionType } from "@custom-types/vault-types";
 import { useAppDispatch } from "@store/store-helper";
 import { addSection } from "@store/vault/vault-slice";

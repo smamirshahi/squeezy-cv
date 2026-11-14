@@ -9,8 +9,8 @@ import {
   DialogTitle,
   IconButton,
   TextField,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+} from "@components/ui";
+import { DeleteOutlined as DeleteIcon } from "@components/ui/icons";
 import { navigate } from "@hooks/navigation";
 import { Section } from "@custom-types/vault-types";
 import { useAppDispatch } from "@store/store-helper";

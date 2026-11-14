@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Button, IconButton, keyframes } from "@mui/material";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import UndoOutlinedIcon from "@mui/icons-material/UndoOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import { Box, Button, IconButton, keyframes } from "@components/ui";
+import {
+  CheckCircleOutlined as CheckCircleOutlinedIcon,
+  CloseOutlined as CloseOutlinedIcon,
+  ErrorOutlineOutlined as ErrorOutlineOutlinedIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  UndoOutlined as UndoOutlinedIcon,
+  WarningAmberOutlined as WarningAmberOutlinedIcon,
+} from "@components/ui/icons";
 import { AiIcon } from "@components/ai-button";
 import {
   NOTIFICATION_DURATION_MS,

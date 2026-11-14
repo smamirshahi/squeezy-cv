@@ -5,7 +5,7 @@ import {
   Button,
   CircularProgress,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { BulletsMode } from "@custom-types/bullets-types";
 import { Item } from "@custom-types/vault-types";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";

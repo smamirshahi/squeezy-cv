@@ -11,6 +11,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- One UI layer (#453): every MUI component and icon is imported from `@components/ui` (icons from `@components/ui/icons`); buttons, text, links, fields, dropdowns, dialogs, papers and chips are wrappers with a fixed set of variants, colours and sizes (written down in `docs/design-language.md`), icons are all the Outlined set, and ESLint warns about direct `@mui/*` imports.
+- Applications page: the Save for later button is gone (use it on the job page); Export all has the same height as the Sort dropdown. About dialog: Close is the orange filled button. Job page: Choose PDF has an orange outline.
 - About dialog (#368): my photo, my own "Why I made this" text, a short strip of the three ideas (write it once, pick for each job, keep a record), and two cards for "Your data" and AI that say what the app really does (data stays with you, AI is optional and marked, you see the exact text before it is sent, masking can hide names and employers, AI only proposes). The dialog has a fixed header and footer, fits phones and the dark theme.
 - The "How to use" guide dialog is gone. What it said that no tutorial said (back up your data, install the app, your own AI key in browser mode, the Safari-on-iPhone warning) is now in the Vault tutorial, which has a new "Back it up" step. The "Privacy note" stays, in the footer of the About dialog.
 - Opening the app at its address now shows the Vault (`/vault`) instead of jumping to `/jobs/default` (#455). The installed app (PWA) also starts on the Vault. Links such as `/jobs/<id>` are unchanged.

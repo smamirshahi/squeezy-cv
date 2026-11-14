@@ -6,9 +6,11 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+} from "@components/ui";
+import {
+  AutoAwesomeOutlined as AutoAwesomeOutlinedIcon,
+  InfoOutlined as InfoOutlinedIcon,
+} from "@components/ui/icons";
 import { AiProviderId, AiTask } from "@shared/ai/providers";
 import { cssVar } from "@custom-styles/theme";
 import { AiProviderPicker } from "@pages/workspace/ai-provider-picker";

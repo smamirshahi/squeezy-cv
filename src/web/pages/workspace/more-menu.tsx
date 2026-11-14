@@ -5,13 +5,15 @@ import {
   Menu,
   MenuItem,
   Typography,
-} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import BackupOutlinedIcon from "@mui/icons-material/BackupOutlined";
-import MemoryIcon from "@mui/icons-material/Memory";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+} from "@components/ui";
+import {
+  BackupOutlined as BackupOutlinedIcon,
+  DarkModeOutlined as DarkModeOutlinedIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  LightModeOutlined as LightModeOutlinedIcon,
+  MemoryOutlined as MemoryIcon,
+  MoreVertOutlined as MoreVertIcon,
+} from "@components/ui/icons";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { AboutDialog } from "@pages/workspace/about-dialog";

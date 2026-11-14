@@ -10,8 +10,7 @@ import {
   isBrowserMode,
   requestPersistentStorage,
 } from "@store/persistence/browser/storage-mode";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs, LocalizationProvider } from "@components/ui";
 
 if (isBrowserMode()) {
   void requestPersistentStorage();

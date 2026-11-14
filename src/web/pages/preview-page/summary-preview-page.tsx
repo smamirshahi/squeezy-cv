@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid } from "@components/ui";
 import { RenderedSection } from "@shared/variant/render";
 import { CvTypography } from "@components/cv-typography";
 

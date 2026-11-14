@@ -6,7 +6,7 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
-} from "@mui/material";
+} from "@components/ui";
 import { Bullet, Item } from "@custom-types/vault-types";
 import { RewriteMode, RewriteResult } from "@custom-types/rewrite-types";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";

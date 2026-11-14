@@ -3,12 +3,12 @@ import {
   Alert,
   Box,
   Button,
+  FormControlLabel,
   Paper,
   Switch,
   TextField,
   Typography,
-  FormControlLabel,
-} from "@mui/material";
+} from "@components/ui";
 import {
   BrowserAiKeys,
   readBrowserAiKeys,
