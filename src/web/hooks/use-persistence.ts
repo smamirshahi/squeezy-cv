@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useStore } from "react-redux";
+import { isDeletingAllData } from "@store/persistence/browser/delete-all-data";
 import { createApiClient } from "@store/persistence/api-client";
 import {
   loadFromServer,
@@ -64,7 +65,10 @@ export function usePersistence(): void {
       return undefined;
     }
     function warn(event: BeforeUnloadEvent): void {
-      event.preventDefault();
+      // "Delete all my data" reloads on purpose
+      if (!isDeletingAllData()) {
+        event.preventDefault();
+      }
     }
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);

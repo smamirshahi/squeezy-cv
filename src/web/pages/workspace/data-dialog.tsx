@@ -12,6 +12,7 @@ import {
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { createApiClient } from "@store/persistence/api-client";
+import { DeleteDataDialog } from "@pages/workspace/delete-data-dialog";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { RestoreSummary } from "@shared/backup/full-backup";
 import { toIsoDay } from "@shared/application/application-utils";
@@ -55,6 +56,7 @@ function DataDialog({
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [restored, setRestored] = useState<string>("");
+  const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -200,6 +202,35 @@ function DataDialog({
             {error}
           </Alert>
         )}
+        {isBrowserMode() && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 2,
+              border: "1px solid",
+              borderColor: "error.main",
+              borderRadius: 1,
+            }}
+          >
+            <Typography
+              component="h3"
+              sx={{ fontSize: 14, fontWeight: 700, color: "error.main" }}
+            >
+              Danger zone
+            </Typography>
+            <Typography variant="body2" sx={{ my: 1 }}>
+              Remove everything CV Builder keeps in this browser. Download a
+              backup first if you may want it back.
+            </Typography>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={() => setIsDeleteOpen(true)}
+            >
+              Delete all my data…
+            </Button>
+          </Box>
+        )}
         {restored && (
           <Alert
             severity="success"
@@ -221,6 +252,11 @@ function DataDialog({
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
+      <DeleteDataDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onDownloadBackup={download}
+      />
     </Dialog>
   );
 }

@@ -13,8 +13,8 @@ export interface KvStore {
   deleteKeepingCopy(key: string): Promise<boolean>;
   /** The keys that start with `prefix`, sorted */
   keys(prefix: string): Promise<string[]>;
-  /** Removes everything (used by "Delete all my data") */
-  clear(): Promise<void>;
+  /** Closes the connection (before the database is deleted) */
+  close(): Promise<void>;
 }
 
 const DB_NAME = "cv-builder";
@@ -44,10 +44,32 @@ function open(name: string): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       request.result.createObjectStore(STORE);
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      // Another tab that deletes the database may do so: let go of it
+      request.result.onversionchange = () => request.result.close();
+      resolve(request.result);
+    };
     request.onerror = () => reject(request.error);
     request.onblocked = () =>
       reject(new Error("The browser database is blocked by another tab."));
+  });
+}
+
+/** Thrown by `deleteKvStore` when another open tab still holds the database */
+export class DatabaseBlockedError extends Error {}
+
+/** Deletes the whole database (close its `KvStore` first) */
+export function deleteKvStore(name: string = DB_NAME): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () =>
+      reject(
+        new DatabaseBlockedError(
+          "Another CV Builder tab is still open. Close the other tabs and try again."
+        )
+      );
   });
 }
 
@@ -96,10 +118,11 @@ export function openKvStore(name: string = DB_NAME): KvStore {
       );
       return found.map(String).sort();
     },
-    async clear() {
-      const transaction = (await db()).transaction(STORE, "readwrite");
-      transaction.objectStore(STORE).clear();
-      await finished(transaction);
+    async close() {
+      if (connection) {
+        (await connection).close();
+        connection = undefined;
+      }
     },
   };
 }
