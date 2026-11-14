@@ -157,7 +157,8 @@ describe("legacyRedirect", () => {
     );
     expect(legacyRedirect("/", "?application=abc")).toBe("/applications/abc");
     expect(legacyRedirect("/", "?print=main")).toBe("/print/main");
-    expect(legacyRedirect("/", "")).toBe("/jobs");
+    expect(legacyRedirect("/", "")).toBe("/vault");
+    expect(legacyRedirect("/", "?utm_source=x")).toBe("/vault");
   });
 
   it("leaves current addresses alone", () => {

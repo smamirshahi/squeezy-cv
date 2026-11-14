@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Opening the app at its address now shows the Vault (`/vault`) instead of jumping to `/jobs/default` (#455). The installed app (PWA) also starts on the Vault. Links such as `/jobs/<id>` are unchanged.
+
 ### Added
 
 - "Delete all my data" in the browser version (#452, part of #350): in "Your data", under a Danger zone, a button that permanently removes everything CV Builder keeps in this browser: the database (CV, templates, jobs, applications with their PDFs and the earlier versions), settings, AI keys and choices, drafts, and the offline copy (service worker and caches). The dialog says what goes, offers "Download backup first", and enables the button only after you type DELETE. If another CV Builder tab holds the database it says to close the other tabs and nothing is removed. Afterwards the page reloads to an empty first start (without the unsaved-changes prompt). Cancel changes nothing. It is hidden in server mode (the data is the `data` folder there). Covered by unit, component and e2e tests.

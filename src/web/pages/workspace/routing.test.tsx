@@ -200,7 +200,7 @@ describe("routing in the workspace", () => {
   it("redirects the old query addresses", async () => {
     window.history.replaceState(null, "", "/");
     await open("/");
-    await waitFor(() => expect(window.location.pathname).toMatch(/^\/jobs/));
+    await waitFor(() => expect(window.location.pathname).toBe("/vault"));
     cleanup();
 
     vi.stubGlobal("fetch", () =>

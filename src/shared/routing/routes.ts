@@ -73,7 +73,7 @@ export function parseRoute(pathname: string, search = ""): Route {
 
   switch (first) {
     case undefined:
-      // "/" is the Jobs tool; the old query addresses are mapped by `legacyRedirect`
+      // "/" is redirected to `/vault` (home) by `legacyRedirect`, as are the old query addresses
       return { kind: "jobs", view: "page" };
     case "vault":
       return rest.length > 0
@@ -189,5 +189,5 @@ export function legacyRedirect(
     const rest = params.toString();
     return `/applications${rest === "" ? "" : `?${rest}`}`;
   }
-  return "/jobs";
+  return "/vault";
 }

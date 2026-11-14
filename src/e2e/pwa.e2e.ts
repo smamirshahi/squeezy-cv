@@ -50,7 +50,7 @@ describe("installable app that works offline (real Chromium)", () => {
     };
     expect(manifest.name).toBe("CV Builder");
     expect(manifest.display).toBe("standalone");
-    expect(manifest.start_url).toBe("/jobs");
+    expect(manifest.start_url).toBe("/vault");
     expect(manifest.icons.map((icon) => icon.sizes)).toEqual(
       expect.arrayContaining(["192x192", "512x512"])
     );

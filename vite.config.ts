@@ -29,7 +29,7 @@ export default defineConfig({
               description:
                 "Build and tailor your CV. Your data stays in your browser.",
               // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
-              start_url: "/jobs",
+              start_url: "/vault",
               scope: "/",
               display: "standalone",
               // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
