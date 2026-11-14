@@ -8,7 +8,7 @@ A personal CV builder. You keep all your facts once (the **vault**), then make a
 
 ## Using it without installing anything (browser version)
 
-The same app can run as a website that keeps your data in your own browser: no Node, no server, nothing to install. Build it with `pnpm build:browser` (or run it with `pnpm dev:browser`). It is hosted on Cloudflare Pages, see [docs/hosting.md](docs/hosting.md) for the address, how to restrict it to chosen people and why the address must not change. Inside the app, About → "How to use" and "Privacy note" explain it for users. The rest of this README is about the developer (server) version.
+The same app can run as a website that keeps your data in your own browser: no Node, no server, nothing to install. Build it with `pnpm build:browser` (or run it with `pnpm dev:browser`). It is hosted on Cloudflare Pages, see [docs/hosting.md](docs/hosting.md) for the address, how to change who may log in, what deploys when (merging to `main` deploys automatically) and why the address must not change. Local development with `pnpm dev` is unchanged. Inside the app, About → "How to use" and "Privacy note" explain it for users. The rest of this README is about the developer (server) version.
 
 ## 1. Prepare your computer
 
