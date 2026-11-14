@@ -197,7 +197,11 @@ describe("inline vault item editor", () => {
     setup();
     open("Languages");
     expect(screen.getByLabelText("About level and years")).toBeTruthy();
-    expect(screen.queryByTestId("DeleteOutlinedIcon")).toBeNull();
+    // the lists and the editor share the Outlined delete icon; the old "DeleteOutline" one is gone
+    expect(screen.queryByTestId("DeleteOutlineIcon")).toBeNull();
+    expect(screen.getAllByTestId("DeleteOutlinedIcon").length).toBeGreaterThan(
+      0
+    );
   });
 
   it("goes to the previous and next item, with the buttons or [ and ]", () => {
