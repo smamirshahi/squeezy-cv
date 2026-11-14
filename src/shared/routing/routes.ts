@@ -17,6 +17,7 @@ export type Route =
   | { kind: "applications"; search: string }
   | { kind: "application"; id: string }
   | { kind: "print"; jobId: string }
+  | { kind: "printApplication"; id: string }
   | { kind: "notFound"; path: string };
 
 const TEMPLATE_TABS: TemplatesTab[] = ["templates", "design"];
@@ -112,6 +113,10 @@ export function parseRoute(pathname: string, search = ""): Route {
       return second !== undefined && third === undefined
         ? { kind: "print", jobId: second }
         : notFound;
+    case "print-application":
+      return second !== undefined && third === undefined
+        ? { kind: "printApplication", id: second }
+        : notFound;
     default:
       return notFound;
   }
@@ -152,6 +157,8 @@ export function formatRoute(route: Route): string {
       return `/applications/${encodeURIComponent(route.id)}`;
     case "print":
       return `/print/${encodeURIComponent(route.jobId)}`;
+    case "printApplication":
+      return `/print-application/${encodeURIComponent(route.id)}`;
     case "notFound":
       return route.path;
   }

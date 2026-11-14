@@ -16,7 +16,7 @@ import { OPEN_GENERAL_EVENT } from "@pages/workspace/general-settings-event";
 import { FitTuning } from "@custom-types/variant-types";
 import { useAutoFit } from "@pages/preview-page/use-auto-fit";
 import { computeFitMetrics } from "@shared/layout/fit-metrics";
-import { render } from "@shared/variant/render";
+import { RenderedDocument, render } from "@shared/variant/render";
 import { RenderedColumns } from "@pages/preview-page/rendered-columns";
 
 interface Props {
@@ -28,11 +28,15 @@ interface Props {
    * the page (see `PrintView`) and the saved auto-fit result is used, not recalculated.
    */
   isPrintView?: boolean;
+
+  /** Draw this document instead of the vault's: the CV of a sent application (frozen when it was sent) */
+  frozen?: RenderedDocument;
 }
 
 export function PreviewPage({
   contentRef,
   isPrintView = false,
+  frozen,
 }: Props): JSX.Element {
   const { structure, columnWidth } = useAppSelector(appSelector);
   const vault = useAppSelector(vaultSelector);
@@ -40,8 +44,8 @@ export function PreviewPage({
   // What the active job shows, in its order and wording. The layout is the one the
   // editor currently has, so changes to it show at once.
   const rendered = useMemo(
-    () => render(vault, { ...variant, layout: structure }),
-    [vault, variant, structure]
+    () => frozen ?? render(vault, { ...variant, layout: structure }),
+    [frozen, vault, variant, structure]
   );
 
   const style = useAppSelector(styleSelector);

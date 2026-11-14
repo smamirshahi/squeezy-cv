@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AppThemeProvider } from "@custom-styles/theme";
 import { Workspace } from "@pages/workspace/workspace";
+import { PrintApplicationView } from "@pages/print-page/print-application-view";
 import { PrintView } from "@pages/print-page/print-view";
 import { NotFound } from "@pages/workspace/not-found";
 import { AiSettingsHost } from "@pages/workspace/ai-settings-dialog";
@@ -35,6 +36,9 @@ export function App(): JSX.Element {
   }
   if (route.kind === "print") {
     return <PrintView jobId={route.jobId} />;
+  }
+  if (route.kind === "printApplication") {
+    return <PrintApplicationView id={route.id} />;
   }
   // The print page has no theme: the PDF is always the light default
   return (
