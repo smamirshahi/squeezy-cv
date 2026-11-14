@@ -15,6 +15,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import {
   isAutoStartOff,
   isTutorialDone,
@@ -462,19 +463,56 @@ const VAULT_STEPS: VaultStep[] = [
     note: "Nothing is rewritten until you accept it.",
   },
   {
-    title: "It stays on your computer",
-    lead: "Your vault is a file on this computer.",
+    title: "It stays on your device",
+    lead: isBrowserMode()
+      ? "Your vault is stored in this browser."
+      : "Your vault is a file on this computer.",
     body: [
       <>
         Editing it uploads nothing and shares nothing, so you can keep every
         detail, including ones that only one particular job needs.
       </>,
       <>
-        Text only leaves your computer when you start an AI feature yourself,
-        and only to the provider you chose in Settings.
+        Text only leaves your device when you start an AI feature yourself, and
+        only to the provider you chose in Settings.
+        {isBrowserMode() && (
+          <>
+            {" "}
+            For AI, add your own key in <b>Settings</b>. It stays in this
+            browser and is not part of a backup.
+          </>
+        )}
       </>,
     ],
-    note: "Back it up with Export JSON in the left column. It is your file.",
+    note: "No account, no tracking, and we never see your data.",
+  },
+  {
+    title: "Back it up",
+    lead: "Your data is yours, so keeping a copy is up to you.",
+    body: isBrowserMode()
+      ? [
+          <>
+            Clearing the site data, using a private window or switching browser
+            or device means the vault is not there. Press <b>Data</b> and{" "}
+            <b>Download backup</b> now and then, and keep the file somewhere
+            safe.
+          </>,
+          <>
+            To move to another device, download a backup there and use{" "}
+            <b>Restore from backup</b> here. You can also install the app (the{" "}
+            <b>Data</b> button, or your browser's install icon): it opens in its
+            own window and works offline.
+          </>,
+        ]
+      : [
+          <>
+            Your data is in the <code>data</code> folder. <b>Data</b> also lets
+            you download one backup file and restore it.
+          </>,
+        ],
+    note: isBrowserMode()
+      ? "Safari on iPhone can delete the data of a website you have not opened for about a week unless it is added to the Home Screen. Install it and keep a backup."
+      : "It is your file: copy the folder or download a backup.",
   },
   {
     title: "You choose what reaches a CV",

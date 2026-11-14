@@ -5,41 +5,65 @@ import {
   Box,
   Button,
   Dialog,
+  DialogContent,
   DialogTitle,
   IconButton,
   Link,
-  Paper,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import DesktopWindowsOutlinedIcon from "@mui/icons-material/DesktopWindowsOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
-import { cssVar } from "@custom-styles/theme";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import { APP_VERSION } from "@shared/version";
-import { GuideDialog, GuideKind } from "@pages/workspace/guide-dialog";
+import { GuideDialog } from "@pages/workspace/guide-dialog";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /**
  * What the About dialog says. Edit the texts here. `photoUrl`: a picture in the `public/` folder
- * (for example "/me.jpg"); empty shows the initials instead.
+ * (for example "/me-avatar.jpg"); empty shows the initials instead.
  */
 const ABOUT = {
   name: "Mohammad Amirshahi",
   role: "Software developer · Nottingham, UK",
-  photoUrl: "",
+  photoUrl: "/me-avatar.jpg",
   linkedinUrl: "https://www.linkedin.com/in/mohammadamirshahi/",
-  why: "I build software and wanted a better way to keep my own CV in shape. Every job asks for a slightly different CV, and rewriting it each time is slow and easy to get wrong. CV Builder keeps everything you have done in one place, and lets each job application show only what matters for that job.",
+  whyLead:
+    "I made this for myself. Every job needs a slightly different CV, and keeping track of every version I had sent was a mess.",
+  whyMore:
+    "I don't like Word, and LaTeX makes templates easy to change but is hard to use. I wanted to write down everything I had done in my own words, without worrying about making it perfect, pick the parts that fit each job, and keep a record of where I applied and how I felt about it. CV Builder is that.",
+  ideas: [
+    {
+      icon: <FolderOutlinedIcon fontSize="small" />,
+      title: "Write it once",
+      text: "All you have done, in your own words",
+    },
+    {
+      icon: <WorkOutlineOutlinedIcon fontSize="small" />,
+      title: "Pick for each job",
+      text: "Show only the parts that fit",
+    },
+    {
+      icon: <DescriptionOutlinedIcon fontSize="small" />,
+      title: "Keep a record",
+      text: "Where you applied and how it felt",
+    },
+  ],
   supportUrl: "https://ko-fi.com/mohammadamirshahi",
   supportText:
-    "CV Builder is free and I work on it in my own time. If it helped you land an interview, or saved you an evening of fiddling with a document, a coffee helps me keep improving it.",
+    "CV Builder is free and I work on it in my own time. If it helped you land an interview, a coffee helps me keep improving it.",
 } as const;
 
-const AVATAR_SIZE = 72;
+const AVATAR_SIZE = 64;
 
 function initialsOf(name: string): string {
   return name
@@ -58,7 +82,7 @@ const SECTION_TITLE_SX = {
   color: WORKSPACE_COLORS.muted,
 } as const;
 
-/** One line of "Your data and AI": an icon and a sentence (AI lines use the AI colour) */
+/** One line in a card of "Your data and AI": a small icon and a sentence */
 function Point({
   icon,
   color,
@@ -71,15 +95,75 @@ function Point({
   return (
     <Box
       component="li"
-      sx={{ display: "flex", alignItems: "center", gap: 1.25 }}
+      sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}
     >
-      <Box sx={{ display: "inline-flex", color }}>{icon}</Box>
-      <Typography sx={{ fontSize: 14 }}>{children}</Typography>
+      <Box sx={{ display: "inline-flex", color, pt: "1px", flexShrink: 0 }}>
+        {icon}
+      </Box>
+      <Typography sx={{ fontSize: 13, lineHeight: "19px" }}>
+        {children}
+      </Typography>
     </Box>
   );
 }
 
-/** About the app and its author: who made it and why, how data and AI are handled, a way to support it, the version and the links */
+/** A card of "Your data and AI": a title with an icon and its points (the AI card uses the AI colours) */
+function PointsCard({
+  title,
+  icon,
+  isAi,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  isAi?: boolean;
+  children: ReactNode;
+}): JSX.Element {
+  return (
+    <Box
+      component="section"
+      sx={{
+        p: 2,
+        display: "grid",
+        gap: 1.5,
+        alignContent: "start",
+        borderRadius: 1.5,
+        border: `1px solid ${isAi ? WORKSPACE_COLORS.aiBorder : WORKSPACE_COLORS.border}`,
+        bgcolor: isAi ? WORKSPACE_COLORS.aiSoft : "transparent",
+        color: isAi ? WORKSPACE_COLORS.aiText : WORKSPACE_COLORS.muted,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          color: isAi ? WORKSPACE_COLORS.aiText : "text.primary",
+        }}
+      >
+        <Box
+          sx={{
+            display: "inline-flex",
+            color: isAi ? WORKSPACE_COLORS.ai : "inherit",
+          }}
+        >
+          {icon}
+        </Box>
+        <Typography component="h4" sx={{ fontSize: 14, fontWeight: 600 }}>
+          {title}
+        </Typography>
+      </Box>
+      <Box
+        component="ul"
+        sx={{ m: 0, p: 0, listStyle: "none", display: "grid", gap: 1.25 }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+/** About the app and its author: why it exists, data and AI, a way to support it, the version, the privacy note */
 export function AboutDialog({
   isOpen,
   onClose,
@@ -88,7 +172,8 @@ export function AboutDialog({
   onClose: () => void;
 }): JSX.Element {
   const isPhone = useViewport() === "phone";
-  const [guide, setGuide] = useState<GuideKind | null>(null);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const isBrowser = isBrowserMode();
   return (
     <Dialog
       open={isOpen}
@@ -96,6 +181,7 @@ export function AboutDialog({
       fullWidth
       fullScreen={isPhone}
       maxWidth="sm"
+      scroll="paper"
       aria-labelledby="about-title"
     >
       <DialogTitle
@@ -116,7 +202,16 @@ export function AboutDialog({
         </IconButton>
       </DialogTitle>
 
-      <Box sx={{ p: 3, display: "grid", gap: 2.5, lineHeight: 1.55 }}>
+      <DialogContent
+        sx={{
+          p: { xs: 2, sm: 3 },
+          pt: { xs: "20px !important", sm: "24px !important" },
+          display: "grid",
+          gap: 3,
+          alignContent: "start",
+          lineHeight: 1.55,
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
             src={ABOUT.photoUrl || undefined}
@@ -124,147 +219,259 @@ export function AboutDialog({
             sx={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: 500,
+              flexShrink: 0,
               bgcolor: WORKSPACE_COLORS.accentSoft,
               color: WORKSPACE_COLORS.accentText,
             }}
           >
             {initialsOf(ABOUT.name)}
           </Avatar>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography component="h2" sx={{ fontSize: 20, fontWeight: 600 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography component="h2" sx={{ fontSize: 18, fontWeight: 600 }}>
               {ABOUT.name}
             </Typography>
-            <Typography sx={{ color: WORKSPACE_COLORS.muted }}>
+            <Typography sx={{ fontSize: 13, color: WORKSPACE_COLORS.muted }}>
               {ABOUT.role}
             </Typography>
           </Box>
-          <Box sx={{ flex: 1 }} />
-          <Tooltip title="LinkedIn (opens in a new tab)">
-            <IconButton
-              component="a"
-              href={ABOUT.linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn profile of Mohammad Amirshahi (opens in a new tab)"
-              sx={{ color: "#0A66C2" }}
+          <Button
+            component="a"
+            href={ABOUT.linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outlined"
+            color="inherit"
+            aria-label="LinkedIn profile of Mohammad Amirshahi (opens in a new tab)"
+            startIcon={<LinkedInIcon sx={{ color: "#0A66C2" }} />}
+            sx={{
+              flexShrink: 0,
+              minWidth: { xs: 44, sm: 64 },
+              height: { xs: 44, sm: 32 },
+              px: { xs: 0, sm: 1.5 },
+              "& .MuiButton-startIcon": {
+                mr: { xs: 0, sm: 1 },
+                ml: { xs: 0, sm: -0.25 },
+              },
+            }}
+          >
+            <Box
+              component="span"
+              sx={{ display: { xs: "none", sm: "inline" } }}
             >
-              <LinkedInIcon />
-            </IconButton>
-          </Tooltip>
+              LinkedIn
+            </Box>
+          </Button>
         </Box>
 
-        <Box sx={{ display: "grid", gap: 0.75 }}>
+        <Box sx={{ display: "grid", gap: 1.25 }}>
           <Typography component="h3" sx={SECTION_TITLE_SX}>
             Why I made this
           </Typography>
-          <Typography sx={{ fontSize: 14 }}>{ABOUT.why}</Typography>
-        </Box>
-
-        <Box sx={{ display: "grid", gap: 1 }}>
-          <Typography component="h3" sx={SECTION_TITLE_SX}>
-            Your data and AI
+          <Typography
+            sx={{
+              fontSize: 13,
+              lineHeight: "20px",
+              color: WORKSPACE_COLORS.muted,
+            }}
+          >
+            {ABOUT.whyLead} {ABOUT.whyMore}
           </Typography>
           <Box
             component="ul"
             sx={{
               m: 0,
+              mt: 0.75,
               p: 0,
+              pt: 2,
               listStyle: "none",
+              borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
               display: "grid",
-              gap: 1,
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(3, minmax(0, 1fr))",
+              },
+              gap: 2,
             }}
           >
-            <Point
-              color={WORKSPACE_COLORS.accent}
-              icon={<DesktopWindowsOutlinedIcon fontSize="small" />}
-            >
-              {isBrowserMode()
-                ? "Your data stays in this browser."
-                : "Your data stays on your computer."}
-            </Point>
-            <Point
-              color={WORKSPACE_COLORS.ai}
-              icon={<AutoAwesomeOutlinedIcon fontSize="small" />}
-            >
-              AI is optional, and always marked.
-            </Point>
-            <Point
-              color={WORKSPACE_COLORS.accent}
-              icon={<CheckOutlinedIcon fontSize="small" />}
-            >
-              AI only proposes. You decide what goes on the CV.
-            </Point>
+            {ABOUT.ideas.map((idea) => (
+              <Box
+                key={idea.title}
+                component="li"
+                sx={{ display: "flex", gap: 1.25, alignItems: "flex-start" }}
+              >
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 1,
+                    bgcolor: WORKSPACE_COLORS.panelAlt,
+                  }}
+                >
+                  {idea.icon}
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+                    {idea.title}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 13,
+                      color: WORKSPACE_COLORS.muted,
+                      mt: 0.25,
+                    }}
+                  >
+                    {idea.text}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setGuide("guide")}
-          >
-            How to use
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setGuide("privacy")}
-          >
-            Privacy note
-          </Button>
-        </Box>
-
-        <Paper
-          variant="outlined"
-          sx={{
-            p: 2,
-            display: "grid",
-            gap: 1,
-            bgcolor: cssVar("oks"),
-            borderColor: cssVar("ok"),
-          }}
-        >
+        <Box sx={{ display: "grid", gap: 1.25 }}>
+          <Typography component="h3" sx={SECTION_TITLE_SX}>
+            Your data and AI
+          </Typography>
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
+              },
               gap: 1.5,
             }}
           >
-            <Typography
-              component="h3"
-              sx={{ fontSize: 14, fontWeight: 700, color: cssVar("okt") }}
+            <PointsCard
+              title="Your data stays with you"
+              icon={<DesktopWindowsOutlinedIcon fontSize="small" />}
             >
-              Support this project
-            </Typography>
-            <Button
-              component={Link}
-              href={ABOUT.supportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
-              size="small"
-              startIcon={<LocalCafeOutlinedIcon />}
+              <Point
+                icon={<CheckOutlinedIcon fontSize="small" />}
+                color="text.primary"
+              >
+                {isBrowser
+                  ? "Your data stays in this browser. No account, no tracking, and we never see it."
+                  : "Your data stays on your computer. No account, no tracking, and we never see it."}
+              </Point>
+              <Point
+                icon={<LockOutlinedIcon fontSize="small" />}
+                color="text.primary"
+              >
+                Your CV is yours and is not used for anything else.
+              </Point>
+              <Point
+                icon={<FileDownloadOutlinedIcon fontSize="small" />}
+                color="text.primary"
+              >
+                {isBrowser
+                  ? "Syncing between devices is harder, so download a backup now and then."
+                  : "It is saved as files in the data folder, so back it up now and then."}
+              </Point>
+            </PointsCard>
+            <PointsCard
+              isAi
+              title="AI is optional and marked"
+              icon={<AutoAwesomeOutlinedIcon fontSize="small" />}
             >
-              Buy me a coffee
-            </Button>
+              <Point
+                icon={<VisibilityOutlinedIcon fontSize="small" />}
+                color={WORKSPACE_COLORS.ai}
+              >
+                Before anything is sent you see the exact text.
+              </Point>
+              <Point
+                icon={<LockOutlinedIcon fontSize="small" />}
+                color={WORKSPACE_COLORS.ai}
+              >
+                Your name, contacts and employers can be masked.
+              </Point>
+              <Point
+                icon={<CheckOutlinedIcon fontSize="small" />}
+                color={WORKSPACE_COLORS.ai}
+              >
+                AI only proposes. You decide what goes on the CV.
+              </Point>
+            </PointsCard>
           </Box>
-          <Typography sx={{ fontSize: 13, color: cssVar("okt") }}>
-            {ABOUT.supportText}
-          </Typography>
-        </Paper>
-      </Box>
+        </Box>
+
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            borderRadius: 1.5,
+            border: `1px solid ${WORKSPACE_COLORS.border}`,
+            bgcolor: WORKSPACE_COLORS.panelAlt,
+          }}
+        >
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1 }}
+          >
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                bgcolor: WORKSPACE_COLORS.accentSoft,
+                color: WORKSPACE_COLORS.accentText,
+              }}
+            >
+              <LocalCafeOutlinedIcon fontSize="small" />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography component="h3" sx={{ fontSize: 14, fontWeight: 600 }}>
+                Support this project
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  lineHeight: "19px",
+                  color: WORKSPACE_COLORS.muted,
+                }}
+              >
+                {ABOUT.supportText}
+              </Typography>
+            </Box>
+          </Box>
+          <Button
+            component={Link}
+            href={ABOUT.supportUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            startIcon={<LocalCafeOutlinedIcon />}
+            sx={{
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              height: { xs: 44, sm: 36 },
+            }}
+          >
+            Buy me a coffee
+          </Button>
+        </Box>
+      </DialogContent>
 
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
-          px: 3,
+          flexWrap: "wrap",
+          gap: 1,
+          px: { xs: 2, sm: 3 },
           py: 1.5,
           borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           bgcolor: WORKSPACE_COLORS.panelAlt,
@@ -274,11 +481,17 @@ export function AboutDialog({
           Version {APP_VERSION}
         </Typography>
         <Box sx={{ flex: 1 }} />
+        <Button size="small" onClick={() => setIsPrivacyOpen(true)}>
+          Privacy note
+        </Button>
         <Button variant="outlined" color="inherit" onClick={onClose}>
           Close
         </Button>
       </Box>
-      <GuideDialog kind={guide} onClose={() => setGuide(null)} />
+      <GuideDialog
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
     </Dialog>
   );
 }

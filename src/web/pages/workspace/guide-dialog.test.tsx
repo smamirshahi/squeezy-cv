@@ -12,18 +12,11 @@ function openAbout(): void {
   render(<AboutDialog isOpen onClose={() => undefined} />);
 }
 
-describe("user guide and privacy note in the About dialog", () => {
-  it("opens the guide and the privacy note", () => {
-    openAbout();
-    fireEvent.click(screen.getByRole("button", { name: "How to use" }));
-    expect(screen.getByText("How to use CV Builder")).toBeTruthy();
-    expect(screen.getByText("Back up your data")).toBeTruthy();
-  });
-
+describe("privacy note in the About dialog", () => {
   it("says in the browser version that the data lives in this browser", () => {
     vi.stubEnv("VITE_STORAGE_MODE", "browser");
     openAbout();
-    expect(screen.getByText("Your data stays in this browser.")).toBeTruthy();
+    expect(screen.getByText(/Your data stays in this browser\./)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Privacy note" }));
     expect(screen.getByRole("heading", { name: "Privacy note" })).toBeTruthy();
     expect(screen.getByText("Masking is best effort")).toBeTruthy();
@@ -32,7 +25,7 @@ describe("user guide and privacy note in the About dialog", () => {
 
   it("says in the server version that the data is on this computer", () => {
     openAbout();
-    expect(screen.getByText("Your data stays on your computer.")).toBeTruthy();
+    expect(screen.getByText(/Your data stays on your computer\./)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Privacy note" }));
     expect(screen.queryByText("Your AI key")).toBeNull();
   });

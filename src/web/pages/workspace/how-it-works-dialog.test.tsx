@@ -58,3 +58,37 @@ describe("the Applications tutorial", () => {
     expect(screen.getByRole("heading", { name: "Applications" })).toBeTruthy();
   });
 });
+
+describe("the Vault tutorial", () => {
+  function openVault(): void {
+    render(<HowItWorksDialog isOpen startTutorial="vault" onClose={vi.fn()} />);
+  }
+
+  it("has the 'Back it up' step after 'It stays on your device'", () => {
+    openVault();
+    expect(screen.getByText("Your vault · Step 1 of 5")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Step 3: It stays on your device" })
+    );
+    expect(screen.getByText(/Text only leaves your device/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("heading", { name: "Back it up" })).toBeTruthy();
+    // server mode (the test default): the data folder, no browser-only advice
+    expect(
+      screen.getByText(/copy the folder or download a backup/)
+    ).toBeTruthy();
+    expect(screen.queryByText(/Safari/)).toBeNull();
+  });
+
+  it("ends with 'Start filling my vault' on the last step", () => {
+    openVault();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Step 5: You choose what reaches a CV",
+      })
+    );
+    expect(
+      screen.getByRole("button", { name: "Start filling my vault" })
+    ).toBeTruthy();
+  });
+});
