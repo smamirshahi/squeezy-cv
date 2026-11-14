@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 import { AtsBand, bandOf, NATURAL_RANGE } from "@shared/ats/ats-score";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 

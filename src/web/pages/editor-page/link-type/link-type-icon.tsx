@@ -1,7 +1,9 @@
 import type { ComponentType } from "react";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import {
+  LinkOutlined as LinkOutlinedIcon,
+  LinkedIn as LinkedInIcon,
+  PublicOutlined as PublicOutlinedIcon,
+} from "@components/ui/icons";
 import {
   SiBehance,
   SiBitbucket,

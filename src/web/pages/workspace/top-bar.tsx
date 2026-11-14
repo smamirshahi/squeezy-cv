@@ -1,9 +1,13 @@
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import RedoIcon from "@mui/icons-material/Redo";
-import UndoIcon from "@mui/icons-material/Undo";
+import { Box, IconButton, Tooltip, Typography } from "@components/ui";
+import {
+  ArrowForwardOutlined as ArrowForwardIcon,
+  FeedbackOutlined as FeedbackOutlinedIcon,
+  HelpOutlineOutlined as HelpOutlineIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  RedoOutlined as RedoIcon,
+  UndoOutlined as UndoIcon,
+} from "@components/ui/icons";
 import { redo, undo } from "@store/history/history";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { SaveStatus } from "@pages/editor-page/save-status";
 import { useEffect, useState } from "react";
 import {
@@ -16,8 +20,6 @@ import {
   markTutorialSeen,
   type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
-import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
 import { FeedbackDialog } from "@pages/workspace/feedback-dialog";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";

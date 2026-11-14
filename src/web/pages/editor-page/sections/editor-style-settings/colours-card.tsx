@@ -6,9 +6,8 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import ArrowDropDownOutlined from "@mui/icons-material/ArrowDropDownOutlined";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+} from "@components/ui";
+import { ArrowDropDownOutlined, InfoOutlined } from "@components/ui/icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   COLOR_PALETTE,

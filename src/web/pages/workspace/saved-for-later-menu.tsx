@@ -7,11 +7,13 @@ import {
   IconButton,
   Popover,
   Typography,
-} from "@mui/material";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorderOutlined";
-import CloseIcon from "@mui/icons-material/CloseOutlined";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMoreOutlined";
-import ChevronRightIcon from "@mui/icons-material/ChevronRightOutlined";
+} from "@components/ui";
+import {
+  BookmarkBorderOutlined as BookmarkBorderIcon,
+  ChevronRightOutlined as ChevronRightIcon,
+  CloseOutlined as CloseIcon,
+  ExpandMoreOutlined as ExpandMoreIcon,
+} from "@components/ui/icons";
 import { Candidate } from "@custom-types/candidate-types";
 import { navigate } from "@hooks/navigation";
 import { useViewport } from "@hooks/use-viewport";
@@ -180,7 +182,7 @@ export function SavedForLaterMenu({
     <>
       <Button
         variant="outlined"
-        color="inherit"
+        color="neutral"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         onClick={(event) => {

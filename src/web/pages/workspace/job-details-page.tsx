@@ -32,12 +32,14 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/AddOutlined";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorderOutlined";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
-import CheckIcon from "@mui/icons-material/CheckOutlined";
-import ChevronRightIcon from "@mui/icons-material/ChevronRightOutlined";
+} from "@components/ui";
+import {
+  AddOutlined as AddIcon,
+  BookmarkBorderOutlined as BookmarkBorderIcon,
+  CheckOutlined as CheckIcon,
+  ChevronRightOutlined as ChevronRightIcon,
+  WorkOutlined as WorkOutlineIcon,
+} from "@components/ui/icons";
 import { Job } from "@custom-types/job-types";
 import { JOB_OPINIONS, JobOpinion } from "@custom-types/json-types";
 import { navigate } from "@hooks/navigation";
@@ -221,7 +223,7 @@ function ProgressList({ items }: { items: ProgressItem[] }): JSX.Element {
           sx={{ listStyle: "none", display: "flex" }}
         >
           <Button
-            color="inherit"
+            color="neutral"
             onClick={() => goTo(item.target)}
             sx={{
               flex: 1,
@@ -520,13 +522,12 @@ export function JobDetailsPage(): JSX.Element {
   const appliedElsewhereButton = (
     <Button
       variant="outlined"
-      color="inherit"
+      color="neutral"
       fullWidth
       startIcon={<WorkOutlineIcon />}
       disabled={!job || isDemo}
       title={isDemo ? "Not available in the demo" : undefined}
       onClick={() => setIsApplying(true)}
-      sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
     >
       I applied elsewhere
     </Button>
@@ -627,11 +628,10 @@ export function JobDetailsPage(): JSX.Element {
         {reminderFields}
         <Button
           variant="outlined"
-          color="inherit"
+          color="primary"
           fullWidth
           disabled={!job}
           startIcon={<BookmarkBorderIcon />}
-          onClick={() => void saveForLater()}
           sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
         >
           {parkedEntry ? "Update Saved for later" : "Save for later"}
@@ -778,7 +778,7 @@ export function JobDetailsPage(): JSX.Element {
         {isPhone ? (
           <Button
             variant="outlined"
-            color="inherit"
+            color="neutral"
             aria-label="Start another job"
             onClick={startAnother}
             sx={{
@@ -791,7 +791,7 @@ export function JobDetailsPage(): JSX.Element {
           </Button>
         ) : (
           <Button
-            color="inherit"
+            color="neutral"
             startIcon={<AddIcon />}
             onClick={startAnother}
           >
@@ -1016,10 +1016,9 @@ export function JobDetailsPage(): JSX.Element {
           <Button
             size="small"
             variant="outlined"
-            color="inherit"
+            color="primary"
             disabled={isReading}
             onClick={() => fileRef.current?.click()}
-            sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
           >
             {isReading ? "Reading…" : "Choose PDF"}
           </Button>
@@ -1103,12 +1102,11 @@ export function JobDetailsPage(): JSX.Element {
           >
             <Button
               variant="outlined"
-              color="inherit"
+              color="primary"
               size="large"
               disabled={!job}
               startIcon={<BookmarkBorderIcon />}
               onClick={() => void saveForLater()}
-              sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
             >
               Save for later
             </Button>
@@ -1138,11 +1136,11 @@ export function JobDetailsPage(): JSX.Element {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button color="inherit" onClick={() => setIsLeaving(false)}>
+          <Button color="neutral" onClick={() => setIsLeaving(false)}>
             Cancel
           </Button>
           <Button
-            color="inherit"
+            color="neutral"
             onClick={() => {
               void saveForLater();
             }}

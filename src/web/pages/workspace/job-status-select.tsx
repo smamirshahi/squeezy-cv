@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** The stage of a job that has not been sent yet. It is set on the CV page; Applied is not here. */

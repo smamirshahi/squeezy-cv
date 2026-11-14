@@ -8,10 +8,12 @@ import {
   IconButton,
   Slider,
   Typography,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+} from "@components/ui";
+import {
+  CloseOutlined as CloseIcon,
+  ImageOutlined as ImageOutlinedIcon,
+  PersonOutlined as PersonOutlineIcon,
+} from "@components/ui/icons";
 import { resizePhoto } from "@hooks/resize-photo";
 import {
   FRAME_HEIGHT,

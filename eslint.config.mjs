@@ -199,6 +199,12 @@ export default tseslint.config(
             },
           ],
           patterns: [
+            // All UI comes through one place so the look stays the same and MUI can be swapped (#453)
+            {
+              group: ["@mui/*", "@mui/**"],
+              message:
+                "Import UI components from '@components/ui' and icons from '@components/ui/icons', not from MUI.",
+            },
             {
               group: ["./**", "../**", "**/./**", "**/../**"],
               message:
@@ -433,6 +439,24 @@ export default tseslint.config(
       "@typescript-eslint/await-thenable": "off",
       // Some types in the monorepo are "empty", meaning they do not add anything to the parent type
       "@typescript-eslint/no-empty-object-type": "off",
+    },
+  },
+  {
+    // The UI layer and the theme are the only places that may import MUI (#453)
+    files: ["src/web/components/ui/**", "src/web/custom-styles/theme.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "warn",
+        {
+          patterns: [
+            {
+              group: ["./**", "../**", "**/./**", "**/../**"],
+              message:
+                'Relative imports with any number of "../" or "./" are not allowed. Use path mapping instead',
+            },
+          ],
+        },
+      ],
     },
   },
   {

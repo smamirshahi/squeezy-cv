@@ -1,5 +1,5 @@
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { InputAdornment, Tooltip } from "@mui/material";
+import { InfoOutlined as InfoOutlinedIcon } from "@components/ui/icons";
+import { InputAdornment, Tooltip } from "@components/ui";
 import { DESCRIPTION_HINT } from "@shared/vault/item-fields";
 
 interface Props {

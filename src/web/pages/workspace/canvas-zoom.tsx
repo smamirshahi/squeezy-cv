@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Box, IconButton, Tooltip, Typography } from "@components/ui";
+import {
+  AddOutlined as AddIcon,
+  RemoveOutlined as RemoveIcon,
+} from "@components/ui/icons";
 import { A4_DIMENSION_MM } from "@custom-styles/custom-styles";
 import { ZOOM_STEP, clampZoom, setCanvasZoom } from "@store/app/app-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";

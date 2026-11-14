@@ -12,9 +12,11 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+} from "@components/ui";
+import {
+  AddOutlined as AddOutlinedIcon,
+  SettingsOutlined,
+} from "@components/ui/icons";
 import {
   MAX_IMPORT_LENGTH,
   MAX_IMPORT_PDF_BYTES,

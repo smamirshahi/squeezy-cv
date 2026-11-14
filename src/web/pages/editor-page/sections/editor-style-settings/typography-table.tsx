@@ -2,14 +2,16 @@ import { Fragment } from "react";
 import {
   Box,
   IconButton,
-  Tooltip,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography,
-} from "@mui/material";
-import AddOutlined from "@mui/icons-material/AddOutlined";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import RemoveOutlined from "@mui/icons-material/RemoveOutlined";
+} from "@components/ui";
+import {
+  AddOutlined,
+  InfoOutlined,
+  RemoveOutlined,
+} from "@components/ui/icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { STYLE_TOKENS } from "@pages/editor-page/sections/editor-style-settings/style-tokens";
 import { useResolvedStyle } from "@hooks/use-resolved-style";

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
-} from "@mui/material";
+} from "@components/ui";
 import { nanoid } from "@reduxjs/toolkit";
 import { activateTemplateLook } from "@hooks/use-sync-active-job";
 import {

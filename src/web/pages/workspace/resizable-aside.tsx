@@ -1,6 +1,5 @@
 import { KeyboardEvent, PointerEvent, ReactNode, useState } from "react";
-import { Box } from "@mui/material";
-import type { Breakpoint } from "@mui/material/styles";
+import { Box, type Breakpoint } from "@components/ui";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   normalisePanelWidth,

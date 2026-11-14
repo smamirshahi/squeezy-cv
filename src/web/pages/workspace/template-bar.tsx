@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, MenuItem, Select, Typography } from "@components/ui";
 import { moveJobToTemplate } from "@pages/workspace/template-scope";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { createApiClient } from "@store/persistence/api-client";

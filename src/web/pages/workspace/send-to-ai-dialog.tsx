@@ -14,8 +14,8 @@ import {
   FormControlLabel,
   IconButton,
   Typography,
-} from "@mui/material";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+} from "@components/ui";
+import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
 import {
   MASK_KINDS,
   MaskKind,

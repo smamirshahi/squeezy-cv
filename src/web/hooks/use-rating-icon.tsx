@@ -1,9 +1,11 @@
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import CircleIcon from "@mui/icons-material/Circle";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import {
+  CircleOutlined as CircleIcon,
+  CircleOutlined as CircleOutlinedIcon,
+  StarBorderOutlined as StarBorderIcon,
+  StarBorderOutlined as StarBorderOutlinedIcon,
+} from "@components/ui/icons";
 import { useMemo } from "react";
 
 interface ReturnProps {

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Menu, MenuItem, Typography } from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Box, Button, Menu, MenuItem, Typography } from "@components/ui";
+import {
+  FileDownloadOutlined as FileDownloadOutlinedIcon,
+  KeyboardArrowDownOutlined as KeyboardArrowDownIcon,
+} from "@components/ui/icons";
 import { ExportDialog } from "@pages/workspace/export-dialog";
 import { JobContent } from "@pages/editor-page/sections/job-content";
 import { GeneralStep } from "@pages/workspace/general-step";
@@ -118,7 +120,7 @@ export function ContentPanel(): JSX.Element {
                 Section {index + 1} of {steps.length}
               </Typography>
               <Button
-                color="inherit"
+                color="neutral"
                 aria-label="Go to section"
                 aria-haspopup="menu"
                 onClick={(event) => setSectionMenu(event.currentTarget)}

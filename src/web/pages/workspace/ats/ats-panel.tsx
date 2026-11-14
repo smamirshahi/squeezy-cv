@@ -9,14 +9,16 @@ import {
   ToggleButtonGroup,
   Tooltip,
   Typography,
-} from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
-import SyncIcon from "@mui/icons-material/Sync";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+} from "@components/ui";
+import {
+  CheckCircleOutlined as CheckCircleOutlinedIcon,
+  CheckOutlined as CheckOutlinedIcon,
+  ChevronRightOutlined as ChevronRightIcon,
+  ExpandLessOutlined as ExpandLessIcon,
+  ExpandMoreOutlined as ExpandMoreIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  SyncOutlined as SyncIcon,
+} from "@components/ui/icons";
 import {
   AtsCategoryId,
   AtsSnapshot,

@@ -10,10 +10,10 @@ import {
   Link,
   TextField,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { notify } from "@components/notifications/notify";
 import { useViewport } from "@hooks/use-viewport";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
+import { WorkOutlined as WorkOutlineIcon } from "@components/ui/icons";
 import { useEffect, useMemo, useState } from "react";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { useStore } from "react-redux";
@@ -57,7 +57,7 @@ export function MarkAsApplied(): JSX.Element {
     <>
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
-        color="inherit"
+        color="neutral"
         disabled={isDemo}
         title={isDemo ? "Not available in the demo" : undefined}
         onClick={() => setIsOpen(true)}

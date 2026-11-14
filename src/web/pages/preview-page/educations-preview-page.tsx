@@ -1,9 +1,9 @@
 import { normaliseLink } from "@shared/vault/link-utils";
-import { Grid } from "@mui/material";
+import { Grid } from "@components/ui";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { DatePeriod } from "@components/date-period";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { LocationOnOutlined as LocationOnIcon } from "@components/ui/icons";
 import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";

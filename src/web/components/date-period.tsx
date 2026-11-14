@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { CalendarMonthOutlined as CalendarMonthIcon } from "@components/ui/icons";
 import { IconWithText } from "@components/icon-with-text";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";

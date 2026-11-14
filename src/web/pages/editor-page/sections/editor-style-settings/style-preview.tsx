@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@components/ui";
 import { usePhonePreview } from "@pages/workspace/phone-preview";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { TemplateSample } from "@pages/workspace/template-section-styles";

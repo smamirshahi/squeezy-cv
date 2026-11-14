@@ -15,7 +15,7 @@ import {
   moveBetweenColumns,
   reorderInColumn,
 } from "@pages/editor-page/section-placement/section-placement-utils";
-import { Box } from "@mui/material";
+import { Box } from "@components/ui";
 import { PageStructure } from "@store/app/app-slice-types";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";

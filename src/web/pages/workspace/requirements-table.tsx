@@ -7,9 +7,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+} from "@components/ui";
+import {
+  CheckOutlined as CheckOutlinedIcon,
+  SearchOutlined as SearchOutlinedIcon,
+} from "@components/ui/icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 export interface RequirementGroup {

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, MenuItem, Select, Typography } from "@components/ui";
+import { AddOutlined as AddIcon } from "@components/ui/icons";
 import { activateVariant } from "@hooks/use-sync-active-job";
 import { NewJobDialog } from "@pages/workspace/new-job-dialog";
 import {

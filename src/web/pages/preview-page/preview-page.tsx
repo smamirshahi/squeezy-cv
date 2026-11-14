@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Alert, Box, Button, Link, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Link, Paper, Typography } from "@components/ui";
 import { A4_DIMENSION_MM, PAPER_MARGIN_MM } from "@custom-styles/custom-styles";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { marginToPx, usePagination } from "@pages/preview-page/use-pagination";
@@ -183,7 +183,7 @@ export function PreviewPage({
                 <>
                   {!isAutoFit && (
                     <Button
-                      color="inherit"
+                      color="neutral"
                       size="small"
                       onClick={() =>
                         dispatch(
@@ -196,7 +196,7 @@ export function PreviewPage({
                   )}
                   {pageLimit === 1 && (
                     <Button
-                      color="inherit"
+                      color="neutral"
                       size="small"
                       onClick={() =>
                         dispatch(setPageLimit({ id: variant.id, pageLimit: 2 }))
@@ -253,7 +253,7 @@ export function PreviewPage({
               action={
                 <>
                   <Button
-                    color="inherit"
+                    color="neutral"
                     size="small"
                     onClick={() =>
                       dispatch(setAutoFit({ id: variant.id, isAutoFit: false }))
@@ -263,7 +263,7 @@ export function PreviewPage({
                   </Button>
                   {pageLimit === 1 && (
                     <Button
-                      color="inherit"
+                      color="neutral"
                       size="small"
                       onClick={() =>
                         dispatch(setPageLimit({ id: variant.id, pageLimit: 2 }))

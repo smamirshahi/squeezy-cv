@@ -7,17 +7,19 @@ import {
   Slider,
   Switch,
   Tab,
-  TextField,
   Tabs,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import FormatBoldIcon from "@mui/icons-material/FormatBold";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+} from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardIcon,
+  ArrowUpwardOutlined as ArrowUpwardIcon,
+  FormatBoldOutlined as FormatBoldIcon,
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 import { getItemLabel } from "@shared/variant/item-label";
 import {
   singleColumnLayout,

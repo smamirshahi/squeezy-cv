@@ -5,8 +5,8 @@ import {
   CircularProgress,
   Tooltip,
   Typography,
-} from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+} from "@components/ui";
+import { FileDownloadOutlined as FileDownloadOutlinedIcon } from "@components/ui/icons";
 
 interface Props {
   /** How many applications exist (all of them, whatever the search or filter shows) */
@@ -69,7 +69,8 @@ export function ExportAllButton({ count }: Props): JSX.Element {
         <span>
           <Button
             variant="outlined"
-            size="small"
+            size="medium"
+            sx={{ height: 40 }}
             disabled={isDisabled}
             onClick={() => void exportAll()}
             startIcon={

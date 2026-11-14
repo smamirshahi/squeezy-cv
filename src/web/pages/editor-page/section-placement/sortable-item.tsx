@@ -4,11 +4,13 @@ import {
   MenuItem,
   TextField,
   Typography,
-} from "@mui/material";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+} from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardIcon,
+  ArrowUpwardOutlined as ArrowUpwardIcon,
+  DeleteOutlined as DeleteOutlineIcon,
+  DragIndicatorOutlined as DragIndicatorIcon,
+} from "@components/ui/icons";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Side } from "@custom-types/styles-types";

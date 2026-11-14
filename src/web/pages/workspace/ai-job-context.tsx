@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, IconButton, Popover, Typography } from "@mui/material";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { Box, IconButton, Popover, Typography } from "@components/ui";
+import {
+  InfoOutlined as InfoOutlinedIcon,
+  SettingsOutlined as SettingsOutlinedIcon,
+  WorkOutlineOutlined as WorkOutlineOutlinedIcon,
+} from "@components/ui/icons";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { AiTask } from "@shared/ai/providers";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   AiStatus,

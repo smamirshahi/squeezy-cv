@@ -1,5 +1,5 @@
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button } from "@components/ui";
 import { navigate } from "@hooks/navigation";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { VaultPage } from "@pages/workspace/vault-page";

@@ -1,10 +1,12 @@
 import { RefObject, useLayoutEffect, useState } from "react";
-import { Box, IconButton, Tooltip } from "@mui/material";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import FormatBoldIcon from "@mui/icons-material/FormatBold";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { Box, IconButton, Tooltip } from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardIcon,
+  ArrowUpwardOutlined as ArrowUpwardIcon,
+  FormatBoldOutlined as FormatBoldIcon,
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 import { useBlockActions } from "@pages/workspace/use-block-actions";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppSelector } from "@store/store-helper";

@@ -14,13 +14,15 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import CheckOutlined from "@mui/icons-material/CheckOutlined";
-import CloseOutlined from "@mui/icons-material/CloseOutlined";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import MoreHorizOutlined from "@mui/icons-material/MoreHorizOutlined";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
-import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
+} from "@components/ui";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  InfoOutlined,
+  MoreHorizOutlined,
+  SettingsOutlined,
+  WarningAmberOutlined,
+} from "@components/ui/icons";
 import { Operation } from "@custom-types/chat-types";
 import { buildChatContext } from "@shared/chat/chat-context";
 import { describeOperation } from "@shared/chat/describe-operation";
@@ -629,7 +631,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
                         <Button
                           size="small"
                           variant="outlined"
-                          color="inherit"
+                          color="neutral"
                           onClick={() => dismiss(turn)}
                         >
                           Dismiss
@@ -665,7 +667,7 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
                       <Button
                         size="small"
                         variant="outlined"
-                        color="inherit"
+                        color="neutral"
                         onClick={() => dispatch(undo())}
                       >
                         Undo

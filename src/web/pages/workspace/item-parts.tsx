@@ -7,7 +7,7 @@ import {
   CircularProgress,
   Link,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { RewordMode, RewordResult } from "@custom-types/reword-types";
 import { Item, Section } from "@custom-types/vault-types";
 import {
@@ -180,7 +180,7 @@ function TextActions({
             <Button
               size="small"
               variant="outlined"
-              color="inherit"
+              color="neutral"
               disabled={!isReworded || isBusy}
               sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
               onClick={() => setText(undefined)}

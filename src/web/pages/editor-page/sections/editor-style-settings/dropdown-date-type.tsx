@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@components/ui";
 import { setDateFormat, styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 

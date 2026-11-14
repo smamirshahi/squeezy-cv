@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
+  Tooltip,
   Button,
   Chip,
   CircularProgress,
   Typography,
-} from "@mui/material";
+} from "@components/ui";
 import { Job } from "@custom-types/job-types";
 import { AiSettingsButton } from "@pages/workspace/ai-job-context";
 import { RequirementsDialog } from "@pages/workspace/requirements-dialog";
@@ -38,6 +39,14 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
   const ai = status ? taskProvider(status, "tailor") : null;
   const advert = (job.jobAd ?? "").trim();
   const analysis = job.analysis;
+  // Why the button is disabled, shown as its tooltip ("" = enabled)
+  const disabledReason = isRunning
+    ? "The analysis is running."
+    : !ai?.isConfigured
+      ? "AI is not set up. Choose a provider in Settings."
+      : advert === ""
+        ? "Add the job description first, then you can analyse it."
+        : "";
 
   useEffect(() => {
     api
@@ -142,22 +151,27 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
           <Button
             size="small"
             variant="outlined"
-            color="inherit"
+            color="neutral"
             sx={{ flex: 1, borderColor: WORKSPACE_COLORS.borderStrong }}
             onClick={() => setIsResultOpen(true)}
           >
             See results
           </Button>
         )}
-        <AiButton
-          size="small"
-          variant="outlined"
-          sx={{ flex: 1, bgcolor: WORKSPACE_COLORS.panel }}
-          disabled={isRunning || advert === "" || !ai?.isConfigured}
-          onClick={() => void analyse()}
-        >
-          {analysis ? "Analyse again" : "Analyse job description"}
-        </AiButton>
+        <Tooltip title={disabledReason} disableHoverListener={!disabledReason}>
+          {/* A disabled button gets no mouse events, so the span carries the tooltip */}
+          <Box component="span" sx={{ flex: 1, display: "flex" }}>
+            <AiButton
+              size="small"
+              variant="outlined"
+              sx={{ flex: 1, bgcolor: WORKSPACE_COLORS.panel }}
+              disabled={disabledReason !== ""}
+              onClick={() => void analyse()}
+            >
+              {analysis ? "Analyse again" : "Analyse job description"}
+            </AiButton>
+          </Box>
+        </Tooltip>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography

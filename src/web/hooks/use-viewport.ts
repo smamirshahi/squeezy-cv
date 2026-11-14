@@ -1,4 +1,4 @@
-import { useMediaQuery, useTheme } from "@mui/material";
+import { useMediaQuery, useTheme } from "@components/ui";
 
 /**
  * The size class of the window. It follows MUI's breakpoints, so `sx` values written as

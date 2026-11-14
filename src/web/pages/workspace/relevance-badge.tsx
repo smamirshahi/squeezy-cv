@@ -1,4 +1,4 @@
-import { Box, Chip, Tooltip } from "@mui/material";
+import { Box, Chip, Tooltip } from "@components/ui";
 
 /** From this score an item is "related" to the job */
 const RELATED_FROM = 70;

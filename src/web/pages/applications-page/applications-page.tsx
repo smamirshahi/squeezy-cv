@@ -20,12 +20,14 @@ import {
   TableRow,
   TextField,
   Typography,
-} from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import OpenInNewIcon from "@mui/icons-material/OpenInNewOutlined";
-import SearchIcon from "@mui/icons-material/Search";
+} from "@components/ui";
+import {
+  CheckOutlined as CheckIcon,
+  CloseOutlined as CloseIcon,
+  ExpandMoreOutlined as ExpandMoreIcon,
+  OpenInNewOutlined as OpenInNewIcon,
+  SearchOutlined as SearchIcon,
+} from "@components/ui/icons";
 import { MouseEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
   APPLICATION_STATUSES,
@@ -51,9 +53,8 @@ import { onAppLinkClick } from "@hooks/navigation";
 import { ExportAllButton } from "@pages/applications-page/export-all-button";
 import { ApplicationView } from "@pages/applications-page/application-view";
 import { Job } from "@custom-types/job-types";
-import { Candidate, NewCandidate } from "@custom-types/candidate-types";
+import { Candidate } from "@custom-types/candidate-types";
 import { isOverdue } from "@shared/candidate/candidate-utils";
-import { CandidateDialog } from "@pages/candidates-page/candidate-dialog";
 import {
   openCandidateJob,
   useContinueCandidate,
@@ -259,7 +260,6 @@ export function ApplicationsPage(): JSX.Element {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   // Jobs dropped from Saved for later: kept here so they can be restored or deleted for good
   const [dropped, setDropped] = useState<Candidate[]>([]);
-  const [isSavingLater, setIsSavingLater] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string>("");
   const continueCandidate = useContinueCandidate();
   const [templateNames, setTemplateNames] = useState<Record<string, string>>(
@@ -318,11 +318,6 @@ export function ApplicationsPage(): JSX.Element {
     const parked = await api.listCandidates();
     setCandidates(parked.filter((c) => c.status === "open"));
     setDropped(parked.filter((c) => c.status === "dropped"));
-  }
-
-  async function saveForLater(input: NewCandidate): Promise<void> {
-    await api.createCandidate(input);
-    await reloadCandidates();
   }
 
   async function runCandidateAction(
@@ -562,9 +557,6 @@ export function ApplicationsPage(): JSX.Element {
                 </Typography>
               )}
             </Box>
-            <Button variant="outlined" onClick={() => setIsSavingLater(true)}>
-              Save for later
-            </Button>
           </Box>
           {actionError !== "" && <Alert severity="error">{actionError}</Alert>}
 
@@ -597,11 +589,6 @@ export function ApplicationsPage(): JSX.Element {
             />
           )}
         </Box>
-        <CandidateDialog
-          isOpen={isSavingLater}
-          onClose={() => setIsSavingLater(false)}
-          onSave={saveForLater}
-        />
         {selectedId && !isSideBySide && (
           <Drawer
             anchor="right"

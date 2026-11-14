@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@components/ui";
 import {
   MIDDLE_AREA_SX,
   WORKSPACE_COLORS,

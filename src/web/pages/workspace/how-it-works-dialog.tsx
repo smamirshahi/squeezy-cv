@@ -9,11 +9,13 @@ import {
   Typography,
   type SxProps,
   type Theme,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+} from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardIcon,
+  CheckOutlined as CheckIcon,
+  CloseOutlined as CloseIcon,
+  ExpandMoreOutlined as ExpandMoreIcon,
+} from "@components/ui/icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import {
@@ -3170,7 +3172,7 @@ function NavPicker({
         <Button
           fullWidth
           variant="outlined"
-          color="inherit"
+          color="neutral"
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           onClick={() => setIsOpen(true)}

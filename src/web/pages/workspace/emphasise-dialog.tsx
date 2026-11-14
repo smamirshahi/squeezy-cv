@@ -4,13 +4,13 @@ import {
   Box,
   Button,
   Chip,
-  IconButton,
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   Typography,
-} from "@mui/material";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+} from "@components/ui";
+import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
 import { AiButton } from "@components/ai-button";
 import {
   AiInfoButton,
@@ -210,7 +210,7 @@ export function EmphasiseDialog({
           ))}
         </Box>
         <Button
-          color="inherit"
+          color="neutral"
           disabled={count === 0}
           onClick={() => setSelected([])}
         >

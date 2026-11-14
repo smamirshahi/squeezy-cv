@@ -1,6 +1,8 @@
-import { IconButton } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { IconButton } from "@components/ui";
+import {
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 
 /** The eye that shows or hides an entry or bullet in this job */
 export function EyeToggle({

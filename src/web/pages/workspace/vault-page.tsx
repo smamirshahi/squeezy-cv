@@ -11,10 +11,12 @@ import {
   Menu,
   MenuItem,
   Typography,
-} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import { styled } from "@mui/material/styles";
+  styled,
+} from "@components/ui";
+import {
+  ArrowBackIosNewOutlined as ArrowBackIosNewIcon,
+  MoreVertOutlined as MoreVertIcon,
+} from "@components/ui/icons";
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { selectedItemOf } from "@pages/workspace/section-items";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";

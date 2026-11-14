@@ -10,19 +10,21 @@ import {
   IconButton,
   Link,
   Typography,
-} from "@mui/material";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import DesktopWindowsOutlinedIcon from "@mui/icons-material/DesktopWindowsOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+} from "@components/ui";
+import {
+  AutoAwesomeOutlined as AutoAwesomeOutlinedIcon,
+  CheckOutlined as CheckOutlinedIcon,
+  CloseOutlined as CloseOutlinedIcon,
+  DescriptionOutlined as DescriptionOutlinedIcon,
+  DesktopWindowsOutlined as DesktopWindowsOutlinedIcon,
+  FileDownloadOutlined as FileDownloadOutlinedIcon,
+  FolderOutlined as FolderOutlinedIcon,
+  LinkedIn as LinkedInIcon,
+  LocalCafeOutlined as LocalCafeOutlinedIcon,
+  LockOutlined as LockOutlinedIcon,
+  VisibilityOutlined as VisibilityOutlinedIcon,
+  WorkOutlineOutlined as WorkOutlineOutlinedIcon,
+} from "@components/ui/icons";
 import { APP_VERSION } from "@shared/version";
 import { GuideDialog } from "@pages/workspace/guide-dialog";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
@@ -242,7 +244,7 @@ export function AboutDialog({
             target="_blank"
             rel="noopener noreferrer"
             variant="outlined"
-            color="inherit"
+            color="neutral"
             aria-label="LinkedIn profile of Mohammad Amirshahi (opens in a new tab)"
             startIcon={<LinkedInIcon sx={{ color: "#0A66C2" }} />}
             sx={{
@@ -484,7 +486,7 @@ export function AboutDialog({
         <Button size="small" onClick={() => setIsPrivacyOpen(true)}>
           Privacy note
         </Button>
-        <Button variant="outlined" color="inherit" onClick={onClose}>
+        <Button variant="contained" color="primary" onClick={onClose}>
           Close
         </Button>
       </Box>

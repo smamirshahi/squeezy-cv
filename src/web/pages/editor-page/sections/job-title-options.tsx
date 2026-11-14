@@ -1,5 +1,5 @@
-import { Autocomplete, TextField, Tooltip } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Autocomplete, TextField, Tooltip } from "@components/ui";
+import { InfoOutlined as InfoOutlinedIcon } from "@components/ui/icons";
 
 interface JobTitleOptionsProps {
   options: string[];

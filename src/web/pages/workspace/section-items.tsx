@@ -9,11 +9,13 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
-import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
-import DeleteIcon from "@mui/icons-material/Delete";
+} from "@components/ui";
+import {
+  AddOutlined as AddIcon,
+  ArrowDownwardOutlined as ArrowDownwardOutlinedIcon,
+  ArrowUpwardOutlined as ArrowUpwardOutlinedIcon,
+  DeleteOutlined as DeleteIcon,
+} from "@components/ui/icons";
 import dayjs from "dayjs";
 import { Item, Section } from "@custom-types/vault-types";
 import { itemYear } from "@shared/vault/vault-utils";

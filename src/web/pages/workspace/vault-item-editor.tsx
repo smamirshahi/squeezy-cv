@@ -2,22 +2,24 @@ import { HintAdornment } from "@components/description-hint";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
+  Chip,
   FormControlLabel,
   IconButton,
   MenuItem,
-  Tooltip,
-  Autocomplete,
-  Chip,
   TextField,
+  Tooltip,
   Typography,
-} from "@mui/material";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+} from "@components/ui";
+import {
+  ArrowDownwardOutlined as ArrowDownwardIcon,
+  ArrowUpwardOutlined as ArrowUpwardIcon,
+  DeleteOutlined as DeleteIcon,
+  InfoOutlined as InfoOutlinedIcon,
+} from "@components/ui/icons";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
 import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { isRatingAcceptable } from "@custom-types/type-guards";

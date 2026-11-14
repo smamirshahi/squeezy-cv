@@ -1,5 +1,5 @@
-import { IconButton, Tooltip } from "@mui/material";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import { IconButton, Tooltip } from "@components/ui";
+import { OpenInNewOutlined as OpenInNewOutlinedIcon } from "@components/ui/icons";
 
 /** The address to open: `https://` is added when the text has none but looks like a web address; null otherwise */
 function openableUrl(text: string): string | null {

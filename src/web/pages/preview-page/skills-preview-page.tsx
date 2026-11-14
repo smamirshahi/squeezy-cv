@@ -1,4 +1,4 @@
-import { Box, Grid, Rating } from "@mui/material";
+import { Box, Grid, Rating } from "@components/ui";
 import { RenderedSection } from "@shared/variant/render";
 import React from "react";
 import { CvTypography } from "@components/cv-typography";

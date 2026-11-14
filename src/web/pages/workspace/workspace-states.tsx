@@ -1,5 +1,4 @@
-import { Alert, Box, Button, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Alert, Box, Button, Typography, styled } from "@components/ui";
 import { useState } from "react";
 import { AiButton } from "@components/ai-button";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
@@ -42,12 +41,12 @@ export function ConnectionBanner(): JSX.Element | null {
       sx={{ borderRadius: 0, ...BANNER_WRAP_SX }}
       action={
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button color="inherit" size="small" onClick={retry}>
+          <Button color="neutral" size="small" onClick={retry}>
             Retry
           </Button>
           {hasUnsavedChanges && (
             <Button
-              color="inherit"
+              color="neutral"
               size="small"
               onClick={() => handleExport("cv-unsaved")}
             >
@@ -85,13 +84,13 @@ export function DemoBanner(): JSX.Element | null {
       action={
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
-            color="inherit"
+            color="neutral"
             size="small"
             onClick={() => startDemo(dispatch)}
           >
             Reset demo
           </Button>
-          <Button color="inherit" size="small" onClick={retry}>
+          <Button color="neutral" size="small" onClick={retry}>
             Leave demo
           </Button>
         </Box>

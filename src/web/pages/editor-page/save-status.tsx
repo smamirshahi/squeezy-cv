@@ -1,4 +1,4 @@
-import { Box, Button, Chip } from "@mui/material";
+import { Box, Button, Chip } from "@components/ui";
 import { useHasUnsavedChanges, useSaveActions } from "@hooks/use-persistence";
 import { useAppSelector } from "@store/store-helper";
 
@@ -52,14 +52,14 @@ export function SaveStatus(): JSX.Element {
         title={saveError || message}
       />
       {(status === "offline" || status === "error") && (
-        <Button color="inherit" size="small" onClick={retry}>
+        <Button color="neutral" size="small" onClick={retry}>
           Retry
         </Button>
       )}
       {/* Only there when there is something to save, so the saved state takes no room */}
       {status === "ready" && (hasUnsavedChanges || isSaving) && (
         <Button
-          color="inherit"
+          color="neutral"
           size="small"
           variant="outlined"
           disabled={isSaving}

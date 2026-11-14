@@ -1,5 +1,5 @@
 import { MouseEvent, useEffect, useRef } from "react";
-import { Box, Chip, Divider, Typography } from "@mui/material";
+import { Box, Chip, Divider, Typography } from "@components/ui";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";

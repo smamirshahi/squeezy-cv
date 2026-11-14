@@ -1,4 +1,4 @@
-import { SvgIcon } from "@mui/material";
+import { SvgIcon } from "@components/ui";
 import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { useCvTypographyUtils } from "@components/cv-typography-utils";
 

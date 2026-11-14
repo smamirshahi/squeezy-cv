@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid } from "@components/ui";
 import { CvTypography } from "@components/cv-typography";
 import { CvIcon } from "@components/cv-icon";
 import { useAppSelector } from "@store/store-helper";
