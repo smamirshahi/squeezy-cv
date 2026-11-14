@@ -24,6 +24,8 @@ import {
 } from "@shared/ai/providers";
 import { AiIcon } from "@components/ai-button";
 import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
+import { BrowserAiKeysPanel } from "@pages/workspace/browser-ai-keys";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   AiStatus,
@@ -100,11 +102,15 @@ function AiSettingsDialog({
     }
     setSelected(initial);
     setError("");
+    refreshStatus();
+  }, [api, isOpen, initial]);
+
+  function refreshStatus(): void {
     api
       .getAiStatus()
       .then(setStatus)
       .catch(() => setStatus(null));
-  }, [api, isOpen, initial]);
+  }
 
   async function choose(
     tasks: AiTask[],
@@ -330,7 +336,10 @@ function AiSettingsDialog({
             “Preview the exact request” shows the real messages.
           </Paper>
 
-          {selected === "setup" && (
+          {selected === "setup" && isBrowserMode() && (
+            <BrowserAiKeysPanel onSaved={refreshStatus} />
+          )}
+          {selected === "setup" && !isBrowserMode() && (
             <>
               <Paper sx={{ p: 2, fontSize: 13, lineHeight: 1.7 }}>
                 <b>How to set it up</b>
@@ -550,8 +559,9 @@ function AiSettingsDialog({
         <Typography
           sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
         >
-          Changes apply immediately. Keys stay in the .env file on this
-          computer.
+          {isBrowserMode()
+            ? "Changes apply immediately. Keys stay in this browser."
+            : "Changes apply immediately. Keys stay in the .env file on this computer."}
         </Typography>
         <Button variant="contained" onClick={onClose}>
           Close

@@ -127,6 +127,8 @@ export function createAnthropicSender(config: AiConfig): MessageSender {
   const client = new Anthropic({
     apiKey: config.apiKey,
     timeout: config.timeoutMs,
+    // In the browser version the user's own key is used from their own browser (see #449)
+    dangerouslyAllowBrowser: typeof window !== "undefined",
   });
   return async (system, messages) => {
     try {

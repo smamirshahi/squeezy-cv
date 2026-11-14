@@ -71,13 +71,15 @@ describe("the API client on IndexedDB", () => {
     expect(await api.listApplications()).toEqual([]);
   });
 
-  it("keeps candidates, and answers 501 for what needs the server", async () => {
+  it("keeps candidates, and answers 501 for reading a PDF to import", async () => {
     const candidate = await api.createCandidate({
       company: "Acme",
       role: "Dev",
     });
     expect(await api.listCandidates()).toHaveLength(1);
     await api.deleteCandidate(candidate.id);
-    expect(await codeOf(api.analyseJobAd("ad"))).toBe("browser_unavailable");
+    expect(await codeOf(api.extractPdfText(new Blob(["%PDF-1.7"])))).toBe(
+      "browser_unavailable"
+    );
   });
 });

@@ -7,9 +7,9 @@ import { buildServer } from "@server/app";
 import {
   AiChoiceError,
   AiRegistry,
-  FileAiSettings,
   MemoryAiSettings,
 } from "@server/ai/ai-registry";
+import { FileAiSettings } from "@server/ai/ai-settings-file";
 import { AiClient, GenerateRequest } from "@server/ai/ai-types";
 import { FileCvStorage } from "@server/storage/file-cv-storage";
 
