@@ -15,6 +15,7 @@ import { createApiClient } from "@store/persistence/api-client";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { RestoreSummary } from "@shared/backup/full-backup";
 import { toIsoDay } from "@shared/application/application-utils";
+import { useInstallPrompt } from "@hooks/use-install-prompt";
 import { useViewport } from "@hooks/use-viewport";
 import { notify } from "@components/notifications/notify";
 
@@ -50,6 +51,7 @@ function DataDialog({
   const isPhone = useViewport() === "phone";
   const api = useMemo(() => createApiClient(), []);
   const fileInput = useRef<HTMLInputElement>(null);
+  const installApp = useInstallPrompt();
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [restored, setRestored] = useState<string>("");
@@ -123,6 +125,38 @@ function DataDialog({
             ? "Your CV lives only in this browser, on this device. Clearing site data, using a private window or another browser or device means it is not there. Download a backup regularly, and to move to another device."
             : "Your data is in the data folder on this computer. A backup file is another way to keep or move it."}
         </Alert>
+        {isBrowserMode() && (
+          <Box sx={{ mb: 2 }}>
+            {installApp.isInstalled ? (
+              <Alert severity="success">
+                CV Builder is installed on this device. That also makes it less
+                likely that the browser clears your data.
+              </Alert>
+            ) : installApp.canInstall ? (
+              <Alert
+                severity="info"
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() => void installApp.install()}
+                  >
+                    Install
+                  </Button>
+                }
+              >
+                Install CV Builder as an app: it opens in its own window, works
+                offline, and the browser is less likely to clear your data.
+              </Alert>
+            ) : installApp.isIos ? (
+              <Alert severity="info">
+                On iPhone and iPad: tap Share, then “Add to Home Screen”. Safari
+                can delete the data of a website you have not opened for about a
+                week; an installed app is kept. Download a backup too.
+              </Alert>
+            ) : null}
+          </Box>
+        )}
         <Typography variant="body2" sx={{ mb: 2 }}>
           A backup is one file with your CV, templates, jobs, saved jobs and
           applications (with the PDFs that were sent). It never contains AI
