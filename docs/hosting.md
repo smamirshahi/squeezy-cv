@@ -46,3 +46,27 @@ people you list in:
 
 Nothing in the repo is secret, because the app contains no data and no keys; Access only decides
 who can open the page. Users enter their own AI key in the app later (#449).
+
+## Current setup (done, 2026-11)
+
+- Cloudflare Pages project **`mohammad-cv-builder`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://mohammad-cv-builder.pages.dev`.
+- GitHub secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, expires after one year: renew it) and `CLOUDFLARE_ACCOUNT_ID` are used by `deploy.yml`. They are never in the repo or in chat.
+- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "mohammad-cv-builder - Cloudflare Pages" (created by the project's "Restrict previews" button). Destinations: `*.mohammad-cv-builder.pages.dev` (previews) and `mohammad-cv-builder.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
+- The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=mohammad-cv-builder --branch=main`). Normal deploys come from `deploy.yml`.
+
+## Who can log in
+
+Edit the policy: Zero Trust → Access controls → Applications → open the application → Policies → "Allow Members" → Edit → Include → Emails. Add or remove addresses and save. Use only **Emails** (or Emails ending in) and no Everyone rule, and no second policy that allows more people. Test with an address that is not listed: it must be refused and get no code. A removed person keeps an open session until it ends; revoke it under Zero Trust → Team & Resources → Users, or shorten the session duration in the application's settings.
+
+## What deploys when
+
+- Merge or push to `main` → production, automatically (needs `deploy.yml` on `main` and the two secrets; without the secrets the job logs that it skipped and does not fail).
+- Pull request that is not a draft and not from a fork → preview at `<branch>.mohammad-cv-builder.pages.dev` (also behind Access). Draft pull requests do not deploy.
+- `deploy.yml` does **not** run tests or lint; `ci.yml` does that on pull requests, so merge through pull requests. A format change needs a migration step because testers keep real data in their browsers (see `CLAUDE.md`). Never change the project name or address.
+
+## Local development is unchanged
+
+- `pnpm dev`: server mode as before (web :5173, server :3001, data in `data/`, Chromium PDF, keys in `.env`).
+- `pnpm dev:browser`: the browser version locally (data in IndexedDB of that browser profile, no server). `localhost:5173` in server mode and in browser mode do not share data.
+- `pnpm build:browser` then `pnpm preview`: tries the installable, offline build locally.
+- To move your own `data/` into the hosted app: in server mode press Data → Download backup, then on the hosted site Data → Restore from backup.
