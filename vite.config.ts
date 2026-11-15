@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 import { VitePWA } from "vite-plugin-pwa";
 
 // The browser version (`pnpm build:browser`) is an installable app that works offline; the
@@ -9,8 +10,25 @@ import { VitePWA } from "vite-plugin-pwa";
 const isBrowserMode = process.env.VITE_STORAGE_MODE === "browser";
 const MAX_PRECACHED_BYTES = 6 * 1024 * 1024;
 
+// The short git commit of this build, shown next to the version (#460). Cloudflare Pages has no
+// .git history to rely on, so it passes the commit in CF_PAGES_COMMIT_SHA
+function readCommit(): string {
+  const fromHost = process.env.CF_PAGES_COMMIT_SHA ?? process.env.GITHUB_SHA;
+  if (fromHost) return fromHost.slice(0, 7);
+  try {
+    return execSync("git rev-parse --short=7 HEAD", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return "unknown";
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: { __APP_COMMIT__: JSON.stringify(readCommit()) },
   plugins: [
     react(),
     tsconfigPaths(),

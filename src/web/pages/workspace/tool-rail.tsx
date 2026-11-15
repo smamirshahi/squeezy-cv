@@ -1,5 +1,5 @@
 import { MouseEvent, useState } from "react";
-import { Box, ButtonBase, Typography } from "@components/ui";
+import { Box, ButtonBase, Tooltip, Typography } from "@components/ui";
 import {
   BackupOutlined as BackupOutlinedIcon,
   DarkModeOutlined as DarkModeOutlinedIcon,
@@ -16,6 +16,7 @@ import { Route, formatRoute } from "@shared/routing/routes";
 import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
+import { COMMIT_TOOLTIP } from "@hooks/build-info";
 import { AboutDialog } from "@pages/workspace/about-dialog";
 import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
@@ -240,12 +241,14 @@ export function ToolRail(): JSX.Element {
         );
       })}
       {!isPhone && (
-        <Typography
-          aria-label={`Version ${APP_VERSION}`}
-          sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
-        >
-          v{APP_VERSION}
-        </Typography>
+        <Tooltip title={COMMIT_TOOLTIP}>
+          <Typography
+            aria-label={`Version ${APP_VERSION}`}
+            sx={{ fontSize: 10, color: WORKSPACE_COLORS.muted, pt: 0.5 }}
+          >
+            v{APP_VERSION}
+          </Typography>
+        </Tooltip>
       )}
       {!isPhone && (
         <AboutDialog

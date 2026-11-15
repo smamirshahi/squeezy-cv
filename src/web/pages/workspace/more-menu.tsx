@@ -4,6 +4,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Tooltip,
   Typography,
 } from "@components/ui";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@components/ui/icons";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
+import { COMMIT_TOOLTIP } from "@hooks/build-info";
 import { AboutDialog } from "@pages/workspace/about-dialog";
 import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
@@ -105,12 +107,14 @@ export function MoreMenu(): JSX.Element {
           </ListItemIcon>
           {mode === "dark" ? "Light" : "Dark"}
         </MenuItem>
-        <Typography
-          aria-label={`Version ${APP_VERSION}`}
-          sx={{ fontSize: 11, color: WORKSPACE_COLORS.muted, px: 2, py: 0.5 }}
-        >
-          v{APP_VERSION}
-        </Typography>
+        <Tooltip title={COMMIT_TOOLTIP}>
+          <Typography
+            aria-label={`Version ${APP_VERSION}`}
+            sx={{ fontSize: 11, color: WORKSPACE_COLORS.muted, px: 2, py: 0.5 }}
+          >
+            v{APP_VERSION}
+          </Typography>
+        </Tooltip>
       </Menu>
       <AboutDialog isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </>
