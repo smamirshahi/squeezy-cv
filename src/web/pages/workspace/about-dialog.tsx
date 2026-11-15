@@ -26,6 +26,7 @@ import {
   WorkOutlineOutlined as WorkOutlineOutlinedIcon,
 } from "@components/ui/icons";
 import { APP_VERSION } from "@shared/version";
+import { APP_COMMIT } from "@hooks/build-info";
 import { GuideDialog } from "@pages/workspace/guide-dialog";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -480,7 +481,7 @@ export function AboutDialog({
         }}
       >
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
-          Version {APP_VERSION}
+          Version {APP_VERSION} ({APP_COMMIT})
         </Typography>
         <Box sx={{ flex: 1 }} />
         <Button size="small" onClick={() => setIsPrivacyOpen(true)}>
