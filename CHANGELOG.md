@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Tutorial: the install hint now also names "Add to Home Screen" for iPhone and iPad and says installing makes it less likely that the browser clears your data; the section example reads "Publications" or "Skills"; the Apply picture shows real eye icons; the AI wording step and note are corrected; the Applications tutorial has plain headings instead of the big coloured name (#462).
 - The commit the app was built from (#460): the About dialog shows it next to the version (`Version 0.7.0 (1a2b3c4)`), and the version label in the tool rail and the More menu shows `Commit 1a2b3c4` as a tooltip. It is read from git at build time (`CF_PAGES_COMMIT_SHA` on Cloudflare Pages), "unknown" when there is none.
 - One UI layer (#453): every MUI component and icon is imported from `@components/ui` (icons from `@components/ui/icons`); buttons, text, links, fields, dropdowns, dialogs, papers and chips are wrappers with a fixed set of variants, colours and sizes (written down in `docs/design-language.md`), icons are all the Outlined set, and ESLint warns about direct `@mui/*` imports.
 - Applications page: the Save for later button is gone (use it on the job page); Export all has the same height as the Sort dropdown. About dialog: Close is the orange filled button. Job page: Choose PDF has an orange outline.

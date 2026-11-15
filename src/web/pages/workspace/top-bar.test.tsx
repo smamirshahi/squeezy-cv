@@ -59,7 +59,9 @@ describe("tutorials on the first visit of a page", () => {
 
   it("opens the Applications tutorial the first time the Applications page is visited, and not again", () => {
     show("/applications");
-    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(
+      screen.getByRole("dialog", { name: "Where does each job stand?" })
+    ).toBeTruthy();
     expect(hasSeenTutorial("applications")).toBe(true);
     expect(hasSeenTutorial("apply")).toBe(false);
     cleanup();
@@ -70,13 +72,17 @@ describe("tutorials on the first visit of a page", () => {
 
   it("opens the Applications tutorial on an opened application too", () => {
     show("/applications/abc");
-    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(
+      screen.getByRole("dialog", { name: "Where does each job stand?" })
+    ).toBeTruthy();
     expect(hasSeenTutorial("applications")).toBe(true);
   });
 
   it("shows no tutorial by itself on a page that has none, such as Settings", () => {
     show("/settings");
-    expect(screen.queryByRole("dialog", { name: "Applications" })).toBeNull();
+    expect(
+      screen.queryByRole("dialog", { name: "Where does each job stand?" })
+    ).toBeNull();
     expect(hasSeenTutorial("applications")).toBe(false);
   });
 
@@ -88,7 +94,9 @@ describe("tutorials on the first visit of a page", () => {
     show("/jobs");
     fireEvent.click(screen.getByRole("button", { name: "Tutorials" }));
     fireEvent.click(screen.getByRole("button", { name: /Your applications/ }));
-    expect(screen.getByRole("dialog", { name: "Applications" })).toBeTruthy();
+    expect(
+      screen.getByRole("dialog", { name: "Where does each job stand?" })
+    ).toBeTruthy();
     expect(screen.getByText("Your applications · Step 1 of 4")).toBeTruthy();
   });
 

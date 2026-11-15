@@ -76,7 +76,9 @@ describe("About dialog", () => {
     expect(coffee.getAttribute("href")).toBe(
       "https://ko-fi.com/mohammadamirshahi"
     );
-    expect(screen.getByText(`Version ${APP_VERSION}`)).toBeTruthy();
+    expect(
+      screen.getByText(new RegExp(`^Version ${APP_VERSION} \\(`))
+    ).toBeTruthy();
   });
 
   it("has no 'How to use' button any more, and opens the Privacy note from the footer", () => {

@@ -15,6 +15,8 @@ import {
   CheckOutlined as CheckIcon,
   CloseOutlined as CloseIcon,
   ExpandMoreOutlined as ExpandMoreIcon,
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
 } from "@components/ui/icons";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
@@ -502,8 +504,9 @@ const VAULT_STEPS: VaultStep[] = [
           <>
             To move to another device, download a backup there and use{" "}
             <b>Restore from backup</b> here. You can also install the app (the{" "}
-            <b>Data</b> button, or your browser's install icon): it opens in its
-            own window and works offline.
+            <b>Data</b> button, your browser's install icon, or Share, then “Add
+            to Home Screen” on iPhone and iPad): it opens in its own window,
+            works offline, and the browser is less likely to clear your data.
           </>,
         ]
       : [
@@ -522,7 +525,7 @@ const VAULT_STEPS: VaultStep[] = [
     body: [
       <>
         The <b style={{ color: "#B8400D" }}>template</b> decides which{" "}
-        <b>sections</b> a CV has, for example “Early life” or “Awards”.
+        <b>sections</b> a CV has, for example “Publications” or “Skills”.
       </>,
       <>
         The <b style={{ color: "#1E7A46" }}>job</b> decides which <b>items</b>{" "}
@@ -1595,16 +1598,16 @@ const APPLY_STEPS: ApplyStep[] = [
     body: [
       <>
         Open an entry and the AI helps with its description in two steps.{" "}
-        <b>1 · Lean on:</b> pick the points from the advert to stress.{" "}
-        <b>2 · Then:</b> shorten it, rephrase it, make it longer, or{" "}
-        <b>make bullets</b>.
+        <b>1 · Lean on:</b> pick the points from the advert to stress (after you
+        have analysed the advert). <b>2 · Then:</b> shorten it, rephrase it,
+        make it longer, or <b>make bullets</b>.
       </>,
       <>
         Not happy with the result? <b>Use the vault text</b> puts your original
         words back.
       </>,
     ],
-    note: "This is the bullet-points and rephrase option from the vault, and it works per job.",
+    note: "The AI wording is saved with this job only. Make bullets replaces the description for this job, and “Use the vault’s bullets instead” brings the vault version back.",
   },
   {
     title: "Check, export, mark as applied",
@@ -1759,11 +1762,19 @@ function ApplyEntry({
         opacity: isHidden ? 0.55 : 1,
       }}
     >
-      <span
-        style={{ color: isHidden ? WORKSPACE_COLORS.muted : TEMPLATE_COLOR }}
+      <Box
+        component="span"
+        sx={{
+          display: "inline-flex",
+          color: isHidden ? WORKSPACE_COLORS.muted : TEMPLATE_COLOR,
+        }}
       >
-        {isHidden ? "◌" : "◉"}
-      </span>
+        {isHidden ? (
+          <VisibilityOffIcon fontSize="small" />
+        ) : (
+          <VisibilityIcon fontSize="small" />
+        )}
+      </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <b style={{ fontSize: 13 }}>{name}</b>
         <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
@@ -2452,24 +2463,11 @@ function ApplicationsText({ step }: { step: number }): JSX.Element {
   const current = APPLICATIONS_STEPS[step];
   return (
     <>
-      <Typography id="how-it-works-title" component="h2" sx={{ m: 0 }}>
-        <Box
-          component="span"
-          sx={{
-            display: "inline-block",
-            px: 1.5,
-            py: 0.25,
-            borderRadius: 3.5,
-            bgcolor: current.color,
-            color: "#fff",
-            fontSize: 24,
-            fontWeight: 700,
-          }}
-        >
-          {current.name}
-        </Box>
-      </Typography>
-      <Typography sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted, mb: 1.5 }}>
+      <Typography
+        id="how-it-works-title"
+        component="h2"
+        sx={{ m: 0, mb: 1.5, fontSize: 26, fontWeight: 700, lineHeight: 1.2 }}
+      >
         {current.question}
       </Typography>
       {current.body.map((paragraph, index) => (
