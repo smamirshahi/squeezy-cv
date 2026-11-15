@@ -23,7 +23,12 @@ describe("the Applications tutorial", () => {
   it("goes through the four steps with Next and ends with Got it", () => {
     const onClose = vi.fn();
     open(onClose);
-    const titles = ["Applications", "Statuses", "Applied", "Follow up"];
+    const titles = [
+      "Where does each job stand?",
+      "How does a job move forward?",
+      "What exactly did I send?",
+      "What happens after I send it?",
+    ];
     titles.forEach((title, index) => {
       expect(screen.getByRole("heading", { name: title })).toBeTruthy();
       if (index < titles.length - 1) {
@@ -55,7 +60,9 @@ describe("the Applications tutorial", () => {
   it("opens on the chosen tutorial from the list", () => {
     render(<HowItWorksDialog isOpen onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Your applications/ }));
-    expect(screen.getByRole("heading", { name: "Applications" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Where does each job stand?" })
+    ).toBeTruthy();
   });
 });
 
