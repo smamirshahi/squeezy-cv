@@ -6,12 +6,17 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TopBar } from "@pages/workspace/top-bar";
 import {
   hasSeenTutorial,
+  hasSeenWelcome,
   markTutorialSeen,
+  markWelcomeSeen,
+  setAutoStartOff,
 } from "@pages/workspace/tutorial-seen";
 import { undoableReducer } from "@store/store";
 
 beforeEach(() => {
   localStorage.clear();
+  // The page tutorials below are for people who have been welcomed already
+  markWelcomeSeen();
 });
 
 afterEach(cleanup);
@@ -124,5 +129,36 @@ describe("the feedback button", () => {
     );
     fireEvent.click(buttons[tutorials + 1]);
     expect(screen.getByRole("dialog", { name: "Send feedback" })).toBeTruthy();
+  });
+});
+
+describe("welcome on the very first open", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("opens the Welcome overview once, before any page tutorial", () => {
+    show("/jobs");
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(hasSeenWelcome()).toBe(true);
+    expect(hasSeenTutorial("apply")).toBe(false);
+    cleanup();
+
+    show("/jobs");
+    expect(
+      screen.getByRole("dialog", { name: "Start with the advert" })
+    ).toBeTruthy();
+  });
+
+  it("does not open when someone has seen a page tutorial before", () => {
+    markTutorialSeen("vault");
+    show("/settings");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("respects Don't show on start", () => {
+    setAutoStartOff(true);
+    show("/settings");
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

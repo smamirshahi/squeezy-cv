@@ -15,6 +15,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- The Welcome tutorial opens by itself the very first time the app is opened (#482); page tutorials follow on each page's first visit. People who already saw a tutorial are not welcomed again.
+
 - Templates has a new **Sections** tab (#477, with #465 and #476): the list of the template's sections on the left, the sample CV in the middle with the chosen section outlined and tagged "Editing" (click a section on the paper to pick it; the Highlight switch turns the outline off), and its settings on the right, with Back and Next in CV order. Below a desktop the list is the dropdown in the settings header. The header options (photo, nationality, marital status, gender, right to work) are in Personal Info, Links in Contact Info, the References options in References, Skill icon in Skills and the page layout and section order on this tab; Design keeps what is the same everywhere (margin, date format, spacing, line under titles, icons next to details, bullet point icon, colours and type).
 - Work Experience and Education each have their own **Order of entries** (newest first, the default, or oldest first) in the template; an order a job sets by hand still wins. Template format version 2 (a migration adds the new settings).
 - Publications (#465, #476): your name is bold among the authors, the journal is in italics, the link is visible text at the end of the line (a bare DOI shows as `doi.org/...`) or not shown, long author lists are cut with "et al." (3, 6 or all; in APA your own name is kept), and the order is newest first or your own. "My name as written in citations" is saved in your vault (Main Info profile), not in the template. The publication settings have a live sample.
