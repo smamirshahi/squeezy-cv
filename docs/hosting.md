@@ -2,20 +2,22 @@
 
 The browser version (`pnpm build:browser`, see #350) is a static site: all data stays in the
 user's browser (IndexedDB). It is hosted on **Cloudflare Pages**, project name
-**`mohammad-cv-builder`**, so the address is `https://mohammad-cv-builder.pages.dev`.
+**`squeezy-cv`**, so the address is `https://squeezy-cv.pages.dev`.
 
 > **The address must not change.** IndexedDB data belongs to the origin (the exact address).
 > A different address means an empty app for every user, unless they download a backup first
-> (#447). If a custom domain is wanted later, set it up before real users arrive and keep it.
-> Preview deploys (one per pull request) are other origins, so they start empty; that is normal.
+> (#447). The address moved once, from `mohammad-cv-builder.pages.dev` to `squeezy-cv.pages.dev`,
+> when the app was renamed (#467, #480); a Pages project cannot be renamed. If a custom domain is
+> wanted later, set it up before real users arrive and keep it. Preview deploys (one per pull
+> request) are other origins, so they start empty; that is normal.
 
 ## How it deploys
 
 `.github/workflows/deploy.yml` builds with `pnpm build:browser` and uploads `dist` with
 Wrangler:
 
-- push to `main` → production (`mohammad-cv-builder.pages.dev`)
-- pull request (not a draft, not from a fork) → preview at `<branch>.mohammad-cv-builder.pages.dev`
+- push to `main` → production (`squeezy-cv.pages.dev`)
+- pull request (not a draft, not from a fork) → preview at `<branch>.squeezy-cv.pages.dev`
 
 `public/_redirects` sends every path to `index.html`, so a deep link such as `/jobs` works.
 `public/_headers` and `public/robots.txt` ask search engines not to index the site.
@@ -23,9 +25,9 @@ Wrangler:
 ## One-time setup (needs your Cloudflare account)
 
 1. Cloudflare dashboard → **Workers & Pages → Create → Pages → Upload assets**, name it
-   `mohammad-cv-builder` (if the name is taken, pick another and change `PROJECT` in the
+   `squeezy-cv` (if the name is taken, pick another and change `PROJECT` in the
    workflow, and this file). Upload any file once; GitHub replaces it. Or from a terminal:
-   `pnpm dlx wrangler pages project create mohammad-cv-builder --production-branch main`.
+   `pnpm dlx wrangler pages project create squeezy-cv --production-branch main`.
 2. Create an API token: **My Profile → API Tokens → Create Token → Custom**, permission
    _Account → Cloudflare Pages → Edit_. Note the **Account ID** (right side of the dashboard).
 3. In GitHub: **Settings → Secrets and variables → Actions** → add secrets
@@ -38,7 +40,7 @@ people you list in:
 
 1. Cloudflare dashboard → **Zero Trust** (free plan, up to 50 users) → **Access → Applications →
    Add an application → Self-hosted**.
-2. Application domains: add `mohammad-cv-builder.pages.dev` **and** `*.mohammad-cv-builder.pages.dev`
+2. Application domains: add `squeezy-cv.pages.dev` **and** `*.squeezy-cv.pages.dev`
    (the second one covers the PR previews).
 3. Policy: action **Allow**, rule **Emails** → the addresses of your testers. Login method:
    **One-time PIN** (they get a code by email; no account needed).
@@ -49,10 +51,10 @@ who can open the page. Users enter their own AI key in the app later (#449).
 
 ## Current setup (done, 2026-11)
 
-- Cloudflare Pages project **`mohammad-cv-builder`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://mohammad-cv-builder.pages.dev`.
+- Cloudflare Pages project **`squeezy-cv`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://squeezy-cv.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, expires after one year: renew it) and `CLOUDFLARE_ACCOUNT_ID` are used by `deploy.yml`. They are never in the repo or in chat.
-- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "mohammad-cv-builder - Cloudflare Pages" (created by the project's "Restrict previews" button). Destinations: `*.mohammad-cv-builder.pages.dev` (previews) and `mohammad-cv-builder.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
-- The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=mohammad-cv-builder --branch=main`). Normal deploys come from `deploy.yml`.
+- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "mohammad-cv-builder - Cloudflare Pages" (the application keeps its old name; its destinations are the new project's addresses) (created by the project's "Restrict previews" button). Destinations: `*.squeezy-cv.pages.dev` (previews) and `squeezy-cv.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
+- The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=squeezy-cv --branch=main`). Normal deploys come from `deploy.yml`.
 
 ## Who can log in
 
@@ -61,7 +63,7 @@ Edit the policy: Zero Trust → Access controls → Applications → open the ap
 ## What deploys when
 
 - Merge or push to `main` → production, automatically (needs `deploy.yml` on `main` and the two secrets; without the secrets the job logs that it skipped and does not fail).
-- Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.mohammad-cv-builder.pages.dev` (also behind Access). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
+- Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.squeezy-cv.pages.dev` (also behind Access). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
 - `deploy.yml` does **not** run tests or lint; `ci.yml` does that on pull requests, so merge through pull requests. A format change needs a migration step because testers keep real data in their browsers (see `CLAUDE.md`). Never change the project name or address.
 
 ## Local development is unchanged
