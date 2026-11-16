@@ -61,7 +61,7 @@ Edit the policy: Zero Trust → Access controls → Applications → open the ap
 ## What deploys when
 
 - Merge or push to `main` → production, automatically (needs `deploy.yml` on `main` and the two secrets; without the secrets the job logs that it skipped and does not fail).
-- Pull request that is not a draft and not from a fork → preview at `<branch>.mohammad-cv-builder.pages.dev` (also behind Access). Draft pull requests do not deploy.
+- Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.mohammad-cv-builder.pages.dev` (also behind Access). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
 - `deploy.yml` does **not** run tests or lint; `ci.yml` does that on pull requests, so merge through pull requests. A format change needs a migration step because testers keep real data in their browsers (see `CLAUDE.md`). Never change the project name or address.
 
 ## Local development is unchanged

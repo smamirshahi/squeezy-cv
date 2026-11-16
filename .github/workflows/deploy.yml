@@ -1,13 +1,19 @@
 name: Deploy (Cloudflare Pages)
 
 # The browser version of the app (VITE_STORAGE_MODE=browser) on Cloudflare Pages, see docs/hosting.md.
-# Needs the secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID. Pushes to main go to production;
-# pull requests that are ready for review get a preview. Without the secrets the job stops.
+# Needs the secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID. Pushes to main go to production
+# (not for changes that only touch docs); a pull request gets a preview only when it has the
+# "preview" label (#470, to save minutes). Without the secrets the job stops.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "data.example/**"
+      - ".claude/**"
+      - ".githooks/**"
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
     paths-ignore:
       - "**.md"
       - "data.example/**"
@@ -24,10 +30,13 @@ env:
 
 jobs:
   deploy:
-    # Not for drafts and not for forks (they have no access to the secrets)
+    # A pull request needs the "preview" label, is not a draft and not from a fork (forks have no
+    # access to the secrets); the label itself is the only "labeled" event that deploys
     if: >-
       github.event_name != 'pull_request' ||
-      (!github.event.pull_request.draft &&
+      (contains(github.event.pull_request.labels.*.name, 'preview') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'preview') &&
+      !github.event.pull_request.draft &&
       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
