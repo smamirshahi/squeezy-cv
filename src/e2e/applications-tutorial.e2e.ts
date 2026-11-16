@@ -29,7 +29,9 @@ describe("the Applications tutorial", () => {
     await dialog.getByText("Your applications · Step 1 of 4").waitFor();
     await dialog.getByRole("button", { name: "Next" }).click();
     expect(
-      await dialog.getByRole("heading", { name: "Statuses" }).count()
+      await dialog
+        .getByRole("heading", { name: "How does a job move forward?" })
+        .count()
     ).toBe(1);
     await dialog.getByRole("button", { name: "Close" }).click();
     await dialog.waitFor({ state: "hidden" });
@@ -44,7 +46,9 @@ describe("the Applications tutorial", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: /Your applications/ }).click();
     expect(
-      await dialog.getByRole("heading", { name: "Applications" }).count()
+      await dialog
+        .getByRole("heading", { name: "Where does each job stand?" })
+        .count()
     ).toBe(1);
   });
 });

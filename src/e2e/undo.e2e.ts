@@ -24,7 +24,7 @@ afterAll(async () => {
 
 describe("undo and redo of manual edits", () => {
   it("undoes hiding an item with the button and the keyboard, and redoes it", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     const item = page
       .locator("[data-cv-item]")

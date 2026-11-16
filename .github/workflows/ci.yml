@@ -43,4 +43,5 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      # --bail 1: stop at the first failing test, a broken suite must not burn the whole run (#473)
+      - run: pnpm test:e2e --bail 1

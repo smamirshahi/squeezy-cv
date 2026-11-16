@@ -67,7 +67,7 @@ describe("chat edits (the AI's answers are stubbed)", () => {
       seen = body;
     });
 
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     await page.getByText("Saved", { exact: true }).waitFor();
     const item = page

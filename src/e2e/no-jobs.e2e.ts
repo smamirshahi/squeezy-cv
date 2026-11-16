@@ -29,7 +29,7 @@ function tool(name: string): ReturnType<Page["getByRole"]> {
 
 describe("a vault with no template and no job", () => {
   it("shows no job, a template page without cards, and a disabled Design", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     // the first address opens the Apply tool, which sends you to the job application first
     await page.getByRole("main", { name: "No job added yet" }).waitFor();
     await page.getByText("Start with the job application").waitFor();
