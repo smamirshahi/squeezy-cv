@@ -120,11 +120,15 @@ describe("Delete all my data (real Chromium)", () => {
     await Promise.all([page.waitForNavigation(), button.click()]);
     await page.waitForSelector("#root *");
     const left = await leftovers(page);
-    // The empty app writes its own defaults (theme, the first tutorial) on start; nothing of before is left
+    // The empty app writes its own defaults (theme) on start, and the first tutorial opens again
+    // (opening it marks it seen); nothing else of before is left
     const keys = await page.evaluate(() => Object.keys(localStorage));
     expect(keys).not.toContain("cv-builder-ai-keys");
     expect(keys).not.toContain("cv-builder-ai-choice");
-    expect(keys).not.toContain("cv-builder-vault-tutorial-seen");
+    expect(keys).not.toContain("cv-builder-template-tutorial-seen");
+    expect(keys).not.toContain("cv-builder-apply-tutorial-seen");
+    expect(keys).not.toContain("cv-builder-applications-tutorial-seen");
+    await page.getByRole("dialog").waitFor();
     expect(left.records).toBe(0);
     expect(left.caches).toBe(0);
   });

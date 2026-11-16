@@ -28,7 +28,7 @@ afterAll(async () => {
 
 describe("canvas zoom and Tab between blocks (real browser)", () => {
   it("zooms the page without changing what is measured", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     // the overflow banner under the page says how far over it is
     const chip = page.getByText(/\d+ lines? (is|are) over; page 2 starts at/);
@@ -80,7 +80,7 @@ describe("canvas zoom and Tab between blocks (real browser)", () => {
   });
 
   it("Tab selects the next block, Shift+Tab the previous, and lets go at the ends", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     await page.locator("[data-cv-paper]").focus();
     const selected = async (): Promise<string | null> =>
@@ -110,7 +110,7 @@ describe("canvas zoom and Tab between blocks (real browser)", () => {
   });
 
   it("the block toolbar floats beside the selected item and follows the zoom", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     const toolbar = page.getByRole("toolbar", { name: "Selected block" });
     expect(await toolbar.count()).toBe(0);

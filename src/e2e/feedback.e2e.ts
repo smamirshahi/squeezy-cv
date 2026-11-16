@@ -23,7 +23,7 @@ afterAll(async () => {
 });
 
 async function openDialog(): Promise<void> {
-  await page.goto(app.webUrl);
+  await page.goto(`${app.webUrl}/jobs`);
   await page.getByText("Jane Doe").first().waitFor();
   await page.getByRole("button", { name: "Send feedback" }).click();
   await page.getByRole("dialog", { name: "Send feedback" }).waitFor();
@@ -31,7 +31,7 @@ async function openDialog(): Promise<void> {
 
 describe("send feedback", () => {
   it("sits right of the Tutorials button and opens with the keyboard", async () => {
-    await page.goto(app.webUrl);
+    await page.goto(`${app.webUrl}/jobs`);
     await page.getByText("Jane Doe").first().waitFor();
     const tutorials = page.getByRole("button", { name: "Tutorials" });
     const feedback = page.getByRole("button", { name: "Send feedback" });
