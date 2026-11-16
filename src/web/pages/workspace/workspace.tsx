@@ -70,7 +70,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   useRouteSync(route);
   const missing = missingThing(route, isLoading, jobs, sections, templates);
   useEffect(() => {
-    document.title = `${missing ? "Not found" : titleOf(route, activeJobName)} · CV Builder`;
+    document.title = `${missing ? "Not found" : titleOf(route, activeJobName)} · Squeezy CV`;
   }, [route, activeJobName, missing]);
   const zoom = useAppSelector((s) => s.app.canvasZoom);
   useCanvasShortcuts(tool === "jobs");

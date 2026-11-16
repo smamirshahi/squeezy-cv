@@ -55,7 +55,7 @@ export function App(): JSX.Element {
 /** An address that is not one of the app's */
 function NotFoundPage(): JSX.Element {
   useEffect(() => {
-    document.title = "Not found · CV Builder";
+    document.title = "Not found · Squeezy CV";
   }, []);
   return (
     <div style={{ display: "flex", height: "100vh" }}>

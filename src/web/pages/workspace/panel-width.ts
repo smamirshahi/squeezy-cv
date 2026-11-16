@@ -1,6 +1,6 @@
 export type PanelSide = "left" | "right";
 
-const STORAGE_PREFIX = "cv-builder-panel-width:";
+const STORAGE_PREFIX = "squeezy-cv-panel-width:";
 
 export function normalisePanelWidth(width: number): number {
   return Number.isFinite(width) ? Math.max(0, Math.round(width)) : 0;

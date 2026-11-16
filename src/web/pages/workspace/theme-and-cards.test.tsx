@@ -34,7 +34,7 @@ describe("theme", () => {
     );
     fireEvent.click(screen.getByRole("button"));
     expect(screen.getByRole("button").textContent).toBe("mode: dark");
-    expect(window.localStorage.getItem("cv-builder-theme")).toBe("dark");
+    expect(window.localStorage.getItem("squeezy-cv-theme")).toBe("dark");
     const css = [...document.querySelectorAll("style")]
       .map((style) => style.textContent)
       .join("");

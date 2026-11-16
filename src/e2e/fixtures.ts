@@ -54,10 +54,10 @@ export function longFile(count: number): CvFile {
 export async function skipTutorials(page: Page): Promise<void> {
   await page.addInitScript(() => {
     for (const key of [
-      "cv-builder-vault-tutorial-seen",
-      "cv-builder-template-tutorial-seen",
-      "cv-builder-apply-tutorial-seen",
-      "cv-builder-applications-tutorial-seen",
+      "squeezy-cv-vault-tutorial-seen",
+      "squeezy-cv-template-tutorial-seen",
+      "squeezy-cv-apply-tutorial-seen",
+      "squeezy-cv-applications-tutorial-seen",
     ]) {
       localStorage.setItem(key, "1");
     }

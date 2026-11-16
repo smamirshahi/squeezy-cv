@@ -36,7 +36,7 @@ describe("routing in a real browser", () => {
     await page.reload();
     await page.getByText("Jane Doe").first().waitFor();
     expect(new URL(page.url()).pathname).toBe("/jobs/main");
-    expect(await page.title()).toBe("Apply · Sample CV · CV Builder");
+    expect(await page.title()).toBe("Apply · Sample CV · Squeezy CV");
   });
 
   it("goes Back and Forward between sections without leaving the app", async () => {

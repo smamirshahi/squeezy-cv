@@ -86,11 +86,11 @@ export interface UpgradeNotice {
   toFormat: number;
 }
 
-/** "This file was made with CV Builder 0.5.0 and has been updated to 0.6.0." */
+/** "This file was made with Squeezy CV 0.5.0 and has been updated to 0.6.0." */
 export function describeUpgrade(notice: UpgradeNotice): string {
   const from = notice.fromAppVersion
-    ? `CV Builder ${notice.fromAppVersion}`
-    : "an older version of CV Builder";
+    ? `Squeezy CV ${notice.fromAppVersion}`
+    : "an older version of Squeezy CV";
   return `This file was made with ${from} and has been updated to ${notice.toAppVersion}.`;
 }
 

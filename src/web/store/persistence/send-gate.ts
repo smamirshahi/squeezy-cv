@@ -61,7 +61,7 @@ const GATED: Record<string, { scope: string; hasAdvert: boolean }> = {
   "/api/ai/import": { scope: "The whole text you pasted", hasAdvert: false },
 };
 
-const MASKS_KEY = "cv-builder-always-mask";
+const MASKS_KEY = "squeezy-cv-always-mask";
 const MAX_REMEMBERED_MASKS = 100;
 
 let host: SendHost | undefined;

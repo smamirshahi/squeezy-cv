@@ -313,7 +313,7 @@ export function buildServer({
       .header("Content-Type", "application/json")
       .header(
         "Content-Disposition",
-        `attachment; filename="cv-builder-backup-${toIsoDay(now())}.json"`
+        `attachment; filename="squeezy-cv-backup-${toIsoDay(now())}.json"`
       )
       .send(JSON.stringify(backup));
   });

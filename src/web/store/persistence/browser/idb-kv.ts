@@ -17,7 +17,7 @@ export interface KvStore {
   close(): Promise<void>;
 }
 
-const DB_NAME = "cv-builder";
+const DB_NAME = "squeezy-cv";
 const DB_VERSION = 1;
 const STORE = "files";
 /** The highest character, so `prefix` .. `prefix + HIGH` covers every key with that prefix */
@@ -67,7 +67,7 @@ export function deleteKvStore(name: string = DB_NAME): Promise<void> {
     request.onblocked = () =>
       reject(
         new DatabaseBlockedError(
-          "Another CV Builder tab is still open. Close the other tabs and try again."
+          "Another Squeezy CV tab is still open. Close the other tabs and try again."
         )
       );
   });

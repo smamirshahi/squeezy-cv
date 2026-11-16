@@ -23,7 +23,7 @@ import { useViewport } from "@hooks/use-viewport";
 import { notify } from "@components/notifications/notify";
 
 /** Fired to open the "Your data" dialog (backup and restore) */
-const OPEN_DATA_EVENT = "cv-builder-open-data";
+const OPEN_DATA_EVENT = "squeezy-cv-open-data";
 
 export function openDataDialog(): void {
   window.dispatchEvent(new Event(OPEN_DATA_EVENT));
@@ -75,7 +75,7 @@ function DataDialog({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `cv-builder-backup-${toIsoDay(new Date())}.json`;
+      link.download = `squeezy-cv-backup-${toIsoDay(new Date())}.json`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (caught) {
@@ -99,7 +99,7 @@ function DataDialog({
       try {
         parsed = JSON.parse(await file.text());
       } catch {
-        throw new Error("This file is not a CV Builder backup.");
+        throw new Error("This file is not a Squeezy CV backup.");
       }
       const summary = await api.restoreBackup(parsed);
       setRestored(describeRestore(summary));
@@ -133,7 +133,7 @@ function DataDialog({
           <Box sx={{ mb: 2 }}>
             {installApp.isInstalled ? (
               <Alert severity="success">
-                CV Builder is installed on this device. That also makes it less
+                Squeezy CV is installed on this device. That also makes it less
                 likely that the browser clears your data.
               </Alert>
             ) : installApp.canInstall ? (
@@ -149,7 +149,7 @@ function DataDialog({
                   </Button>
                 }
               >
-                Install CV Builder as an app: it opens in its own window, works
+                Install Squeezy CV as an app: it opens in its own window, works
                 offline, and the browser is less likely to clear your data.
               </Alert>
             ) : installApp.isIos ? (
@@ -221,7 +221,7 @@ function DataDialog({
               Danger zone
             </Typography>
             <Typography variant="body2" sx={{ my: 1 }}>
-              Remove everything CV Builder keeps in this browser. Download a
+              Remove everything Squeezy CV keeps in this browser. Download a
               backup first if you may want it back.
             </Typography>
             <Button

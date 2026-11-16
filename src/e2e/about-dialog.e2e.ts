@@ -29,20 +29,20 @@ async function openAbout(): Promise<void> {
     // on a phone About is in the More menu of the top bar
     await page.getByRole("button", { name: "More", exact: true }).click();
     await page
-      .getByRole("menuitem", { name: "About CV Builder and its author" })
+      .getByRole("menuitem", { name: "About Squeezy CV and its author" })
       .click();
   } else {
     await page
-      .getByRole("button", { name: "About CV Builder and its author" })
+      .getByRole("button", { name: "About Squeezy CV and its author" })
       .click();
   }
-  await page.getByRole("dialog", { name: "About CV Builder" }).waitFor();
+  await page.getByRole("dialog", { name: "About Squeezy CV" }).waitFor();
 }
 
 describe("About dialog", () => {
   it("loads the photo, shows the texts and opens the Privacy note", async () => {
     await openAbout();
-    const dialog = page.getByRole("dialog", { name: "About CV Builder" });
+    const dialog = page.getByRole("dialog", { name: "About Squeezy CV" });
     const photo = dialog.getByRole("img", { name: "Mohammad Amirshahi" });
     await photo.waitFor();
     // a broken image has no natural width: this proves /me-avatar.jpg is really served
@@ -63,7 +63,7 @@ describe("About dialog", () => {
   it("keeps the header and footer in view when the window is short", async () => {
     await page.setViewportSize({ width: 1280, height: 520 });
     await openAbout();
-    const dialog = page.getByRole("dialog", { name: "About CV Builder" });
+    const dialog = page.getByRole("dialog", { name: "About Squeezy CV" });
     await dialog.getByRole("button", { name: "Close" }).last().waitFor();
     const box = await dialog.boundingBox();
     const closeBox = await dialog
@@ -80,7 +80,7 @@ describe("About dialog", () => {
   it("is full screen on a phone and fits the width", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openAbout();
-    const dialog = page.getByRole("dialog", { name: "About CV Builder" });
+    const dialog = page.getByRole("dialog", { name: "About Squeezy CV" });
     const box = await dialog.boundingBox();
     expect(box!.width).toBeLessThanOrEqual(390);
     const overflow = await page.evaluate(

@@ -85,7 +85,7 @@ describe("buildApplicationsExport", () => {
 
   it("puts every application, its PDF, a summary and an index in one ZIP", async () => {
     const result = await buildApplicationsExport(storage, NOW);
-    expect(result.fileName).toBe("cv-builder-applications-2026-11-12.zip");
+    expect(result.fileName).toBe("squeezy-cv-applications-2026-11-12.zip");
     expect(result.exportedCount).toBe(2);
     expect(result.problems).toEqual([]);
     const entries = readZip(result.zip);
@@ -125,7 +125,7 @@ describe("buildApplicationsExport", () => {
     expect(ok.statusCode).toBe(200);
     expect(ok.headers["content-type"]).toBe("application/zip");
     expect(ok.headers["content-disposition"]).toContain(
-      "cv-builder-applications-2026-11-12.zip"
+      "squeezy-cv-applications-2026-11-12.zip"
     );
     await app.close();
 

@@ -36,7 +36,7 @@ export function ExportAllButton({ count }: Props): JSX.Element {
       const name =
         /filename="([^"]+)"/.exec(
           response.headers.get("Content-Disposition") ?? ""
-        )?.[1] ?? "cv-builder-applications.zip";
+        )?.[1] ?? "squeezy-cv-applications.zip";
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

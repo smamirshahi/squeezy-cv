@@ -292,6 +292,13 @@ export function TopBar(): JSX.Element {
         },
       }}
     >
+      <img
+        src="/favicon.svg"
+        alt=""
+        width={22}
+        height={22}
+        style={{ flex: "none", borderRadius: 5 }}
+      />
       <Typography
         sx={{
           fontWeight: 700,
@@ -301,7 +308,7 @@ export function TopBar(): JSX.Element {
           display: { xs: "block", sm: "none", md: "block" },
         }}
       >
-        CV Builder
+        Squeezy CV
       </Typography>
       <IconButton
         size="small"

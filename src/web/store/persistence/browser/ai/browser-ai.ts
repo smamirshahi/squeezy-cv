@@ -10,8 +10,8 @@ import { AiClient } from "@server/ai/ai-types";
 import { CvStorage } from "@shared/storage/cv-storage";
 import { AiProviderId } from "@shared/ai/providers";
 
-const KEYS_STORAGE = "cv-builder-ai-keys";
-const CHOICE_STORAGE = "cv-builder-ai-choice";
+const KEYS_STORAGE = "squeezy-cv-ai-keys";
+const CHOICE_STORAGE = "squeezy-cv-ai-choice";
 
 /**
  * The user's own AI settings in browser mode. They live in this browser's localStorage only:

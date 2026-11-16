@@ -1,9 +1,9 @@
 ---
-name: cv-builder-reference
-description: Detailed architecture notes for CV Builder (templates and jobs, vault, routing, AI routes and privacy masking, pagination, auto-fit, PDF, workspace UI, saving, applications). Read the matching file before changing that area; CLAUDE.md only has the short version.
+name: squeezy-cv-reference
+description: Detailed architecture notes for Squeezy CV (templates and jobs, vault, routing, AI routes and privacy masking, pagination, auto-fit, PDF, workspace UI, saving, applications). Read the matching file before changing that area; CLAUDE.md only has the short version.
 ---
 
-# CV Builder reference
+# Squeezy CV reference
 
 Read only the file for the area you touch:
 

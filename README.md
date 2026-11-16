@@ -1,6 +1,6 @@
-# CV Builder
+# Squeezy CV
 
-A personal CV builder. You keep all your facts once (the **vault**), then make a **job** for each application. A job picks a **template** (the look: layout, fonts, page limit) and decides what to show. Check it on a live A4 preview and export a PDF. Optional AI can help tailor a job to an advert.
+Keep everything. Squeeze what fits. A personal CV app. You keep all your facts once (the **vault**), then make a **job** for each application. A job picks a **template** (the look: layout, fonts, page limit) and decides what to show. Check it on a live A4 preview and export a PDF. Optional AI can help tailor a job to an advert.
 
 - **Web app:** React 19, TypeScript, Vite, MUI, Redux Toolkit.
 - **Local server:** Fastify. It stores your data as JSON files on your computer and makes the PDF with headless Chromium.
@@ -25,8 +25,8 @@ Install these once.
 Then:
 
 ```bash
-git clone <this repo's URL> CV-Builder
-cd CV-Builder
+git clone <this repo's URL> squeezy-cv
+cd squeezy-cv
 pnpm install
 pnpm exec playwright install chromium
 ```

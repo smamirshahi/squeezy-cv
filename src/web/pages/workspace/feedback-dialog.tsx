@@ -303,7 +303,7 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
         {kind === "feedback" && (
           <Box>
             <Typography variant="body2" sx={{ mb: 0.5 }}>
-              How do you feel about CV Builder?
+              How do you feel about Squeezy CV?
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -311,7 +311,7 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
               size="small"
               color="primary"
               value={mood}
-              aria-label="How do you feel about CV Builder?"
+              aria-label="How do you feel about Squeezy CV?"
               onChange={(_event, value: FeedbackMood | null) => setMood(value)}
             >
               {MOODS.map(({ mood: value, label, Icon }) => (

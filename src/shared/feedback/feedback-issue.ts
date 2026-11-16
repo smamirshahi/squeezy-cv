@@ -5,7 +5,7 @@ import {
 } from "@custom-types/feedback-types";
 
 /** The repository that receives the reports (also the target of the "open on GitHub" fallback) */
-export const FEEDBACK_REPO = "smamirshahi/CV-Builder";
+export const FEEDBACK_REPO = "smamirshahi/squeezy-cv";
 
 const FEEDBACK_LABELS: Record<FeedbackKind, string> = {
   feedback: "Feedback",
@@ -92,5 +92,5 @@ export function buildAppInfo(info: {
   userAgent: string;
   page: string;
 }): string {
-  return `CV Builder ${info.version} · ${describeBrowser(info.userAgent)} · ${info.page} page`;
+  return `Squeezy CV ${info.version} · ${describeBrowser(info.userAgent)} · ${info.page} page`;
 }

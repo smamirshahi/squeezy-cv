@@ -273,7 +273,7 @@ describe("backup file", () => {
     });
     expect(download.statusCode).toBe(200);
     expect(download.headers["content-disposition"]).toContain(
-      "cv-builder-backup-2026-11-06.json"
+      "squeezy-cv-backup-2026-11-06.json"
     );
     const other = await mkdtemp(path.join(os.tmpdir(), "cv-app-restore-"));
     const target = buildServer({ storage: new FileCvStorage(other), pdf });

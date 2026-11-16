@@ -155,7 +155,7 @@ export async function restoreBackup(
   raw: unknown
 ): Promise<RestoreSummary> {
   if (!isRecord(raw) || readExportMeta(raw)?.kind !== "backup") {
-    throw new Error("This file is not a CV Builder backup.");
+    throw new Error("This file is not a Squeezy CV backup.");
   }
   assertNotNewer(raw);
 

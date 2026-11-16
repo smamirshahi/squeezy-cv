@@ -4,10 +4,10 @@ export type FirstVisitTutorial =
 
 // The vault key is the one used before there were several tutorials, so nobody sees it twice
 const KEYS: Record<FirstVisitTutorial, string> = {
-  vault: "cv-builder-vault-tutorial-seen",
-  template: "cv-builder-template-tutorial-seen",
-  apply: "cv-builder-apply-tutorial-seen",
-  applications: "cv-builder-applications-tutorial-seen",
+  vault: "squeezy-cv-vault-tutorial-seen",
+  template: "squeezy-cv-template-tutorial-seen",
+  apply: "squeezy-cv-apply-tutorial-seen",
+  applications: "squeezy-cv-applications-tutorial-seen",
 };
 
 /** Whether this tutorial has already been shown in this browser */
@@ -31,8 +31,8 @@ export function markTutorialSeen(id: FirstVisitTutorial): void {
 /** Every tutorial in the dialog (the overview does not open by itself) */
 export type TutorialKey = "overview" | FirstVisitTutorial;
 
-const DONE_PREFIX = "cv-builder-tutorial-done-";
-const NO_AUTO_START_KEY = "cv-builder-tutorials-no-autostart";
+const DONE_PREFIX = "squeezy-cv-tutorial-done-";
+const NO_AUTO_START_KEY = "squeezy-cv-tutorials-no-autostart";
 
 /** Whether the user has read this tutorial to its last step (it gets a tick in the list) */
 export function isTutorialDone(id: TutorialKey): boolean {

@@ -54,7 +54,7 @@ export function useImportExportJson(): ReturnProps {
           notify({
             kind: "error",
             text:
-              error instanceof Error && error.message.includes("CV Builder")
+              error instanceof Error && error.message.includes("Squeezy CV")
                 ? error.message
                 : "Invalid file format.",
           });

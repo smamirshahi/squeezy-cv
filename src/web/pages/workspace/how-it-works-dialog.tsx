@@ -2816,7 +2816,7 @@ interface Tutorial {
 const TUTORIALS: Tutorial[] = [
   {
     id: "overview",
-    name: "How CV Builder works",
+    name: "How Squeezy CV works",
     shortName: "Welcome",
     summary: "Vault, template and job in three steps",
     stepNames: STEPS.map((s) => s.name),

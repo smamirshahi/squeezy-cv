@@ -83,7 +83,7 @@ describe("send feedback", () => {
       kind: "bug",
       note: "I clicked Save for later and nothing happened",
     });
-    expect(seen?.appInfo).toMatch(/^CV Builder \d+\.\d+\.\d+ · Chrome \d+ on /);
+    expect(seen?.appInfo).toMatch(/^Squeezy CV \d+\.\d+\.\d+ · Chrome \d+ on /);
     expect(seen?.appInfo).toMatch(/ · jobs page$/);
     expect(seen?.mood).toBeUndefined();
     expect(

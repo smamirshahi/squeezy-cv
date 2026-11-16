@@ -43,7 +43,7 @@ const ABOUT = {
   whyLead:
     "I made this for myself. Every job needs a slightly different CV, and keeping track of every version I had sent was a mess.",
   whyMore:
-    "I don't like Word, and LaTeX makes templates easy to change but is hard to use. I wanted to write down everything I had done in my own words, without worrying about making it perfect, pick the parts that fit each job, and keep a record of where I applied and how I felt about it. CV Builder is that.",
+    "I don't like Word, and LaTeX makes templates easy to change but is hard to use. I wanted to write down everything I had done in my own words, without worrying about making it perfect, pick the parts that fit each job, and keep a record of where I applied and how I felt about it. Squeezy CV is that.",
   ideas: [
     {
       icon: <FolderOutlinedIcon fontSize="small" />,
@@ -63,7 +63,7 @@ const ABOUT = {
   ],
   supportUrl: "https://ko-fi.com/mohammadamirshahi",
   supportText:
-    "CV Builder is free and I work on it in my own time. If it helped you land an interview, a coffee helps me keep improving it.",
+    "Squeezy CV is free and I work on it in my own time. If it helped you land an interview, a coffee helps me keep improving it.",
 } as const;
 
 const AVATAR_SIZE = 64;
@@ -198,7 +198,14 @@ export function AboutDialog({
           borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
         }}
       >
-        About CV Builder
+        <img
+          src="/icon.svg"
+          alt=""
+          width={28}
+          height={28}
+          style={{ flex: "none", borderRadius: 6 }}
+        />
+        About Squeezy CV
         <Box sx={{ flex: 1 }} />
         <IconButton size="small" aria-label="Close" onClick={onClose}>
           <CloseOutlinedIcon fontSize="small" />

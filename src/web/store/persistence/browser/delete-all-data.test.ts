@@ -26,13 +26,13 @@ describe("delete all my data", () => {
     const kv = openKvStore();
     await new IdbCvStorage(kv).saveVault(migrateCvFile(sample));
     await kv.close();
-    window.localStorage.setItem("cv-builder-ai-keys", '{"claude":"k"}');
+    window.localStorage.setItem("squeezy-cv-ai-keys", '{"claude":"k"}');
     window.sessionStorage.setItem("draft", "x");
-    expect(await databaseNames()).toContain("cv-builder");
+    expect(await databaseNames()).toContain("squeezy-cv");
 
     await deleteAllBrowserData();
 
-    expect(await databaseNames()).not.toContain("cv-builder");
+    expect(await databaseNames()).not.toContain("squeezy-cv");
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
     expect(isDeletingAllData()).toBe(true);
@@ -40,7 +40,7 @@ describe("delete all my data", () => {
 
   it("says to close the other tabs when another tab holds the database, and keeps the data", async () => {
     const other = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("cv-builder", 1);
+      const request = indexedDB.open("squeezy-cv", 1);
       request.onupgradeneeded = () => request.result.createObjectStore("files");
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);

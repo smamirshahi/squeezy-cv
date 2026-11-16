@@ -29,7 +29,7 @@ describe("tutorials seen", () => {
 
   it("remembers the Applications tutorial under its own key", () => {
     markTutorialSeen("applications");
-    expect(localStorage.getItem("cv-builder-applications-tutorial-seen")).toBe(
+    expect(localStorage.getItem("squeezy-cv-applications-tutorial-seen")).toBe(
       "1"
     );
     expect(hasSeenTutorial("applications")).toBe(true);
@@ -37,7 +37,7 @@ describe("tutorials seen", () => {
   });
 
   it("keeps the key the vault tutorial always used, so nobody sees it twice", () => {
-    localStorage.setItem("cv-builder-vault-tutorial-seen", "1");
+    localStorage.setItem("squeezy-cv-vault-tutorial-seen", "1");
     expect(hasSeenTutorial("vault")).toBe(true);
   });
 

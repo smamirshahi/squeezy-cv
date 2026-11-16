@@ -75,7 +75,7 @@ export function DeleteDataDialog({
           This cannot be undone.
         </Alert>
         <Typography variant="body2" component="div" sx={{ mb: 2 }}>
-          This permanently removes everything CV Builder keeps in this browser:
+          This permanently removes everything Squeezy CV keeps in this browser:
           <ul>
             <li>
               your CV, templates, jobs, saved jobs and applications, with the

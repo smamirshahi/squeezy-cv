@@ -137,7 +137,7 @@ export async function buildApplicationsExport(
   ]);
 
   return {
-    fileName: `cv-builder-applications-${now.toISOString().slice(0, 10)}.zip`,
+    fileName: `squeezy-cv-applications-${now.toISOString().slice(0, 10)}.zip`,
     zip,
     exportedCount,
     problems,

@@ -19,7 +19,7 @@ export interface Turn {
 /** Only the newest turns are kept, so the browser's storage never fills up */
 export const MAX_REMEMBERED_TURNS = 40;
 
-const KEY_PREFIX = "cv-builder-chat:";
+const KEY_PREFIX = "squeezy-cv-chat:";
 
 function keyOf(jobId: string): string {
   return `${KEY_PREFIX}${jobId}`;

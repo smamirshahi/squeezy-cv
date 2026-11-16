@@ -109,7 +109,7 @@ export function ToolRail(): JSX.Element {
               key="about"
               onClick={() => setIsAboutOpen(true)}
               aria-haspopup="dialog"
-              aria-label="About CV Builder and its author"
+              aria-label="About Squeezy CV and its author"
               sx={{
                 width: 60,
                 py: 0.9,
