@@ -108,3 +108,26 @@ describe("runMigrations", () => {
     );
   });
 });
+
+describe("template 1 to 2 (#477)", () => {
+  it("adds the publication and entry-order settings and keeps what was set", async () => {
+    const old = (await import("@fixtures/template-v1.json")).default;
+    const { upgradeFile } = await import("@shared/migration/migration-chains");
+    const { file, notice } = upgradeFile(structuredClone(old), "template");
+    const upgraded = file as {
+      version: number;
+      style: Record<string, unknown>;
+    };
+    expect(upgraded.version).toBe(2);
+    expect(upgraded.style).toMatchObject({
+      citationStyle: "ieee",
+      publicationLinks: "end",
+      highlightOwnName: true,
+      maxAuthors: 6,
+      publicationOrder: "newest",
+      experienceOrder: "newest",
+      educationOrder: "newest",
+    });
+    expect(notice).toMatchObject({ fromFormat: 1, toFormat: 2 });
+  });
+});

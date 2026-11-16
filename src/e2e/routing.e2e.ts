@@ -78,6 +78,14 @@ describe("routing in a real browser", () => {
     await page.getByText("Reset colours and text styles").waitFor();
   });
 
+  it("opens the sections tab by address and picks a section on the paper", async () => {
+    await page.goto(`${app.webUrl}/templates/sections`);
+    await page.getByLabel("Section properties").waitFor();
+    await page.getByText(/Section 1 of/).waitFor();
+    await page.locator("[data-cv-section]").first().click();
+    await page.getByText(/Section [3-9] of/).waitFor();
+  });
+
   it("says not found for an unknown job, with a way back", async () => {
     await page.goto(`${app.webUrl}/jobs/does-not-exist`);
     await page.getByText(/This job does not exist/).waitFor();

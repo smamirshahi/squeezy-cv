@@ -42,15 +42,16 @@ describe("editing in the browser, saving, and exporting a PDF", () => {
     await page.getByRole("button", { name: "Shown", exact: true }).click();
     await page.getByText("Unsaved changes").waitFor();
 
-    // Reorder: Education above Work Experience (the layout belongs to the template: Design)
+    // Reorder: Education above Work Experience (the layout belongs to the template: Sections)
     await page
       .getByRole("navigation", { name: "Tools" })
       .getByRole("link", { name: "Templates" })
       .click();
     await page
       .getByRole("navigation", { name: "Template sections" })
-      .getByRole("link", { name: "Design" })
+      .getByRole("link", { name: "Sections" })
       .click();
+    await page.getByRole("button", { name: "Edit Education" }).click();
     await page.getByRole("button", { name: "Move Education up" }).click();
 
     // Save to the server

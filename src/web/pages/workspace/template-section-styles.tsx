@@ -45,9 +45,15 @@ function sampleJob(templateId: string, hiddenSections: string[]): Job {
  */
 export function TemplateSample({
   templateId,
+  selectedPartId,
+  onSelectPart,
 }: {
   /** The template to draw; missing = the template of the active job */
   templateId?: string;
+  /** A section (or "personalInfo" / "contactInfo") to outline and tag "Editing"; screen only */
+  selectedPartId?: string;
+  /** Called with the id of the section that was clicked on the paper */
+  onSelectPart?: (id: string) => void;
 }): JSX.Element {
   const activeTemplate = useAppSelector(activeTemplateSelector);
   const templates = useAppSelector(templatesSelector);
@@ -91,6 +97,41 @@ export function TemplateSample({
     observer.current.observe(node);
   }, []);
 
+  /** The section under a click: its id from `data-cv-section` (sections) or `data-cv-header` (name, contact) */
+  function selectAt(target: EventTarget): void {
+    const part = (target as HTMLElement).closest<HTMLElement>(
+      "[data-cv-section], [data-cv-header]"
+    );
+    const id = part?.dataset.cvSection ?? part?.dataset.cvHeader;
+    if (id !== undefined) {
+      onSelectPart?.(id);
+    }
+  }
+  const outline =
+    selectedPartId === undefined
+      ? {}
+      : {
+          [`& [data-cv-section="${selectedPartId}"], & [data-cv-header="${selectedPartId}"]`]:
+            {
+              position: "relative",
+              outline: `2px solid ${WORKSPACE_COLORS.accent}`,
+              outlineOffset: "6px",
+              "&::before": {
+                content: '"Editing"',
+                position: "absolute",
+                top: "-22px",
+                right: 0,
+                px: "6px",
+                borderRadius: "3px",
+                fontSize: "9pt",
+                lineHeight: 1.6,
+                fontFamily: "sans-serif",
+                color: WORKSPACE_COLORS.accentContrast,
+                bgcolor: WORKSPACE_COLORS.accent,
+              },
+            },
+        };
+
   const paperPx = A4_DIMENSION_MM.width * MM_TO_PX;
   const zoom = available > 0 ? Math.min(1, available / paperPx) : SAMPLE_ZOOM;
 
@@ -99,7 +140,15 @@ export function TemplateSample({
       <Box
         aria-label="Sample CV"
         role="img"
+        onClick={onSelectPart ? (event) => selectAt(event.target) : undefined}
         sx={{
+          ...(onSelectPart
+            ? {
+                "& [data-cv-section], & [data-cv-header]": {
+                  cursor: "pointer",
+                },
+              }
+            : {}),
           flex: "0 0 auto",
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           overflow: "hidden",
@@ -121,6 +170,7 @@ export function TemplateSample({
               color: "#000",
               bgcolor: "#fff",
               "& a": { color: "inherit", textDecoration: "none" },
+              ...outline,
             }}
           >
             <RenderedColumns rendered={rendered} columnWidth={columnWidth} />

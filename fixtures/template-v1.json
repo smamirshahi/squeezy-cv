@@ -1,0 +1,27 @@
+{
+  "id": "old-template",
+  "version": 1,
+  "name": "Old template",
+  "createdAt": "2026-10-01",
+  "layout": {
+    "fullWidth": ["personalInfo", "contactInfo", "experience", "publications"],
+    "left": [],
+    "right": []
+  },
+  "style": {
+    "shouldShowFullContactLinks": false,
+    "citationStyle": "ieee",
+    "hasHeadingLine": true,
+    "ratingIcon": "star",
+    "bulletPointIcon": "disc",
+    "dateFormat": "MMM YYYY",
+    "paperMargin": "normal",
+    "typography": {}
+  },
+  "meta": {
+    "appVersion": "0.6.0",
+    "formatVersion": 1,
+    "exportedAt": "2026-10-01T10:00:00.000Z",
+    "kind": "template"
+  }
+}

@@ -99,16 +99,23 @@ describe("routing in the workspace", () => {
     expect(document.title).toContain("Design");
   });
 
-  it("shows layout and style together on the Design page", async () => {
+  it("shows only what is the same everywhere on the Design page", async () => {
     await open("/templates/design");
-    expect(screen.getByRole("heading", { name: "Layout" })).toBeTruthy();
-    expect(
-      screen.getByRole("radiogroup", { name: "Page layout" })
-    ).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Layout" })).toBeNull();
+    expect(screen.queryByLabelText("Nationality")).toBeNull();
     expect(screen.getByRole("heading", { name: "Style" })).toBeTruthy();
     expect(screen.getByLabelText("Colours")).toBeTruthy();
     expect(screen.getByLabelText("Typography")).toBeTruthy();
     expect(screen.getByLabelText("Live preview")).toBeTruthy();
+  });
+
+  it("shows the sections, the sample and the properties on the Sections page", async () => {
+    await open("/templates/sections");
+    expect(document.title).toContain("Sections");
+    expect(screen.getByLabelText("Sections")).toBeTruthy();
+    expect(screen.getByLabelText("Sample CV")).toBeTruthy();
+    expect(screen.getByLabelText("Section properties")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Sections" })).toBeTruthy();
   });
 
   it("makes the rail real links and changes the address on a click", async () => {

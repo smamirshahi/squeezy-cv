@@ -1,5 +1,6 @@
 import {
   Box,
+  ButtonBase,
   IconButton,
   MenuItem,
   TextField,
@@ -36,6 +37,12 @@ interface Props {
 
   /** Whether the CV has more than one column (then the area can be chosen) */
   hasColumns: boolean;
+
+  /**
+   * Template mode (Templates > Sections): the row is a short, selectable one (drag handle and
+   * name); moving between areas, the arrows and the bin are in the properties header instead.
+   */
+  selection?: { isSelected: boolean; onSelect: () => void };
 }
 
 /** Icon buttons are 44px on touch sizes and keep their small size from a desktop up */
@@ -51,7 +58,12 @@ const AREA_LABELS: Record<Side, string> = {
  * One part of the page in a column: drag handle, include box (sections only; the header
  * always stays), name, area and up/down buttons (the keyboard way to reorder).
  */
-export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
+export function SortableItem({
+  itemId,
+  side,
+  hasColumns,
+  selection,
+}: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const {
     attributes,
@@ -104,9 +116,13 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
         my: 0.5,
         border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
         borderRadius: 1,
-        bgcolor: isDragging
-          ? WORKSPACE_COLORS.accentSoft
-          : WORKSPACE_COLORS.panel,
+        bgcolor:
+          isDragging || selection?.isSelected
+            ? WORKSPACE_COLORS.accentSoft
+            : WORKSPACE_COLORS.panel,
+        ...(selection?.isSelected
+          ? { borderColor: WORKSPACE_COLORS.accent }
+          : {}),
       }}
     >
       <IconButton
@@ -119,78 +135,117 @@ export function SortableItem({ itemId, side, hasColumns }: Props): JSX.Element {
       >
         <DragIndicatorIcon fontSize="small" />
       </IconButton>
-      <Typography
-        noWrap
-        sx={{
-          flex: { xs: "1 1 120px", lg: 1 },
-          minWidth: 0,
-          fontWeight: 500,
-          fontSize: 14,
-          color: WORKSPACE_COLORS.text,
-          pl: 1,
-        }}
-      >
-        {name}
-      </Typography>
-      {hasColumns && !isHeader && (
-        <TextField
-          select
-          size="small"
-          value={side}
-          slotProps={{ htmlInput: { "aria-label": `Area for ${name}` } }}
-          onChange={(event) =>
-            dispatch(
-              updatePageStructure(
-                moveToColumn(structure, itemId, event.target.value as Side)
-              )
-            )
-          }
-          sx={{ width: 118, ml: { xs: 6.5, lg: 0 }, order: { xs: 1, lg: 0 } }}
+      {selection ? (
+        <ButtonBase
+          onClick={selection.onSelect}
+          aria-current={selection.isSelected ? "true" : undefined}
+          aria-label={`Edit ${name}`}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 44,
+            justifyContent: "flex-start",
+            textAlign: "left",
+            pl: 1,
+            fontWeight: selection.isSelected ? 700 : 500,
+            fontSize: 14,
+            color: WORKSPACE_COLORS.text,
+          }}
         >
-          {(Object.keys(AREA_LABELS) as Side[]).map((key) => (
-            <MenuItem key={key} value={key}>
-              {AREA_LABELS[key]}
-            </MenuItem>
-          ))}
-        </TextField>
+          <Typography
+            noWrap
+            sx={{ fontSize: "inherit", fontWeight: "inherit" }}
+          >
+            {name}
+          </Typography>
+        </ButtonBase>
+      ) : (
+        <Typography
+          noWrap
+          sx={{
+            flex: { xs: "1 1 120px", lg: 1 },
+            minWidth: 0,
+            fontWeight: 500,
+            fontSize: 14,
+            color: WORKSPACE_COLORS.text,
+            pl: 1,
+          }}
+        >
+          {name}
+        </Typography>
       )}
-      <IconButton
-        size="small"
-        aria-label={`Move ${name} up`}
-        disabled={index <= 0}
-        sx={TOUCH_BUTTON_SX}
-        onClick={() => move(-1)}
-      >
-        <ArrowUpwardIcon fontSize="small" />
-      </IconButton>
-      <IconButton
-        size="small"
-        aria-label={`Move ${name} down`}
-        disabled={index < 0 || index === column.length - 1}
-        sx={TOUCH_BUTTON_SX}
-        onClick={() => move(1)}
-      >
-        <ArrowDownwardIcon fontSize="small" />
-      </IconButton>
-      {!isHeader && (
+      {selection
+        ? null
+        : hasColumns &&
+          !isHeader && (
+            <TextField
+              select
+              size="small"
+              value={side}
+              slotProps={{ htmlInput: { "aria-label": `Area for ${name}` } }}
+              onChange={(event) =>
+                dispatch(
+                  updatePageStructure(
+                    moveToColumn(structure, itemId, event.target.value as Side)
+                  )
+                )
+              }
+              sx={{
+                width: 118,
+                ml: { xs: 6.5, lg: 0 },
+                order: { xs: 1, lg: 0 },
+              }}
+            >
+              {(Object.keys(AREA_LABELS) as Side[]).map((key) => (
+                <MenuItem key={key} value={key}>
+                  {AREA_LABELS[key]}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+      {selection ? null : (
         <IconButton
           size="small"
-          aria-label={`Remove ${name} from this job`}
-          title="Remove from this job (your vault keeps it)"
+          aria-label={`Move ${name} up`}
+          disabled={index <= 0}
           sx={TOUCH_BUTTON_SX}
-          onClick={() =>
-            dispatch(
-              setSectionShown({
-                jobId: variant.id,
-                sectionId: itemId,
-                isShown: false,
-              })
-            )
-          }
+          onClick={() => move(-1)}
         >
-          <DeleteOutlineIcon fontSize="small" />
+          <ArrowUpwardIcon fontSize="small" />
         </IconButton>
       )}
+      {selection ? null : (
+        <IconButton
+          size="small"
+          aria-label={`Move ${name} down`}
+          disabled={index < 0 || index === column.length - 1}
+          sx={TOUCH_BUTTON_SX}
+          onClick={() => move(1)}
+        >
+          <ArrowDownwardIcon fontSize="small" />
+        </IconButton>
+      )}
+      {selection
+        ? null
+        : !isHeader && (
+            <IconButton
+              size="small"
+              aria-label={`Remove ${name} from this job`}
+              title="Remove from this job (your vault keeps it)"
+              sx={TOUCH_BUTTON_SX}
+              onClick={() =>
+                dispatch(
+                  setSectionShown({
+                    jobId: variant.id,
+                    sectionId: itemId,
+                    isShown: false,
+                  })
+                )
+              }
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          )}
     </Box>
   );
 }

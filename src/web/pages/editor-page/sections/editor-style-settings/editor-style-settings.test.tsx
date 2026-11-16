@@ -104,16 +104,15 @@ describe("Style settings page", () => {
     expect(colorsOf(store).text).toMatch(/^#[0-9a-f]{6}$/);
   });
 
-  it("groups the header options under one heading and saves each choice", () => {
-    const store = setup();
-    expect(screen.getByText("Show in the header")).toBeTruthy();
-    fireEvent.click(screen.getByLabelText("Nationality"));
-    fireEvent.click(screen.getByLabelText("Right to work"));
-    fireEvent.click(screen.getByLabelText("Links (LinkedIn, GitHub, ...)"));
-    const style = store.getState().cvData.style;
-    expect(style.shouldShowNationality).toBe(true);
-    expect(style.shouldShowRightToWork).toBe(true);
-    expect(style.shouldShowLinks).toBe(false);
+  it("keeps only what is the same everywhere: the options of one section moved to Sections", () => {
+    setup();
+    expect(screen.queryByText("Show in the header")).toBeNull();
+    expect(screen.queryByLabelText("Nationality")).toBeNull();
+    expect(screen.queryByLabelText("Links (LinkedIn, GitHub, ...)")).toBeNull();
+    expect(screen.queryByText("Publication style")).toBeNull();
+    expect(screen.queryByText("Skill Icon")).toBeNull();
+    expect(screen.getAllByText("Bullet Point Icon").length).toBeGreaterThan(0);
+    expect(screen.getByLabelText("Icons next to details")).toBeTruthy();
   });
 
   it("has no colour field in the style table", () => {

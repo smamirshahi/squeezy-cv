@@ -20,7 +20,7 @@ import {
 export const TEMPLATE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** The current version of the template format. Bump it together with a migration. */
-export const CURRENT_TEMPLATE_VERSION = 1;
+export const CURRENT_TEMPLATE_VERSION = 2;
 
 /**
  * How a CV looks: layout, section order, style, page limit, skill display and the

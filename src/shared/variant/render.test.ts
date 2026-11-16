@@ -717,3 +717,24 @@ describe("awards and interests", () => {
     expect(sectionPart(parts, "in")?.type).toBe("interests");
   });
 });
+
+describe("the template's order of entries (#477)", () => {
+  const work = vault.sections.find((s) => s.type === "experience");
+
+  function workIds(order?: "newest" | "oldest"): string[] {
+    const base = createVariant(vault, file.style, "v", "V");
+    const variant: Variant = {
+      ...base,
+      style: { ...base.style, ...(order ? { experienceOrder: order } : {}) },
+    };
+    const part = sectionPart(allParts(render(vault, variant)), work!.id);
+    return part!.items.map((item) => item.id);
+  }
+
+  it("work experience follows the template: newest first by default, oldest first on request", () => {
+    expect(work).toBeDefined();
+    const newest = workIds();
+    expect(newest).toEqual(workIds("newest"));
+    expect(workIds("oldest")).toEqual([...newest].reverse());
+  });
+});

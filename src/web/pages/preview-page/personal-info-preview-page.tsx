@@ -24,6 +24,7 @@ export function PersonalInfoPreviewPage({
   return (
     <Grid
       container
+      data-cv-header="personalInfo"
       sx={{
         flexDirection: "column",
         alignItems: "flex-start",

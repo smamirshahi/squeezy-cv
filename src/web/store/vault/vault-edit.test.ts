@@ -223,7 +223,7 @@ describe("section types", () => {
       expect(SECTION_TYPE_LABELS[type]).toBeTruthy();
       expect(getDefaultSectionTitle(type)).toBe(SECTION_TYPE_LABELS[type]);
     }
-    expect(SECTION_TYPES).toHaveLength(11);
+    expect(SECTION_TYPES).toHaveLength(12);
   });
 
   it("knows which types have a special layout", () => {

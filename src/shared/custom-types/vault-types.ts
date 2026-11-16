@@ -127,6 +127,12 @@ export const ProfileSchema = Object({
   /** Gender, picked from a list. Shown under the name when the style asks for it. */
   gender: String.optional(),
 
+  /**
+   * How the user's name is written in publication citations, e.g. "Doe, J." (other spellings
+   * separated by a semicolon). Missing = the full name. Used to bold the user among the authors.
+   */
+  citationName: String.optional(),
+
   /** A small photo as a data URL (cropped to 4:5 in the browser). Drawn in the header; never sent to AI. */
   photo: String.optional(),
 

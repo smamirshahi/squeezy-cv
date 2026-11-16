@@ -115,6 +115,24 @@ export const StyleSchema = Object({
     Literal("plain")
   ).optional(),
 
+  /** Whether a publication shows its link at the end of the line ("end", default) or no link at all */
+  publicationLinks: Union(Literal("end"), Literal("none")).optional(),
+
+  /** Whether the author that is the user is drawn bold; missing = bold */
+  highlightOwnName: Boolean.optional(),
+
+  /** How many authors a publication names before "et al."; missing = 6 */
+  maxAuthors: Union(Literal(3), Literal(6), Literal("all")).optional(),
+
+  /** Publications newest first (default) or in the order of the vault / the job */
+  publicationOrder: Union(Literal("newest"), Literal("manual")).optional(),
+
+  /** Work experience newest first (default) or oldest first */
+  experienceOrder: Union(Literal("newest"), Literal("oldest")).optional(),
+
+  /** Education newest first (default) or oldest first */
+  educationOrder: Union(Literal("newest"), Literal("oldest")).optional(),
+
   /** The line under each section title; missing = shown */
   hasHeadingLine: Boolean.optional(),
 

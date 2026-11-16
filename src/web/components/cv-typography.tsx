@@ -3,7 +3,7 @@ import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { SxProps, Typography } from "@components/ui";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { useResolvedStyle } from "@hooks/use-resolved-style";
 import { useCvTypographyUtils } from "@components/cv-typography-utils";
 
@@ -12,7 +12,10 @@ interface TypographyVariantProps {
   variant: AvailableFonts;
 
   /** The text to display */
-  text: string;
+  text?: string;
+
+  /** Runs with their own look (bold, italic, link) instead of `text` */
+  children?: ReactNode;
 
   /** Makes the text a hyperlink to this (already checked http(s)) address */
   href?: string;
@@ -31,6 +34,7 @@ interface TypographyVariantProps {
 export function CvTypography({
   variant,
   text,
+  children,
   href,
   isEmphasised = false,
   pageBreak,
@@ -87,7 +91,7 @@ export function CvTypography({
       data-cv-keep={pageBreak === "keep-with-next" ? "" : undefined}
       gutterBottom
     >
-      {text}
+      {children ?? text}
     </Typography>
   );
 }

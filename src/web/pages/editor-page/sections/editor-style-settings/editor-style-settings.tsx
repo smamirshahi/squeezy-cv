@@ -7,10 +7,8 @@ import {
   Tooltip,
   Typography,
 } from "@components/ui";
-import { DropdownCitationStyle } from "@pages/editor-page/sections/editor-style-settings/dropdown-citation-style";
 import { InfoOutlined } from "@components/ui/icons";
 import { DropdownDateType } from "@pages/editor-page/sections/editor-style-settings/dropdown-date-type";
-import { DropdownSkillIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-skill-icon";
 import { DropdownMargin } from "@pages/editor-page/sections/editor-style-settings/dropdown-margin";
 import { DropdownBulletPointIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-bullet-point-icon";
 import { ColoursCard } from "@pages/editor-page/sections/editor-style-settings/colours-card";
@@ -22,14 +20,6 @@ import {
   setHasHeadingLine,
   setShouldShowIcons,
   setSectionSpacing,
-  setShouldShowRightToWork,
-  setShouldShowPhoto,
-  setShouldShowReferenceContacts,
-  setIsReferencesOnRequest,
-  setShouldShowLinks,
-  setShouldShowNationality,
-  setShouldShowMaritalStatus,
-  setShouldShowGender,
   styleSelector,
 } from "@store/cv-data/cv-data-slice";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
@@ -40,81 +30,8 @@ const SECTION_SPACING_RANGE = { min: 0, max: 40 } as const;
 /** The Style settings page (design B14): page options and the typography table (the live preview is the right panel) */
 export function EditorTypography(): JSX.Element {
   const dispatch = useAppDispatch();
-  const {
-    shouldShowRightToWork,
-    shouldShowPhoto,
-    shouldShowLinks,
-    shouldShowNationality,
-    shouldShowMaritalStatus,
-    shouldShowGender,
-    shouldShowReferenceContacts,
-    isReferencesOnRequest,
-    sectionSpacing,
-    hasHeadingLine,
-    shouldShowIcons,
-  } = useAppSelector(styleSelector);
-
-  /** The details that can be switched on in the header, one checkbox each */
-  const headerOptions: {
-    label: string;
-    checked: boolean;
-    onChange: (value: boolean) => void;
-    info?: string;
-  }[] = [
-    {
-      label: "Links (LinkedIn, GitHub, ...)",
-      checked: shouldShowLinks !== false,
-      onChange: (value) => dispatch(setShouldShowLinks(value)),
-      info: "This turns links on or off for the whole template. Which links appear, and in what order, is chosen separately for each job, on the job's Content tab.",
-    },
-    {
-      label: "Profile photo",
-      checked: shouldShowPhoto !== false,
-      onChange: (value) => dispatch(setShouldShowPhoto(value)),
-      info: "Only has an effect when a photo is added in Main Info.",
-    },
-    {
-      label: "Nationality",
-      checked: shouldShowNationality ?? false,
-      onChange: (value) => dispatch(setShouldShowNationality(value)),
-    },
-    {
-      label: "Marital status",
-      checked: shouldShowMaritalStatus ?? false,
-      onChange: (value) => dispatch(setShouldShowMaritalStatus(value)),
-    },
-    {
-      label: "Gender",
-      checked: shouldShowGender ?? false,
-      onChange: (value) => dispatch(setShouldShowGender(value)),
-    },
-    {
-      label: "Right to work",
-      checked: shouldShowRightToWork ?? false,
-      onChange: (value) => dispatch(setShouldShowRightToWork(value)),
-    },
-  ];
-
-  /** How the References section is drawn, one checkbox each */
-  const referenceOptions: {
-    label: string;
-    checked: boolean;
-    onChange: (value: boolean) => void;
-    info: string;
-  }[] = [
-    {
-      label: "Contact details (email, phone)",
-      checked: shouldShowReferenceContacts ?? false,
-      onChange: (value) => dispatch(setShouldShowReferenceContacts(value)),
-      info: "These are other people's details, so they are hidden unless you turn this on. They are never sent to AI.",
-    },
-    {
-      label: "Only say “References available on request”",
-      checked: isReferencesOnRequest ?? false,
-      onChange: (value) => dispatch(setIsReferencesOnRequest(value)),
-      info: "Replaces the list of people with one line. The References section still has to be in the vault and placed on the template.",
-    },
-  ];
+  const { sectionSpacing, hasHeadingLine, shouldShowIcons } =
+    useAppSelector(styleSelector);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -159,7 +76,9 @@ export function EditorTypography(): JSX.Element {
             1 · Page
           </Typography>
           <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
-            Margins, dates, icons and which details show in the header.
+            What is the same everywhere: margin, dates, spacing, icons and
+            bullets. Settings of one section (the header, publications, skills
+            ...) are in Sections.
           </Typography>
         </Box>
         <Box
@@ -175,9 +94,7 @@ export function EditorTypography(): JSX.Element {
         >
           <DropdownMargin />
           <DropdownDateType />
-          <DropdownSkillIcon />
           <DropdownBulletPointIcon />
-          <DropdownCitationStyle />
           <TextField
             type="number"
             label="Space between sections (px)"
@@ -235,114 +152,6 @@ export function EditorTypography(): JSX.Element {
               sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted }}
             />
           </Tooltip>
-        </Box>
-        <Box
-          component="fieldset"
-          sx={{ border: 0, p: 0, m: 0, mt: 1.5, minWidth: 0 }}
-        >
-          <Typography
-            component="legend"
-            sx={{
-              mb: 0.5,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".07em",
-              textTransform: "uppercase",
-              color: WORKSPACE_COLORS.muted,
-            }}
-          >
-            Show in the header
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr)",
-                sm: "repeat(2, minmax(0, 1fr))",
-              },
-              columnGap: 1.5,
-            }}
-          >
-            {headerOptions.map(({ label, checked, onChange, info }) => (
-              <Box
-                key={label}
-                sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
-              >
-                <FormControlLabel
-                  sx={{ mr: 0.5 }}
-                  label={label}
-                  control={
-                    <Checkbox
-                      checked={checked}
-                      onChange={(event) => onChange(event.target.checked)}
-                    />
-                  }
-                />
-                {info !== undefined && (
-                  <Tooltip title={info}>
-                    <InfoOutlined
-                      tabIndex={0}
-                      aria-label={`About ${label.toLowerCase()}`}
-                      sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted }}
-                    />
-                  </Tooltip>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-        <Box
-          component="fieldset"
-          sx={{ border: 0, p: 0, m: 0, mt: 1.5, minWidth: 0 }}
-        >
-          <Typography
-            component="legend"
-            sx={{
-              mb: 0.5,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".07em",
-              textTransform: "uppercase",
-              color: WORKSPACE_COLORS.muted,
-            }}
-          >
-            References
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr)",
-                sm: "repeat(2, minmax(0, 1fr))",
-              },
-              columnGap: 1.5,
-            }}
-          >
-            {referenceOptions.map(({ label, checked, onChange, info }) => (
-              <Box
-                key={label}
-                sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
-              >
-                <FormControlLabel
-                  sx={{ mr: 0.5 }}
-                  label={label}
-                  control={
-                    <Checkbox
-                      checked={checked}
-                      onChange={(event) => onChange(event.target.checked)}
-                    />
-                  }
-                />
-                <Tooltip title={info}>
-                  <InfoOutlined
-                    tabIndex={0}
-                    aria-label={`About ${label.toLowerCase()}`}
-                    sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted }}
-                  />
-                </Tooltip>
-              </Box>
-            ))}
-          </Box>
         </Box>
       </Box>
       <ColoursCard />
