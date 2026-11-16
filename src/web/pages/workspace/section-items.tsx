@@ -22,9 +22,11 @@ import { itemYear } from "@shared/vault/vault-utils";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { UnsortedPlacement } from "@pages/workspace/unsorted-placement";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { requestFocusOnNewItem } from "@pages/workspace/new-item-focus";
 import { useDraftFields, withDraft } from "@pages/workspace/draft-fields";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute } from "@shared/routing/routes";
+import { fromMonthValue } from "@shared/vault/item-fields";
 import {
   datedTitle,
   entryColumns,
@@ -34,12 +36,18 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { addBullet, addItem, removeItem } from "@store/vault/vault-slice";
 
-/** An item with nothing filled in (no field text and no bullet text) */
+/** An item with nothing filled in (no field text and no bullet text); the end date a new item starts with does not count */
 function isEmptyItem(item: Section["items"][number]): boolean {
   return (
-    Object.values(item.fields).every((value) => value.trim() === "") &&
-    item.bullets.every((bullet) => bullet.text.trim() === "")
+    Object.entries(item.fields).every(
+      ([key, value]) => key === "endDate" || value.trim() === ""
+    ) && item.bullets.every((bullet) => bullet.text.trim() === "")
   );
+}
+
+/** This month as a date ("YYYY-MM-01"): a new job or study starts with it as its end, so "Current" is unchecked */
+function thisMonth(): string {
+  return fromMonthValue(new Date().toISOString().slice(0, 7));
 }
 
 /** What a new item of a section starts with */
@@ -52,7 +60,7 @@ function newItemFields(section: Section): Record<string, string> {
         location: "",
         workMode: "",
         startDate: "",
-        endDate: "",
+        endDate: thisMonth(),
       };
     case "education":
       return {
@@ -62,7 +70,7 @@ function newItemFields(section: Section): Record<string, string> {
         location: "",
         workMode: "",
         startDate: "",
-        endDate: "",
+        endDate: thisMonth(),
       };
     case "skills":
       return { category: "" };
@@ -150,7 +158,7 @@ const SORT_OPTIONS: Partial<Record<Section["type"], SortOption[]>> = {
     { key: "journal", label: "Journal", kind: "text", text: field("journal") },
   ],
   awards: [
-    { ...DATES, key: "year", label: "Year" },
+    { ...DATES, key: "date", label: "Date" },
     TITLE,
     { key: "issuer", label: "Issuer", kind: "text", text: field("issuer") },
   ],
@@ -296,9 +304,9 @@ function tableOf(
             value: (_p, item) => item.fields.title ?? "",
           },
           {
-            key: "year",
-            label: "Year",
-            value: (_p, item) => item.fields.date ?? "",
+            key: "date",
+            label: "Date",
+            value: (p) => p.dates,
             isMuted: true,
           },
         ],
@@ -414,6 +422,7 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
     // Only one empty item at a time: open the existing empty one instead
     const empty = section.items.find(isEmptyItem);
     if (empty) {
+      requestFocusOnNewItem(empty.id);
       select(empty.id);
       return;
     }
@@ -430,6 +439,7 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
         })
       );
     }
+    requestFocusOnNewItem(item.id);
     select(item.id);
   }
 

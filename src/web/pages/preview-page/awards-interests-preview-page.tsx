@@ -1,7 +1,11 @@
+import dayjs from "dayjs";
 import { Grid } from "@components/ui";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { normaliseLink } from "@shared/vault/link-utils";
+import { formatStoredDate } from "@shared/vault/item-fields";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 
@@ -36,13 +40,17 @@ function SectionFrame({
 
 /** Awards: "Title, Issuer, Date" on one line, an optional description under it, linked when it has a link */
 export function AwardsPreviewPage({ section }: Props): JSX.Element | null {
+  const { dateFormat } = useAppSelector(styleSelector);
   if (section.items.length === 0) {
     return null;
   }
   return (
     <SectionFrame section={section}>
       {section.items.map((item) => {
-        const line = [item.fields.title, item.fields.issuer, item.fields.date]
+        const date = formatStoredDate(item.fields.date, (day) =>
+          dayjs(day).format(dateFormat)
+        );
+        const line = [item.fields.title, item.fields.issuer, date]
           .map((part) => part?.trim())
           .filter(Boolean)
           .join(", ");

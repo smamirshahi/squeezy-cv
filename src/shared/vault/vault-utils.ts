@@ -157,12 +157,6 @@ export function replaceBulletTexts(
   });
 }
 
-/** Whether a number of years is acceptable: a whole number from 0 to 80 */
-export function isYearsAcceptable(years: number): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  return Number.isInteger(years) && years >= 0 && years <= 80;
-}
-
 /** The name of a level (a rating in steps of 0.5; halves are named by the whole level below) */
 export function levelLabel(
   rating: number | undefined,

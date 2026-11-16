@@ -11,6 +11,9 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- Awards: the Date is a month picker like Start and End, shown with the template's date format; older text dates such as "Mar 2024" are converted when the file opens (a bare year stays as text). Skills no longer have a "Years" field (it was never shown on the CV); stored values are dropped. Vault format version 3 (#469).
+- New Experience and Education entries start with "Current" unchecked; "Add new ..." focuses the first input; the pasted BibTeX stays in its box (#468).
+- Workflows: a PR preview deploys only with the `preview` label, and a docs-only merge does not redeploy (#470).
 - Tutorial: the install hint now also names "Add to Home Screen" for iPhone and iPad and says installing makes it less likely that the browser clears your data; the section example reads "Publications" or "Skills"; the Apply picture shows real eye icons; the AI wording step and note are corrected; the Applications tutorial has plain headings instead of the big coloured name (#462).
 - The commit the app was built from (#460): the About dialog shows it next to the version (`Version 0.7.0 (1a2b3c4)`), and the version label in the tool rail and the More menu shows `Commit 1a2b3c4` as a tooltip. It is read from git at build time (`CF_PAGES_COMMIT_SHA` on Cloudflare Pages), "unknown" when there is none.
 - One UI layer (#453): every MUI component and icon is imported from `@components/ui` (icons from `@components/ui/icons`); buttons, text, links, fields, dropdowns, dialogs, papers and chips are wrappers with a fixed set of variants, colours and sizes (written down in `docs/design-language.md`), icons are all the Outlined set, and ESLint warns about direct `@mui/*` imports.

@@ -193,10 +193,10 @@ describe("inline vault item editor", () => {
     );
   });
 
-  it("explains level and years in one (i) and uses the same delete icon as the lists", () => {
+  it("explains level in one (i) and uses the same delete icon as the lists", () => {
     setup();
     open("Languages");
-    expect(screen.getByLabelText("About level and years")).toBeTruthy();
+    expect(screen.getByLabelText("About level")).toBeTruthy();
     // the lists and the editor share the Outlined delete icon; the old "DeleteOutline" one is gone
     expect(screen.queryByTestId("DeleteOutlineIcon")).toBeNull();
     expect(screen.getAllByTestId("DeleteOutlinedIcon").length).toBeGreaterThan(
@@ -238,21 +238,12 @@ describe("inline vault item editor", () => {
     ).toBe(false);
   });
 
-  it("sets and clears Years, ignores invalid years, and always shows skill levels", () => {
+  it("has no Years field, and always shows skill levels", () => {
     const store = setup();
     open("Languages");
-    const first = stored(store, "Languages").bullets[0];
     pickLevel(0, "4 – Fluent");
     expect(stored(store, "Languages").bullets[0].rating).toBe(4);
-    const years = screen.getByLabelText(`${first.text} years`);
-
-    fireEvent.change(years, { target: { value: "7" } });
-    expect(stored(store, "Languages").bullets[0].years).toBe(7);
-    fireEvent.change(years, { target: { value: "-2" } });
-    fireEvent.change(years, { target: { value: "2.5" } });
-    expect(stored(store, "Languages").bullets[0].years).toBe(7);
-    fireEvent.change(years, { target: { value: "" } });
-    expect(stored(store, "Languages").bullets[0].years).toBeUndefined();
+    expect(screen.queryByLabelText(/years$/)).toBeNull();
 
     expect(screen.queryByLabelText(/Track my level/)).toBeNull();
     expect(screen.getAllByRole("combobox", { name: /^Level/ })).toHaveLength(2);

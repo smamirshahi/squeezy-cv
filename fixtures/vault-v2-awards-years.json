@@ -1,0 +1,281 @@
+{
+  "metaData": {
+    "version": "1.0",
+    "title": "Sample CV",
+    "jobUrl": ""
+  },
+  "vault": {
+    "version": 2,
+    "profile": {
+      "fullName": "Jane Doe",
+      "headline": "Software Developer",
+      "email": "jane.doe@example.com",
+      "phone": "+44 7700 900000",
+      "location": "London, UK"
+    },
+    "links": [
+      {
+        "id": "d2bzRgojtyxeqNWVs95Ko",
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/janedoe-example",
+        "tags": []
+      },
+      {
+        "id": "RunxyQG8-aiMYaUOGdlMA",
+        "label": "GitHub",
+        "url": "https://github.com/janedoe-example",
+        "tags": []
+      }
+    ],
+    "sections": [
+      {
+        "id": "summary",
+        "type": "summary",
+        "title": "Professional Summary",
+        "items": [
+          {
+            "id": "Kuc-hvqzmUbpjkm1ImqZ9",
+            "fields": {
+              "text": "Front-end developer with six years of experience building React and TypeScript applications. Focused on clear interfaces, tested code and steady delivery."
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          }
+        ]
+      },
+      {
+        "id": "experience",
+        "type": "experience",
+        "title": "Work Experience",
+        "items": [
+          {
+            "id": "exp-1",
+            "fields": {
+              "jobTitle": "Senior Software Developer",
+              "company": "Example Ltd",
+              "location": "London, UK",
+              "startDate": "2022-03-01",
+              "description": "Led development of a React dashboard used by 200 internal users\nIntroduced Redux Toolkit and cut state-related bugs\nMentored two junior developers"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "exp-2",
+            "fields": {
+              "jobTitle": "Software Developer",
+              "company": "Sample Systems",
+              "location": "Leeds, UK",
+              "startDate": "2018-09-01",
+              "endDate": "2022-02-28",
+              "description": "Built reusable form components in TypeScript\nAdded unit tests that raised coverage from 30% to 80%"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "exp-3",
+            "fields": {
+              "jobTitle": "Intern",
+              "company": "Demo Co",
+              "location": "Remote",
+              "startDate": "2018-01-01",
+              "endDate": "2018-06-30",
+              "description": "Fixed UI bugs in a legacy jQuery application"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": false
+          }
+        ]
+      },
+      {
+        "id": "education",
+        "type": "education",
+        "title": "Education",
+        "items": [
+          {
+            "id": "edu-1",
+            "fields": {
+              "degree": "BSc Computer Science",
+              "institute": "University of Example",
+              "location": "Leeds, UK",
+              "startDate": "2014-09-01",
+              "endDate": "2018-06-30"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          }
+        ]
+      },
+      {
+        "id": "skills",
+        "type": "skills",
+        "title": "Skills",
+        "items": [
+          {
+            "id": "sk-1",
+            "fields": {
+              "category": "Languages"
+            },
+            "bullets": [
+              {
+                "id": "sk-1-1",
+                "text": "English",
+                "tags": [],
+                "rating": 5,
+                "years": 7
+              },
+              {
+                "id": "sk-1-2",
+                "text": "French",
+                "tags": [],
+                "rating": 2.5,
+                "years": 3
+              }
+            ],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "sk-2",
+            "fields": {
+              "category": "Frontend"
+            },
+            "bullets": [
+              {
+                "id": "sk-2-1",
+                "text": "React",
+                "tags": [],
+                "rating": 5
+              },
+              {
+                "id": "sk-2-2",
+                "text": "TypeScript",
+                "tags": [],
+                "rating": 4.5
+              }
+            ],
+            "tags": [],
+            "shouldShow": true
+          }
+        ]
+      },
+      {
+        "id": "awards",
+        "type": "awards",
+        "title": "Awards",
+        "items": [
+          {
+            "id": "a1",
+            "fields": {
+              "title": "Best Poster",
+              "issuer": "Example University",
+              "date": "Mar 2015"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "a2",
+            "fields": {
+              "title": "Dean's List",
+              "issuer": "Example University",
+              "date": "2019"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "a3",
+            "fields": {
+              "title": "Hackathon Winner",
+              "issuer": "Example University",
+              "date": "03/2021"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "a4",
+            "fields": {
+              "title": "Open Source Prize",
+              "issuer": "Example University",
+              "date": "2022-11"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          },
+          {
+            "id": "a5",
+            "fields": {
+              "title": "Teaching Award",
+              "issuer": "Example University",
+              "date": "Spring term"
+            },
+            "bullets": [],
+            "tags": [],
+            "shouldShow": true
+          }
+        ]
+      }
+    ]
+  },
+  "style": {
+    "bulletPointIcon": "disc",
+    "shouldShowFullContactLinks": true,
+    "ratingIcon": "star",
+    "dateFormat": "MMM/YYYY",
+    "paperMargin": "narrow",
+    "typography": {
+      "headingLg": {
+        "fontSize": "18pt",
+        "fontWeight": "700",
+        "color": "#222222"
+      },
+      "headingMd": {
+        "fontSize": "13pt",
+        "fontWeight": "700",
+        "color": "#333333"
+      },
+      "headingSm": {
+        "fontSize": "11pt",
+        "fontWeight": "700",
+        "color": "#222222"
+      },
+      "bodyLg": {
+        "fontSize": "13pt",
+        "fontWeight": "400",
+        "color": "#444444"
+      },
+      "bodyMd": {
+        "fontSize": "10pt",
+        "fontWeight": "400",
+        "color": "#555555"
+      },
+      "bodySm": {
+        "fontSize": "9pt",
+        "fontWeight": "400",
+        "color": "#777777"
+      },
+      "bulletText": {
+        "fontSize": "9pt",
+        "fontWeight": "400",
+        "color": "#333333"
+      },
+      "icon": {
+        "fontSize": "20pt",
+        "fontWeight": "400",
+        "color": "#1976d2"
+      }
+    }
+  }
+}

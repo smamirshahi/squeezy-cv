@@ -13,7 +13,6 @@ import {
   findBullet,
   findItem,
   findSection,
-  isYearsAcceptable,
   keepInDateOrder,
   moveInArray,
   normalizeTags,
@@ -274,8 +273,6 @@ const vaultSlice = createSlice({
             text?: string;
             tags?: string[];
             rating?: number;
-            /** null removes the years */
-            years?: number | null;
           };
         }
       >
@@ -307,14 +304,6 @@ const vaultSlice = createSlice({
             .map(({ entry }) => entry);
           item.bullets.splice(0, item.bullets.length, ...sorted);
         }
-      }
-      if (update.years === null) {
-        delete bullet.years;
-      } else if (
-        update.years !== undefined &&
-        isYearsAcceptable(update.years)
-      ) {
-        bullet.years = update.years;
       }
     },
 

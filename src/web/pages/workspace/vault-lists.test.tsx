@@ -137,6 +137,156 @@ describe("awards list", () => {
   });
 });
 
+describe("award dates are month pickers", () => {
+  const openFirst = (): void => {
+    fireEvent.click(
+      within(screen.getByRole("list", { name: "Items" })).getAllByRole(
+        "link"
+      )[0]
+    );
+  };
+
+  it("lists a stored date in the template's date format", () => {
+    setup([], "/vault/awards", [{ title: "Poster", date: "2024-03-01" }]);
+    expect(rows()[0]).toContain("Mar 2024");
+    expect(rows()[0]).not.toContain("2024-03-01");
+  });
+
+  it("edits the date with a month input and stores the first day of the month", () => {
+    const store = setup([], "/vault/awards", [
+      { title: "Poster", date: "2024-03-01" },
+    ]);
+    openFirst();
+    const date = screen.getByLabelText<HTMLInputElement>("Date");
+    expect(date.type).toBe("month");
+    expect(date.value).toBe("2024-03");
+    fireEvent.change(date, { target: { value: "2024-05" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(
+      store.getState().vault.sections.find((x) => x.id === "awards")!.items[0]
+        .fields.date
+    ).toBe("2024-05-01");
+  });
+
+  it("keeps an older text date and shows it as a note instead of losing it", () => {
+    const store = setup([], "/vault/awards", [
+      { title: "Poster", date: "2015" },
+    ]);
+    expect(rows()[0]).toContain("2015");
+    openFirst();
+    expect(screen.getByLabelText<HTMLInputElement>("Date").value).toBe("");
+    expect(screen.getByText("Saved before as text: “2015”")).toBeTruthy();
+    expect(
+      store.getState().vault.sections.find((x) => x.id === "awards")!.items[0]
+        .fields.date
+    ).toBe("2015");
+  });
+});
+
+describe("Add new item", () => {
+  it("focuses the first input of a new item, and starts a job with Current unchecked", () => {
+    const store = setup([], "/vault/experience");
+    fireEvent.click(screen.getByRole("button", { name: "Add new experience" }));
+    expect(document.activeElement).toBe(screen.getByLabelText("Job title"));
+    expect(
+      screen.getByRole<HTMLInputElement>("checkbox", { name: "Current" })
+        .checked
+    ).toBe(false);
+    expect(screen.getByLabelText<HTMLInputElement>("End").disabled).toBe(false);
+    const created = store
+      .getState()
+      .vault.sections.find((x) => x.id === "experience")!.items[0];
+    expect(created.fields.endDate).toMatch(/^\d{4}-\d{2}-01$/);
+  });
+
+  it("starts education with Current unchecked and focuses its first input", () => {
+    setup([], "/vault/education");
+    fireEvent.click(screen.getByRole("button", { name: "Add new education" }));
+    expect(document.activeElement).toBe(screen.getByLabelText("Degree"));
+    expect(
+      screen.getByRole<HTMLInputElement>("checkbox", { name: "Current" })
+        .checked
+    ).toBe(false);
+  });
+
+  it("still opens only one empty job: Add again reopens it and focuses it", () => {
+    const store = setup([], "/vault/experience");
+    const add = (): void => {
+      fireEvent.click(
+        screen.getByRole("button", { name: "Add new experience" })
+      );
+    };
+    add();
+    (document.activeElement as HTMLElement).blur();
+    add();
+    expect(
+      store.getState().vault.sections.find((x) => x.id === "experience")!.items
+    ).toHaveLength(1);
+    expect(document.activeElement).toBe(screen.getByLabelText("Job title"));
+  });
+
+  it("does not give other sections an end date", () => {
+    const store = setup([], "/vault/awards");
+    fireEvent.click(screen.getByRole("button", { name: "Add new item" }));
+    expect(
+      store.getState().vault.sections.find((x) => x.id === "awards")!.items[0]
+        .fields.endDate
+    ).toBeUndefined();
+  });
+});
+
+describe("pasted BibTeX stays in its box", () => {
+  const ENTRY =
+    "@article{key, title = {A paper}, author = {Doe, Jane}, journal = {Nature}, year = {2024}}";
+
+  it("keeps the text after it parsed, and the fields are filled from it", () => {
+    setup([{ title: "Existing", year: "2020" }]);
+    fireEvent.click(
+      within(screen.getByRole("list", { name: "Items" })).getAllByRole(
+        "link"
+      )[0]
+    );
+    const box = screen.getByLabelText<HTMLTextAreaElement>(
+      "Paste BibTeX or LaTeX entry"
+    );
+    fireEvent.change(box, { target: { value: ENTRY } });
+    expect(box.value).toBe(ENTRY);
+    expect(screen.getByLabelText<HTMLInputElement>("Title").value).toBe(
+      "A paper"
+    );
+  });
+
+  it("keeps text that is not an entry, with the message, and a new item starts empty", () => {
+    setup([{ title: "Existing", year: "2020" }]);
+    fireEvent.click(
+      within(screen.getByRole("list", { name: "Items" })).getAllByRole(
+        "link"
+      )[0]
+    );
+    const box = screen.getByLabelText<HTMLTextAreaElement>(
+      "Paste BibTeX or LaTeX entry"
+    );
+    fireEvent.change(box, { target: { value: "not an entry" } });
+    expect(box.value).toBe("not an entry");
+    expect(
+      screen.getByText("No BibTeX entry found in this text.")
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Add new item" }));
+    expect(
+      screen.getByLabelText<HTMLTextAreaElement>("Paste BibTeX or LaTeX entry")
+        .value
+    ).toBe("");
+  });
+
+  it("focuses the paste box when a new publication is added", () => {
+    setup([{ title: "Existing", year: "2020" }]);
+    fireEvent.click(screen.getByRole("button", { name: "Add new item" }));
+    expect(document.activeElement).toBe(
+      screen.getByLabelText("Paste BibTeX or LaTeX entry")
+    );
+  });
+});
+
 describe("Unsorted entry", () => {
   it("shows as Unsorted and can be opened while empty (no more 'AI sorting' placeholder)", () => {
     setup(PAPERS);

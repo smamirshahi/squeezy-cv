@@ -25,14 +25,19 @@ import { LocationAutocomplete } from "@pages/workspace/location-autocomplete";
 import { isRatingAcceptable } from "@custom-types/type-guards";
 import { splitList } from "@shared/vault/split-list";
 import { parseBibtex } from "@shared/vault/bibtex";
+import {
+  takeFocusRequest,
+  useFocusRequests,
+} from "@pages/workspace/new-item-focus";
 import { getItemLabel } from "@shared/variant/item-label";
 import { setDraftFields } from "@pages/workspace/draft-fields";
 import { skillSuggestions } from "@shared/vault/skill-suggestions";
-import { isYearsAcceptable, levelLabel } from "@shared/vault/vault-utils";
+import { levelLabel } from "@shared/vault/vault-utils";
 import {
   FieldSpec,
   fieldSpecsFor,
   fromMonthValue,
+  isStoredDay,
   toMonthValue,
   workModeOf,
   WORK_MODES,
@@ -345,7 +350,7 @@ function levelOptionLabel(level: number, category?: string): string {
 }
 
 const LEVEL_HINT =
-  "Level: how well you know the skill, from 1 (just learning) to 5 (expert). It is not years of experience; that is the Years field. Both are optional, and each template decides whether to show them.";
+  "Level: how well you know the skill, from 1 (just learning) to 5 (expert). It is optional, and each template decides whether to show it.";
 
 interface SkillCardProps {
   section: Section;
@@ -356,7 +361,7 @@ interface SkillCardProps {
   onNewAfter: (index: number) => void;
 }
 
-/** One skill of a group: name, level and years. Every change is saved to the vault at once. */
+/** One skill of a group: name and level. Every change is saved to the vault at once. */
 function SkillCard({
   section,
   item,
@@ -367,7 +372,6 @@ function SkillCard({
 }: SkillCardProps): JSX.Element {
   const dispatch = useAppDispatch();
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
-  const skillName = bullet.text || `Skill ${index + 1}`;
   const level = Math.floor(bullet.rating ?? 0);
   return (
     <Box
@@ -471,31 +475,6 @@ function SkillCard({
           </MenuItem>
         ))}
       </TextField>
-      <TextField
-        size="small"
-        label="Years"
-        type="number"
-        value={bullet.years ?? ""}
-        onChange={(event) => {
-          const text = event.target.value.trim();
-          if (text === "") {
-            dispatch(updateBullet({ ...ref, update: { years: null } }));
-            return;
-          }
-          const years = Number(text);
-          if (isYearsAcceptable(years)) {
-            dispatch(updateBullet({ ...ref, update: { years } }));
-          }
-        }}
-        slotProps={{
-          htmlInput: {
-            min: 0,
-            step: 1,
-            "aria-label": `${skillName} years`,
-          },
-        }}
-        sx={{ width: 80, flex: { xs: "1 1 80px", lg: "none" } }}
-      />
       <IconButton
         size="small"
         aria-label={`Remove skill ${index + 1}`}
@@ -529,6 +508,8 @@ export function VaultItemEditor({
   const [focusBulletId, setFocusBulletId] = useState<string>("");
   // Edits of the fields wait here until Apply (a skills group saves as you type)
   const [bibtexMessage, setBibtexMessage] = useState("");
+  // The pasted entry stays in its box, so the user can check it or fix it; another entry starts empty
+  const [bibtexText, setBibtexText] = useState("");
   const [draft, setDraft] = useState<Record<string, string>>({});
   const index = section.items.findIndex((entry) => entry.id === item.id);
   const ref = { sectionId: section.id, itemId: item.id };
@@ -555,7 +536,26 @@ export function VaultItemEditor({
     setDraft({});
   }
 
+  // A new item (Add new ...) opens with its first input focused
+  const focusRequests = useFocusRequests();
+  useEffect(() => {
+    if (!takeFocusRequest(item.id)) {
+      return;
+    }
+    document
+      .querySelector<HTMLElement>(
+        `[data-item-editor="${item.id}"] :is(input, textarea):not([aria-hidden="true"]):not([disabled]):not([type="hidden"])`
+      )
+      ?.focus();
+  }, [item.id, focusRequests]);
+
+  useEffect(() => {
+    setBibtexText("");
+    setBibtexMessage("");
+  }, [item.id]);
+
   function pasteBibtex(text: string): void {
+    setBibtexText(text);
     const parsed = parseBibtex(text);
     if (!parsed) {
       setBibtexMessage(
@@ -634,6 +634,7 @@ export function VaultItemEditor({
   return (
     <Box
       aria-label="Edit item"
+      data-item-editor={item.id}
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       onKeyDown={(event) => {
         const target = event.target as HTMLElement;
@@ -720,7 +721,7 @@ export function VaultItemEditor({
             "Fills the fields below from the entry. Edit them after if needed."
           }
           error={bibtexMessage !== ""}
-          value=""
+          value={bibtexText}
           multiline
           minRows={3}
           onChange={(event) => pasteBibtex(event.target.value)}
@@ -771,8 +772,26 @@ export function VaultItemEditor({
               (candidate) => candidate.kind === "month" && candidate.isEnd
             );
             if (!endSpec) {
-              throw new Error(
-                `Missing end-date field for ${section.type} section`
+              // A single date (an award): one month picker. An older free text ("2024") that
+              // is no date shows as the hint, so nothing is lost silently.
+              const stored = draft[spec.key] ?? item.fields[spec.key] ?? "";
+              const isOldText = stored !== "" && !isStoredDay(stored);
+              return (
+                <TextField
+                  key={spec.key}
+                  size="medium"
+                  type="month"
+                  label={spec.label}
+                  value={toMonthValue(stored)}
+                  onChange={(event) =>
+                    changeField(spec.key, fromMonthValue(event.target.value))
+                  }
+                  helperText={
+                    isOldText ? `Saved before as text: “${stored}”` : undefined
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ gridColumn: `span ${spec.span}` }}
+                />
               );
             }
             return (
@@ -814,7 +833,7 @@ export function VaultItemEditor({
               <InfoOutlinedIcon
                 fontSize="small"
                 tabIndex={0}
-                aria-label="About level and years"
+                aria-label="About level"
                 sx={{ ml: 0.5, color: "text.secondary", cursor: "help" }}
               />
             </Tooltip>

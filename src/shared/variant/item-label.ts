@@ -1,3 +1,4 @@
+import { formatStoredDate } from "@shared/vault/item-fields";
 import { Item } from "@custom-types/vault-types";
 
 const LABEL_FIELDS = [
@@ -67,6 +68,6 @@ export function entryColumns(
     location: field("location"),
     dates: start
       ? `${formatDay(start)} - ${end ? formatDay(end) : "Present"}`
-      : field("date") || field("year"),
+      : formatStoredDate(field("date"), formatDay) || field("year"),
   };
 }

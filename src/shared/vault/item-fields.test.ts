@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   DESCRIPTION_HINT,
   fieldSpecsFor,
+  formatStoredDate,
   fromMonthValue,
+  isStoredDay,
   toMonthValue,
 } from "@shared/vault/item-fields";
 
@@ -76,5 +78,23 @@ describe("month values", () => {
     expect(fromMonthValue("2021-03")).toBe("2021-03-01");
     expect(fromMonthValue("2021")).toBe("");
     expect(fromMonthValue("")).toBe("");
+  });
+});
+
+describe("an award's date is a month picker", () => {
+  it("is a single month field, not a start/end pair", () => {
+    const date = fieldSpecsFor("awards").find((f) => f.key === "date")!;
+    expect(date.kind).toBe("month");
+    expect(date.isEnd).toBeUndefined();
+  });
+
+  it("shows a stored day in the given format and an older text as it is", () => {
+    const format = (day: string) => `<${day}>`;
+    expect(isStoredDay("2024-03-01")).toBe(true);
+    expect(isStoredDay("2024")).toBe(false);
+    expect(isStoredDay(undefined)).toBe(false);
+    expect(formatStoredDate("2024-03-01", format)).toBe("<2024-03-01>");
+    expect(formatStoredDate("  2024 ", format)).toBe("2024");
+    expect(formatStoredDate(undefined, format)).toBe("");
   });
 });
