@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import legacyV0 from "@fixtures/legacy-cv-v0.json";
+import vaultV2 from "@fixtures/vault-v2-awards-years.json";
 import sample from "@fixtures/sample-cv.json";
 import {
   CURRENT_VAULT_VERSION,
@@ -7,6 +8,9 @@ import {
   Section,
 } from "@custom-types/vault-types";
 import {
+  awardDateToDay,
+  awardDatesToDays,
+  dropSkillYears,
   foldBulletsIntoDescriptions,
   migrateCvFile,
   migrateLegacyFile,
@@ -317,7 +321,7 @@ describe("version 1 to 2: bullets become the description (#244)", () => {
   });
 
   it("sets the version, and running it again on the result changes nothing", () => {
-    expect(migrated.vault.version).toBe(2);
+    expect(migrated.vault.version).toBe(CURRENT_VAULT_VERSION);
     expect(migrateCvFile(clone(migrated))).toEqual(migrated);
   });
 
@@ -325,5 +329,86 @@ describe("version 1 to 2: bullets become the description (#244)", () => {
     const before = JSON.stringify(old);
     migrateCvFile(old);
     expect(JSON.stringify(old)).toBe(before);
+  });
+});
+
+describe("version 2 to 3: award dates are days, skills have no years", () => {
+  const migrated = migrateCvFile(structuredClone(vaultV2));
+  const dates = migrated.vault.sections
+    .find((x) => x.type === "awards")!
+    .items.map((item) => item.fields.date);
+
+  it("converts a month and year written as text to the first day of that month", () => {
+    expect(awardDateToDay("Mar 2015")).toBe("2015-03-01");
+    expect(awardDateToDay("March 2015")).toBe("2015-03-01");
+    expect(awardDateToDay("sept. 2020")).toBe("2020-09-01");
+    expect(awardDateToDay("03/2021")).toBe("2021-03-01");
+    expect(awardDateToDay("3-2021")).toBe("2021-03-01");
+    expect(awardDateToDay("2022-11")).toBe("2022-11-01");
+  });
+
+  it("keeps a bare year, other text, a real day and an impossible month as they were", () => {
+    for (const text of [
+      "2019",
+      "Spring term",
+      "",
+      "2022-11-05",
+      "13/2020",
+      "Foo 2020",
+    ]) {
+      expect(awardDateToDay(text)).toBe(text);
+    }
+  });
+
+  it("migrates the old fixture file and sets the version", () => {
+    expect(vaultV2.vault.version).toBe(2);
+    expect(migrated.vault.version).toBe(CURRENT_VAULT_VERSION);
+    expect(dates).toEqual([
+      "2015-03-01",
+      "2019",
+      "2021-03-01",
+      "2022-11-01",
+      "Spring term",
+    ]);
+  });
+
+  it("drops the years of every skill and keeps the rest of it", () => {
+    const before = vaultV2.vault.sections.find((x) => x.type === "skills")!;
+    const after = migrated.vault.sections.find((x) => x.type === "skills")!;
+    expect(
+      before.items.flatMap((i) => i.bullets).some((b) => "years" in b)
+    ).toBe(true);
+    expect(
+      after.items.flatMap((i) => i.bullets).some((b) => "years" in b)
+    ).toBe(false);
+    expect(after.items[0].bullets[0].text).toBe(
+      before.items[0].bullets[0].text
+    );
+    expect(after.items[0].bullets[0].rating).toBe(
+      before.items[0].bullets[0].rating
+    );
+  });
+
+  it("leaves other sections alone and does not change the input", () => {
+    const input = structuredClone(vaultV2);
+    const before = JSON.stringify(input);
+    const out = migrateCvFile(input);
+    expect(JSON.stringify(input)).toBe(before);
+    expect(
+      out.vault.sections.find((x) => x.type === "experience")!.items
+    ).toEqual(
+      migrateCvFile(structuredClone(vaultV2)).vault.sections.find(
+        (x) => x.type === "experience"
+      )!.items
+    );
+  });
+
+  it("running the steps again on the result changes nothing", () => {
+    expect(migrateCvFile(structuredClone(migrated))).toEqual(migrated);
+    const raw = structuredClone(migrated) as unknown as Record<string, unknown>;
+    const again = awardDatesToDays(
+      dropSkillYears(raw) as Record<string, unknown>
+    ) as { vault: unknown };
+    expect(again.vault).toEqual(migrated.vault);
   });
 });

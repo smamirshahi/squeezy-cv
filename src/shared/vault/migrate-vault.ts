@@ -140,9 +140,130 @@ export const foldBulletsIntoDescriptions: VaultMigration = (raw) => {
   };
 };
 
+const MONTH_NAMES = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
+
+/**
+ * An award's older free-text date as the stored day ("2024-03-01"): "Mar 2024", "March 2024",
+ * "03/2024", "2024-03". Anything else (a bare year, other text) is not a month and stays as it is.
+ */
+export function awardDateToDay(text: string): string {
+  const value = text.trim();
+  const named = /^([A-Za-z]{3,9})\.?,?\s+(\d{4})$/.exec(value);
+  if (named) {
+    const month = MONTH_NAMES.indexOf(named[1].slice(0, 3).toLowerCase());
+    if (month >= 0) {
+      return `${named[2]}-${globalThis.String(month + 1).padStart(2, "0")}-01`;
+    }
+  }
+  const numeric = /^(\d{1,2})[/.-](\d{4})$/.exec(value);
+  if (numeric && Number(numeric[1]) >= 1 && Number(numeric[1]) <= 12) {
+    return `${numeric[2]}-${numeric[1].padStart(2, "0")}-01`;
+  }
+  const iso = /^(\d{4})-(\d{2})$/.exec(value);
+  if (iso && Number(iso[2]) >= 1 && Number(iso[2]) <= 12) {
+    return `${value}-01`;
+  }
+  return text;
+}
+
+/**
+ * Version 2 to 3 (first part): the date of an award is a month picker now, stored as a day ("2024-03-01").
+ * A free text that names a month and a year is converted; a bare year or other text is kept as
+ * it was (it still shows on the CV, and the editor shows it as a note).
+ */
+export const awardDatesToDays: VaultMigration = (raw) => {
+  const vault = isRecord(raw.vault) ? raw.vault : {};
+  const sections = globalThis.Array.isArray(vault.sections)
+    ? vault.sections
+    : [];
+  return {
+    ...raw,
+    vault: {
+      ...vault,
+      version: 3,
+      sections: sections.map((section: unknown) => {
+        if (
+          !isRecord(section) ||
+          section.type !== "awards" ||
+          !globalThis.Array.isArray(section.items)
+        ) {
+          return section;
+        }
+        return {
+          ...section,
+          items: section.items.map((item: unknown) => {
+            if (!isRecord(item) || !isRecord(item.fields)) {
+              return item;
+            }
+            const date = item.fields.date;
+            return typeof date === "string"
+              ? {
+                  ...item,
+                  fields: { ...item.fields, date: awardDateToDay(date) },
+                }
+              : item;
+          }),
+        };
+      }),
+    },
+  };
+};
+
+/** Version 2 to 3 (second part): skills have no "years" any more, so a stored value is dropped */
+export const dropSkillYears: VaultMigration = (raw) => {
+  const vault = isRecord(raw.vault) ? raw.vault : {};
+  const sections = globalThis.Array.isArray(vault.sections)
+    ? vault.sections
+    : [];
+  return {
+    ...raw,
+    vault: {
+      ...vault,
+      version: 3,
+      sections: sections.map((section: unknown) => {
+        if (!isRecord(section) || !globalThis.Array.isArray(section.items)) {
+          return section;
+        }
+        return {
+          ...section,
+          items: section.items.map((item: unknown) => {
+            if (!isRecord(item) || !globalThis.Array.isArray(item.bullets)) {
+              return item;
+            }
+            return {
+              ...item,
+              bullets: item.bullets.map((bullet: unknown) => {
+                if (!isRecord(bullet) || !("years" in bullet)) {
+                  return bullet;
+                }
+                const { years: _years, ...rest } = bullet;
+                return rest;
+              }),
+            };
+          }),
+        };
+      }),
+    },
+  };
+};
+
 /** Key N migrates the vault from version N to N+1. */
 const VAULT_MIGRATIONS: Record<number, VaultMigration> = {
   1: foldBulletsIntoDescriptions,
+  2: (raw) => dropSkillYears(awardDatesToDays(raw) as Record<string, unknown>),
 };
 
 /** A legacy file is converted to this vault version first, then the chain brings it up to date */

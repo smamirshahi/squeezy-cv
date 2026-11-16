@@ -135,9 +135,9 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         {
           key: "date",
           label: "Date",
-          kind: "text",
+          kind: "month",
           span: 1,
-          hint: 'Month and year, or just the year, e.g. "Mar 2024" or "2024"',
+          hint: "Month and year of the award",
         },
         {
           key: "description",
@@ -251,6 +251,20 @@ export function toMonthValue(iso: string | undefined): string {
 /** A month input's "2021-03" as the stored ISO day; empty stays empty */
 export function fromMonthValue(month: string): string {
   return /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : "";
+}
+
+/** A stored date as the ISO day the month picker writes ("2024-03-01") */
+export function isStoredDay(value: string | undefined): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
+}
+
+/** A date for display: a stored day goes through `formatDay`; an older free text stays as it is */
+export function formatStoredDate(
+  value: string | undefined,
+  formatDay: (day: string) => string
+): string {
+  const text = value?.trim() ?? "";
+  return isStoredDay(text) ? formatDay(text) : text;
 }
 
 /** Work mode choices of an experience or education item (optional; stored as the value) */
