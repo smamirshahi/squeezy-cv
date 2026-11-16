@@ -26,8 +26,9 @@ describe("migration guard", () => {
   );
 
   it.each(KINDS)("%s without meta still opens, without a notice", (kind) => {
-    const { file, notice } = upgradeFile({ version: 1, id: "x" }, kind);
-    expect(file).toEqual({ version: 1, id: "x" });
+    const version = MIGRATION_CHAINS[kind].current;
+    const { file, notice } = upgradeFile({ version, id: "x" }, kind);
+    expect(file).toEqual({ version, id: "x" });
     expect(notice).toBeUndefined();
   });
 

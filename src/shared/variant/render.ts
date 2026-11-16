@@ -15,6 +15,7 @@ import {
 } from "@custom-types/vault-types";
 import { HEADER_IDS } from "@shared/vault/default-vault";
 import { reconcileStructure } from "@shared/vault/page-structure";
+import { orderForTemplate } from "@shared/variant/entry-order";
 
 interface RenderedBullet {
   id: string;
@@ -283,11 +284,20 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
       variant.selection,
       isSkills ? variant.skillMinLevel : undefined
     );
+    const hasJobOrder = section.items.some(
+      (item) => variant.selection[item.id]?.order !== undefined
+    );
+    const ordered = orderForTemplate(
+      section.type,
+      grouped,
+      variant.style,
+      hasJobOrder
+    );
     const items =
       isSkills && variant.skillGroupBy === "level"
-        ? flattenSkills(grouped)
+        ? flattenSkills(ordered)
         : isSkills
-          ? grouped.map((item) =>
+          ? ordered.map((item) =>
               // an order the job has chosen for this group wins over the level order
               Object.values(variant.selection[item.id]?.bullets ?? {}).some(
                 (choice) => choice.order !== undefined
@@ -295,7 +305,7 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
                 ? item
                 : sortSkillsByLevel(item)
             )
-          : grouped;
+          : ordered;
     // "References available on request" needs no entries, so the section stays without any
     const isOnRequestLine =
       section.type === "references" && variant.style.isReferencesOnRequest;

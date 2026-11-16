@@ -2,21 +2,25 @@ import { Grid } from "@components/ui";
 import { GAP_PX, spaced } from "@custom-styles/custom-styles";
 import { RenderedSection } from "@shared/variant/render";
 import { formatCitation } from "@shared/vault/citation";
-import { normaliseLink } from "@shared/vault/link-utils";
 import { useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { vaultSelector } from "@store/vault/vault-slice";
 import { CvBlock } from "@components/cv-block";
+import { CvCitation } from "@components/cv-citation";
 import { CvTypography } from "@components/cv-typography";
 
 interface Props {
   section: RenderedSection;
 }
 
-/** Publications: one line per paper in the citation style of the template, linked when it has a link */
+/** Publications: one line per paper in the citation style of the template; the link is visible text at the end */
 export function PublicationsPreviewPage({
   section,
 }: Props): JSX.Element | null {
-  const { citationStyle } = useAppSelector(styleSelector);
+  const { citationStyle, publicationLinks, highlightOwnName, maxAuthors } =
+    useAppSelector(styleSelector);
+  const { profile } = useAppSelector(vaultSelector);
+  const ownName = profile.citationName?.trim() || profile.fullName;
 
   if (section.items.length === 0) {
     return null;
@@ -46,11 +50,15 @@ export function PublicationsPreviewPage({
           sx={{ mb: spaced(GAP_PX.item) }}
         >
           <CvBlock>
-            <CvTypography
-              variant="bulletText"
+            <CvCitation
               isEmphasised={item.emphasis === "high"}
-              text={formatCitation(item.fields, citationStyle)}
-              href={normaliseLink(item.fields.link)}
+              segments={formatCitation(item.fields, {
+                style: citationStyle,
+                links: publicationLinks,
+                highlightOwnName,
+                maxAuthors,
+                ownName,
+              })}
             />
           </CvBlock>
         </Grid>

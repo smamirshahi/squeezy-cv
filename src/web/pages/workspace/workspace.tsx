@@ -383,7 +383,7 @@ function titleOf(route: ShellRoute, jobName: string): string {
     case "jobs":
       return `${titleOfJobsView(route.view)}${jobName ? ` · ${jobName}` : ""}`;
     case "templates":
-      return `Templates${route.tab === "templates" ? "" : " · Design"}`;
+      return `Templates${route.tab === "templates" ? "" : route.tab === "sections" ? " · Sections" : " · Design"}`;
     case "chat":
       return `Chat${jobName ? ` · ${jobName}` : ""}`;
     case "ai":

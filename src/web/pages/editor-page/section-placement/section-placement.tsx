@@ -21,11 +21,20 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { appSelector, updatePageStructure } from "@store/app/app-slice";
 import { activeVariantSelector } from "@store/jobs/jobs-slice";
 
-export function SectionPlacement(): JSX.Element {
+interface Props {
+  /**
+   * Template mode (Templates > Sections): every section of the template is listed (not only
+   * the ones the active job shows) and a row can be selected.
+   */
+  selection?: { selectedId: string; onSelect: (id: string) => void };
+}
+
+export function SectionPlacement({ selection }: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector(appSelector);
   const [pageStructure, setPageStructure] = useState<PageStructure>(structure);
-  const removed = useAppSelector(activeVariantSelector).hiddenSections ?? [];
+  const jobRemoved = useAppSelector(activeVariantSelector).hiddenSections ?? [];
+  const removed = selection ? [] : jobRemoved;
   const shown = (ids: string[]): string[] =>
     ids.filter((id) => !removed.includes(id));
   const hasColumns = structure.left.length > 0 || structure.right.length > 0;
@@ -82,6 +91,7 @@ export function SectionPlacement(): JSX.Element {
                 side="fullWidth"
                 itemIds={shown(pageStructure.fullWidth)}
                 hasColumns
+                selection={selection}
               />
             </Box>
             <SortableColumn
@@ -89,12 +99,14 @@ export function SectionPlacement(): JSX.Element {
               side="left"
               itemIds={shown(pageStructure.left)}
               hasColumns
+              selection={selection}
             />
             <SortableColumn
               title="Right column"
               side="right"
               itemIds={shown(pageStructure.right)}
               hasColumns
+              selection={selection}
             />
           </>
         ) : (
@@ -104,6 +116,7 @@ export function SectionPlacement(): JSX.Element {
             side="fullWidth"
             itemIds={shown(pageStructure.fullWidth)}
             hasColumns={false}
+            selection={selection}
           />
         )}
       </Box>

@@ -40,7 +40,7 @@ export function ContactInfoPreviewPage({
   const { shouldShowFullContactLinks } = useAppSelector(styleSelector);
 
   return (
-    <Grid container direction="row">
+    <Grid container direction="row" data-cv-header="contactInfo">
       <IconWithText
         variant="bulletText"
         icon={AlternateEmailIcon}

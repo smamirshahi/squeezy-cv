@@ -91,6 +91,36 @@ const cvDataSlice = createSlice({
       state.style.citationStyle = action.payload;
     },
 
+    setPublicationLinks(
+      state,
+      action: PayloadAction<Style["publicationLinks"]>
+    ) {
+      state.style.publicationLinks = action.payload;
+    },
+
+    setHighlightOwnName(state, action: PayloadAction<boolean>) {
+      state.style.highlightOwnName = action.payload;
+    },
+
+    setMaxAuthors(state, action: PayloadAction<Style["maxAuthors"]>) {
+      state.style.maxAuthors = action.payload;
+    },
+
+    setPublicationOrder(
+      state,
+      action: PayloadAction<Style["publicationOrder"]>
+    ) {
+      state.style.publicationOrder = action.payload;
+    },
+
+    setExperienceOrder(state, action: PayloadAction<Style["experienceOrder"]>) {
+      state.style.experienceOrder = action.payload;
+    },
+
+    setEducationOrder(state, action: PayloadAction<Style["educationOrder"]>) {
+      state.style.educationOrder = action.payload;
+    },
+
     setShouldShowIcons(state, action: PayloadAction<boolean>) {
       state.style.shouldShowIcons = action.payload;
     },
@@ -184,6 +214,12 @@ export const {
   setHasHeadingLine,
   setShouldShowIcons,
   setCitationStyle,
+  setPublicationLinks,
+  setHighlightOwnName,
+  setMaxAuthors,
+  setPublicationOrder,
+  setExperienceOrder,
+  setEducationOrder,
   setPaperMargin,
   setTypography,
   setColors,

@@ -5,7 +5,7 @@
 type JobsView = "page" | "settings" | "details" | "ats";
 
 /** The pages of the Templates tool */
-export type TemplatesTab = "templates" | "design";
+export type TemplatesTab = "templates" | "sections" | "design";
 
 /** Where the user is. The address is the source of truth; see `parseRoute` / `formatRoute`. */
 export type Route =
@@ -20,7 +20,7 @@ export type Route =
   | { kind: "printApplication"; id: string }
   | { kind: "notFound"; path: string };
 
-const TEMPLATE_TABS: TemplatesTab[] = ["templates", "design"];
+const TEMPLATE_TABS: TemplatesTab[] = ["templates", "sections", "design"];
 
 /** The routes that are pages of the workspace (they share the rail and the top bar) */
 export type WorkspaceRoute = Extract<
@@ -88,12 +88,14 @@ export function parseRoute(pathname: string, search = ""): Route {
             view: jobsViewOf(params.get("view")),
           };
     case "templates": {
-      // `/templates`, `/templates/<tab>` (no template named yet) or `/templates/<id>/design`
+      // `/templates`, `/templates/<tab>` (no template named yet) or `/templates/<id>/<tab>`
       const tab = second ?? "templates";
       if (third === undefined && TEMPLATE_TABS.some((t) => t === tab)) {
         return { kind: "templates", tab: tab as TemplatesTab };
       }
-      return second !== undefined && third === "design" && rest.length === 0
+      return second !== undefined &&
+        (third === "design" || third === "sections") &&
+        rest.length === 0
         ? { kind: "templates", tab: third, templateId: second }
         : notFound;
     }

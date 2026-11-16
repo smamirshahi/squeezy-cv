@@ -8,7 +8,7 @@ import {
 import { splitVariant } from "@shared/variant/template-job";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { readPdf } from "@e2e/read-pdf";
-import { longFile, makeExperience } from "@e2e/fixtures";
+import { longFile, makeExperience, sampleFile } from "@e2e/fixtures";
 
 /** A4 in points, with a little tolerance for rounding */
 const A4_PT = { width: 595.28, height: 841.89 };
@@ -144,5 +144,63 @@ describe("PDF of a job (real Chromium)", () => {
     expect(a.text).not.toContain("Engineer Number 1");
     expect(b.text).toContain("Engineer Number 1");
     expect(b.text).not.toContain("Engineer Number 2");
+  });
+});
+
+describe("PDF of publications (#476)", () => {
+  let pubsApp: RunningApp;
+
+  beforeAll(async () => {
+    pubsApp = await startApp();
+    const pubsFile = sampleFile();
+    pubsFile.vault.sections.push({
+      id: "pubs",
+      type: "publications",
+      title: "Publications",
+      items: [
+        {
+          id: "pub-old",
+          fields: {
+            title: "Older paper",
+            authors: "Doe, J., Shahi, M.",
+            journal: "Journal of Old Things",
+            year: "2019",
+          },
+          bullets: [],
+          tags: [],
+          shouldShow: true,
+        },
+        {
+          id: "pub-new",
+          fields: {
+            title: "Newer paper",
+            authors: "Doe, J., Shahi, M.",
+            journal: "Journal of New Things",
+            year: "2024",
+            link: "10.1234/abcd",
+          },
+          bullets: [],
+          tags: [],
+          shouldShow: true,
+        },
+      ],
+    });
+    pubsFile.vault.profile.citationName = "Doe, J.";
+    const variant = createVariant(pubsFile.vault, pubsFile.style, "pubs", "P");
+    variant.layout.fullWidth.push("pubs");
+    await pubsApp.seed(pubsFile, [variant]);
+  });
+
+  afterAll(async () => {
+    await pubsApp?.close();
+  });
+
+  it("has the link as visible text at the end of the line, and the newest first", async () => {
+    const pdf = await readPdf(await pubsApp.pdf("pubs"));
+    expect(pdf.text).toContain("doi.org/10.1234/abcd");
+    expect(pdf.text.indexOf("Newer paper")).toBeGreaterThan(-1);
+    expect(pdf.text.indexOf("Newer paper")).toBeLessThan(
+      pdf.text.indexOf("Older paper")
+    );
   });
 });

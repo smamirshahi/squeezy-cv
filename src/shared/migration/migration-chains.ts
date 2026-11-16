@@ -25,13 +25,43 @@ interface Chain {
   steps: MigrationStep[];
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Template 1 to 2 (#477): work experience and education get an order of their own, and
+ * publications get their link, name, author and order settings. Missing values were drawn the
+ * way these defaults say, so a template keeps its look.
+ */
+const TEMPLATE_V1_TO_V2: MigrationStep = {
+  kind: "template",
+  fromVersion: 1,
+  toVersion: 2,
+  migrate: (json) => {
+    const style = isPlainObject(json.style) ? json.style : {};
+    return {
+      ...json,
+      style: {
+        publicationLinks: "end",
+        highlightOwnName: true,
+        maxAuthors: 6,
+        publicationOrder: "newest",
+        experienceOrder: "newest",
+        educationOrder: "newest",
+        ...style,
+      },
+    };
+  },
+};
+
 /**
  * The single place where the migration chains of the simple file kinds are registered. Every chain starts
  * empty at version 1. `migration-guard.test.ts` fails when `current` has no step from the version before.
  */
 export const MIGRATION_CHAINS: Record<ChainKind, Chain> = {
   job: { current: CURRENT_JOB_VERSION, steps: [] },
-  template: { current: CURRENT_TEMPLATE_VERSION, steps: [] },
+  template: { current: CURRENT_TEMPLATE_VERSION, steps: [TEMPLATE_V1_TO_V2] },
   application: { current: CURRENT_APPLICATION_VERSION, steps: [] },
   candidate: { current: CURRENT_CANDIDATE_VERSION, steps: [] },
 };

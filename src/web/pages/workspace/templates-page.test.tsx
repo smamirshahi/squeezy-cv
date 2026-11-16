@@ -48,7 +48,7 @@ describe("templates page", () => {
     expect(screen.getByTestId("sample-cv").textContent).toContain("Jane Doe");
   });
 
-  it("with no template: no cards, and the Design link is disabled", () => {
+  it("with no template: no cards, and the Sections and Design links are disabled", () => {
     const store: AppStore = configureStore({ reducer: rootReducer });
     store.dispatch(setVault(migrateCvFile(sample).vault));
     store.dispatch(markPlaceholder());
@@ -61,8 +61,10 @@ describe("templates page", () => {
     expect(
       screen.getByRole("button", { name: "Create template" })
     ).toBeTruthy();
-    const design = screen.getByText("Design").closest("a");
-    expect(design?.getAttribute("aria-disabled")).toBe("true");
-    expect(screen.getByText("Create a template first")).toBeTruthy();
+    for (const name of ["Sections", "Design"]) {
+      const link = screen.getByText(name).closest("a");
+      expect(link?.getAttribute("aria-disabled")).toBe("true");
+    }
+    expect(screen.getAllByText("Create a template first")).toHaveLength(2);
   });
 });

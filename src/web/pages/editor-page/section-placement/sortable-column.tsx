@@ -23,6 +23,9 @@ interface Props {
 
   /** Whether the CV has more than one column */
   hasColumns: boolean;
+
+  /** Template mode: rows can be selected (see `SortableItem`) */
+  selection?: { selectedId: string; onSelect: (id: string) => void };
 }
 
 /** A column representing sortable items */
@@ -32,6 +35,7 @@ export function SortableColumn({
   itemIds,
   hint,
   hasColumns,
+  selection,
 }: Props): JSX.Element {
   const { setNodeRef, isOver } = useDroppable({ id: side });
 
@@ -87,6 +91,12 @@ export function SortableColumn({
               itemId={id}
               side={side}
               hasColumns={hasColumns}
+              selection={
+                selection && {
+                  isSelected: selection.selectedId === id,
+                  onSelect: () => selection.onSelect(id),
+                }
+              }
             />
           ))}
         </Box>

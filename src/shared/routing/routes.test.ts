@@ -56,6 +56,15 @@ describe("parseRoute", () => {
       tab: "design",
       templateId: "a b",
     });
+    expect(parseRoute("/templates/sections")).toEqual({
+      kind: "templates",
+      tab: "sections",
+    });
+    expect(parseRoute("/templates/t1/sections")).toEqual({
+      kind: "templates",
+      tab: "sections",
+      templateId: "t1",
+    });
     // the earlier Page layout and Style settings addresses no longer exist
     expect(parseRoute("/templates/t1/layout").kind).toBe("notFound");
     expect(parseRoute("/templates/style").kind).toBe("notFound");
@@ -116,6 +125,8 @@ describe("formatRoute", () => {
     { kind: "jobs", jobId: "main", view: "page" },
     { kind: "jobs", jobId: "main", view: "settings" },
     { kind: "templates", tab: "templates" },
+    { kind: "templates", tab: "sections" },
+    { kind: "templates", tab: "sections", templateId: "t1" },
     { kind: "templates", tab: "design" },
     { kind: "templates", tab: "design", templateId: "t1" },
     { kind: "templates", tab: "design", templateId: "a b/c" },
