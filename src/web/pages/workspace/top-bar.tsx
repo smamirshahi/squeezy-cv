@@ -16,8 +16,10 @@ import {
 } from "@pages/workspace/how-it-works-dialog";
 import {
   hasSeenTutorial,
+  hasSeenWelcome,
   isAutoStartOff,
   markTutorialSeen,
+  markWelcomeSeen,
   type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
 import { FeedbackDialog } from "@pages/workspace/feedback-dialog";
@@ -265,6 +267,12 @@ export function TopBar(): JSX.Element {
   // The first time a page is opened, its tutorial shows; after that only the buttons do
   const visited = tutorialOfRoute(route.kind);
   useEffect(() => {
+    // The very first open of the app shows the Welcome overview instead
+    if (!isAutoStartOff() && !hasSeenWelcome()) {
+      markWelcomeSeen();
+      setHelp({ tutorial: "overview", step: 0 });
+      return;
+    }
     if (visited && !isAutoStartOff() && !hasSeenTutorial(visited)) {
       markTutorialSeen(visited);
       setHelp({ tutorial: visited, step: 0 });

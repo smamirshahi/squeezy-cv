@@ -28,6 +28,29 @@ export function markTutorialSeen(id: FirstVisitTutorial): void {
   }
 }
 
+const WELCOME_KEY = "squeezy-cv-welcome-seen";
+
+/** Whether the Welcome overview was shown already; anyone who has seen a page tutorial counts as welcomed */
+export function hasSeenWelcome(): boolean {
+  try {
+    return (
+      localStorage.getItem(WELCOME_KEY) === "1" ||
+      (Object.keys(KEYS) as FirstVisitTutorial[]).some(hasSeenTutorial)
+    );
+  } catch {
+    // Blocked storage: do not nag on every visit
+    return true;
+  }
+}
+
+export function markWelcomeSeen(): void {
+  try {
+    localStorage.setItem(WELCOME_KEY, "1");
+  } catch {
+    // Nothing to do: the welcome then simply stays hidden
+  }
+}
+
 /** Every tutorial in the dialog (the overview does not open by itself) */
 export type TutorialKey = "overview" | FirstVisitTutorial;
 
