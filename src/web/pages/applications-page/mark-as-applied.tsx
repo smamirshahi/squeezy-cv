@@ -52,14 +52,11 @@ function emptyForm(): Form {
  */
 export function MarkAsApplied(): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const isDemo = useAppSelector((s) => s.persistence.status === "demo");
   return (
     <>
       <Button
         sx={{ height: "40px", minWidth: "auto", px: 1 }}
         color="neutral"
-        disabled={isDemo}
-        title={isDemo ? "Not available in the demo" : undefined}
         onClick={() => setIsOpen(true)}
         startIcon={<WorkOutlineIcon />}
       >

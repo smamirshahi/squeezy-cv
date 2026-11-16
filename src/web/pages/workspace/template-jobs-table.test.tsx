@@ -2,13 +2,20 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { ApplicationSummary } from "@custom-types/application-types";
-import { Job } from "@custom-types/job-types";
+import { CURRENT_JOB_VERSION, Job } from "@custom-types/job-types";
 import { TemplateJobsTable } from "@pages/workspace/template-jobs-table";
-import { buildDemo } from "@shared/demo/demo-data";
 
 afterEach(cleanup);
 
-const [baseJob] = buildDemo().jobs;
+const baseJob: Job = {
+  id: "base",
+  version: CURRENT_JOB_VERSION,
+  name: "Base",
+  templateId: "t",
+  createdAt: "2026-11-01",
+  tone: "neutral",
+  selection: {},
+};
 const jobs: Job[] = [
   { ...baseJob, id: "j1", name: "Acme dev", createdAt: "2026-11-01" },
   { ...baseJob, id: "j2", name: "Beta dev", createdAt: "2026-11-05" },

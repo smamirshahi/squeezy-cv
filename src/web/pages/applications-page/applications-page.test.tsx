@@ -22,7 +22,7 @@ import { migrateCvFile } from "@shared/vault/migrate-vault";
 
 const file = migrateCvFile(sample);
 
-/** The page reads the store (mark as applied, demo mode), so it is rendered inside one */
+/** The page reads the store (mark as applied), so it is rendered inside one */
 function renderPage(): ReturnType<typeof render> {
   return render(
     <Provider store={configureStore({ reducer: undoableReducer })}>

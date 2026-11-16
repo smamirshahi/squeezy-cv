@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Removed
+
+- Demo mode (#429): the "Try with demo data" button on the first-run screen, the made-up CV with two demo templates and a job, the Demo banner (Reset demo, Leave demo), the "Demo - not saved" label and the places that switched off PDF export, Mark as applied and AI actions in the demo. A new user now starts with an empty vault and the built-in blank layout; ready-made templates will come later. Your own data is not touched.
+
 ### Changed
 
 - Tutorial: the install hint now also names "Add to Home Screen" for iPhone and iPad and says installing makes it less likely that the browser clears your data; the section example reads "Publications" or "Skills"; the Apply picture shows real eye icons; the AI wording step and note are corrected; the Applications tutorial has plain headings instead of the big coloured name (#462).

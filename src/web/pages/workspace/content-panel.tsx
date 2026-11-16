@@ -38,7 +38,6 @@ export function ContentPanel(): JSX.Element {
   const sections = useAppSelector(sectionsSelector);
   const hidden = useAppSelector(activeVariantSelector).hiddenSections ?? [];
   const dispatch = useAppDispatch();
-  const isDemo = useAppSelector((s) => s.persistence.status === "demo");
   const jobs = useAppSelector(jobsSelector);
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const isPlaceholder = useAppSelector(isPlaceholderSelector);
@@ -245,8 +244,7 @@ export function ContentPanel(): JSX.Element {
               <Button
                 size="small"
                 variant="contained"
-                disabled={!job || isDemo}
-                title={isDemo ? "Not available in the demo" : undefined}
+                disabled={!job}
                 startIcon={<FileDownloadOutlinedIcon />}
                 onClick={() => setIsExportOpen(true)}
               >

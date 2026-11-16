@@ -333,7 +333,6 @@ export function JobDetailsPage(): JSX.Element {
   const activeJobId = useAppSelector((s) => s.jobs.activeJobId);
   const vault = useAppSelector(vaultSelector);
   const style = useAppSelector(styleSelector);
-  const isDemo = useAppSelector((s) => s.persistence.status === "demo");
   const viewport = useViewport();
   const isDesktop = viewport === "desktop";
   const isPhone = viewport === "phone";
@@ -525,8 +524,7 @@ export function JobDetailsPage(): JSX.Element {
       color="neutral"
       fullWidth
       startIcon={<WorkOutlineIcon />}
-      disabled={!job || isDemo}
-      title={isDemo ? "Not available in the demo" : undefined}
+      disabled={!job}
       onClick={() => setIsApplying(true)}
     >
       I applied elsewhere
