@@ -6,7 +6,7 @@ user's browser (IndexedDB). It is hosted on **Cloudflare Pages**, project name
 
 > **The address must not change.** IndexedDB data belongs to the origin (the exact address).
 > A different address means an empty app for every user, unless they download a backup first
-> (#447). The address moved once, from `mohammad-cv-builder.pages.dev` to `squeezy-cv.pages.dev`,
+> (#447). The address changed once,
 > when the app was renamed (#467, #480); a Pages project cannot be renamed. If a custom domain is
 > wanted later, set it up before real users arrive and keep it. Preview deploys (one per pull
 > request) are other origins, so they start empty; that is normal.
@@ -53,7 +53,7 @@ who can open the page. Users enter their own AI key in the app later (#449).
 
 - Cloudflare Pages project **`squeezy-cv`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://squeezy-cv.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, expires after one year: renew it) and `CLOUDFLARE_ACCOUNT_ID` are used by `deploy.yml`. They are never in the repo or in chat.
-- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "squeezy-cv - Cloudflare Pages" (renamed from "mohammad-cv-builder - Cloudflare Pages" in #483) (created by the project's "Restrict previews" button). Destinations: `*.squeezy-cv.pages.dev` (previews) and `squeezy-cv.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
+- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "squeezy-cv - Cloudflare Pages" (created by the project's "Restrict previews" button). Destinations: `*.squeezy-cv.pages.dev` (previews) and `squeezy-cv.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
 - The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=squeezy-cv --branch=main`). Normal deploys come from `deploy.yml`.
 
 ## Who can log in
