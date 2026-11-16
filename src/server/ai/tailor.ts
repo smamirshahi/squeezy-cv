@@ -39,7 +39,11 @@ export function buildRefs(vault: Vault): CvRefs {
   return refs;
 }
 
-/** What the model is told about the CV: short names and text. Nothing it does not need. */
+/**
+ * What the model is told about the CV: short names and text. Nothing it does not need. The
+ * References section is left out whole: the people in it (names, emails, phone numbers) are
+ * other people's personal data, and no AI action needs them.
+ */
 export function describeCv(
   vault: Vault,
   refs: CvRefs = buildRefs(vault)
@@ -50,21 +54,23 @@ export function describeCv(
     [...refs.bullets].map(([ref, value]) => [value.bulletId, ref])
   );
   return {
-    sections: vault.sections.map((section) => ({
-      id: sectionRef.get(section.id),
-      title: section.title,
-      type: section.type,
-      items: section.items.map((item) => ({
-        id: itemRef.get(item.id),
-        label: getItemLabel(item),
-        fields: item.fields,
-        bullets: item.bullets.map((bullet) => ({
-          id: bulletRef.get(bullet.id),
-          text: bullet.text,
-          ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
+    sections: vault.sections
+      .filter((section) => section.type !== "references")
+      .map((section) => ({
+        id: sectionRef.get(section.id),
+        title: section.title,
+        type: section.type,
+        items: section.items.map((item) => ({
+          id: itemRef.get(item.id),
+          label: getItemLabel(item),
+          fields: item.fields,
+          bullets: item.bullets.map((bullet) => ({
+            id: bulletRef.get(bullet.id),
+            text: bullet.text,
+            ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
+          })),
         })),
       })),
-    })),
   };
 }
 

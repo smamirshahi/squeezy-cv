@@ -296,7 +296,10 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
                 : sortSkillsByLevel(item)
             )
           : grouped;
-    return items.length === 0
+    // "References available on request" needs no entries, so the section stays without any
+    const isOnRequestLine =
+      section.type === "references" && variant.style.isReferencesOnRequest;
+    return items.length === 0 && !isOnRequestLine
       ? []
       : [
           {

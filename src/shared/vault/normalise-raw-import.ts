@@ -60,9 +60,11 @@ export function normaliseRawImport(value: unknown): unknown {
   const sections = (Array.isArray(value.sections) ? value.sections : [])
     .filter(isObject)
     .map((section) => {
-      const type = SectionTypeSchema.guard(section.type)
-        ? section.type
-        : "custom";
+      // the model is never asked for references (other people's details), so one it makes up is a custom section
+      const type =
+        SectionTypeSchema.guard(section.type) && section.type !== "references"
+          ? section.type
+          : "custom";
       const items = (Array.isArray(section.items) ? section.items : [])
         .filter(isObject)
         .map((item) => {

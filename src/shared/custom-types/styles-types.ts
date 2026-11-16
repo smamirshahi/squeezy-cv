@@ -93,6 +93,12 @@ export const StyleSchema = Object({
   /** Whether the profile photo is drawn in the header; missing = shown */
   shouldShowPhoto: Boolean.optional(),
 
+  /** Whether each reference shows its email and phone (other people's details); missing = hidden */
+  shouldShowReferenceContacts: Boolean.optional(),
+
+  /** Whether the References section is only the line "References available on request" instead of the list; missing = the list */
+  isReferencesOnRequest: Boolean.optional(),
+
   /** Whether the right-to-work line (from the profile) is shown under the name */
   shouldShowRightToWork: Boolean.optional(),
 

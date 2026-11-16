@@ -13,6 +13,7 @@ import {
   AwardsPreviewPage,
   InterestsPreviewPage,
 } from "@pages/preview-page/awards-interests-preview-page";
+import { ReferencesPreviewPage } from "@pages/preview-page/references-preview-page";
 import { PublicationsPreviewPage } from "@pages/preview-page/publications-preview-page";
 import { GenericSectionPreviewPage } from "@pages/preview-page/generic-section-preview-page";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
@@ -45,6 +46,8 @@ function renderPart(part: RenderedPart): JSX.Element | null {
           return <AwardsPreviewPage key={part.id} section={part} />;
         case "interests":
           return <InterestsPreviewPage key={part.id} section={part} />;
+        case "references":
+          return <ReferencesPreviewPage key={part.id} section={part} />;
         case "skills":
           return <SkillsPreviewPage key={part.id} section={part} />;
         default:

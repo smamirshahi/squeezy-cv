@@ -73,6 +73,10 @@ export async function scoreSection(
     warnings.push(message);
   };
   const scores: ScoreResult["scores"] = [];
+  if (section.type === "references") {
+    // other people's details never go to a model; there is nothing to score here
+    return { scores, warnings };
+  }
   const seen = new Set<string>();
   const entries = section.items.map((item, index) => ({
     ref: `i${index + 1}`,
