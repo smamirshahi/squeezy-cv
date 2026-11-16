@@ -24,6 +24,8 @@ import {
   setSectionSpacing,
   setShouldShowRightToWork,
   setShouldShowPhoto,
+  setShouldShowReferenceContacts,
+  setIsReferencesOnRequest,
   setShouldShowLinks,
   setShouldShowNationality,
   setShouldShowMaritalStatus,
@@ -45,6 +47,8 @@ export function EditorTypography(): JSX.Element {
     shouldShowNationality,
     shouldShowMaritalStatus,
     shouldShowGender,
+    shouldShowReferenceContacts,
+    isReferencesOnRequest,
     sectionSpacing,
     hasHeadingLine,
     shouldShowIcons,
@@ -88,6 +92,27 @@ export function EditorTypography(): JSX.Element {
       label: "Right to work",
       checked: shouldShowRightToWork ?? false,
       onChange: (value) => dispatch(setShouldShowRightToWork(value)),
+    },
+  ];
+
+  /** How the References section is drawn, one checkbox each */
+  const referenceOptions: {
+    label: string;
+    checked: boolean;
+    onChange: (value: boolean) => void;
+    info: string;
+  }[] = [
+    {
+      label: "Contact details (email, phone)",
+      checked: shouldShowReferenceContacts ?? false,
+      onChange: (value) => dispatch(setShouldShowReferenceContacts(value)),
+      info: "These are other people's details, so they are hidden unless you turn this on. They are never sent to AI.",
+    },
+    {
+      label: "Only say “References available on request”",
+      checked: isReferencesOnRequest ?? false,
+      onChange: (value) => dispatch(setIsReferencesOnRequest(value)),
+      info: "Replaces the list of people with one line. The References section still has to be in the vault and placed on the template.",
     },
   ];
 
@@ -262,6 +287,59 @@ export function EditorTypography(): JSX.Element {
                     />
                   </Tooltip>
                 )}
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box
+          component="fieldset"
+          sx={{ border: 0, p: 0, m: 0, mt: 1.5, minWidth: 0 }}
+        >
+          <Typography
+            component="legend"
+            sx={{
+              mb: 0.5,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: ".07em",
+              textTransform: "uppercase",
+              color: WORKSPACE_COLORS.muted,
+            }}
+          >
+            References
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                sm: "repeat(2, minmax(0, 1fr))",
+              },
+              columnGap: 1.5,
+            }}
+          >
+            {referenceOptions.map(({ label, checked, onChange, info }) => (
+              <Box
+                key={label}
+                sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
+              >
+                <FormControlLabel
+                  sx={{ mr: 0.5 }}
+                  label={label}
+                  control={
+                    <Checkbox
+                      checked={checked}
+                      onChange={(event) => onChange(event.target.checked)}
+                    />
+                  }
+                />
+                <Tooltip title={info}>
+                  <InfoOutlined
+                    tabIndex={0}
+                    aria-label={`About ${label.toLowerCase()}`}
+                    sx={{ fontSize: 16, color: WORKSPACE_COLORS.muted }}
+                  />
+                </Tooltip>
               </Box>
             ))}
           </Box>

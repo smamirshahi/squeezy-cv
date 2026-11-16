@@ -9,6 +9,7 @@ const LABEL_FIELDS = [
   "company",
   "institute",
   "institution",
+  "name",
   "text",
 ];
 const MAX_LABEL_LENGTH = 60;
@@ -49,6 +50,7 @@ const ORGANISATION_FIELDS = [
   "company",
   "institute",
   "institution",
+  "organisation",
   "subtitle",
   "issuer",
   "journal",

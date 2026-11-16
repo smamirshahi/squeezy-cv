@@ -12,6 +12,7 @@ export const SECTION_TYPE_LABELS: Record<SectionType, string> = {
   volunteering: "Volunteering",
   awards: "Awards",
   interests: "Personal interests",
+  references: "References",
   custom: "Custom",
   unsorted: "Unsorted",
 };
@@ -68,6 +69,12 @@ export const ADD_SECTION_OPTIONS: {
     type: "interests",
     label: "Personal interests",
     description: "A short list or one line, e.g. Cycling, puzzle design",
+  },
+  {
+    type: "references",
+    label: "References",
+    description:
+      "People who can vouch for you: name, position, relationship, contact",
   },
   {
     type: "custom",

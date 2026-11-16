@@ -171,6 +171,39 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           hint: 'One phrase, e.g. "Club cyclist, rides 100 km on weekends"',
         },
       ];
+    case "references":
+      return [
+        { key: "name", label: "Name", kind: "text", span: 2 },
+        {
+          key: "position",
+          label: "Position",
+          kind: "text",
+          span: 1,
+          hint: 'Their job title, e.g. "Head of Engineering"',
+        },
+        { key: "organisation", label: "Organisation", kind: "text", span: 2 },
+        {
+          key: "relationship",
+          label: "Relationship",
+          kind: "text",
+          span: 1,
+          hint: 'How they know your work, e.g. "Line manager" or "PhD supervisor"',
+        },
+        {
+          key: "email",
+          label: "Email (optional)",
+          kind: "text",
+          span: 2,
+          hint: "Shown on the CV only when the template shows reference contact details. Never sent to AI.",
+        },
+        {
+          key: "phone",
+          label: "Phone (optional)",
+          kind: "text",
+          span: 1,
+          hint: "Shown on the CV only when the template shows reference contact details. Never sent to AI.",
+        },
+      ];
     case "projects":
       return [
         { key: "title", label: "Title", kind: "text", span: 2 },

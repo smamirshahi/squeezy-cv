@@ -13,7 +13,7 @@ interface Props {
   section: RenderedSection;
 }
 
-function SectionFrame({
+export function SectionFrame({
   section,
   children,
 }: Props & { children: React.ReactNode }): JSX.Element {

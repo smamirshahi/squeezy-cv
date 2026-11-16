@@ -78,6 +78,15 @@ function newItemFields(section: Section): Record<string, string> {
       return { title: "", issuer: "", date: "", description: "", link: "" };
     case "interests":
       return { title: "", detail: "" };
+    case "references":
+      return {
+        name: "",
+        position: "",
+        organisation: "",
+        relationship: "",
+        email: "",
+        phone: "",
+      };
     case "publications":
       return { title: "", authors: "", journal: "", year: "", link: "" };
     default:
@@ -95,6 +104,7 @@ const ADD_LABELS: Partial<Record<Section["type"], string>> = {
   experience: "Add new experience",
   education: "Add new education",
   skills: "Add new skill category",
+  references: "Add new reference",
 };
 
 /** How a section can be sorted in the list. The first option is the vault's own order (newest first). */
@@ -174,6 +184,10 @@ const SORT_OPTIONS: Partial<Record<Section["type"], SortOption[]>> = {
   interests: [
     ORDER,
     { key: "title", label: "Interest", kind: "text", text: field("title") },
+  ],
+  references: [
+    ORDER,
+    { key: "name", label: "Name", kind: "text", text: field("name") },
   ],
   projects: [ORDER, DATES, TITLE],
   certifications: [ORDER, DATES, TITLE],
@@ -342,6 +356,24 @@ function tableOf(
             key: "detail",
             label: "Detail",
             value: (_p, item) => item.fields.detail ?? "",
+            isMuted: true,
+          },
+        ],
+      };
+    case "references":
+      return {
+        template: THREE_COLUMNS,
+        columns: [
+          { key: "name", label: "Name", value: (p) => p.title },
+          {
+            key: "organisation",
+            label: "Organisation",
+            value: (p) => p.organisation,
+          },
+          {
+            key: "position",
+            label: "Position",
+            value: (_p, item) => item.fields.position ?? "",
             isMuted: true,
           },
         ],
