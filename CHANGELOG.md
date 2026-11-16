@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CV Builder are written here. The format follows
+All notable changes to Squeezy CV (formerly CV Builder) are written here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the version numbers
 follow [Semantic Versioning](https://semver.org/) (while the major number is 0,
 a minor bump may change the saved data format; the migration chain reads old files).
@@ -8,6 +8,10 @@ a minor bump may change the saved data format; the migration chain reads old fil
 How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
+
+### Changed
+
+- The app and repo are renamed from CV Builder to **Squeezy CV** (#467), with a new lemon icon (a lemon-slice C with a drop falling on the V): favicon, PWA icons (192, 512, maskable), Apple touch icon, and the mark in the top bar and About dialog. Browser-mode storage keys (IndexedDB, localStorage) now start with `squeezy-cv`, so data saved in the browser under the old name is not read any more (back up first). The Cloudflare Pages project keeps its name `mohammad-cv-builder`.
 
 ### Added
 
@@ -412,11 +416,11 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/CV-Builder/compare/v0.7.0...HEAD
-[0.7.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/smamirshahi/CV-Builder/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/smamirshahi/CV-Builder/releases/tag/v0.1.0
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/smamirshahi/squeezy-cv/releases/tag/v0.1.0

@@ -70,7 +70,7 @@ async function seededPage() {
   await page.goto(`${webUrl}/robots.txt`);
   await page.evaluate(async (records) => {
     await new Promise<void>((resolve, reject) => {
-      const open = indexedDB.open("cv-builder", 1);
+      const open = indexedDB.open("squeezy-cv", 1);
       open.onupgradeneeded = () => open.result.createObjectStore("files");
       open.onerror = () => reject(open.error);
       open.onsuccess = () => {

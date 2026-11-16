@@ -94,7 +94,7 @@ export function cssVar(token: string): string {
   return `var(--${token})`;
 }
 
-const STORAGE_KEY = "cv-builder-theme";
+const STORAGE_KEY = "squeezy-cv-theme";
 const FONT_FAMILY =
   '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
 const BORDER_RADIUS_PX = 4;

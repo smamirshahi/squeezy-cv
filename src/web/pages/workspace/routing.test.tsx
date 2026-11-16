@@ -89,7 +89,7 @@ describe("routing in the workspace", () => {
   it("opens the section the address names", async () => {
     await open("/vault/education");
     expect(screen.getAllByLabelText("Degree").length).toBe(1);
-    expect(document.title).toBe("Vault · CV Builder");
+    expect(document.title).toBe("Vault · Squeezy CV");
   });
 
   it("shows the tool of each address", async () => {

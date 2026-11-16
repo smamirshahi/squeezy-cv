@@ -42,7 +42,7 @@ describe("export metadata", () => {
     const newer = {
       meta: { appVersion: "99.0.0", formatVersion: 1, kind: "job" },
     };
-    expect(() => assertNotNewer(newer)).toThrow(/made by CV Builder 99\.0\.0/);
+    expect(() => assertNotNewer(newer)).toThrow(/made by Squeezy CV 99\.0\.0/);
     expect(() => assertNotNewer(newer, "99.0.0")).not.toThrow();
   });
 

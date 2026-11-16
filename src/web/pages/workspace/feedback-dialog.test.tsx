@@ -176,7 +176,7 @@ describe("the feedback dialog", () => {
       fireEvent.click(sendButton());
       await screen.findByText(/Thanks, your note is/);
       expect(sent[0].appInfo).toMatch(
-        /^CV Builder \d+\.\d+\.\d+ · .+ · jobs page$/
+        /^Squeezy CV \d+\.\d+\.\d+ · .+ · jobs page$/
       );
       expect(sent[0].appInfo).not.toContain("Mozilla");
     });

@@ -47,7 +47,7 @@ export function MoreMenu(): JSX.Element {
       </IconButton>
       <Menu anchorEl={anchor} open={anchor !== null} onClose={close}>
         <MenuItem
-          aria-label="About CV Builder and its author"
+          aria-label="About Squeezy CV and its author"
           aria-haspopup="dialog"
           sx={{ minHeight: 44 }}
           onClick={() => {

@@ -39,11 +39,17 @@ export default defineConfig({
             // interrupted; the next visit uses it
             registerType: "prompt",
             injectRegister: "script",
-            includeAssets: ["icon.svg", "apple-touch-icon.png", "cities.txt"],
+            includeAssets: [
+              "icon.svg",
+              "favicon.svg",
+              "favicon-32.png",
+              "apple-touch-icon.png",
+              "cities.txt",
+            ],
             manifest: {
-              name: "CV Builder",
+              name: "Squeezy CV",
               // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field
-              short_name: "CV Builder",
+              short_name: "Squeezy CV",
               description:
                 "Build and tailor your CV. Your data stays in your browser.",
               // eslint-disable-next-line @typescript-eslint/naming-convention -- manifest field

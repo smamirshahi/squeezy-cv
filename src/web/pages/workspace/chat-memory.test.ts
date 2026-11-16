@@ -52,11 +52,11 @@ describe("chat memory", () => {
 
   it("ignores damaged data and drops operations that are no longer valid", () => {
     const storage = fakeStorage();
-    storage.setItem("cv-builder-chat:a", "{not json");
+    storage.setItem("squeezy-cv-chat:a", "{not json");
     expect(loadChat("a", storage)).toEqual([]);
 
     storage.setItem(
-      "cv-builder-chat:a",
+      "squeezy-cv-chat:a",
       JSON.stringify([
         { id: "x", role: "user", content: "bad id" },
         turn(2, {

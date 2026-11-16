@@ -48,7 +48,7 @@ describe("installable app that works offline (real Chromium)", () => {
       start_url: string;
       icons: { sizes: string; purpose?: string }[];
     };
-    expect(manifest.name).toBe("CV Builder");
+    expect(manifest.name).toBe("Squeezy CV");
     expect(manifest.display).toBe("standalone");
     expect(manifest.start_url).toBe("/vault");
     expect(manifest.icons.map((icon) => icon.sizes)).toEqual(
@@ -77,7 +77,7 @@ describe("installable app that works offline (real Chromium)", () => {
     await page.goto(`${webUrl}/vault`);
     // The app (not the browser's offline error page) is shown
     await page.waitForSelector("#root *", { timeout: 15_000 });
-    expect(await page.title()).toBe("Vault · CV Builder");
+    expect(await page.title()).toBe("Vault · Squeezy CV");
     expect((await page.content()).includes("ERR_INTERNET_DISCONNECTED")).toBe(
       false
     );

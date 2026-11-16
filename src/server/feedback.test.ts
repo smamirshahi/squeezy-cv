@@ -53,7 +53,7 @@ describe("POST /api/feedback", () => {
     const response = await send(app, {
       kind: "bug",
       note: "  Save does nothing  ",
-      appInfo: "CV Builder 0.7.0 · Chrome 157 on macOS · jobs page",
+      appInfo: "Squeezy CV 0.7.0 · Chrome 157 on macOS · jobs page",
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
@@ -63,7 +63,7 @@ describe("POST /api/feedback", () => {
     expect(created).toHaveLength(1);
     expect(created[0].title).toBe("[Bug] Save does nothing");
     expect(created[0].labels).toEqual(["customer-created", "bug"]);
-    expect(created[0].body).toContain("**App info:** CV Builder 0.7.0");
+    expect(created[0].body).toContain("**App info:** Squeezy CV 0.7.0");
   });
 
   it("keeps the mood of feedback", async () => {

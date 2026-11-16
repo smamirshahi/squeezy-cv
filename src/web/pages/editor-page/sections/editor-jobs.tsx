@@ -38,7 +38,7 @@ import {
   variantsSelector,
 } from "@store/jobs/jobs-slice";
 
-const INTRO_KEY = "cv-builder-jobs-intro";
+const INTRO_KEY = "squeezy-cv-jobs-intro";
 
 const LABEL_SX = {
   fontSize: 11,

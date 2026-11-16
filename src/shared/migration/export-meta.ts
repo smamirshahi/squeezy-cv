@@ -15,7 +15,7 @@ export const CURRENT_BACKUP_VERSION = 1;
 
 /**
  * Written into every JSON file the app exports or saves, under the key `meta`. It says which
- * version of CV Builder wrote the file, so a later version knows which migration steps to run.
+ * version of Squeezy CV wrote the file, so a later version knows which migration steps to run.
  * Not to be mixed up with `CvFile.metaData` (the job title, URL, opinion and notes of a CV).
  */
 export interface ExportMeta {
@@ -108,7 +108,7 @@ export function assertNotNewer(
   const meta = readExportMeta(raw);
   if (meta && compareVersions(meta.appVersion, currentVersion) === 1) {
     throw new Error(
-      `This file was made by CV Builder ${meta.appVersion}, but this app is ${currentVersion}. Update the app to open it.`
+      `This file was made by Squeezy CV ${meta.appVersion}, but this app is ${currentVersion}. Update the app to open it.`
     );
   }
 }

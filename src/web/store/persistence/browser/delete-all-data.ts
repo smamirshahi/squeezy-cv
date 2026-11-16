@@ -20,7 +20,7 @@ async function removeOfflineCopy(): Promise<void> {
 }
 
 /**
- * Permanently deletes everything CV Builder keeps in this browser: the database (CV, templates,
+ * Permanently deletes everything Squeezy CV keeps in this browser: the database (CV, templates,
  * jobs, applications with their PDFs and the previous versions), localStorage and sessionStorage
  * (settings, AI keys and choices, drafts), and the service worker with its caches. Throws a
  * readable error when another open tab blocks the database; nothing else is removed then.

@@ -31,7 +31,7 @@ export class GithubFeedbackSender implements FeedbackSender {
             Authorization: `Bearer ${this.token}`,
             Accept: "application/vnd.github+json",
             "Content-Type": "application/json",
-            "User-Agent": "cv-builder",
+            "User-Agent": "squeezy-cv",
           },
           body: JSON.stringify(issue),
         }

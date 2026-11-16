@@ -95,7 +95,7 @@ describe("full backup", () => {
       })
     ).rejects.toThrow(/newer|99\.0\.0/);
     await expect(restoreBackup(target, file)).rejects.toThrow(
-      /not a CV Builder backup/
+      /not a Squeezy CV backup/
     );
     await expect(target.loadVault()).rejects.toMatchObject({
       code: "not_found",

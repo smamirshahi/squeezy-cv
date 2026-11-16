@@ -59,7 +59,7 @@ describe("phone shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "More" }));
     expect(screen.getByRole("menuitem", { name: "Settings" })).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("menuitem", { name: "About CV Builder and its author" })
+      screen.getByRole("menuitem", { name: "About Squeezy CV and its author" })
     );
     expect(screen.getByRole("dialog")).toBeTruthy();
   });

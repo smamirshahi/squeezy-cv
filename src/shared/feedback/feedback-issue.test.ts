@@ -57,10 +57,10 @@ describe("buildFeedbackIssue", () => {
     const withInfo = buildFeedbackIssue({
       kind: "bug",
       note: "Broken",
-      appInfo: "CV Builder 1.0.0 · Chrome 1 on macOS · jobs page",
+      appInfo: "Squeezy CV 1.0.0 · Chrome 1 on macOS · jobs page",
     });
     expect(withInfo.body).toBe(
-      "Broken\n\n---\n**App info:** CV Builder 1.0.0 · Chrome 1 on macOS · jobs page"
+      "Broken\n\n---\n**App info:** Squeezy CV 1.0.0 · Chrome 1 on macOS · jobs page"
     );
     expect(
       buildFeedbackIssue({ kind: "bug", note: "Broken", appInfo: "  " }).body
@@ -91,7 +91,7 @@ describe("buildAppInfo", () => {
       info(
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
       )
-    ).toBe("CV Builder 0.7.0 · Chrome 157 on macOS · jobs page");
+    ).toBe("Squeezy CV 0.7.0 · Chrome 157 on macOS · jobs page");
   });
 
   it.each([

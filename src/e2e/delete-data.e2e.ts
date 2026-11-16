@@ -36,7 +36,7 @@ async function appWithData(): Promise<Page> {
   await page.goto(`${webUrl}/robots.txt`);
   await page.evaluate(async (vault) => {
     await new Promise<void>((resolve, reject) => {
-      const open = indexedDB.open("cv-builder", 1);
+      const open = indexedDB.open("squeezy-cv", 1);
       open.onupgradeneeded = () => open.result.createObjectStore("files");
       open.onerror = () => reject(open.error);
       open.onsuccess = () => {
@@ -48,14 +48,14 @@ async function appWithData(): Promise<Page> {
         };
       };
     });
-    localStorage.setItem("cv-builder-ai-keys", '{"claude":"secret"}');
-    localStorage.setItem("cv-builder-ai-choice", "{}");
+    localStorage.setItem("squeezy-cv-ai-keys", '{"claude":"secret"}');
+    localStorage.setItem("squeezy-cv-ai-choice", "{}");
     // Tutorials seen, so none opens over the page (deleting the data brings them back)
     for (const key of [
-      "cv-builder-vault-tutorial-seen",
-      "cv-builder-template-tutorial-seen",
-      "cv-builder-apply-tutorial-seen",
-      "cv-builder-applications-tutorial-seen",
+      "squeezy-cv-vault-tutorial-seen",
+      "squeezy-cv-template-tutorial-seen",
+      "squeezy-cv-apply-tutorial-seen",
+      "squeezy-cv-applications-tutorial-seen",
     ]) {
       localStorage.setItem(key, "1");
     }
@@ -78,7 +78,7 @@ async function leftovers(
 ): Promise<{ records: number; keys: number; caches: number }> {
   return page.evaluate(async () => {
     const records = await new Promise<number>((resolve) => {
-      const open = indexedDB.open("cv-builder", 1);
+      const open = indexedDB.open("squeezy-cv", 1);
       open.onupgradeneeded = () => open.result.createObjectStore("files");
       open.onsuccess = () => {
         const request = open.result
@@ -123,11 +123,11 @@ describe("Delete all my data (real Chromium)", () => {
     // The empty app writes its own defaults (theme) on start, and the first tutorial opens again
     // (opening it marks it seen); nothing else of before is left
     const keys = await page.evaluate(() => Object.keys(localStorage));
-    expect(keys).not.toContain("cv-builder-ai-keys");
-    expect(keys).not.toContain("cv-builder-ai-choice");
-    expect(keys).not.toContain("cv-builder-template-tutorial-seen");
-    expect(keys).not.toContain("cv-builder-apply-tutorial-seen");
-    expect(keys).not.toContain("cv-builder-applications-tutorial-seen");
+    expect(keys).not.toContain("squeezy-cv-ai-keys");
+    expect(keys).not.toContain("squeezy-cv-ai-choice");
+    expect(keys).not.toContain("squeezy-cv-template-tutorial-seen");
+    expect(keys).not.toContain("squeezy-cv-apply-tutorial-seen");
+    expect(keys).not.toContain("squeezy-cv-applications-tutorial-seen");
     await page.getByRole("dialog").waitFor();
     expect(left.records).toBe(0);
     expect(left.caches).toBe(0);

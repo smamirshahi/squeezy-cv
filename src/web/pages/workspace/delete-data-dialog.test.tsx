@@ -70,7 +70,7 @@ describe("Delete all my data dialog", () => {
   it("shows why it failed (another tab open) and stays open", async () => {
     deleteAll.mockRejectedValue(
       new Error(
-        "Another CV Builder tab is still open. Close the other tabs and try again."
+        "Another Squeezy CV tab is still open. Close the other tabs and try again."
       )
     );
     const { onDeleted } = open();
