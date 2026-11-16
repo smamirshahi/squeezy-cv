@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Removed
+
+- Demo mode (#429): the "Try with demo data" button on the first-run screen, the made-up CV with two demo templates and a job, the Demo banner (Reset demo, Leave demo), the "Demo - not saved" label and the places that switched off PDF export, Mark as applied and AI actions in the demo. A new user now starts with an empty vault and the built-in blank layout; ready-made templates will come later. Your own data is not touched.
+
 ### Changed
 
 - Awards: the Date is a month picker like Start and End, shown with the template's date format; older text dates such as "Mar 2024" are converted when the file opens (a bare year stays as text). Skills no longer have a "Years" field (it was never shown on the CV); stored values are dropped. Vault format version 3 (#469).

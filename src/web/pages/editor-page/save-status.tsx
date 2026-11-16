@@ -12,10 +12,7 @@ export function SaveStatus(): JSX.Element {
 
   let label = "Saved";
   let color: "success" | "warning" | "error" | "default" = "success";
-  if (status === "demo") {
-    label = "Demo - not saved";
-    color = "default";
-  } else if (status === "loading") {
+  if (status === "loading") {
     label = "Loading…";
     color = "default";
   } else if (status === "offline") {
