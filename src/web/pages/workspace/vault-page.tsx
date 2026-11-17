@@ -20,7 +20,7 @@ import {
 import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { selectedItemOf } from "@pages/workspace/section-items";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
-import { AiButton } from "@components/ai-button";
+import { AiIcon } from "@components/ai-button";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
@@ -69,6 +69,8 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
   const factPages = pages.filter((page) => FACT_PAGES.has(page.id));
+  const unsorted = sections.find((section) => section.type === "unsorted");
+  const unsortedCount = unsorted?.items.length ?? 0;
 
   return (
     <ResizableAside
@@ -118,11 +120,8 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
             SECTIONS
           </Typography>
           <List dense disablePadding>
-            {[...sections]
-              .sort(
-                (a, b) =>
-                  Number(a.type === "unsorted") - Number(b.type === "unsorted")
-              )
+            {sections
+              .filter((section) => section.type !== "unsorted")
               .map((section) => (
                 <Box key={section.id}>
                   <ListItemButton
@@ -151,26 +150,73 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
                   </ListItemButton>
                 </Box>
               ))}
-            {!sections.some((section) => section.type === "unsorted") && (
-              <ListItemButton
-                onClick={() => {
-                  dispatch(ensureUnsortedSection());
-                  navigate({ kind: "vault", sectionId: UNSORTED_SECTION_ID });
-                }}
-              >
-                <ListItemText
-                  primary="Unsorted"
-                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-                />
-                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                  0
-                </Typography>
-              </ListItemButton>
-            )}
           </List>
           <Box sx={{ display: "flex", px: 1, pt: 1 }}>
             <AddSectionButton />
           </Box>
+          <Typography
+            sx={{
+              px: 1,
+              pt: 2,
+              pb: 0.5,
+              fontSize: 11,
+              fontWeight: 700,
+              color: "text.secondary",
+            }}
+          >
+            ASSISTANTS
+          </Typography>
+          <List dense disablePadding>
+            <ListItemButton
+              selected={selectedPage === UNSORTED_SECTION_ID}
+              onClick={() => {
+                if (!unsorted) {
+                  dispatch(ensureUnsortedSection());
+                }
+                navigate({ kind: "vault", sectionId: UNSORTED_SECTION_ID });
+              }}
+            >
+              <ListItemText
+                primary="Unsorted"
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+              <Typography
+                sx={{
+                  fontSize: 12,
+                  fontWeight: unsortedCount > 0 ? 700 : 400,
+                  px: 0.75,
+                  borderRadius: 10,
+                  color:
+                    unsortedCount > 0 ? "secondary.main" : "text.secondary",
+                  bgcolor:
+                    unsortedCount > 0 ? WORKSPACE_COLORS.aiSoft : "transparent",
+                }}
+              >
+                {unsortedCount}
+              </Typography>
+            </ListItemButton>
+            <ListItemButton onClick={() => setIsImportOpen(true)}>
+              <Box
+                sx={{
+                  display: "flex",
+                  mr: 1,
+                  color: "secondary.main",
+                }}
+              >
+                <AiIcon />
+              </Box>
+              <ListItemText
+                primary="Paste CV text, AI sorts it"
+                slotProps={{
+                  primary: { sx: { fontWeight: 600, color: "secondary.main" } },
+                }}
+              />
+            </ListItemButton>
+          </List>
+          <ImportCvDialog
+            isOpen={isImportOpen}
+            onClose={() => setIsImportOpen(false)}
+          />
         </Box>
         <Box
           sx={{
@@ -181,18 +227,6 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
             borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
           }}
         >
-          <AiButton
-            size="small"
-            variant="contained"
-            sx={{ flex: "1 1 100%", whiteSpace: "normal" }}
-            onClick={() => setIsImportOpen(true)}
-          >
-            Paste CV text, AI sorts it
-          </AiButton>
-          <ImportCvDialog
-            isOpen={isImportOpen}
-            onClose={() => setIsImportOpen(false)}
-          />
           <Button
             component="label"
             size="small"
