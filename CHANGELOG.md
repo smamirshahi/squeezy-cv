@@ -9,6 +9,8 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-17
+
 ### Changed
 
 - The Vault sidebar has an **Assistants** group below New section (#493): Unsorted (with a highlighted count when it holds items) and "Paste CV text, AI sorts it" (AI-marked). Import JSON and Export JSON stay at the bottom.
@@ -428,7 +430,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.4.0...v0.5.0
