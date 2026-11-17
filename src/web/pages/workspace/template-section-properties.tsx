@@ -14,6 +14,7 @@ import { Section } from "@custom-types/vault-types";
 import { DropdownCitationStyle } from "@pages/editor-page/sections/editor-style-settings/dropdown-citation-style";
 import { DropdownSkillIcon } from "@pages/editor-page/sections/editor-style-settings/dropdown-skill-icon";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
+import { ENTRY_DETAILS, isDetailShown } from "@shared/style/entry-details";
 import {
   DEFAULT_MAX_AUTHORS,
   DEFAULT_PUBLICATION_LINKS,
@@ -29,6 +30,7 @@ import {
   setPublicationOrder,
   setShouldShowGender,
   setSkillsLayout,
+  setDetailShown,
   setShouldShowLinks,
   setShouldShowMaritalStatus,
   setShouldShowNationality,
@@ -269,6 +271,30 @@ function SkillsLayoutChoice(): JSX.Element {
   );
 }
 
+/** One switch per detail of an entry; all are on unless the template hides them */
+function EntryDetailsCard({
+  kind,
+}: {
+  kind: keyof typeof ENTRY_DETAILS;
+}): JSX.Element {
+  const dispatch = useAppDispatch();
+  const { hiddenDetails } = useAppSelector(styleSelector);
+  return (
+    <PropertyCard title="Show in each entry">
+      {ENTRY_DETAILS[kind].map((detail) => (
+        <SwitchRow
+          key={detail.key}
+          label={detail.label}
+          checked={isDetailShown(hiddenDetails, detail.key)}
+          onChange={(isShown) =>
+            dispatch(setDetailShown({ key: detail.key, isShown }))
+          }
+        />
+      ))}
+    </PropertyCard>
+  );
+}
+
 function EntryOrderProperties({
   kind,
 }: {
@@ -296,6 +322,7 @@ function EntryOrderProperties({
           as the latest. An order a job sets by hand wins over this.
         </Typography>
       </PropertyCard>
+      <EntryDetailsCard kind={kind} />
       <Note>
         {PER_JOB_NOTE}
         {isExperience ? " The bullet point icon is set in Design." : ""}
@@ -482,6 +509,13 @@ export function SectionProperties({
       );
     case "references":
       return <ReferencesProperties />;
+    case "projects":
+      return (
+        <>
+          <EntryDetailsCard kind="projects" />
+          <Note>{PER_JOB_NOTE}</Note>
+        </>
+      );
     default:
       return (
         <Note>

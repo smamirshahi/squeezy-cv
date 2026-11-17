@@ -21,6 +21,7 @@ import {
   moveWithinColumn,
 } from "@pages/editor-page/section-placement/section-placement-utils";
 import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
+import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { SectionProperties } from "@pages/workspace/template-section-properties";
 import { TemplateSample } from "@pages/workspace/template-section-styles";
 import {
@@ -90,7 +91,7 @@ export function TemplateSectionsPage({
   templateSwitcher,
 }: {
   /** The "which template" control, drawn above the sample */
-  templateSwitcher: ReactNode;
+  templateSwitcher?: ReactNode;
 }): JSX.Element {
   const dispatch = useAppDispatch();
   const viewport = useViewport();
@@ -191,6 +192,200 @@ export function TemplateSectionsPage({
     </Box>
   );
 
+  const properties = (
+    <Box
+      component="aside"
+      aria-label="Section properties"
+      sx={{
+        width: { lg: "100%" },
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.canvas,
+        borderLeft: { lg: `1px solid ${WORKSPACE_COLORS.border}` },
+        borderTop: { xs: `1px solid ${WORKSPACE_COLORS.border}`, lg: 0 },
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+      }}
+    >
+      <Box
+        sx={{
+          p: 1.5,
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+        }}
+      >
+        <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
+          Section {index + 1} of {ids.length}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
+          {isDesktop ? (
+            <Typography
+              component="h1"
+              noWrap
+              sx={{ flex: 1, fontSize: 18, fontWeight: 700 }}
+            >
+              {label(current)}
+            </Typography>
+          ) : (
+            <TextField
+              select
+              size="small"
+              value={current}
+              onChange={(event) => setSelected(event.target.value)}
+              slotProps={{ htmlInput: { "aria-label": "Section" } }}
+              sx={{ flex: 1, minWidth: 0 }}
+            >
+              {ids.map((id) => (
+                <MenuItem key={id} value={id}>
+                  {label(id)}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+          {!isHeaderPart && (
+            <>
+              <IconButton
+                aria-label={`Move ${label(current)} up`}
+                disabled={structure[side].indexOf(current) <= 0}
+                onClick={() => move(-1)}
+                sx={{ p: { xs: "11px", lg: "8px" } }}
+              >
+                <ArrowUpwardIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                aria-label={`Move ${label(current)} down`}
+                disabled={
+                  structure[side].indexOf(current) ===
+                  structure[side].length - 1
+                }
+                onClick={() => move(1)}
+                sx={{ p: { xs: "11px", lg: "8px" } }}
+              >
+                <ArrowDownwardIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                aria-label={`Remove ${label(current)} from the template`}
+                title="Remove from this template (your vault keeps it)"
+                onClick={remove}
+                sx={{ p: { xs: "11px", lg: "8px" } }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </>
+          )}
+        </Box>
+        {isHeaderPart && (
+          <Typography
+            sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted, mt: 0.5 }}
+          >
+            Always at the top
+          </Typography>
+        )}
+        <Box sx={{ display: "flex", gap: 0.5, mt: 1 }} aria-hidden="true">
+          {ids.map((id, position) => (
+            <Box
+              key={id}
+              sx={{
+                flex: 1,
+                height: 4,
+                borderRadius: 2,
+                bgcolor:
+                  position <= index
+                    ? WORKSPACE_COLORS.accent
+                    : WORKSPACE_COLORS.border,
+              }}
+            />
+          ))}
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflow: "auto",
+          p: 1.5,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        {hasColumns && !isHeaderPart && (
+          <TextField
+            select
+            size="small"
+            label="Area on the page"
+            value={side}
+            onChange={(event) =>
+              dispatch(
+                updatePageStructure(
+                  moveToColumn(structure, current, event.target.value as Side)
+                )
+              )
+            }
+          >
+            {(Object.keys(AREA_LABELS) as Side[]).map((key) => (
+              <MenuItem key={key} value={key}>
+                {AREA_LABELS[key]}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        <SectionProperties id={current} section={section} />
+        {!isDesktop && (
+          <Box
+            sx={{
+              mt: 1,
+              pt: 1.5,
+              borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+            }}
+          >
+            <Typography sx={{ fontWeight: 600, fontSize: 14, mb: 1 }}>
+              Page layout and sections
+            </Typography>
+            <Box sx={{ mb: 1.5 }}>
+              <LayoutSelect />
+            </Box>
+            {hasColumns && (
+              <Box sx={{ mb: 1.5 }}>
+                <PageStructureSlider />
+              </Box>
+            )}
+            <SectionPlacement
+              selection={{ selectedId: current, onSelect: setSelected }}
+            />
+            <AddToTemplateButton />
+          </Box>
+        )}
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 1,
+          p: 1.5,
+          bgcolor: WORKSPACE_COLORS.panel,
+          borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+        }}
+      >
+        <Button
+          disabled={index <= 0}
+          onClick={() => setSelected(ids[index - 1])}
+          sx={{ minHeight: { xs: 44, lg: 36 } }}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          disabled={index >= ids.length - 1}
+          onClick={() => setSelected(ids[index + 1])}
+          sx={{ minHeight: { xs: 44, lg: 36 } }}
+        >
+          {index < ids.length - 1 ? `Next: ${label(ids[index + 1])}` : "Next"}
+        </Button>
+      </Box>
+    </Box>
+  );
+
   return (
     <Box
       sx={{
@@ -224,7 +419,7 @@ export function TemplateSectionsPage({
               mb: 1.5,
             }}
           >
-            <Box sx={{ flex: 1, minWidth: 220 }}>{templateSwitcher}</Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>{templateSwitcher}</Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <Switch
                 checked={isHighlighted}
@@ -241,199 +436,17 @@ export function TemplateSectionsPage({
           />
         </Box>
       </Box>
-      <Box
-        component="aside"
-        aria-label="Section properties"
-        sx={{
-          width: { lg: 340 },
-          flex: "none",
-          bgcolor: WORKSPACE_COLORS.canvas,
-          borderLeft: { lg: `1px solid ${WORKSPACE_COLORS.border}` },
-          borderTop: { xs: `1px solid ${WORKSPACE_COLORS.border}`, lg: 0 },
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
-        }}
-      >
-        <Box
-          sx={{
-            p: 1.5,
-            bgcolor: WORKSPACE_COLORS.panel,
-            borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
-          }}
+      {isDesktop ? (
+        <ResizableAside
+          side="right"
+          label="the section properties"
+          defaultWidth={340}
         >
-          <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
-            Section {index + 1} of {ids.length}
-          </Typography>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}
-          >
-            {isDesktop ? (
-              <Typography
-                component="h1"
-                noWrap
-                sx={{ flex: 1, fontSize: 18, fontWeight: 700 }}
-              >
-                {label(current)}
-              </Typography>
-            ) : (
-              <TextField
-                select
-                size="small"
-                value={current}
-                onChange={(event) => setSelected(event.target.value)}
-                slotProps={{ htmlInput: { "aria-label": "Section" } }}
-                sx={{ flex: 1, minWidth: 0 }}
-              >
-                {ids.map((id) => (
-                  <MenuItem key={id} value={id}>
-                    {label(id)}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-            {!isHeaderPart && (
-              <>
-                <IconButton
-                  aria-label={`Move ${label(current)} up`}
-                  disabled={structure[side].indexOf(current) <= 0}
-                  onClick={() => move(-1)}
-                  sx={{ p: { xs: "11px", lg: "8px" } }}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  aria-label={`Move ${label(current)} down`}
-                  disabled={
-                    structure[side].indexOf(current) ===
-                    structure[side].length - 1
-                  }
-                  onClick={() => move(1)}
-                  sx={{ p: { xs: "11px", lg: "8px" } }}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  aria-label={`Remove ${label(current)} from the template`}
-                  title="Remove from this template (your vault keeps it)"
-                  onClick={remove}
-                  sx={{ p: { xs: "11px", lg: "8px" } }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </>
-            )}
-          </Box>
-          {isHeaderPart && (
-            <Typography
-              sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted, mt: 0.5 }}
-            >
-              Always at the top
-            </Typography>
-          )}
-          <Box sx={{ display: "flex", gap: 0.5, mt: 1 }} aria-hidden="true">
-            {ids.map((id, position) => (
-              <Box
-                key={id}
-                sx={{
-                  flex: 1,
-                  height: 4,
-                  borderRadius: 2,
-                  bgcolor:
-                    position <= index
-                      ? WORKSPACE_COLORS.accent
-                      : WORKSPACE_COLORS.border,
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            overflow: "auto",
-            p: 1.5,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-          }}
-        >
-          {hasColumns && !isHeaderPart && (
-            <TextField
-              select
-              size="small"
-              label="Area on the page"
-              value={side}
-              onChange={(event) =>
-                dispatch(
-                  updatePageStructure(
-                    moveToColumn(structure, current, event.target.value as Side)
-                  )
-                )
-              }
-            >
-              {(Object.keys(AREA_LABELS) as Side[]).map((key) => (
-                <MenuItem key={key} value={key}>
-                  {AREA_LABELS[key]}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
-          <SectionProperties id={current} section={section} />
-          {!isDesktop && (
-            <Box
-              sx={{
-                mt: 1,
-                pt: 1.5,
-                borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-              }}
-            >
-              <Typography sx={{ fontWeight: 600, fontSize: 14, mb: 1 }}>
-                Page layout and sections
-              </Typography>
-              <Box sx={{ mb: 1.5 }}>
-                <LayoutSelect />
-              </Box>
-              {hasColumns && (
-                <Box sx={{ mb: 1.5 }}>
-                  <PageStructureSlider />
-                </Box>
-              )}
-              <SectionPlacement
-                selection={{ selectedId: current, onSelect: setSelected }}
-              />
-              <AddToTemplateButton />
-            </Box>
-          )}
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 1,
-            p: 1.5,
-            bgcolor: WORKSPACE_COLORS.panel,
-            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
-          }}
-        >
-          <Button
-            disabled={index <= 0}
-            onClick={() => setSelected(ids[index - 1])}
-            sx={{ minHeight: { xs: 44, lg: 36 } }}
-          >
-            Back
-          </Button>
-          <Button
-            variant="contained"
-            disabled={index >= ids.length - 1}
-            onClick={() => setSelected(ids[index + 1])}
-            sx={{ minHeight: { xs: 44, lg: 36 } }}
-          >
-            {index < ids.length - 1 ? `Next: ${label(ids[index + 1])}` : "Next"}
-          </Button>
-        </Box>
-      </Box>
+          {properties}
+        </ResizableAside>
+      ) : (
+        properties
+      )}
     </Box>
   );
 }

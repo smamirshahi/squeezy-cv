@@ -188,6 +188,18 @@ const cvDataSlice = createSlice({
       state.style.ratingIcon = action.payload;
     },
 
+    setDetailShown(
+      state,
+      action: PayloadAction<{ key: string; isShown: boolean }>
+    ) {
+      const others = (state.style.hiddenDetails ?? []).filter(
+        (key) => key !== action.payload.key
+      );
+      state.style.hiddenDetails = action.payload.isShown
+        ? others
+        : [...others, action.payload.key];
+    },
+
     setBulletPointIcon(state, action: PayloadAction<Style["bulletPointIcon"]>) {
       state.style.bulletPointIcon = action.payload;
     },
@@ -231,6 +243,7 @@ export const {
   resetTypography,
   setRatingIcon,
   setBulletPointIcon,
+  setDetailShown,
   resetCvDataState,
 } = cvDataSlice.actions;
 

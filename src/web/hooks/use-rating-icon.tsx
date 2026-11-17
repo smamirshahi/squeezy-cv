@@ -25,6 +25,7 @@ export function useRatingIcon(): ReturnProps {
         };
 
       // "text" shows the level as a word instead (the skills page); these are not drawn
+      case "none":
       case "text":
       case "star":
         return {
