@@ -5,8 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
-import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
+import { TemplateDesignPage } from "@pages/workspace/template-design-page";
 import { DEFAULT_COLORS } from "@shared/style/resolve-style";
 import { TypographyVariant } from "@custom-styles/custom-styles";
 
@@ -16,8 +15,7 @@ function setup(): AppStore {
   const store = configureStore({ reducer: rootReducer });
   render(
     <Provider store={store}>
-      <EditorTypography />
-      <StylePreviewPanel />
+      <TemplateDesignPage templateId="t1" />
     </Provider>
   );
   return store;

@@ -9,6 +9,17 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Templates: **show or hide details** in Sections for Projects (technologies, link, description), Education (field of study, location, dissertation title, description or bullet points) and Experience (location, description or bullet points). All are on by default. Stored as the optional `hiddenDetails` in the template's style, so old files open unchanged.
+- Skills: the Skill Icon setting has **Don't show the level** (names only).
+
+### Changed
+
+- Templates: the **Design tab now has the same layout as Sections** (groups Page, Colours and Typography on the left, the live preview in the middle, the settings of the chosen group on the right). Typography is an accordion, one style open at a time.
+- Templates: the **Editing template** switcher sits next to the tabs on Design and Sections, and its hint is an (i) tooltip.
+- Templates: the right panel in Sections can be resized.
+
 ## [0.9.0] - 2026-11-17
 
 ### Added
