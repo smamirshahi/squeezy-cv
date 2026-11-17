@@ -17,13 +17,13 @@ beforeAll(async () => {
   await build({
     configFile: "vite.config.ts",
     logLevel: "error",
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Vite option names
+
     build: { outDir, emptyOutDir: true },
   });
   server = await preview({
     configFile: "vite.config.ts",
     logLevel: "error",
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Vite option names
+
     build: { outDir },
     preview: { port: 0, host: "127.0.0.1" },
   });

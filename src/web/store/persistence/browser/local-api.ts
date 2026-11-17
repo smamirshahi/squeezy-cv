@@ -44,7 +44,7 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
     headers: { "Content-Type": "application/json" },
   });
 }
@@ -260,7 +260,7 @@ export function createLocalFetch(
         const bytes = await storage.loadApplicationPdf(id);
         return new Response(bytes as BlobPart, {
           status: HTTP_OK,
-          // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
           headers: { "Content-Type": "application/pdf" },
         });
       }

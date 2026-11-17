@@ -2,6 +2,10 @@ import { Operation } from "@custom-types/chat-types";
 import { Vault } from "@custom-types/vault-types";
 import { getItemLabel, shorten } from "@shared/variant/item-label";
 
+/** How much of a bullet is quoted when describing an operation */
+const BULLET_PREVIEW_CHARS = 40;
+/** How much of the new text is quoted when describing a reword */
+const REWRITE_PREVIEW_CHARS = 60;
 function itemLabel(vault: Vault, itemId: string): string {
   for (const section of vault.sections) {
     const item = section.items.find((entry) => entry.id === itemId);
@@ -18,7 +22,7 @@ function bulletText(vault: Vault, itemId: string, bulletId: string): string {
       .find((entry) => entry.id === itemId)
       ?.bullets.find((entry) => entry.id === bulletId);
     if (bullet) {
-      return `“${shorten(bullet.text, 40)}”`;
+      return `“${shorten(bullet.text, BULLET_PREVIEW_CHARS)}”`;
     }
   }
   return "a bullet";
@@ -43,7 +47,7 @@ export function describeOperation(op: Operation, vault: Vault): string {
     case "useWording":
       return `Use the ${op.wording === "text" ? "original" : op.wording} wording of ${bulletText(vault, op.itemId, op.bulletId)}`;
     case "rewriteBullet":
-      return `Reword ${bulletText(vault, op.itemId, op.bulletId)} (${op.wording}): “${shorten(op.text, 60)}”`;
+      return `Reword ${bulletText(vault, op.itemId, op.bulletId)} (${op.wording}): “${shorten(op.text, REWRITE_PREVIEW_CHARS)}”`;
     case "setTone":
       return `Set the tone to ${op.tone}`;
     case "setPageLimit":

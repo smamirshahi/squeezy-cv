@@ -47,13 +47,7 @@ async function postJson(
   if (!response.ok) {
     const error = payload.error as { message?: string } | string | undefined;
     const detail = typeof error === "string" ? error : (error?.message ?? "");
-    const reason =
-      response.status === HTTP_UNAUTHORIZED ||
-      response.status === HTTP_FORBIDDEN
-        ? "the key was refused"
-        : response.status === HTTP_RATE_LIMITED
-          ? "the free limit is used up for now, try again later"
-          : `status ${response.status}`;
+    const reason = describeStatus(response.status);
     throw new AiError(
       "api_error",
       redact(
@@ -71,6 +65,34 @@ interface GeminiResponse {
     finishReason?: string;
   }[];
   promptFeedback?: { blockReason?: string };
+}
+
+type StopReason = "end_turn" | "max_tokens" | "refusal" | "other";
+
+/** Gemini's finishReason as our stop reason (anything else is "other") */
+function geminiStopReason(finish: string): StopReason {
+  if (finish === "MAX_TOKENS") {
+    return "max_tokens";
+  }
+  return finish === "STOP" ? "end_turn" : "other";
+}
+
+/** Groq's finish_reason to our stop reason (anything else is "other") */
+const GROQ_STOP_REASONS: Record<string, StopReason | undefined> = {
+  length: "max_tokens",
+  content_filter: "refusal",
+  stop: "end_turn",
+};
+
+/** What went wrong, in words, for an error status of a hosted model */
+function describeStatus(status: number): string {
+  if (status === HTTP_UNAUTHORIZED || status === HTTP_FORBIDDEN) {
+    return "the key was refused";
+  }
+  if (status === HTTP_RATE_LIMITED) {
+    return "the free limit is used up for now, try again later";
+  }
+  return `status ${status}`;
 }
 
 const GEMINI_REFUSALS = new Set([
@@ -93,7 +115,7 @@ export function createGeminiSender(
   return async (system: string, messages: ChatMessage[]) => {
     const payload = (await postJson(
       `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
       { "x-goog-api-key": apiKey ?? "" },
       {
         systemInstruction: { parts: [{ text: system }] },
@@ -120,13 +142,7 @@ export function createGeminiSender(
       GEMINI_REFUSALS.has(finish);
     return {
       text,
-      stopReason: isBlocked
-        ? "refusal"
-        : finish === "MAX_TOKENS"
-          ? "max_tokens"
-          : finish === "STOP"
-            ? "end_turn"
-            : "other",
+      stopReason: isBlocked ? "refusal" : geminiStopReason(finish),
     };
   };
 }
@@ -134,7 +150,7 @@ export function createGeminiSender(
 interface GroqResponse {
   choices?: {
     message?: { content?: string };
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- API field name
+
     finish_reason?: string;
   }[];
 }
@@ -153,9 +169,9 @@ export function createGroqSender(
       {
         model,
         messages: [{ role: "system", content: system }, ...messages],
-        // eslint-disable-next-line @typescript-eslint/naming-convention -- API field names
+
         response_format: { type: "json_object" },
-        // eslint-disable-next-line @typescript-eslint/naming-convention -- API field name
+
         max_tokens: GROQ_MAX_OUTPUT_TOKENS,
       },
       { apiKey, timeoutMs: config.timeouts.groq, name: "Groq" },
@@ -166,14 +182,7 @@ export function createGroqSender(
     const finish = choice?.finish_reason ?? "";
     return {
       text: choice?.message?.content ?? "",
-      stopReason:
-        finish === "length"
-          ? "max_tokens"
-          : finish === "content_filter"
-            ? "refusal"
-            : finish === "stop"
-              ? "end_turn"
-              : "other",
+      stopReason: GROQ_STOP_REASONS[finish] ?? "other",
     };
   };
 }

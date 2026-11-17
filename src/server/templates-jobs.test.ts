@@ -57,7 +57,6 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- the response type of inject() is not exported
 function call(
   method: "GET" | "PUT" | "DELETE" | "POST",
   url: string,

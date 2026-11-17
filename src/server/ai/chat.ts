@@ -12,6 +12,8 @@ import { AiClient } from "@server/ai/ai-types";
 import { CvRefs, buildRefs, describeCv } from "@server/ai/tailor";
 import { checkRewrite, describeFlags } from "@shared/ai/guardrails";
 
+/** How much of a reworded text is quoted in a warning */
+const WARNING_TEXT_CHARS = 40;
 /** More changes than this in one answer are cut (and said so) */
 const MAX_OPERATIONS = 20;
 const PAGE_LIMITS = [1, 2];
@@ -192,7 +194,7 @@ export function toOperations(
         const flags = describeFlags(checkRewrite(entry.text, sources).flags);
         if (flags.length > 0) {
           warnings.push(
-            `A rewording of “${original.text.slice(0, 40)}” needs your check: ${flags.join("; ")}.`
+            `A rewording of “${original.text.slice(0, WARNING_TEXT_CHARS)}” needs your check: ${flags.join("; ")}.`
           );
         }
         operations.push({

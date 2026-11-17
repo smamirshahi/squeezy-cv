@@ -24,8 +24,12 @@ interface LinkTypeSelectProps {
 /** Dropdown of link types, each with its icon beside the name */
 /** Alphabetical, with "Other" always last */
 const SORTED_LINK_TYPES = [...LINK_TYPES].sort((a, b) => {
-  if (a.id === OTHER_LINK_TYPE_ID) return 1;
-  if (b.id === OTHER_LINK_TYPE_ID) return -1;
+  if (a.id === OTHER_LINK_TYPE_ID) {
+    return 1;
+  }
+  if (b.id === OTHER_LINK_TYPE_ID) {
+    return -1;
+  }
   return a.label.localeCompare(b.label);
 });
 

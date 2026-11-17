@@ -371,10 +371,10 @@ export function JobDetailsPage(): JSX.Element {
       const isFollowing =
         job.name === DEFAULT_JOB_NAME ||
         job.name === nameFrom(job.company, job.role);
-      const changesWho =
+      const isChangingWho =
         details.company !== undefined || details.role !== undefined;
       const next =
-        details.name === undefined && isFollowing && changesWho
+        details.name === undefined && isFollowing && isChangingWho
           ? {
               ...details,
               name:

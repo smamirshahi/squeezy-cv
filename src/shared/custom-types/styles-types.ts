@@ -122,6 +122,7 @@ export const StyleSchema = Object({
   highlightOwnName: Boolean.optional(),
 
   /** How many authors a publication names before "et al."; missing = 6 */
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- the values of the data format
   maxAuthors: Union(Literal(3), Literal(6), Literal("all")).optional(),
 
   /** Publications newest first (default) or in the order of the vault / the job */

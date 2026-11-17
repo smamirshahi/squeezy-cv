@@ -5,7 +5,7 @@ const HTTP_NOT_FOUND = 404;
 
 interface OllamaChatResponse {
   message?: { content?: string };
-  // eslint-disable-next-line @typescript-eslint/naming-convention -- Ollama field name
+
   done_reason?: string;
   error?: string;
 }
@@ -24,14 +24,14 @@ export function createOllamaSender(
     try {
       response = await fetchImpl(`${url}/api/chat`, {
         method: "POST",
-        // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model,
-          // eslint-disable-next-line @typescript-eslint/naming-convention -- Ollama field name
+
           stream: false,
           format: "json",
-          // eslint-disable-next-line @typescript-eslint/naming-convention -- Ollama option name
+
           options: { num_ctx: numCtx },
           messages: [{ role: "system", content: system }, ...messages],
         }),

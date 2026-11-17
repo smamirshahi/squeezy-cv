@@ -223,7 +223,7 @@ function Link({
  * The picture of a tutorial step. Desktop: a column beside the text (`width` px); small laptop:
  * 80% of that; tablet and phone: the full width above the text, its content centred.
  */
-function pictureSx(width: number) {
+function pictureSx(width: number): SxProps<Theme> {
   return {
     flex: "none",
     width: { xs: "auto", md: Math.round(width * 0.8), lg: width },

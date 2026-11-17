@@ -124,7 +124,6 @@ async function request(
       ...(body === undefined
         ? {}
         : {
-            // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
           }),
@@ -392,7 +391,7 @@ export function createApiClient(
       try {
         response = await fetchImpl("/api/import/pdf", {
           method: "POST",
-          // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
           headers: { "Content-Type": "application/pdf" },
           body: file,
         });
@@ -505,7 +504,7 @@ export function createApiClient(
           `/api/applications/${encodeURIComponent(id)}/pdf`,
           {
             method: "PUT",
-            // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
             headers: { "Content-Type": "application/pdf" },
             body: file,
           }

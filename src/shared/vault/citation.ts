@@ -155,6 +155,21 @@ function end(text: string): string {
 }
 
 /** Appends a plain run; a run with the same look as the last one is merged into it */
+/** What goes between two authors: a comma, or "and" / "&" before the last one of a short list */
+function authorGlue(
+  isComma: boolean,
+  isPair: boolean,
+  style: CitationStyle
+): string {
+  if (isComma) {
+    return ", ";
+  }
+  if (isPair) {
+    return style === "apa" ? " & " : " and ";
+  }
+  return style === "apa" ? ", & " : ", and ";
+}
+
 function add(out: CitationSegment[], segment: CitationSegment): void {
   if (segment.text === "") {
     return;
@@ -222,24 +237,18 @@ function authorSegments(
   style: CitationStyle
 ): CitationSegment[] {
   const { shown, isCut } = shownAuthors(authors, options, style);
-  const bold = options.highlightOwnName !== false;
+  const isBold = options.highlightOwnName !== false;
   const out: CitationSegment[] = [];
   shown.forEach((author, index) => {
     if (index > 0) {
       const isLast = index === shown.length - 1;
-      const glue =
-        isCut || !isLast
-          ? ", "
-          : shown.length === 2
-            ? style === "apa"
-              ? " & "
-              : " and "
-            : style === "apa"
-              ? ", & "
-              : ", and ";
+      const glue = authorGlue(isCut || !isLast, shown.length === 2, style);
       add(out, { text: glue });
     }
-    add(out, { text: author.text, ...(bold && author.isOwn ? { bold } : {}) });
+    add(out, {
+      text: author.text,
+      ...(isBold && author.isOwn ? { bold: true } : {}),
+    });
   });
   if (isCut) {
     add(out, { text: ", et al." });

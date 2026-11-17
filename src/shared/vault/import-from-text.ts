@@ -111,7 +111,8 @@ export function importToVault(
       const rawFields = splitYearRange(renameFields(section.type, item.fields));
       for (const [key, value] of Object.entries(rawFields)) {
         if (value.trim() === "" && !DATE_FIELDS.has(key)) {
-          continue; // small models fill unknown fields with ""
+          // small models fill unknown fields with ""
+          continue;
         }
         if (DATE_FIELDS.has(key) && value.trim() !== "") {
           const iso = toIsoDate(value);
@@ -131,8 +132,8 @@ export function importToVault(
       }
       // Only a skills group keeps bullets (its skills); everywhere else the points become the
       // lines of the item's description (#244)
-      const keepsBullets = section.type === "skills";
-      if (!keepsBullets && bullets.length > 0) {
+      const isKeepingBullets = section.type === "skills";
+      if (!isKeepingBullets && bullets.length > 0) {
         fields.description = [fields.description ?? "", ...bullets]
           .filter((line) => line.trim() !== "")
           .join("\n");
@@ -140,7 +141,7 @@ export function importToVault(
       return {
         id: newId(),
         fields,
-        bullets: keepsBullets
+        bullets: isKeepingBullets
           ? bullets.map((text) => ({
               id: newId(),
               text,
@@ -188,7 +189,8 @@ export function mergeIntoVault(existing: Vault, imported: Vault): Vault {
   const profile = { ...existing.profile };
   for (const [key, value] of Object.entries(imported.profile)) {
     if (typeof value !== "string") {
-      continue; // the list of other job titles is never imported
+      // the list of other job titles is never imported
+      continue;
     }
     const current = (profile as Record<string, unknown>)[key];
     if (!(typeof current === "string" && current.trim()) && value) {

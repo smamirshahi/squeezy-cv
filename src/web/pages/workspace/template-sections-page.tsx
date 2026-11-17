@@ -20,6 +20,7 @@ import {
   moveToColumn,
   moveWithinColumn,
 } from "@pages/editor-page/section-placement/section-placement-utils";
+import { PageStructureSlider } from "@pages/editor-page/sections/editor-page-structure/page-structure-slider";
 import { SectionProperties } from "@pages/workspace/template-section-properties";
 import { TemplateSample } from "@pages/workspace/template-section-styles";
 import {
@@ -165,6 +166,7 @@ export function TemplateSectionsPage({
       }}
     >
       <LayoutSelect />
+      {hasColumns && <PageStructureSlider />}
       <Typography
         component="h2"
         sx={{
@@ -392,6 +394,11 @@ export function TemplateSectionsPage({
               <Box sx={{ mb: 1.5 }}>
                 <LayoutSelect />
               </Box>
+              {hasColumns && (
+                <Box sx={{ mb: 1.5 }}>
+                  <PageStructureSlider />
+                </Box>
+              )}
               <SectionPlacement
                 selection={{ selectedId: current, onSelect: setSelected }}
               />

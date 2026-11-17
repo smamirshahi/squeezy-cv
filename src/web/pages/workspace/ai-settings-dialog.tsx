@@ -103,6 +103,8 @@ function AiSettingsDialog({
     setSelected(initial);
     setError("");
     refreshStatus();
+    // refreshStatus is redefined on every render; it reads api, which is listed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, isOpen, initial]);
 
   function refreshStatus(): void {

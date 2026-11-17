@@ -74,7 +74,10 @@ export async function buildBackup(
   problems: string[];
 }> {
   const problems: string[] = [];
-  async function attempt<T>(label: string, read: () => Promise<T>) {
+  async function attempt<T>(
+    label: string,
+    read: () => Promise<T>
+  ): Promise<T | undefined> {
     try {
       return await read();
     } catch (error) {

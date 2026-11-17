@@ -20,10 +20,10 @@ export interface InstallState {
 
 /** True when the page runs as an installed app (display-mode standalone, or iOS' own flag) */
 function detectInstalled(): boolean {
-  const iosStandalone = (navigator as { standalone?: boolean }).standalone;
+  const isIosStandalone = (navigator as { standalone?: boolean }).standalone;
   return (
     window.matchMedia?.("(display-mode: standalone)").matches === true ||
-    iosStandalone === true
+    isIosStandalone === true
   );
 }
 

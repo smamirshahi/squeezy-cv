@@ -134,7 +134,7 @@ export function createAnthropicSender(config: AiConfig): MessageSender {
     try {
       const response = await client.messages.create({
         model: config.model,
-        // eslint-disable-next-line @typescript-eslint/naming-convention -- API field name
+
         max_tokens: MAX_OUTPUT_TOKENS,
         system,
         messages,

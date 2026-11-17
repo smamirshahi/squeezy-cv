@@ -84,13 +84,8 @@ describe("sidebars fill the window height", () => {
     await expectFullHeight("Content", "Resize the content panel");
   });
 
-  it("Templates: the menu and the sample CV panel", async () => {
+  it("Templates: the sample CV panel (the template menu is tabs across the top)", async () => {
     await openTool("Templates");
-    await expectFullHeight(
-      "Template sections",
-      "Resize the template menu",
-      "navigation"
-    );
     await expectFullHeight("Sample CV panel", "Resize the sample CV");
   });
 

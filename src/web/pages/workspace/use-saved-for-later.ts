@@ -60,9 +60,9 @@ export function useSavedForLater(): {
 
   async function continueWith(candidate: Candidate): Promise<void> {
     // saved from a job that still exists: open that one instead of making a second one
-    const existing = jobs.some((job) => job.id === candidate.jobId);
+    const isExisting = jobs.some((job) => job.id === candidate.jobId);
     const jobId =
-      existing && candidate.jobId
+      isExisting && candidate.jobId
         ? candidate.jobId
         : continueCandidate(candidate);
     await run(() =>

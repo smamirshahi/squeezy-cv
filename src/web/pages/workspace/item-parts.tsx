@@ -370,8 +370,8 @@ function TextActions({
           proposal={bullets.proposal}
           ticked={bullets.ticked}
           onTick={bullets.setTicked}
-          replaceDescription={bullets.replaceDescription}
-          onReplaceDescription={bullets.setReplaceDescription}
+          isReplacingDescription={bullets.isReplacingDescription}
+          onReplaceDescription={bullets.setIsReplacingDescription}
           onDiscard={() => bullets.setProposal(null)}
           onUse={bullets.accept}
         />

@@ -164,62 +164,58 @@ function TemplatesNav({
   templateId: string;
 }): JSX.Element {
   return (
-    <ResizableAside
-      side="left"
-      label="the template menu"
-      defaultWidth={220}
-      stackBelow="lg"
-      stackedHeight={56}
+    <Box
+      component="nav"
+      aria-label="Template sections"
+      sx={{
+        width: "100%",
+        flex: "none",
+        bgcolor: WORKSPACE_COLORS.panel,
+        borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
+        px: 1,
+        overflowX: "auto",
+      }}
     >
-      <Box
-        component="nav"
-        aria-label="Template sections"
-        sx={{
-          width: "100%",
-          flex: "none",
-          bgcolor: WORKSPACE_COLORS.panel,
-          borderRight: { xs: 0, lg: `1px solid ${WORKSPACE_COLORS.border}` },
-          borderBottom: { xs: `1px solid ${WORKSPACE_COLORS.border}`, lg: 0 },
-          p: 1,
-          overflow: "auto",
-        }}
-      >
-        {/* below a desktop the list is a tab strip above the page */}
-        <List
-          dense
-          disablePadding
-          sx={{ display: { xs: "flex", lg: "block" }, gap: 0.5 }}
-        >
-          {TEMPLATE_TABS.map((entry) => (
-            <ListItemButton
-              key={entry.id}
-              component="a"
-              href={formatRoute(templatesRoute(entry.id, templateId))}
-              selected={tab === entry.id}
-              disabled={entry.id !== "templates" && !hasTemplates}
-              sx={{
-                minHeight: { xs: 44, lg: 0 },
-                width: { xs: "auto", lg: "100%" },
-                flex: "none",
-                whiteSpace: "nowrap",
-              }}
-              onClick={(event: MouseEvent<HTMLElement>) =>
-                onAppLinkClick(event, templatesRoute(entry.id, templateId))
+      {/* the three parts are tabs across the top, so the page below gets the whole width */}
+      <List disablePadding sx={{ display: "flex", gap: 0.5 }}>
+        {TEMPLATE_TABS.map((entry) => (
+          <ListItemButton
+            key={entry.id}
+            component="a"
+            href={formatRoute(templatesRoute(entry.id, templateId))}
+            selected={tab === entry.id}
+            disabled={entry.id !== "templates" && !hasTemplates}
+            sx={{
+              minHeight: 44,
+              width: "auto",
+              flex: "none",
+              whiteSpace: "nowrap",
+              px: 2,
+              borderBottom: "3px solid transparent",
+              "&.Mui-selected": {
+                borderBottomColor: WORKSPACE_COLORS.accent,
+                bgcolor: "transparent",
+              },
+            }}
+            onClick={(event: MouseEvent<HTMLElement>) =>
+              onAppLinkClick(event, templatesRoute(entry.id, templateId))
+            }
+          >
+            <ListItemText
+              primary={entry.label}
+              secondary={
+                entry.id !== "templates" && !hasTemplates
+                  ? "Create a template first"
+                  : undefined
               }
-            >
-              <ListItemText
-                primary={entry.label}
-                secondary={
-                  entry.id !== "templates" && !hasTemplates
-                    ? "Create a template first"
-                    : undefined
-                }
-              />
-            </ListItemButton>
-          ))}
-        </List>
-      </Box>
-    </ResizableAside>
+              slotProps={{
+                primary: { sx: { fontWeight: tab === entry.id ? 700 : 500 } },
+              }}
+            />
+          </ListItemButton>
+        ))}
+      </List>
+    </Box>
   );
 }
 
@@ -301,7 +297,7 @@ export function TemplatesPage(): JSX.Element {
         flex: 1,
         minWidth: 0,
         minHeight: 0,
-        display: { xs: "flex", lg: "contents" },
+        display: "flex",
         flexDirection: "column",
       }}
     >
@@ -323,7 +319,7 @@ export function TemplatesPage(): JSX.Element {
             flex: 1,
             minWidth: 0,
             minHeight: 0,
-            display: { xs: "flex", lg: "contents" },
+            display: "flex",
             flexDirection: { xs: "column", md: "row" },
           }}
         >
@@ -346,322 +342,313 @@ export function TemplatesPage(): JSX.Element {
               </Box>
             )}
             {tab === "templates" && (
-              <>
-                <Box sx={{ maxWidth: 1000, mx: "auto" }}>
-                  <Typography
-                    component="h1"
-                    sx={{ fontSize: 18, fontWeight: 700 }}
-                  >
-                    Templates
-                  </Typography>
-                  <Typography sx={{ color: WORKSPACE_COLORS.muted, mb: 2 }}>
-                    A template decides which sections a CV has, their order and
-                    their styles. The items inside each section are decided by
-                    the job, through its variant. Changing a template does not
-                    change jobs you have already applied with, only the ones
-                    still in draft.
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: { xs: "column", sm: "row" },
-                      gap: 1,
-                      mb: 2,
-                      alignItems: { xs: "stretch", sm: "flex-start" },
+              <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+                <Typography
+                  component="h1"
+                  sx={{ fontSize: 18, fontWeight: 700 }}
+                >
+                  Templates
+                </Typography>
+                <Typography sx={{ color: WORKSPACE_COLORS.muted, mb: 2 }}>
+                  A template decides which sections a CV has, their order and
+                  their styles. The items inside each section are decided by the
+                  job, through its variant. Changing a template does not change
+                  jobs you have already applied with, only the ones still in
+                  draft.
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 1,
+                    mb: 2,
+                    alignItems: { xs: "stretch", sm: "flex-start" },
+                  }}
+                >
+                  <TextField
+                    size="small"
+                    label="New template name"
+                    placeholder={nextTemplateName(templates)}
+                    value={newName}
+                    onChange={(event) => setNewName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        create();
+                      }
                     }}
+                    helperText="Starts as a copy of the look you are editing now."
+                    sx={{ flex: 1 }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={create}
+                    sx={{ height: { xs: 44, sm: 40 } }}
                   >
-                    <TextField
-                      size="small"
-                      label="New template name"
-                      placeholder={nextTemplateName(templates)}
-                      value={newName}
-                      onChange={(event) => setNewName(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          create();
-                        }
-                      }}
-                      helperText="Starts as a copy of the look you are editing now."
-                      sx={{ flex: 1 }}
-                    />
-                    <Button
-                      variant="contained"
-                      onClick={create}
-                      sx={{ height: { xs: 44, sm: 40 } }}
-                    >
-                      Create template
-                    </Button>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      mb: 1,
-                    }}
+                    Create template
+                  </Button>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    mb: 1,
+                  }}
+                >
+                  <Button
+                    size="small"
+                    aria-haspopup="menu"
+                    onClick={(event) => setSortAnchor(event.currentTarget)}
+                  >
+                    Sort by: {SORT_LABELS[sort]}
+                  </Button>
+                  <Tooltip
+                    title={SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]}
                   >
                     <Button
                       size="small"
-                      aria-haspopup="menu"
-                      onClick={(event) => setSortAnchor(event.currentTarget)}
+                      aria-label={`Reverse the order (now ${SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]})`}
+                      onClick={() => setIsReversed((value) => !value)}
+                      sx={{ minWidth: 0, px: 0.75 }}
                     >
-                      Sort by: {SORT_LABELS[sort]}
-                    </Button>
-                    <Tooltip
-                      title={SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]}
-                    >
-                      <Button
-                        size="small"
-                        aria-label={`Reverse the order (now ${SORT_DIRECTION_HINTS[sort][isReversed ? 1 : 0]})`}
-                        onClick={() => setIsReversed((value) => !value)}
-                        sx={{ minWidth: 0, px: 0.75 }}
-                      >
-                        {isReversed ? (
-                          <ArrowUpwardOutlinedIcon fontSize="small" />
-                        ) : (
-                          <ArrowDownwardOutlinedIcon fontSize="small" />
-                        )}
-                      </Button>
-                    </Tooltip>
-                    <Menu
-                      anchorEl={sortAnchor}
-                      open={sortAnchor !== null}
-                      onClose={() => setSortAnchor(null)}
-                    >
-                      {(Object.keys(SORT_LABELS) as TemplateSort[]).map(
-                        (key) => (
-                          <MenuItem
-                            key={key}
-                            selected={key === sort}
-                            onClick={() => {
-                              setSort(key);
-                              setIsReversed(false);
-                              setSortAnchor(null);
-                            }}
-                          >
-                            {SORT_LABELS[key]}
-                          </MenuItem>
-                        )
+                      {isReversed ? (
+                        <ArrowUpwardOutlinedIcon fontSize="small" />
+                      ) : (
+                        <ArrowDownwardOutlinedIcon fontSize="small" />
                       )}
-                    </Menu>
-                  </Box>
-                  <Box
-                    component="ul"
-                    aria-label="Templates"
-                    sx={{
-                      listStyle: "none",
-                      m: 0,
-                      p: 0,
-                      display: "grid",
-                      gridTemplateColumns: "minmax(0, 1fr)",
-                      gap: 2,
-                    }}
+                    </Button>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={sortAnchor}
+                    open={sortAnchor !== null}
+                    onClose={() => setSortAnchor(null)}
                   >
-                    {sortTemplates(templates, jobs, sort, isReversed).map(
-                      (template) => {
-                        const users = jobs.filter(
-                          (j) => j.templateId === template.id
-                        );
-                        const reason = deleteBlockReason(templates.length);
-                        const isShown = template.id === shownId;
-                        const isExpanded = expandedIds.includes(template.id);
-                        const reasonId = `delete-reason-${template.id}`;
-                        return (
+                    {(Object.keys(SORT_LABELS) as TemplateSort[]).map((key) => (
+                      <MenuItem
+                        key={key}
+                        selected={key === sort}
+                        onClick={() => {
+                          setSort(key);
+                          setIsReversed(false);
+                          setSortAnchor(null);
+                        }}
+                      >
+                        {SORT_LABELS[key]}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+                <Box
+                  component="ul"
+                  aria-label="Templates"
+                  sx={{
+                    listStyle: "none",
+                    m: 0,
+                    p: 0,
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr)",
+                    gap: 2,
+                  }}
+                >
+                  {sortTemplates(templates, jobs, sort, isReversed).map(
+                    (template) => {
+                      const users = jobs.filter(
+                        (j) => j.templateId === template.id
+                      );
+                      const reason = deleteBlockReason(templates.length);
+                      const isShown = template.id === shownId;
+                      const isExpanded = expandedIds.includes(template.id);
+                      const reasonId = `delete-reason-${template.id}`;
+                      return (
+                        <Box
+                          component="li"
+                          key={template.id}
+                          data-selected={isShown}
+                          onClick={() => setPickedId(template.id)}
+                          sx={{
+                            border: `1px solid ${
+                              isShown
+                                ? WORKSPACE_COLORS.accent
+                                : WORKSPACE_COLORS.border
+                            }`,
+                            boxShadow: isShown
+                              ? `0 0 0 1px ${WORKSPACE_COLORS.accent}`
+                              : "none",
+                            borderRadius: "6px",
+                            bgcolor: isShown
+                              ? WORKSPACE_COLORS.accentSoft
+                              : WORKSPACE_COLORS.panel,
+                            cursor: "pointer",
+                            p: 1.75,
+                          }}
+                        >
                           <Box
-                            component="li"
-                            key={template.id}
-                            data-selected={isShown}
-                            onClick={() => setPickedId(template.id)}
                             sx={{
-                              border: `1px solid ${
-                                isShown
-                                  ? WORKSPACE_COLORS.accent
-                                  : WORKSPACE_COLORS.border
-                              }`,
-                              boxShadow: isShown
-                                ? `0 0 0 1px ${WORKSPACE_COLORS.accent}`
-                                : "none",
-                              borderRadius: "6px",
-                              bgcolor: isShown
-                                ? WORKSPACE_COLORS.accentSoft
-                                : WORKSPACE_COLORS.panel,
-                              cursor: "pointer",
-                              p: 1.75,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              flexWrap: "wrap",
+                              gap: 1,
                             }}
                           >
+                            <ButtonBase
+                              aria-pressed={isShown}
+                              aria-label={`Show a sample of ${template.name}`}
+                              onClick={() => setPickedId(template.id)}
+                              sx={{ textAlign: "left", borderRadius: 0.5 }}
+                            >
+                              <Typography
+                                sx={{ fontWeight: 700, fontSize: 15 }}
+                              >
+                                {template.name}
+                              </Typography>
+                            </ButtonBase>
                             <Box
                               sx={{
                                 display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                flexWrap: "wrap",
                                 gap: 1,
+                                flexWrap: "wrap",
+                                justifyContent: "flex-end",
                               }}
                             >
-                              <ButtonBase
-                                aria-pressed={isShown}
-                                aria-label={`Show a sample of ${template.name}`}
-                                onClick={() => setPickedId(template.id)}
-                                sx={{ textAlign: "left", borderRadius: 0.5 }}
-                              >
-                                <Typography
-                                  sx={{ fontWeight: 700, fontSize: 15 }}
-                                >
-                                  {template.name}
-                                </Typography>
-                              </ButtonBase>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  gap: 1,
-                                  flexWrap: "wrap",
-                                  justifyContent: "flex-end",
+                              <Button
+                                size="small"
+                                sx={TOUCH_BUTTON_SX}
+                                variant="contained"
+                                component="a"
+                                href={formatRoute(
+                                  templatesRoute("sections", template.id)
+                                )}
+                                aria-label={`Edit template ${template.name}`}
+                                onClick={(event: MouseEvent<HTMLElement>) => {
+                                  event.stopPropagation();
+                                  onAppLinkClick(
+                                    event,
+                                    templatesRoute("sections", template.id)
+                                  );
                                 }}
                               >
-                                <Button
-                                  size="small"
-                                  sx={TOUCH_BUTTON_SX}
-                                  variant="contained"
-                                  component="a"
-                                  href={formatRoute(
-                                    templatesRoute("design", template.id)
-                                  )}
-                                  aria-label={`Edit template ${template.name}`}
-                                  onClick={(event: MouseEvent<HTMLElement>) => {
-                                    event.stopPropagation();
-                                    onAppLinkClick(
-                                      event,
-                                      templatesRoute("design", template.id)
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="small"
-                                  sx={TOUCH_BUTTON_SX}
-                                  aria-label={`Rename template ${template.name}`}
-                                  onClick={() => {
-                                    setDraftName(template.name);
-                                    setAsking({ kind: "rename", template });
-                                  }}
-                                >
-                                  Rename
-                                </Button>
-                                <Button
-                                  size="small"
-                                  sx={TOUCH_BUTTON_SX}
-                                  aria-label={`Duplicate template ${template.name}`}
-                                  onClick={() => {
-                                    const id = nanoid();
-                                    dispatch(
-                                      addTemplate({
-                                        id,
-                                        name: `${template.name} (copy)`,
-                                        sourceId: template.id,
-                                      })
-                                    );
-                                    setPickedId(id);
-                                  }}
-                                >
-                                  Duplicate
-                                </Button>
-                                <Button
-                                  size="small"
-                                  sx={TOUCH_BUTTON_SX}
-                                  color="error"
-                                  disabled={reason !== ""}
-                                  aria-label={`Delete template ${template.name}`}
-                                  aria-describedby={
-                                    reason ? reasonId : undefined
-                                  }
-                                  onClick={() => {
-                                    setMoveToId(
-                                      templates.find(
-                                        (t) => t.id !== template.id
-                                      )?.id ?? ""
-                                    );
-                                    setAsking({ kind: "delete", template });
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </Box>
+                                Edit
+                              </Button>
+                              <Button
+                                size="small"
+                                sx={TOUCH_BUTTON_SX}
+                                aria-label={`Rename template ${template.name}`}
+                                onClick={() => {
+                                  setDraftName(template.name);
+                                  setAsking({ kind: "rename", template });
+                                }}
+                              >
+                                Rename
+                              </Button>
+                              <Button
+                                size="small"
+                                sx={TOUCH_BUTTON_SX}
+                                aria-label={`Duplicate template ${template.name}`}
+                                onClick={() => {
+                                  const id = nanoid();
+                                  dispatch(
+                                    addTemplate({
+                                      id,
+                                      name: `${template.name} (copy)`,
+                                      sourceId: template.id,
+                                    })
+                                  );
+                                  setPickedId(id);
+                                }}
+                              >
+                                Duplicate
+                              </Button>
+                              <Button
+                                size="small"
+                                sx={TOUCH_BUTTON_SX}
+                                color="error"
+                                disabled={reason !== ""}
+                                aria-label={`Delete template ${template.name}`}
+                                aria-describedby={reason ? reasonId : undefined}
+                                onClick={() => {
+                                  setMoveToId(
+                                    templates.find((t) => t.id !== template.id)
+                                      ?.id ?? ""
+                                  );
+                                  setAsking({ kind: "delete", template });
+                                }}
+                              >
+                                Delete
+                              </Button>
                             </Box>
-                            {reason && (
+                          </Box>
+                          {reason && (
+                            <Typography
+                              id={reasonId}
+                              sx={{
+                                fontSize: 12,
+                                mt: 0.75,
+                                color: WORKSPACE_COLORS.muted,
+                              }}
+                            >
+                              Cannot be deleted: {reason}
+                            </Typography>
+                          )}
+                          <Box sx={{ mt: 1 }}>
+                            {users.length === 0 ? (
                               <Typography
-                                id={reasonId}
                                 sx={{
                                   fontSize: 12,
-                                  mt: 0.75,
                                   color: WORKSPACE_COLORS.muted,
                                 }}
                               >
-                                Cannot be deleted: {reason}
+                                No jobs prepared with this template
                               </Typography>
-                            )}
-                            <Box sx={{ mt: 1 }}>
-                              {users.length === 0 ? (
-                                <Typography
+                            ) : (
+                              <>
+                                <ButtonBase
+                                  aria-expanded={isExpanded}
+                                  aria-controls={`template-jobs-${template.id}`}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setExpandedIds((ids) =>
+                                      isExpanded
+                                        ? ids.filter((id) => id !== template.id)
+                                        : [...ids, template.id]
+                                    );
+                                  }}
                                   sx={{
+                                    gap: 0.5,
+                                    borderRadius: 0.5,
                                     fontSize: 12,
                                     color: WORKSPACE_COLORS.muted,
                                   }}
                                 >
-                                  No jobs prepared with this template
-                                </Typography>
-                              ) : (
-                                <>
-                                  <ButtonBase
-                                    aria-expanded={isExpanded}
-                                    aria-controls={`template-jobs-${template.id}`}
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      setExpandedIds((ids) =>
-                                        isExpanded
-                                          ? ids.filter(
-                                              (id) => id !== template.id
-                                            )
-                                          : [...ids, template.id]
-                                      );
-                                    }}
+                                  <ExpandMoreOutlinedIcon
+                                    fontSize="small"
                                     sx={{
-                                      gap: 0.5,
-                                      borderRadius: 0.5,
-                                      fontSize: 12,
-                                      color: WORKSPACE_COLORS.muted,
+                                      transform: isExpanded
+                                        ? "rotate(180deg)"
+                                        : "none",
                                     }}
-                                  >
-                                    <ExpandMoreOutlinedIcon
-                                      fontSize="small"
-                                      sx={{
-                                        transform: isExpanded
-                                          ? "rotate(180deg)"
-                                          : "none",
-                                      }}
-                                    />
-                                    {jobCountText(users.length)} prepared with
-                                    this template
-                                  </ButtonBase>
-                                  <Collapse
-                                    in={isExpanded}
-                                    id={`template-jobs-${template.id}`}
-                                  >
-                                    <TemplateJobsTable
-                                      jobs={users}
-                                      applications={applications}
-                                    />
-                                  </Collapse>
-                                </>
-                              )}
-                            </Box>
+                                  />
+                                  {jobCountText(users.length)} prepared with
+                                  this template
+                                </ButtonBase>
+                                <Collapse
+                                  in={isExpanded}
+                                  id={`template-jobs-${template.id}`}
+                                >
+                                  <TemplateJobsTable
+                                    jobs={users}
+                                    applications={applications}
+                                  />
+                                </Collapse>
+                              </>
+                            )}
                           </Box>
-                        );
-                      }
-                    )}
-                  </Box>
+                        </Box>
+                      );
+                    }
+                  )}
                 </Box>
-              </>
+              </Box>
             )}
 
             <Dialog

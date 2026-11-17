@@ -17,9 +17,8 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { useViewport } from "@hooks/use-viewport";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
-/* eslint-disable @typescript-eslint/no-magic-numbers -- CSS: 96 px per 25.4 mm */
 const A4_WIDTH_PX = (A4_DIMENSION_MM.width * 96) / 25.4;
-/* eslint-enable @typescript-eslint/no-magic-numbers */
+
 const CANVAS_PADDING_PX = 48;
 const PERCENT = 100;
 

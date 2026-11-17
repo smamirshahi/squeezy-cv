@@ -109,7 +109,7 @@ describe("ATS score", () => {
       "Built GraphQL queries and Jest tests that raised coverage from 30% to 80%\nCut load time by 40% for 12 teams";
     await fetch(`${app.apiUrl}/api/vault`, {
       method: "PUT",
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(edited),
     });
@@ -168,7 +168,7 @@ describe("ATS score", () => {
     // an earlier test edited the saved CV: start from the original again
     await fetch(`${app.apiUrl}/api/vault`, {
       method: "PUT",
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(file),
     });

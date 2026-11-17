@@ -6,6 +6,8 @@ export const MAX_ZOOM = 3;
 /** The size of the saved photo */
 const OUTPUT_WIDTH = 600;
 const OUTPUT_HEIGHT = 750;
+/** JPEG quality of the cropped photo (0-1) */
+const JPEG_QUALITY = 0.88;
 
 interface Point {
   x: number;
@@ -88,7 +90,7 @@ export function cropToDataUrl(
     OUTPUT_WIDTH,
     OUTPUT_HEIGHT
   );
-  return canvas.toDataURL("image/jpeg", 0.88);
+  return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 }
 
 export interface PhotoCrop {

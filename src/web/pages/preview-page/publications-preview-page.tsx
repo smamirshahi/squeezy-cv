@@ -17,8 +17,8 @@ interface Props {
 export function PublicationsPreviewPage({
   section,
 }: Props): JSX.Element | null {
-  const { citationStyle, publicationLinks, highlightOwnName, maxAuthors } =
-    useAppSelector(styleSelector);
+  const style = useAppSelector(styleSelector);
+  const { citationStyle, publicationLinks, maxAuthors } = style;
   const { profile } = useAppSelector(vaultSelector);
   const ownName = profile.citationName?.trim() || profile.fullName;
 
@@ -55,7 +55,7 @@ export function PublicationsPreviewPage({
               segments={formatCitation(item.fields, {
                 style: citationStyle,
                 links: publicationLinks,
-                highlightOwnName,
+                highlightOwnName: style.highlightOwnName,
                 maxAuthors,
                 ownName,
               })}
