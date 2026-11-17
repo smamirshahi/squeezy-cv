@@ -610,9 +610,22 @@ export function VaultItemEditor({
   );
 
   function removeEmptySkills(): void {
-    for (const bulletId of emptySkillIds) {
-      dispatch(removeBullet({ ...ref, bulletId }));
-    }
+    const ids = emptySkillIds;
+    // Wait until focus has landed: moving from the category to the empty skill
+    // input (Tab or click) must not delete the row the user is going to type in
+    setTimeout(() => {
+      const active = document.activeElement;
+      const focusedId =
+        active instanceof HTMLElement
+          ? active.closest<HTMLElement>("[data-bullet-input]")?.dataset
+              .bulletInput
+          : undefined;
+      for (const bulletId of ids) {
+        if (bulletId !== focusedId) {
+          dispatch(removeBullet({ ...ref, bulletId }));
+        }
+      }
+    }, 0);
   }
 
   function newBulletAfter(position: number): void {

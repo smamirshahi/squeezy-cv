@@ -371,7 +371,8 @@ function PublicationsProperties(): JSX.Element {
           onChange={(event) => {
             const raw = event.target.value;
             dispatch(
-              setMaxAuthors(raw === "all" ? "all" : raw === "3" ? 3 : 6)
+              // the menu items carry numbers, so the value arrives as 3 (not "3")
+              setMaxAuthors(raw === "all" ? "all" : Number(raw) === 3 ? 3 : 6)
             );
           }}
         >

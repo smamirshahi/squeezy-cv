@@ -172,7 +172,16 @@ function renderItems(
         ...(bullet.rating === undefined ? {} : { rating: bullet.rating }),
       })),
       emphasis: selection[item.id]?.emphasis ?? "normal",
-    }));
+    }))
+    .filter((item) => !isBlankItem(item));
+}
+
+/** An item with no text in any field or bullet (a stub that was added and never filled in) */
+function isBlankItem(item: RenderedItem): boolean {
+  return (
+    Object.values(item.fields).every((value) => value.trim() === "") &&
+    item.bullets.every((bullet) => bullet.text.trim() === "")
+  );
 }
 
 /** The skills of one group, highest level first (unrated last, ties keep their order) */

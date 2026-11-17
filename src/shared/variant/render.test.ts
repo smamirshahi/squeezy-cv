@@ -3,6 +3,7 @@ import sample from "@fixtures/sample-cv.json";
 import { Variant } from "@custom-types/variant-types";
 import { Vault } from "@custom-types/vault-types";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
+import { singleColumnLayout } from "@shared/vault/page-structure";
 import {
   jobBullets,
   render,
@@ -736,5 +737,33 @@ describe("the template's order of entries (#477)", () => {
     const newest = workIds();
     expect(newest).toEqual(workIds("newest"));
     expect(workIds("oldest")).toEqual([...newest].reverse());
+  });
+});
+
+describe("blank items", () => {
+  it("leaves out an item with no text, and the section when only blank items remain", () => {
+    const variant = createDefaultVariant(file, "blank");
+    const stub = {
+      id: "stub",
+      fields: {},
+      bullets: [],
+      tags: [],
+      shouldShow: true,
+    };
+    const withStubs: Vault = {
+      ...vault,
+      sections: [
+        ...vault.sections.map((s) =>
+          s.id === "experience" ? { ...s, items: [...s.items, stub] } : s
+        ),
+        { id: "proj", type: "projects", title: "Projects", items: [stub] },
+      ],
+    };
+    const doc = { ...variant, layout: singleColumnLayout(withStubs.sections) };
+    const parts = allParts(render(withStubs, doc));
+    expect(sectionPart(parts, "proj")).toBeUndefined();
+    const experience = sectionPart(parts, "experience");
+    expect(experience?.items.some((i) => i.id === "stub")).toBe(false);
+    expect(experience?.items.length).toBeGreaterThan(0);
   });
 });
