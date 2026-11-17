@@ -267,6 +267,7 @@ const jobsSlice = createSlice({
         action: PayloadAction<{
           id: string;
           name: string;
+          subtitle?: string;
           sourceId?: string;
           layout?: VariantLayout;
         }>
@@ -279,6 +280,12 @@ const jobsSlice = createSlice({
           action.payload.id,
           action.payload.name
         );
+        const subtitle = action.payload.subtitle?.trim();
+        if (subtitle) {
+          created.subtitle = subtitle;
+        } else {
+          delete created.subtitle;
+        }
         if (action.payload.layout) {
           // a ready-made template (e.g. Developer) brings its own section placement
           created.layout = structuredClone(action.payload.layout);
@@ -296,6 +303,7 @@ const jobsSlice = createSlice({
       },
       prepare(input: {
         name: string;
+        subtitle?: string;
         id?: string;
         sourceId?: string;
         layout?: VariantLayout;
@@ -304,10 +312,21 @@ const jobsSlice = createSlice({
       },
     },
 
-    renameTemplate(state, action: PayloadAction<{ id: string; name: string }>) {
+    renameTemplate(
+      state,
+      action: PayloadAction<{ id: string; name: string; subtitle?: string }>
+    ) {
       const template = state.templates.find((t) => t.id === action.payload.id);
       if (template) {
         template.name = action.payload.name;
+        if (action.payload.subtitle !== undefined) {
+          const subtitle = action.payload.subtitle.trim();
+          if (subtitle) {
+            template.subtitle = subtitle;
+          } else {
+            delete template.subtitle;
+          }
+        }
       }
     },
 

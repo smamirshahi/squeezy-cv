@@ -1,5 +1,7 @@
 import { Typography } from "@components/ui";
 import { Template } from "@custom-types/template-types";
+import { SectionType } from "@custom-types/vault-types";
+import { SECTION_TYPE_LABELS } from "@store/vault/section-types";
 import { Job } from "@custom-types/job-types";
 import { activateTemplateLook } from "@hooks/use-sync-active-job";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -36,6 +38,26 @@ export function sortTemplates(
     sorted.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }
   return isReversed ? sorted.reverse() : sorted;
+}
+
+/**
+ * The default subtitle of a template: its column count and the sections in order,
+ * e.g. "One column: Summary, Skills, Experience". Header blocks are left out.
+ */
+export function describeLayout(
+  layout: Template["layout"],
+  sections: { id: string; type: SectionType; title?: string }[]
+): string {
+  const byId = new Map(sections.map((s) => [s.id, s]));
+  const names = [...layout.fullWidth, ...layout.left, ...layout.right]
+    .map((id) => byId.get(id))
+    .filter((s) => s !== undefined)
+    .map((s) => s.title || SECTION_TYPE_LABELS[s.type]);
+  const columns =
+    layout.left.length > 0 || layout.right.length > 0
+      ? "Two columns"
+      : "One column";
+  return names.length > 0 ? `${columns}: ${names.join(", ")}` : columns;
 }
 
 /** The name for a new template: "Template 1", "Template 2", ... the first one not taken */

@@ -36,6 +36,7 @@ import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-sett
 import {
   jobCountText,
   TemplateSort,
+  describeLayout,
   nextTemplateName,
   sortTemplates,
 } from "@pages/workspace/template-scope";
@@ -241,6 +242,8 @@ export function TemplatesPage(): JSX.Element {
   const activeJob = useAppSelector(activeJobSelector);
   const vaultSections = useAppSelector(sectionsSelector);
   const [newName, setNewName] = useState<string>("");
+  const [newSubtitle, setNewSubtitle] = useState<string>("");
+  const [draftSubtitle, setDraftSubtitle] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
   const [sort, setSort] = useState<TemplateSort>("newest");
@@ -285,12 +288,26 @@ export function TemplatesPage(): JSX.Element {
     }
   }, [isTemplatePlaceholder, tab]);
 
+  // A new template starts as a copy of the active job's template, so its layout gives the default
+  const sourceTemplate =
+    templates.find((t) => t.id === activeJob.templateId) ?? templates[0];
+  const defaultSubtitle = sourceTemplate
+    ? describeLayout(sourceTemplate.layout, vaultSections)
+    : "";
+
   function create(): void {
     const name = newName.trim() || nextTemplateName(templates);
     const id = nanoid();
-    dispatch(addTemplate({ id, name }));
+    dispatch(
+      addTemplate({
+        id,
+        name,
+        subtitle: newSubtitle.trim() || defaultSubtitle,
+      })
+    );
     setPickedId(id);
     setNewName("");
+    setNewSubtitle("");
   }
 
   /** Makes a real template from a premade one (#488), laid out with the vault's own sections */
@@ -300,6 +317,7 @@ export function TemplatesPage(): JSX.Element {
       addTemplate({
         id,
         name: premade.name,
+        subtitle: premade.description,
         layout: premade.buildLayout(vaultSections),
       })
     );
@@ -395,6 +413,20 @@ export function TemplatesPage(): JSX.Element {
                     }}
                     helperText="Starts as a copy of the look you are editing now."
                     sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Subtitle"
+                    placeholder={defaultSubtitle}
+                    value={newSubtitle}
+                    onChange={(event) => setNewSubtitle(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        create();
+                      }
+                    }}
+                    helperText="Sections in order and the columns, unless you write your own."
+                    sx={{ flex: 1.5 }}
                   />
                   <Button
                     variant="contained"
@@ -520,6 +552,17 @@ export function TemplatesPage(): JSX.Element {
                                 {template.name}
                               </Typography>
                             </ButtonBase>
+                            {template.subtitle && (
+                              <Typography
+                                sx={{
+                                  flexBasis: "100%",
+                                  fontSize: 12,
+                                  color: WORKSPACE_COLORS.muted,
+                                }}
+                              >
+                                {template.subtitle}
+                              </Typography>
+                            )}
                             <Box
                               sx={{
                                 display: "flex",
@@ -553,6 +596,7 @@ export function TemplatesPage(): JSX.Element {
                                 aria-label={`Rename template ${template.name}`}
                                 onClick={() => {
                                   setDraftName(template.name);
+                                  setDraftSubtitle(template.subtitle ?? "");
                                   setAsking({ kind: "rename", template });
                                 }}
                               >
@@ -756,6 +800,13 @@ export function TemplatesPage(): JSX.Element {
                   onChange={(event) => setDraftName(event.target.value)}
                   sx={{ mt: 1 }}
                 />
+                <TextField
+                  fullWidth
+                  label="Subtitle"
+                  value={draftSubtitle}
+                  onChange={(event) => setDraftSubtitle(event.target.value)}
+                  sx={{ mt: 2 }}
+                />
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setAsking(null)}>Cancel</Button>
@@ -768,6 +819,7 @@ export function TemplatesPage(): JSX.Element {
                         renameTemplate({
                           id: asking.template.id,
                           name: draftName.trim(),
+                          subtitle: draftSubtitle,
                         })
                       );
                     }
