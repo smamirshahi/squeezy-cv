@@ -15,6 +15,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- A **Premade templates** list below your templates (#488), starting with **Developer**: one column for 1-2 pages (header, summary, grouped skills, experience, projects or open source, then education and certifications; optional sections last). "Add to my templates" makes a real template from it, laid out with your own sections, which you can then edit, rename or delete like any other. The page limit belongs to the job, so set it there.
 - The Welcome tutorial opens by itself the very first time the app is opened (#482); page tutorials follow on each page's first visit. People who already saw a tutorial are not welcomed again.
 
 - Templates has a new **Sections** tab (#477, with #465 and #476): the list of the template's sections on the left, the sample CV in the middle with the chosen section outlined and tagged "Editing" (click a section on the paper to pick it; the Highlight switch turns the outline off), and its settings on the right, with Back and Next in CV order. Below a desktop the list is the dropdown in the settings header. The header options (photo, nationality, marital status, gender, right to work) are in Personal Info, Links in Contact Info, the References options in References, Skill icon in Skills and the page layout and section order on this tab; Design keeps what is the same everywhere (margin, date format, spacing, line under titles, icons next to details, bullet point icon, colours and type).

@@ -268,6 +268,7 @@ const jobsSlice = createSlice({
           id: string;
           name: string;
           sourceId?: string;
+          layout?: VariantLayout;
         }>
       ) {
         const source =
@@ -278,6 +279,10 @@ const jobsSlice = createSlice({
           action.payload.id,
           action.payload.name
         );
+        if (action.payload.layout) {
+          // a ready-made template (e.g. Developer) brings its own section placement
+          created.layout = structuredClone(action.payload.layout);
+        }
         if (state.isTemplatePlaceholder) {
           // the first real template replaces the stand-in; the stand-in job moves to it
           state.templates = [created];
@@ -289,7 +294,12 @@ const jobsSlice = createSlice({
           state.templates.push(created);
         }
       },
-      prepare(input: { name: string; id?: string; sourceId?: string }) {
+      prepare(input: {
+        name: string;
+        id?: string;
+        sourceId?: string;
+        layout?: VariantLayout;
+      }) {
         return { payload: { ...input, id: input.id ?? nanoid() } };
       },
     },

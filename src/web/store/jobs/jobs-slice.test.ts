@@ -376,6 +376,24 @@ describe("templates and jobs: who owns what", () => {
     );
   });
 
+  it("adds a template with the layout it is given instead of the copied one", () => {
+    const layout = {
+      fullWidth: ["personalInfo", "skills"],
+      left: [],
+      right: [],
+    };
+    const state = jobsReducer(
+      withTwo(),
+      addTemplate({ name: "Developer", id: "dev", layout })
+    );
+    const added = state.templates.find((t) => t.id === "dev")!;
+    expect(added.layout).toEqual(layout);
+    expect(added.layout).not.toBe(layout);
+    // the rest of the look still comes from the copied template
+    expect(added.style).toEqual(state.templates[1].style);
+    expect(state.templates[1].layout).not.toEqual(layout);
+  });
+
   it("renames a template", () => {
     const state = jobsReducer(
       withTwo(),

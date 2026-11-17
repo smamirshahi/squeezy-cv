@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   ButtonBase,
+  Chip,
   Collapse,
   Dialog,
   DialogActions,
@@ -57,6 +58,8 @@ import {
   renameTemplate,
   templatesSelector,
 } from "@store/jobs/jobs-slice";
+import { sectionsSelector } from "@store/vault/vault-slice";
+import { PREMADE_TEMPLATES } from "@shared/vault/premade-templates";
 import { nanoid } from "@reduxjs/toolkit";
 
 /** Why a template cannot be deleted, or an empty text when it can */
@@ -236,6 +239,7 @@ export function TemplatesPage(): JSX.Element {
   const templates = isTemplatePlaceholder ? [] : allTemplates;
   const jobs = isJobPlaceholder ? [] : allJobs;
   const activeJob = useAppSelector(activeJobSelector);
+  const vaultSections = useAppSelector(sectionsSelector);
   const [newName, setNewName] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
   const [draftName, setDraftName] = useState<string>("");
@@ -287,6 +291,19 @@ export function TemplatesPage(): JSX.Element {
     dispatch(addTemplate({ id, name }));
     setPickedId(id);
     setNewName("");
+  }
+
+  /** Makes a real template from a premade one (#488), laid out with the vault's own sections */
+  function addPremade(premade: (typeof PREMADE_TEMPLATES)[number]): void {
+    const id = nanoid();
+    dispatch(
+      addTemplate({
+        id,
+        name: premade.name,
+        layout: premade.buildLayout(vaultSections),
+      })
+    );
+    setPickedId(id);
   }
 
   return (
@@ -647,6 +664,78 @@ export function TemplatesPage(): JSX.Element {
                       );
                     }
                   )}
+                </Box>
+                <Typography
+                  component="h2"
+                  sx={{ fontSize: 15, fontWeight: 700, mt: 3, mb: 1 }}
+                >
+                  Premade templates
+                </Typography>
+                <Box
+                  component="ul"
+                  aria-label="Premade"
+                  sx={{
+                    listStyle: "none",
+                    m: 0,
+                    p: 0,
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr)",
+                    gap: 2,
+                  }}
+                >
+                  {PREMADE_TEMPLATES.map((premade) => (
+                    <Box
+                      component="li"
+                      key={premade.key}
+                      sx={{
+                        border: `1px solid ${WORKSPACE_COLORS.border}`,
+                        borderRadius: "6px",
+                        bgcolor: WORKSPACE_COLORS.panel,
+                        p: 1.75,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          flexWrap: "wrap",
+                          gap: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                          }}
+                        >
+                          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+                            {premade.name}
+                          </Typography>
+                          <Chip size="small" label="Premade" />
+                        </Box>
+                        <Button
+                          size="small"
+                          sx={TOUCH_BUTTON_SX}
+                          variant="outlined"
+                          aria-label={`Add ${premade.name} template to my templates`}
+                          onClick={() => addPremade(premade)}
+                        >
+                          Add to my templates
+                        </Button>
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontSize: 12,
+                          mt: 0.75,
+                          color: WORKSPACE_COLORS.muted,
+                        }}
+                      >
+                        {premade.description}
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
               </Box>
             )}
