@@ -167,8 +167,12 @@ describe("templates and jobs in the browser", () => {
       .getByRole("navigation", { name: "Tools" })
       .getByRole("link", { name: "Templates" })
       .click();
-    await page.getByLabel("New template name").fill("Unused look");
+    await page.getByRole("button", { name: "New template" }).click();
+    await page.getByLabel("Name", { exact: true }).fill("Unused look");
     await page.getByRole("button", { name: "Create template" }).click();
+    // creating opens the new template's Sections tab; go back to the list
+    await page.waitForURL(/\/templates\/[^/]+\/sections$/);
+    await page.getByRole("link", { name: "Template list" }).click();
     const card = page
       .getByRole("list", { name: "Templates" })
       .getByRole("listitem")

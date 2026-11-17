@@ -233,16 +233,20 @@ describe("the Templates list", () => {
     ).toBe("/templates/second/design");
   });
 
-  it("selects a newly created template, and the Design tab then edits it", async () => {
+  it("opens a newly created template in Sections, and the Design tab then edits it", async () => {
     const store = await open("/templates");
-    fireEvent.change(screen.getByLabelText("New template name"), {
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Fresh" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Create template" }));
     const fresh = templatesSelector(store.getState()).find(
       (t) => t.name === "Fresh"
     )!;
-    const nav = screen.getByRole("navigation", { name: "Template sections" });
+    expect(window.location.pathname).toBe(`/templates/${fresh.id}/sections`);
+    const nav = await screen.findByRole("navigation", {
+      name: "Template sections",
+    });
     expect(
       within(nav).getByRole("link", { name: "Design" }).getAttribute("href")
     ).toBe(`/templates/${fresh.id}/design`);

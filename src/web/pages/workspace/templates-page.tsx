@@ -1,4 +1,11 @@
-import { MouseEvent, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Box,
   Button,
@@ -20,6 +27,7 @@ import {
   Typography,
 } from "@components/ui";
 import {
+  AddOutlined as AddOutlinedIcon,
   ArrowDownwardOutlined as ArrowDownwardOutlinedIcon,
   ArrowUpwardOutlined as ArrowUpwardOutlinedIcon,
   ExpandMoreOutlined as ExpandMoreOutlinedIcon,
@@ -89,11 +97,145 @@ const SORT_DIRECTION_HINTS: Record<TemplateSort, [string, string]> = {
   alphabetic: ["A to Z", "Z to A"],
 };
 
-/** One dialog for the two name questions: rename and delete confirmation share the shell */
-type Asking =
-  | { kind: "rename"; template: Template }
-  | { kind: "delete"; template: Template }
-  | null;
+/** The delete confirmation dialog; renaming and creating happen in place on the list (#499) */
+type Asking = { kind: "delete"; template: Template } | null;
+
+/** The one in-place form that can be open: a draft card for a new template, or a card being renamed */
+type InlineForm = { kind: "new" } | { kind: "rename"; id: string } | null;
+
+/** The in-place form for a template's name and subtitle, shared by New and Rename */
+function TemplateForm({
+  title,
+  name,
+  subtitle,
+  namePlaceholder,
+  subtitlePlaceholder,
+  error,
+  hint,
+  submitLabel,
+  submitDisabled,
+  onName,
+  onSubtitle,
+  onSubmit,
+  onCancel,
+}: {
+  title: string;
+  name: string;
+  subtitle: string;
+  namePlaceholder?: string;
+  subtitlePlaceholder?: string;
+  error: string;
+  hint: string;
+  submitLabel: string;
+  submitDisabled: boolean;
+  onName: (value: string) => void;
+  onSubtitle: (value: string) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+}): JSX.Element {
+  return (
+    <Box
+      component="form"
+      aria-label={title}
+      onSubmit={(event: FormEvent) => {
+        event.preventDefault();
+        if (!submitDisabled) {
+          onSubmit();
+        }
+      }}
+      onKeyDown={(event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          onCancel();
+        }
+      }}
+      sx={{
+        border: `2px solid ${WORKSPACE_COLORS.accent}`,
+        borderRadius: "6px",
+        bgcolor: WORKSPACE_COLORS.panel,
+        p: 1.75,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+      }}
+    >
+      <Typography sx={{ fontSize: 12, fontWeight: 700 }}>{title}</Typography>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "5fr 7fr" },
+          gap: 1.5,
+        }}
+      >
+        <TextField
+          autoFocus
+          size="small"
+          label="Name"
+          value={name}
+          placeholder={namePlaceholder}
+          onChange={(event) => onName(event.target.value)}
+          error={error !== ""}
+          slotProps={{ htmlInput: { maxLength: 40 } }}
+        />
+        <TextField
+          size="small"
+          label="Subtitle (optional)"
+          value={subtitle}
+          placeholder={subtitlePlaceholder ?? "What is it for?"}
+          onChange={(event) => onSubtitle(event.target.value)}
+          slotProps={{ htmlInput: { maxLength: 120 } }}
+        />
+      </Box>
+      {error && (
+        <Typography role="alert" sx={{ fontSize: 12, color: "error.main" }}>
+          {error}
+        </Typography>
+      )}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: 1,
+        }}
+      >
+        <Typography
+          sx={{
+            flex: 1,
+            fontSize: 12,
+            color: WORKSPACE_COLORS.muted,
+            order: { xs: 3, sm: 0 },
+          }}
+        >
+          {hint} Enter saves. Esc cancels.
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            "& > *": { flex: { xs: 1, sm: "none" } },
+          }}
+        >
+          <Button
+            type="button"
+            color="neutral"
+            sx={TOUCH_BUTTON_SX}
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={TOUCH_BUTTON_SX}
+            disabled={submitDisabled}
+          >
+            {submitLabel}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 const TEMPLATE_TABS: { id: TemplateTab; label: string }[] = [
   { id: "templates", label: "Template list" },
@@ -241,11 +383,10 @@ export function TemplatesPage(): JSX.Element {
   const jobs = isJobPlaceholder ? [] : allJobs;
   const activeJob = useAppSelector(activeJobSelector);
   const vaultSections = useAppSelector(sectionsSelector);
-  const [newName, setNewName] = useState<string>("");
-  const [newSubtitle, setNewSubtitle] = useState<string>("");
+  const [form, setForm] = useState<InlineForm>(null);
+  const [draftName, setDraftName] = useState<string>("");
   const [draftSubtitle, setDraftSubtitle] = useState<string>("");
   const [asking, setAsking] = useState<Asking>(null);
-  const [draftName, setDraftName] = useState<string>("");
   const [sort, setSort] = useState<TemplateSort>("newest");
   const api = useMemo(() => createApiClient(), []);
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
@@ -295,19 +436,62 @@ export function TemplatesPage(): JSX.Element {
     ? describeLayout(sourceTemplate.layout, vaultSections)
     : "";
 
-  function create(): void {
-    const name = newName.trim() || nextTemplateName(templates);
-    const id = nanoid();
-    dispatch(
-      addTemplate({
-        id,
-        name,
-        subtitle: newSubtitle.trim() || defaultSubtitle,
-      })
-    );
-    setPickedId(id);
-    setNewName("");
-    setNewSubtitle("");
+  /** A name another template already has (any case), or an empty text; the template being renamed is not counted */
+  function nameClash(): string {
+    const wanted = draftName.trim().toLowerCase();
+    const ownId = form?.kind === "rename" ? form.id : null;
+    const isClash =
+      wanted !== "" &&
+      templates.some(
+        (t) => t.id !== ownId && t.name.trim().toLowerCase() === wanted
+      );
+    return isClash
+      ? `A template called “${draftName.trim()}” already exists. Pick another name.`
+      : "";
+  }
+
+  function openNew(): void {
+    setDraftName("");
+    setDraftSubtitle("");
+    setForm({ kind: "new" });
+  }
+
+  function openRename(template: Template): void {
+    setDraftName(template.name);
+    setDraftSubtitle(template.subtitle ?? "");
+    setPickedId(template.id);
+    setForm({ kind: "rename", id: template.id });
+  }
+
+  /** Create (a draft card) or rename (a card in place), whichever form is open */
+  function commit(): void {
+    if (form === null || nameClash() !== "") {
+      return;
+    }
+    if (form.kind === "new") {
+      const id = nanoid();
+      dispatch(
+        addTemplate({
+          id,
+          name: draftName.trim() || nextTemplateName(templates),
+          subtitle: draftSubtitle.trim() || defaultSubtitle,
+        })
+      );
+      setPickedId(id);
+      setForm(null);
+      // a new template opens straight in its Sections tab, ready to be shaped
+      navigate(templatesRoute("sections", id));
+      return;
+    } else if (draftName.trim() !== "") {
+      dispatch(
+        renameTemplate({
+          id: form.id,
+          name: draftName.trim(),
+          subtitle: draftSubtitle,
+        })
+      );
+    }
+    setForm(null);
   }
 
   /** Makes a real template from a premade one (#488), laid out with the vault's own sections */
@@ -384,56 +568,30 @@ export function TemplatesPage(): JSX.Element {
                 >
                   Templates
                 </Typography>
-                <Typography sx={{ color: WORKSPACE_COLORS.muted, mb: 2 }}>
-                  A template decides which sections a CV has, their order and
-                  their styles. The items inside each section are decided by the
-                  job, through its variant. Changing a template does not change
-                  jobs you have already applied with, only the ones still in
-                  draft.
-                </Typography>
                 <Box
                   sx={{
                     display: "flex",
                     flexDirection: { xs: "column", sm: "row" },
-                    gap: 1,
+                    gap: 2,
                     mb: 2,
                     alignItems: { xs: "stretch", sm: "flex-start" },
                   }}
                 >
-                  <TextField
-                    size="small"
-                    label="New template name"
-                    placeholder={nextTemplateName(templates)}
-                    value={newName}
-                    onChange={(event) => setNewName(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        create();
-                      }
-                    }}
-                    helperText="Starts as a copy of the look you are editing now."
-                    sx={{ flex: 1 }}
-                  />
-                  <TextField
-                    size="small"
-                    label="Subtitle"
-                    placeholder={defaultSubtitle}
-                    value={newSubtitle}
-                    onChange={(event) => setNewSubtitle(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        create();
-                      }
-                    }}
-                    helperText="Sections in order and the columns, unless you write your own."
-                    sx={{ flex: 1.5 }}
-                  />
+                  <Typography sx={{ color: WORKSPACE_COLORS.muted, flex: 1 }}>
+                    A template decides which sections a CV has, their order and
+                    their styles. The items inside each section are decided by
+                    the job, through its variant. Changing a template does not
+                    change jobs you have already applied with, only the ones
+                    still in draft.
+                  </Typography>
                   <Button
                     variant="contained"
-                    onClick={create}
-                    sx={{ height: { xs: 44, sm: 40 } }}
+                    startIcon={<AddOutlinedIcon />}
+                    disabled={form !== null}
+                    onClick={openNew}
+                    sx={{ flex: "none", height: { xs: 44, sm: 40 } }}
                   >
-                    Create template
+                    New template
                   </Button>
                 </Box>
                 <Box
@@ -499,8 +657,56 @@ export function TemplatesPage(): JSX.Element {
                     gap: 2,
                   }}
                 >
+                  {form?.kind === "new" && (
+                    <Box component="li">
+                      <TemplateForm
+                        title="New template"
+                        name={draftName}
+                        subtitle={draftSubtitle}
+                        namePlaceholder={nextTemplateName(templates)}
+                        subtitlePlaceholder={defaultSubtitle}
+                        error={nameClash()}
+                        hint="Starts as a copy of the look you are editing now. Your vault and jobs are not changed."
+                        submitLabel="Create template"
+                        submitDisabled={nameClash() !== ""}
+                        onName={setDraftName}
+                        onSubtitle={setDraftSubtitle}
+                        onSubmit={commit}
+                        onCancel={() => setForm(null)}
+                      />
+                    </Box>
+                  )}
                   {sortTemplates(templates, jobs, sort, isReversed).map(
                     (template) => {
+                      if (form?.kind === "rename" && form.id === template.id) {
+                        return (
+                          <Box component="li" key={template.id}>
+                            <TemplateForm
+                              title="Rename template"
+                              name={draftName}
+                              subtitle={draftSubtitle}
+                              error={nameClash()}
+                              hint={`${
+                                jobs.some((j) => j.templateId === template.id)
+                                  ? `Used by ${jobCountText(
+                                      jobs.filter(
+                                        (j) => j.templateId === template.id
+                                      ).length
+                                    )}. Renaming does not change any CV.`
+                                  : "No job uses this template yet."
+                              }`}
+                              submitLabel="Rename"
+                              submitDisabled={
+                                draftName.trim() === "" || nameClash() !== ""
+                              }
+                              onName={setDraftName}
+                              onSubtitle={setDraftSubtitle}
+                              onSubmit={commit}
+                              onCancel={() => setForm(null)}
+                            />
+                          </Box>
+                        );
+                      }
                       const users = jobs.filter(
                         (j) => j.templateId === template.id
                       );
@@ -534,41 +740,60 @@ export function TemplatesPage(): JSX.Element {
                           <Box
                             sx={{
                               display: "flex",
-                              alignItems: "center",
+                              alignItems: "flex-start",
                               justifyContent: "space-between",
                               flexWrap: "wrap",
                               gap: 1,
                             }}
                           >
-                            <ButtonBase
-                              aria-pressed={isShown}
-                              aria-label={`Show a sample of ${template.name}`}
-                              onClick={() => setPickedId(template.id)}
-                              sx={{ textAlign: "left", borderRadius: 0.5 }}
-                            >
-                              <Typography
-                                sx={{ fontWeight: 700, fontSize: 15 }}
+                            <Box sx={{ flex: "1 1 240px", minWidth: 0 }}>
+                              <Box
+                                sx={{ display: "flex", alignItems: "center" }}
                               >
-                                {template.name}
-                              </Typography>
-                            </ButtonBase>
-                            {template.subtitle && (
-                              <Typography
-                                sx={{
-                                  flexBasis: "100%",
-                                  fontSize: 12,
-                                  color: WORKSPACE_COLORS.muted,
-                                }}
-                              >
-                                {template.subtitle}
-                              </Typography>
-                            )}
+                                <ButtonBase
+                                  aria-pressed={isShown}
+                                  aria-label={`Show a sample of ${template.name}`}
+                                  onClick={() => setPickedId(template.id)}
+                                  sx={{ textAlign: "left", borderRadius: 0.5 }}
+                                >
+                                  <Typography
+                                    sx={{ fontWeight: 700, fontSize: 15 }}
+                                  >
+                                    {template.name}
+                                  </Typography>
+                                </ButtonBase>
+                              </Box>
+                              {template.subtitle ? (
+                                <Typography
+                                  sx={{
+                                    fontSize: 12,
+                                    color: WORKSPACE_COLORS.muted,
+                                  }}
+                                >
+                                  {template.subtitle}
+                                </Typography>
+                              ) : (
+                                <Button
+                                  size="small"
+                                  disabled={form !== null}
+                                  startIcon={<AddOutlinedIcon />}
+                                  onClick={(event: MouseEvent<HTMLElement>) => {
+                                    event.stopPropagation();
+                                    openRename(template);
+                                  }}
+                                  sx={{ fontSize: 12, alignSelf: "flex-start" }}
+                                >
+                                  Add a subtitle
+                                </Button>
+                              )}
+                            </Box>
                             <Box
                               sx={{
                                 display: "flex",
                                 gap: 1,
                                 flexWrap: "wrap",
                                 justifyContent: "flex-end",
+                                flex: "none",
                               }}
                             >
                               <Button
@@ -590,19 +815,33 @@ export function TemplatesPage(): JSX.Element {
                               >
                                 Edit
                               </Button>
+                              <Box
+                                component="span"
+                                aria-hidden="true"
+                                sx={{
+                                  width: "1px",
+                                  alignSelf: "stretch",
+                                  mx: 0.5,
+                                  bgcolor: WORKSPACE_COLORS.border,
+                                }}
+                              />
                               <Button
+                                variant="outlined"
+                                color="neutral"
                                 size="small"
                                 sx={TOUCH_BUTTON_SX}
+                                disabled={form !== null}
                                 aria-label={`Rename template ${template.name}`}
-                                onClick={() => {
-                                  setDraftName(template.name);
-                                  setDraftSubtitle(template.subtitle ?? "");
-                                  setAsking({ kind: "rename", template });
+                                onClick={(event: MouseEvent<HTMLElement>) => {
+                                  event.stopPropagation();
+                                  openRename(template);
                                 }}
                               >
                                 Rename
                               </Button>
                               <Button
+                                variant="outlined"
+                                color="neutral"
                                 size="small"
                                 sx={TOUCH_BUTTON_SX}
                                 aria-label={`Duplicate template ${template.name}`}
@@ -620,7 +859,18 @@ export function TemplatesPage(): JSX.Element {
                               >
                                 Duplicate
                               </Button>
+                              <Box
+                                component="span"
+                                aria-hidden="true"
+                                sx={{
+                                  width: "1px",
+                                  alignSelf: "stretch",
+                                  mx: 0.5,
+                                  bgcolor: WORKSPACE_COLORS.border,
+                                }}
+                              />
                               <Button
+                                variant="outlined"
                                 size="small"
                                 sx={TOUCH_BUTTON_SX}
                                 color="error"
@@ -783,53 +1033,6 @@ export function TemplatesPage(): JSX.Element {
                 </Box>
               </Box>
             )}
-
-            <Dialog
-              open={asking?.kind === "rename"}
-              onClose={() => setAsking(null)}
-              fullWidth
-              maxWidth="xs"
-            >
-              <DialogTitle>Rename template</DialogTitle>
-              <DialogContent sx={{ pt: 1 }}>
-                <TextField
-                  autoFocus
-                  fullWidth
-                  label="Template name"
-                  value={draftName}
-                  onChange={(event) => setDraftName(event.target.value)}
-                  sx={{ mt: 1 }}
-                />
-                <TextField
-                  fullWidth
-                  label="Subtitle"
-                  value={draftSubtitle}
-                  onChange={(event) => setDraftSubtitle(event.target.value)}
-                  sx={{ mt: 2 }}
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setAsking(null)}>Cancel</Button>
-                <Button
-                  variant="contained"
-                  disabled={draftName.trim() === ""}
-                  onClick={() => {
-                    if (asking?.kind === "rename") {
-                      dispatch(
-                        renameTemplate({
-                          id: asking.template.id,
-                          name: draftName.trim(),
-                          subtitle: draftSubtitle,
-                        })
-                      );
-                    }
-                    setAsking(null);
-                  }}
-                >
-                  Save name
-                </Button>
-              </DialogActions>
-            </Dialog>
 
             <Dialog
               open={asking?.kind === "delete"}
