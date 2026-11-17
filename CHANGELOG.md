@@ -22,6 +22,13 @@ How to release: see "Versioning" in `CLAUDE.md`.
 - Work Experience and Education each have their own **Order of entries** (newest first, the default, or oldest first) in the template; an order a job sets by hand still wins. Template format version 2 (a migration adds the new settings).
 - Publications (#465, #476): your name is bold among the authors, the journal is in italics, the link is visible text at the end of the line (a bare DOI shows as `doi.org/...`) or not shown, long author lists are cut with "et al." (3, 6 or all; in APA your own name is kept), and the order is newest first or your own. "My name as written in citations" is saved in your vault (Main Info profile), not in the template. The publication settings have a live sample.
 
+### Fixed
+
+- Adding a skill category: filling in the Category no longer removes the empty skill input (#490).
+- Publications: "Authors before et al." set to 3 now keeps 3 authors, not 6 (#490).
+- An item with no text (for example an unfilled project) no longer draws its section heading; a section with only such items is left out (#490).
+- The Bullet Point Icon dropdown shows the actual bullet next to each name (#490).
+
 ### Removed
 
 - Demo mode (#429): the "Try with demo data" button on the first-run screen, the made-up CV with two demo templates and a job, the Demo banner (Reset demo, Leave demo), the "Demo - not saved" label and the places that switched off PDF export, Mark as applied and AI actions in the demo. A new user now starts with an empty vault and the built-in blank layout; ready-made templates will come later. Your own data is not touched.
