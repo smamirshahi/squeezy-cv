@@ -36,6 +36,9 @@ export const TemplateSchema = Object({
   /** Name shown in lists, e.g. "Template 1" */
   name: String,
 
+  /** One line under the name: what the template is, e.g. "One column: Summary, Experience". Missing = none. */
+  subtitle: String.optional(),
+
   /** Day the template was made (YYYY-MM-DD); missing in templates from before this field */
   createdAt: String.optional(),
 
