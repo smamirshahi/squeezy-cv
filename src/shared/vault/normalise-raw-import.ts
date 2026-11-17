@@ -8,7 +8,9 @@ function isObject(value: unknown): value is Obj {
 
 /** A string for text, numbers and lists of those; undefined for anything else (null, objects, empty) */
 function toText(value: unknown): string | undefined {
-  if (typeof value === "string") return value.trim() === "" ? undefined : value;
+  if (typeof value === "string") {
+    return value.trim() === "" ? undefined : value;
+  }
   if (typeof value === "number" || typeof value === "boolean") {
     return String(value);
   }
@@ -20,8 +22,12 @@ function toText(value: unknown): string | undefined {
 }
 
 function toTextList(value: unknown): string[] {
-  if (typeof value === "string") return value.trim() === "" ? [] : [value];
-  if (!Array.isArray(value)) return [];
+  if (typeof value === "string") {
+    return value.trim() === "" ? [] : [value];
+  }
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value.map(toText).filter((p): p is string => p !== undefined);
 }
 
@@ -41,12 +47,16 @@ const PROFILE_KEYS = [
  * wrong afterwards is reported by the schema as before.
  */
 export function normaliseRawImport(value: unknown): unknown {
-  if (!isObject(value)) return value;
+  if (!isObject(value)) {
+    return value;
+  }
   const rawProfile = isObject(value.profile) ? value.profile : {};
   const profile: Obj = { fullName: toText(rawProfile.fullName) ?? "" };
   for (const key of PROFILE_KEYS) {
     const text = toText(rawProfile[key]);
-    if (key !== "fullName" && text !== undefined) profile[key] = text;
+    if (key !== "fullName" && text !== undefined) {
+      profile[key] = text;
+    }
   }
 
   const links = (Array.isArray(value.links) ? value.links : [])
@@ -72,7 +82,9 @@ export function normaliseRawImport(value: unknown): unknown {
           if (isObject(item.fields)) {
             for (const [key, field] of Object.entries(item.fields)) {
               const text = toText(field);
-              if (text !== undefined) fields[key] = text;
+              if (text !== undefined) {
+                fields[key] = text;
+              }
             }
           }
           return {

@@ -143,6 +143,8 @@ export default tseslint.config(
         {
           code: 130,
           ignorePattern: "^import .*",
+          // Doc comments are prose; prettier does not wrap them and a break mid-sentence hurts more
+          ignoreComments: true,
           ignoreStrings: true,
           ignoreUrls: true,
           ignoreTemplateLiterals: true,
@@ -150,7 +152,9 @@ export default tseslint.config(
       ],
 
       // Require the use of function declarations instead of function expressions
-      "func-style": ["warn", "declaration"],
+      // Arrow functions assigned to a const are allowed: React components, hooks and
+      // callbacks are written that way. Plain "function" declarations stay the default.
+      "func-style": ["warn", "declaration", { allowArrowFunctions: true }],
 
       /* Comments */
       // Enforce consistent spacing after the `//` or `/*` in a comment
@@ -160,7 +164,10 @@ export default tseslint.config(
       "multiline-comment-style": ["warn", "separate-lines"],
 
       // Disallow comments in same line as code
-      "line-comment-position": "warn",
+      "line-comment-position": [
+        "warn",
+        { position: "above", applyDefaultIgnorePatterns: true },
+      ],
 
       // Require quotes around object literal property names
       "quote-props": ["warn", "as-needed"],
@@ -237,17 +244,24 @@ export default tseslint.config(
           filter: {
             // & is added to exclude css class names specifically MUI css class names
             // aria-labelledby is from MUI package
-            regex: "&|aria-labelledby|aria-label",
+            // Names that are not valid identifiers ("POST /api/ai/chat", "Content-Type",
+            // "job-a") or are snake_case (start_url, html_url) belong to HTTP, file
+            // formats or external APIs, so we cannot rename them
+            regex:
+              "&|aria-labelledby|aria-label|[^A-Za-z0-9_]|^[a-z0-9]+_[a-z0-9_]+$|^[0-9]+$",
             match: false,
           },
         },
         {
           selector: "variable",
           format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          // "_unused" marks a value that is deliberately not used
+          leadingUnderscore: "allow",
         },
         {
           selector: "parameter",
-          format: ["camelCase"],
+          // PascalCase: a parameter that is a component, e.g. (Icon) => <Icon />
+          format: ["camelCase", "PascalCase"],
           leadingUnderscore: "allow",
         },
         {
@@ -255,14 +269,12 @@ export default tseslint.config(
           format: ["PascalCase"],
         },
 
-        // Require booleans to start with a whitelisted verb
-        ...[
-          "variable",
-          "parameter",
-          "property",
-          "parameterProperty",
-          "accessor",
-        ].map((selector) => ({
+        // Require booleans to start with a whitelisted verb. Not applied to
+        // "property": object keys are mostly option names of MUI, Playwright,
+        // fs and the like (exact, shrink, recursive, printBackground), which we cannot rename.
+        // Not applied to "parameter" either: callbacks such as onChange(value),
+        // onCheckedChange(checked) have their parameter names and types set by MUI.
+        ...["variable", "parameterProperty", "accessor"].map((selector) => ({
           selector,
           types: ["boolean"],
           // "format" is required, but the camelcase rule already enforces it
@@ -386,8 +398,12 @@ export default tseslint.config(
       "@typescript-eslint/no-magic-numbers": [
         "warn",
         {
-          ignore: [-1, 1, 0, 2, 100],
+          // 3 and 10 (hex shorthand, decimal base) and 1024 (bytes per KiB) are
+          // self-explanatory
+          ignore: [-1, 1, 0, 2, 3, 10, 100, 1024],
           ignoreArrayIndexes: true,
+          // Types such as 3 | 6 | "all" are values of the data format
+          ignoreNumericLiteralTypes: true,
         },
       ],
 
@@ -420,7 +436,9 @@ export default tseslint.config(
           args: "all",
           argsIgnorePattern: "^_",
           vars: "all",
-          varsIgnorePattern: "^_",
+          // The runtypes schemas (FooSchema) are used as `Static<typeof FooSchema>`,
+          // which the rule counts as a type-only use; knip finds the really dead ones
+          varsIgnorePattern: "^_|Schema$",
           caughtErrorsIgnorePattern: "^_",
           destructuredArrayIgnorePattern: "^_",
         },
@@ -460,6 +478,28 @@ export default tseslint.config(
     },
   },
   {
+    // A screen in a component is often "loading ? ... : error ? ... : list". Keep the rule for
+    // plain logic (.ts), where a nested ternary is better as a lookup or if/else.
+    files: ["src/web/**/*.tsx"],
+    rules: {
+      "no-nested-ternary": "off",
+    },
+  },
+  {
+    // Numbers in styles (sx spacing, sizes, colours), e2e checks and binary formats
+    // (zip headers, file signatures) are the content itself; a named constant for each
+    // would hide the value instead of explaining it.
+    files: [
+      "src/web/**/*.tsx",
+      "src/e2e/**",
+      "src/server/export/zip.ts",
+      "src/web/store/persistence/browser/**",
+    ],
+    rules: {
+      "@typescript-eslint/no-magic-numbers": "off",
+    },
+  },
+  {
     // This objects contains rules customization only for test files
     files: ["**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
     languageOptions: {
@@ -483,6 +523,8 @@ export default tseslint.config(
       "import/default": "off",
       "@typescript-eslint/naming-convention": "off",
       "@typescript-eslint/no-unused-vars": "off",
+      // Helpers and mocks in tests are small and typed by their use
+      "@typescript-eslint/explicit-function-return-type": "off",
     },
   }
 );

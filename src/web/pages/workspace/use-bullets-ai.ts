@@ -13,12 +13,25 @@ import {
   setItemSelection,
 } from "@store/jobs/jobs-slice";
 
+/** The points to lean on: the ones picked for this request, else the ones picked for the item */
+function focusFor(
+  mode: BulletsMode,
+  focus: string[] | undefined,
+  leanOn: string[]
+): string[] | undefined {
+  if (mode === "emphasise") {
+    return focus;
+  }
+  return leanOn.length > 0 ? leanOn : undefined;
+}
+
 /**
  * Bullets for one item in this job, made by AI from the item's description. The proposal is only
  * kept in this state: a bullet with something that is not in the description is flagged and
  * starts unticked, and `accept` saves the ticked ones in the job (the vault is never changed; one
  * undo step). `leanOn` = the points the user picked to emphasise; they go with every request.
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- the return type is inferred from the state it hands out
 export function useBulletsAi(item: Item, leanOn: string[] = []) {
   const dispatch = useAppDispatch();
   const api = useMemo(() => createApiClient(), []);
@@ -28,21 +41,27 @@ export function useBulletsAi(item: Item, leanOn: string[] = []) {
   const [proposal, setProposal] = useState<BulletsResult | null>(null);
   const [ticked, setTicked] = useState<boolean[]>([]);
   // The bullets say what the description says: by default the description is left out of this job
-  const [replaceDescription, setReplaceDescription] = useState<boolean>(true);
+  const [isReplacingDescription, setIsReplacingDescription] =
+    useState<boolean>(true);
 
   const description = (item.fields.description ?? "").trim();
   const choice = variant.selection[item.id];
   const hiddenFields = choice?.hiddenFields ?? [];
   const hasGenerated = (choice?.generated?.length ?? 0) > 0;
   const analysis = useAppSelector(activeJobSelector).analysis;
-  const requirements = variant.tailor
-    ? [
-        ...variant.tailor.requirements.mustHave,
-        ...variant.tailor.requirements.niceToHave,
-      ]
-    : analysis
-      ? [...analysis.mustHave, ...analysis.niceToHave, ...analysis.keywords]
-      : [];
+  let requirements: string[] = [];
+  if (variant.tailor) {
+    requirements = [
+      ...variant.tailor.requirements.mustHave,
+      ...variant.tailor.requirements.niceToHave,
+    ];
+  } else if (analysis) {
+    requirements = [
+      ...analysis.mustHave,
+      ...analysis.niceToHave,
+      ...analysis.keywords,
+    ];
+  }
   const currentTexts = sortBulletsByVariant(item, variant.selection)
     .filter((bullet) => choice?.bullets?.[bullet.id]?.isVisible !== false)
     .map((bullet) => bullet.text);
@@ -57,8 +76,7 @@ export function useBulletsAi(item: Item, leanOn: string[] = []) {
         mode,
         requirements,
         current: mode === "make" ? undefined : currentTexts,
-        focus:
-          mode === "emphasise" ? focus : leanOn.length > 0 ? leanOn : undefined,
+        focus: focusFor(mode, focus, leanOn),
       });
       setProposal(result);
       setTicked(result.bullets.map((bullet) => bullet.flags.length === 0));
@@ -85,7 +103,7 @@ export function useBulletsAi(item: Item, leanOn: string[] = []) {
           itemId: item.id,
           change: {
             ...generatedBulletsChange(choice, accepted),
-            ...(replaceDescription && !hiddenFields.includes("description")
+            ...(isReplacingDescription && !hiddenFields.includes("description")
               ? { hiddenFields: [...hiddenFields, "description"] }
               : {}),
           },
@@ -126,8 +144,8 @@ export function useBulletsAi(item: Item, leanOn: string[] = []) {
     ticked,
     setTicked,
     setProposal,
-    replaceDescription,
-    setReplaceDescription,
+    isReplacingDescription,
+    setIsReplacingDescription,
     description,
     hiddenFields,
     hasGenerated,

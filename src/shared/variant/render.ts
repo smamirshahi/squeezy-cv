@@ -293,19 +293,19 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
       variant.style,
       hasJobOrder
     );
-    const items =
-      isSkills && variant.skillGroupBy === "level"
-        ? flattenSkills(ordered)
-        : isSkills
-          ? ordered.map((item) =>
-              // an order the job has chosen for this group wins over the level order
-              Object.values(variant.selection[item.id]?.bullets ?? {}).some(
-                (choice) => choice.order !== undefined
-              )
-                ? item
-                : sortSkillsByLevel(item)
-            )
-          : ordered;
+    let items = ordered;
+    if (isSkills && variant.skillGroupBy === "level") {
+      items = flattenSkills(ordered);
+    } else if (isSkills) {
+      items = ordered.map((item) =>
+        // an order the job has chosen for this group wins over the level order
+        Object.values(variant.selection[item.id]?.bullets ?? {}).some(
+          (choice) => choice.order !== undefined
+        )
+          ? item
+          : sortSkillsByLevel(item)
+      );
+    }
     // "References available on request" needs no entries, so the section stays without any
     const isOnRequestLine =
       section.type === "references" && variant.style.isReferencesOnRequest;

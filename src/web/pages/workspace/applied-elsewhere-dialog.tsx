@@ -140,147 +140,143 @@ export function AppliedElsewhereDialog({
   }
 
   return (
-    <>
-      <Dialog
-        open={isOpen}
-        onClose={isBusy ? undefined : onClose}
-        fullWidth
-        fullScreen={isPhone}
-        maxWidth="sm"
-      >
-        <DialogTitle>I applied elsewhere</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-            Records that you already sent this job, so you can follow it in
-            Applications.
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <TextField
-              select
-              label="How did you apply?"
-              value={way}
-              onChange={(event) => setWay(event.target.value)}
-            >
-              {WAYS.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-            {way === "Other" && (
-              <TextField
-                label="Where?"
-                required
-                autoFocus
-                value={otherWay}
-                onChange={(event) => setOtherWay(event.target.value)}
-              />
-            )}
-            <TextField
-              label="Date applied"
-              type="date"
-              required
-              value={appliedAt}
-              onChange={(event) => setAppliedAt(event.target.value)}
-              slotProps={DATE_FIELD_SLOT_PROPS}
-            />
-            <TextField
-              label="Company"
-              required
-              value={form.company}
-              onChange={(event) =>
-                setForm({ ...form, company: event.target.value })
-              }
-            />
-            <TextField
-              label="Role"
-              required
-              value={form.role}
-              onChange={(event) =>
-                setForm({ ...form, role: event.target.value })
-              }
-            />
-            <TextField
-              label="Link to the advert (optional)"
-              value={form.jobUrl}
-              onChange={(event) =>
-                setForm({ ...form, jobUrl: event.target.value })
-              }
-            />
-            <FormControl>
-              <FormLabel id="applied-cv-label">Did you send a CV?</FormLabel>
-              <RadioGroup
-                aria-labelledby="applied-cv-label"
-                value={hasCv}
-                onChange={(event) =>
-                  setHasCv(event.target.value === "yes" ? "yes" : "no")
-                }
-              >
-                <FormControlLabel
-                  value="no"
-                  control={<Radio />}
-                  label="No CV, or one that was not made here"
-                />
-                <FormControlLabel
-                  value="yes"
-                  control={<Radio />}
-                  label="Yes, I have the PDF"
-                />
-              </RadioGroup>
-            </FormControl>
-            {hasCv === "yes" && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Button
-                  variant="outlined"
-                  color="neutral"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  {cvFile ? "Choose another PDF" : "Choose the PDF"}
-                </Button>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", minWidth: 0 }}
-                  noWrap
-                >
-                  {cvFile?.name ?? "No file chosen"}
-                </Typography>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="application/pdf"
-                  hidden
-                  aria-label="CV PDF"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0] ?? null;
-                    event.target.value = "";
-                    if (file && file.size > MAX_IMPORT_PDF_BYTES) {
-                      setError(
-                        `The PDF is larger than ${MAX_IMPORT_PDF_BYTES / (1024 * 1024)} MB.`
-                      );
-                      return;
-                    }
-                    setError("");
-                    setCvFile(file);
-                  }}
-                />
-              </Box>
-            )}
-            {error && <Alert severity="error">{error}</Alert>}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} disabled={isBusy}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => void submit()}
-            disabled={!canSubmit || isBusy}
+    <Dialog
+      open={isOpen}
+      onClose={isBusy ? undefined : onClose}
+      fullWidth
+      fullScreen={isPhone}
+      maxWidth="sm"
+    >
+      <DialogTitle>I applied elsewhere</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+          Records that you already sent this job, so you can follow it in
+          Applications.
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+          <TextField
+            select
+            label="How did you apply?"
+            value={way}
+            onChange={(event) => setWay(event.target.value)}
           >
-            {isBusy ? "Saving…" : "Save application"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+            {WAYS.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </TextField>
+          {way === "Other" && (
+            <TextField
+              label="Where?"
+              required
+              autoFocus
+              value={otherWay}
+              onChange={(event) => setOtherWay(event.target.value)}
+            />
+          )}
+          <TextField
+            label="Date applied"
+            type="date"
+            required
+            value={appliedAt}
+            onChange={(event) => setAppliedAt(event.target.value)}
+            slotProps={DATE_FIELD_SLOT_PROPS}
+          />
+          <TextField
+            label="Company"
+            required
+            value={form.company}
+            onChange={(event) =>
+              setForm({ ...form, company: event.target.value })
+            }
+          />
+          <TextField
+            label="Role"
+            required
+            value={form.role}
+            onChange={(event) => setForm({ ...form, role: event.target.value })}
+          />
+          <TextField
+            label="Link to the advert (optional)"
+            value={form.jobUrl}
+            onChange={(event) =>
+              setForm({ ...form, jobUrl: event.target.value })
+            }
+          />
+          <FormControl>
+            <FormLabel id="applied-cv-label">Did you send a CV?</FormLabel>
+            <RadioGroup
+              aria-labelledby="applied-cv-label"
+              value={hasCv}
+              onChange={(event) =>
+                setHasCv(event.target.value === "yes" ? "yes" : "no")
+              }
+            >
+              <FormControlLabel
+                value="no"
+                control={<Radio />}
+                label="No CV, or one that was not made here"
+              />
+              <FormControlLabel
+                value="yes"
+                control={<Radio />}
+                label="Yes, I have the PDF"
+              />
+            </RadioGroup>
+          </FormControl>
+          {hasCv === "yes" && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Button
+                variant="outlined"
+                color="neutral"
+                onClick={() => fileRef.current?.click()}
+              >
+                {cvFile ? "Choose another PDF" : "Choose the PDF"}
+              </Button>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", minWidth: 0 }}
+                noWrap
+              >
+                {cvFile?.name ?? "No file chosen"}
+              </Typography>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/pdf"
+                hidden
+                aria-label="CV PDF"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  event.target.value = "";
+                  if (file && file.size > MAX_IMPORT_PDF_BYTES) {
+                    setError(
+                      `The PDF is larger than ${MAX_IMPORT_PDF_BYTES / (1024 * 1024)} MB.`
+                    );
+                    return;
+                  }
+                  setError("");
+                  setCvFile(file);
+                }}
+              />
+            </Box>
+          )}
+          {error && <Alert severity="error">{error}</Alert>}
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={isBusy}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => void submit()}
+          disabled={!canSubmit || isBusy}
+        >
+          {isBusy ? "Saving…" : "Save application"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

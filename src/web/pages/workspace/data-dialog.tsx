@@ -55,7 +55,7 @@ function DataDialog({
   const api = useMemo(() => createApiClient(), []);
   const fileInput = useRef<HTMLInputElement>(null);
   const installApp = useInstallPrompt();
-  const [busy, setBusy] = useState<boolean>(false);
+  const [isBusy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [restored, setRestored] = useState<string>("");
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
@@ -170,7 +170,7 @@ function DataDialog({
           <Button
             variant="contained"
             startIcon={<FileDownloadOutlinedIcon />}
-            disabled={busy}
+            disabled={isBusy}
             onClick={() => void download()}
           >
             Download backup
@@ -178,7 +178,7 @@ function DataDialog({
           <Button
             variant="outlined"
             startIcon={<FileUploadOutlinedIcon />}
-            disabled={busy}
+            disabled={isBusy}
             onClick={() => fileInput.current?.click()}
           >
             Restore from backup

@@ -30,6 +30,7 @@ const LUMA_RED = 0.2126;
 const LUMA_GREEN = 0.7152;
 const LUMA_BLUE = 0.0722;
 /** Where the red, green and blue digits start in `#rrggbb` */
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- the three offsets are the format `#rrggbb`
 const RED_GREEN_BLUE_STARTS = [1, 3, 5];
 const CONTRAST_OFFSET = 0.05;
 

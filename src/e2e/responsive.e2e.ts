@@ -39,7 +39,7 @@ beforeAll(async () => {
   await app.seed(file, [createDefaultVariant(file, "main")]);
   const response = await fetch(`${app.apiUrl}/api/applications`, {
     method: "POST",
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       jobId: "main",

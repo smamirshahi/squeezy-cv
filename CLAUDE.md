@@ -31,7 +31,7 @@ One package, three folders in `src/`:
 Package manager is **pnpm**. Use Node 24 (`nvm use 24`).
 
 - `pnpm dev` runs web (Vite, :5173) and server (:3001); `PORT`, `DATA_DIR` (default `./data`), `WEB_URL` configure the server. PDF export needs `pnpm exec playwright install chromium` once.
-- `pnpm build`, `pnpm lint:check`, `pnpm format-check` (fix: `pnpm format-fix`), `pnpm knip` (dead code; remove what it reports).
+- `pnpm build`, `pnpm lint:check` (zero tolerance: a warning fails it, so fix every warning, never leave one; a rule is relaxed only in `eslint.config.mjs` with the reason written there), `pnpm format-check` (fix: `pnpm format-fix`), `pnpm knip` (dead code; remove what it reports).
 - `pnpm test` (Vitest; single file: `pnpm exec vitest run <path>`), `pnpm test:e2e` (real browser, `src/e2e`). Component tests start with `// @vitest-environment jsdom`. Tests are currently paused, see the `testing-rules` skill.
 - CI (`.github/workflows/ci.yml`) runs only on non-draft PRs. Open a draft PR to hold it back.
 - Held-back packages (#154): `eslint`/`@eslint/js` v9, `eslint-plugin-unicorn` v65, `typescript` 6.0, `@types/node` follows Node 24. MUI is v9 (system props in `sx`, icons `*Outlined`), Vite 8.

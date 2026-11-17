@@ -7,11 +7,13 @@ export interface Hsv {
 
 const HUE_SECTORS = 6;
 const HUE_DEGREES = 360;
+/** Hue sector of blue is 4 (red 0, yellow 1, green 2, cyan 3) */
+const BLUE_SECTOR = 4;
 const BYTE_MAX = 255;
 const HEX_RADIX = 16;
 const HEX_DIGITS = 2;
 /** Where the red, green and blue digits start in `#rrggbb` */
-const CHANNEL_STARTS = [1, 3, 5];
+const CHANNEL_STARTS = [1, 1 + HEX_DIGITS, 1 + 2 * HEX_DIGITS];
 
 /** `#rrggbb` (a valid, normalised colour) as hue, saturation and value */
 export function hexToHsv(hex: string): Hsv {
@@ -28,7 +30,7 @@ export function hexToHsv(hex: string): Hsv {
     } else if (max === green) {
       hue = (blue - red) / delta + 2;
     } else {
-      hue = (red - green) / delta + 4;
+      hue = (red - green) / delta + BLUE_SECTOR;
     }
   }
   const degrees =

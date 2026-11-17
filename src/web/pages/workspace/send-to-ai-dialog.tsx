@@ -613,7 +613,7 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
  * Mount once. Shows the "Send to AI" dialog for every request that the API client holds back
  * (`gateAiFetch`); requests wait in line when several arrive together.
  */
-export function SendToAiHost(): JSX.Element {
+export function SendToAiHost(): JSX.Element | null {
   const [state, setState] = useState<DialogState | null>(null);
   const chain = useRef<Promise<unknown>>(Promise.resolve());
 
@@ -638,5 +638,5 @@ export function SendToAiHost(): JSX.Element {
     []
   );
 
-  return state ? <SendToAiDialog {...state} /> : <></>;
+  return state ? <SendToAiDialog {...state} /> : null;
 }

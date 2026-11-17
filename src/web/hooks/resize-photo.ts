@@ -1,4 +1,6 @@
 const MAX_SIDE = 800;
+/** JPEG quality of the resized photo (0-1) */
+const JPEG_QUALITY = 0.85;
 
 /** Reads an image file and returns it scaled down (longest side 800 px) as a JPEG data URL; the 4:5 crop is done when drawing */
 export async function resizePhoto(file: File): Promise<string> {
@@ -18,5 +20,5 @@ export async function resizePhoto(file: File): Promise<string> {
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return canvas.toDataURL("image/jpeg", 0.85);
+  return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 }

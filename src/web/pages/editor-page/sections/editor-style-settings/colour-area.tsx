@@ -71,6 +71,8 @@ export function ColourArea({ color, label, onChange }: Props): JSX.Element {
   }
 
   // Do not lose the last colour when the popover closes in the middle of a drag
+  // Runs only on unmount; flush reads refs, so the first render's copy sends the latest colour
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => flush, []);
 
   /** `isLive`: part of a drag, so the page is told at most every LIVE_INTERVAL_MS */

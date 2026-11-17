@@ -365,9 +365,9 @@ export function ApplicationsPage(): JSX.Element {
 
   async function continueWith(candidate: Candidate): Promise<void> {
     // saved from a job that still exists: open it instead of making a second one
-    const existing = allJobs.some((j) => j.id === candidate.jobId);
+    const isExisting = allJobs.some((j) => j.id === candidate.jobId);
     const jobId =
-      existing && candidate.jobId
+      isExisting && candidate.jobId
         ? candidate.jobId
         : continueCandidate(candidate);
     await runCandidateAction(() =>
@@ -1260,7 +1260,7 @@ function ApplicationsTable({
             {rows.map((row) => {
               if (row.kind === "candidate") {
                 const { candidate, isDropped } = row;
-                const overdue = !isDropped && isOverdue(candidate, today);
+                const isLate = !isDropped && isOverdue(candidate, today);
                 return (
                   <TableRow
                     key={row.id}
@@ -1321,9 +1321,9 @@ function ApplicationsTable({
                     <TableCell>
                       {candidate.applyBy ? (
                         <Typography
-                          sx={{ color: overdue ? "error.main" : undefined }}
+                          sx={{ color: isLate ? "error.main" : undefined }}
                         >
-                          {overdue ? "Overdue · " : "Apply by "}
+                          {isLate ? "Overdue · " : "Apply by "}
                           {formatDay(candidate.applyBy)}
                         </Typography>
                       ) : (

@@ -156,7 +156,6 @@ export function buildServer({
   const registry = aiRegistry ?? AiRegistry.single(ai, aiProvider);
 
   const app = Fastify({
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Fastify option name
     logger: isLoggingEnabled,
     bodyLimit: MAX_BODY_BYTES,
   });

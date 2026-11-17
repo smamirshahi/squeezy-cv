@@ -75,7 +75,7 @@ export function deleteKvStore(name: string = DB_NAME): Promise<void> {
 
 export function openKvStore(name: string = DB_NAME): KvStore {
   let connection: Promise<IDBDatabase> | undefined;
-  const db = () => (connection ??= open(name));
+  const db = (): Promise<IDBDatabase> => (connection ??= open(name));
 
   return {
     async get(key) {

@@ -33,7 +33,7 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
 - **Tests are paused for now** (the UI, UX and logic are still changing, and running them costs too much time and tokens): do NOT write or update tests, and do NOT run `pnpm test` or `pnpm test:e2e` before merging. Remove this note (and the one in `testing-rules`), and uncomment the test steps in `.github/workflows/ci.yml`, when the user says tests are back on.
 - Make sure these pass:
   - `pnpm build`
-  - `pnpm lint:check`
+  - `pnpm lint:check` (zero tolerance: warnings count as failures; fix them all, and relax a rule only in `eslint.config.mjs` with the reason)
   - `pnpm format-check` (fix with `pnpm format-fix`)
   - `pnpm knip` (dead code)
 - If anything fails, fix it and re-run. Never skip or weaken a test to get green. If something cannot be fixed, stop and report it.

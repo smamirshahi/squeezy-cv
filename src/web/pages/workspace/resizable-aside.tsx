@@ -72,10 +72,10 @@ export function ResizableAside({
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
-      const grows =
+      const isGrowing =
         (event.key === "ArrowRight" && isLeft) ||
         (event.key === "ArrowLeft" && !isLeft);
-      change(width + (grows ? KEY_STEP : -KEY_STEP));
+      change(width + (isGrowing ? KEY_STEP : -KEY_STEP));
     }
   }
 

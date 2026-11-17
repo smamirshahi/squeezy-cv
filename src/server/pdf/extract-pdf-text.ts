@@ -69,7 +69,6 @@ export async function extractPdfText(
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention -- unpdf option name
   const { totalPages, text } = await extractText(pdf, { mergePages: true });
   const clean = text.trim();
   if (clean.length === 0) {

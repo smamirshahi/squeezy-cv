@@ -51,7 +51,7 @@ export class PlaywrightPdfRenderer implements PdfRenderer {
         throw new Error(`The print page failed: ${message}`);
       }
       // The page sets its own @page size and margin
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- Playwright option names
+
       return await page.pdf({ preferCSSPageSize: true, printBackground: true });
     } finally {
       await page.close();

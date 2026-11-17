@@ -60,7 +60,7 @@ export async function writeJsonAtomic(
   isReadable: (existing: unknown) => boolean
 ): Promise<void> {
   const dir = path.dirname(filePath);
-  // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
+
   await fs.mkdir(dir, { recursive: true });
 
   if (await fileExists(filePath)) {
@@ -89,7 +89,6 @@ export async function writeJsonAtomic(
     }
     await fs.rename(tempPath, filePath);
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
     await fs.rm(tempPath, { force: true });
     throw error;
   }
@@ -100,7 +99,6 @@ export async function writeBytesAtomic(
   filePath: string,
   bytes: Uint8Array
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.${randomBytes(TEMP_NAME_BYTES).toString("hex")}.tmp`;
   try {
@@ -113,7 +111,6 @@ export async function writeBytesAtomic(
     }
     await fs.rename(tempPath, filePath);
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option name
     await fs.rm(tempPath, { force: true });
     throw error;
   }

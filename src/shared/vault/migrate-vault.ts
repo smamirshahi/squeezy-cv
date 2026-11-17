@@ -140,6 +140,7 @@ export const foldBulletsIntoDescriptions: VaultMigration = (raw) => {
   };
 };
 
+const MONTHS_PER_YEAR = 12;
 const MONTH_NAMES = [
   "jan",
   "feb",
@@ -169,11 +170,15 @@ export function awardDateToDay(text: string): string {
     }
   }
   const numeric = /^(\d{1,2})[/.-](\d{4})$/.exec(value);
-  if (numeric && Number(numeric[1]) >= 1 && Number(numeric[1]) <= 12) {
+  if (
+    numeric &&
+    Number(numeric[1]) >= 1 &&
+    Number(numeric[1]) <= MONTHS_PER_YEAR
+  ) {
     return `${numeric[2]}-${numeric[1].padStart(2, "0")}-01`;
   }
   const iso = /^(\d{4})-(\d{2})$/.exec(value);
-  if (iso && Number(iso[2]) >= 1 && Number(iso[2]) <= 12) {
+  if (iso && Number(iso[2]) >= 1 && Number(iso[2]) <= MONTHS_PER_YEAR) {
     return `${value}-01`;
   }
   return text;

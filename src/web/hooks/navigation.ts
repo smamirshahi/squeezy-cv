@@ -23,6 +23,8 @@ function readUrl(): string {
 }
 
 function canLeave(): boolean {
+  // The browser's own confirm is the right tool here: it also blocks the navigation that is in progress
+  // eslint-disable-next-line no-alert
   return dirtyDrafts.size === 0 || window.confirm(LEAVE_MESSAGE);
 }
 

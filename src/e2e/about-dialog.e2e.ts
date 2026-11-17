@@ -83,10 +83,10 @@ describe("About dialog", () => {
     const dialog = page.getByRole("dialog", { name: "About Squeezy CV" });
     const box = await dialog.boundingBox();
     expect(box!.width).toBeLessThanOrEqual(390);
-    const overflow = await page.evaluate(
+    const hasOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth
     );
-    expect(overflow).toBe(false);
+    expect(hasOverflow).toBe(false);
     await page.setViewportSize({ width: 1280, height: 800 });
   });
 });

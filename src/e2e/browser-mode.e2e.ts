@@ -64,6 +64,7 @@ afterAll(async () => {
 });
 
 /** Opens the app in a fresh browser profile with the records already in IndexedDB */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- the Playwright Page type is not imported here
 async function seededPage() {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -92,7 +93,7 @@ describe("browser mode (real Chromium, no server)", () => {
     const page = await seededPage();
     await page.goto(`${webUrl}/print/${job.id}`);
     await page.waitForSelector("[data-cv-ready]");
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Playwright option names
+
     const pdf = await readPdf(
       await page.pdf({ preferCSSPageSize: true, printBackground: true })
     );
@@ -110,13 +111,13 @@ describe("browser mode (real Chromium, no server)", () => {
     const page = await seededPage();
     await page.goto(`${webUrl}/print/${job.id}`);
     await page.waitForSelector("[data-cv-ready]");
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Playwright option names
+
     const jobPdf = await readPdf(
       await page.pdf({ preferCSSPageSize: true, printBackground: true })
     );
     await page.goto(`${webUrl}/print-application/${application.id}`);
     await page.waitForSelector("[data-cv-ready]");
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- Playwright option names
+
     const sent = await readPdf(
       await page.pdf({ preferCSSPageSize: true, printBackground: true })
     );

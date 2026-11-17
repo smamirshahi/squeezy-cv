@@ -38,6 +38,10 @@ import { clampFitLimits } from "@shared/layout/fit";
 import { createDefaultVault } from "@shared/vault/default-vault";
 import { initialState as initialStyleState } from "@store/cv-data/cv-data-slice";
 
+/** Longest id of a template made for a job */
+const MAX_TEMPLATE_ID_LENGTH = 64;
+/** Highest level a skill can have */
+const MAX_SKILL_LEVEL = 5;
 /**
  * State of the jobs slice: the templates (how a CV looks) and the jobs (what each one
  * shows, with the template it uses). The "variant" the rest of the app draws is
@@ -61,7 +65,7 @@ const DEFAULT_VARIANT_ID = "default";
 
 /** Id of the template made for a variant/job id (same rule as the server's legacy templates) */
 export function templateIdFor(jobId: string): string {
-  return `template-${jobId}`.slice(0, 64);
+  return `template-${jobId}`.slice(0, MAX_TEMPLATE_ID_LENGTH);
 }
 
 function createInitialState(): JobsState {
@@ -629,7 +633,7 @@ const jobsSlice = createSlice({
           if (level <= 0) {
             delete template.skillMinLevel;
           } else {
-            template.skillMinLevel = Math.min(level, 5);
+            template.skillMinLevel = Math.min(level, MAX_SKILL_LEVEL);
           }
         }
       });

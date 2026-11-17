@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention -- Playwright option names (exact, acceptDownloads) */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Browser, chromium, Page } from "playwright";
 import { createDefaultVariant } from "@shared/variant/variant-utils";

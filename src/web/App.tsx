@@ -18,7 +18,7 @@ import { isShellRoute, legacyRedirect } from "@shared/routing/routes";
  * query addresses (`/?applications`, `/?application=<id>`, `/?print=<id>`) and `/` are
  * redirected to the new ones.
  */
-export function App(): JSX.Element {
+export function App(): JSX.Element | null {
   const route = useRoute();
   const redirect = legacyRedirect(
     window.location.pathname,
@@ -32,7 +32,7 @@ export function App(): JSX.Element {
 
   // The first render after a redirect is skipped: the address is about to change
   if (redirect) {
-    return <></>;
+    return null;
   }
   if (route.kind === "print") {
     return <PrintView jobId={route.jobId} />;

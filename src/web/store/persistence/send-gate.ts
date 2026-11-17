@@ -159,7 +159,7 @@ function cancelled(): Response {
       code: "cancelled",
       message: "Cancelled. Nothing was sent.",
     }),
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
     { status: 409, headers: { "Content-Type": "application/json" } }
   );
 }
@@ -193,7 +193,7 @@ export function gateAiFetch(fetchImpl: FetchLike): FetchLike {
         ...withMasking(masking),
         headers: {
           ...(init.headers as Record<string, string> | undefined),
-          // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
           "x-ai-preview": "1",
         },
       });
@@ -214,7 +214,7 @@ export function gateAiFetch(fetchImpl: FetchLike): FetchLike {
               body: JSON.stringify({ ...(entry.body as object), masking }),
               headers: {
                 ...(init.headers as Record<string, string> | undefined),
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
                 "x-ai-preview": "1",
               },
             })

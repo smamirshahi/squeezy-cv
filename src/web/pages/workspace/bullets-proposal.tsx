@@ -13,7 +13,7 @@ interface Props {
   proposal: BulletsResult;
   ticked: boolean[];
   onTick: (ticked: boolean[]) => void;
-  replaceDescription: boolean;
+  isReplacingDescription: boolean;
   onReplaceDescription: (value: boolean) => void;
   onDiscard: () => void;
   onUse: () => void;
@@ -27,7 +27,7 @@ export function BulletsProposal({
   proposal,
   ticked,
   onTick,
-  replaceDescription,
+  isReplacingDescription,
   onReplaceDescription,
   onDiscard,
   onUse,
@@ -58,7 +58,7 @@ export function BulletsProposal({
           <Checkbox
             size="small"
             color="secondary"
-            checked={replaceDescription}
+            checked={isReplacingDescription}
             onChange={(event) => onReplaceDescription(event.target.checked)}
           />
         }

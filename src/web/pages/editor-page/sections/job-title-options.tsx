@@ -20,7 +20,7 @@ export function JobTitleOptions({
       freeSolo
       size="small"
       options={[]}
-      sx={{ "& .MuiOutlinedInput-root": { pr: 5 } }}
+      sx={{ "& .MuiOutlinedInput-root": { pr: 9 } }}
       value={options}
       onChange={(_event, value) =>
         onChange(value.map((entry) => entry.trim()).filter(Boolean))
@@ -48,7 +48,7 @@ export function JobTitleOptions({
                       aria-label="Why keep other job titles"
                       sx={{
                         position: "absolute",
-                        right: 9,
+                        right: 40,
                         top: "calc(50% - 10px)",
                         color: "text.secondary",
                       }}

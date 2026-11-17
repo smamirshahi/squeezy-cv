@@ -24,7 +24,7 @@ async function post(
 ): Promise<{ status: number; json: Record<string, unknown> }> {
   const response = await local(path, {
     method: "POST",
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
   });

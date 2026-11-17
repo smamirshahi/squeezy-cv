@@ -34,7 +34,7 @@ export function DeleteDataDialog({
 }): JSX.Element {
   const isPhone = useViewport() === "phone";
   const [typed, setTyped] = useState<string>("");
-  const [busy, setBusy] = useState<boolean>(false);
+  const [isBusy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export function DeleteDataDialog({
   return (
     <Dialog
       open={isOpen}
-      onClose={busy ? undefined : onClose}
+      onClose={isBusy ? undefined : onClose}
       fullWidth
       maxWidth="sm"
       fullScreen={isPhone}
@@ -90,7 +90,7 @@ export function DeleteDataDialog({
         <Button
           variant="outlined"
           startIcon={<FileDownloadOutlinedIcon />}
-          disabled={busy}
+          disabled={isBusy}
           onClick={() => void onDownloadBackup()}
           sx={{ mb: 2 }}
         >
@@ -111,13 +111,13 @@ export function DeleteDataDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={busy}>
+        <Button onClick={onClose} disabled={isBusy}>
           Cancel
         </Button>
         <Button
           color="error"
           variant="contained"
-          disabled={busy || typed !== DELETE_WORD}
+          disabled={isBusy || typed !== DELETE_WORD}
           onClick={() => void remove()}
         >
           Delete everything

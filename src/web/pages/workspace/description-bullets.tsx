@@ -42,8 +42,8 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
     ticked,
     setTicked,
     setProposal,
-    replaceDescription,
-    setReplaceDescription,
+    isReplacingDescription,
+    setIsReplacingDescription,
     description,
     hiddenFields,
     hasGenerated,
@@ -184,8 +184,8 @@ export function DescriptionBullets({ item }: Props): JSX.Element {
             proposal={proposal}
             ticked={ticked}
             onTick={setTicked}
-            replaceDescription={replaceDescription}
-            onReplaceDescription={setReplaceDescription}
+            isReplacingDescription={isReplacingDescription}
+            onReplaceDescription={setIsReplacingDescription}
             onDiscard={() => setProposal(null)}
             onUse={accept}
           />

@@ -74,7 +74,7 @@ export async function startApp(): Promise<RunningApp> {
   async function put(url: string, body: unknown): Promise<void> {
     const response = await fetch(`${apiUrl}${url}`, {
       method: "PUT",
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
@@ -114,7 +114,7 @@ export async function startApp(): Promise<RunningApp> {
     pdfOfJob: async (jobId) => {
       const response = await fetch(`${apiUrl}/api/pdf`, {
         method: "POST",
-        // eslint-disable-next-line @typescript-eslint/naming-convention -- HTTP header name
+
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId }),
       });
@@ -127,7 +127,7 @@ export async function startApp(): Promise<RunningApp> {
     close: async () => {
       await web.close();
       await api.close();
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option names
+
       await rm(dataDir, { recursive: true, force: true });
     },
   };

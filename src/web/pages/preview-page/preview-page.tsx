@@ -100,12 +100,12 @@ export function PreviewPage({
     () => ({ rendered, style, columnWidth, tuning }),
     [rendered, style, columnWidth, tuning]
   );
-  /* eslint-disable @typescript-eslint/naming-convention -- CSS custom properties */
+
   const paperVariables = {
     "--cv-spacing": tuning.spacing,
     "--cv-font-scale": tuning.fontScale,
   } as React.CSSProperties;
-  /* eslint-enable @typescript-eslint/naming-convention */
+
   const paperRef = useRef<HTMLDivElement | null>(null);
   const pagination = usePagination(paperRef, marginMm, layoutKey);
   const { pageCount, breaks } = pagination;
@@ -358,7 +358,7 @@ export function PreviewPage({
                 fontSize: "9pt",
                 textAlign: "right",
                 pointerEvents: "none",
-                // eslint-disable-next-line @typescript-eslint/naming-convention -- CSS at-rule
+
                 "@media print": { display: "none" },
               }}
             >

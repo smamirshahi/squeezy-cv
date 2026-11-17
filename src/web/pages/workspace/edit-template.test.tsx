@@ -211,9 +211,9 @@ describe("the Templates list", () => {
     const edit = screen.getByRole("link", {
       name: "Edit template Second look",
     });
-    expect(edit.getAttribute("href")).toBe("/templates/second/design");
+    expect(edit.getAttribute("href")).toBe("/templates/second/sections");
     fireEvent.click(edit);
-    expect(window.location.pathname).toBe("/templates/second/design");
+    expect(window.location.pathname).toBe("/templates/second/sections");
     await waitFor(() =>
       expect(store.getState().app.editedTemplateId).toBe("second")
     );

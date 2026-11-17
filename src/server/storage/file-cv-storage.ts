@@ -46,6 +46,8 @@ import {
   writeJsonAtomic,
 } from "@server/storage/file-utils";
 
+/** Longest id of a template made from a legacy variant */
+const MAX_TEMPLATE_ID_LENGTH = 64;
 const VAULT_FILE = "vault.json";
 const VARIANTS_DIR = "variants";
 const TEMPLATES_DIR = "templates";
@@ -75,7 +77,10 @@ function isReadableJob(raw: unknown): boolean {
 
 /** Id of the template made from the legacy variant `variantId` (at most 64 characters) */
 function legacyTemplateId(variantId: string): string {
-  return `${LEGACY_TEMPLATE_PREFIX}${variantId}`.slice(0, 64);
+  return `${LEGACY_TEMPLATE_PREFIX}${variantId}`.slice(
+    0,
+    MAX_TEMPLATE_ID_LENGTH
+  );
 }
 
 function isMissing(error: unknown): boolean {
@@ -623,7 +628,7 @@ export class FileCvStorage implements CvStorage {
         throw new StorageError("not_found", `There is no application ${id}.`);
       }
       // Keep it aside instead of destroying it for good (git history has it too)
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- Node option names
+
       await fs.rm(`${dir}.deleted`, { recursive: true, force: true });
       await fs.rename(dir, `${dir}.deleted`);
     });

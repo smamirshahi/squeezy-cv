@@ -10,12 +10,14 @@ interface DatePeriodProps {
 }
 
 /** Text with start and end date and a calendar icon at the beginning */
-export function DatePeriod({ datePeriod }: DatePeriodProps): JSX.Element {
+export function DatePeriod({
+  datePeriod,
+}: DatePeriodProps): JSX.Element | null {
   const { dateFormat } = useAppSelector(styleSelector);
 
   // No start date means the dates are not shown (e.g. a job that hides them): never "Present" alone
   if (!datePeriod.start) {
-    return <></>;
+    return null;
   }
 
   return (
