@@ -56,6 +56,41 @@ export function singleColumnLayout(sections: { id: string }[]): SectionColumns {
 }
 
 /**
+ * Section types of the developer CV in the order they are drawn: summary, grouped skills,
+ * experience, projects or open source, education and certifications. The optional ones
+ * (talks, publications, awards, ...) follow, in the vault's order.
+ */
+const DEVELOPER_ORDER: SectionType[] = [
+  "summary",
+  "skills",
+  "experience",
+  "projects",
+  "education",
+  "certifications",
+];
+
+/**
+ * Developer CV: one column, header first, then the sections by type in the order of
+ * `DEVELOPER_ORDER`; every other section comes last in the vault's order. Sections of a
+ * type listed twice keep the vault's order among themselves.
+ */
+export function developerLayout(
+  sections: { id: string; type: SectionType }[]
+): SectionColumns {
+  const rank = (type: SectionType): number => {
+    const index = DEVELOPER_ORDER.indexOf(type);
+    return index === -1 ? DEVELOPER_ORDER.length : index;
+  };
+  // Array.prototype.sort is stable, so equal ranks keep the vault's order
+  const ordered = [...sections].sort((a, b) => rank(a.type) - rank(b.type));
+  return {
+    fullWidth: [...HEADER_IDS, ...ordered.map((s) => s.id)],
+    left: [],
+    right: [],
+  };
+}
+
+/**
  * Two columns: header and summary across the top, experience on the left, everything
  * else on the right
  */

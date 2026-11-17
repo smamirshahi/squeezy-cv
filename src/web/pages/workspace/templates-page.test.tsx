@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
@@ -57,7 +63,11 @@ describe("templates page", () => {
         <TemplatesPage />
       </Provider>
     );
-    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(
+      within(screen.getByRole("list", { name: "Templates" })).queryAllByRole(
+        "listitem"
+      )
+    ).toHaveLength(0);
     expect(
       screen.getByRole("button", { name: "Create template" })
     ).toBeTruthy();
@@ -66,5 +76,48 @@ describe("templates page", () => {
       expect(link?.getAttribute("aria-disabled")).toBe("true");
     }
     expect(screen.getAllByText("Create a template first")).toHaveLength(2);
+  });
+
+  it("lists the Developer template as premade, below the templates", () => {
+    setup();
+    const premade = within(screen.getByRole("list", { name: "Premade" }));
+    expect(premade.getByText("Developer")).toBeTruthy();
+    expect(premade.getByText("Premade")).toBeTruthy();
+    // it is not a saved template yet
+    expect(
+      within(screen.getByRole("list", { name: "Templates" })).queryByText(
+        "Developer"
+      )
+    ).toBeNull();
+  });
+
+  it("adds a one-column Developer template from the premade card", () => {
+    const store = setup();
+    const before = templatesSelector(store.getState()).length;
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Add Developer template to my templates",
+      })
+    );
+    const templates = templatesSelector(store.getState());
+    expect(templates).toHaveLength(before + 1);
+    const added = templates.find((t) => t.name === "Developer")!;
+    expect(added.layout.left).toEqual([]);
+    expect(added.layout.right).toEqual([]);
+    expect(added.layout.fullWidth.slice(0, 2)).toEqual([
+      "personalInfo",
+      "contactInfo",
+    ]);
+    // a real card appears, and the premade card stays so it can be added again
+    expect(
+      within(screen.getByRole("list", { name: "Templates" })).getByText(
+        "Developer"
+      )
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: "Add Developer template to my templates",
+      })
+    ).toBeTruthy();
   });
 });
