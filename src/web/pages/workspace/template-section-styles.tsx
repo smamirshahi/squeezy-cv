@@ -47,6 +47,7 @@ export function TemplateSample({
   templateId,
   selectedPartId,
   onSelectPart,
+  isFullLength = false,
 }: {
   /** The template to draw; missing = the template of the active job */
   templateId?: string;
@@ -54,6 +55,8 @@ export function TemplateSample({
   selectedPartId?: string;
   /** Called with the id of the section that was clicked on the paper */
   onSelectPart?: (id: string) => void;
+  /** Show the whole CV instead of cutting it after two pages (the Sections tab, to reach every section) */
+  isFullLength?: boolean;
 }): JSX.Element {
   const activeTemplate = useAppSelector(activeTemplateSelector);
   const templates = useAppSelector(templatesSelector);
@@ -153,7 +156,11 @@ export function TemplateSample({
           border: `1px solid ${WORKSPACE_COLORS.border}`,
           overflow: "hidden",
           width: `calc(${A4_DIMENSION_MM.width}mm * ${zoom})`,
-          height: `calc(${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm * ${zoom})`,
+          ...(isFullLength
+            ? {}
+            : {
+                height: `calc(${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm * ${zoom})`,
+              }),
         }}
       >
         <ZoomFrame zoom={zoom}>
@@ -161,8 +168,12 @@ export function TemplateSample({
             data-testid="sample-cv"
             sx={{
               width: `${A4_DIMENSION_MM.width}mm`,
-              height: `${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm`,
-              overflow: "hidden",
+              ...(isFullLength
+                ? { minHeight: `${A4_DIMENSION_MM.height}mm` }
+                : {
+                    height: `${A4_DIMENSION_MM.height * SAMPLE_PAGES}mm`,
+                    overflow: "hidden",
+                  }),
               boxSizing: "border-box",
               p: `${marginMm}mm`,
               fontSize: "12pt",

@@ -427,7 +427,15 @@ export function buildServer({
   app.delete<{ Params: { id: string } }>(
     "/api/templates/:id",
     async (request, reply) => {
-      await storage.loadTemplate(request.params.id);
+      // A template that cannot be read may still be removed (a copy is kept): that is how the
+      // "cannot be read" banner is cleared. A missing one is still a 404.
+      try {
+        await storage.loadTemplate(request.params.id);
+      } catch (error) {
+        if (!(error instanceof StorageError && error.code === "corrupt")) {
+          throw error;
+        }
+      }
       const jobs = (await storage.listJobs()).filter(
         (job) => job.templateId === request.params.id
       );

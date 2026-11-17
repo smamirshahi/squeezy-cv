@@ -20,6 +20,7 @@ import {
   setSavedState,
   setSaving,
   setStorageStatus,
+  setUnreadable,
 } from "@store/persistence/persistence-slice";
 import { AppDispatch, RootState } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
@@ -121,6 +122,14 @@ async function readFromServer(
       ...templateSummaries.filter((summary) => summary.isCorrupt),
       ...jobSummaries.filter((summary) => summary.isCorrupt),
     ];
+    dispatch(
+      setUnreadable({
+        templates: templateSummaries
+          .filter((s) => s.isCorrupt)
+          .map((s) => s.id),
+        jobs: jobSummaries.filter((s) => s.isCorrupt).map((s) => s.id),
+      })
+    );
     if (broken.length > 0) {
       dispatch(
         setStorageStatus({
@@ -190,6 +199,35 @@ async function readFromServer(
       );
     }
   }
+}
+
+/**
+ * Removes the saved templates and jobs that cannot be read (the storage keeps a copy of
+ * each, `.deleted`), then reads everything again so saving is allowed.
+ */
+export async function removeUnreadable(
+  api: ApiClient,
+  dispatch: AppDispatch,
+  getState: () => RootState
+): Promise<void> {
+  const { templates, jobs } = getState().persistence.unreadable;
+  try {
+    for (const id of jobs) {
+      await ignoreNotFound(() => api.deleteJob(id));
+    }
+    for (const id of templates) {
+      await ignoreNotFound(() => api.deleteTemplate(id));
+    }
+  } catch (error) {
+    dispatch(
+      setStorageStatus({
+        status: "error",
+        message: `${errorText(error)} Saving is off so nothing is overwritten.`,
+      })
+    );
+    return;
+  }
+  await loadFromServer(api, dispatch, getState);
 }
 
 async function ignoreNotFound(run: () => Promise<void>): Promise<void> {

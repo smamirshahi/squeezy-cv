@@ -9,9 +9,22 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-17
+
+### Added
+
+- Templates: **skills layout** (#502) in the Skills section's settings: a list (as before), two or three columns, or all skills of a group on one line. Stored as the optional `skillsLayout` in the template's style, so old files open unchanged.
+- The "The saved data cannot be read" banner has **Remove unreadable items**: it deletes the saved templates and jobs that cannot be read (a `.deleted` copy is kept) and loads again, so saving works after you import a file. A template that cannot be read can now be deleted through the server and in browser mode.
+
 ### Changed
 
+- The **Developer** premade template now holds only summary, skills, experience, projects and education (no publications, awards, certifications, interests or unsorted), and its description says so.
 - Templates: **rename and New template happen in place** (#499), with no dialog. The pencil next to a name (or "Add a subtitle") turns the card into a name and subtitle form; **New template** opens a draft card at the top of the list, and creating it opens the new template's Sections tab. Enter saves, Esc cancels, and a name another template already has is flagged before you save. The card buttons are now Edit, Rename, Duplicate and Delete in that grouping, with Rename and Duplicate as grey outline buttons.
+- The how-it-works pictures use fictional company names.
+
+### Fixed
+
+- The Sections tab preview showed only the first two pages, so the last sections could not be reached; it now shows the whole CV.
 
 ## [0.8.0] - 2026-11-17
 
@@ -434,7 +447,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.5.0...v0.6.0

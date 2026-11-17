@@ -57,8 +57,8 @@ export function singleColumnLayout(sections: { id: string }[]): SectionColumns {
 
 /**
  * Section types of the developer CV in the order they are drawn: summary, grouped skills,
- * experience, projects or open source, education and certifications. The optional ones
- * (talks, publications, awards, ...) follow, in the vault's order.
+ * experience, projects or open source and education. Every other type
+ * (publications, awards, certifications, unsorted, ...) is left out of the template.
  */
 const DEVELOPER_ORDER: SectionType[] = [
   "summary",
@@ -66,23 +66,21 @@ const DEVELOPER_ORDER: SectionType[] = [
   "experience",
   "projects",
   "education",
-  "certifications",
 ];
 
 /**
  * Developer CV: one column, header first, then the sections by type in the order of
- * `DEVELOPER_ORDER`; every other section comes last in the vault's order. Sections of a
+ * `DEVELOPER_ORDER`; sections of any other type are left out. Sections of a
  * type listed twice keep the vault's order among themselves.
  */
 export function developerLayout(
   sections: { id: string; type: SectionType }[]
 ): SectionColumns {
-  const rank = (type: SectionType): number => {
-    const index = DEVELOPER_ORDER.indexOf(type);
-    return index === -1 ? DEVELOPER_ORDER.length : index;
-  };
+  const rank = (type: SectionType): number => DEVELOPER_ORDER.indexOf(type);
   // Array.prototype.sort is stable, so equal ranks keep the vault's order
-  const ordered = [...sections].sort((a, b) => rank(a.type) - rank(b.type));
+  const ordered = sections
+    .filter((s) => rank(s.type) !== -1)
+    .sort((a, b) => rank(a.type) - rank(b.type));
   return {
     fullWidth: [...HEADER_IDS, ...ordered.map((s) => s.id)],
     left: [],

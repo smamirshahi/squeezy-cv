@@ -85,10 +85,18 @@ function Level({ display, rating }: LevelProps): JSX.Element | null {
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
   const RatingIcon = useRatingIcon();
-  const { ratingIcon } = useAppSelector(styleSelector);
+  const { ratingIcon, skillsLayout } = useAppSelector(styleSelector);
   const { typography } = useResolvedStyle();
   const display = section.skillStyle?.display;
-  const columns = section.skillStyle?.columns ?? 1;
+  const columns =
+    skillsLayout === "two"
+      ? 2
+      : skillsLayout === "three"
+        ? 3
+        : skillsLayout === "inline"
+          ? 1
+          : (section.skillStyle?.columns ?? 1);
+  const isInline = skillsLayout === "inline";
 
   if (section.items.length === 0) {
     return null;
@@ -122,12 +130,13 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
               <Grid
                 key={skill.id}
                 data-cv-block=""
-                size={columns === 2 ? 6 : 12}
+                size={isInline ? "auto" : 12 / columns}
                 container
                 direction="row"
                 sx={{
                   alignItems: "center",
                   breakInside: "avoid",
+                  ...(isInline ? { mr: 2 } : {}),
                 }}
               >
                 <CvTypography variant="bulletText" text={skill.text} />

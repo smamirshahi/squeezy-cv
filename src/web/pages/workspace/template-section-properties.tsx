@@ -28,6 +28,7 @@ import {
   setPublicationLinks,
   setPublicationOrder,
   setShouldShowGender,
+  setSkillsLayout,
   setShouldShowLinks,
   setShouldShowMaritalStatus,
   setShouldShowNationality,
@@ -242,6 +243,32 @@ const ORDER_OPTIONS = [
   { value: "oldest", label: "Oldest first" },
 ] as const;
 
+const SKILLS_LAYOUT_OPTIONS = [
+  { value: "list", label: "List" },
+  { value: "two", label: "2 columns" },
+  { value: "three", label: "3 columns" },
+  { value: "inline", label: "One line" },
+] as const;
+
+function SkillsLayoutChoice(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const { skillsLayout } = useAppSelector(styleSelector);
+  return (
+    <>
+      <Choice
+        label="Skills layout"
+        value={skillsLayout ?? "list"}
+        options={[...SKILLS_LAYOUT_OPTIONS]}
+        onChange={(next) => dispatch(setSkillsLayout(next))}
+      />
+      <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
+        Skills are short, so columns or one line per group save space. The level
+        is written after each skill.
+      </Typography>
+    </>
+  );
+}
+
 function EntryOrderProperties({
   kind,
 }: {
@@ -444,6 +471,7 @@ export function SectionProperties({
       return (
         <>
           <PropertyCard>
+            <SkillsLayoutChoice />
             <DropdownSkillIcon />
           </PropertyCard>
           <Note>

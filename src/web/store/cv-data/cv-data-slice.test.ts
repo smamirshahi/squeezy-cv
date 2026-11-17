@@ -8,6 +8,7 @@ import {
   setMetaData,
   setPaperMargin,
   setRatingIcon,
+  setSkillsLayout,
   setStyle,
   setTypography,
 } from "@store/cv-data/cv-data-slice";
@@ -39,6 +40,13 @@ describe("cvDataSlice", () => {
       bulletPointIcon: "dash",
     });
     expect(state.style.typography).toEqual(initialState.style.typography);
+  });
+
+  it("sets the skills layout, which is missing until chosen", () => {
+    expect(initialState.style.skillsLayout).toBeUndefined();
+    const next = cvDataReducer(initialState, setSkillsLayout("three"));
+    expect(next.style.skillsLayout).toBe("three");
+    expect(next.style.ratingIcon).toBe(initialState.style.ratingIcon);
   });
 
   it("changes one typography variant only", () => {

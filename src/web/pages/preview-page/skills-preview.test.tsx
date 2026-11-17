@@ -6,6 +6,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { rootReducer } from "@store/store";
 import { RenderedSection } from "@shared/variant/render";
+import { setSkillsLayout } from "@store/cv-data/cv-data-slice";
 
 afterEach(cleanup);
 
@@ -60,5 +61,54 @@ describe("skill levels on the page", () => {
   it("a skill without a level has no symbol", () => {
     const text = draw("dots").textContent ?? "";
     expect(text.match(/○/g)?.length).toBe(1);
+  });
+});
+
+describe("skills layout", () => {
+  function drawLayout(
+    layout: "list" | "two" | "three" | "inline" | undefined,
+    jobColumns: 1 | 2 = 1
+  ): HTMLElement {
+    const store = configureStore({ reducer: rootReducer });
+    store.dispatch(setSkillsLayout(layout));
+    const rendered = section();
+    rendered.skillStyle = { columns: jobColumns };
+    return render(
+      <Provider store={store}>
+        <SkillsPreviewPage section={rendered} />
+      </Provider>
+    ).container;
+  }
+
+  /** The grid size (12, 6, 4 or "auto") of every skill, not of the group heading */
+  const widths = (container: HTMLElement): string[] =>
+    [...container.querySelectorAll(".MuiGrid-container [data-cv-block]")].map(
+      (block) => /MuiGrid-grid-xs-(\w+)/.exec(block.className)?.[1] ?? ""
+    );
+
+  it("is one skill per line when nothing is set, or the job's two columns", () => {
+    const [first] = widths(drawLayout(undefined));
+    cleanup();
+    expect(first).toBe("12");
+    expect(widths(drawLayout(undefined, 2))[0]).toBe("6");
+  });
+
+  it("the template's columns win over the job's", () => {
+    expect(widths(drawLayout("two"))[0]).toBe("6");
+    cleanup();
+    expect(widths(drawLayout("three", 2))[0]).toBe("4");
+  });
+
+  it("one line sizes each skill to its content", () => {
+    expect(widths(drawLayout("inline"))[0]).toBe("auto");
+  });
+
+  it("keeps every skill in every layout", () => {
+    for (const layout of ["list", "two", "three", "inline"] as const) {
+      const text = drawLayout(layout).textContent ?? "";
+      cleanup();
+      expect(text).toContain("React");
+      expect(text).toContain("Git");
+    }
   });
 });

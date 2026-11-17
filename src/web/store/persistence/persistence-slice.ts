@@ -15,6 +15,9 @@ interface PersistenceState {
   /** Explains `offline` and `error` */
   message: string;
 
+  /** Ids of saved templates and jobs that could not be read (they block saving until removed) */
+  unreadable: { templates: string[]; jobs: string[] };
+
   /** What is known to be on disk; null if nothing is saved yet */
   saved: SavedState | null;
 
@@ -27,6 +30,7 @@ interface PersistenceState {
 const initialState: PersistenceState = {
   status: "loading",
   message: "",
+  unreadable: { templates: [], jobs: [] },
   saved: null,
   isSaving: false,
   saveError: "",
@@ -43,6 +47,13 @@ const persistenceSlice = createSlice({
     ) {
       state.status = action.payload.status;
       state.message = action.payload.message ?? "";
+    },
+
+    setUnreadable(
+      state,
+      action: PayloadAction<{ templates: string[]; jobs: string[] }>
+    ) {
+      state.unreadable = action.payload;
     },
 
     setSavedState(state, action: PayloadAction<SavedState | null>) {
@@ -64,5 +75,10 @@ const persistenceSlice = createSlice({
 
 export const persistenceReducer = persistenceSlice.reducer;
 
-export const { setStorageStatus, setSavedState, setSaving, setSaveError } =
-  persistenceSlice.actions;
+export const {
+  setStorageStatus,
+  setUnreadable,
+  setSavedState,
+  setSaving,
+  setSaveError,
+} = persistenceSlice.actions;

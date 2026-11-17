@@ -187,7 +187,14 @@ export function createLocalFetch(
         return json(HTTP_OK, { status: "saved" });
       }
       if (id && method === "DELETE") {
-        await storage.loadTemplate(id);
+        // A template that cannot be read may still be removed (a copy is kept)
+        try {
+          await storage.loadTemplate(id);
+        } catch (error) {
+          if (!(error instanceof StorageError && error.code === "corrupt")) {
+            throw error;
+          }
+        }
         const users = (await storage.listJobs()).filter(
           (job) => job.templateId === id
         );

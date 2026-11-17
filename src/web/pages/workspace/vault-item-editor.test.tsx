@@ -92,7 +92,14 @@ describe("inline vault item editor", () => {
         <VaultPage />
       </Provider>
     );
-    open("AWS cert");
+    // Unsorted is a button in the Assistants group (#493), not a section link
+    const tree = screen.getByRole("complementary", { name: "Vault tree" });
+    fireEvent.click(within(tree).getByRole("button", { name: /^Unsorted/ }));
+    fireEvent.click(
+      within(screen.getByRole("main", { name: "Edit" })).getAllByRole("link", {
+        name: /^AWS cert/,
+      })[0]
+    );
     expect(screen.getAllByLabelText("Move to section").length).toBeGreaterThan(
       0
     );

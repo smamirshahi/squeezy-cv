@@ -27,7 +27,9 @@ const HiddenInput = styled("input")({ display: "none" });
 export function ConnectionBanner(): JSX.Element | null {
   const { status, message } = useAppSelector((s) => s.persistence);
   const hasUnsavedChanges = useHasUnsavedChanges();
-  const { retry } = useSaveActions();
+  const { retry, removeBroken } = useSaveActions();
+  const { templates, jobs } = useAppSelector((s) => s.persistence.unreadable);
+  const hasUnreadable = templates.length + jobs.length > 0;
   const { handleExport } = useImportExportJson();
 
   if (status !== "offline" && status !== "error") {
@@ -43,6 +45,11 @@ export function ConnectionBanner(): JSX.Element | null {
           <Button color="neutral" size="small" onClick={retry}>
             Retry
           </Button>
+          {hasUnreadable && (
+            <Button color="neutral" size="small" onClick={removeBroken}>
+              Remove unreadable items
+            </Button>
+          )}
           {hasUnsavedChanges && (
             <Button
               color="neutral"

@@ -2123,26 +2123,26 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
           </Box>
           <ApplyEntry
             name="Software Engineer"
-            company="AMETEK"
+            company="Northwind Systems"
             score="Relevancy 15%"
             tone={RED_SOFT}
           />
           <ApplyEntry
             name="Software Engineer"
-            company="Faro Technologies"
+            company="Example Ltd"
             score="Relevancy 85%"
             tone={{ ...GREEN_SOFT, border: "1px solid #B7DFC6" }}
             isStarred
           />
           <ApplyEntry
             name="Software Engineer"
-            company="HoloBuilder"
+            company="Acme Software"
             score="Relevancy 50%"
             tone={{ ...AMBER_SOFT, border: "1px solid #E8CF98" }}
           />
           <ApplyEntry
             name="Researcher"
-            company="University of Bremen"
+            company="Example University"
             score="Relevancy 5%"
             tone={RED_SOFT}
             isHidden
@@ -2171,8 +2171,8 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
           }}
         >
           <Caption>Description (your vault text)</Caption>
-          Contributed to the HoloBuilder WebEditor and Dashboard, building React
-          components that improved construction project data management. Built a
+          Contributed to the Acme web editor and customer dashboard, building
+          React components that improved project data management. Built a
           standalone React application for internal management of subscriptions
           and sales workflows.
         </Box>
