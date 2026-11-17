@@ -175,8 +175,10 @@ describe("templates and jobs in the browser", () => {
       .filter({ hasText: "Unused look" });
     await card.waitFor();
 
-    // Edit opens Design of that template, with its id in the address
+    // Edit opens Sections of that template, with its id in the address; Design is the next tab
     await card.getByRole("link", { name: "Edit template Unused look" }).click();
+    await page.waitForURL(/\/templates\/[^/]+\/sections$/);
+    await page.getByRole("link", { name: "Design" }).click();
     await page.waitForURL(/\/templates\/[^/]+\/design$/);
     const designUrl = page.url();
     await page
