@@ -68,9 +68,7 @@ describe("templates page", () => {
         "listitem"
       )
     ).toHaveLength(0);
-    expect(
-      screen.getByRole("button", { name: "Create template" })
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "New template" })).toBeTruthy();
     for (const name of ["Sections", "Design"]) {
       const link = screen.getByText(name).closest("a");
       expect(link?.getAttribute("aria-disabled")).toBe("true");

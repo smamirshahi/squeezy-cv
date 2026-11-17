@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Templates: **rename and New template happen in place** (#499), with no dialog. The pencil next to a name (or "Add a subtitle") turns the card into a name and subtitle form; **New template** opens a draft card at the top of the list, and creating it opens the new template's Sections tab. Enter saves, Esc cancels, and a name another template already has is flagged before you save. The card buttons are now Edit, Rename, Duplicate and Delete in that grouping, with Rename and Duplicate as grey outline buttons.
+
 ## [0.8.0] - 2026-11-17
 
 ### Changed

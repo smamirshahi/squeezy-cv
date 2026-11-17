@@ -36,7 +36,7 @@ describe("a vault with no template and no job", () => {
     expect(await page.locator("[data-cv-paper]").count()).toBe(0);
 
     await tool("Templates").click();
-    await page.getByLabel("New template name").waitFor();
+    await page.getByRole("button", { name: "New template" }).waitFor();
     const list = page.getByRole("list", { name: "Templates" });
     expect(await list.getByRole("listitem").count()).toBe(0);
     const design = page.getByRole("link", { name: /Design/ });
@@ -44,13 +44,11 @@ describe("a vault with no template and no job", () => {
   });
 
   it("creating a template saves only the template and enables Design", async () => {
-    await page.getByLabel("New template name").fill("First look");
+    await page.getByRole("button", { name: "New template" }).click();
+    await page.getByLabel("Name", { exact: true }).fill("First look");
     await page.getByRole("button", { name: "Create template" }).click();
-    await page
-      .getByRole("list", { name: "Templates" })
-      .getByRole("listitem")
-      .filter({ hasText: "First look" })
-      .waitFor();
+    // creating opens the new template's Sections tab
+    await page.waitForURL(/\/templates\/[^/]+\/sections$/);
     expect(
       await page
         .getByRole("link", { name: /Design/ })

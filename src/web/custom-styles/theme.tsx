@@ -141,7 +141,7 @@ function createAppTheme(mode: ThemeMode): ReturnType<typeof createTheme> {
         variants: [
           {
             props: { variant: "outlined", color: "inherit" },
-            style: { borderColor: t.bd2 },
+            style: { borderColor: t.bd2, color: t.tx },
           },
         ],
       },

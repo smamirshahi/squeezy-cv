@@ -47,6 +47,8 @@ function Frame({ children }: { children: JSX.Element }): JSX.Element {
 }
 
 function setup(content: JSX.Element): AppStore {
+  // creating a template navigates to its Sections tab: start every test on the list
+  window.history.replaceState({}, "", "/templates");
   const store: AppStore = configureStore({ reducer: rootReducer });
   store.dispatch(setVault(file.vault));
   render(
@@ -303,22 +305,67 @@ describe("templates page", () => {
     ).toBeTruthy();
   });
 
-  it("creates a template from the active look, named by default", () => {
+  it("creates a template from the active look, named by default, and opens its Sections tab", () => {
     const store = setup(<TemplatesPage />);
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    // one form at a time: New and the card buttons are off while it is open
+    expect(
+      screen
+        .getByRole("button", { name: "New template" })
+        .hasAttribute("disabled")
+    ).toBe(true);
+    expect(
+      screen
+        .getByRole("button", { name: "Rename template Template 1" })
+        .hasAttribute("disabled")
+    ).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Create template" }));
     expect(templates(store).map((t) => t.name)).toEqual([
       "Template 1",
       "Template 2",
     ]);
-    fireEvent.change(screen.getByLabelText("New template name"), {
+    expect(window.location.pathname).toBe(
+      `/templates/${templates(store)[1].id}/sections`
+    );
+    expect(screen.queryByRole("form", { name: "New template" })).toBeNull();
+  });
+
+  it("creates a template with the name typed, as a copy of the active look", () => {
+    const store = setup(<TemplatesPage />);
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Two columns" },
     });
-    fireEvent.keyDown(screen.getByLabelText("New template name"), {
-      key: "Enter",
-    });
-    expect(templates(store)[2].name).toBe("Two columns");
-    expect(templates(store)[2].layout).toEqual(templates(store)[0].layout);
+    fireEvent.click(screen.getByRole("button", { name: "Create template" }));
+    expect(templates(store)[1].name).toBe("Two columns");
+    expect(templates(store)[1].layout).toEqual(templates(store)[0].layout);
     expect(jobs(store)).toHaveLength(1);
+  });
+
+  it("cancels a new template with Escape or Cancel, and creates nothing", () => {
+    const store = setup(<TemplatesPage />);
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Escape" });
+    expect(screen.queryByRole("form", { name: "New template" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("form", { name: "New template" })).toBeNull();
+    expect(templates(store)).toHaveLength(1);
+  });
+
+  it("does not accept a name another template already has", () => {
+    const store = setup(<TemplatesPage />);
+    fireEvent.click(screen.getByRole("button", { name: "New template" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "template 1" },
+    });
+    expect(screen.getByRole("alert").textContent).toContain("already exists");
+    expect(
+      screen
+        .getByRole("button", { name: "Create template" })
+        .hasAttribute("disabled")
+    ).toBe(true);
+    expect(templates(store)).toHaveLength(1);
   });
 
   it("duplicates a template without moving any job", () => {
@@ -333,20 +380,37 @@ describe("templates page", () => {
     expect(jobs(store)[0].templateId).toBe(templates(store)[0].id);
   });
 
-  it("renames a template in a dialog", async () => {
+  it("renames a template and its subtitle in place", () => {
     const store = setup(<TemplatesPage />);
     fireEvent.click(
       screen.getByRole("button", { name: "Rename template Template 1" })
     );
-    fireEvent.change(screen.getByLabelText("Template name"), {
+    fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Classic" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
-    await closed();
+    fireEvent.change(screen.getByLabelText("Subtitle (optional)"), {
+      target: { value: "Plain and short" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Rename" }));
     expect(templates(store)[0].name).toBe("Classic");
+    expect(templates(store)[0].subtitle).toBe("Plain and short");
+    expect(screen.queryByRole("dialog")).toBeNull();
     expect(
       screen.getByRole("button", { name: "Rename template Classic" })
     ).toBeTruthy();
+  });
+
+  it("cancels a rename with Escape and keeps the old name", () => {
+    const store = setup(<TemplatesPage />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Rename template Template 1" })
+    );
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Changed" },
+    });
+    fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Escape" });
+    expect(templates(store)[0].name).toBe("Template 1");
+    expect(screen.queryByRole("form", { name: "Rename template" })).toBeNull();
   });
 
   it("does not accept an empty name", () => {
@@ -354,11 +418,11 @@ describe("templates page", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Rename template Template 1" })
     );
-    fireEvent.change(screen.getByLabelText("Template name"), {
+    fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "  " },
     });
     expect(
-      screen.getByRole("button", { name: "Save name" }).hasAttribute("disabled")
+      screen.getByRole("button", { name: "Rename" }).hasAttribute("disabled")
     ).toBe(true);
   });
 
