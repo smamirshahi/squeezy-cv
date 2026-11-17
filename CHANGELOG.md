@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Changed
 
+- The Vault sidebar has an **Assistants** group below New section (#493): Unsorted (with a highlighted count when it holds items) and "Paste CV text, AI sorts it" (AI-marked). Import JSON and Export JSON stay at the bottom.
 - The app and repo are renamed to **Squeezy CV** (#467), with a new lemon icon (a lemon-slice C with a drop falling on the V): favicon, PWA icons (192, 512, maskable), Apple touch icon, and the mark in the top bar and About dialog. Browser-mode storage keys (IndexedDB, localStorage) now start with `squeezy-cv`, so data saved in the browser under the old name is not read any more (back up first). Hosting moved to the new Cloudflare Pages project `squeezy-cv` (`squeezy-cv.pages.dev`, #480); a project cannot be renamed, so the old address is retired and browser data saved there does not carry over.
 
 ### Added
