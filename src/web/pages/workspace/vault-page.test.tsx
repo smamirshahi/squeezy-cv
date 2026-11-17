@@ -236,7 +236,8 @@ describe("VaultPage: Unsorted section", () => {
     store.dispatch(ensureUnsortedSection());
     renderEditor(store);
     const tree = screen.getByRole("complementary", { name: "Vault tree" });
-    const link = within(tree).getByRole("link", { name: /^Unsorted/ });
+    // Unsorted sits in the Assistants group as a button (#493)
+    const link = within(tree).getByRole("button", { name: /^Unsorted/ });
     expect(link.getAttribute("aria-disabled")).not.toBe("true");
     expect(link.className).not.toMatch(/Mui-disabled/);
     expect(within(tree).queryByText("AI sorting")).toBeNull();
@@ -263,13 +264,14 @@ describe("VaultPage: Unsorted section", () => {
 });
 
 describe("VaultPage: AI import", () => {
-  it("has an enabled purple 'Paste CV text, AI sorts it' button that opens the import dialog", () => {
+  it("has an enabled 'Paste CV text, AI sorts it' button, marked with the AI icon, that opens the import dialog", () => {
     renderEditor(createStore());
     const button = screen.getByRole("button", {
       name: "Paste CV text, AI sorts it",
     });
     expect(button.hasAttribute("disabled")).toBe(false);
-    expect(button.className).toMatch(/colorSecondary/);
+    // the AI colour comes from the label and icon (secondary), not from the button's colour prop
+    expect(button.querySelector("svg")).not.toBeNull();
     fireEvent.click(button);
     expect(screen.getByRole("dialog")).toBeTruthy();
   });

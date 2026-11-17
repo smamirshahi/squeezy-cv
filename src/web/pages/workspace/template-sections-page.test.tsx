@@ -120,6 +120,21 @@ describe("Templates > Sections", () => {
     expect(screen.getAllByText("Skill Icon").length).toBeGreaterThan(0);
   });
 
+  it("Skills sets the skills layout of the template", () => {
+    const store = setup();
+    const skills = sectionsSelector(store.getState()).find(
+      (section) => section.type === "skills"
+    )!;
+    open(skills.title);
+    expect(style(store).skillsLayout).toBeUndefined();
+    fireEvent.click(screen.getByRole("button", { name: "3 columns" }));
+    expect(style(store).skillsLayout).toBe("three");
+    fireEvent.click(screen.getByRole("button", { name: "One line" }));
+    expect(style(store).skillsLayout).toBe("inline");
+    fireEvent.click(screen.getByRole("button", { name: "List" }));
+    expect(style(store).skillsLayout).toBe("list");
+  });
+
   it("moves a section with the arrows in the header and removes it from the template", () => {
     const store = setup();
     const work = sectionsSelector(store.getState()).find(

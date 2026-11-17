@@ -67,3 +67,24 @@ describe("template sample", () => {
     expect(sampleText()).toContain(section.title);
   });
 });
+
+describe("template sample length", () => {
+  it("is cut after two pages by default and grows with its content when full length", () => {
+    const store: AppStore = configureStore({ reducer: rootReducer });
+    store.dispatch(setVault(file.vault));
+    store.dispatch(setVariants([createDefaultVariant(file, "main")]));
+    render(
+      <Provider store={store}>
+        <TemplateSample />
+        <TemplateSample isFullLength />
+      </Provider>
+    );
+    const [cut, full] = screen.getAllByTestId("sample-cv");
+    expect(cut.style.height || getComputedStyle(cut).height).not.toBe("");
+    expect(getComputedStyle(cut).overflow).toBe("hidden");
+    expect(getComputedStyle(full).overflow).not.toBe("hidden");
+    expect(getComputedStyle(full).height).not.toBe(
+      getComputedStyle(cut).height
+    );
+  });
+});

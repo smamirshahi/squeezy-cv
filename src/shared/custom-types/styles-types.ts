@@ -134,6 +134,17 @@ export const StyleSchema = Object({
   /** Education newest first (default) or oldest first */
   educationOrder: Union(Literal("newest"), Literal("oldest")).optional(),
 
+  /**
+   * How the entries of a skills group are laid out: one per line (default), in two or three
+   * columns, or all on one line. Missing = one per line (or the columns a job sets).
+   */
+  skillsLayout: Union(
+    Literal("list"),
+    Literal("two"),
+    Literal("three"),
+    Literal("inline")
+  ).optional(),
+
   /** The line under each section title; missing = shown */
   hasHeadingLine: Boolean.optional(),
 

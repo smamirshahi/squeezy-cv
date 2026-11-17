@@ -118,6 +118,15 @@ describe("templates API", () => {
     expect((await call("DELETE", "/api/templates/tpl1")).statusCode).toBe(200);
   });
 
+  it("removes a template that cannot be read, keeping a .deleted copy", async () => {
+    await call("PUT", "/api/templates/tpl1", template);
+    await writeFile(path.join(dir, "templates", "tpl1.json"), "{");
+    expect((await call("DELETE", "/api/templates/tpl1")).statusCode).toBe(200);
+    expect(await readdir(path.join(dir, "templates"))).toEqual([
+      "tpl1.json.deleted",
+    ]);
+  });
+
   it("reports a corrupt template as 500 corrupt", async () => {
     await call("PUT", "/api/templates/tpl1", template);
     await writeFile(path.join(dir, "templates", "tpl1.json"), "{");

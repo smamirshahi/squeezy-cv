@@ -1,13 +1,22 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
 import { ConnectionBanner, FirstRun } from "@pages/workspace/workspace-states";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
-import { setStorageStatus } from "@store/persistence/persistence-slice";
+import {
+  setStorageStatus,
+  setUnreadable,
+} from "@store/persistence/persistence-slice";
 import { setVault } from "@store/vault/vault-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 
@@ -42,6 +51,41 @@ describe("ConnectionBanner", () => {
     );
     expect(screen.getByText(/Can’t reach the local server/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Retry" })).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: "Remove unreadable items" })
+    ).toBeNull();
+  });
+
+  it("offers to remove unreadable templates and jobs, and calls the server to do it", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        calls.push(`${init?.method ?? "GET"} ${url}`);
+        return Promise.resolve(
+          new Response(JSON.stringify({ status: "deleted" }))
+        );
+      })
+    );
+    const store = makeStore();
+    store.dispatch(setStorageStatus({ status: "error", message: "broken" }));
+    store.dispatch(setUnreadable({ templates: ["t1"], jobs: ["j1"] }));
+    render(
+      <Provider store={store}>
+        <ConnectionBanner />
+      </Provider>
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove unreadable items" })
+    );
+    await waitFor(() =>
+      expect(
+        calls.some((c) => c.startsWith("DELETE") && c.includes("j1"))
+      ).toBe(true)
+    );
+    expect(calls.some((c) => c.startsWith("DELETE") && c.includes("t1"))).toBe(
+      true
+    );
   });
 });
 

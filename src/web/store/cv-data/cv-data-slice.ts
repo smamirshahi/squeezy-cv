@@ -113,6 +113,10 @@ const cvDataSlice = createSlice({
       state.style.publicationOrder = action.payload;
     },
 
+    setSkillsLayout(state, action: PayloadAction<Style["skillsLayout"]>) {
+      state.style.skillsLayout = action.payload;
+    },
+
     setExperienceOrder(state, action: PayloadAction<Style["experienceOrder"]>) {
       state.style.experienceOrder = action.payload;
     },
@@ -219,6 +223,7 @@ export const {
   setMaxAuthors,
   setPublicationOrder,
   setExperienceOrder,
+  setSkillsLayout,
   setEducationOrder,
   setPaperMargin,
   setTypography,

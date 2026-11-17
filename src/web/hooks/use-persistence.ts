@@ -4,6 +4,7 @@ import { isDeletingAllData } from "@store/persistence/browser/delete-all-data";
 import { createApiClient } from "@store/persistence/api-client";
 import {
   loadFromServer,
+  removeUnreadable,
   saveToServer,
 } from "@store/persistence/persistence-actions";
 import { isDirty, toSavedState } from "@store/persistence/persistence-logic";
@@ -32,6 +33,9 @@ interface SaveActions {
 
   /** Asks the server again what is saved, e.g. after it was started */
   retry: () => void;
+
+  /** Deletes saved templates and jobs that cannot be read, then loads again */
+  removeBroken: () => void;
 }
 
 /** The actions behind the Save and Retry buttons */
@@ -43,6 +47,8 @@ export function useSaveActions(): SaveActions {
       void saveToServer(api, store.dispatch as AppDispatch, store.getState),
     retry: () =>
       void loadFromServer(api, store.dispatch as AppDispatch, store.getState),
+    removeBroken: () =>
+      void removeUnreadable(api, store.dispatch as AppDispatch, store.getState),
   };
 }
 

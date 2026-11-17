@@ -18,38 +18,32 @@ describe("developerLayout", () => {
     expect(layout.right).toEqual([]);
   });
 
-  it("orders summary, skills, experience, projects, education, certifications", () => {
+  it("orders summary, skills, experience, projects, education", () => {
     const layout = developerLayout(
-      sections([
-        "certifications",
-        "education",
-        "projects",
-        "experience",
-        "skills",
-        "summary",
-      ])
+      sections(["education", "projects", "experience", "skills", "summary"])
     );
     expect(layout.fullWidth.slice(2)).toEqual([
-      "summary-5",
-      "skills-4",
-      "experience-3",
-      "projects-2",
-      "education-1",
-      "certifications-0",
+      "summary-4",
+      "skills-3",
+      "experience-2",
+      "projects-1",
+      "education-0",
     ]);
   });
 
-  it("puts the other sections last, in the vault's order", () => {
+  it("leaves out publications, awards, certifications, interests and unsorted", () => {
     const layout = developerLayout(
-      sections(["interests", "publications", "summary", "awards", "skills"])
+      sections([
+        "interests",
+        "publications",
+        "summary",
+        "awards",
+        "certifications",
+        "unsorted",
+        "skills",
+      ])
     );
-    expect(layout.fullWidth.slice(2)).toEqual([
-      "summary-2",
-      "skills-4",
-      "interests-0",
-      "publications-1",
-      "awards-3",
-    ]);
+    expect(layout.fullWidth.slice(2)).toEqual(["summary-2", "skills-6"]);
   });
 
   it("keeps the vault's order between sections of the same type", () => {
@@ -60,12 +54,12 @@ describe("developerLayout", () => {
     expect(layout.fullWidth.slice(2)).toEqual(["job-b", "job-a"]);
   });
 
-  it("places every section exactly once and does not change its input", () => {
-    const input = sections(["education", "custom", "summary", "custom"]);
+  it("places each kept section once and does not change its input", () => {
+    const input = sections(["education", "custom", "summary", "education"]);
     const copy = structuredClone(input);
     const layout = developerLayout(input);
     expect(layout.fullWidth.slice(2).sort()).toEqual(
-      input.map((s) => s.id).sort()
+      ["education-0", "education-3", "summary-2"].sort()
     );
     expect(input).toEqual(copy);
   });

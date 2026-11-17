@@ -20,7 +20,7 @@ export const PREMADE_TEMPLATES: PremadeTemplate[] = [
     key: "developer",
     name: "Developer",
     description:
-      "One column: header, summary, grouped skills, experience, projects or open source, then education and certifications.",
+      "One column: header, summary, skills, experience, projects and education. Everything else (publications, awards, certifications, interests, unsorted) is left out.",
     buildLayout: developerLayout,
   },
 ];

@@ -235,6 +235,7 @@ export function TemplateSectionsPage({
             </Box>
           </Box>
           <TemplateSample
+            isFullLength
             selectedPartId={isHighlighted ? current : undefined}
             onSelectPart={(id) => ids.includes(id) && setSelected(id)}
           />

@@ -17,6 +17,7 @@ import {
 import {
   loadCvFileIntoStore,
   loadFromServer,
+  removeUnreadable,
   saveToServer,
 } from "@store/persistence/persistence-actions";
 import {
@@ -456,6 +457,36 @@ describe("load and save through the server", () => {
     await loadFromServer(api, store.dispatch, store.getState);
     expect(store.getState().persistence.status).toBe("error");
     expect(store.getState().persistence.message).toContain("bad");
+  });
+
+  it("lists unreadable templates and jobs, and removing them (keeping a copy) allows saving again", async () => {
+    const api = clientFor(app);
+    await api.saveVault(file);
+    await mkdir(path.join(dir, "jobs"), { recursive: true });
+    await writeFile(path.join(dir, "jobs", "bad.json"), "{{{");
+    await mkdir(path.join(dir, "templates"), { recursive: true });
+    await writeFile(path.join(dir, "templates", "worse.json"), "{{{");
+
+    const store = newStore();
+    await loadFromServer(api, store.dispatch, store.getState);
+    expect(store.getState().persistence.status).toBe("error");
+    expect(store.getState().persistence.unreadable).toEqual({
+      templates: ["worse"],
+      jobs: ["bad"],
+    });
+
+    await removeUnreadable(api, store.dispatch, store.getState);
+    expect(store.getState().persistence.status).toBe("ready");
+    expect(store.getState().persistence.unreadable).toEqual({
+      templates: [],
+      jobs: [],
+    });
+    const { existsSync } = await import("node:fs");
+    expect(existsSync(path.join(dir, "jobs", "bad.json"))).toBe(false);
+    expect(existsSync(path.join(dir, "jobs", "bad.json.deleted"))).toBe(true);
+    expect(existsSync(path.join(dir, "templates", "worse.json.deleted"))).toBe(
+      true
+    );
   });
 
   it("goes offline when the server cannot be reached, and does not save", async () => {
