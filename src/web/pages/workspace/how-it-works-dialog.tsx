@@ -29,7 +29,7 @@ import {
 
 /** The tutorials in the dialog's left list */
 export type TutorialId =
-  "overview" | "vault" | "template" | "apply" | "applications";
+  "overview" | "vault" | "template" | "apply" | "applications" | "ai";
 
 interface HowItWorksDialogProps {
   isOpen: boolean;
@@ -2803,6 +2803,785 @@ function ApplicationsPicture({ step }: { step: number }): JSX.Element {
   );
 }
 
+interface AiStep {
+  name: string;
+  question: string;
+  lead: string;
+  body: JSX.Element[];
+  note: JSX.Element | string;
+  noteTone: "plain" | "ai" | "warn";
+}
+
+const AI_STEPS: AiStep[] = [
+  {
+    name: "A helper",
+    question: "AI is a helper, not the author",
+    lead: "It only runs when you press an AI button.",
+    body: [
+      <>
+        AI helps in five places: <b>tailoring</b> to a job ad, <b>sorting</b>{" "}
+        pasted CV text, <b>picking what to hide</b>, <b>chat edits</b> and{" "}
+        <b>placing unsorted items</b>.
+      </>,
+      <>
+        It reads, scores and suggests. <b>You approve every change.</b> It
+        cannot add or edit your facts. That stays in the Vault.
+      </>,
+    ],
+    note: (
+      <>
+        Every AI button has the <b>✦ sparkle</b> and the purple colour. You
+        choose which AI to use in <b>AI settings</b>; the gear next to an AI
+        button opens it.
+      </>
+    ),
+    noteTone: "plain",
+  },
+  {
+    name: "Online or offline",
+    question: "Online or offline AI",
+    lead: "The question is: where does your text go?",
+    body: [
+      <>
+        <b>Online</b> AIs (Claude, Gemini, Groq) run on someone else’s servers,
+        so the text you send <b>leaves this computer</b>. Some bill per use,
+        some have a free tier.
+      </>,
+      <>
+        <b>Offline</b> AI (Ollama) runs <b>on this computer</b>. Nothing leaves
+        it and it is free, but you set it up yourself first.
+      </>,
+    ],
+    note: isBrowserMode()
+      ? "Pick one AI for everything, then override a single task if it needs something different. Your keys stay in this browser."
+      : "Pick one AI for everything, then override a single task if it needs something different. Your keys stay in the .env file on this computer.",
+    noteTone: "plain",
+  },
+  {
+    name: "What leaves",
+    question: "What leaves your computer",
+    lead: "Only when you use an online AI, and only text.",
+    body: [
+      <>
+        <b>Sent:</b> the job advert and the text of your entries: titles,
+        bullets and dates.
+      </>,
+      <>
+        <b>Masked first:</b> your name, email, phone, address, links, employers
+        and schools are swapped for placeholders.
+      </>,
+      <>
+        <b>Never sent:</b> your saved data files. <b>Sort pasted CV text</b> is
+        the exception to masking: it sends the whole text you paste, because
+        that text is the personal data.
+      </>,
+    ],
+    note: (
+      <>
+        Not sure? The <b>Send to AI</b> window shows the exact text before an
+        online AI gets it. <b>AI settings</b> shows what each task sends.
+      </>
+    ),
+    noteTone: "plain",
+  },
+  {
+    name: "Masking",
+    question: "Masking: names swapped for placeholders",
+    lead: "The AI sees the story, not who it is about.",
+    body: [
+      <>
+        Before sending, your name becomes <b>[Candidate Name]</b>, an employer
+        becomes <b>[Company 1]</b> and a school becomes <b>[Institution 1]</b>.
+        Email, phone, address and links are masked too.
+      </>,
+      <>
+        When the answer comes back, the app <b>puts the real names back</b>. If
+        the AI changes a placeholder, you see a warning.
+      </>,
+    ],
+    note: (
+      <>
+        <b>Best effort, no guarantee.</b> A detail written in an unusual way can
+        slip through, and dates and wording can still identify a person.
+      </>
+    ),
+    noteTone: "warn",
+  },
+  {
+    name: "Hide more",
+    question: "When to hide more yourself",
+    lead: "Before an advert is sent, you get to read it first.",
+    body: [
+      <>
+        Select any words and hide them as <b>Company, Institution, Person</b>,{" "}
+        <b>Location, Date</b> or <b>Other</b>. Do it for a client, a project
+        name, a manager’s name, or anything private.
+      </>,
+      <>
+        <b>Remember my own masks</b> saves your choices for next time. Tick{" "}
+        <b>This job advert is private or confidential</b> when it is.
+      </>,
+    ],
+    note: (
+      <>
+        <b>Rule of thumb:</b> for anything you cannot accept leaving this
+        computer, do not rely on masking. Use an offline AI.
+      </>
+    ),
+    noteTone: "ai",
+  },
+  {
+    name: "Relevancy",
+    question: "Relevancy: how well it fits the job",
+    lead: "A score the AI gives. Never a decision.",
+    body: [
+      <>
+        The AI compares each job title, entry and section with what the advert
+        asks for. It gives a <b>Relevancy</b> percentage and a short reason.{" "}
+        <b>Green</b> is a strong fit, <b>amber</b> partial, <b>red</b> weak.
+      </>,
+      <>
+        Use it to decide what to show first or hide.{" "}
+        <b>It never hides or moves anything by itself.</b> Score again after you
+        edit.
+      </>,
+    ],
+    note: "It is the AI’s opinion, so check it. A different AI can score the same entry differently.",
+    noteTone: "plain",
+  },
+];
+
+const AI_NOTE_TONES: Record<AiStep["noteTone"], SxProps<Theme>> = {
+  plain: {
+    bgcolor: WORKSPACE_COLORS.canvas,
+    border: `1px solid ${WORKSPACE_COLORS.border}`,
+  },
+  ai: { bgcolor: AI_SOFT, border: "1px solid #C9BEF2", color: "#2F1E80" },
+  warn: { bgcolor: "#FFF3DA", border: "1px solid #E8CF98", color: "#5C3A00" },
+};
+
+function AiText({ step }: { step: number }): JSX.Element {
+  const current = AI_STEPS[step];
+  return (
+    <>
+      <Typography
+        id="how-it-works-title"
+        component="h2"
+        sx={{ m: 0, fontSize: 26, fontWeight: 700, lineHeight: 1.2 }}
+      >
+        {current.question}
+      </Typography>
+      <Typography
+        sx={{ mb: 0.75, fontSize: 16, color: WORKSPACE_COLORS.muted }}
+      >
+        {current.lead}
+      </Typography>
+      {current.body.map((paragraph, index) => (
+        <Box key={index} sx={BULLET_SX}>
+          <span>{paragraph}</span>
+        </Box>
+      ))}
+      <Box
+        sx={{
+          mt: 1.75,
+          px: 1.5,
+          py: 1.25,
+          borderRadius: "4px",
+          fontSize: 13,
+          ...AI_NOTE_TONES[current.noteTone],
+        }}
+      >
+        {current.note}
+      </Box>
+    </>
+  );
+}
+
+/** A small rounded tag of the AI pictures */
+function AiTag({
+  children,
+  tone,
+}: {
+  children: string;
+  tone: SxProps<Theme>;
+}): JSX.Element {
+  return <Chip sx={tone}>{children}</Chip>;
+}
+
+const AI_TAG: SxProps<Theme> = { bgcolor: AI_SOFT, color: AI_TEXT };
+const SENT_TAG: SxProps<Theme> = AMBER_SOFT;
+const SAFE_TAG: SxProps<Theme> = GREEN_SOFT;
+
+/** One line of a picture: a name, a small tag and a grey caption */
+function AiRow({
+  name,
+  tag,
+  tagTone,
+  caption,
+}: {
+  name: string;
+  tag: string;
+  tagTone: SxProps<Theme>;
+  caption: string;
+}): JSX.Element {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, fontSize: 13 }}>
+      <b style={{ width: 62, flex: "none" }}>{name}</b>
+      <AiTag tone={tagTone}>{tag}</AiTag>
+      <Typography
+        sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted, minWidth: 0 }}
+      >
+        {caption}
+      </Typography>
+    </Box>
+  );
+}
+
+/** A card with a coloured left edge and a row of tags (the "what leaves" picture) */
+function AiGroup({
+  title,
+  hint,
+  edge,
+  titleColor,
+  tags,
+  tone,
+}: {
+  title: string;
+  hint?: string;
+  edge: string;
+  titleColor: string;
+  tags: string[];
+  tone: SxProps<Theme>;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        bgcolor: WORKSPACE_COLORS.panel,
+        border: `1px solid ${WORKSPACE_COLORS.border}`,
+        borderLeft: `6px solid ${edge}`,
+        borderRadius: "6px",
+        px: 1.75,
+        py: 1.25,
+      }}
+    >
+      <Typography sx={{ fontSize: 13.5, color: titleColor }}>
+        <b>{title}</b>
+        {hint && (
+          <Box
+            component="span"
+            sx={{ ml: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
+          >
+            {hint}
+          </Box>
+        )}
+      </Typography>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.75 }}>
+        {tags.map((tag) => (
+          <AiTag key={tag} tone={tone}>
+            {tag}
+          </AiTag>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+/** A placeholder inside a sentence of the masking picture */
+function Mask({ children }: { children: string }): JSX.Element {
+  return (
+    <Box
+      component="span"
+      sx={{
+        bgcolor: AI_SOFT,
+        color: AI_TEXT,
+        px: 0.6,
+        py: 0.1,
+        borderRadius: "3px",
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+/** A small caps label above the text of a picture card */
+function AiLabel({
+  children,
+  color = WORKSPACE_COLORS.muted,
+}: {
+  children: string;
+  color?: string;
+}): JSX.Element {
+  return (
+    <Typography
+      sx={{
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: ".05em",
+        color,
+        mb: 0.5,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+function AiScoreRow({
+  title,
+  detail,
+  score,
+  tone,
+  isDim,
+}: {
+  title: string;
+  detail: string;
+  score: string;
+  tone: SxProps<Theme>;
+  isDim?: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.25,
+        px: 1.75,
+        py: 1.1,
+        borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+        opacity: isDim ? 0.6 : 1,
+      }}
+    >
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <b style={{ fontSize: 13 }}>{title}</b>
+        <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+          {detail}
+        </Typography>
+      </Box>
+      <Chip sx={tone}>{score}</Chip>
+    </Box>
+  );
+}
+
+function AiPictureContent({ step }: { step: number }): JSX.Element {
+  if (step === 0) {
+    return (
+      <>
+        <Box
+          sx={{
+            bgcolor: WORKSPACE_COLORS.panel,
+            border: `2px solid ${AI_COLOR}`,
+            borderRadius: 2,
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              px: 1.75,
+              py: 1.25,
+              bgcolor: AI_SOFT,
+              color: AI_TEXT,
+              fontWeight: 700,
+              fontSize: 13.5,
+            }}
+          >
+            ✦ AI helps in five places, only when you press a button
+          </Box>
+          {[
+            "Tailor to a job ad",
+            "Sort pasted CV text",
+            "Pick what to hide",
+            "Chat edits",
+            "Place unsorted items",
+          ].map((name) => (
+            <Box
+              key={name}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                px: 1.75,
+                py: 1.1,
+                borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+              }}
+            >
+              <b style={{ flex: 1, fontSize: 13.5 }}>{name}</b>
+              <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+                uses your chosen AI
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ flex: 1, ...GREEN_SOFT, borderRadius: "6px", p: 1.25 }}>
+            <b style={{ fontSize: 12.5 }}>AI can</b>
+            <Typography sx={{ fontSize: 12.5 }}>
+              read, score, suggest
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              bgcolor: WORKSPACE_COLORS.panel,
+              border: `1px solid ${WORKSPACE_COLORS.border}`,
+              borderRadius: "6px",
+              p: 1.25,
+            }}
+          >
+            <b style={{ fontSize: 12.5 }}>AI cannot</b>
+            <Typography sx={{ fontSize: 12.5 }}>
+              add or edit your facts
+            </Typography>
+          </Box>
+        </Box>
+        <Caption>You approve every change.</Caption>
+      </>
+    );
+  }
+  if (step === 1) {
+    return (
+      <>
+        <PicCard borderColor={WORKSPACE_COLORS.borderStrong}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <b>Online AI</b>
+            <Caption>text leaves this computer</Caption>
+          </Box>
+          <AiRow
+            name="Claude"
+            tag="online"
+            tagTone={{}}
+            caption="Sent to Anthropic. Billed per use."
+          />
+          <AiRow
+            name="Gemini"
+            tag="online"
+            tagTone={{}}
+            caption="Sent to Google. Free tier."
+          />
+          <AiRow
+            name="Groq"
+            tag="online"
+            tagTone={{}}
+            caption="Sent to Groq. Free tier."
+          />
+        </PicCard>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 8,
+            fontSize: 12,
+            color: WORKSPACE_COLORS.muted,
+          }}
+        >
+          <span>↑ leaves</span>
+          <span>stays here ↓</span>
+        </Box>
+        <PicCard borderColor={GOOD_COLOR}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <b>Offline AI</b>
+            <Caption>text stays on this computer</Caption>
+          </Box>
+          <AiRow
+            name="Ollama"
+            tag="offline"
+            tagTone={{ bgcolor: GOOD_COLOR, color: "#fff" }}
+            caption="Nothing leaves it. Free."
+          />
+        </PicCard>
+        <Caption>One AI for everything, or override a single task.</Caption>
+      </>
+    );
+  }
+  if (step === 2) {
+    return (
+      <>
+        <AiGroup
+          title="Sent"
+          edge="#B58A2E"
+          titleColor="#7A4C00"
+          tags={["job advert", "bullet text", "titles", "dates"]}
+          tone={SENT_TAG}
+        />
+        <AiGroup
+          title="Masked first"
+          hint="swapped for placeholders"
+          edge={AI_COLOR}
+          titleColor={AI_TEXT}
+          tags={[
+            "name",
+            "email",
+            "phone",
+            "address",
+            "links",
+            "employers",
+            "schools",
+          ]}
+          tone={AI_TAG}
+        />
+        <AiGroup
+          title="Never sent"
+          edge={GOOD_COLOR}
+          titleColor="#175F37"
+          tags={["your saved data files", "the PDF you export"]}
+          tone={SAFE_TAG}
+        />
+      </>
+    );
+  }
+  if (step === 3) {
+    return (
+      <>
+        <PicCard borderColor="#B9B3A9">
+          <AiLabel>ON YOUR SCREEN</AiLabel>
+          <Typography sx={{ fontSize: 13 }}>
+            Alex Morgan, Senior Developer at Brightwater Systems, 2020 to 2024.
+            BSc at Example University. alex@example.com
+          </Typography>
+        </PicCard>
+        <Typography
+          sx={{
+            textAlign: "center",
+            color: AI_TEXT,
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          ↓ masked before sending
+        </Typography>
+        <PicCard borderColor={AI_COLOR}>
+          <AiLabel color={AI_TEXT}>WHAT THE AI SEES</AiLabel>
+          <Typography sx={{ fontSize: 13, lineHeight: 1.7 }}>
+            <Mask>[Candidate Name]</Mask>, Senior Developer at{" "}
+            <Mask>[Company 1]</Mask>, 2020 to 2024. BSc at{" "}
+            <Mask>[Institution 1]</Mask>. <Mask>[Email]</Mask>
+          </Typography>
+        </PicCard>
+        <Typography
+          sx={{
+            textAlign: "center",
+            color: GOOD_COLOR,
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          ↓ real names put back in the answer
+        </Typography>
+        <PicCard borderColor="#B7DFC6">
+          <AiLabel color="#175F37">ANSWER YOU READ</AiLabel>
+          <Typography sx={{ fontSize: 13 }}>
+            Led the checkout rebuild at Brightwater Systems.
+          </Typography>
+        </PicCard>
+      </>
+    );
+  }
+  if (step === 4) {
+    return (
+      <PicCard borderColor={AI_COLOR}>
+        <b style={{ fontSize: 14 }}>Send to your AI?</b>
+        <Caption>
+          Check the text below, hide anything private, then send.
+        </Caption>
+        <Typography sx={{ fontSize: 12.5 }}>
+          Hide “Harbourlight Software” as
+        </Typography>
+        <Box sx={{ display: "flex", gap: 0.6, flexWrap: "wrap" }}>
+          {[
+            "Company",
+            "Institution",
+            "Person",
+            "Location",
+            "Date",
+            "Other",
+          ].map((kind) => (
+            <Chip
+              key={kind}
+              sx={{
+                borderRadius: "4px",
+                border: "1px solid #B8400D",
+                color: "#8A2F08",
+                bgcolor: kind === "Company" ? "#FBEBE2" : "transparent",
+                fontWeight: kind === "Company" ? 700 : 400,
+              }}
+            >
+              {kind}
+            </Chip>
+          ))}
+        </Box>
+        <Box
+          sx={{
+            border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+            borderRadius: "4px",
+            p: 1.25,
+            fontSize: 12.5,
+            lineHeight: 1.5,
+          }}
+        >
+          <Box component="span" sx={{ bgcolor: "#BFD8F5" }}>
+            Harbourlight Software
+          </Box>{" "}
+          is hiring a React developer for the Atlas project. You will report to
+          Sam Rivera and work from the Leeds office.
+        </Box>
+        <Box sx={{ display: "flex", gap: 1.25, fontSize: 12 }}>
+          <Box sx={{ flex: 1 }}>
+            <b>Hidden automatically</b>
+            <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+              Your name, contact details, employers and schools.
+            </Typography>
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <b>Hidden by you</b>
+            <Typography sx={{ fontSize: 12, color: AI_TEXT }}>
+              Harbourlight Software → [Company 1]
+            </Typography>
+          </Box>
+        </Box>
+        {[
+          "Remember my own masks next time",
+          "This job advert is private or confidential",
+        ].map((label) => (
+          <Box
+            key={label}
+            sx={{
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+              fontSize: 12.5,
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                width: 15,
+                height: 15,
+                border: `1.5px solid ${WORKSPACE_COLORS.muted}`,
+                borderRadius: "3px",
+              }}
+            />
+            {label}
+          </Box>
+        ))}
+      </PicCard>
+    );
+  }
+  return (
+    <>
+      <Box
+        sx={{
+          bgcolor: WORKSPACE_COLORS.panel,
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderRadius: "6px",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            px: 1.75,
+            py: 1.1,
+            bgcolor: WORKSPACE_COLORS.hover,
+            fontWeight: 700,
+            fontSize: 13,
+          }}
+        >
+          Job title{" "}
+          <Box
+            component="span"
+            sx={{ fontWeight: 400, color: WORKSPACE_COLORS.muted }}
+          >
+            scored against the advert
+          </Box>
+        </Box>
+        <AiScoreRow
+          title="React developer"
+          detail="Matches the advert’s React focus"
+          score="Relevancy 80%"
+          tone={GREEN_SOFT}
+        />
+        <AiScoreRow
+          title="Frontend developer"
+          detail="Front-end focus, less React emphasis"
+          score="Relevancy 55%"
+          tone={AMBER_SOFT}
+        />
+        <AiScoreRow
+          title="Software Developer"
+          detail="Generic title"
+          score="Relevancy 30%"
+          tone={AMBER_SOFT}
+        />
+      </Box>
+      <Box
+        sx={{
+          bgcolor: WORKSPACE_COLORS.panel,
+          border: `1px solid ${WORKSPACE_COLORS.border}`,
+          borderRadius: "6px",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            px: 1.75,
+            py: 1.1,
+            bgcolor: WORKSPACE_COLORS.hover,
+            fontWeight: 700,
+            fontSize: 13,
+          }}
+        >
+          Experience{" "}
+          <Box
+            component="span"
+            sx={{ fontWeight: 400, color: WORKSPACE_COLORS.muted }}
+          >
+            scored entry by entry
+          </Box>
+        </Box>
+        <AiScoreRow
+          title="Senior Developer"
+          detail="Brightwater Systems"
+          score="Relevancy 85%"
+          tone={GREEN_SOFT}
+        />
+        <AiScoreRow
+          title="Developer"
+          detail="Fernside Data"
+          score="Relevancy 50%"
+          tone={AMBER_SOFT}
+        />
+        <AiScoreRow
+          title="Shop assistant"
+          detail="Cobalt Retail"
+          score="Relevancy 5%"
+          tone={RED_SOFT}
+          isDim
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1,
+          fontSize: 12,
+          color: AI_TEXT,
+        }}
+      >
+        <AiPill>✦ Score entries again</AiPill>
+        Nothing is hidden or moved.
+      </Box>
+    </>
+  );
+}
+
+/** The picture of an AI tutorial step */
+function AiPicture({ step }: { step: number }): JSX.Element {
+  return (
+    <Box aria-hidden="true" sx={{ ...pictureSx(420), gap: 1.25 }}>
+      <AiPictureContent step={step} />
+    </Box>
+  );
+}
+
 interface Tutorial {
   id: TutorialId;
   name: string;
@@ -2852,6 +3631,14 @@ const TUTORIALS: Tutorial[] = [
     shortName: "Applications",
     summary: "Statuses, what you sent and follow up",
     stepNames: APPLICATIONS_STEPS.map((s) => s.name),
+    lastLabel: "Got it",
+  },
+  {
+    id: "ai",
+    name: "Using AI safely",
+    shortName: "AI",
+    summary: "Online or offline, masking and what is sent",
+    stepNames: AI_STEPS.map((s) => s.name),
     lastLabel: "Got it",
   },
 ];
@@ -3313,6 +4100,8 @@ export function HowItWorksDialog({
       <ApplyPicture step={step} />
     ) : tutorialId === "applications" ? (
       <ApplicationsPicture step={step} />
+    ) : tutorialId === "ai" ? (
+      <AiPicture step={step} />
     ) : (
       <TemplatePicture step={step} />
     );
@@ -3426,6 +4215,8 @@ export function HowItWorksDialog({
                 <ApplyText step={step} />
               ) : tutorialId === "applications" ? (
                 <ApplicationsText step={step} />
+              ) : tutorialId === "ai" ? (
+                <AiText step={step} />
               ) : (
                 <TemplateText step={step} />
               )}

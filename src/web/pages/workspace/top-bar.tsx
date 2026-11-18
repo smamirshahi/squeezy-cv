@@ -22,6 +22,8 @@ import {
   markWelcomeSeen,
   type FirstVisitTutorial,
 } from "@pages/workspace/tutorial-seen";
+import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
+import { OPEN_TUTORIAL_EVENT } from "@pages/workspace/tutorial-event";
 import { FeedbackDialog } from "@pages/workspace/feedback-dialog";
 import { onAppLinkClick, useRoute } from "@hooks/navigation";
 import { formatRoute, type Route } from "@shared/routing/routes";
@@ -278,6 +280,33 @@ export function TopBar(): JSX.Element {
       setHelp({ tutorial: visited, step: 0 });
     }
   }, [visited]);
+
+  // Opening the AI settings in any way (rail, gear next to an AI button, menu) shows the AI
+  // tutorial the first time. It opens after the settings, so it sits on top of them.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onSettings = (): void => {
+      if (isAutoStartOff() || hasSeenTutorial("ai")) {
+        return;
+      }
+      markTutorialSeen("ai");
+      timer = setTimeout(() => setHelp({ tutorial: "ai", step: 0 }), 0);
+    };
+    const onTutorial = (event: Event): void => {
+      const tutorial = (event as CustomEvent<{ tutorial: TutorialId }>).detail
+        ?.tutorial;
+      if (tutorial) {
+        setHelp({ tutorial, step: 0 });
+      }
+    };
+    window.addEventListener(OPEN_AI_SETTINGS_EVENT, onSettings);
+    window.addEventListener(OPEN_TUTORIAL_EVENT, onTutorial);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener(OPEN_AI_SETTINGS_EVENT, onSettings);
+      window.removeEventListener(OPEN_TUTORIAL_EVENT, onTutorial);
+    };
+  }, []);
 
   return (
     <Box

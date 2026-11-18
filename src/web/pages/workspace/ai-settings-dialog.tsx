@@ -24,6 +24,7 @@ import {
 } from "@shared/ai/providers";
 import { AiIcon } from "@components/ai-button";
 import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
+import { openTutorial } from "@pages/workspace/tutorial-event";
 import { BrowserAiKeysPanel } from "@pages/workspace/browser-ai-keys";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -224,6 +225,14 @@ function AiSettingsDialog({
         <AiIcon fontSize="inherit" />
         AI settings
         <Box sx={{ flex: 1 }} />
+        <Button
+          size="small"
+          color="secondary"
+          onClick={() => openTutorial("ai")}
+          sx={{ textTransform: "none", letterSpacing: 0 }}
+        >
+          How AI is used
+        </Button>
         <IconButton size="small" aria-label="Close" onClick={onClose}>
           <CloseOutlinedIcon fontSize="small" />
         </IconButton>
