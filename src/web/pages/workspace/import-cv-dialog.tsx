@@ -70,7 +70,7 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
     }
   }, [isOpen, api]);
 
-  /** Reads the PDF's text on the local server and puts it in the (editable) text box */
+  /** Reads the PDF's text (on the local server, or in the browser version on this device) and puts it in the (editable) text box */
   async function readPdf(file: File): Promise<void> {
     setError("");
     setPdfNote("");

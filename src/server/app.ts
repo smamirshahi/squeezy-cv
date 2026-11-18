@@ -28,7 +28,7 @@ import {
   FeedbackSendError,
   FeedbackSender,
 } from "@server/feedback/github-feedback";
-import { extractPdfText, PdfTextError } from "@server/pdf/extract-pdf-text";
+import { extractPdfText, PdfTextError } from "@shared/pdf/extract-pdf-text";
 import { AiRegistry } from "@server/ai/ai-registry";
 import { AiProviderId } from "@shared/ai/providers";
 import { MAX_IMPORT_PDF_BYTES } from "@custom-types/import-types";
