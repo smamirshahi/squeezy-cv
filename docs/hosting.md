@@ -66,6 +66,8 @@ Edit the policy: Zero Trust → Access controls → Applications → open the ap
 - Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.squeezy-cv.pages.dev` (also behind Access). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
 - `deploy.yml` does **not** run tests or lint; `ci.yml` does that on pull requests, so merge through pull requests. A format change needs a migration step because testers keep real data in their browsers (see `CLAUDE.md`). Never change the project name or address.
 
+To keep data in a folder that Drive, Dropbox, iCloud or OneDrive syncs (browser and server mode), see [sync-with-a-folder.md](sync-with-a-folder.md).
+
 ## Local development is unchanged
 
 - `pnpm dev`: server mode as before (web :5173, server :3001, data in `data/`, Chromium PDF, keys in `.env`).
