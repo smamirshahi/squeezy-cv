@@ -9,6 +9,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Contact info: switches to show or hide the email, phone number and location for the whole template (on by default).
+- Skills: move a skill category up or down in the vault with arrow buttons (stored in the vault order), with a note that the final order for a job is set later.
+
 ## [0.10.0] - 2026-11-18
 
 ### Added

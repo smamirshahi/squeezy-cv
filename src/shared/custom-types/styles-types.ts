@@ -82,6 +82,11 @@ export const StyleSchema = Object({
   /** Whether the contact area draws the links (LinkedIn, GitHub, ...); missing = shown */
   shouldShowLinks: Boolean.optional(),
 
+  /** Whether the contact area shows the email, phone number and location; missing = shown */
+  shouldShowEmail: Boolean.optional(),
+  shouldShowPhone: Boolean.optional(),
+  shouldShowLocation: Boolean.optional(),
+
   /** Whether the nationalities (from the profile) are shown under the name; missing = hidden */
   shouldShowNationality: Boolean.optional(),
 

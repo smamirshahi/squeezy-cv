@@ -262,13 +262,25 @@ function EditedTemplateSwitcher({
   const hint = `This template is used by ${jobCountText(jobs.filter((j) => j.templateId === templateId).length)}.`;
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+      <Typography
+        sx={{
+          fontSize: 12,
+          color: WORKSPACE_COLORS.muted,
+          whiteSpace: "nowrap",
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        Editing
+      </Typography>
       <TextField
         select
         size="small"
-        label="Editing template"
         value={templateId}
         onChange={(event) => navigate(templatesRoute(tab, event.target.value))}
-        sx={{ minWidth: { xs: 200, sm: 260 }, bgcolor: "background.paper" }}
+        slotProps={{
+          select: { SelectDisplayProps: { "aria-label": "Editing template" } },
+        }}
+        sx={{ minWidth: { xs: 180, sm: 220 }, bgcolor: "background.paper" }}
       >
         {templates.map((template) => (
           <MenuItem key={template.id} value={template.id}>
