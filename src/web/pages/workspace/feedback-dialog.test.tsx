@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { FeedbackDialog } from "@pages/workspace/feedback-dialog";
 
@@ -297,5 +298,159 @@ describe("the feedback dialog", () => {
       expect(alert.textContent).toContain("could not be reached");
       expect(note().value).toBe("Nice");
     });
+  });
+});
+
+describe("the feedback dialog in the browser version (no server)", () => {
+  let openWindow: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.stubEnv("VITE_STORAGE_MODE", "browser");
+    openWindow = vi.fn();
+    vi.stubGlobal("open", openWindow);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const githubButton = (): HTMLButtonElement =>
+    screen.getByRole<HTMLButtonElement>("button", { name: "Open on GitHub" });
+
+  it("offers Open on GitHub instead of Send, and says what it does", () => {
+    open();
+    expect(screen.queryByRole("button", { name: "Send" })).toBeNull();
+    expect(githubButton().disabled).toBe(true);
+    expect(screen.getByText(/you need a GitHub account/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Copy the text/ })).toBeTruthy();
+  });
+
+  it("never calls the server", () => {
+    open();
+    write("Nice");
+    fireEvent.click(githubButton());
+    expect(fetch).not.toHaveBeenCalled();
+    expect(sent).toEqual([]);
+  });
+
+  it("opens a prefilled new issue in a new tab, without giving the page to GitHub", () => {
+    open();
+    fireEvent.click(screen.getByRole("button", { name: "Happy" }));
+    write("  Easy to use  ");
+    fireEvent.click(githubButton());
+    expect(openWindow).toHaveBeenCalledOnce();
+    const [address, target, features] = openWindow.mock.calls[0] as [
+      string,
+      string,
+      string,
+    ];
+    const url = new URL(address);
+    expect(url.origin + url.pathname).toBe(
+      "https://github.com/smamirshahi/squeezy-cv/issues/new"
+    );
+    expect(url.searchParams.get("title")).toBe("[Feedback] Easy to use");
+    expect(url.searchParams.get("body")).toContain("Easy to use");
+    expect(url.searchParams.get("body")).toContain("Happy");
+    expect(url.searchParams.get("labels")).toBe("customer-created,feedback");
+    expect(target).toBe("_blank");
+    expect(features).toContain("noopener");
+  });
+
+  it("includes the app info only when it is switched on", () => {
+    open();
+    fireEvent.click(screen.getByRole("button", { name: "Bug" }));
+    write("It broke when I saved");
+    fireEvent.click(githubButton());
+    const withInfo = new URL(openWindow.mock.calls[0][0] as string);
+    expect(withInfo.searchParams.get("body")).toContain("App info");
+
+    fireEvent.click(screen.getByRole("button", { name: "Write another" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bug" }));
+    write("It broke again when I saved");
+    fireEvent.click(appInfoBox());
+    fireEvent.click(githubButton());
+    const without = new URL(openWindow.mock.calls[1][0] as string);
+    expect(without.searchParams.get("body")).not.toContain("App info");
+  });
+
+  it("never puts anything but the note, the mood and the app info in the address", () => {
+    open();
+    write("Plain note");
+    fireEvent.click(githubButton());
+    const address = decodeURIComponent(openWindow.mock.calls[0][0] as string);
+    expect(address).not.toMatch(/vault|template|secret|key/i);
+  });
+
+  it("explains the next step, and can open the address again", () => {
+    open();
+    write("Nice");
+    fireEvent.click(githubButton());
+    expect(screen.getByText("GitHub opened in a new tab")).toBeTruthy();
+    expect(screen.getByText(/Submit new issue/)).toBeTruthy();
+    const again = screen.getByRole("link", { name: /Open it again/ });
+    expect(again.getAttribute("href")).toBe(openWindow.mock.calls[0][0]);
+    expect(again.getAttribute("rel")).toContain("noopener");
+  });
+
+  it("starts empty again for another note", () => {
+    open();
+    write("First");
+    fireEvent.click(screen.getByRole("button", { name: "Happy" }));
+    fireEvent.click(githubButton());
+    fireEvent.click(screen.getByRole("button", { name: "Write another" }));
+    expect(note().value).toBe("");
+    expect(githubButton().disabled).toBe(true);
+  });
+
+  it("does not open a link for a note that is too long, and keeps the text to copy", async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    open();
+    write("é & ".repeat(1000));
+    fireEvent.click(githubButton());
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("too long to put in a link");
+    expect(alert.textContent).not.toContain("Could not send");
+    expect(openWindow).not.toHaveBeenCalled();
+    expect(note().value).not.toBe("");
+    // No server to retry, and no second GitHub button that would hit the same limit
+    expect(
+      within(alert).queryByRole("button", { name: "Try again" })
+    ).toBeNull();
+    expect(
+      within(alert).queryByRole("link", { name: /Open on GitHub/ })
+    ).toBeNull();
+    fireEvent.click(
+      within(alert).getByRole("button", { name: /Copy the text/ })
+    );
+    // Both copy buttons (in the notice and next to Open on GitHub) show it
+    expect((await screen.findAllByText("Copied")).length).toBeGreaterThan(0);
+    expect(writeText).toHaveBeenCalled();
+  });
+
+  it("copies the text without opening anything", async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    open();
+    write("Nice  ");
+    fireEvent.click(screen.getByRole("button", { name: /Copy the text/ }));
+    await screen.findByText("Copied");
+    expect(writeText).toHaveBeenCalledWith("Nice");
+    expect(openWindow).not.toHaveBeenCalled();
+  });
+
+  it("keeps the same rules for the length of a bug note", () => {
+    open();
+    fireEvent.click(screen.getByRole("button", { name: "Bug" }));
+    write("broken");
+    expect(githubButton().disabled).toBe(true);
+    write("It is broken when I save");
+    expect(githubButton().disabled).toBe(false);
   });
 });

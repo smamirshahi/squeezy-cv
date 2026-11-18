@@ -4,6 +4,7 @@ import {
   buildFeedbackIssue,
   buildNewIssueUrl,
   FEEDBACK_REPO,
+  fitsInNewIssueUrl,
 } from "@shared/feedback/feedback-issue";
 
 describe("buildFeedbackIssue", () => {
@@ -79,6 +80,34 @@ describe("buildNewIssueUrl", () => {
     expect(url.searchParams.get("title")).toBe("[Feature] Dark mode & more");
     expect(url.searchParams.get("body")).toBe("Dark mode & more");
     expect(url.searchParams.get("labels")).toBe("customer-created,feature");
+  });
+});
+
+describe("fitsInNewIssueUrl", () => {
+  it("accepts a normal note", () => {
+    expect(
+      fitsInNewIssueUrl({ kind: "bug", note: "It broke when I saved" })
+    ).toBe(true);
+  });
+
+  it("accepts the longest plain-text note the dialog allows", () => {
+    expect(
+      fitsInNewIssueUrl({ kind: "feedback", note: "a".repeat(4000) })
+    ).toBe(true);
+  });
+
+  it("refuses a note whose address would be too long once special characters are encoded", () => {
+    expect(
+      fitsInNewIssueUrl({ kind: "feedback", note: "é & ".repeat(1000) })
+    ).toBe(false);
+  });
+
+  it("counts the app info too", () => {
+    const note = "a".repeat(4000);
+    expect(fitsInNewIssueUrl({ kind: "bug", note })).toBe(true);
+    expect(
+      fitsInNewIssueUrl({ kind: "bug", note, appInfo: "é".repeat(500) })
+    ).toBe(false);
   });
 });
 
