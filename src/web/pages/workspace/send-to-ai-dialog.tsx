@@ -22,6 +22,7 @@ import {
   Masking,
   MaskTerm,
 } from "@custom-types/masking-types";
+import { openTutorial } from "@pages/workspace/tutorial-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
   SendApproval,
@@ -289,7 +290,15 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
         Send to {provider.recipient}?
         <Typography variant="body2" color="text.secondary">
           {request.scope}. {provider.detail} Check the text below, hide anything
-          private, then send.
+          private, then send.{" "}
+          <Button
+            size="small"
+            color="secondary"
+            onClick={() => openTutorial("ai")}
+            sx={{ textTransform: "none", p: 0, minWidth: 0 }}
+          >
+            How does this work?
+          </Button>
         </Typography>
       </DialogTitle>
       <DialogContent dividers>

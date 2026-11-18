@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- A **"Using AI safely" tutorial** (#504) in the Tutorials list: AI as a helper, online or offline AI, what leaves your computer, masking, hiding more yourself, and relevancy. It opens by itself the first time you open the AI settings in any way (rail icon, gear next to an AI button, menu), and "How AI is used" in the AI settings and "How does this work?" in the Send to AI window open it again.
+
 ## [0.9.0] - 2026-11-17
 
 ### Added

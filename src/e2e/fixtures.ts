@@ -58,6 +58,7 @@ export async function skipTutorials(page: Page): Promise<void> {
       "squeezy-cv-template-tutorial-seen",
       "squeezy-cv-apply-tutorial-seen",
       "squeezy-cv-applications-tutorial-seen",
+      "squeezy-cv-ai-tutorial-seen",
     ]) {
       localStorage.setItem(key, "1");
     }

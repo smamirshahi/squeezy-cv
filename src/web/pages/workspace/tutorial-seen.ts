@@ -1,6 +1,6 @@
 /** The tutorials that open by themselves the first time their page is visited */
 export type FirstVisitTutorial =
-  "vault" | "template" | "apply" | "applications";
+  "vault" | "template" | "apply" | "applications" | "ai";
 
 // The vault key is the one used before there were several tutorials, so nobody sees it twice
 const KEYS: Record<FirstVisitTutorial, string> = {
@@ -8,6 +8,7 @@ const KEYS: Record<FirstVisitTutorial, string> = {
   template: "squeezy-cv-template-tutorial-seen",
   apply: "squeezy-cv-apply-tutorial-seen",
   applications: "squeezy-cv-applications-tutorial-seen",
+  ai: "squeezy-cv-ai-tutorial-seen",
 };
 
 /** Whether this tutorial has already been shown in this browser */

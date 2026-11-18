@@ -12,6 +12,8 @@ import {
   setAutoStartOff,
 } from "@pages/workspace/tutorial-seen";
 import { undoableReducer } from "@store/store";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import { openTutorial } from "@pages/workspace/tutorial-event";
 
 beforeEach(() => {
   localStorage.clear();
@@ -160,5 +162,45 @@ describe("welcome on the very first open", () => {
     setAutoStartOff(true);
     show("/settings");
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+});
+
+describe("the AI tutorial on the first open of the AI settings (#504)", () => {
+  it("opens the first time the AI settings are opened, and not again", async () => {
+    show("/settings");
+    expect(hasSeenTutorial("ai")).toBe(false);
+    openAiSettings();
+    expect(
+      await screen.findByRole("dialog", {
+        name: "AI is a helper, not the author",
+      })
+    ).toBeTruthy();
+    expect(hasSeenTutorial("ai")).toBe(true);
+    cleanup();
+
+    show("/settings");
+    openAiSettings("chat");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("stays closed when tutorials are switched off on start", async () => {
+    setAutoStartOff(true);
+    show("/settings");
+    openAiSettings();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(hasSeenTutorial("ai")).toBe(false);
+  });
+
+  it("opens from a How does this work? link on any time", async () => {
+    markTutorialSeen("ai");
+    show("/settings");
+    openTutorial("ai");
+    expect(
+      await screen.findByRole("dialog", {
+        name: "AI is a helper, not the author",
+      })
+    ).toBeTruthy();
   });
 });

@@ -99,3 +99,29 @@ describe("the Vault tutorial", () => {
     ).toBeTruthy();
   });
 });
+
+describe("the AI tutorial (#504)", () => {
+  it("is in the list and goes through its six steps", () => {
+    const onClose = vi.fn();
+    render(<HowItWorksDialog isOpen startTutorial="ai" onClose={onClose} />);
+    const list = screen.getByRole("navigation", { name: "Tutorials" });
+    expect(list.textContent).toContain("AI");
+    expect(screen.getByText("Using AI safely · Step 1 of 6")).toBeTruthy();
+    const titles = [
+      "AI is a helper, not the author",
+      "Online or offline AI",
+      "What leaves your computer",
+      "Masking: names swapped for placeholders",
+      "When to hide more yourself",
+      "Relevancy: how well it fits the job",
+    ];
+    titles.forEach((title, index) => {
+      expect(screen.getByRole("heading", { name: title })).toBeTruthy();
+      if (index < titles.length - 1) {
+        fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+});
