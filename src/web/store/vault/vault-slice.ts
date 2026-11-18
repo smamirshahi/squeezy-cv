@@ -338,6 +338,22 @@ const vaultSlice = createSlice({
       }
     },
 
+    /** Moves a bullet (a skill) to the end of another item of the same section. */
+    moveBulletToItem(
+      state,
+      action: PayloadAction<BulletRef & { toItemId: string }>
+    ) {
+      const { sectionId, itemId, bulletId, toItemId } = action.payload;
+      const from = findItem(state, sectionId, itemId);
+      const to = findItem(state, sectionId, toItemId);
+      const bullet = from?.bullets.find((b) => b.id === bulletId);
+      if (!from || !to || !bullet || from.id === to.id) {
+        return;
+      }
+      from.bullets = from.bullets.filter((b) => b.id !== bulletId);
+      to.bullets.push(bullet);
+    },
+
     moveBullet(state, action: PayloadAction<BulletRef & { toIndex: number }>) {
       const { sectionId, itemId, bulletId, toIndex } = action.payload;
       const item = findItem(state, sectionId, itemId);
@@ -443,6 +459,7 @@ export const {
   setBulletAlt,
   removeBullet,
   moveBullet,
+  moveBulletToItem,
   updateProfile,
   setProfile,
   setLinks,

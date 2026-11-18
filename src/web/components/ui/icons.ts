@@ -25,6 +25,7 @@ export { default as DeleteOutlined } from "@mui/icons-material/DeleteOutlined";
 export { default as DescriptionOutlined } from "@mui/icons-material/DescriptionOutlined";
 export { default as DesktopWindowsOutlined } from "@mui/icons-material/DesktopWindowsOutlined";
 export { default as DragIndicatorOutlined } from "@mui/icons-material/DragIndicatorOutlined";
+export { default as DriveFileMoveOutlined } from "@mui/icons-material/DriveFileMoveOutlined";
 export { default as ErrorOutlineOutlined } from "@mui/icons-material/ErrorOutlineOutlined";
 export { default as ExpandLessOutlined } from "@mui/icons-material/ExpandLessOutlined";
 export { default as ExpandMoreOutlined } from "@mui/icons-material/ExpandMoreOutlined";

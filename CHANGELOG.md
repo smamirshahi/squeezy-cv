@@ -11,6 +11,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ### Added
 
+- Skills: a **move icon** next to delete on each skill moves it to another category (#518).
 - Browser version: **import a CV from a PDF** (#511). The PDF is read on your device (its text layer, no upload), with the same limits and messages as the server version: 5 MB, 20 pages, no password, no scans (no OCR). The PDF reader is only downloaded the first time you use it.
 - Browser version: **Send feedback** works without a server (#510). "Open on GitHub" opens a new issue with your note, the kind and the optional app info already filled in (you need a GitHub account); "Copy the text" is there for everyone else, and also for a note too long to fit in a link.
 - Browser mode: **store my data in a folder** (#492). In "Your data", Choose folder keeps the CV, templates, jobs and applications as files in a folder you pick, the same layout as the server's `data/` folder. A folder that Drive, Dropbox, iCloud or OneDrive syncs gives you sync and a backup, and the app never talks to those services. Chrome and Edge on a computer only; AI keys are never written to the folder.

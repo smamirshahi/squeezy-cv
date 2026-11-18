@@ -12,12 +12,14 @@ import {
   MenuItem,
   TextField,
   Tooltip,
+  Menu,
   Typography,
 } from "@components/ui";
 import {
   ArrowDownwardOutlined as ArrowDownwardIcon,
   ArrowUpwardOutlined as ArrowUpwardIcon,
   DeleteOutlined as DeleteIcon,
+  DriveFileMoveOutlined as MoveIcon,
   InfoOutlined as InfoOutlinedIcon,
 } from "@components/ui/icons";
 import { Bullet, Item, Section } from "@custom-types/vault-types";
@@ -52,6 +54,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import {
   addBullet,
   moveBullet,
+  moveBulletToItem,
   removeBullet,
   moveItemToSection,
   sectionsSelector,
@@ -359,6 +362,9 @@ interface SkillCardProps {
   index: number;
   count: number;
   onNewAfter: (index: number) => void;
+
+  /** The other categories (skills groups) of the section */
+  categories: Item[];
 }
 
 /** One skill of a group: name and level. Every change is saved to the vault at once. */
@@ -369,8 +375,10 @@ function SkillCard({
   index,
   count,
   onNewAfter,
+  categories,
 }: SkillCardProps): JSX.Element {
   const dispatch = useAppDispatch();
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const ref = { sectionId: section.id, itemId: item.id, bulletId: bullet.id };
   const level = Math.floor(bullet.rating ?? 0);
   return (
@@ -475,6 +483,36 @@ function SkillCard({
           </MenuItem>
         ))}
       </TextField>
+      {categories.length > 0 && (
+        <>
+          <Tooltip title="Move to another category">
+            <IconButton
+              size="small"
+              aria-label={`Move skill ${index + 1} to another category`}
+              onClick={(event) => setMenuAnchor(event.currentTarget)}
+            >
+              <MoveIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={menuAnchor}
+            open={menuAnchor !== null}
+            onClose={() => setMenuAnchor(null)}
+          >
+            {categories.map((category) => (
+              <MenuItem
+                key={category.id}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  dispatch(moveBulletToItem({ ...ref, toItemId: category.id }));
+                }}
+              >
+                {getItemLabel(category) || "Untitled category"}
+              </MenuItem>
+            ))}
+          </Menu>
+        </>
+      )}
       <IconButton
         size="small"
         aria-label={`Remove skill ${index + 1}`}
@@ -870,6 +908,7 @@ export function VaultItemEditor({
               index={bulletIndex}
               count={item.bullets.length}
               onNewAfter={newBulletAfter}
+              categories={section.items.filter((other) => other.id !== item.id)}
             />
           ))}
         </>
