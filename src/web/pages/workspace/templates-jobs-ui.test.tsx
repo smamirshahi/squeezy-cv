@@ -12,7 +12,7 @@ import {
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import sample from "@fixtures/sample-cv.json";
-import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
+import { TemplateDesignPage } from "@pages/workspace/template-design-page";
 import { Inspector } from "@pages/workspace/inspector";
 import { JobSwitcher } from "@pages/workspace/job-switcher";
 import { TemplatesPage } from "@pages/workspace/templates-page";
@@ -552,7 +552,7 @@ describe("inspector and style settings say what they change", () => {
   });
 
   it("a style change on the Style Settings page reaches every job on the template", () => {
-    const store = setup(<EditorTypography />);
+    const store = setup(<TemplateDesignPage templateId="t1" />);
     addJob(store, "acme");
     fireEvent.click(screen.getByLabelText("Increase bodyMd size"));
     const sizes = variantsSelector(store.getState()).map(

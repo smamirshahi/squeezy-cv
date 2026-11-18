@@ -231,52 +231,31 @@ export function ColoursCard(): JSX.Element {
     <Box
       component="section"
       aria-label="Colours"
-      sx={{
-        border: `1px solid ${WORKSPACE_COLORS.border}`,
-        borderRadius: 1.5,
-        bgcolor: WORKSPACE_COLORS.panel,
-        p: { xs: 1.75, md: 2.5 },
-      }}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
     >
-      <Box sx={{ mb: 1.75 }}>
-        <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
-          2 · Colours
-        </Typography>
-        <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
-          Two colours and an optional accent are enough, and they print well in
-          black and white.
-        </Typography>
-      </Box>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "minmax(0, 1fr)",
-            sm: "repeat(3, minmax(0, 1fr))",
-          },
-          gap: 2,
-        }}
-      >
-        <ColorPicker
-          label="Text"
-          hint="Name, headings, body, skills"
-          color={colors.text}
-          onChange={(text) => dispatch(setColors({ text }))}
-        />
-        <ColorPicker
-          label="Secondary"
-          hint="Dates and contact line"
-          color={colors.secondary}
-          onChange={(secondary) => dispatch(setColors({ secondary }))}
-        />
-        <ColorPicker
-          label="Accent"
-          hint="Section titles, line, symbols"
-          color={colors.accent}
-          onChange={(accent) => dispatch(setColors({ accent }))}
-          onClear={() => dispatch(setColors({ accent: null }))}
-        />
-      </Box>
+      <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
+        Two colours and an optional accent are enough, and they print well in
+        black and white.
+      </Typography>
+      <ColorPicker
+        label="Text"
+        hint="Name, headings, body, skills"
+        color={colors.text}
+        onChange={(text) => dispatch(setColors({ text }))}
+      />
+      <ColorPicker
+        label="Secondary"
+        hint="Dates and contact line"
+        color={colors.secondary}
+        onChange={(secondary) => dispatch(setColors({ secondary }))}
+      />
+      <ColorPicker
+        label="Accent"
+        hint="Section titles, line, symbols"
+        color={colors.accent}
+        onChange={(accent) => dispatch(setColors({ accent }))}
+        onClear={() => dispatch(setColors({ accent: null }))}
+      />
     </Box>
   );
 }

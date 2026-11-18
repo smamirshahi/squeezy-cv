@@ -6,6 +6,7 @@ import {
   Literal,
   Boolean,
   Number,
+  Array as RtArray,
 } from "runtypes";
 
 const SideSchema = Union(
@@ -149,7 +150,17 @@ export const StyleSchema = Object({
   hasHeadingLine: Boolean.optional(),
 
   /** The rating icon */
-  ratingIcon: Union(Literal("star"), Literal("circle"), Literal("text")),
+  ratingIcon: Union(
+    Literal("star"),
+    Literal("circle"),
+    Literal("text"),
+
+    /** No level at all: only the skill names */
+    Literal("none")
+  ),
+
+  /** Entry details the template leaves out, as "section.detail" keys (see entry-details.ts); missing = all shown */
+  hiddenDetails: RtArray(String).optional(),
 
   /** The bullet point icon */
   bulletPointIcon: Union(

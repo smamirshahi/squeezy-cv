@@ -10,6 +10,7 @@ import { LocationOnOutlined as LocationOnIcon } from "@components/ui/icons";
 import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
+import { isDetailShown } from "@shared/style/entry-details";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
 
 interface Props {
@@ -20,7 +21,10 @@ interface Props {
 export function GenericSectionPreviewPage({
   section,
 }: Props): JSX.Element | null {
-  const { bulletPointIcon } = useAppSelector(styleSelector);
+  const { bulletPointIcon, hiddenDetails } = useAppSelector(styleSelector);
+  const isProjects = section.type === "projects";
+  const isShown = (detail: string): boolean =>
+    !isProjects || isDetailShown(hiddenDetails, `projects.${detail}`);
   const { accent } = useResolvedStyle();
   const visibleItems = section.items;
 
@@ -95,20 +99,20 @@ export function GenericSectionPreviewPage({
                   }}
                 />
               )}
-              {item.fields.technologies && (
+              {isShown("technologies") && item.fields.technologies && (
                 <CvTypography
                   variant="bodyMd"
                   text={`Technologies: ${item.fields.technologies}`}
                 />
               )}
-              {item.fields.link && (
+              {isShown("link") && item.fields.link && (
                 <CvTypography
                   variant="bodyMd"
                   text={item.fields.link.replace(/^https?:\/\//, "")}
                   href={normaliseLink(item.fields.link)}
                 />
               )}
-              {item.fields.description && (
+              {isShown("description") && item.fields.description && (
                 <CvTypography
                   variant="bulletText"
                   text={item.fields.description}

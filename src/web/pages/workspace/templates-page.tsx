@@ -38,9 +38,8 @@ import { createApiClient } from "@store/persistence/api-client";
 import { Template } from "@custom-types/template-types";
 import { navigate, onAppLinkClick, useRoute } from "@hooks/navigation";
 import { Route, TemplatesTab, formatRoute } from "@shared/routing/routes";
+import { TemplateDesignPage } from "@pages/workspace/template-design-page";
 import { TemplateSectionsPage } from "@pages/workspace/template-sections-page";
-import { EditorTypography } from "@pages/editor-page/sections/editor-style-settings/editor-style-settings";
-import { StylePreviewPanel } from "@pages/editor-page/sections/editor-style-settings/style-preview";
 import {
   jobCountText,
   TemplateSort,
@@ -250,7 +249,7 @@ function templatesRoute(tab: TemplateTab, templateId: string): Route {
     : { kind: "templates", tab, templateId };
 }
 
-/** Top of Design: which template is being edited, and a way to switch */
+/** Which template is being edited, and a way to switch; the hint is in the (i) tooltip */
 function EditedTemplateSwitcher({
   tab,
   templateId,
@@ -260,15 +259,16 @@ function EditedTemplateSwitcher({
 }): JSX.Element {
   const templates = useAppSelector(templatesSelector);
   const jobs = useAppSelector(jobsSelector);
+  const hint = `This template is used by ${jobCountText(jobs.filter((j) => j.templateId === templateId).length)}.`;
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
       <TextField
         select
         size="small"
         label="Editing template"
         value={templateId}
         onChange={(event) => navigate(templatesRoute(tab, event.target.value))}
-        sx={{ minWidth: { xs: "100%", sm: 280 }, bgcolor: "background.paper" }}
+        sx={{ minWidth: { xs: 200, sm: 260 }, bgcolor: "background.paper" }}
       >
         {templates.map((template) => (
           <MenuItem key={template.id} value={template.id}>
@@ -276,23 +276,21 @@ function EditedTemplateSwitcher({
           </MenuItem>
         ))}
       </TextField>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          mt: 1,
-          fontSize: 13,
-          color: WORKSPACE_COLORS.muted,
-        }}
-      >
-        <InfoOutlinedIcon sx={{ fontSize: 16 }} />
-        <span>
-          Hint: this template is used by{" "}
-          {jobCountText(jobs.filter((j) => j.templateId === templateId).length)}
-          .
-        </span>
-      </Box>
+      <Tooltip title={hint}>
+        <Box
+          component="span"
+          tabIndex={0}
+          role="img"
+          aria-label={hint}
+          sx={{
+            display: "inline-flex",
+            color: WORKSPACE_COLORS.muted,
+            cursor: "help",
+          }}
+        >
+          <InfoOutlinedIcon sx={{ fontSize: 18 }} />
+        </Box>
+      </Tooltip>
     </Box>
   );
 }
@@ -302,8 +300,12 @@ function TemplatesNav({
   tab,
   templateId,
   hasTemplates,
+  showSwitcher,
 }: {
   tab: TemplateTab;
+
+  /** Design and Sections show which template they edit, next to the tabs */
+  showSwitcher: boolean;
   /** False until a template exists: there is nothing to design yet */
   hasTemplates: boolean;
   /** The template the Design link opens */
@@ -320,6 +322,9 @@ function TemplatesNav({
         borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
         px: 1,
         overflowX: "auto",
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
       }}
     >
       {/* the three parts are tabs across the top, so the page below gets the whole width */}
@@ -361,6 +366,11 @@ function TemplatesNav({
           </ListItemButton>
         ))}
       </List>
+      {showSwitcher && (
+        <Box sx={{ flex: "none", py: 0.5 }}>
+          <EditedTemplateSwitcher tab={tab} templateId={templateId} />
+        </Box>
+      )}
     </Box>
   );
 }
@@ -524,15 +534,11 @@ export function TemplatesPage(): JSX.Element {
         tab={tab}
         templateId={shownId}
         hasTemplates={!isTemplatePlaceholder}
+        showSwitcher={tab !== "templates" && !isTemplatePlaceholder}
       />
-      {tab === "sections" && (
-        <TemplateSectionsPage
-          templateSwitcher={
-            <EditedTemplateSwitcher tab={tab} templateId={shownId} />
-          }
-        />
-      )}
-      {tab !== "sections" && (
+      {tab === "sections" && <TemplateSectionsPage />}
+      {tab === "design" && <TemplateDesignPage templateId={shownId} />}
+      {tab === "templates" && (
         <Box
           sx={{
             flex: 1,
@@ -554,12 +560,6 @@ export function TemplatesPage(): JSX.Element {
               ...MIDDLE_AREA_SX,
             }}
           >
-            {tab === "design" && (
-              <Box sx={{ maxWidth: 1000, mx: "auto" }}>
-                <EditedTemplateSwitcher tab={tab} templateId={shownId} />
-                <EditorTypography />
-              </Box>
-            )}
             {tab === "templates" && (
               <Box sx={{ maxWidth: 1000, mx: "auto" }}>
                 <Typography
@@ -1092,9 +1092,7 @@ export function TemplatesPage(): JSX.Element {
               </DialogActions>
             </Dialog>
           </Box>
-          {tab === "design" ? (
-            <StylePreviewPanel templateId={shownId} />
-          ) : isTemplatePlaceholder ? null : (
+          {isTemplatePlaceholder ? null : (
             <ResizableAside
               side="right"
               label="the sample CV"

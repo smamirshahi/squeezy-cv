@@ -8,6 +8,9 @@ import { IconWithText } from "@components/icon-with-text";
 import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 import { ItemDescription } from "@pages/preview-page/item-description";
+import { styleSelector } from "@store/cv-data/cv-data-slice";
+import { useAppSelector } from "@store/store-helper";
+import { isDetailShown } from "@shared/style/entry-details";
 import { locationLabel, workModeOf } from "@shared/vault/item-fields";
 
 interface Props {
@@ -16,6 +19,9 @@ interface Props {
 
 /** Renders the whole education part in preview page */
 export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
+  const { hiddenDetails } = useAppSelector(styleSelector);
+  const isShown = (detail: string): boolean =>
+    isDetailShown(hiddenDetails, `education.${detail}`);
   if (section.items.length === 0) {
     return null;
   }
@@ -69,18 +75,22 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
                 text={item.fields.institute ?? ""}
                 href={normaliseLink(item.fields.link)}
               />
-              <CvTypography
-                variant="bodyMd"
-                text={item.fields.fieldOfStudy ?? ""}
-              />
-              <IconWithText
-                icon={LocationOnIcon}
-                text={locationLabel(
-                  item.fields.location,
-                  workModeOf(item.fields)
-                )}
-                variant="bodyMd"
-              />
+              {isShown("fieldOfStudy") && (
+                <CvTypography
+                  variant="bodyMd"
+                  text={item.fields.fieldOfStudy ?? ""}
+                />
+              )}
+              {isShown("location") && (
+                <IconWithText
+                  icon={LocationOnIcon}
+                  text={locationLabel(
+                    item.fields.location,
+                    workModeOf(item.fields)
+                  )}
+                  variant="bodyMd"
+                />
+              )}
             </Grid>
             <DatePeriod
               datePeriod={{
@@ -89,14 +99,16 @@ export function EducationsPreviewPage({ section }: Props): JSX.Element | null {
               }}
             />
 
-            {item.fields.dissertationTitle && (
+            {isShown("dissertation") && item.fields.dissertationTitle && (
               <CvTypography
                 variant="bulletText"
                 text={`Dissertation Title: ${item.fields.dissertationTitle}`}
               />
             )}
           </CvBlock>
-          <ItemDescription text={item.fields.description} />
+          {isShown("description") && (
+            <ItemDescription text={item.fields.description} />
+          )}
         </Grid>
       ))}
     </Grid>

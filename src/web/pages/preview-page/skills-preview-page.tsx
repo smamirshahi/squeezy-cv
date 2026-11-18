@@ -140,7 +140,8 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
                 }}
               >
                 <CvTypography variant="bulletText" text={skill.text} />
-                {display === undefined && ratingIcon === "text" ? (
+                {ratingIcon === "none" ? null : display === undefined &&
+                  ratingIcon === "text" ? (
                   skill.rating ? (
                     <Box component="span" data-cv-level="text" sx={{ ml: 1 }}>
                       <CvTypography

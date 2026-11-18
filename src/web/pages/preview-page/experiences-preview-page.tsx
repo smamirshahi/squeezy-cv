@@ -12,6 +12,7 @@ import { CvBlock } from "@components/cv-block";
 import { CvTypography } from "@components/cv-typography";
 import { ItemDescription } from "@pages/preview-page/item-description";
 import { getBulletListStyle } from "@pages/preview-page/bullet-list-style";
+import { isDetailShown } from "@shared/style/entry-details";
 import { locationLabel, workModeOf } from "@shared/vault/item-fields";
 
 interface Props {
@@ -20,7 +21,9 @@ interface Props {
 
 /** Renders the whole experiences part */
 export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
-  const { bulletPointIcon } = useAppSelector(styleSelector);
+  const { bulletPointIcon, hiddenDetails } = useAppSelector(styleSelector);
+  const isShown = (detail: string): boolean =>
+    isDetailShown(hiddenDetails, `experience.${detail}`);
   const { accent } = useResolvedStyle();
 
   const listStyleType = getBulletListStyle(bulletPointIcon);
@@ -77,14 +80,16 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
                 text={item.fields.company ?? ""}
                 href={normaliseLink(item.fields.link)}
               />
-              <IconWithText
-                icon={LocationOnIcon}
-                text={locationLabel(
-                  item.fields.location,
-                  workModeOf(item.fields)
-                )}
-                variant="bodyMd"
-              />
+              {isShown("location") && (
+                <IconWithText
+                  icon={LocationOnIcon}
+                  text={locationLabel(
+                    item.fields.location,
+                    workModeOf(item.fields)
+                  )}
+                  variant="bodyMd"
+                />
+              )}
             </Grid>
             <DatePeriod
               datePeriod={{
@@ -93,8 +98,10 @@ export function ExperiencesPreviewPage({ section }: Props): JSX.Element | null {
               }}
             />
           </CvBlock>
-          <ItemDescription text={item.fields.description} />
-          {item.bullets.length > 0 && (
+          {isShown("description") && (
+            <ItemDescription text={item.fields.description} />
+          )}
+          {isShown("description") && item.bullets.length > 0 && (
             <Box
               component="ul"
               sx={{
