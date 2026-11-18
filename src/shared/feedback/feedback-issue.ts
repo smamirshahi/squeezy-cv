@@ -59,6 +59,14 @@ export function buildNewIssueUrl(report: FeedbackRequest): string {
   return `https://github.com/${FEEDBACK_REPO}/issues/new?${query.toString()}`;
 }
 
+/** GitHub refuses a "new issue" address longer than this, so a longer note is copied instead */
+const MAX_NEW_ISSUE_URL_LENGTH = 7000;
+
+/** True when the prefilled "new issue" address for this report is short enough to open */
+export function fitsInNewIssueUrl(report: FeedbackRequest): boolean {
+  return buildNewIssueUrl(report).length <= MAX_NEW_ISSUE_URL_LENGTH;
+}
+
 /** Browsers in the order to test (Edge and Opera also say "Chrome", Chrome also says "Safari") */
 const BROWSERS: [name: string, pattern: RegExp][] = [
   ["Edge", /Edg(?:e|A|iOS)?\/(\d+)/],

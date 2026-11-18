@@ -37,7 +37,9 @@ import {
 import {
   buildAppInfo,
   buildNewIssueUrl,
+  fitsInNewIssueUrl,
 } from "@shared/feedback/feedback-issue";
+import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { APP_VERSION } from "@shared/version";
 import { useRoute } from "@hooks/navigation";
 import { useViewport } from "@hooks/use-viewport";
@@ -81,7 +83,10 @@ const MOODS: {
 ];
 
 type SendResult =
-  { issue: { number: number; url: string } } | { error: string };
+  | { issue: { number: number; url: string } }
+  /** Browser mode: GitHub was opened with the note filled in; the person presses Submit there */
+  | { opened: string }
+  | { error: string };
 
 /** Sends the report to the local server, which creates the GitHub issue */
 async function sendReport(report: FeedbackRequest): Promise<SendResult> {
@@ -119,6 +124,8 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
   const [isBusy, setIsBusy] = useState(false);
   const [result, setResult] = useState<SendResult | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  // No server in browser mode, so no token to create the issue with: GitHub opens with the note filled in
+  const isBrowser = isBrowserMode();
   const page = useRoute().kind;
   const isPhone = useViewport() === "phone";
   const current = KINDS.find((entry) => entry.kind === kind) ?? KINDS[0];
@@ -143,7 +150,26 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
     appInfo: isAppInfoOn ? appInfo : undefined,
   };
 
+  function handleOpenOnGithub(): void {
+    if (!fitsInNewIssueUrl(report)) {
+      setResult({
+        error:
+          "Your note is too long to put in a link. Copy the text and paste it into a new issue on GitHub.",
+      });
+      return;
+    }
+    const url = buildNewIssueUrl(report);
+    window.open(url, "_blank", "noopener");
+    setResult({ opened: url });
+    setNote("");
+    setMood(null);
+  }
+
   async function handleSend(): Promise<void> {
+    if (isBrowser) {
+      handleOpenOnGithub();
+      return;
+    }
     setIsBusy(true);
     setResult(null);
     const sent = await sendReport(report);
@@ -173,7 +199,11 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
   const header = (
     <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
       <Box sx={{ flex: 1 }}>
-        {result && "issue" in result ? "Note sent" : "Send feedback"}
+        {result && "issue" in result
+          ? "Note sent"
+          : result && "opened" in result
+            ? "One more step"
+            : "Send feedback"}
       </Box>
       <IconButton aria-label="Close" onClick={handleClose} size="small">
         <CloseOutlinedIcon fontSize="small" />
@@ -229,6 +259,52 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
     );
   }
 
+  if (result && "opened" in result) {
+    return (
+      <Dialog
+        open={isOpen}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="xs"
+        fullScreen={isPhone}
+      >
+        {header}
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1.5,
+            textAlign: "center",
+            py: 3,
+          }}
+        >
+          <OpenInNewOutlinedIcon color="primary" sx={{ fontSize: 48 }} />
+          <Typography variant="h6">GitHub opened in a new tab</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Your note is filled in there. Press “Submit new issue” to send it.
+            You need a GitHub account, and anyone who can see the repository can
+            read the note.
+          </Typography>
+          <Button
+            href={result.opened}
+            target="_blank"
+            rel="noopener"
+            startIcon={<OpenInNewOutlinedIcon />}
+          >
+            Nothing opened? Open it again
+          </Button>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setResult(null)}>Write another</Button>
+          <Button variant="contained" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog
       open={isOpen}
@@ -245,28 +321,33 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
           <Alert
             severity="error"
             action={
-              <Button
-                color="neutral"
-                size="small"
-                disabled={isBusy || isTooShort}
-                onClick={() => void handleSend()}
-              >
-                Try again
-              </Button>
+              isBrowser ? undefined : (
+                <Button
+                  color="neutral"
+                  size="small"
+                  disabled={isBusy || isTooShort}
+                  onClick={() => void handleSend()}
+                >
+                  Try again
+                </Button>
+              )
             }
           >
-            Could not send. {result.error} Your text is still here.
+            {isBrowser ? "" : "Could not send. "}
+            {result.error} Your text is still here.
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 1 }}>
-              <Button
-                size="small"
-                color="neutral"
-                startIcon={<OpenInNewOutlinedIcon />}
-                href={buildNewIssueUrl(report)}
-                target="_blank"
-                rel="noopener"
-              >
-                Open on GitHub
-              </Button>
+              {!isBrowser && (
+                <Button
+                  size="small"
+                  color="neutral"
+                  startIcon={<OpenInNewOutlinedIcon />}
+                  href={buildNewIssueUrl(report)}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Open on GitHub
+                </Button>
+              )}
               <Button
                 size="small"
                 color="neutral"
@@ -343,7 +424,9 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
           helperText={
             kind !== "feedback" && trimmed.length > 0 && isTooShort
               ? `Please write a little more (at least ${MIN_DETAILED_NOTE_LENGTH} characters) so we can act on it.`
-              : "Never includes your CV, notes or AI keys."
+              : isBrowser
+                ? "Opens GitHub with this filled in; you need a GitHub account. Never includes your CV, notes or AI keys."
+                : "Never includes your CV, notes or AI keys."
           }
         />
         <FormControlLabel
@@ -370,12 +453,22 @@ export function FeedbackDialog({ isOpen, onClose }: Props): JSX.Element {
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose}>Cancel</Button>
+        {isBrowser && (
+          <Button
+            startIcon={<ContentCopyOutlinedIcon />}
+            disabled={isTooShort}
+            onClick={() => void handleCopy()}
+          >
+            {isCopied ? "Copied" : "Copy the text"}
+          </Button>
+        )}
         <Button
           variant="contained"
           disabled={isTooShort || isBusy}
+          startIcon={isBrowser ? <OpenInNewOutlinedIcon /> : undefined}
           onClick={() => void handleSend()}
         >
-          Send
+          {isBrowser ? "Open on GitHub" : "Send"}
         </Button>
       </DialogActions>
     </Dialog>
