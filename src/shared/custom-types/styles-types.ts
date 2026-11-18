@@ -137,13 +137,24 @@ export const StyleSchema = Object({
 
   /**
    * How the entries of a skills group are laid out: one per line (default), in two or three
-   * columns, or all on one line. Missing = one per line (or the columns a job sets).
+   * columns, all on one line, or one row per group (bold label left, skills joined with dots, no levels). Missing = one per line (or the columns a job sets).
    */
   skillsLayout: Union(
     Literal("list"),
     Literal("two"),
     Literal("three"),
-    Literal("inline")
+    Literal("inline"),
+    Literal("grouped")
+  ).optional(),
+
+  /**
+   * Levels in the grouped-rows skills layout: none (default), only the skills that differ
+   * from the group's usual level, or all. Missing = none.
+   */
+  groupedLevels: Union(
+    Literal("off"),
+    Literal("exceptions"),
+    Literal("all")
   ).optional(),
 
   /** The line under each section title; missing = shown */

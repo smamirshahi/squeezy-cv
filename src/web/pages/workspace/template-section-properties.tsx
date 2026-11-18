@@ -29,6 +29,7 @@ import {
   setPublicationLinks,
   setPublicationOrder,
   setShouldShowGender,
+  setGroupedLevels,
   setSkillsLayout,
   setDetailShown,
   setShouldShowLinks,
@@ -250,11 +251,18 @@ const SKILLS_LAYOUT_OPTIONS = [
   { value: "two", label: "2 columns" },
   { value: "three", label: "3 columns" },
   { value: "inline", label: "One line" },
+  { value: "grouped", label: "Grouped rows" },
+] as const;
+
+const GROUPED_LEVEL_OPTIONS = [
+  { value: "off", label: "None" },
+  { value: "exceptions", label: "Exceptions" },
+  { value: "all", label: "All" },
 ] as const;
 
 function SkillsLayoutChoice(): JSX.Element {
   const dispatch = useAppDispatch();
-  const { skillsLayout } = useAppSelector(styleSelector);
+  const { skillsLayout, groupedLevels } = useAppSelector(styleSelector);
   return (
     <>
       <Choice
@@ -263,6 +271,22 @@ function SkillsLayoutChoice(): JSX.Element {
         options={[...SKILLS_LAYOUT_OPTIONS]}
         onChange={(next) => dispatch(setSkillsLayout(next))}
       />
+      {skillsLayout === "grouped" && (
+        <>
+          <Choice
+            label="Levels in grouped rows"
+            value={groupedLevels ?? "off"}
+            options={[...GROUPED_LEVEL_OPTIONS]}
+            onChange={(next) => dispatch(setGroupedLevels(next))}
+          />
+          <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
+            Exceptions writes a level, in small grey text, only after the skills
+            that differ from the group's usual level; a skill without one is at
+            the usual level. A group without a clear usual level shows none.
+            Languages always show every level.
+          </Typography>
+        </>
+      )}
       <Typography sx={{ fontSize: 12.5, color: WORKSPACE_COLORS.muted }}>
         Skills are short, so columns or one line per group save space. The level
         is written after each skill.

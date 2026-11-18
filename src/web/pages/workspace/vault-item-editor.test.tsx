@@ -319,4 +319,25 @@ describe("inline vault item editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove skill 3" }));
     expect(stored(store, "Spoken languages").bullets).toHaveLength(2);
   });
+
+  it("moves a skill to another category from its menu, and lists only the other categories", () => {
+    const store = setup();
+    open("Languages");
+    const movedId = stored(store, "Languages").bullets[0].id;
+    const before = stored(store, "Frontend").bullets.length;
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Move skill 1 to another category" })
+    );
+    const menu = screen.getByRole("menu");
+    expect(within(menu).queryByText("Languages")).toBeNull();
+    fireEvent.click(within(menu).getByRole("menuitem", { name: "Frontend" }));
+
+    expect(stored(store, "Languages").bullets.map((b) => b.id)).not.toContain(
+      movedId
+    );
+    const frontend = stored(store, "Frontend").bullets;
+    expect(frontend).toHaveLength(before + 1);
+    expect(frontend.at(-1)?.id).toBe(movedId);
+  });
 });

@@ -6,7 +6,10 @@ import { configureStore } from "@reduxjs/toolkit";
 import { SkillsPreviewPage } from "@pages/preview-page/skills-preview-page";
 import { rootReducer } from "@store/store";
 import { RenderedSection } from "@shared/variant/render";
-import { setSkillsLayout } from "@store/cv-data/cv-data-slice";
+import {
+  setGroupedLevels,
+  setSkillsLayout,
+} from "@store/cv-data/cv-data-slice";
 
 afterEach(cleanup);
 
@@ -110,5 +113,68 @@ describe("skills layout", () => {
       expect(text).toContain("React");
       expect(text).toContain("Git");
     }
+  });
+});
+
+describe("grouped rows layout", () => {
+  function drawGrouped(levels?: "off" | "exceptions" | "all"): HTMLElement {
+    const store = configureStore({ reducer: rootReducer });
+    store.dispatch(setSkillsLayout("grouped"));
+    if (levels) {
+      store.dispatch(setGroupedLevels(levels));
+    }
+    const rendered = section("dots");
+    rendered.items = [
+      {
+        id: "a",
+        fields: { category: "Frontend" },
+        emphasis: "normal",
+        bullets: [
+          { id: "1", text: "React", rating: 4 },
+          { id: "2", text: "Redux", rating: 4 },
+          { id: "3", text: "Svelte", rating: 2 },
+        ],
+      },
+      {
+        id: "b",
+        fields: { category: "Testing" },
+        emphasis: "normal",
+        bullets: [{ id: "4", text: "Vitest", rating: 4 }],
+      },
+    ];
+    return render(
+      <Provider store={store}>
+        <SkillsPreviewPage section={rendered} />
+      </Provider>
+    ).container;
+  }
+
+  it("is one row per group: the label, then the skills joined with dots, no symbols", () => {
+    const text = drawGrouped().textContent ?? "";
+    expect(text).toContain("FrontendReact · Redux · Svelte");
+    expect(text).toContain("TestingVitest");
+    expect(text).not.toMatch(/[●○★]/);
+    expect(drawGrouped().querySelectorAll("[data-cv-level]")).toHaveLength(0);
+  });
+
+  it("has a divider between rows but not above the first", () => {
+    const rows = [...drawGrouped().querySelectorAll("[data-cv-block]")].filter(
+      (block) => getComputedStyle(block).display === "grid"
+    );
+    expect(rows).toHaveLength(2);
+    expect(getComputedStyle(rows[0]).borderTopStyle).not.toBe("solid");
+    expect(getComputedStyle(rows[1]).borderTopStyle).toBe("solid");
+  });
+
+  it("exceptions writes the level only after the skill that differs", () => {
+    const text = drawGrouped("exceptions").textContent ?? "";
+    expect(text).toContain("Svelte(Working)");
+    expect(text).not.toContain("React(");
+  });
+
+  it("all writes the level after every skill that has one", () => {
+    const text = drawGrouped("all").textContent ?? "";
+    expect(text).toContain("React(Advanced)");
+    expect(text).toContain("Vitest(Advanced)");
   });
 });

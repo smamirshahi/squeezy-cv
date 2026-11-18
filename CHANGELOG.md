@@ -9,8 +9,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-18
+
 ### Added
 
+- Skills: a new **Grouped rows** layout (#520): one row per group with the bold label on the left and the skills joined with dots, a thin line between rows. **Levels in grouped rows** is None (default), Exceptions (a level in small grey text only after skills that differ from the group's usual level; none when no level is clearly the usual one) or All; a languages group always shows every level. The Skill Icon setting is switched off in this layout. Stored as the optional `skillsLayout: "grouped"` and `groupedLevels` in the template's style, so old files open unchanged.
 - Skills: a **move icon** next to delete on each skill moves it to another category (#518).
 - Browser version: **import a CV from a PDF** (#511). The PDF is read on your device (its text layer, no upload), with the same limits and messages as the server version: 5 MB, 20 pages, no password, no scans (no OCR). The PDF reader is only downloaded the first time you use it.
 - Browser version: **Send feedback** works without a server (#510). "Open on GitHub" opens a new issue with your note, the kind and the optional app info already filled in (you need a GitHub account); "Copy the text" is there for everyone else, and also for a note too long to fit in a link.
@@ -463,7 +466,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.6.0...v0.7.0

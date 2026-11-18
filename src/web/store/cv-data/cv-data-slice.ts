@@ -117,6 +117,10 @@ const cvDataSlice = createSlice({
       state.style.skillsLayout = action.payload;
     },
 
+    setGroupedLevels(state, action: PayloadAction<Style["groupedLevels"]>) {
+      state.style.groupedLevels = action.payload;
+    },
+
     setExperienceOrder(state, action: PayloadAction<Style["experienceOrder"]>) {
       state.style.experienceOrder = action.payload;
     },
@@ -236,6 +240,7 @@ export const {
   setPublicationOrder,
   setExperienceOrder,
   setSkillsLayout,
+  setGroupedLevels,
   setEducationOrder,
   setPaperMargin,
   setTypography,
