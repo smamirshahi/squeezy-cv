@@ -6,6 +6,7 @@ import {
   addBullet,
   addItem,
   moveBullet,
+  moveBulletToItem,
   moveItem,
   removeBullet,
   removeItem,
@@ -353,5 +354,49 @@ describe("skills sections keep ratings through edits", () => {
     const skill = state.sections.find((s) => s.id === "skills")!.items[1]
       .bullets[1];
     expect(skill).toMatchObject({ text: "TypeScript", rating: 3 });
+  });
+});
+
+describe("moving a skill to another category", () => {
+  function skills(): { state: VaultState; sectionId: string; items: Item[] } {
+    const state = freshVault();
+    const section = state.sections.find((s) => s.type === "skills")!;
+    return { state, sectionId: section.id, items: section.items };
+  }
+
+  it("moves the skill with its level to the end of the other category", () => {
+    const { state, sectionId, items } = skills();
+    const [from, to] = items;
+    const bullet = from.bullets[0];
+    const next = vaultReducer(
+      state,
+      moveBulletToItem({
+        sectionId,
+        itemId: from.id,
+        bulletId: bullet.id,
+        toItemId: to.id,
+      })
+    );
+    const section = next.sections.find((s) => s.id === sectionId)!;
+    const after = (id: string): Item => section.items.find((i) => i.id === id)!;
+    expect(after(from.id).bullets.map((b) => b.id)).not.toContain(bullet.id);
+    expect(after(to.id).bullets.at(-1)).toEqual(bullet);
+    expect(after(to.id).bullets).toHaveLength(to.bullets.length + 1);
+  });
+
+  it("does nothing for the same category or an unknown one", () => {
+    const { state, sectionId, items } = skills();
+    const [from] = items;
+    const base = {
+      sectionId,
+      itemId: from.id,
+      bulletId: from.bullets[0].id,
+    };
+    expect(
+      vaultReducer(state, moveBulletToItem({ ...base, toItemId: from.id }))
+    ).toEqual(state);
+    expect(
+      vaultReducer(state, moveBulletToItem({ ...base, toItemId: "nope" }))
+    ).toEqual(state);
   });
 });

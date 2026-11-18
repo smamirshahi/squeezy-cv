@@ -5,6 +5,7 @@ import { CvTypography } from "@components/cv-typography";
 import { useRatingIcon } from "@hooks/use-rating-icon";
 import { SkillDisplay } from "@custom-types/variant-types";
 import { useResolvedStyle } from "@hooks/use-resolved-style";
+import { groupedLevelLabels } from "@shared/vault/grouped-levels";
 import { levelLabel } from "@shared/vault/vault-utils";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { useAppSelector } from "@store/store-helper";
@@ -82,6 +83,64 @@ function Level({ display, rating }: LevelProps): JSX.Element | null {
   );
 }
 
+/** One row per group: the label in a fixed left column, the skills joined with dots, a thin divider between rows */
+function GroupedSkills({ section }: Props): JSX.Element {
+  const { groupedLevels } = useAppSelector(styleSelector);
+  return (
+    <div data-cv-section={section.id}>
+      <CvTypography
+        variant="headingMd"
+        pageBreak="keep-with-next"
+        text={section.title}
+      />
+      {section.items.map((group, index) => (
+        <Box
+          key={group.id}
+          data-cv-block=""
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "170px 1fr" },
+            columnGap: 2,
+            py: 0.75,
+            breakInside: "avoid",
+            borderTop: index === 0 ? "none" : "1px solid rgba(0, 0, 0, 0.12)",
+          }}
+        >
+          <CvTypography
+            variant="headingSm"
+            isEmphasised={group.emphasis === "high"}
+            text={group.fields.category ?? ""}
+          />
+          <CvTypography variant="bulletText">
+            {group.bullets.map((skill, skillIndex) => {
+              const level = groupedLevelLabels(
+                group.bullets,
+                groupedLevels ?? "off",
+                group.fields.category
+              )[skillIndex];
+              return (
+                <React.Fragment key={skill.id}>
+                  {skillIndex > 0 && " · "}
+                  {skill.text}
+                  {level && (
+                    <Box
+                      component="span"
+                      data-cv-level="text"
+                      sx={{ ml: 0.5, fontSize: "0.85em", opacity: 0.65 }}
+                    >
+                      ({level})
+                    </Box>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </CvTypography>
+        </Box>
+      ))}
+    </div>
+  );
+}
+
 /** Skills section (Areas of Expertise) */
 export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
   const RatingIcon = useRatingIcon();
@@ -100,6 +159,10 @@ export function SkillsPreviewPage({ section }: Props): JSX.Element | null {
 
   if (section.items.length === 0) {
     return null;
+  }
+
+  if (skillsLayout === "grouped") {
+    return <GroupedSkills section={section} />;
   }
 
   return (

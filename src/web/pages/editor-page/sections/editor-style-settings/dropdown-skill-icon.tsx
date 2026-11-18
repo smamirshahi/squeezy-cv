@@ -3,15 +3,22 @@ import { FormControl, InputLabel, MenuItem, Select } from "@components/ui";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 export function DropdownSkillIcon(): JSX.Element {
-  const { ratingIcon } = useAppSelector(styleSelector);
+  const { ratingIcon, skillsLayout } = useAppSelector(styleSelector);
   const dispatch = useAppDispatch();
 
+  // Grouped rows show no level, so the icon has no effect there
+  const isGrouped = skillsLayout === "grouped";
+
   return (
-    <FormControl fullWidth>
-      <InputLabel>Skill Icon</InputLabel>
+    <FormControl fullWidth disabled={isGrouped}>
+      <InputLabel>
+        {isGrouped ? "Skill Icon (not used in grouped rows)" : "Skill Icon"}
+      </InputLabel>
       <Select
         value={ratingIcon}
-        label="Skill Icon"
+        label={
+          isGrouped ? "Skill Icon (not used in grouped rows)" : "Skill Icon"
+        }
         onChange={(event) => dispatch(setRatingIcon(event.target.value))}
       >
         <MenuItem value="none">Don't show the level</MenuItem>
