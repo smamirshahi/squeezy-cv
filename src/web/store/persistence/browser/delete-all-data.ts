@@ -1,5 +1,6 @@
 import { closeBrowserStorage } from "@store/persistence/browser/storage-mode";
 import { deleteKvStore } from "@store/persistence/browser/idb-kv";
+import { forgetFolderHandle } from "@store/persistence/browser/folder-handle";
 
 let isDeleting = false;
 
@@ -30,6 +31,8 @@ export async function deleteAllBrowserData(): Promise<void> {
   try {
     await closeBrowserStorage();
     await deleteKvStore();
+    // The remembered folder goes too; the files in the folder itself are not touched
+    await forgetFolderHandle();
     try {
       window.localStorage.clear();
       window.sessionStorage.clear();

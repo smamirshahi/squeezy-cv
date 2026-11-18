@@ -23,6 +23,7 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useSyncStructure } from "@hooks/use-sync-structure";
 import { AtsPanel } from "@pages/workspace/ats/ats-panel";
 import { usePersistence } from "@hooks/use-persistence";
+import { useFolderWatch } from "@hooks/use-folder-watch";
 import { useSyncActiveJob } from "@hooks/use-sync-active-job";
 import { useAppSelector } from "@store/store-helper";
 import { NotFound } from "@pages/workspace/not-found";
@@ -112,6 +113,7 @@ export function Workspace({ route }: { route: ShellRoute }): JSX.Element {
   useSyncStructure();
   useSyncActiveJob();
   usePersistence();
+  useFolderWatch();
 
   return (
     <Box

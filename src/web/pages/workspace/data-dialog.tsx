@@ -15,6 +15,7 @@ import {
 } from "@components/ui/icons";
 import { createApiClient } from "@store/persistence/api-client";
 import { DeleteDataDialog } from "@pages/workspace/delete-data-dialog";
+import { FolderSection } from "@pages/workspace/folder-section";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { RestoreSummary } from "@shared/backup/full-backup";
 import { toIsoDay } from "@shared/application/application-utils";
@@ -203,6 +204,11 @@ function DataDialog({
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
+        )}
+        {isBrowserMode() && (
+          <Box sx={{ mt: 3 }}>
+            <FolderSection />
+          </Box>
         )}
         {isBrowserMode() && (
           <Box

@@ -9,6 +9,12 @@ import {
 } from "@store/persistence/browser/delete-all-data";
 import { IdbCvStorage } from "@store/persistence/browser/idb-cv-storage";
 import {
+  forgetFolderHandle,
+  loadFolderHandle,
+  saveFolderHandle,
+} from "@store/persistence/browser/folder-handle";
+import { FolderHandle } from "@store/persistence/browser/folder-kv";
+import {
   DatabaseBlockedError,
   openKvStore,
 } from "@store/persistence/browser/idb-kv";
@@ -36,6 +42,14 @@ describe("delete all my data", () => {
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
     expect(isDeletingAllData()).toBe(true);
+  });
+
+  it("forgets the chosen data folder too", async () => {
+    await saveFolderHandle({ name: "Dropbox" } as unknown as FolderHandle);
+    expect(await loadFolderHandle()).toBeDefined();
+    await deleteAllBrowserData();
+    expect(await loadFolderHandle()).toBeUndefined();
+    await forgetFolderHandle();
   });
 
   it("says to close the other tabs when another tab holds the database, and keeps the data", async () => {
