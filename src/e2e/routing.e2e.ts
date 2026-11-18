@@ -74,13 +74,16 @@ describe("routing in a real browser", () => {
 
   it("opens the template tab by address", async () => {
     await page.goto(`${app.webUrl}/templates/design`);
-    await page.getByRole("main", { name: "Templates" }).waitFor();
+    await page.getByRole("main", { name: "Template design" }).waitFor();
+    // Design opens on Page; the colours and text styles are other groups of the tab
+    await page.getByRole("button", { name: /^Colours/ }).click();
     await page.getByText("Reset colours and text styles").waitFor();
   });
 
   it("opens the sections tab by address and picks a section on the paper", async () => {
     await page.goto(`${app.webUrl}/templates/sections`);
-    await page.getByLabel("Section properties").waitFor();
+    // exact: the panel's resize handle is also named after the section properties
+    await page.getByLabel("Section properties", { exact: true }).waitFor();
     await page.getByText(/Section 1 of/).waitFor();
     await page.locator("[data-cv-section]").first().click();
     await page.getByText(/Section [3-9] of/).waitFor();

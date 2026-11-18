@@ -5,6 +5,13 @@ import { splitVariant } from "@shared/variant/template-job";
 import { RunningApp, startApp } from "@e2e/start-app";
 import { openCvPage, sampleFile, skipTutorials } from "@e2e/fixtures";
 
+/** Design tab: the sizes are in the Typography group, and one text style is open at a time */
+async function increaseSize(page: Page, variant: string): Promise<void> {
+  await page.getByRole("button", { name: /^Typography/ }).click();
+  await page.locator(`[data-style-row="${variant}"] button`).first().click();
+  await page.getByLabel(`Increase ${variant} size`).click();
+}
+
 let app: RunningApp;
 let browser: Browser;
 let page: Page;
@@ -109,9 +116,9 @@ describe("templates and jobs in the browser", () => {
       .getByRole("combobox", { name: "Editing template" })
       .filter({ hasText: "Template Two" })
       .waitFor();
-    // the page says how many jobs a change reaches
-    await page.getByText(/this template is used by 2 jobs/).waitFor();
-    await page.getByLabel("Increase headingMd size").click();
+    // the (i) next to the template field says how many jobs a change reaches
+    await page.getByLabel("This template is used by 2 jobs.").waitFor();
+    await increaseSize(page, "headingMd");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await page.getByText("Saved", { exact: true }).waitFor();
     await openJob("job-a");
@@ -191,7 +198,7 @@ describe("templates and jobs in the browser", () => {
       .waitFor();
 
     // Change a style there
-    await page.getByLabel("Increase headingMd size").click();
+    await increaseSize(page, "headingMd");
     expect(page.url()).toBe(designUrl);
 
     // The job being edited did not change
