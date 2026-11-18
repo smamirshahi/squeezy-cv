@@ -208,7 +208,7 @@ export interface ApiClient {
 
   /** Also hide employer and school names ([Company 1], [Institution 1]) in what is sent to a model */
 
-  /** The text layer of a PDF, read by the local server (the file is not stored). Nothing is sent to an AI here. */
+  /** The text layer of a PDF, read by the local server, or on this device in the browser version (the file is not stored). Nothing is sent to an AI here. */
   extractPdfText: (file: Blob) => Promise<{ text: string; pages: number }>;
 
   /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */

@@ -1,4 +1,3 @@
-import { extractText, getDocumentProxy } from "unpdf";
 import {
   MAX_IMPORT_LENGTH,
   MAX_IMPORT_PDF_BYTES,
@@ -29,12 +28,13 @@ const PDF_MAGIC = "%PDF-";
 /** True when the bytes start like a PDF (checks the content, not the file name) */
 function looksLikePdf(bytes: Uint8Array): boolean {
   // Some writers put a few bytes before the header; the spec allows 1024
-  const head = Buffer.from(bytes.subarray(0, 1024)).toString("latin1");
+  const head = new TextDecoder("latin1").decode(bytes.subarray(0, 1024));
   return head.includes(PDF_MAGIC);
 }
 
 /**
- * Takes the text layer out of a PDF in memory. The bytes are never written anywhere.
+ * Takes the text layer out of a PDF in memory. The bytes are never written anywhere. Used by the
+ * server (`POST /api/import/pdf`) and by the browser version, which reads the PDF on the device.
  * Scanned PDFs (images only) have no text layer: OCR is not supported.
  */
 export async function extractPdfText(
@@ -49,6 +49,9 @@ export async function extractPdfText(
   if (!looksLikePdf(bytes)) {
     throw new PdfTextError("not_pdf", "This file is not a PDF.");
   }
+
+  // Loaded when a PDF is read, so the browser version does not download the PDF reader until then
+  const { extractText, getDocumentProxy } = await import("unpdf");
 
   let pdf;
   try {

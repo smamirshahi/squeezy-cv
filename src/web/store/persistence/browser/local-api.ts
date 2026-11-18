@@ -26,6 +26,7 @@ import { aiErrorResult } from "@server/ai/ai-routes";
 import { AiError } from "@server/ai/ai-types";
 import { handleBrowserAi } from "@store/persistence/browser/ai/browser-ai";
 import { buildBackup, restoreBackup } from "@shared/backup/full-backup";
+import { extractPdfText, PdfTextError } from "@shared/pdf/extract-pdf-text";
 import { CvStorage, StorageError } from "@shared/storage/cv-storage";
 import { resolveVariant } from "@shared/variant/template-job";
 
@@ -33,6 +34,7 @@ const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
+const HTTP_PAYLOAD_TOO_LARGE = 413;
 const HTTP_SERVER_ERROR = 500;
 const HTTP_NOT_IMPLEMENTED = 501;
 const ID_SUFFIX_BYTES = 3;
@@ -69,7 +71,7 @@ function statusOf(error: StorageError): number {
   }
 }
 
-/** Features that need the server (reading a PDF to import) */
+/** Routes the browser version does not answer (they need the server) */
 function unavailable(): Response {
   return failure(
     HTTP_NOT_IMPLEMENTED,
@@ -82,7 +84,7 @@ function unavailable(): Response {
  * The server's storage routes, answered in the browser from a `CvStorage`. It has the same
  * addresses, bodies and error codes as the Fastify routes in `server/app.ts`, so the API client
  * (and everything above it) works the same in browser mode. Routes that need the server
- * (PDF import) answer 501 `browser_unavailable`.
+ * answer 501 `browser_unavailable`.
  */
 export function createLocalFetch(
   storage: CvStorage,
@@ -143,6 +145,14 @@ export function createLocalFetch(
           );
         }
       }
+    }
+    if (area === "import" && id === "pdf" && method === "POST") {
+      // Reads the PDF on this device: the file goes nowhere, only the text comes back
+      const bytes =
+        rawBody instanceof Blob
+          ? new Uint8Array(await rawBody.arrayBuffer())
+          : new Uint8Array();
+      return json(HTTP_OK, await extractPdfText(bytes));
     }
     if (area === "ai") {
       const result = await handleBrowserAi(
@@ -405,6 +415,15 @@ export function createLocalFetch(
       if (error instanceof AiError) {
         const result = aiErrorResult(error);
         return json(result.status, result.body);
+      }
+      if (error instanceof PdfTextError) {
+        return failure(
+          error.code === "too_large"
+            ? HTTP_PAYLOAD_TOO_LARGE
+            : HTTP_BAD_REQUEST,
+          error.code,
+          error.message
+        );
       }
       if (
         error instanceof ValidationError ||
