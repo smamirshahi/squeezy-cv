@@ -75,6 +75,18 @@ const cvDataSlice = createSlice({
       state.style.shouldShowGender = action.payload;
     },
 
+    setShouldShowEmail(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowEmail = action.payload;
+    },
+
+    setShouldShowPhone(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowPhone = action.payload;
+    },
+
+    setShouldShowLocation(state, action: PayloadAction<boolean>) {
+      state.style.shouldShowLocation = action.payload;
+    },
+
     setShouldShowLinks(state, action: PayloadAction<boolean>) {
       state.style.shouldShowLinks = action.payload;
     },
@@ -227,6 +239,9 @@ export const {
   setShouldShowReferenceContacts,
   setIsReferencesOnRequest,
   setShouldShowLinks,
+  setShouldShowEmail,
+  setShouldShowPhone,
+  setShouldShowLocation,
   setShouldShowNationality,
   setShouldShowMaritalStatus,
   setShouldShowGender,

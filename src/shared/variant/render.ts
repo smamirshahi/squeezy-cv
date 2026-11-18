@@ -273,7 +273,18 @@ export function render(vault: Vault, variant: Variant): RenderedDocument {
         {
           kind: "contactInfo",
           id,
-          profile: vault.profile,
+          profile: {
+            ...vault.profile,
+            ...(variant.style.shouldShowEmail === false && {
+              email: undefined,
+            }),
+            ...(variant.style.shouldShowPhone === false && {
+              phone: undefined,
+            }),
+            ...(variant.style.shouldShowLocation === false && {
+              location: undefined,
+            }),
+          },
           links:
             variant.style.shouldShowLinks === false
               ? []

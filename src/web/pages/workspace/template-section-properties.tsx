@@ -33,6 +33,9 @@ import {
   setSkillsLayout,
   setDetailShown,
   setShouldShowLinks,
+  setShouldShowEmail,
+  setShouldShowPhone,
+  setShouldShowLocation,
   setShouldShowMaritalStatus,
   setShouldShowNationality,
   setShouldShowPhoto,
@@ -226,6 +229,24 @@ function ContactInfoProperties(): JSX.Element {
   return (
     <>
       <PropertyCard>
+        <SwitchRow
+          label="Email"
+          hint="Shows the email address."
+          checked={style.shouldShowEmail !== false}
+          onChange={(value) => dispatch(setShouldShowEmail(value))}
+        />
+        <SwitchRow
+          label="Phone number"
+          hint="Shows the phone number."
+          checked={style.shouldShowPhone !== false}
+          onChange={(value) => dispatch(setShouldShowPhone(value))}
+        />
+        <SwitchRow
+          label="Location"
+          hint="Shows your location."
+          checked={style.shouldShowLocation !== false}
+          onChange={(value) => dispatch(setShouldShowLocation(value))}
+        />
         <SwitchRow
           label="Links (LinkedIn, GitHub, ...)"
           hint="Turns links on or off for the whole template."

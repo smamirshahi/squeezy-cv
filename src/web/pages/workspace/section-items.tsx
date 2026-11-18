@@ -9,6 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Typography,
 } from "@components/ui";
 import {
   AddOutlined as AddIcon,
@@ -19,6 +20,7 @@ import {
 import dayjs from "dayjs";
 import { Item, Section } from "@custom-types/vault-types";
 import { itemYear } from "@shared/vault/vault-utils";
+import { SortingIcons } from "@pages/editor-page/accordion/sorting-icons";
 import { SectionTitleField } from "@pages/editor-page/sections/section-title-field";
 import { UnsortedPlacement } from "@pages/workspace/unsorted-placement";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -34,7 +36,12 @@ import {
 } from "@shared/variant/item-label";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { styleSelector } from "@store/cv-data/cv-data-slice";
-import { addBullet, addItem, removeItem } from "@store/vault/vault-slice";
+import {
+  addBullet,
+  addItem,
+  moveItem,
+  removeItem,
+} from "@store/vault/vault-slice";
 
 /** An item with nothing filled in (no field text and no bullet text); the end date a new item starts with does not count */
 function isEmptyItem(item: Section["items"][number]): boolean {
@@ -417,6 +424,9 @@ function tableOf(
   }
 }
 
+/** Width of the delete button plus the up/down arrows of a reorderable list */
+const REORDER_COLUMN = { xs: 108, sm: 100 };
+
 /** The item the right panel shows: the one in the address, else the first */
 export function selectedItemOf(
   section: Section,
@@ -445,6 +455,12 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
   const draftFields = useDraftFields();
   const table = tableOf(section);
   const viewItems = sortedForView(section, sort, isReversed);
+  // Skill categories can be moved by hand while the list shows the vault's own order
+  const canReorder =
+    section.type === "skills" &&
+    section.items.length > 1 &&
+    viewItems === section.items;
+  const lastColumn = canReorder ? REORDER_COLUMN : { xs: 44, sm: 40 };
 
   function select(id: string): void {
     navigate({ kind: "vault", sectionId: section.id, itemId: id });
@@ -484,8 +500,8 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
           sx={{
             display: "grid",
             gridTemplateColumns: {
-              xs: "minmax(0, 1fr) 44px",
-              sm: "minmax(0, 1fr) 40px",
+              xs: `minmax(0, 1fr) ${lastColumn.xs}px`,
+              sm: `minmax(0, 1fr) ${lastColumn.sm}px`,
             },
             borderBottom: `1px solid ${WORKSPACE_COLORS.border}`,
             borderLeft: "3px solid transparent",
@@ -573,7 +589,7 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
         aria-label="Items"
         sx={{ listStyle: "none", m: 0, p: 0 }}
       >
-        {viewItems.map((item) => {
+        {viewItems.map((item, index) => {
           const isSelected = selected?.id === item.id;
           const shown = withDraft(item, draftFields);
           const title =
@@ -663,6 +679,21 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
                     ))
                   : title}
               </Box>
+              {canReorder && (
+                <SortingIcons
+                  index={index}
+                  swapFunction={(_from, toIndex) =>
+                    dispatch(
+                      moveItem({
+                        sectionId: section.id,
+                        itemId: item.id,
+                        toIndex,
+                      })
+                    )
+                  }
+                  isLastEntity={index === viewItems.length - 1}
+                />
+              )}
               <IconButton
                 aria-label={`Delete ${title}`}
                 onClick={() => setRemovingId(item.id)}
@@ -684,6 +715,12 @@ export function SectionItems({ section }: { section: Section }): JSX.Element {
       >
         {ADD_LABELS[section.type] ?? "Add new item"}
       </Button>
+      {section.type === "skills" && (
+        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+          This order is only to make the vault easier for you to read. The final
+          order of skills for a job is decided later, when you finalize the CV.
+        </Typography>
+      )}
       <Dialog open={removing !== undefined} onClose={() => setRemovingId("")}>
         <DialogTitle>Remove this item?</DialogTitle>
         <DialogContent>
