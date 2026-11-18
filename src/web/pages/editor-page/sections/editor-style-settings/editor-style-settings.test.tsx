@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { rootReducer } from "@store/store";
@@ -11,14 +17,28 @@ import { TypographyVariant } from "@custom-styles/custom-styles";
 
 afterEach(cleanup);
 
-function setup(): AppStore {
+/** The Design tab opens on Page; the settings of the other groups show after choosing the group */
+function setup(group?: "Colours" | "Typography"): AppStore {
   const store = configureStore({ reducer: rootReducer });
   render(
     <Provider store={store}>
       <TemplateDesignPage templateId="t1" />
     </Provider>
   );
+  if (group) {
+    fireEvent.click(
+      screen.getByRole("button", { name: new RegExp(`^${group}`) })
+    );
+  }
   return store;
+}
+
+/** One text style is open at a time (headingLg at first): opens the row of another one */
+function openStyle(variant: string): void {
+  const row = document.querySelector<HTMLElement>(
+    `[data-style-row="${variant}"]`
+  );
+  fireEvent.click(within(row!).getAllByRole("button")[0]);
 }
 
 const colorsOf = (store: AppStore) => store.getState().cvData.style.colors!;
@@ -27,16 +47,33 @@ const typographyOf = (store: AppStore) =>
   store.getState().cvData.style.typography;
 
 describe("Style settings page", () => {
-  it("shows one row for each of the 5 styles, the colours and the preview", () => {
+  it("has the groups Page, Colours and Typography, opens on Page and shows the preview", () => {
     setup();
-    expect(document.querySelectorAll("[data-style-row]")).toHaveLength(5);
-    expect(screen.getByLabelText("Colours")).toBeTruthy();
-    expect(screen.getByLabelText("Live preview")).toBeTruthy();
+    const groups = screen.getByLabelText("Design groups");
+    for (const name of ["Page", "Colours", "Typography"]) {
+      expect(
+        within(groups).getByRole("button", { name: new RegExp(`^${name}`) })
+      ).toBeTruthy();
+    }
+    expect(
+      screen.getByRole("button", { name: /^Page/ }).getAttribute("aria-pressed")
+    ).toBe("true");
+    expect(screen.getByLabelText("Template design")).toBeTruthy();
     expect(screen.queryByText("Apply")).toBeNull();
   });
 
+  it("shows one row for each of the 5 styles in Typography and the colours in Colours", () => {
+    setup("Typography");
+    expect(document.querySelectorAll("[data-style-row]")).toHaveLength(5);
+    expect(screen.queryByLabelText("Colours")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Colours/ }));
+    expect(screen.getByLabelText("Colours")).toBeTruthy();
+    expect(document.querySelectorAll("[data-style-row]")).toHaveLength(0);
+  });
+
   it("steps the size at once", () => {
-    const store = setup();
+    const store = setup("Typography");
+    openStyle("bodyMd");
     expect(typographyOf(store).bodyMd.fontSize).toBe("10pt");
     fireEvent.click(screen.getByLabelText("Increase bodyMd size"));
     expect(typographyOf(store).bodyMd.fontSize).toBe("11pt");
@@ -46,7 +83,8 @@ describe("Style settings page", () => {
   });
 
   it("toggles the weight and marks the pressed button", () => {
-    const store = setup();
+    const store = setup("Typography");
+    openStyle("bodyMd");
     const group = screen.getByLabelText("bodyMd weight");
     const bold = group.querySelectorAll("button")[1];
     fireEvent.click(bold);
@@ -55,7 +93,7 @@ describe("Style settings page", () => {
   });
 
   it("opens a palette, saves a typed colour and refuses an invalid one", () => {
-    const store = setup();
+    const store = setup("Colours");
     fireEvent.click(screen.getByLabelText("Text colour"));
     const field = screen.getByLabelText("Text colour hex");
     fireEvent.change(field, { target: { value: "#123" } });
@@ -68,7 +106,7 @@ describe("Style settings page", () => {
   });
 
   it("sets the secondary colour and the accent, and can remove the accent", () => {
-    const store = setup();
+    const store = setup("Colours");
     expect(colorsOf(store).accent).toBeUndefined();
     fireEvent.click(screen.getByLabelText("Accent colour"));
     fireEvent.click(screen.getByLabelText("Use #1f3a5f for Accent"));
@@ -83,14 +121,14 @@ describe("Style settings page", () => {
   });
 
   it("has a shade area and a hue slider in the picker", () => {
-    setup();
+    setup("Colours");
     fireEvent.click(screen.getByLabelText("Accent colour"));
     expect(screen.getByLabelText(/Accent shade/)).toBeTruthy();
     expect(screen.getByLabelText("Accent hue")).toBeTruthy();
   });
 
   it("changes the colour with the arrow keys on the shade area", () => {
-    const store = setup();
+    const store = setup("Colours");
     fireEvent.click(screen.getByLabelText("Text colour"));
     fireEvent.change(screen.getByLabelText("Text colour hex"), {
       target: { value: "#ff0000" },
@@ -119,7 +157,7 @@ describe("Style settings page", () => {
   });
 
   it("explains a low contrast colour in an info tooltip, not in the page", () => {
-    setup();
+    setup("Colours");
     expect(screen.queryByLabelText(/Low contrast on white/)).toBeNull();
     fireEvent.click(screen.getByLabelText("Text colour"));
     fireEvent.change(screen.getByLabelText("Text colour hex"), {
@@ -132,7 +170,7 @@ describe("Style settings page", () => {
   });
 
   it("resets to defaults", () => {
-    const store = setup();
+    const store = setup("Typography");
     fireEvent.click(screen.getByLabelText("Increase headingLg size"));
     fireEvent.click(screen.getByText("Reset colours and text styles"));
     expect(typographyOf(store)).toEqual(TypographyVariant);
@@ -140,7 +178,7 @@ describe("Style settings page", () => {
   });
 
   it("tells where a style is used in a tooltip next to it", () => {
-    setup();
+    setup("Typography");
     expect(screen.getByLabelText("Where headingLg is used")).toBeTruthy();
   });
 

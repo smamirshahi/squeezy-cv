@@ -95,7 +95,7 @@ describe("routing in the workspace", () => {
   it("shows the tool of each address", async () => {
     await open("/templates/design");
     expect(rail("Templates").getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("main", { name: "Templates" })).toBeTruthy();
+    expect(screen.getByRole("main", { name: "Template design" })).toBeTruthy();
     expect(document.title).toContain("Design");
   });
 
@@ -103,10 +103,15 @@ describe("routing in the workspace", () => {
     await open("/templates/design");
     expect(screen.queryByRole("heading", { name: "Layout" })).toBeNull();
     expect(screen.queryByLabelText("Nationality")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Style" })).toBeTruthy();
-    expect(screen.getByLabelText("Colours")).toBeTruthy();
-    expect(screen.getByLabelText("Typography")).toBeTruthy();
-    expect(screen.getByLabelText("Live preview")).toBeTruthy();
+    // The groups on the left, the group's settings on the right, the preview in the middle
+    const groups = screen.getByLabelText("Design groups");
+    for (const name of ["Page", "Colours", "Typography"]) {
+      expect(
+        within(groups).getByRole("button", { name: new RegExp(`^${name}`) })
+      ).toBeTruthy();
+    }
+    expect(screen.getByRole("heading", { name: "Page" })).toBeTruthy();
+    expect(screen.getByLabelText("Template design")).toBeTruthy();
   });
 
   it("shows the sections, the sample and the properties on the Sections page", async () => {

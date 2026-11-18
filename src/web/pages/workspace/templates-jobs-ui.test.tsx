@@ -554,6 +554,12 @@ describe("inspector and style settings say what they change", () => {
   it("a style change on the Style Settings page reaches every job on the template", () => {
     const store = setup(<TemplateDesignPage templateId="t1" />);
     addJob(store, "acme");
+    // Typography is a group of the Design tab; one text style is open at a time
+    fireEvent.click(screen.getByRole("button", { name: /^Typography/ }));
+    const row = document.querySelector<HTMLElement>(
+      '[data-style-row="bodyMd"]'
+    );
+    fireEvent.click(within(row!).getAllByRole("button")[0]);
     fireEvent.click(screen.getByLabelText("Increase bodyMd size"));
     const sizes = variantsSelector(store.getState()).map(
       (v) => v.style.typography.bodyMd.fontSize
