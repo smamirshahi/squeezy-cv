@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.13.2] - 2026-11-19
+
+### Fixed
+
+- Gemini: the default model is now gemini-3.8-flash, because Google retired gemini-2.5-flash for new users (404) (#535).
+
 ## [0.13.1] - 2026-11-19
 
 ### Fixed
@@ -507,7 +513,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...HEAD
+[0.13.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.11.0...v0.12.0
