@@ -9,6 +9,7 @@ import {
   updateItemFields,
   vaultSelector,
 } from "@store/vault/vault-slice";
+import { DESCRIPTION_PLACEHOLDER } from "@shared/vault/item-fields";
 import { useVaultDraft } from "@pages/editor-page/use-vault-draft";
 
 interface Props {
@@ -48,6 +49,8 @@ export function EditorSummary({ sectionId }: Props): JSX.Element | null {
   return (
     <TextField
       label="Professional Summary"
+      placeholder={DESCRIPTION_PLACEHOLDER}
+      slotProps={{ inputLabel: { shrink: true } }}
       variant="outlined"
       multiline
       value={item?.fields.text ?? ""}

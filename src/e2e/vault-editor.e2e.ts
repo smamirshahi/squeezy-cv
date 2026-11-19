@@ -106,6 +106,29 @@ describe("editing an item in the vault (inline editor)", () => {
     await page.getByText("Principal Engineer").first().waitFor();
   });
 
+  it("shows the free-writing placeholder in an empty description", async () => {
+    await page.goto(app.webUrl);
+    await page.getByText("Jane Doe").first().waitFor();
+    await page
+      .getByRole("navigation", { name: "Tools" })
+      .getByRole("link", { name: "Vault" })
+      .click();
+    const tree = page.getByRole("complementary", { name: "Vault tree" });
+    await tree.getByRole("link", { name: /^Work Experience/ }).click();
+    await page
+      .getByRole("main", { name: "Edit" })
+      .getByRole("link", {
+        name: /^(Senior Software Developer|Principal Engineer)/,
+      })
+      .click();
+    await page.getByLabel("Edit item").waitFor();
+    const description = page.getByLabel("Description");
+    await description.fill("");
+    expect(await description.first().getAttribute("placeholder")).toMatch(
+      /whatever comes to your mind.*in full.*own words/
+    );
+  });
+
   it("writes a description, which shows on the page and in the PDF text", async () => {
     await page.goto(app.webUrl);
     await page.getByText("Jane Doe").first().waitFor();

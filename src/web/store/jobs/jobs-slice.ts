@@ -216,6 +216,11 @@ const jobsSlice = createSlice({
       );
     },
 
+    /** Marks only the current job as a stand-in (saved templates stay real) */
+    markJobPlaceholder(state) {
+      state.isPlaceholder = true;
+    },
+
     /** Marks the current job and template as stand-ins (nothing is saved yet) */
     markPlaceholder(state) {
       state.isPlaceholder = true;
@@ -812,6 +817,7 @@ export const jobsReducer = jobsSlice.reducer;
 
 export const {
   markPlaceholder,
+  markJobPlaceholder,
   setVariants,
   setTemplatesAndJobs,
   createJob,

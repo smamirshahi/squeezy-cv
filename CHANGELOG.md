@@ -13,6 +13,11 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 - Contact info: switches to show or hide the email, phone number and location for the whole template (on by default).
 - Skills: move a skill category up or down in the vault with arrow buttons (stored in the vault order), with a note that the final order for a job is set later.
+- Vault: empty Description fields (experience, education, projects) and the Professional Summary show a placeholder: write whatever comes to your mind, in full and in your own words; you can adjust it later and rephrase it for each job application (#525).
+
+### Fixed
+
+- Templates: a template added with "Add to my templates" (or made with New template) before any job exists is no longer gone after a reload (#525).
 
 ## [0.10.0] - 2026-11-18
 

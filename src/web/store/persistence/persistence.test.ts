@@ -305,6 +305,41 @@ describe("load and save through the server", () => {
     expect(await api.listJobs()).toEqual([]);
   });
 
+  it("a template saved with no job is still there after a restart (premade Developer layout included)", async () => {
+    const first = newStore();
+    const api = clientFor(app);
+    await loadFromServer(api, first.dispatch, first.getState, () =>
+      Promise.resolve(file)
+    );
+    first.dispatch(
+      addTemplate({
+        name: "Developer",
+        id: "template-dev",
+        layout: { fullWidth: ["skills"], left: [], right: [] },
+      })
+    );
+    await saveToServer(api, first.dispatch, first.getState);
+
+    const second = newStore();
+    await loadFromServer(api, second.dispatch, second.getState, () =>
+      Promise.resolve(file)
+    );
+    const { jobs } = second.getState();
+    expect(jobs.templates.map((t) => t.id)).toEqual(["template-dev"]);
+    expect(jobs.isTemplatePlaceholder).toBe(false);
+    // the job is only a stand-in: it is not saved, and it uses the saved template
+    expect(jobs.isPlaceholder).toBe(true);
+    expect(jobs.jobs).toHaveLength(1);
+    expect(jobs.jobs[0].templateId).toBe("template-dev");
+
+    // saving again keeps the template and writes no job
+    await saveToServer(api, second.dispatch, second.getState);
+    expect((await api.listTemplates()).map((t) => t.id)).toEqual([
+      "template-dev",
+    ]);
+    expect(await api.listJobs()).toEqual([]);
+  });
+
   it("save writes only the changed templates and jobs", async () => {
     const store = newStore();
     const api = clientFor(app);

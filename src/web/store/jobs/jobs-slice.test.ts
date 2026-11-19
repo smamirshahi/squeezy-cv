@@ -8,6 +8,8 @@ import {
   JobsState,
   activeVariantSelector,
   addTemplate,
+  markJobPlaceholder,
+  savableOf,
   createJob,
   deleteTemplate,
   deleteJob,
@@ -654,5 +656,21 @@ describe("page limit and job title scores belong to the job", () => {
     expect(again.jobs[0].titleScores?.["Frontend developer"].relevance).toBe(
       90
     );
+  });
+});
+
+describe("markJobPlaceholder", () => {
+  it("marks only the job as a stand-in and leaves the templates real", () => {
+    const state = jobsReducer(
+      jobsReducer(
+        withTwo(),
+        setTemplatesAndJobs({ templates: withTwo().templates, jobs: [] })
+      ),
+      markJobPlaceholder()
+    );
+    expect(state.isPlaceholder).toBe(true);
+    expect(state.isTemplatePlaceholder).toBe(false);
+    expect(savableOf(state).templates).toHaveLength(2);
+    expect(savableOf(state).jobs).toEqual([]);
   });
 });
