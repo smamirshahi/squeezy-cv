@@ -150,7 +150,7 @@ export interface KeyTestResult {
 }
 
 /**
- * Tries a key with one tiny request ("Reply with OK", no CV data) straight from this browser to the
+ * Tries a key with one tiny request (a JSON "ok", no CV data) straight from this browser to the
  * provider it belongs to. The key is used as typed, so it can be checked before pressing Save.
  */
 export async function testBrowserAiKey(
@@ -177,8 +177,9 @@ export async function testBrowserAiKey(
     groq: () => createGroqSender(config),
   };
   try {
-    await senders[provider]()("Reply with the single word OK.", [
-      { role: "user", content: "Test" },
+    // The hosted senders always ask for JSON, and Groq refuses that unless the messages say "json"
+    await senders[provider]()('Reply only with this JSON: {"ok": true}', [
+      { role: "user", content: "Answer in JSON." },
     ]);
     return { isOk: true, message: "The key works." };
   } catch (error) {
