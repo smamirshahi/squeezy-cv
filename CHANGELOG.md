@@ -9,14 +9,23 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-19
+
 ### Added
 
+- The premade Developer template starts with its own colours (text #222222, secondary #555555, accent #1f3a5f) (#527).
 - Contact info: switches to show or hide the email, phone number and location for the whole template (on by default).
 - Skills: move a skill category up or down in the vault with arrow buttons (stored in the vault order), with a note that the final order for a job is set later.
 - Vault: empty Description fields (experience, education, projects) and the Professional Summary show a placeholder: write whatever comes to your mind, in full and in your own words; you can adjust it later and rephrase it for each job application (#525).
 
+### Changed
+
+- Default typography: Name is 20pt (was 18) and Section heading 12pt (was 13); saved templates keep their sizes (#527).
+
 ### Fixed
 
+- Typography rows showed the unit twice ("20ptpt bold") (#527).
+- Templates: the tooltip next to "Editing" counted the stand-in job as a job using the template (#527).
 - Templates: a template added with "Add to my templates" (or made with New template) before any job exists is no longer gone after a reload (#525).
 
 ## [0.10.0] - 2026-11-18
@@ -476,7 +485,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.7.0...v0.8.0

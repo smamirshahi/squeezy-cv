@@ -106,6 +106,11 @@ describe("templates page", () => {
       "personalInfo",
       "contactInfo",
     ]);
+    expect(added.style.colors).toEqual({
+      text: "#222222",
+      secondary: "#555555",
+      accent: "#1f3a5f",
+    });
     // a real card appears, and the premade card stays so it can be added again
     expect(
       within(screen.getByRole("list", { name: "Templates" })).getByText(

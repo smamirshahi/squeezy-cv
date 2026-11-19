@@ -38,6 +38,7 @@ The issue ID is the argument (e.g. `/work-on-issue 101`). If none is given, ask 
   - `pnpm knip` (dead code)
 - If anything fails, fix it and re-run. Never skip or weaken a test to get green. If something cannot be fixed, stop and report it.
 - Check each acceptance criterion against the result.
+- **Version bump on every merge (standing decision):** do not wait to be asked. Before merging a branch to `main`, decide the bump from what changed and do it in the same branch: **minor** (0.x.0) when the change adds a feature or changes the saved data format or default behaviour, **patch** (0.0.x) for fixes, polish and docs/process-only changes with no new feature. **Major** (1.0.0 and up): ask the user first, never bump it alone. If `[Unreleased]` already holds earlier entries, they ship in this release (the bump is the highest kind among them). Follow "Release" in `CLAUDE.md`: rename Unreleased to `## [x.y.z] - date` with a fresh empty Unreleased and compare links, set `package.json`, `src/shared/version.ts` and the changelog heading equal, merge, then `git tag vx.y.z && git push origin vx.y.z` and `gh release create vx.y.z --notes-file` with that section.
 
 ## 5. PR and merge
 

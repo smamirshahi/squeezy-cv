@@ -396,6 +396,26 @@ describe("templates and jobs: who owns what", () => {
     expect(state.templates[1].layout).not.toEqual(layout);
   });
 
+  it("adds a template with the colours it is given and keeps the copied ones otherwise", () => {
+    const colors = { text: "#222222", secondary: "#555555", accent: "#1f3a5f" };
+    const state = jobsReducer(
+      withTwo(),
+      addTemplate({ name: "Developer", id: "dev", colors })
+    );
+    expect(state.templates.find((t) => t.id === "dev")!.style.colors).toEqual(
+      colors
+    );
+    // the source template is not touched
+    expect(state.templates[1].style.colors).not.toEqual(colors);
+    const plain = jobsReducer(
+      withTwo(),
+      addTemplate({ name: "Plain", id: "p" })
+    );
+    expect(plain.templates.find((t) => t.id === "p")!.style.colors).toEqual(
+      plain.templates[1].style.colors
+    );
+  });
+
   it("renames a template", () => {
     const state = jobsReducer(
       withTwo(),

@@ -275,6 +275,7 @@ const jobsSlice = createSlice({
           subtitle?: string;
           sourceId?: string;
           layout?: VariantLayout;
+          colors?: { text: string; secondary: string; accent?: string };
         }>
       ) {
         const source =
@@ -295,6 +296,9 @@ const jobsSlice = createSlice({
           // a ready-made template (e.g. Developer) brings its own section placement
           created.layout = structuredClone(action.payload.layout);
         }
+        if (action.payload.colors) {
+          created.style.colors = { ...action.payload.colors };
+        }
         if (state.isTemplatePlaceholder) {
           // the first real template replaces the stand-in; the stand-in job moves to it
           state.templates = [created];
@@ -312,6 +316,7 @@ const jobsSlice = createSlice({
         id?: string;
         sourceId?: string;
         layout?: VariantLayout;
+        colors?: { text: string; secondary: string; accent?: string };
       }) {
         return { payload: { ...input, id: input.id ?? nanoid() } };
       },

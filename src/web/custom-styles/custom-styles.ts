@@ -28,12 +28,12 @@ export const A4_DIMENSION_MM = {
 
 export const TypographyVariant: Record<AvailableFonts, FontStyle> = {
   headingLg: {
-    fontSize: "18pt",
+    fontSize: "20pt",
     fontWeight: "700",
     color: "#222222",
   },
   headingMd: {
-    fontSize: "13pt",
+    fontSize: "12pt",
     fontWeight: "700",
     color: "#333333",
   },
