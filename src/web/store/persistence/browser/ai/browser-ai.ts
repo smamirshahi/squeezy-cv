@@ -3,7 +3,7 @@ import {
   AiSettingsData,
   AiSettingsStore,
 } from "@server/ai/ai-registry";
-import { readAiConfig } from "@server/ai/ai-config";
+import { AiConfig, readAiConfig } from "@server/ai/ai-config";
 import { createAiClients } from "@server/ai/ai-provider";
 import { AiHttpResult, createAiRoutes } from "@server/ai/ai-routes";
 import { AiClient, MessageSender } from "@server/ai/ai-types";
@@ -26,6 +26,11 @@ export interface BrowserAiKeys {
   claude?: string;
   gemini?: string;
   groq?: string;
+
+  /** The model of each online provider; empty means the recommended one */
+  claudeModel?: string;
+  geminiModel?: string;
+  groqModel?: string;
 
   /** Use a local Ollama (it must allow this site, see the settings page) */
   isOllamaOn?: boolean;
@@ -58,6 +63,9 @@ export function readBrowserAiKeys(): BrowserAiKeys {
     claude: text(raw.claude),
     gemini: text(raw.gemini),
     groq: text(raw.groq),
+    claudeModel: text(raw.claudeModel),
+    geminiModel: text(raw.geminiModel),
+    groqModel: text(raw.groqModel),
     isOllamaOn: raw.isOllamaOn === true,
     ollamaUrl: text(raw.ollamaUrl),
     ollamaModel: text(raw.ollamaModel),
@@ -99,9 +107,15 @@ async function browserRegistry(
     // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
     ANTHROPIC_API_KEY: keys.claude,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    ANTHROPIC_MODEL: keys.claudeModel,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
     GEMINI_API_KEY: keys.gemini,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GEMINI_MODEL: keys.geminiModel,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
     GROQ_API_KEY: keys.groq,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GROQ_MODEL: keys.groqModel,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
     OLLAMA_URL: keys.ollamaUrl,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
@@ -140,38 +154,52 @@ export async function handleBrowserAi(
   return routes.handle(method, path, body, { isPreview });
 }
 
-/** The cheapest Claude model: a key test needs no more */
-const TEST_CLAUDE_MODEL = "claude-haiku-5-5";
-
 /** What a key test says: a short message for the person, never the key */
 export interface KeyTestResult {
   isOk: boolean;
   message: string;
 }
 
+type OnlineProvider = "claude" | "gemini" | "groq";
+
+/** The config for one online provider with the key (and model) as typed */
+function onlineConfig(
+  provider: OnlineProvider,
+  apiKey: string,
+  model: string | undefined
+): AiConfig {
+  return readAiConfig({
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    ANTHROPIC_API_KEY: provider === "claude" ? apiKey : undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    ANTHROPIC_MODEL: provider === "claude" ? model : undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GEMINI_API_KEY: provider === "gemini" ? apiKey : undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GEMINI_MODEL: provider === "gemini" ? model : undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GROQ_API_KEY: provider === "groq" ? apiKey : undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
+    GROQ_MODEL: provider === "groq" ? model : undefined,
+  });
+}
+
 /**
  * Tries a key with one tiny request (a JSON "ok", no CV data) straight from this browser to the
- * provider it belongs to. The key is used as typed, so it can be checked before pressing Save.
+ * provider it belongs to. The key and model are used as typed, so they can be checked before
+ * pressing Save, and the model is the one the app will really use (a retired model fails here).
  */
 export async function testBrowserAiKey(
-  provider: "claude" | "gemini" | "groq",
-  key: string
+  provider: OnlineProvider,
+  key: string,
+  model?: string
 ): Promise<KeyTestResult> {
   const apiKey = key.trim();
   if (!apiKey) {
     return { isOk: false, message: "Paste a key first." };
   }
-  const config = readAiConfig({
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
-    ANTHROPIC_API_KEY: provider === "claude" ? apiKey : undefined,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
-    ANTHROPIC_MODEL: TEST_CLAUDE_MODEL,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
-    GEMINI_API_KEY: provider === "gemini" ? apiKey : undefined,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- env names
-    GROQ_API_KEY: provider === "groq" ? apiKey : undefined,
-  });
-  const senders: Record<typeof provider, () => MessageSender> = {
+  const config = onlineConfig(provider, apiKey, model?.trim() || undefined);
+  const senders: Record<OnlineProvider, () => MessageSender> = {
     claude: () => createAnthropicSender(config),
     gemini: () => createGeminiSender(config),
     groq: () => createGroqSender(config),
@@ -190,5 +218,83 @@ export async function testBrowserAiKey(
           ? error.message
           : "The service could not be reached.",
     };
+  }
+}
+
+const LIST_TIMEOUT_MS = 10_000;
+
+async function getJson(
+  url: string,
+  headers: Record<string, string>
+): Promise<unknown> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LIST_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { headers, signal: controller.signal });
+    return response.ok ? await response.json() : undefined;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function names(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+/**
+ * The models a key can use, asked from the provider itself, to offer as suggestions. Best effort:
+ * any failure (blocked by the provider, offline, a changed answer) gives an empty list and the
+ * person simply types a model name.
+ */
+export async function listProviderModels(
+  provider: OnlineProvider,
+  key: string
+): Promise<string[]> {
+  const apiKey = key.trim();
+  if (!apiKey) {
+    return [];
+  }
+  const config = onlineConfig(provider, apiKey, undefined);
+  try {
+    if (provider === "claude") {
+      const answer = (await getJson(
+        "https://api.anthropic.com/v1/models?limit=100",
+        {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        }
+      )) as { data?: { id?: unknown }[] } | undefined;
+      return names(answer?.data?.map((model) => model.id));
+    }
+    if (provider === "gemini") {
+      const answer = (await getJson(
+        `${config.gemini.baseUrl}/v1beta/models?pageSize=200`,
+        { "x-goog-api-key": apiKey }
+      )) as
+        | {
+            models?: { name?: unknown; supportedGenerationMethods?: unknown }[];
+          }
+        | undefined;
+      return names(
+        answer?.models
+          ?.filter((model) =>
+            names(model.supportedGenerationMethods).includes("generateContent")
+          )
+          .map((model) =>
+            typeof model.name === "string"
+              ? model.name.replace(/^models\//, "")
+              : undefined
+          )
+      );
+    }
+    const answer = (await getJson(`${config.groq.baseUrl}/v1/models`, {
+      authorization: `Bearer ${apiKey}`,
+    })) as { data?: { id?: unknown }[] } | undefined;
+    return names(answer?.data?.map((model) => model.id));
+  } catch {
+    return [];
   }
 }

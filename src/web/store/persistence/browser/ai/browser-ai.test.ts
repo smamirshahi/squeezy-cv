@@ -8,7 +8,9 @@ import { IdbCvStorage } from "@store/persistence/browser/idb-cv-storage";
 import { openKvStore } from "@store/persistence/browser/idb-kv";
 import { createLocalFetch } from "@store/persistence/browser/local-api";
 import {
+  listProviderModels,
   readBrowserAiKeys,
+  testBrowserAiKey,
   writeBrowserAiKeys,
 } from "@store/persistence/browser/ai/browser-ai";
 
@@ -141,5 +143,130 @@ describe("AI in the browser", () => {
       isOllamaOn: true,
       ollamaModel: "llama3.2",
     });
+  });
+
+  it("keeps the chosen model of each provider and reads it back", () => {
+    writeBrowserAiKeys({
+      gemini: "k",
+      geminiModel: "gemini-x",
+      groqModel: " ",
+    });
+    expect(readBrowserAiKeys()).toMatchObject({
+      geminiModel: "gemini-x",
+      groqModel: undefined,
+    });
+  });
+
+  it("calls the chosen Gemini model, and the recommended one when none is chosen", async () => {
+    const ok = JSON.stringify({
+      candidates: [
+        { content: { parts: [{ text: '{"ok":true}' }] }, finishReason: "STOP" },
+      ],
+    });
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(() => Promise.resolve(new Response(ok)));
+    await testBrowserAiKey("gemini", "k1");
+    await testBrowserAiKey("gemini", "k1", "  gemini-custom ");
+    const urls = fetchSpy.mock.calls.map(([url]) => String(url as string));
+    expect(urls[0]).toContain("/models/gemini-3.8-flash:generateContent");
+    expect(urls[1]).toContain("/models/gemini-custom:generateContent");
+  });
+});
+
+describe("Test key", () => {
+  it("says to paste a key first, without calling anyone", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    expect(await testBrowserAiKey("groq", "  ")).toEqual({
+      isOk: false,
+      message: "Paste a key first.",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("reports that a Groq key works, sending the word JSON and no CV data", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          choices: [
+            { message: { content: '{"ok":true}' }, finish_reason: "stop" },
+          ],
+        })
+      )
+    );
+    expect((await testBrowserAiKey("groq", "gk")).isOk).toBe(true);
+    const body = String(fetchSpy.mock.calls[0][1]?.body as string);
+    expect(body).toMatch(/json/i);
+    expect(body).not.toContain("gk");
+  });
+
+  it("shows the provider's own error and never the key", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({ error: { message: "This model is retired." } }),
+        { status: 404 }
+      )
+    );
+    const result = await testBrowserAiKey("gemini", "secret-key-9");
+    expect(result.isOk).toBe(false);
+    expect(result.message).toMatch(/404/);
+    expect(result.message).not.toContain("secret-key-9");
+  });
+});
+
+describe("Models a key can use", () => {
+  it("lists Gemini models that can generate text, without the models/ prefix", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          models: [
+            {
+              name: "models/gemini-3.8-flash",
+              supportedGenerationMethods: ["generateContent"],
+            },
+            {
+              name: "models/embedding-1",
+              supportedGenerationMethods: ["embedContent"],
+            },
+          ],
+        })
+      )
+    );
+    expect(await listProviderModels("gemini", "k")).toEqual([
+      "gemini-3.8-flash",
+    ]);
+    const init = fetchSpy.mock.calls[0][1] as {
+      headers: Record<string, string>;
+    };
+    expect(init.headers["x-goog-api-key"]).toBe("k");
+  });
+
+  it("lists Groq and Claude models", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ data: [{ id: "m1" }, { id: "m2" }] }))
+        )
+      );
+    expect(await listProviderModels("groq", "k")).toEqual(["m1", "m2"]);
+    expect(await listProviderModels("claude", "k")).toEqual(["m1", "m2"]);
+    expect(String(fetchSpy.mock.calls[0][0] as string)).toContain(
+      "api.groq.com"
+    );
+    expect(String(fetchSpy.mock.calls[1][0] as string)).toContain(
+      "api.anthropic.com"
+    );
+  });
+
+  it("gives an empty list when the provider refuses, fails or answers oddly", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(new Response("no", { status: 401 }));
+    expect(await listProviderModels("groq", "k")).toEqual([]);
+    fetchSpy.mockRejectedValueOnce(new Error("offline"));
+    expect(await listProviderModels("gemini", "k")).toEqual([]);
+    fetchSpy.mockResolvedValueOnce(new Response(JSON.stringify({ x: 1 })));
+    expect(await listProviderModels("claude", "k")).toEqual([]);
+    expect(await listProviderModels("claude", "")).toEqual([]);
   });
 });
