@@ -9,6 +9,17 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-19
+
+### Added
+
+- Browser mode, AI settings: each provider is a card with a status chip (Not set up, Not tested, Key works, Test failed) and a Model field that is always editable. Empty uses the recommended model, shown as the hint; a model you type is used by every AI call. After a passing test the card suggests the models the key can use (best effort) (#537).
+
+### Changed
+
+- Test key now tests the model that will really be used, so a retired model shows up in the test (it no longer uses Claude Haiku), and shows the provider's own error (#537).
+- The AI settings footer in browser mode says that keys and models are kept when you press Save (#537).
+
 ## [0.13.2] - 2026-11-19
 
 ### Fixed
@@ -513,7 +524,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...v0.14.0
 [0.13.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.12.0...v0.13.0

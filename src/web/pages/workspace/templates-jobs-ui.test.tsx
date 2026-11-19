@@ -375,7 +375,7 @@ describe("templates page", () => {
     );
     expect(templates(store).map((t) => t.name)).toEqual([
       "Template 1",
-      "Template 1 (copy)",
+      "Template 1 (duplicate 1)",
     ]);
     expect(jobs(store)[0].templateId).toBe(templates(store)[0].id);
   });

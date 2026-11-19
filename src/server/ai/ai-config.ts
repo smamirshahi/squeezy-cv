@@ -47,6 +47,13 @@ const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash";
 const DEFAULT_GEMINI_URL = "https://generativelanguage.googleapis.com";
 const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
 const DEFAULT_GROQ_URL = "https://api.groq.com/openai";
+
+/** The recommended model of each online provider: used when none is chosen (shown as the hint in the browser settings) */
+export const DEFAULT_MODELS = {
+  claude: DEFAULT_MODEL,
+  gemini: DEFAULT_GEMINI_MODEL,
+  groq: DEFAULT_GROQ_MODEL,
+} as const;
 const LOCAL_NAMES = ["127.0.0.1", "localhost", "[::1]"];
 
 function positiveInteger(

@@ -571,7 +571,7 @@ function AiSettingsDialog({
           sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
         >
           {isBrowserMode()
-            ? "Changes apply immediately. Keys stay in this browser."
+            ? "A provider choice applies at once. Keys and models are kept when you press Save, and stay in this browser."
             : "Changes apply immediately. Keys stay in the .env file on this computer."}
         </Typography>
         <Button variant="contained" onClick={onClose}>
