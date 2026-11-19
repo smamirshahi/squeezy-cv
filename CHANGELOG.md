@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-19
+
+### Added
+
+- Browser mode, "Use your own AI key": each provider (Claude, Gemini, Groq) has a link to its keys page, short numbered steps for creating a key, and a Test key button that sends one tiny request (no CV data) and says whether the key works (#531).
+
 ## [0.12.0] - 2026-11-19
 
 ### Changed
@@ -495,7 +501,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.9.0...v0.10.0
