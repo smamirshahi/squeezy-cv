@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DESCRIPTION_HINT,
+  DESCRIPTION_PLACEHOLDER,
   fieldSpecsFor,
   formatStoredDate,
   fromMonthValue,
@@ -67,6 +68,32 @@ describe("fieldSpecsFor", () => {
   it("marks only the end date as one that can be 'Present'", () => {
     const ends = fieldSpecsFor("experience").filter((f) => f.isEnd);
     expect(ends.map((f) => f.key)).toEqual(["endDate"]);
+  });
+});
+
+describe("description placeholder", () => {
+  it("is on every description field and on the summary text", () => {
+    for (const type of ["experience", "education", "projects"] as const) {
+      const spec = fieldSpecsFor(type).find((f) => f.key === "description");
+      expect(spec?.placeholder).toBe(DESCRIPTION_PLACEHOLDER);
+    }
+    expect(fieldSpecsFor("summary")[0].placeholder).toBe(
+      DESCRIPTION_PLACEHOLDER
+    );
+  });
+
+  it("invites free, full writing in the user's own words, to be reworded per job", () => {
+    expect(DESCRIPTION_PLACEHOLDER).toMatch(/whatever comes to your mind/);
+    expect(DESCRIPTION_PLACEHOLDER).toMatch(/in full/);
+    expect(DESCRIPTION_PLACEHOLDER).toMatch(/own words/);
+    expect(DESCRIPTION_PLACEHOLDER).toMatch(/rephrase/);
+  });
+
+  it("is not on short one-line fields", () => {
+    const withPlaceholder = fieldSpecsFor("experience").filter(
+      (f) => f.placeholder
+    );
+    expect(withPlaceholder.map((f) => f.key)).toEqual(["description"]);
   });
 });
 

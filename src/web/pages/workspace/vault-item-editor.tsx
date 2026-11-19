@@ -191,11 +191,13 @@ function Field({
     <TextField
       size="medium"
       label={spec.label}
+      placeholder={spec.placeholder}
       value={value}
       multiline={spec.kind === "multiline"}
       minRows={spec.kind === "multiline" ? 3 : undefined}
       onChange={(event) => onChange(event.target.value)}
       slotProps={{
+        inputLabel: spec.placeholder ? { shrink: true } : undefined,
         input: {
           endAdornment: spec.hint ? (
             <HintAdornment

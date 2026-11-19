@@ -22,7 +22,14 @@ export interface FieldSpec {
 
   /** Help shown in an (i) tooltip beside the field */
   hint?: string;
+
+  /** Greyed text shown while the field is empty */
+  placeholder?: string;
 }
+
+/** Shown in an empty Description or Summary: invites a free, full, own-language first draft */
+export const DESCRIPTION_PLACEHOLDER =
+  "Write whatever comes to your mind, in full and in your own words. You can adjust it later and rephrase it for each job application.";
 
 /** What the (i) beside every Description field says */
 export const DESCRIPTION_HINT =
@@ -72,6 +79,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           kind: "multiline",
           span: 3,
           hint: DESCRIPTION_HINT,
+          placeholder: DESCRIPTION_PLACEHOLDER,
         },
       ];
     case "education":
@@ -100,6 +108,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           kind: "multiline",
           span: 3,
           hint: DESCRIPTION_HINT,
+          placeholder: DESCRIPTION_PLACEHOLDER,
         },
       ];
     case "publications":
@@ -243,6 +252,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           kind: "multiline",
           span: 3,
           hint: DESCRIPTION_HINT,
+          placeholder: DESCRIPTION_PLACEHOLDER,
         },
       ];
     case "skills":
@@ -256,7 +266,15 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
         },
       ];
     case "summary":
-      return [{ key: "text", label: "Summary", kind: "multiline", span: 3 }];
+      return [
+        {
+          key: "text",
+          label: "Summary",
+          kind: "multiline",
+          span: 3,
+          placeholder: DESCRIPTION_PLACEHOLDER,
+        },
+      ];
     default:
       return [
         { key: "title", label: "Title", kind: "text", span: 2 },
@@ -270,6 +288,7 @@ export function fieldSpecsFor(type: SectionType): FieldSpec[] {
           kind: "multiline",
           span: 3,
           hint: DESCRIPTION_HINT,
+          placeholder: DESCRIPTION_PLACEHOLDER,
         },
       ];
   }

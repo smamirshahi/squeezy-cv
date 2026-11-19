@@ -23,6 +23,7 @@ import { setVariants } from "@store/jobs/jobs-slice";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { setVault } from "@store/vault/vault-slice";
 import { Section } from "@custom-types/vault-types";
+import { DESCRIPTION_PLACEHOLDER } from "@shared/vault/item-fields";
 import { EditorSummary } from "@pages/editor-page/sections/editor-summary";
 import { EditorMainInfo } from "@pages/editor-page/sections/editor-main-info";
 
@@ -71,6 +72,14 @@ describe("EditorSummary", () => {
     expect(storedSection(store, "summary").items[0].fields.text).toBe(
       "New summary"
     );
+  });
+
+  it("shows the free-writing placeholder", () => {
+    const store = createStore();
+    renderWith(store, <EditorSummary sectionId="summary" />);
+    expect(
+      screen.getByLabelText("Professional Summary").getAttribute("placeholder")
+    ).toBe(DESCRIPTION_PLACEHOLDER);
   });
 
   it("creates the summary item when there is none yet", () => {

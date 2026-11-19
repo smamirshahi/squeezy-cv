@@ -4,7 +4,7 @@ import { Template } from "@custom-types/template-types";
 import { Variant } from "@custom-types/variant-types";
 import { CvFile } from "@custom-types/vault-types";
 import { activateVariant } from "@hooks/use-sync-active-job";
-import { resolveVariant } from "@shared/variant/template-job";
+import { resolveVariant, splitVariant } from "@shared/variant/template-job";
 import { createDefaultVariant } from "@shared/variant/variant-utils";
 import { createCvFile } from "@shared/vault/cv-file";
 import { initialState as initialAppState } from "@store/app/app-slice";
@@ -25,6 +25,7 @@ import {
 import { AppDispatch, RootState } from "@store/store-helper";
 import { clearHistory } from "@store/history/history";
 import {
+  markJobPlaceholder,
   markPlaceholder,
   savableOf,
   setTemplatesAndJobs,
@@ -55,6 +56,17 @@ export function loadCvFileIntoStore(
         loaded.templates[0],
       job
     );
+  } else if (!Array.isArray(loaded) && loaded && loaded.templates.length > 0) {
+    // saved templates but no job yet: keep the templates, the job is a stand-in
+    const standIn = createDefaultVariant(
+      file,
+      nanoid(),
+      initialAppState.structure
+    );
+    const { job } = splitVariant(standIn, loaded.templates[0].id);
+    dispatch(setTemplatesAndJobs({ templates: loaded.templates, jobs: [job] }));
+    dispatch(markJobPlaceholder());
+    first = resolveVariant(loaded.templates[0], job);
   } else {
     first = createDefaultVariant(file, nanoid(), initialAppState.structure);
     dispatch(setVariants([first]));
