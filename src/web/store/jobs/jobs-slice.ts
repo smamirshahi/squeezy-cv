@@ -33,6 +33,7 @@ import {
   jobsUsingTemplate,
   resolveVariant,
   splitVariant,
+  uniqueTemplateName,
 } from "@shared/variant/template-job";
 import { clampFitLimits } from "@shared/layout/fit";
 import { createDefaultVault } from "@shared/vault/default-vault";
@@ -284,7 +285,8 @@ const jobsSlice = createSlice({
         const created = duplicateTemplate(
           current(source),
           action.payload.id,
-          action.payload.name
+          // names stay unique, also when a caller forgot to check
+          uniqueTemplateName(state.templates, action.payload.name)
         );
         const subtitle = action.payload.subtitle?.trim();
         if (subtitle) {

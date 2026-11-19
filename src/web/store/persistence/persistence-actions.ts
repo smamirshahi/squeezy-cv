@@ -270,6 +270,10 @@ export async function saveToServer(
     savableOf(state.jobs).jobs
   );
   const plan = planSave(state.persistence.saved, current);
+  if (Object.keys(current.templates).length === 0) {
+    // the store holds no real template (a stand-in): never wipe the saved ones (#529)
+    plan.templatesToDelete = [];
+  }
 
   dispatch(setSaving(true));
   try {
