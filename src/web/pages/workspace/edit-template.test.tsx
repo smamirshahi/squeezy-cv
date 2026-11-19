@@ -22,6 +22,7 @@ import { navigate } from "@hooks/navigation";
 import {
   addTemplate,
   createJob,
+  markPlaceholder,
   templatesSelector,
 } from "@store/jobs/jobs-slice";
 import { undo } from "@store/history/history";
@@ -148,6 +149,19 @@ describe("editing the template named in the address", () => {
     expect(field.textContent).toContain("Second look");
     expect(field.textContent).not.toMatch(/jobs?\)/);
     // The count is in the (i) next to the field, named by its text
+    expect(
+      screen.getByLabelText("This template is used by 0 jobs.")
+    ).toBeTruthy();
+  });
+
+  it("does not count the stand-in job as a job that uses the template", async () => {
+    const store = await open("/templates/second/design");
+    act(() => {
+      store.dispatch(markPlaceholder());
+      store.dispatch(addTemplate({ id: "real", name: "Real" }));
+      navigate("/templates/real/design", { replace: true });
+    });
+    expect(store.getState().jobs.isPlaceholder).toBe(true);
     expect(
       screen.getByLabelText("This template is used by 0 jobs.")
     ).toBeTruthy();

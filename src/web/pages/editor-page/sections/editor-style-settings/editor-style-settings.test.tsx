@@ -71,6 +71,28 @@ describe("Style settings page", () => {
     expect(document.querySelectorAll("[data-style-row]")).toHaveLength(0);
   });
 
+  it("starts with the default sizes and writes the unit once", () => {
+    const store = setup("Typography");
+    const sizes = Object.fromEntries(
+      ["headingLg", "headingMd", "headingSm", "bodyMd", "bodySm"].map((v) => [
+        v,
+        typographyOf(store)[v as "bodyMd"].fontSize,
+      ])
+    );
+    expect(sizes).toEqual({
+      headingLg: "20pt",
+      headingMd: "12pt",
+      headingSm: "11pt",
+      bodyMd: "10pt",
+      bodySm: "9pt",
+    });
+    const label = document.querySelector(
+      "[data-style-row=headingLg]"
+    )!.textContent;
+    expect(label).toContain("20pt bold");
+    expect(label).not.toContain("ptpt");
+  });
+
   it("steps the size at once", () => {
     const store = setup("Typography");
     openStyle("bodyMd");

@@ -92,7 +92,7 @@ export function TypographyTable(): JSX.Element {
                 <Typography
                   sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}
                 >
-                  {use} · {style.fontSize}pt{" "}
+                  {use} · {style.fontSize}{" "}
                   {style.fontWeight === "700" ? "bold" : "regular"}
                 </Typography>
               </Box>

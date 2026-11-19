@@ -29,4 +29,5 @@ When the user gives a new task, make sure it is tracked in the GitHub issues bef
 - **Only create the issue** (stop after step 4) when the user says so explicitly, for example "only create an issue" or "don't work on it".
 - Several tasks in one message or sent while you work: one issue, one branch and one merge **each**, one after the other. Never mix two tasks in one branch.
 - Questions ("is this needed?") are answered first; start the flow when the user agrees or the intent is plain.
+- Every merge to `main` bumps the version (minor or patch, major only after asking), as written in `work-on-issue` step 4.
 - Uncommitted work that belongs to an earlier task is finished and merged first.

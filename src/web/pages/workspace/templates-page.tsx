@@ -258,7 +258,10 @@ function EditedTemplateSwitcher({
   templateId: string;
 }): JSX.Element {
   const templates = useAppSelector(templatesSelector);
-  const jobs = useAppSelector(jobsSelector);
+  const allJobs = useAppSelector(jobsSelector);
+  const isJobPlaceholder = useAppSelector(isPlaceholderSelector);
+  // the stand-in job is not a real one, so it is not counted
+  const jobs = isJobPlaceholder ? [] : allJobs;
   const hint = `This template is used by ${jobCountText(jobs.filter((j) => j.templateId === templateId).length)}.`;
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
@@ -525,6 +528,7 @@ export function TemplatesPage(): JSX.Element {
         name: premade.name,
         subtitle: premade.description,
         layout: premade.buildLayout(vaultSections),
+        colors: premade.colors,
       })
     );
     setPickedId(id);
