@@ -100,6 +100,44 @@ export function splitVariant(
   return { template, job };
 }
 
+const DUPLICATE_SUFFIX = / \(duplicate \d+\)$/;
+
+/** True when a template in `templates` already has `name` (case and outer spaces ignored) */
+export function templateNameTaken(
+  templates: readonly Template[],
+  name: string
+): boolean {
+  const wanted = name.trim().toLowerCase();
+  return templates.some((t) => t.name.trim().toLowerCase() === wanted);
+}
+
+/** "Developer (duplicate 1)": the first duplicate name of `name` no template has yet */
+export function duplicateTemplateName(
+  templates: readonly Template[],
+  name: string
+): string {
+  const base = name.replace(DUPLICATE_SUFFIX, "");
+  let number = 1;
+  while (templateNameTaken(templates, `${base} (duplicate ${number})`)) {
+    number += 1;
+  }
+  return `${base} (duplicate ${number})`;
+}
+
+/** `name` itself when free, else the first free "name (2)", "name (3)", ... */
+export function uniqueTemplateName(
+  templates: readonly Template[],
+  name: string
+): string {
+  let candidate = name;
+  let number = 2;
+  while (templateNameTaken(templates, candidate)) {
+    candidate = `${name} (${number})`;
+    number += 1;
+  }
+  return candidate;
+}
+
 /** A new template with the look of `source` and nothing shared with it */
 export function duplicateTemplate(
   source: Template,

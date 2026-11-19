@@ -1,3 +1,4 @@
+import { duplicateTemplateName } from "@shared/variant/template-job";
 import {
   FormEvent,
   KeyboardEvent,
@@ -866,7 +867,10 @@ export function TemplatesPage(): JSX.Element {
                                   dispatch(
                                     addTemplate({
                                       id,
-                                      name: `${template.name} (copy)`,
+                                      name: duplicateTemplateName(
+                                        templates,
+                                        template.name
+                                      ),
                                       sourceId: template.id,
                                     })
                                   );

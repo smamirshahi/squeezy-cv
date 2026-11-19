@@ -1,3 +1,4 @@
+import { templateNameTaken } from "@shared/variant/template-job";
 import { useState } from "react";
 import { useViewport } from "@hooks/use-viewport";
 import {
@@ -49,8 +50,11 @@ function NewJobForm({ onClose }: { onClose: () => void }): JSX.Element {
   const isNew = choice === NEW_TEMPLATE;
   const chosen = templates.find((t) => t.id === choice);
   const sharedBy = jobs.filter((job) => job.templateId === choice).length;
+  const isTemplateNameClash =
+    isNew && templateNameTaken(templates, templateName);
   const canCreate =
-    name.trim() !== "" && (!isNew || templateName.trim() !== "");
+    name.trim() !== "" &&
+    (!isNew || (templateName.trim() !== "" && !isTemplateNameClash));
 
   function handleClose(): void {
     onClose();
@@ -117,6 +121,12 @@ function NewJobForm({ onClose }: { onClose: () => void }): JSX.Element {
             label="New template name"
             value={templateName}
             onChange={(event) => setTemplateName(event.target.value)}
+            error={isTemplateNameClash}
+            helperText={
+              isTemplateNameClash
+                ? `A template called “${templateName.trim()}” already exists. Pick another name.`
+                : undefined
+            }
           />
         )}
       </DialogContent>
