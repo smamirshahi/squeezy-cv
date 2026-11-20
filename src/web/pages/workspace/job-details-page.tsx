@@ -2,31 +2,15 @@ import { OpenInNewTabButton } from "@components/open-in-new-tab-button";
 import { notify } from "@components/notifications/notify";
 import { AppliedElsewhereDialog } from "@pages/workspace/applied-elsewhere-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
-import {
-  JobStatus,
-  JobStatusChip,
-  STATUS_HELP,
-} from "@pages/workspace/job-status-select";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
 import { SavedForLaterMenu } from "@pages/workspace/saved-for-later-menu";
 import { SponsorshipCheck } from "@pages/workspace/sponsorship-check";
 import { useSavedForLater } from "@pages/workspace/use-saved-for-later";
-import {
-  ChangeEvent,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, ReactNode, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
+  IconButton,
   MenuItem,
   TextField,
   ToggleButton,
@@ -34,9 +18,9 @@ import {
   Typography,
 } from "@components/ui";
 import {
-  AddOutlined as AddIcon,
   BookmarkBorderOutlined as BookmarkBorderIcon,
   CheckOutlined as CheckIcon,
+  ClearAllOutlined as ClearAllIcon,
   ChevronRightOutlined as ChevronRightIcon,
   WorkOutlined as WorkOutlineIcon,
 } from "@components/ui/icons";
@@ -178,35 +162,6 @@ interface ProgressItem {
   target: string;
 }
 
-function ProgressBar({
-  done,
-  total,
-}: {
-  done: number;
-  total: number;
-}): JSX.Element {
-  return (
-    <Box
-      role="img"
-      aria-label={`${done} of ${total} done`}
-      sx={{
-        height: 6,
-        borderRadius: "3px",
-        bgcolor: WORKSPACE_COLORS.panelAlt,
-        overflow: "hidden",
-      }}
-    >
-      <Box
-        sx={{
-          height: "100%",
-          width: `${total === 0 ? 0 : (done / total) * 100}%`,
-          bgcolor: "var(--ok)",
-        }}
-      />
-    </Box>
-  );
-}
-
 function goTo(target: string): void {
   const element = document.getElementById(target);
   element?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -216,11 +171,21 @@ function goTo(target: string): void {
 function ProgressList({ items }: { items: ProgressItem[] }): JSX.Element {
   return (
     <Box component="ul" sx={{ m: 0, p: 0, display: "grid" }}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Box
           component="li"
           key={item.label}
-          sx={{ listStyle: "none", display: "flex" }}
+          sx={{
+            listStyle: "none",
+            display: "flex",
+            // a thin line between the required rows and the optional ones
+            ...(item.isOptional &&
+              !items[index - 1]?.isOptional && {
+                mt: 0.5,
+                pt: 0.5,
+                borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+              }),
+          }}
         >
           <Button
             color="neutral"
@@ -277,38 +242,6 @@ function ProgressList({ items }: { items: ProgressItem[] }): JSX.Element {
   );
 }
 
-/** The note and apply-by day kept with a job in Saved for later; sent by the Save for later button */
-function ReminderFields({
-  value,
-  onChange,
-}: {
-  value: { note: string; applyBy: string };
-  onChange: (next: { note: string; applyBy: string }) => void;
-}): JSX.Element {
-  return (
-    <>
-      <TextField
-        size="small"
-        type="date"
-        label="Apply by (optional)"
-        value={value.applyBy}
-        onChange={(event) =>
-          onChange({ ...value, applyBy: event.target.value })
-        }
-        slotProps={{ inputLabel: { shrink: true } }}
-      />
-      <TextField
-        size="small"
-        label="Note (optional)"
-        multiline
-        minRows={2}
-        value={value.note}
-        onChange={(event) => onChange({ ...value, note: event.target.value })}
-      />
-    </>
-  );
-}
-
 /** What a job is called until it has a role or a company (the model needs some name) */
 const DEFAULT_JOB_NAME = "New job";
 
@@ -324,8 +257,10 @@ function nameFrom(company?: string, role?: string): string {
  * The "Job application" view of the Apply tool (design "Job application v2"): what the job is for,
  * in five short steps: the job, where and how, pay, your private view and the advert (typed,
  * pasted or read from a PDF). Beside the form (a panel on a desktop, cards and a bottom bar
- * below it) sit the status, Save and continue, Save for later, what is left to do, the advert
- * analysis (AI) and quick checks. Nothing here changes the CV page.
+ * below it) sit the advert analysis (AI), what is left to do, Save and continue and "I applied
+ * elsewhere". Save for later and Clear are in the header. The status is not chosen here: Save
+ * and continue leaves a Draft, Save for later a Candidate, "I applied elsewhere" an Applied
+ * job. Nothing here changes the CV page.
  */
 export function JobDetailsPage(): JSX.Element {
   const dispatch = useAppDispatch();
@@ -352,18 +287,9 @@ export function JobDetailsPage(): JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [justSavedId, setJustSavedId] = useState<string>("");
   const [isApplying, setIsApplying] = useState<boolean>(false);
-  const [isLeaving, setIsLeaving] = useState<boolean>(false);
   const parkedEntry = job
     ? parked.open.find((entry) => entry.jobId === job.id)
     : undefined;
-  const [reminder, setReminder] = useState({ note: "", applyBy: "" });
-  // Start from what is saved when another job (or its saved entry) comes up
-  useEffect(() => {
-    setReminder({
-      note: parkedEntry?.note ?? "",
-      applyBy: parkedEntry?.applyBy ?? "",
-    });
-  }, [job?.id, parkedEntry?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function edit(details: Parameters<typeof setJobDetails>[0]["details"]): void {
     if (job) {
@@ -406,8 +332,9 @@ export function JobDetailsPage(): JSX.Element {
       role: job.role ?? "",
       jobUrl: job.url ?? "",
       jobAd: job.jobAd ?? "",
-      note: reminder.note,
-      applyBy: reminder.applyBy,
+      // pressed again for a parked job: keep the note and day it already has
+      note: parkedEntry?.note ?? "",
+      applyBy: parkedEntry?.applyBy ?? "",
     };
     try {
       // pressed again for the same job: update that entry instead of parking a second one
@@ -421,7 +348,7 @@ export function JobDetailsPage(): JSX.Element {
       }
       notify({
         kind: "success",
-        text: "Saved for later. Find it any time in Saved for later at the top of this page, or in Applications.",
+        text: "Saved for later as a Candidate. Find it any time in Saved for later at the top of this page, or in Applications.",
         action: { label: "View list", onClick: () => setIsMenuOpen(true) },
       });
       // the form is ready for the next job
@@ -438,21 +365,31 @@ export function JobDetailsPage(): JSX.Element {
   }
 
   function createAnother(): void {
-    setIsLeaving(false);
     dispatch(createJob({ vault, style, name: DEFAULT_JOB_NAME, id: nanoid() }));
   }
 
-  /** Asks first when the job has something typed in and is not parked in Saved for later */
-  function startAnother(): void {
-    const hasContent = [job?.company, job?.role, job?.url, job?.jobAd].some(
-      (text) => (text ?? "").trim() !== ""
-    );
-    const isParked = parked.open.some((entry) => entry.jobId === job?.id);
-    if (hasContent && !isParked) {
-      setIsLeaving(true);
+  /**
+   * Empties the form for the next job. Nothing is deleted: the job stays where it was (a Draft in
+   * Applications, or in Saved for later) and the notification can bring it back.
+   */
+  function clearForm(): void {
+    if (!job) {
       return;
     }
+    const clearedId = job.id;
+    const where = parkedEntry
+      ? "in Saved for later"
+      : "in Applications as a Draft";
     createAnother();
+    notify({
+      kind: "info",
+      text: `Form cleared. “${job.name}” is not deleted: it is still ${where}.`,
+      action: {
+        label: "Bring it back",
+        onClick: () =>
+          navigate({ kind: "jobs", jobId: clearedId, view: "details" }),
+      },
+    });
   }
 
   function saveAndContinue(): void {
@@ -493,6 +430,7 @@ export function JobDetailsPage(): JSX.Element {
   const hasCompanyAndRole =
     (job?.company ?? "").trim() !== "" && (job?.role ?? "").trim() !== "";
   const hasAdvert = (job?.jobAd ?? "").trim() !== "";
+  // Required rows first, then the optional ones
   const progress: ProgressItem[] = [
     {
       label: "Company and role",
@@ -501,22 +439,30 @@ export function JobDetailsPage(): JSX.Element {
     },
     { label: "Advert text", isDone: hasAdvert, target: "job-ad" },
     {
-      label: "Advert analysed",
-      isDone: job?.analysis !== undefined,
-      target: "job-analysis",
-    },
-    {
       label: "Link to the advert",
       isDone: (job?.url ?? "").trim() !== "",
       isOptional: true,
       target: "job-url",
     },
+    {
+      label: "Advert analysed",
+      isDone: job?.analysis !== undefined,
+      isOptional: true,
+      target: "job-analysis",
+    },
   ];
-  const doneCount = progress.filter((item) => item.isDone).length;
+  const requiredLeft = progress.filter(
+    (item) => !item.isOptional && !item.isDone
+  );
   const firstLeft = progress.find((item) => !item.isDone);
-  const status: JobStatus = job?.stage === "ready" ? "ready" : "draft";
-
-  const statusControl = <JobStatusChip value={status} />;
+  // Anything typed that Clear would take off the screen
+  const hasContent = [
+    job?.company,
+    job?.role,
+    job?.url,
+    job?.jobAd,
+    job?.location,
+  ].some((text) => (text ?? "").trim() !== "");
 
   const appliedElsewhereButton = (
     <Button
@@ -547,15 +493,20 @@ export function JobDetailsPage(): JSX.Element {
             borderRadius: 999,
             fontSize: 12,
             fontWeight: 600,
-            bgcolor: "var(--oks)",
-            color: "var(--okt)",
+            bgcolor: requiredLeft.length === 0 ? "var(--oks)" : "var(--wrs)",
+            color: requiredLeft.length === 0 ? "var(--okt)" : "var(--wrt)",
           }}
         >
-          {doneCount} of {progress.length}
+          {requiredLeft.length === 0
+            ? "Required done"
+            : `${requiredLeft.length} required left`}
         </Box>
       </Box>
-      <ProgressBar done={doneCount} total={progress.length} />
       <ProgressList items={progress} />
+      <Help>
+        Only company, role and advert text are needed. The optional steps help
+        the CV fit the job.
+      </Help>
     </Card>
   );
 
@@ -565,98 +516,73 @@ export function JobDetailsPage(): JSX.Element {
     </Box>
   ) : null;
 
-  const quickChecks = (
-    <Card label="Quick checks">
-      <Typography component="h2" sx={{ fontWeight: 700, fontSize: 14 }}>
-        Quick checks
-      </Typography>
-      <SponsorshipCheck company={job?.company} />
-    </Card>
+  const continueButton = (
+    <Button
+      variant="contained"
+      size="large"
+      fullWidth
+      disabled={!job}
+      endIcon={<ChevronRightIcon />}
+      onClick={saveAndContinue}
+    >
+      Save and continue
+    </Button>
   );
 
-  const reminderFields = job ? (
-    <ReminderFields value={reminder} onChange={setReminder} />
-  ) : null;
-
-  // Desktop: the whole right panel
+  // Desktop: the whole right panel, the way forward at the bottom
   const rightPanel = (
     <Box
       component="aside"
-      aria-label="Status and next steps"
+      aria-label="Next steps"
       sx={{
         width: "100%",
         flex: "none",
-        display: "grid",
+        display: "flex",
+        flexDirection: "column",
         gap: 1.5,
-        alignContent: "start",
         p: 2,
         overflow: "auto",
         borderLeft: `1px solid ${WORKSPACE_COLORS.border}`,
         bgcolor: "var(--bg)",
       }}
     >
-      <Card label="Status">
-        <Typography component="h2" sx={{ fontWeight: 700, fontSize: 14 }}>
-          Status
-        </Typography>
-        {statusControl}
-        <Help>{STATUS_HELP[status]}</Help>
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={!job}
-          endIcon={<ChevronRightIcon />}
-          onClick={saveAndContinue}
-        >
-          Save and continue
-        </Button>
-        <Typography
-          sx={{
-            fontSize: 12,
-            textAlign: "center",
-            color: WORKSPACE_COLORS.muted,
-            mt: -0.5,
-          }}
-        >
-          {job
-            ? "Next: pick a template and choose what the CV shows."
-            : "Fill in something to start this job."}
-        </Typography>
-        {reminderFields}
-        <Button
-          variant="outlined"
-          color="primary"
-          fullWidth
-          disabled={!job}
-          startIcon={<BookmarkBorderIcon />}
-          sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
-        >
-          {parkedEntry ? "Update Saved for later" : "Save for later"}
-        </Button>
-        <Help>
-          Parks the company, role, link, advert, note and date in{" "}
-          <b>Saved for later</b>, without building a CV. Find it again in the
-          menu at the top of this page. Jobs past their date are marked in
-          Applications.
-        </Help>
-        {appliedElsewhereButton}
-      </Card>
-      {progressCard}
       {analysisCard}
-      {quickChecks}
+      {progressCard}
+      <Box sx={{ mt: "auto" }}>
+        <Card label="Next step">
+          <Box sx={{ display: "grid", gap: 1.5 }}>
+            {continueButton}
+            <Typography
+              sx={{
+                fontSize: 12,
+                textAlign: "center",
+                color: WORKSPACE_COLORS.muted,
+                mt: -0.5,
+              }}
+            >
+              {job
+                ? "Next: pick a template, then fix each CV section. Tailor will offer the analysis there."
+                : "Fill in something to start this job."}
+            </Typography>
+            <Box sx={{ display: "grid", justifyItems: "center", gap: 0.5 }}>
+              <Help>Already applied another way?</Help>
+              {appliedElsewhereButton}
+            </Box>
+          </Box>
+        </Card>
+      </Box>
     </Box>
   );
 
-  // Below a desktop: status and progress on top, the analysis last, the buttons in a bottom bar
+  // Below a desktop: what is left on top, the analysis last, the way forward in a bottom bar
   const stackedTop = isPhone ? (
-    <Card label="Status">
+    <Card label="Ready to continue">
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Typography
           component="h2"
           sx={{ flex: 1, fontWeight: 700, fontSize: 14 }}
         >
-          Status
+          Ready to continue
         </Typography>
         <Box
           component="span"
@@ -665,15 +591,15 @@ export function JobDetailsPage(): JSX.Element {
             borderRadius: 999,
             fontSize: 12,
             fontWeight: 600,
-            bgcolor: "var(--oks)",
-            color: "var(--okt)",
+            bgcolor: requiredLeft.length === 0 ? "var(--oks)" : "var(--wrs)",
+            color: requiredLeft.length === 0 ? "var(--okt)" : "var(--wrt)",
           }}
         >
-          {doneCount} of {progress.length} ready
+          {requiredLeft.length === 0
+            ? "Required done"
+            : `${requiredLeft.length} required left`}
         </Box>
       </Box>
-      {statusControl}
-      <ProgressBar done={doneCount} total={progress.length} />
       {firstLeft && (
         <Button
           color="primary"
@@ -684,29 +610,9 @@ export function JobDetailsPage(): JSX.Element {
           {firstLeft.isOptional ? " (optional)" : ""}
         </Button>
       )}
-      {reminderFields}
-      {appliedElsewhereButton}
     </Card>
   ) : (
-    <Box
-      sx={{
-        display: "grid",
-        gap: 1.5,
-        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-        alignItems: "start",
-      }}
-    >
-      <Card label="Status">
-        <Typography component="h2" sx={{ fontWeight: 700, fontSize: 14 }}>
-          Status
-        </Typography>
-        {statusControl}
-        <Help>{STATUS_HELP[status]}</Help>
-        {reminderFields}
-        {appliedElsewhereButton}
-      </Card>
-      {progressCard}
-    </Box>
+    progressCard
   );
 
   const optionalSelect = <T extends string>(
@@ -773,27 +679,36 @@ export function JobDetailsPage(): JSX.Element {
           onOpenChange={setIsMenuOpen}
           onContinue={(candidate) => void parked.continueWith(candidate)}
         />
+        <Button
+          variant="outlined"
+          color="neutral"
+          disabled={!job}
+          startIcon={<BookmarkBorderIcon />}
+          onClick={() => void saveForLater()}
+          sx={{ borderColor: WORKSPACE_COLORS.borderStrong }}
+        >
+          {parkedEntry ? "Update Saved for later" : "Save for later"}
+        </Button>
         {isPhone ? (
-          <Button
-            variant="outlined"
-            color="neutral"
-            aria-label="Start another job"
-            onClick={startAnother}
+          <IconButton
+            aria-label="Clear the form"
+            disabled={!hasContent}
+            onClick={clearForm}
             sx={{
-              minWidth: 44,
-              px: 1,
-              borderColor: WORKSPACE_COLORS.borderStrong,
+              border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              borderRadius: "4px",
             }}
           >
-            <AddIcon />
-          </Button>
+            <ClearAllIcon />
+          </IconButton>
         ) : (
           <Button
             color="neutral"
-            startIcon={<AddIcon />}
-            onClick={startAnother}
+            disabled={!hasContent}
+            startIcon={<ClearAllIcon />}
+            onClick={clearForm}
           >
-            Start another job
+            Clear
           </Button>
         )}
       </Box>
@@ -846,6 +761,14 @@ export function JobDetailsPage(): JSX.Element {
           slotProps={{ inputLabel: { shrink: true } }}
           helperText="Shown in your lists. Follows the role and company until you type your own."
         />
+        <Box
+          sx={{
+            pt: 1.5,
+            borderTop: `1px solid ${WORKSPACE_COLORS.border}`,
+          }}
+        >
+          <SponsorshipCheck company={job?.company} />
+        </Box>
       </Step>
       <Step
         number={2}
@@ -1010,7 +933,17 @@ export function JobDetailsPage(): JSX.Element {
           />
         </Box>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <Typography sx={{ fontWeight: 600, flex: 1 }}>Advert text</Typography>
+          <Typography sx={{ fontWeight: 600, flex: 1 }}>
+            Advert text
+            <Box
+              component="span"
+              aria-hidden="true"
+              sx={{ color: "var(--er)" }}
+            >
+              {" "}
+              *
+            </Box>
+          </Typography>
           <Button
             size="small"
             variant="outlined"
@@ -1038,6 +971,7 @@ export function JobDetailsPage(): JSX.Element {
         <TextField
           id="job-ad"
           multiline
+          required
           minRows={isPhone ? 5 : 7}
           aria-label="Advert text"
           placeholder="Paste the advert here, or choose a PDF"
@@ -1050,7 +984,6 @@ export function JobDetailsPage(): JSX.Element {
         </Help>
       </Step>
       {!isDesktop && analysisCard}
-      {!isDesktop && quickChecks}
     </Box>
   );
 
@@ -1100,13 +1033,13 @@ export function JobDetailsPage(): JSX.Element {
           >
             <Button
               variant="outlined"
-              color="primary"
+              color="neutral"
               size="large"
               disabled={!job}
-              startIcon={<BookmarkBorderIcon />}
-              onClick={() => void saveForLater()}
+              startIcon={isPhone ? undefined : <WorkOutlineIcon />}
+              onClick={() => setIsApplying(true)}
             >
-              Save for later
+              {isPhone ? "Applied elsewhere" : "I applied elsewhere"}
             </Button>
             <Button
               variant="contained"
@@ -1120,36 +1053,6 @@ export function JobDetailsPage(): JSX.Element {
           </Box>
         )}
       </Box>
-      <Dialog
-        open={isLeaving}
-        onClose={() => setIsLeaving(false)}
-        aria-labelledby="leave-job-title"
-      >
-        <DialogTitle id="leave-job-title">Start another job?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            This job is not in Saved for later. If you start another one now,
-            you will not find this one on this page again. Save it for later
-            first to keep it.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button color="neutral" onClick={() => setIsLeaving(false)}>
-            Cancel
-          </Button>
-          <Button
-            color="neutral"
-            onClick={() => {
-              void saveForLater();
-            }}
-          >
-            Save for later, then start
-          </Button>
-          <Button color="error" onClick={createAnother}>
-            Start without saving
-          </Button>
-        </DialogActions>
-      </Dialog>
       <AppliedElsewhereDialog
         isOpen={isApplying}
         onClose={() => setIsApplying(false)}

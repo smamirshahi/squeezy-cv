@@ -9,6 +9,13 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-20
+
+### Changed
+
+- Job application page: the right panel now starts with the Advert analysis card (the AI settings gear and the model that will run are in its header, with an "Optional" chip and a visible "Add the advert text first" hint), then the steps, and ends with Save and continue and "I applied elsewhere". The Status card, the progress bar and the note / apply-by fields are gone from this page; the status follows from what you do (Save and continue: Draft, Save for later: Candidate, I applied elsewhere: Applied) and is still changed in Applications. The steps list the required rows first and the optional ones after a divider, "Advert text" is marked required, and the visa sponsorship check sits in "The job" card (#543).
+- "Start another job" is replaced by two header buttons: Save for later (works on every screen size and opens a blank form) and Clear. Clear only empties the form; the job is kept as a Draft (or stays in Saved for later) and the notification has a "Bring it back" button. The "Start another job?" question is gone (#543).
+
 ## [0.15.1] - 2026-11-20
 
 ### Fixed
@@ -536,7 +543,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...v0.14.0

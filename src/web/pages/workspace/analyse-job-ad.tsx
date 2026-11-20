@@ -37,6 +37,14 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isResultOpen, setIsResultOpen] = useState<boolean>(false);
   const ai = status ? taskProvider(status, "tailor") : null;
+  // The model that will read the advert: the one chosen for this task, else the provider's own
+  const providerEntry = status?.providers?.find(
+    (entry) => entry.id === ai?.info.id
+  );
+  const model = status?.models?.tailor || providerEntry?.defaultModel || "";
+  const whoReads = ai
+    ? [ai.info.label, model].filter((part) => part !== "").join(" · ")
+    : "";
   const advert = (job.jobAd ?? "").trim();
   const analysis = job.analysis;
   // Why the button is disabled, shown as its tooltip ("" = enabled)
@@ -105,7 +113,15 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
         <AiIcon />
         Advert analysis
         {isRunning && <CircularProgress size={16} color="secondary" />}
+        <Box sx={{ flex: 1 }} />
+        <Chip size="small" label="Optional" variant="outlined" />
+        <AiSettingsButton task="tailor" />
       </Box>
+      {ai?.isConfigured && whoReads && (
+        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.aiText }}>
+          Runs on {whoReads}
+        </Typography>
+      )}
       {error && (
         <Alert severity="error">
           {error}
@@ -173,18 +189,18 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
           </Box>
         </Tooltip>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-        <Typography
-          sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
-        >
-          {ai?.isConfigured
-            ? ai.info.isOnline
-              ? `Sends only the advert text to ${ai.info.recipient}. Then use Tailor in each section.`
-              : "The advert goes to your local model only. Then use Tailor in each section."
-            : "AI is not set up. Choose a provider in Settings."}
+      {ai?.isConfigured && advert === "" && !isRunning && (
+        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+          Add the advert text first.
         </Typography>
-        <AiSettingsButton task="tailor" />
-      </Box>
+      )}
+      <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+        {ai?.isConfigured
+          ? ai.info.isOnline
+            ? `Sends only the advert text to ${ai.info.recipient}. Then use Tailor in each section.`
+            : "The advert goes to your local model only. Then use Tailor in each section."
+          : "AI is not set up. Choose a provider in Settings."}
+      </Typography>
       {analysis && (
         <RequirementsDialog
           isOpen={isResultOpen}
