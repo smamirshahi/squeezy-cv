@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-20
+
+### Fixed
+
+- Browser mode, AI settings: the Model field now always shows the recommended model (as the placeholder and as the first option, before the key is tested), uses the app's dropdown instead of the browser's plain list, and says so when the provider's model list could not be loaded (#541).
+
 ## [0.15.0] - 2026-11-19
 
 ### Added
@@ -530,7 +536,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...v0.14.0
 [0.13.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.1...v0.13.2
