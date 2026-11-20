@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-11-20
+
+### Fixed
+
+- Job application page: the "Saved for later" dropdown is gone; parked jobs are listed in Applications (Candidate). The "Saved for later" notification's "View list" button opens Applications on the Candidate filter (#547).
+
 ## [0.17.0] - 2026-11-20
 
 ### Changed
@@ -549,7 +555,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...v0.15.1
