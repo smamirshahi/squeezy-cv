@@ -162,8 +162,14 @@ export interface ImportedCv {
 export interface AiStatus {
   isConfigured: boolean;
   provider: AiProviderId;
-  providers?: (AiProviderInfo & { isConfigured: boolean })[];
+  providers?: (AiProviderInfo & {
+    isConfigured: boolean;
+    defaultModel?: string;
+  })[];
   choice?: AiChoice;
+
+  /** The model a task chose; a task that is missing uses its provider's model */
+  models?: Partial<Record<AiTask, string>>;
 }
 
 /** The provider a task uses and whether it is set up, from a status (older answers have only tailoring's) */
@@ -205,6 +211,11 @@ export interface ApiClient {
 
   /** Chooses the provider for some tasks. The server refuses one that is not set up. */
   setAiChoice: (change: Partial<AiChoice>) => Promise<AiChoice>;
+
+  /** Sets the model of some tasks ("" goes back to the provider's model); answers every task's model */
+  setAiModels: (
+    models: Partial<Record<AiTask, string>>
+  ) => Promise<Partial<Record<AiTask, string>>>;
 
   /** Also hide employer and school names ([Company 1], [Institution 1]) in what is sent to a model */
 
@@ -376,6 +387,12 @@ export function createApiClient(
     },
     async getAiStatus() {
       return (await request(fetchImpl, "GET", "/api/ai/status")) as AiStatus;
+    },
+    async setAiModels(models) {
+      const answer = (await request(fetchImpl, "PUT", "/api/ai/choice", {
+        models,
+      })) as { models?: Partial<Record<AiTask, string>> };
+      return answer.models ?? {};
     },
     async setAiChoice(change) {
       const answer = (await request(

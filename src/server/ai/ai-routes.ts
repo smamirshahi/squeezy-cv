@@ -184,6 +184,7 @@ export function createAiRoutes(deps: AiRouteDeps): {
           provider: tailoring.provider,
           providers: registry.providers(),
           choice: registry.choice(),
+          models: registry.models(),
         })
       );
     },
@@ -191,14 +192,28 @@ export function createAiRoutes(deps: AiRouteDeps): {
     // Which provider each task uses. Keys are kept apart; only the choice is stored.
     "PUT /api/ai/choice": async ({ body }) => {
       try {
-        await registry.choose(body as Record<string, string>);
+        const { models, ...providers } = (body ?? {}) as Record<
+          string,
+          unknown
+        >;
+        if (
+          models !== undefined &&
+          (typeof models !== "object" || models === null)
+        ) {
+          return fail(
+            HTTP_BAD_REQUEST,
+            "invalid",
+            "models must be an object of task names and model names."
+          );
+        }
+        await registry.choose(providers, models);
       } catch (error) {
         if (error instanceof AiChoiceError) {
           return fail(HTTP_BAD_REQUEST, "provider_unavailable", error.message);
         }
         throw error;
       }
-      return ok({ choice: registry.choice() });
+      return ok({ choice: registry.choice(), models: registry.models() });
     },
 
     // Reads an advert once: keywords and requirements for the job

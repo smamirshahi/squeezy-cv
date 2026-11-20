@@ -2,7 +2,11 @@ import { buildServer } from "@server/app";
 import { readAiConfig } from "@server/ai/ai-config";
 import { AiRegistry } from "@server/ai/ai-registry";
 import { FileAiSettings } from "@server/ai/ai-settings-file";
-import { createAiClients } from "@server/ai/ai-provider";
+import {
+  createAiClients,
+  createClientWithModel,
+  defaultModels,
+} from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
 import { readFeedbackSender } from "@server/feedback/github-feedback";
 import { FEEDBACK_REPO } from "@shared/feedback/feedback-issue";
@@ -27,7 +31,12 @@ const aiRegistry = new AiRegistry(
   aiConfig.provider,
   new FileAiSettings(
     process.env.AI_SETTINGS_FILE?.trim() || ".ai-settings.json"
-  )
+  ),
+  {
+    clientFor: (provider, model) =>
+      createClientWithModel(aiConfig, provider, model),
+    defaultModels: defaultModels(aiConfig),
+  }
 );
 await aiRegistry.load();
 const app = buildServer({

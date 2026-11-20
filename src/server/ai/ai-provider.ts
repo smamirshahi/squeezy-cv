@@ -46,6 +46,44 @@ export function createConfiguredAi(config: AiConfig): AiClient | undefined {
   }
 }
 
+/** The model a provider uses when a task does not choose one */
+function modelOf(config: AiConfig, provider: AiProvider): string {
+  switch (provider) {
+    case "claude":
+      return config.model;
+    case "gemini":
+      return config.gemini.model;
+    case "groq":
+      return config.groq.model;
+    case "ollama":
+      return config.ollama.model;
+  }
+}
+
+/** The model each provider uses when a task does not choose one */
+export function defaultModels(config: AiConfig): Record<AiProvider, string> {
+  return Object.fromEntries(
+    AI_PROVIDER_IDS.map((id) => [id, modelOf(config, id)])
+  ) as Record<AiProvider, string>;
+}
+
+/** A client for `provider` that uses `model` instead of its usual one (undefined when it cannot be used) */
+export function createClientWithModel(
+  config: AiConfig,
+  provider: AiProvider,
+  model: string
+): AiClient | undefined {
+  let next: AiConfig;
+  if (provider === "claude") {
+    next = { ...config, model };
+  } else if (provider === "ollama") {
+    next = { ...config, ollama: { ...config.ollama, model } };
+  } else {
+    next = { ...config, [provider]: { ...config[provider], model } };
+  }
+  return createConfiguredAi(configFor(next, provider));
+}
+
 /** Every provider that can be used right now (has its key; Ollama is only found missing when asked) */
 export function createAiClients(
   config: AiConfig

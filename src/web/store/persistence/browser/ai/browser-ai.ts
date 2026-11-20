@@ -4,7 +4,11 @@ import {
   AiSettingsStore,
 } from "@server/ai/ai-registry";
 import { AiConfig, readAiConfig } from "@server/ai/ai-config";
-import { createAiClients } from "@server/ai/ai-provider";
+import {
+  createAiClients,
+  createClientWithModel,
+  defaultModels,
+} from "@server/ai/ai-provider";
 import { AiHttpResult, createAiRoutes } from "@server/ai/ai-routes";
 import { AiClient, MessageSender } from "@server/ai/ai-types";
 import { createAnthropicSender } from "@server/ai/claude-client";
@@ -132,7 +136,14 @@ async function browserRegistry(
   const registry = new AiRegistry(
     clients,
     first ?? "claude",
-    new LocalAiSettings()
+    new LocalAiSettings(),
+    {
+      clientFor: (provider, model) =>
+        provider === "ollama" && !keys.isOllamaOn
+          ? undefined
+          : createClientWithModel(config, provider, model),
+      defaultModels: defaultModels(config),
+    }
   );
   await registry.load();
   return registry;
