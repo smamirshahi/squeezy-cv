@@ -18,6 +18,7 @@ export { default as CheckCircleOutlined } from "@mui/icons-material/CheckCircleO
 export { default as CheckOutlined } from "@mui/icons-material/CheckOutlined";
 export { default as ChevronRightOutlined } from "@mui/icons-material/ChevronRightOutlined";
 export { default as CircleOutlined } from "@mui/icons-material/CircleOutlined";
+export { default as ClearAllOutlined } from "@mui/icons-material/ClearAllOutlined";
 export { default as CloseOutlined } from "@mui/icons-material/CloseOutlined";
 export { default as ContentCopyOutlined } from "@mui/icons-material/ContentCopyOutlined";
 export { default as DarkModeOutlined } from "@mui/icons-material/DarkModeOutlined";
