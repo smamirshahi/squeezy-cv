@@ -3,6 +3,7 @@ import { AiButton } from "@components/ai-button";
 import { DEFAULT_MODELS } from "@server/ai/ai-config";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Chip,
@@ -116,15 +117,21 @@ export function BrowserAiKeysPanel({
     Partial<Record<OnlineId, string[]>>
   >({});
 
+  const [listFailed, setListFailed] = useState<
+    Partial<Record<OnlineId, boolean>>
+  >({});
+
   async function test(id: OnlineId): Promise<void> {
     setTesting(id);
     const key = keys[id] ?? "";
     const result = await testBrowserAiKey(id, key, keys[MODEL_FIELD[id]]);
     setResults((previous) => ({ ...previous, [id]: result }));
     setTesting(undefined);
+    setListFailed((previous) => ({ ...previous, [id]: false }));
     if (result.isOk) {
       const models = await listProviderModels(id, key);
       setSuggestions((previous) => ({ ...previous, [id]: models }));
+      setListFailed((previous) => ({ ...previous, [id]: models.length === 0 }));
     }
   }
 
@@ -263,33 +270,60 @@ export function BrowserAiKeysPanel({
                   {result.message}
                 </Typography>
               )}
-              <TextField
+              <Autocomplete
+                freeSolo
                 fullWidth
                 size="small"
-                label="Model"
-                placeholder={`Recommended: ${DEFAULT_MODELS[provider.id]}`}
-                value={keys[modelField] ?? ""}
-                helperText={
-                  suggestions[provider.id]?.length
-                    ? "Pick one of the models this key can use, or type a name. Empty uses the recommended model."
-                    : "Always editable. Empty uses the recommended model. If a test says the model is gone, type a newer name."
-                }
-                slotProps={{
-                  htmlInput: { list: `models-${provider.id}` },
+                options={[
+                  DEFAULT_MODELS[provider.id],
+                  ...(suggestions[provider.id] ?? []).filter(
+                    (model) => model !== DEFAULT_MODELS[provider.id]
+                  ),
+                ]}
+                getOptionLabel={(model) => model}
+                renderOption={(props, model) => (
+                  <li {...props} key={model}>
+                    {model}
+                    {model === DEFAULT_MODELS[provider.id] && (
+                      <Typography
+                        component="span"
+                        sx={{ ml: 1, fontSize: 12, color: "text.secondary" }}
+                      >
+                        recommended
+                      </Typography>
+                    )}
+                  </li>
+                )}
+                inputValue={keys[modelField] ?? ""}
+                onInputChange={(_event, value, reason) => {
+                  if (reason === "reset" && value === "") {
+                    return;
+                  }
+                  change(provider.id, { ...keys, [modelField]: value });
                 }}
-                onChange={(event) =>
-                  change(provider.id, {
-                    ...keys,
-                    [modelField]: event.target.value,
-                  })
-                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Model"
+                    placeholder={`Recommended: ${DEFAULT_MODELS[provider.id]}`}
+                    helperText={
+                      listFailed[provider.id]
+                        ? "Couldn't load the model list from the provider. Type a name or use the recommended model. Empty uses the recommended model."
+                        : suggestions[provider.id]?.length
+                          ? "Pick one of the models this key can use, or type a name. Empty uses the recommended model."
+                          : "Pick the recommended model or type a name. Empty uses the recommended model. Test the key to list every model it can use."
+                    }
+                    slotProps={{
+                      ...params.slotProps,
+                      inputLabel: {
+                        ...params.slotProps?.inputLabel,
+                        shrink: true,
+                      },
+                    }}
+                  />
+                )}
                 sx={{ mt: 1.5 }}
               />
-              <datalist id={`models-${provider.id}`}>
-                {(suggestions[provider.id] ?? []).map((model) => (
-                  <option key={model} value={model} />
-                ))}
-              </datalist>
             </Paper>
           );
         })}
