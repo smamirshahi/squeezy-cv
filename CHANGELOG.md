@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-20
+
+### Changed
+
+- Send to AI window: it shows the provider's warning (for example that a free tier may train on what it receives), the Send button is the purple AI button and says how many messages go out, the title carries the AI icon, and the footer says nothing leaves your computer until you press Send. An unticked automatic row now reads "sent as written" and the footer counts them. "Show exact text" is now a Readable / Exact text switch, and a new "Hide a word or phrase" field hides text without selecting it (keyboard and touch). The "remember my own masks" line says they are kept on this device (#545).
+
 ## [0.16.0] - 2026-11-20
 
 ### Changed
@@ -543,7 +549,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...v0.15.0

@@ -13,8 +13,13 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
+  MenuItem,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@components/ui";
+import { AiButton, AiIcon } from "@components/ai-button";
 import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
 import {
   MASK_KINDS,
@@ -141,6 +146,14 @@ function TermRow({
       >
         {term.value}
       </Typography>
+      {!term.isMasked && !term.isCustom && (
+        <Typography
+          variant="caption"
+          sx={{ flexShrink: 0, fontWeight: 600, color: "var(--wrt)" }}
+        >
+          sent as written
+        </Typography>
+      )}
       <Chip
         size="small"
         label={term.placeholder}
@@ -175,6 +188,8 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
   const [selected, setSelected] = useState("");
   const [isPrivateAdvert, setIsPrivateAdvert] = useState(false);
   const [isRaw, setIsRaw] = useState(false);
+  const [typedMask, setTypedMask] = useState("");
+  const [typedKind, setTypedKind] = useState<MaskKind>("other");
   const [shouldKeepMasks, setShouldKeepMasks] = useState(
     request.initial.custom.length > 0
   );
@@ -216,6 +231,12 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
       return;
     }
     change({ ...masking, custom: [...masking.custom, { text: value, kind }] });
+  }
+
+  /** The typed word or phrase: the same as selecting it in the text, for keyboard and touch */
+  function addTyped(): void {
+    addMask(typedMask, typedKind);
+    setTypedMask("");
   }
 
   function removeCustom(value: string): void {
@@ -276,6 +297,9 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
       ];
   const automatic = preview.terms.filter((term) => !term.isCustom);
   const custom = preview.terms.filter((term) => term.isCustom);
+  // Rows the user unticked: these words leave the computer as they are
+  const asWritten = automatic.filter((term) => !term.isMasked).length;
+  const messageCount = preview.calls.length;
 
   return (
     <Dialog
@@ -287,7 +311,10 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
       aria-labelledby="send-to-ai-title"
     >
       <DialogTitle id="send-to-ai-title">
-        Send to {provider.recipient}?
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <AiIcon />
+          Send to {provider.recipient}?
+        </Box>
         <Typography variant="body2" color="text.secondary">
           {request.scope}. {provider.detail} Check the text below, hide anything
           private, then send.{" "}
@@ -300,6 +327,11 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
             How does this work?
           </Button>
         </Typography>
+        {provider.warning && (
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            {provider.warning}
+          </Alert>
+        )}
       </DialogTitle>
       <DialogContent dividers>
         <Box
@@ -338,19 +370,20 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
               </Typography>
               {isLoading && <CircularProgress size={16} />}
               <Box sx={{ flex: 1 }} />
-              <FormControlLabel
-                sx={{ m: 0, flexShrink: 0, whiteSpace: "nowrap" }}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={isRaw}
-                    onChange={(event) => setIsRaw(event.target.checked)}
-                  />
-                }
-                label={
-                  <Typography variant="caption">Show exact text</Typography>
-                }
-              />
+              <ToggleButtonGroup
+                exclusive
+                size="small"
+                aria-label="How the text is shown"
+                value={isRaw ? "exact" : "readable"}
+                onChange={(_event, next: "readable" | "exact" | null) => {
+                  if (next !== null) {
+                    setIsRaw(next === "exact");
+                  }
+                }}
+              >
+                <ToggleButton value="readable">Readable</ToggleButton>
+                <ToggleButton value="exact">Exact text</ToggleButton>
+              </ToggleButtonGroup>
             </Box>
             {/* The kinds sit on their own line (always there, so nothing jumps when text is
                 selected); if they are wider than the panel only this line scrolls sideways */}
@@ -510,6 +543,43 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
                   />
                 ))
               )}
+              <Box sx={{ display: "flex", gap: 0.75, mt: 0.75 }}>
+                <TextField
+                  size="small"
+                  label="Hide a word or phrase"
+                  value={typedMask}
+                  onChange={(event) => setTypedMask(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addTyped();
+                    }
+                  }}
+                  sx={{ flex: 1, minWidth: 0 }}
+                />
+                <TextField
+                  select
+                  size="small"
+                  label="As"
+                  value={typedKind}
+                  onChange={(event) =>
+                    setTypedKind(event.target.value as MaskKind)
+                  }
+                  sx={{ width: 120 }}
+                >
+                  {MASK_KINDS.map((kind) => (
+                    <MenuItem key={kind} value={kind}>
+                      {KIND_LABELS[kind]}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <Button
+                  disabled={typedMask.trim().length < MIN_SELECTION_LENGTH}
+                  onClick={addTyped}
+                >
+                  Hide
+                </Button>
+              </Box>
               <FormControlLabel
                 sx={{ mt: 0.5 }}
                 control={
@@ -523,7 +593,7 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
                 }
                 label={
                   <Typography variant="body2">
-                    Remember my own masks next time
+                    Remember my own masks next time (kept on this device)
                   </Typography>
                 }
               />
@@ -606,12 +676,32 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
           </Box>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3 }}>
+      <DialogActions sx={{ px: 3, flexWrap: "wrap", gap: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 220 }}>
+          <Typography variant="caption" color="text.secondary">
+            Nothing leaves your computer until you press Send.
+            {messageCount > 1 && provider.isOnline
+              ? ` ${messageCount} messages go out one after another; a free tier's limits may slow this down.`
+              : ""}
+          </Typography>
+          {asWritten > 0 && (
+            <Typography
+              variant="caption"
+              role="status"
+              sx={{ display: "block", fontWeight: 600, color: "var(--wrt)" }}
+            >
+              Sends {asWritten} {asWritten === 1 ? "item" : "items"} as written
+              because they are unticked.
+            </Typography>
+          )}
+        </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button onClick={() => resolve(null)}>Cancel</Button>
-          <Button variant="contained" disabled={isLoading} onClick={send}>
-            Send to {provider.recipient}
-          </Button>
+          <AiButton variant="contained" disabled={isLoading} onClick={send}>
+            {messageCount > 1
+              ? `Send ${messageCount} messages to ${provider.recipient}`
+              : `Send to ${provider.recipient}`}
+          </AiButton>
         </Box>
       </DialogActions>
     </Dialog>
