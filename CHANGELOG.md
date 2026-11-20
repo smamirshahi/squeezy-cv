@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-19
+
+### Added
+
+- AI settings: a task can use its own model, not only its own provider. Pick a task in the AI settings and fill "Model for this task" (empty uses the provider's model; the hint shows what that is). The model is saved with the choice, shown in the task list, and forgotten when the task switches provider. Works in server and browser mode; old settings files still load (#538).
+
 ## [0.14.0] - 2026-11-19
 
 ### Added
@@ -524,7 +530,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.2...v0.14.0
 [0.13.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.13.0...v0.13.1

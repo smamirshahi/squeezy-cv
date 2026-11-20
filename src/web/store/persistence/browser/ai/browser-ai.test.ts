@@ -174,6 +174,37 @@ describe("AI in the browser", () => {
   });
 });
 
+describe("A model for one task in the browser", () => {
+  it("saves the model with the choice, shows it in the status and calls that model for that task only", async () => {
+    writeBrowserAiKeys({ gemini: "gk" });
+    const put = await local("/api/ai/choice", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ models: { tailor: "gemini-task-model" } }),
+    });
+    expect(put.status).toBe(200);
+    const status = await (await local("/api/ai/status")).json();
+    expect(status.models).toEqual({ tailor: "gemini-task-model" });
+    expect(
+      status.providers.find((p: { id: string }) => p.id === "gemini")
+        .defaultModel
+    ).toBe("gemini-3.8-flash");
+
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(() =>
+        Promise.resolve(new Response("{}", { status: 500 }))
+      );
+    await post("/api/ai/analyse", { jobAd: "We need a React developer" });
+    expect(
+      fetchSpy.mock.calls.every(([url]) =>
+        String(url as string).includes("/models/gemini-task-model:")
+      )
+    ).toBe(true);
+    expect(fetchSpy).toHaveBeenCalled();
+  });
+});
+
 describe("Test key", () => {
   it("says to paste a key first, without calling anyone", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");

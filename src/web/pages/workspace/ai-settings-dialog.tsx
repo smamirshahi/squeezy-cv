@@ -12,6 +12,7 @@ import {
   Paper,
   Radio,
   RadioGroup,
+  TextField,
   Typography,
 } from "@components/ui";
 import { CloseOutlined as CloseOutlinedIcon } from "@components/ui/icons";
@@ -125,11 +126,27 @@ function AiSettingsDialog({
         Object.fromEntries(tasks.map((task) => [task, provider]))
       );
       setStatus((current) => (current ? { ...current, choice } : current));
+      // A task that changes provider forgets its model, so read the models again
+      refreshStatus();
     } catch (caught) {
       setError(
         caught instanceof ApiError || caught instanceof Error
           ? caught.message
           : "Could not change the provider."
+      );
+    }
+  }
+
+  async function applyModel(task: AiTask, model: string): Promise<void> {
+    setError("");
+    try {
+      const models = await api.setAiModels({ [task]: model });
+      setStatus((current) => (current ? { ...current, models } : current));
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError || caught instanceof Error
+          ? caught.message
+          : "Could not change the model."
       );
     }
   }
@@ -153,6 +170,14 @@ function AiSettingsDialog({
   )[0]?.[0];
 
   const isChoice = selected !== "setup";
+  const savedModel =
+    selected !== "all" && selected !== "setup"
+      ? (status?.models?.[selected] ?? "")
+      : "";
+  const [modelDraft, setModelDraft] = useState<string>("");
+  useEffect(() => {
+    setModelDraft(savedModel);
+  }, [savedModel, selected]);
   const selectedValue =
     selected === "all"
       ? allValue
@@ -186,7 +211,12 @@ function AiSettingsDialog({
       return {
         id: task,
         label: AI_TASK_LABELS[task],
-        value: status && current ? providerLabel(status, current) : undefined,
+        value:
+          status && current
+            ? `${providerLabel(status, current)}${
+                status.models?.[task] ? ` · ${status.models[task]}` : ""
+              }`
+            : undefined,
         note:
           status && allValue === MIXED && current !== commonProvider
             ? "Overridden"
@@ -505,6 +535,44 @@ function AiSettingsDialog({
                   />
                 ))}
               </RadioGroup>
+              {selected !== "all" && selectedInfo?.isConfigured && (
+                <Box sx={{ mt: 1, mb: 1.5 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Model for this task"
+                    placeholder={`Provider default (${
+                      providers.find((p) => p.id === selectedInfo.id)
+                        ?.defaultModel ?? "its usual model"
+                    })`}
+                    value={modelDraft}
+                    helperText="Empty uses the provider's model. Applied when you leave the field or press Enter."
+                    onChange={(event) => setModelDraft(event.target.value)}
+                    onBlur={() => {
+                      if (modelDraft.trim() !== savedModel) {
+                        void applyModel(selected, modelDraft);
+                      }
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (modelDraft.trim() !== savedModel) {
+                          void applyModel(selected, modelDraft);
+                        }
+                      }
+                    }}
+                  />
+                  {savedModel && (
+                    <Button
+                      size="small"
+                      sx={{ mt: 0.5 }}
+                      onClick={() => void applyModel(selected, "")}
+                    >
+                      Use the provider default
+                    </Button>
+                  )}
+                </Box>
+              )}
               {selected !== "all" && selectedInfo && (
                 <Typography sx={{ fontSize: 12.5, color: "text.secondary" }}>
                   {destinationText(selected, status, selectedInfo.id)}

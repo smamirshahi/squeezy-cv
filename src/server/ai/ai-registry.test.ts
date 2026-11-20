@@ -110,6 +110,118 @@ describe("AiRegistry", () => {
   });
 });
 
+describe("AiRegistry: a model per task", () => {
+  const claude = new Named("claude");
+  const ollama = new Named("ollama");
+  const built: string[] = [];
+  const support = {
+    clientFor: (provider: string, model: string) => {
+      built.push(`${provider}:${model}`);
+      return new Named(`${provider}:${model}`);
+    },
+    defaultModels: { claude: "claude-default", ollama: "llama-default" },
+  };
+  function make(settings = new MemoryAiSettings()): AiRegistry {
+    built.length = 0;
+    return new AiRegistry({ claude, ollama }, "claude", settings, support);
+  }
+
+  it("uses the provider's own client until a task chooses a model, then a client with that model for that task only", async () => {
+    const registry = make();
+    expect(registry.forTask("hide").client).toBe(claude);
+    await registry.choose({}, { hide: "  claude-small " });
+    expect(registry.models()).toEqual({ hide: "claude-small" });
+    expect((registry.forTask("hide").client as Named).name).toBe(
+      "claude:claude-small"
+    );
+    expect(registry.forTask("chat").client).toBe(claude);
+    // the same model builds its client once
+    registry.forTask("hide");
+    expect(built).toEqual(["claude:claude-small"]);
+  });
+
+  it("goes back to the provider's model with an empty name", async () => {
+    const registry = make();
+    await registry.choose({}, { hide: "m" });
+    await registry.choose({}, { hide: " " });
+    expect(registry.models()).toEqual({});
+    expect(registry.forTask("hide").client).toBe(claude);
+  });
+
+  it("forgets a task's model when its provider changes, but keeps it when the provider stays", async () => {
+    const registry = make();
+    await registry.choose({}, { hide: "m", chat: "n" });
+    await registry.choose({ hide: "claude" });
+    expect(registry.models()).toEqual({ hide: "m", chat: "n" });
+    await registry.choose({ hide: "ollama" });
+    expect(registry.models()).toEqual({ chat: "n" });
+    expect(registry.forTask("hide").client).toBe(ollama);
+  });
+
+  it("takes a provider and a model for the same task in one change", async () => {
+    const registry = make();
+    await registry.choose({ hide: "ollama" }, { hide: "llama3.2" });
+    expect((registry.forTask("hide").client as Named).name).toBe(
+      "ollama:llama3.2"
+    );
+  });
+
+  it("remembers models next to the choice, and reads them back", async () => {
+    const settings = new MemoryAiSettings();
+    await make(settings).choose({ chat: "ollama" }, { chat: "llama3.2" });
+    expect(settings.saved?.models).toEqual({ chat: "llama3.2" });
+    expect(settings.saved?.chat).toBe("ollama");
+    const again = make(settings);
+    await again.load();
+    expect(again.models()).toEqual({ chat: "llama3.2" });
+  });
+
+  it("loads an old settings file that has no models", async () => {
+    const settings = new MemoryAiSettings();
+    settings.saved = { tailor: "ollama" };
+    const registry = make(settings);
+    await registry.load();
+    expect(registry.models()).toEqual({});
+    expect(registry.forTask("tailor").provider).toBe("ollama");
+  });
+
+  it("ignores a saved model whose task no longer uses the saved provider", async () => {
+    const settings = new MemoryAiSettings();
+    settings.saved = { tailor: "gemini", models: { tailor: "x" } };
+    const registry = make(settings);
+    await registry.load();
+    expect(registry.models()).toEqual({});
+  });
+
+  it("refuses an unknown task, a model that is not text or too long, and any model where models are not supported", async () => {
+    const registry = make();
+    await expect(
+      registry.choose({}, { gossip: "m" } as never)
+    ).rejects.toBeInstanceOf(AiChoiceError);
+    await expect(
+      registry.choose({}, { hide: 5 } as never)
+    ).rejects.toBeInstanceOf(AiChoiceError);
+    await expect(
+      registry.choose({}, { hide: "x".repeat(121) })
+    ).rejects.toBeInstanceOf(AiChoiceError);
+    const plain = new AiRegistry({ claude }, "claude");
+    await expect(plain.choose({}, { hide: "m" })).rejects.toThrow(
+      /not available/
+    );
+    expect(registry.models()).toEqual({});
+  });
+
+  it("tells each provider's default model", () => {
+    const providers = make().providers();
+    expect(providers.find((p) => p.id === "claude")?.defaultModel).toBe(
+      "claude-default"
+    );
+    expect(providers.find((p) => p.id === "groq")?.defaultModel).toBe(
+      undefined
+    );
+  });
+});
+
 describe("FileAiSettings", () => {
   let dir: string;
   beforeEach(async () => {
@@ -134,6 +246,11 @@ describe("FileAiSettings", () => {
       hide: "claude",
       chat: "claude",
       place: "claude",
+    });
+    await store.save({ tailor: "claude", models: { tailor: "m" } });
+    expect(await store.load()).toEqual({
+      tailor: "claude",
+      models: { tailor: "m" },
     });
     expect(await readFile(file, "utf8")).not.toContain("KEY");
     await rm(file);
@@ -219,6 +336,55 @@ describe("the AI routes with a registry", () => {
     ).json();
     expect(status.provider).toBe("claude");
     expect(status.choice.hide).toBe("ollama");
+  });
+
+  it("sets a task's model over the route, shows it in the status and calls that model", async () => {
+    const small = new Named("small", { hide: [] });
+    const registryApp = buildServer({
+      storage: new FileCvStorage(dir),
+      aiRegistry: new AiRegistry({ claude }, "claude", new MemoryAiSettings(), {
+        clientFor: () => small,
+        defaultModels: { claude: "claude-default" },
+      }),
+    });
+    const put = await registryApp.inject({
+      method: "PUT",
+      url: "/api/ai/choice",
+      payload: { models: { hide: "claude-small" } },
+    });
+    expect(put.statusCode).toBe(200);
+    expect(put.json().models).toEqual({ hide: "claude-small" });
+    await registryApp.inject({
+      method: "POST",
+      url: "/api/ai/hide",
+      payload: hideBody,
+    });
+    expect(small.calls).toEqual(["pick-hide"]);
+    expect(claude.calls).toEqual([]);
+    const status = (
+      await registryApp.inject({ method: "GET", url: "/api/ai/status" })
+    ).json();
+    expect(status.models).toEqual({ hide: "claude-small" });
+    expect(
+      status.providers.find((p: { id: string }) => p.id === "claude")
+        .defaultModel
+    ).toBe("claude-default");
+    await registryApp.close();
+  });
+
+  it("refuses models that are not an object, or a model when the registry cannot choose one", async () => {
+    const bad = await app.inject({
+      method: "PUT",
+      url: "/api/ai/choice",
+      payload: { models: "x" },
+    });
+    expect(bad.statusCode).toBe(400);
+    const unsupported = await app.inject({
+      method: "PUT",
+      url: "/api/ai/choice",
+      payload: { models: { hide: "m" } },
+    });
+    expect(unsupported.statusCode).toBe(400);
   });
 
   it("has no switch for masking employer and school names any more (#271)", async () => {
