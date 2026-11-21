@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.3] - 2026-11-21
+
+### Changed
+
+- Job Content tab: the Relevancy badges of entries and bullets now sit in their own column at the far right, so they line up (#553).
+
 ## [0.17.2] - 2026-11-21
 
 ### Fixed
@@ -561,7 +567,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...HEAD
+[0.17.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...v0.17.0

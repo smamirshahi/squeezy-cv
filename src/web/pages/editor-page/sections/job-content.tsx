@@ -59,10 +59,10 @@ import {
 import { styleSelector } from "@store/cv-data/cv-data-slice";
 import { sectionsSelector } from "@store/vault/vault-slice";
 
-/** Columns of the table: drag handle, tick, entry, wording, highlight, order buttons */
+/** Columns of the table: drag handle, tick, entry, wording, highlight, order buttons, relevancy (far right, so the badges line up) */
 /** The Wording column only exists while some entry has bullets (otherwise it would only take room) */
 function columnsFor(hasWording: boolean): string {
-  return `32px 32px minmax(0, 1fr) ${hasWording ? "120px" : "0px"} 40px 64px`;
+  return `32px 32px minmax(0, 1fr) ${hasWording ? "120px" : "0px"} 40px 64px 112px`;
 }
 
 /** Inside the Entry cell: title, organisation, dates */
@@ -227,12 +227,6 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                     >
                       {bullet.text}
                     </Typography>
-                    {choice?.relevance !== undefined && (
-                      <RelevanceBadge
-                        relevance={choice.relevance}
-                        reason={choice.relevanceReason}
-                      />
-                    )}
                   </Box>
                   <Box>
                     {wordings.length > 1 && (
@@ -279,6 +273,14 @@ function BulletRows({ item, isDimmed }: BulletRowsProps): JSX.Element {
                     }
                     isLastEntity={index === bullets.length - 1}
                   />
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    {choice?.relevance !== undefined && (
+                      <RelevanceBadge
+                        relevance={choice.relevance}
+                        reason={choice.relevanceReason}
+                      />
+                    )}
+                  </Box>
                 </Box>
               )}
             </SortableRow>
@@ -332,6 +334,9 @@ function ColumnHeader({
         sx={{ fontSize: 16, justifySelf: "center" }}
       />
       <span />
+      <Box component="span" sx={{ justifySelf: "end" }}>
+        Relevancy
+      </Box>
     </Box>
   );
 }
@@ -505,14 +510,6 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                                 {label}
                               </Typography>
                             </Box>
-                            {selection?.relevance !== undefined && (
-                              <Box sx={{ ml: 1 }}>
-                                <RelevanceBadge
-                                  relevance={selection.relevance}
-                                  reason={selection.relevanceReason}
-                                />
-                              </Box>
-                            )}
                             {itemBullets.length > 0 && (
                               <Typography
                                 sx={{
@@ -601,6 +598,16 @@ function SectionRows({ section, isOn }: SectionRowsProps): JSX.Element {
                           }
                           isLastEntity={index === items.length - 1}
                         />
+                        <Box
+                          sx={{ display: "flex", justifyContent: "flex-end" }}
+                        >
+                          {selection?.relevance !== undefined && (
+                            <RelevanceBadge
+                              relevance={selection.relevance}
+                              reason={selection.relevanceReason}
+                            />
+                          )}
+                        </Box>
                       </Box>
                       {isOpen && hasParts && (
                         <ItemParts
