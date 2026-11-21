@@ -3,7 +3,6 @@ import { notify } from "@components/notifications/notify";
 import { AppliedElsewhereDialog } from "@pages/workspace/applied-elsewhere-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
-import { SavedForLaterMenu } from "@pages/workspace/saved-for-later-menu";
 import { SponsorshipCheck } from "@pages/workspace/sponsorship-check";
 import { useSavedForLater } from "@pages/workspace/use-saved-for-later";
 import { ChangeEvent, ReactNode, useMemo, useRef, useState } from "react";
@@ -284,8 +283,6 @@ export function JobDetailsPage(): JSX.Element {
   const [note, setNote] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isReading, setIsReading] = useState<boolean>(false);
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [justSavedId, setJustSavedId] = useState<string>("");
   const [isApplying, setIsApplying] = useState<boolean>(false);
   const parkedEntry = job
     ? parked.open.find((entry) => entry.jobId === job.id)
@@ -341,15 +338,16 @@ export function JobDetailsPage(): JSX.Element {
       const existing = parked.open.find((entry) => entry.jobId === job.id);
       if (existing) {
         await parked.change(existing.id, fields);
-        setJustSavedId(existing.id);
       } else {
-        const saved = await parked.save({ ...fields, jobId: job.id });
-        setJustSavedId(saved.id);
+        await parked.save({ ...fields, jobId: job.id });
       }
       notify({
         kind: "success",
-        text: "Saved for later as a Candidate. Find it any time in Saved for later at the top of this page, or in Applications.",
-        action: { label: "View list", onClick: () => setIsMenuOpen(true) },
+        text: "Saved for later as a Candidate. Find it any time in Applications.",
+        action: {
+          label: "View list",
+          href: "/applications?status=candidate",
+        },
       });
       // the form is ready for the next job
       createAnother();
@@ -378,7 +376,7 @@ export function JobDetailsPage(): JSX.Element {
     }
     const clearedId = job.id;
     const where = parkedEntry
-      ? "in Saved for later"
+      ? "in Applications as a Candidate"
       : "in Applications as a Draft";
     createAnother();
     notify({
@@ -672,13 +670,6 @@ export function JobDetailsPage(): JSX.Element {
             </Help>
           )}
         </Box>
-        <SavedForLaterMenu
-          candidates={parked.open}
-          justSavedId={justSavedId}
-          isOpen={isMenuOpen}
-          onOpenChange={setIsMenuOpen}
-          onContinue={(candidate) => void parked.continueWith(candidate)}
-        />
         <Button
           variant="outlined"
           color="neutral"

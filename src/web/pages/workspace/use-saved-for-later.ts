@@ -5,12 +5,6 @@ import {
   NewCandidate,
 } from "@custom-types/candidate-types";
 import { createApiClient } from "@store/persistence/api-client";
-import {
-  openCandidateJob,
-  useContinueCandidate,
-} from "@pages/candidates-page/use-continue-candidate";
-import { jobsSelector } from "@store/jobs/jobs-slice";
-import { useAppSelector } from "@store/store-helper";
 
 /**
  * The jobs parked with "Save for later" (candidates that are still open), with the actions the
@@ -21,11 +15,8 @@ export function useSavedForLater(): {
   error: string;
   save: (input: NewCandidate) => Promise<Candidate>;
   change: (id: string, patch: CandidatePatch) => Promise<void>;
-  continueWith: (candidate: Candidate) => Promise<void>;
 } {
   const api = useMemo(() => createApiClient(), []);
-  const jobs = useAppSelector(jobsSelector);
-  const continueCandidate = useContinueCandidate();
   const [open, setOpen] = useState<Candidate[]>([]);
   const [error, setError] = useState<string>("");
 
@@ -58,18 +49,5 @@ export function useSavedForLater(): {
     await run(() => api.updateCandidate(id, patch));
   }
 
-  async function continueWith(candidate: Candidate): Promise<void> {
-    // saved from a job that still exists: open that one instead of making a second one
-    const isExisting = jobs.some((job) => job.id === candidate.jobId);
-    const jobId =
-      isExisting && candidate.jobId
-        ? candidate.jobId
-        : continueCandidate(candidate);
-    await run(() =>
-      api.updateCandidate(candidate.id, { status: "started", jobId })
-    );
-    openCandidateJob(jobId);
-  }
-
-  return { open, error, save, change, continueWith };
+  return { open, error, save, change };
 }
