@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.5] - 2026-11-21
+
+### Changed
+
+- Applications (#557): deleting an application is now easy to find. Each application row in the list has a delete icon (with a confirmation), and in an application's detail view the Delete button sits at the top next to the status instead of at the very bottom.
+
 ## [0.17.4] - 2026-11-21
 
 ### Changed
@@ -573,7 +579,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.5...HEAD
+[0.17.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...v0.17.5
 [0.17.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...v0.17.4
 [0.17.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...v0.17.2

@@ -18,6 +18,7 @@ import {
   TextField,
   Typography,
 } from "@components/ui";
+import { DeleteOutlined as DeleteIcon } from "@components/ui/icons";
 import { DATE_FIELD_SLOT_PROPS } from "@pages/applications-page/date-field";
 import { nanoid } from "@reduxjs/toolkit";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -315,6 +316,14 @@ export function ApplicationView({
           }}
         >
           {hasNoReply && <Chip label="No reply" color="warning" />}
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => setIsDeleting(true)}
+          >
+            Delete
+          </Button>
           <TextField
             select
             size="small"
@@ -492,12 +501,6 @@ export function ApplicationView({
           Save notes
         </Button>
       </Paper>
-
-      <Box>
-        <Button color="error" onClick={() => setIsDeleting(true)}>
-          Delete this application
-        </Button>
-      </Box>
 
       <Dialog
         open={nextStatus !== null}
