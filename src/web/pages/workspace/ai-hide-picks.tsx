@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Checkbox, Typography } from "@components/ui";
+import { Alert, Box, Button, IconButton, Typography } from "@components/ui";
+import {
+  VisibilityOffOutlined as VisibilityOffIcon,
+  VisibilityOutlined as VisibilityIcon,
+} from "@components/ui/icons";
 import { AiButton } from "@components/ai-button";
 import { useHideCandidates } from "@pages/workspace/hide-to-fit";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -15,7 +19,7 @@ import { useAppDispatch, useAppSelector } from "@store/store-helper";
 
 /**
  * "Ask AI to pick what to hide", with the answer shown right here: the items it would hide, each
- * with the lines it saves and its reason, ticked and ready to change. Only "Hide ticked" changes
+ * with the lines it saves and its reason, each with an eye (crossed eye = will be hidden, open eye = kept). Only "Hide" changes
  * the job (one undo step); the vault is never touched.
  */
 export function AiHidePicks({
@@ -156,33 +160,49 @@ export function AiHidePicks({
           <Typography sx={{ fontSize: 12.5, fontWeight: 600 }}>
             The AI would hide the following {picks.length}{" "}
             {picks.length === 1 ? "item" : "items"}. To keep{" "}
-            {picks.length === 1 ? "it" : "any of them"}, untick its checkbox.
+            {picks.length === 1 ? "it" : "any of them"}, click its eye to keep
+            it visible.
           </Typography>
           {rows.map(({ itemId, reason, candidate }) => (
             <Box
               key={itemId}
               sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}
             >
-              <Checkbox
+              <IconButton
                 size="small"
                 color="secondary"
-                checked={ticked.includes(itemId)}
-                slotProps={{
-                  input: {
-                    "aria-label": `Hide ${candidate?.label ?? "this item"}`,
-                  },
-                }}
-                onChange={(event) =>
+                aria-pressed={ticked.includes(itemId)}
+                aria-label={`${ticked.includes(itemId) ? "Keep" : "Hide"} ${candidate?.label ?? "this item"}`}
+                title={
+                  ticked.includes(itemId)
+                    ? "Will be hidden. Click to keep it visible."
+                    : "Stays visible. Click to hide it."
+                }
+                onClick={() =>
                   setAnswer({
                     picks,
-                    ticked: event.target.checked
-                      ? [...ticked, itemId]
-                      : ticked.filter((id) => id !== itemId),
+                    ticked: ticked.includes(itemId)
+                      ? ticked.filter((id) => id !== itemId)
+                      : [...ticked, itemId],
                   })
                 }
-              />
+              >
+                {ticked.includes(itemId) ? (
+                  <VisibilityOffIcon fontSize="small" />
+                ) : (
+                  <VisibilityIcon fontSize="small" />
+                )}
+              </IconButton>
               <Box sx={{ pt: 0.75, minWidth: 0, flex: 1 }}>
-                <Typography sx={{ fontSize: 13 }}>
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    textDecoration: ticked.includes(itemId)
+                      ? "line-through"
+                      : "none",
+                    opacity: ticked.includes(itemId) ? 0.7 : 1,
+                  }}
+                >
                   {candidate?.label ?? itemId}
                   {candidate && (
                     <Box
@@ -215,7 +235,7 @@ export function AiHidePicks({
             <Typography
               sx={{ flex: 1, fontSize: 12, color: WORKSPACE_COLORS.muted }}
             >
-              Hiding the ticked items saves {savedLines}{" "}
+              Hiding the crossed-out items saves {savedLines}{" "}
               {savedLines === 1 ? "line" : "lines"}
               {linesOver > 0 ? ` of the ${linesOver} over` : ""}.
             </Typography>
@@ -228,7 +248,7 @@ export function AiHidePicks({
               disabled={ticked.length === 0}
               onClick={hideTicked}
             >
-              Hide ticked ({ticked.length})
+              Hide {ticked.length} {ticked.length === 1 ? "item" : "items"}
             </Button>
           </Box>
         </Box>

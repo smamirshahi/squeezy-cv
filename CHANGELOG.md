@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.4] - 2026-11-21
+
+### Changed
+
+- Ask AI to pick what to hide (#555): each suggested item now has an eye icon instead of a checkbox (crossed eye and struck-through text = will be hidden, open eye = kept), the same way you show and hide items elsewhere; the button reads "Hide N items".
+
 ## [0.17.3] - 2026-11-21
 
 ### Changed
@@ -567,7 +573,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...HEAD
+[0.17.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...v0.17.4
 [0.17.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...v0.17.1
