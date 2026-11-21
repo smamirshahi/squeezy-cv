@@ -9,7 +9,7 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
-## [0.18.0] - 2026-11-21
+## [0.19.0] - 2026-11-21
 
 ### Added
 
@@ -18,6 +18,18 @@ How to release: see "Versioning" in `CLAUDE.md`.
 ### Changed
 
 - AI default models (#551): with a Claude key, "Pick what to hide" and "Place unsorted items" now use Haiku (`claude-haiku-5-5`) and every other task uses Sonnet (`claude-sonnet-5-5`) instead of Opus, which is much cheaper. `ANTHROPIC_MODEL`, the browser model field or a model chosen for one task in AI settings still wins. Claude also thinks less: low effort for sorting and picking, medium for writing and scoring (it was the model's own default, high for Sonnet, before).
+
+## [0.18.0] - 2026-11-21
+
+### Added
+
+- Deleted section (#559): any row in Applications (draft, ready or sent) has a delete icon that moves it to a new **Deleted** filter in the left list instead of removing it. In Deleted, each row can be restored or deleted for good (with a confirmation); deleting again removes it from the app. In an application's detail view Delete sits at the top. Job and application files get an optional `deletedAt` (format version 2, old files open unchanged).
+
+## [0.17.5] - 2026-11-21
+
+### Changed
+
+- Applications (#557): deleting an application is now easy to find. Each application row in the list has a delete icon (with a confirmation), and in an application's detail view the Delete button sits at the top next to the status instead of at the very bottom.
 
 ## [0.17.4] - 2026-11-21
 
@@ -583,8 +595,10 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...HEAD
-[0.18.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...v0.18.0
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...v0.19.0
+[0.18.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.5...v0.18.0
+[0.17.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...v0.17.5
 [0.17.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...v0.17.4
 [0.17.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...v0.17.2

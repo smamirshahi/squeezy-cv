@@ -6,6 +6,11 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Drawer,
   IconButton,
   InputAdornment,
@@ -19,11 +24,13 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@components/ui";
 import {
   CheckOutlined as CheckIcon,
   CloseOutlined as CloseIcon,
+  DeleteOutlined as DeleteIcon,
   ExpandMoreOutlined as ExpandMoreIcon,
   OpenInNewOutlined as OpenInNewIcon,
   SearchOutlined as SearchIcon,
@@ -78,11 +85,12 @@ type Stage = "draft" | "ready";
 
 /** The colour of the dot in front of a status or stage */
 const DOT_COLORS: Record<
-  ApplicationStatus | Stage | "candidate" | "dropped",
+  ApplicationStatus | Stage | "candidate" | "dropped" | "deleted",
   string
 > = {
   candidate: "#7B5EA7",
   dropped: "#9AA0A6",
+  deleted: "#C62828",
   draft: "#9AA0A6",
   ready: "#C2410C",
   applied: "#1976D2",
@@ -97,6 +105,14 @@ const STAGE_LABELS: Record<Stage, string> = {
   draft: "Draft",
   ready: "Ready to apply",
 };
+
+/** A row that can be moved to Deleted, brought back or removed for good */
+interface DeleteTarget {
+  kind: "job" | "application";
+  id: string;
+  /** What the confirmation calls it, e.g. "Acme, Developer" */
+  label: string;
+}
 
 interface Option<T extends string> {
   value: T;
@@ -266,6 +282,11 @@ export function ApplicationsPage(): JSX.Element {
     {}
   );
   const today = toIsoDay(new Date());
+  // The application waiting for "Delete?" confirmation, and a counter that reloads the list
+  const [toDelete, setToDelete] = useState<DeleteTarget | null>(null);
+  // Jobs that were never sent and are in Deleted
+  const [trashedJobs, setTrashedJobs] = useState<JobSummary[]>([]);
+  const [reloads, setReloads] = useState<number>(0);
 
   useEffect(() => {
     let isCancelled = false;
@@ -286,7 +307,11 @@ export function ApplicationsPage(): JSX.Element {
             )
           );
           const sent = new Set(applications.map((a) => a.jobId));
-          setJobs(unsentJobs.filter((j) => !j.isCorrupt && !sent.has(j.id)));
+          const unsent = unsentJobs.filter(
+            (j) => !j.isCorrupt && !sent.has(j.id)
+          );
+          setJobs(unsent.filter((j) => j.deletedAt === undefined));
+          setTrashedJobs(unsent.filter((j) => j.deletedAt !== undefined));
           setState({ status: "ready", applications });
         }
       })
@@ -304,7 +329,7 @@ export function ApplicationsPage(): JSX.Element {
     return () => {
       isCancelled = true;
     };
-  }, [api]);
+  }, [api, reloads]);
 
   // The address keeps the search and filters, so "back" from an application finds them again
   useEffect(() => {
@@ -312,7 +337,87 @@ export function ApplicationsPage(): JSX.Element {
     rememberListSearch(viewToQuery(view));
   }, [view]);
 
-  const readable = state.status === "ready" ? state.applications : [];
+  const everyApplication = state.status === "ready" ? state.applications : [];
+  const readable = everyApplication.filter((a) => a.deletedAt === undefined);
+  const trashedApplications = everyApplication.filter(
+    (a) => a.deletedAt !== undefined
+  );
+
+  /** Delete once: move to Deleted. Everything stays and can be restored. */
+  async function trash(target: DeleteTarget): Promise<void> {
+    setActionError("");
+    try {
+      if (target.kind === "application") {
+        await api.updateApplication(target.id, { isDeleted: true });
+      } else {
+        const job = await api.loadJob(target.id);
+        await api.saveJob({ ...job, deletedAt: new Date().toISOString() });
+      }
+      if (
+        selectedId === target.id ||
+        selectedId === `${JOB_PREFIX}${target.id}`
+      ) {
+        setSelectedId("");
+      }
+      setReloads((count) => count + 1);
+      notify({
+        kind: "info",
+        text: `${target.label} was moved to Deleted.`,
+        action: {
+          label: "Undo",
+          onClick: () => void restore(target),
+        },
+      });
+    } catch (caught) {
+      setActionError(
+        caught instanceof Error ? caught.message : "Something went wrong."
+      );
+    }
+  }
+
+  async function restore(target: DeleteTarget): Promise<void> {
+    setActionError("");
+    try {
+      if (target.kind === "application") {
+        await api.updateApplication(target.id, { isDeleted: false });
+      } else {
+        const { deletedAt: _removed, ...job } = await api.loadJob(target.id);
+        await api.saveJob(job);
+      }
+      setReloads((count) => count + 1);
+    } catch (caught) {
+      setActionError(
+        caught instanceof Error ? caught.message : "Something went wrong."
+      );
+    }
+  }
+
+  /** Delete again from Deleted: gone for good */
+  async function deleteForever(): Promise<void> {
+    if (!toDelete) {
+      return;
+    }
+    setActionError("");
+    try {
+      if (toDelete.kind === "application") {
+        await api.deleteApplication(toDelete.id);
+      } else {
+        await api.deleteJob(toDelete.id);
+      }
+      if (
+        selectedId === toDelete.id ||
+        selectedId === `${JOB_PREFIX}${toDelete.id}`
+      ) {
+        setSelectedId("");
+      }
+      setReloads((count) => count + 1);
+    } catch (caught) {
+      setActionError(
+        caught instanceof Error ? caught.message : "Something went wrong."
+      );
+    }
+    setToDelete(null);
+  }
 
   async function reloadCandidates(): Promise<void> {
     const parked = await api.listCandidates();
@@ -406,9 +511,11 @@ export function ApplicationsPage(): JSX.Element {
   }
 
   const selectedJob = selectedId.startsWith(JOB_PREFIX)
-    ? jobs.find((j) => `${JOB_PREFIX}${j.id}` === selectedId)
+    ? [...jobs, ...trashedJobs].find(
+        (j) => `${JOB_PREFIX}${j.id}` === selectedId
+      )
     : undefined;
-  const selectedApplication = readable.find((a) => a.id === selectedId);
+  const selectedApplication = everyApplication.find((a) => a.id === selectedId);
   const jobOfSelected = allJobs.find(
     (j) => j.id === selectedApplication?.jobId
   );
@@ -529,6 +636,7 @@ export function ApplicationsPage(): JSX.Element {
           jobs={jobs}
           candidateCount={candidates.length}
           droppedCount={dropped.length}
+          deletedCount={trashedApplications.length + trashedJobs.length}
           status={view.status}
           today={today}
           onChange={(status) => setView({ ...view, status })}
@@ -567,8 +675,9 @@ export function ApplicationsPage(): JSX.Element {
 
           {state.status === "ready" && (
             <ApplicationsTable
-              applications={state.applications}
+              applications={everyApplication}
               jobs={jobs}
+              trashedJobs={trashedJobs}
               candidates={candidates}
               dropped={dropped}
               onRestore={(candidate) => void moveCandidate(candidate, "open")}
@@ -577,6 +686,9 @@ export function ApplicationsPage(): JSX.Element {
               onDelete={(candidate) =>
                 void runCandidateAction(() => api.deleteCandidate(candidate.id))
               }
+              onTrash={(target) => void trash(target)}
+              onRestoreItem={(target) => void restore(target)}
+              onDeleteForever={setToDelete}
               view={view}
               onViewChange={setView}
               today={today}
@@ -613,6 +725,21 @@ export function ApplicationsPage(): JSX.Element {
           </ResizableAside>
         )}
       </Box>
+      <Dialog open={toDelete !== null} onClose={() => setToDelete(null)}>
+        <DialogTitle>Delete for good?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {toDelete?.label} will be removed from the app for good. This cannot
+            be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setToDelete(null)}>Cancel</Button>
+          <Button color="error" onClick={() => void deleteForever()}>
+            Delete forever
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
@@ -829,6 +956,7 @@ interface SidebarProps {
   jobs: JobSummary[];
   candidateCount: number;
   droppedCount: number;
+  deletedCount: number;
   status: ListView["status"];
   today: string;
   onChange: (status: ListView["status"]) => void;
@@ -846,6 +974,7 @@ function CategoriesSidebar({
   jobs,
   candidateCount,
   droppedCount,
+  deletedCount,
   status,
   today,
   onChange,
@@ -893,6 +1022,12 @@ function CategoriesSidebar({
           },
         ]
       : []),
+    {
+      title: "Deleted",
+      tiles: [
+        { key: "deleted" as const, label: "Deleted", count: deletedCount },
+      ],
+    },
     // Nothing needs a nudge: the group stays out of the way
     ...(noReply > 0
       ? [
@@ -1060,6 +1195,10 @@ interface TableProps {
   onContinue: (candidate: Candidate) => void;
   onDrop: (candidate: Candidate) => void;
   onDelete: (candidate: Candidate) => void;
+  trashedJobs: JobSummary[];
+  onTrash: (target: DeleteTarget) => void;
+  onRestoreItem: (target: DeleteTarget) => void;
+  onDeleteForever: (target: DeleteTarget) => void;
   view: ListView;
   onViewChange: (view: ListView) => void;
   today: string;
@@ -1080,6 +1219,10 @@ function ApplicationsTable({
   onContinue,
   onDrop,
   onDelete,
+  trashedJobs,
+  onTrash,
+  onRestoreItem,
+  onDeleteForever,
   view,
   onViewChange,
   today,
@@ -1103,19 +1246,24 @@ function ApplicationsTable({
 
   // Jobs and applications in one list, newest first (or as chosen)
   const query = view.query.trim().toLowerCase();
-  const unsent = jobs.filter((job) => {
-    const stage = job.stage ?? "draft";
-    return (
-      (view.status === "all" || view.status === stage) &&
-      (query === "" ||
-        [
-          job.name,
-          job.company ?? "",
-          job.role ?? "",
-          templateNames[job.templateId] ?? "",
-        ].some((text) => text.toLowerCase().includes(query)))
-    );
-  });
+  const matchesQuery = (job: JobSummary): boolean =>
+    query === "" ||
+    [
+      job.name,
+      job.company ?? "",
+      job.role ?? "",
+      templateNames[job.templateId] ?? "",
+    ].some((text) => text.toLowerCase().includes(query));
+  const unsent =
+    view.status === "deleted"
+      ? trashedJobs.filter(matchesQuery)
+      : jobs.filter((job) => {
+          const stage = job.stage ?? "draft";
+          return (
+            (view.status === "all" || view.status === stage) &&
+            matchesQuery(job)
+          );
+        });
   const sent = arrangeApplications([...applications], view, today);
   const parked = candidates.filter(
     (candidate) =>
@@ -1227,7 +1375,9 @@ function ApplicationsTable({
             </MenuItem>
           ))}
         </Select>
-        <ExportAllButton count={applications.length} />
+        <ExportAllButton
+          count={applications.filter((a) => a.deletedAt === undefined).length}
+        />
       </Box>
 
       <Paper
@@ -1388,6 +1538,23 @@ function ApplicationsTable({
               const company =
                 job?.company || job?.name || application?.company || "-";
               const role = job?.role || application?.role || "-";
+              const isTrashed =
+                (job?.deletedAt ?? application?.deletedAt) !== undefined;
+              const target: DeleteTarget | undefined = job
+                ? {
+                    kind: "job",
+                    id: job.id,
+                    label: [company, role].filter((x) => x !== "-").join(", "),
+                  }
+                : application
+                  ? {
+                      kind: "application",
+                      id: application.id,
+                      label: [company, role]
+                        .filter((x) => x !== "-")
+                        .join(", "),
+                    }
+                  : undefined;
               const template = job
                 ? templateOf(job.templateId, job.id)
                 : templateOf(
@@ -1505,13 +1672,51 @@ function ApplicationsTable({
                       </Typography>
                     )}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     {jobsById.has(jobId) ? (
                       <OpenJobButton
                         jobId={jobId}
                         label={job?.name || application?.jobName || company}
                       />
                     ) : null}
+                    {target &&
+                      (isTrashed ? (
+                        <>
+                          <Button
+                            size="small"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onRestoreItem(target);
+                            }}
+                          >
+                            Restore
+                          </Button>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDeleteForever(target);
+                            }}
+                          >
+                            Delete forever
+                          </Button>
+                        </>
+                      ) : (
+                        <Tooltip title="Move to Deleted">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            aria-label={`Delete ${target.label}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onTrash(target);
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ))}
                   </TableCell>
                 </TableRow>
               );

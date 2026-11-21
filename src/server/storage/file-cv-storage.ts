@@ -447,6 +447,7 @@ export class FileCvStorage implements CvStorage {
       ...(job.company === undefined ? {} : { company: job.company }),
       ...(job.role === undefined ? {} : { role: job.role }),
       ...(job.stage === undefined ? {} : { stage: job.stage }),
+      ...(job.deletedAt === undefined ? {} : { deletedAt: job.deletedAt }),
       createdAt: job.createdAt,
       isCorrupt: false,
     };

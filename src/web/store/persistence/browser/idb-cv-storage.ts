@@ -253,6 +253,7 @@ export class IdbCvStorage implements CvStorage {
       ...(job.company ? { company: job.company } : {}),
       ...(job.role ? { role: job.role } : {}),
       ...(job.stage ? { stage: job.stage } : {}),
+      ...(job.deletedAt ? { deletedAt: job.deletedAt } : {}),
       createdAt: job.createdAt,
       isCorrupt: false,
     };

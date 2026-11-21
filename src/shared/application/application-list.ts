@@ -20,7 +20,8 @@ export interface ListView {
     | "draft"
     | "ready"
     | "candidate"
-    | "dropped";
+    | "dropped"
+    | "deleted";
   sortKey: SortKey;
   sortDirection: SortDirection;
 }
@@ -57,7 +58,13 @@ export function arrangeApplications(
     if (application.isCorrupt) {
       return true;
     }
-    if (view.status === "noReply") {
+    // Deleted ones show only in the Deleted section
+    if ((application.deletedAt !== undefined) !== (view.status === "deleted")) {
+      return false;
+    }
+    if (view.status === "deleted") {
+      // nothing more to filter by status
+    } else if (view.status === "noReply") {
       if (today === undefined || !isNoReply(application, today)) {
         return false;
       }
@@ -174,7 +181,8 @@ export function queryToView(search: string): ListView {
       status === "draft" ||
       status === "ready" ||
       status === "candidate" ||
-      status === "dropped"
+      status === "dropped" ||
+      status === "deleted"
         ? status
         : (APPLICATION_STATUSES.find((s) => s === status) ?? "all"),
     sortKey: sort === "company" || sort === "appliedAt" ? sort : "appliedAt",

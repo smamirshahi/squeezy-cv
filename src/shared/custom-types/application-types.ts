@@ -22,7 +22,7 @@ import {
 } from "@custom-types/vault-types";
 
 /** The current version of the application format. Bump it together with a migration. */
-export const CURRENT_APPLICATION_VERSION = 1;
+export const CURRENT_APPLICATION_VERSION = 2;
 
 /** Application ids become folder names, so only these characters are allowed */
 export const APPLICATION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -120,6 +120,9 @@ export const ApplicationSchema = Object({
   /** Format version of the application */
   version: Number,
 
+  /** When the application was moved to Deleted (ISO time). Missing = not deleted. */
+  deletedAt: String.optional(),
+
   company: String,
   role: String,
   jobUrl: String.optional(),
@@ -182,6 +185,9 @@ export const ApplicationPatchSchema = Object({
   notes: String.optional(),
   status: ApplicationStatusSchema.optional(),
 
+  /** true moves it to Deleted, false brings it back (the timeline is not touched) */
+  isDeleted: Boolean.optional(),
+
   /** Day of the status change. Defaults to today. */
   statusAt: String.optional(),
   statusNote: String.optional(),
@@ -210,5 +216,8 @@ export interface ApplicationSummary {
 
   /** Day of the latest status change */
   updatedAt: string;
+
+  /** When it was moved to Deleted (missing = not deleted) */
+  deletedAt?: string;
   isCorrupt: boolean;
 }
