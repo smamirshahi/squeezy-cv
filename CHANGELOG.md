@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.19.1] - 2026-11-21
+
+### Added
+
+- AI price check (#562): once a month a GitHub Action reads the providers' price pages and, when a model's price is no longer shown there, opens one issue (label `ai-prices`) so the price list gets updated; nothing changes by itself. `pnpm exec tsx scripts/check-ai-prices.ts` runs the same check by hand.
+
 ## [0.19.0] - 2026-11-21
 
 ### Added
@@ -595,7 +601,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...HEAD
+[0.19.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.5...v0.18.0
 [0.17.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...v0.17.5
