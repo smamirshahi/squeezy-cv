@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.19.2] - 2026-11-21
+
+### Changed
+
+- Applications (#564): the first delete (the icon in a list row, and the Delete button of an application) now asks "Move to Deleted?" before moving it, like deleting for good does; the delete icon in the list rows is grey like the open-in-new-tab icon next to it.
+
 ## [0.19.1] - 2026-11-21
 
 ### Added
@@ -601,7 +607,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...HEAD
+[0.19.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...v0.19.2
 [0.19.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.5...v0.18.0

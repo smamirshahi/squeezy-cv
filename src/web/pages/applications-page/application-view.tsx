@@ -84,6 +84,7 @@ export function ApplicationView({
   const [statusDay, setStatusDay] = useState<string>("");
   const [statusNote, setStatusNote] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isTrashing, setIsTrashing] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>("");
   const [isPdfStoredMissing, setIsPdfMissing] = useState<boolean>(false);
   const cvFrame = useRef<HTMLIFrameElement | null>(null);
@@ -355,7 +356,7 @@ export function ApplicationView({
               variant="outlined"
               color="error"
               startIcon={<DeleteIcon />}
-              onClick={() => void moveToDeleted()}
+              onClick={() => setIsTrashing(true)}
             >
               Delete
             </Button>
@@ -579,6 +580,32 @@ export function ApplicationView({
             onClick={() => void confirmStatus()}
           >
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={isTrashing}
+        onClose={() => setIsTrashing(false)}
+        fullScreen={isPhone}
+      >
+        <DialogTitle>Move to Deleted?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {application.company}, {application.role} will move to Deleted. You
+            can restore it from there, or delete it for good.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsTrashing(false)}>Cancel</Button>
+          <Button
+            color="error"
+            onClick={() => {
+              setIsTrashing(false);
+              void moveToDeleted();
+            }}
+          >
+            Move to Deleted
           </Button>
         </DialogActions>
       </Dialog>

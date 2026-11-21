@@ -284,6 +284,8 @@ export function ApplicationsPage(): JSX.Element {
   const today = toIsoDay(new Date());
   // The application waiting for "Delete?" confirmation, and a counter that reloads the list
   const [toDelete, setToDelete] = useState<DeleteTarget | null>(null);
+  // The row waiting for "Move to Deleted?" confirmation
+  const [toTrash, setToTrash] = useState<DeleteTarget | null>(null);
   // Jobs that were never sent and are in Deleted
   const [trashedJobs, setTrashedJobs] = useState<JobSummary[]>([]);
   const [reloads, setReloads] = useState<number>(0);
@@ -686,7 +688,7 @@ export function ApplicationsPage(): JSX.Element {
               onDelete={(candidate) =>
                 void runCandidateAction(() => api.deleteCandidate(candidate.id))
               }
-              onTrash={(target) => void trash(target)}
+              onTrash={setToTrash}
               onRestoreItem={(target) => void restore(target)}
               onDeleteForever={setToDelete}
               view={view}
@@ -725,6 +727,29 @@ export function ApplicationsPage(): JSX.Element {
           </ResizableAside>
         )}
       </Box>
+      <Dialog open={toTrash !== null} onClose={() => setToTrash(null)}>
+        <DialogTitle>Move to Deleted?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {toTrash?.label} will move to Deleted. You can restore it from
+            there, or delete it for good.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setToTrash(null)}>Cancel</Button>
+          <Button
+            color="error"
+            onClick={() => {
+              if (toTrash) {
+                void trash(toTrash);
+              }
+              setToTrash(null);
+            }}
+          >
+            Move to Deleted
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog open={toDelete !== null} onClose={() => setToDelete(null)}>
         <DialogTitle>Delete for good?</DialogTitle>
         <DialogContent>
@@ -1706,7 +1731,6 @@ function ApplicationsTable({
                         <Tooltip title="Move to Deleted">
                           <IconButton
                             size="small"
-                            color="error"
                             aria-label={`Delete ${target.label}`}
                             onClick={(event) => {
                               event.stopPropagation();
