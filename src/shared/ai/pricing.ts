@@ -42,7 +42,7 @@ const GEMINI_FLASH_NOW: ModelPrice = {
  * Known models: Claude, Gemini and Groq. A model that is not here has no price (Groq's Llama
  * models are "contact sales"): the app says so and never guesses.
  */
-const MODEL_PRICES: Record<string, ModelPrice> = {
+export const MODEL_PRICES: Record<string, ModelPrice> = {
   "claude-haiku-5-5": { input: 0.1, output: 0.5 },
   "claude-sonnet-5-5": { input: 2, output: 10 },
   "claude-sonnet-5": { input: 2, output: 10 },

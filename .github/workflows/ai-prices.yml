@@ -1,0 +1,47 @@
+name: AI prices
+
+# Once a month (and by hand from the Actions tab): checks the price list in
+# src/shared/ai/pricing.ts against the providers' price pages (#562). When a model is not
+# confirmed or a page cannot be read, it opens one issue labelled "ai-prices" (or adds a
+# comment to the one that is already open). Nothing is changed automatically. Never runs on
+# pull requests, so it uses almost no Actions minutes.
+on:
+  schedule:
+    - cron: "0 7 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check the prices
+        id: check
+        env:
+          REPORT_FILE: ${{ runner.temp }}/ai-prices-report.md
+        run: pnpm exec tsx scripts/check-ai-prices.ts
+        continue-on-error: true
+      - name: Open or update the issue
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT_FILE: ${{ runner.temp }}/ai-prices-report.md
+        run: |
+          gh label create ai-prices --description "AI price list may be out of date" --color fbca04 || true
+          open=$(gh issue list --label ai-prices --state open --json number --jq '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body-file "$REPORT_FILE"
+          else
+            gh issue create --label ai-prices --title "AI prices need a check" --body-file "$REPORT_FILE"
+          fi
