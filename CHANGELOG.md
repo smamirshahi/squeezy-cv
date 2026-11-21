@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-11-21
+
+### Fixed
+
+- Send to AI window: the "Readable" view is now readable. It shows headings, plain lines and bullets ("Software Developer", "Company: [Company 1]", "Start date: Jan 2018") instead of the raw outline with `id: i1`, `fields:` and `bullets: (none)`. "Exact text" still shows what is really sent (#549).
+
 ## [0.17.1] - 2026-11-20
 
 ### Fixed
@@ -555,7 +561,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.2...HEAD
+[0.17.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.15.1...v0.16.0
