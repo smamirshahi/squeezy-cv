@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- Job Content tab: the Relevancy badges of entries and bullets now sit in their own column at the far right, so they line up (#553).
+
 ## [0.17.2] - 2026-11-21
 
 ### Fixed
