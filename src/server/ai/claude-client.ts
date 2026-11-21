@@ -9,6 +9,7 @@ import {
   MessageSender,
 } from "@server/ai/ai-types";
 import { loadPrompt } from "@server/ai/prompts";
+import { effortFor, supportsEffort } from "@shared/ai/providers";
 import {
   PersonalData,
   restore,
@@ -51,14 +52,15 @@ function withScrubbing<T>(
   }
   const data: PersonalData = withDetectedMasks(request.input, personal);
   const warned = new Set<string>();
-  return async (system, messages) => {
+  return async (system, messages, options) => {
     const { map } = scrub("", data);
     function out(text: string): string {
       return scrub(text, data).text;
     }
     const result = await send(
       out(system),
-      messages.map((m) => ({ role: m.role, content: out(m.content) }))
+      messages.map((m) => ({ role: m.role, content: out(m.content) })),
+      options
     );
     const restored = restore(result.text, map, { isForJson: true });
     for (const token of restored.unresolved) {
@@ -92,7 +94,12 @@ export class ClaudeAiClient implements AiClient {
     let lastProblem = "";
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
-      const result = await send(system, messages);
+      const result = await send(system, messages, {
+        effort: effortFor(request.promptName),
+      });
+      if (result.usage) {
+        request.onUsage?.(result.usage);
+      }
       if (result.stopReason === "refusal") {
         throw new AiError("refused", "The model declined this request.");
       }
@@ -130,10 +137,15 @@ export function createAnthropicSender(config: AiConfig): MessageSender {
     // In the browser version the user's own key is used from their own browser (see #449)
     dangerouslyAllowBrowser: typeof window !== "undefined",
   });
-  return async (system, messages) => {
+  return async (system, messages, options) => {
     try {
       const response = await client.messages.create({
         model: config.model,
+        // The model decides how hard to think from this; older models do not take it
+        output_config:
+          options?.effort && supportsEffort(config.model)
+            ? { effort: options.effort }
+            : undefined,
 
         max_tokens: MAX_OUTPUT_TOKENS,
         system,
@@ -152,6 +164,14 @@ export function createAnthropicSender(config: AiConfig): MessageSender {
           reason === "refusal"
             ? reason
             : "other",
+        usage: {
+          // Tokens read from or written to a cache are billed too (differently); the app uses no cache
+          inputTokens:
+            response.usage.input_tokens +
+            (response.usage.cache_creation_input_tokens ?? 0) +
+            (response.usage.cache_read_input_tokens ?? 0),
+          outputTokens: response.usage.output_tokens,
+        },
       };
     } catch (error) {
       if (error instanceof Anthropic.APIConnectionTimeoutError) {

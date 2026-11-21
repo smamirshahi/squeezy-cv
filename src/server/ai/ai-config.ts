@@ -27,6 +27,12 @@ export interface AiConfig {
 
   /** Claude: model id */
   model: string;
+
+  /**
+   * Claude: the model was set on purpose (`ANTHROPIC_MODEL`), so every task uses it. Without it
+   * each task uses its own default (`CLAUDE_TASK_MODELS`, #551).
+   */
+  isModelChosen: boolean;
   timeoutMs: number;
   ollama: OllamaConfig;
   gemini: HostedConfig;
@@ -36,7 +42,8 @@ export interface AiConfig {
   timeouts: Record<AiProvider, number>;
 }
 
-const DEFAULT_MODEL = "claude-opus-5-5";
+// Only used where no task is involved (testing a key) and for a task that has no default of its own
+const DEFAULT_MODEL = "claude-sonnet-5-5";
 const DEFAULT_TIMEOUT_MS = 120_000;
 // A model on an ordinary computer's CPU can need many minutes for a CV
 const DEFAULT_OLLAMA_TIMEOUT_MS = 900_000;
@@ -133,6 +140,7 @@ export function readAiConfig(
     provider,
     apiKey: env.ANTHROPIC_API_KEY?.trim() || undefined,
     model: env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
+    isModelChosen: Boolean(env.ANTHROPIC_MODEL?.trim()),
     timeoutMs: positiveInteger(
       env.AI_TIMEOUT_MS,
       provider === "ollama" ? DEFAULT_OLLAMA_TIMEOUT_MS : DEFAULT_TIMEOUT_MS,

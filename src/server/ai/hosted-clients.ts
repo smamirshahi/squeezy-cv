@@ -65,6 +65,11 @@ interface GeminiResponse {
     finishReason?: string;
   }[];
   promptFeedback?: { blockReason?: string };
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+  };
 }
 
 type StopReason = "end_turn" | "max_tokens" | "refusal" | "other";
@@ -140,14 +145,22 @@ export function createGeminiSender(
     const isBlocked =
       payload.promptFeedback?.blockReason !== undefined ||
       GEMINI_REFUSALS.has(finish);
+    const used = payload.usageMetadata;
     return {
       text,
       stopReason: isBlocked ? "refusal" : geminiStopReason(finish),
+      // Thinking tokens are billed as output and are not part of the candidates' count
+      usage: used && {
+        inputTokens: used.promptTokenCount ?? 0,
+        outputTokens:
+          (used.candidatesTokenCount ?? 0) + (used.thoughtsTokenCount ?? 0),
+      },
     };
   };
 }
 
 interface GroqResponse {
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
   choices?: {
     message?: { content?: string };
 
@@ -183,6 +196,10 @@ export function createGroqSender(
     return {
       text: choice?.message?.content ?? "",
       stopReason: GROQ_STOP_REASONS[finish] ?? "other",
+      usage: payload.usage && {
+        inputTokens: payload.usage.prompt_tokens ?? 0,
+        outputTokens: payload.usage.completion_tokens ?? 0,
+      },
     };
   };
 }

@@ -37,6 +37,23 @@ import {
   writeRememberedMasks,
 } from "@store/persistence/send-gate";
 import { AI_PROVIDER_INFO } from "@shared/ai/providers";
+import {
+  estimateRequestCost,
+  formatTokens,
+  formatUsd,
+  modelLabel,
+} from "@shared/ai/pricing";
+import {
+  SendCostSummary,
+  costSuffix,
+} from "@pages/workspace/send-cost-summary";
+import { ApiError, createApiClient } from "@store/persistence/api-client";
+import { notify } from "@components/notifications/notify";
+import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import {
+  AiUsageEntry,
+  onAiUsageRecorded,
+} from "@store/persistence/ai-usage-log";
 import { toReadableParts } from "@shared/ai/readable-text";
 
 const KIND_LABELS: Record<MaskKind, string> = {
@@ -173,6 +190,20 @@ interface DialogState {
   resolve: (approval: SendApproval | null) => void;
 }
 
+/** The notice after a request: what it used and what that cost */
+function describeUsage(entry: AiUsageEntry): string {
+  const tokens = `${formatTokens(entry.inputTokens)} in / ${formatTokens(entry.outputTokens)} out`;
+  let cost: string;
+  if (entry.costUsd === undefined) {
+    cost = "price unknown";
+  } else if (entry.costUsd === 0) {
+    cost = "free";
+  } else {
+    cost = formatUsd(entry.costUsd);
+  }
+  return `${entry.what}: ${cost} (${tokens}${entry.model ? `, ${modelLabel(entry.model)}` : ""})`;
+}
+
 /**
  * The "Send to AI" step (shown before text goes to an online model): the exact text the model
  * will receive, what was hidden automatically (and a switch for each), a way to hide more by
@@ -196,6 +227,11 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
   const viewer = useRef<HTMLDivElement>(null);
   const latest = useRef(0);
   const provider = AI_PROVIDER_INFO[preview.provider];
+  const api = useMemo(() => createApiClient(), []);
+  const estimate = useMemo(
+    () => estimateRequestCost(preview.provider, preview.model, preview.calls),
+    [preview]
+  );
 
   function change(next: Masking): void {
     setMasking(next);
@@ -215,6 +251,39 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
         if (ticket === latest.current) {
           setError(
             reason instanceof Error ? reason.message : "The preview failed."
+          );
+        }
+      })
+      .finally(() => {
+        if (ticket === latest.current) {
+          setIsLoading(false);
+        }
+      });
+  }
+
+  /** Uses another model for this task from now on, then works the estimate out again */
+  function changeModel(model: string): void {
+    if (!preview.task) {
+      return;
+    }
+    setError("");
+    setIsLoading(true);
+    latest.current += 1;
+    const ticket = latest.current;
+    api
+      .setAiModels({ [preview.task]: model })
+      .then(() => request.refresh(masking))
+      .then((answer) => {
+        if (ticket === latest.current) {
+          setPreview(answer);
+        }
+      })
+      .catch((reason: unknown) => {
+        if (ticket === latest.current) {
+          setError(
+            reason instanceof ApiError || reason instanceof Error
+              ? reason.message
+              : "Could not change the model."
           );
         }
       })
@@ -677,13 +746,13 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, flexWrap: "wrap", gap: 1 }}>
-        <Box sx={{ flex: 1, minWidth: 220 }}>
-          <Typography variant="caption" color="text.secondary">
-            Nothing leaves your computer until you press Send.
-            {messageCount > 1 && provider.isOnline
-              ? ` ${messageCount} messages go out one after another; a free tier's limits may slow this down.`
-              : ""}
-          </Typography>
+        <Box sx={{ flex: 1, minWidth: 260 }}>
+          <SendCostSummary
+            preview={preview}
+            estimate={estimate}
+            isBusy={isLoading}
+            onChangeModel={changeModel}
+          />
           {asWritten > 0 && (
             <Typography
               variant="caption"
@@ -698,9 +767,9 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button onClick={() => resolve(null)}>Cancel</Button>
           <AiButton variant="contained" disabled={isLoading} onClick={send}>
-            {messageCount > 1
-              ? `Send ${messageCount} messages to ${provider.recipient}`
-              : `Send to ${provider.recipient}`}
+            {(messageCount > 1
+              ? `Send ${messageCount} requests to ${provider.recipient}`
+              : `Send to ${provider.recipient}`) + costSuffix(estimate)}
           </AiButton>
         </Box>
       </DialogActions>
@@ -715,6 +784,20 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
 export function SendToAiHost(): JSX.Element | null {
   const [state, setState] = useState<DialogState | null>(null);
   const chain = useRef<Promise<unknown>>(Promise.resolve());
+
+  // After each AI request, say what it cost (the details are in AI settings > Cost and usage)
+  useEffect(
+    () =>
+      onAiUsageRecorded((entry) =>
+        notify({
+          kind: "info",
+          isAi: true,
+          text: describeUsage(entry),
+          action: { label: "Usage", onClick: () => openAiSettings("cost") },
+        })
+      ),
+    []
+  );
 
   useEffect(
     () =>

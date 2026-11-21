@@ -9,6 +9,16 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-21
+
+### Added
+
+- AI cost (#551): the Send to AI window shows the model (with a Change list for this task), the cost in plain words ("About 1 US cent, up to 3 US cents if the answer is long"), a "Why a range?" box that splits what you send from the answer's length, what this month already cost with that provider, and the cost on the Send button ("Send to Anthropic · ~1¢"); after each request a notice says what it really cost (from the token counts the provider reports), and AI settings has a new "Cost and usage" page with this month's total, the price of each task's model and the latest requests (kept in this browser only, with a Clear button). Prices are known for Claude, Gemini and Groq models (Gemini's free tier is noted); Ollama shows "free", any other model "price unknown". The prices say the day they were last checked ("checked 21 Nov 2026"), and a test fails when that date is older than 90 days.
+
+### Changed
+
+- AI default models (#551): with a Claude key, "Pick what to hide" and "Place unsorted items" now use Haiku (`claude-haiku-5-5`) and every other task uses Sonnet (`claude-sonnet-5-5`) instead of Opus, which is much cheaper. `ANTHROPIC_MODEL`, the browser model field or a model chosen for one task in AI settings still wins. Claude also thinks less: low effort for sorting and picking, medium for writing and scoring (it was the model's own default, high for Sonnet, before).
+
 ## [0.18.0] - 2026-11-21
 
 ### Added
@@ -585,7 +595,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.5...v0.18.0
 [0.17.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.4...v0.17.5
 [0.17.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.17.3...v0.17.4

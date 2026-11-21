@@ -172,6 +172,9 @@ export interface AiStatus {
 
   /** The model a task chose; a task that is missing uses its provider's model */
   models?: Partial<Record<AiTask, string>>;
+
+  /** The model each task really uses: its own choice, else the default for the task (#551) */
+  usedModels?: Partial<Record<AiTask, string>>;
 }
 
 /** The provider a task uses and whether it is set up, from a status (older answers have only tailoring's) */

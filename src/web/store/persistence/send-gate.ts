@@ -1,9 +1,17 @@
 import { MASK_KINDS, Masking, MaskTerm } from "@custom-types/masking-types";
-import { AI_PROVIDER_INFO, AiProviderId } from "@shared/ai/providers";
+import { AI_USAGE_HEADER, parseUsageHeader } from "@shared/ai/pricing";
+import { AI_PROVIDER_INFO, AiProviderId, AiTask } from "@shared/ai/providers";
+import { recordAiUsage } from "@store/persistence/ai-usage-log";
 
 /** What the server says it would send: see `SendPreview` in `server/ai/send-preview.ts` */
 export interface SendPreviewData {
   provider: AiProviderId;
+
+  /** The model that would answer (the cost estimate depends on it) */
+  model?: string;
+
+  /** The task the request belongs to (to change its model) */
+  task?: AiTask;
   calls: { promptName: string; system: string; input: string }[];
   terms: MaskTerm[];
   suggestions: string[];
@@ -59,6 +67,20 @@ const GATED: Record<string, { scope: string; hasAdvert: boolean }> = {
     hasAdvert: false,
   },
   "/api/ai/import": { scope: "The whole text you pasted", hasAdvert: false },
+};
+
+/** What each request is called in the usage log */
+const USAGE_LABELS: Record<string, string> = {
+  "/api/ai/analyse": "Analyse a job advert",
+  "/api/ai/score-section": "Score a section",
+  "/api/ai/chat": "Chat edit",
+  "/api/ai/rewrite": "Reword a bullet",
+  "/api/ai/bullets": "Make bullets",
+  "/api/ai/reword": "Reword a text",
+  "/api/ai/ats-wording": "ATS wording",
+  "/api/ai/hide": "Pick what to hide",
+  "/api/ai/place": "Place unsorted items",
+  "/api/ai/import": "Sort pasted CV text",
 };
 
 const MASKS_KEY = "squeezy-cv-always-mask";
@@ -129,6 +151,8 @@ function mergePreviews(previews: SendPreviewData[]): SendPreviewData {
   }
   return {
     provider: previews[0].provider,
+    model: previews[0].model,
+    task: previews[0].task,
     calls: previews.flatMap((preview) => preview.calls),
     terms: [...terms.values()],
     suggestions: [...new Set(previews.flatMap((p) => p.suggestions))],
@@ -173,6 +197,19 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
  * step. Anything else goes straight through.
  */
 export function gateAiFetch(fetchImpl: FetchLike): FetchLike {
+  const gated = gateRequests(fetchImpl);
+  return async (input, init) => {
+    const response = await gated(input, init);
+    // What the request really used (also when it failed after some attempts): add it to the log
+    const usage = parseUsageHeader(response.headers.get(AI_USAGE_HEADER));
+    if (usage && USAGE_LABELS[input]) {
+      recordAiUsage(USAGE_LABELS[input], usage);
+    }
+    return response;
+  };
+}
+
+function gateRequests(fetchImpl: FetchLike): FetchLike {
   return async (input, init) => {
     const kind = GATED[input];
     if (

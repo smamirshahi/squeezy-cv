@@ -8,6 +8,7 @@ import {
   createAiClients,
   createClientWithModel,
   defaultModels,
+  taskDefaultModel,
 } from "@server/ai/ai-provider";
 import { AiHttpResult, createAiRoutes } from "@server/ai/ai-routes";
 import { AiClient, MessageSender } from "@server/ai/ai-types";
@@ -143,6 +144,8 @@ async function browserRegistry(
           ? undefined
           : createClientWithModel(config, provider, model),
       defaultModels: defaultModels(config),
+      taskDefaultModel: (provider, task) =>
+        taskDefaultModel(config, provider, task),
     }
   );
   await registry.load();

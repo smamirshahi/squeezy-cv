@@ -1,7 +1,7 @@
 import { Masking, MaskTerm } from "@custom-types/masking-types";
 import { AiClient, GenerateRequest } from "@server/ai/ai-types";
 import { loadPrompt } from "@server/ai/prompts";
-import { AiProviderId } from "@shared/ai/providers";
+import { AiProviderId, AiTask } from "@shared/ai/providers";
 import {
   PersonalData,
   describeMasking,
@@ -20,6 +20,12 @@ interface PreviewedCall {
 /** What the "Send to AI" dialog shows: the messages, what was masked, and what else looks private */
 export interface SendPreview {
   provider: AiProviderId;
+
+  /** The model that would answer, so the window can say what it costs (#551) */
+  model?: string;
+
+  /** The task it belongs to, so the window can change that task's model */
+  task?: AiTask;
   calls: PreviewedCall[];
   terms: MaskTerm[];
   suggestions: string[];
@@ -80,6 +86,8 @@ export interface Recorder extends AiClient {
  */
 export function createRecorder(options: {
   provider: AiProviderId;
+  model?: string;
+  task?: AiTask;
   masking?: Masking;
   callsToRecord?: number;
   standIn?: unknown;
@@ -94,6 +102,8 @@ export function createRecorder(options: {
     const text = raw.join("\n\n");
     return {
       provider: options.provider,
+      model: options.model,
+      task: options.task,
       calls,
       terms: describeMasking(text, data),
       suggestions: suggestMasks(text, data),

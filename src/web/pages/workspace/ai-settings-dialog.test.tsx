@@ -89,7 +89,7 @@ describe("AI settings: a model for one task", () => {
     const field = await screen.findByLabelText<HTMLInputElement>(
       "Model for this task"
     );
-    expect(field.placeholder).toBe("Provider default (claude-default)");
+    expect(field.placeholder).toBe("Default for this task (claude-default)");
     fireEvent.click(screen.getByRole("button", { name: /All tasks/ }));
     await waitFor(() =>
       expect(screen.queryByLabelText("Model for this task")).toBeNull()
@@ -112,7 +112,7 @@ describe("AI settings: a model for one task", () => {
       expect(within(list).getByText(/Claude · claude-small/)).toBeTruthy()
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Use the provider default" })
+      screen.getByRole("button", { name: "Use the default model" })
     );
     await waitFor(() => expect(puts).toContainEqual({ models: { hide: "" } }));
     await waitFor(() =>
@@ -138,13 +138,13 @@ describe("AI settings: a model for one task", () => {
     fireEvent.blur(field);
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Use the provider default" })
+        screen.getByRole("button", { name: "Use the default model" })
       ).toBeTruthy()
     );
     fireEvent.click(screen.getByRole("radio", { name: /Gemini/ }));
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: "Use the provider default" })
+        screen.queryByRole("button", { name: "Use the default model" })
       ).toBeNull()
     );
     expect(

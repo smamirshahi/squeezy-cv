@@ -33,6 +33,12 @@ const MAX_MODEL_LENGTH = 120;
 export interface AiModelSupport {
   clientFor?: (provider: AiProviderId, model: string) => AiClient | undefined;
   defaultModels?: Partial<Record<AiProviderId, string>>;
+
+  /** The model a task uses when the user chose none for it (Claude: Haiku or Sonnet, #551) */
+  taskDefaultModel?: (
+    provider: AiProviderId,
+    task: AiTask
+  ) => string | undefined;
 }
 
 export class MemoryAiSettings implements AiSettingsStore {
@@ -133,21 +139,53 @@ export class AiRegistry {
     }));
   }
 
-  /** The client for a task (undefined when its provider is not set up) and which provider that is */
+  /** The model a task really uses: its own choice, else the task's default, else the provider's model */
+  modelFor(task: AiTask): string | undefined {
+    const provider = this.current[task];
+    return (
+      this.taskModels[task] ??
+      this.support.taskDefaultModel?.(provider, task) ??
+      this.support.defaultModels?.[provider]
+    );
+  }
+
+  /** `modelFor` of every task, for the settings and the cost estimate */
+  usedModels(): Partial<Record<AiTask, string>> {
+    const used: Partial<Record<AiTask, string>> = {};
+    for (const task of AI_TASKS) {
+      const model = this.modelFor(task);
+      if (model) {
+        used[task] = model;
+      }
+    }
+    return used;
+  }
+
+  /** The client for a task (undefined when its provider is not set up), which provider that is and which model it uses */
   forTask(task: AiTask): {
     client: AiClient | undefined;
     provider: AiProviderId;
+    model: string | undefined;
   } {
     const provider = this.current[task];
-    const model = this.taskModels[task];
-    if (model && this.support.clientFor) {
+    const model = this.modelFor(task);
+    if (
+      this.support.clientFor &&
+      model &&
+      model !== this.clientModel(provider)
+    ) {
       const key = `${provider}\u0000${model}`;
       if (!this.modelClients.has(key)) {
         this.modelClients.set(key, this.support.clientFor(provider, model));
       }
-      return { client: this.modelClients.get(key), provider };
+      return { client: this.modelClients.get(key), provider, model };
     }
-    return { client: this.clients[provider], provider };
+    return { client: this.clients[provider], provider, model };
+  }
+
+  /** The model the provider's own client (the one in `clients`) talks to */
+  private clientModel(provider: AiProviderId): string | undefined {
+    return this.support.defaultModels?.[provider];
   }
 
   /**

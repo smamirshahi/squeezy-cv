@@ -24,6 +24,7 @@ import {
 } from "@shared/candidate/candidate-utils";
 import { aiErrorResult } from "@server/ai/ai-routes";
 import { AiError } from "@server/ai/ai-types";
+import { AI_USAGE_HEADER } from "@shared/ai/pricing";
 import { handleBrowserAi } from "@store/persistence/browser/ai/browser-ai";
 import { buildBackup, restoreBackup } from "@shared/backup/full-backup";
 import { extractPdfText, PdfTextError } from "@shared/pdf/extract-pdf-text";
@@ -43,11 +44,15 @@ const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46];
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-function json(status: number, body: unknown): Response {
+function json(
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(body), {
     status,
 
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
   });
 }
 
@@ -163,7 +168,13 @@ export function createLocalFetch(
         isPreview
       );
       if (result) {
-        return json(result.status, result.body);
+        return json(
+          result.status,
+          result.body,
+          result.usage
+            ? { [AI_USAGE_HEADER]: JSON.stringify(result.usage) }
+            : {}
+        );
       }
     }
 

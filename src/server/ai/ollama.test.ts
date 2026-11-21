@@ -93,6 +93,7 @@ describe("the Ollama sender", () => {
     expect(result).toEqual({
       text: '{"keywords":["a"]}',
       stopReason: "end_turn",
+      usage: { inputTokens: 0, outputTokens: 0 },
     });
     const [seen] = fake.requests;
     expect(seen.url).toBe("/api/chat");

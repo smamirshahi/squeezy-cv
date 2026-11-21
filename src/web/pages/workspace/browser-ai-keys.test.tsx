@@ -106,11 +106,13 @@ describe("BrowserAiKeysPanel", () => {
     expect(String(fetchSpy.mock.calls[0][0] as string)).toContain(
       "/models/gemini-next:generateContent"
     );
-    await waitFor(() =>
-      expect(
-        document.querySelector("#models-gemini option[value='gemini-next']")
-      ).not.toBeNull()
-    );
+    // The model field is an Autocomplete (#541): the models the key can use are its options
+    fireEvent.keyDown(within(gemini).getByLabelText("Model"), {
+      key: "ArrowDown",
+    });
+    expect(
+      await screen.findByRole("option", { name: "gemini-next" })
+    ).toBeTruthy();
   });
 
   it("shows the provider's error and keeps the model field editable after a failed test", async () => {

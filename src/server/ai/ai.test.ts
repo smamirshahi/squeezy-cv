@@ -172,7 +172,7 @@ describe("configuration", () => {
     expect(readAiConfig({})).toMatchObject({
       provider: "claude",
       apiKey: undefined,
-      model: "claude-opus-5-5",
+      model: "claude-sonnet-5-5",
       timeoutMs: 120000,
     });
     expect(

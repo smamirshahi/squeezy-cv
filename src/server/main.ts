@@ -6,6 +6,7 @@ import {
   createAiClients,
   createClientWithModel,
   defaultModels,
+  taskDefaultModel,
 } from "@server/ai/ai-provider";
 import { readConfig } from "@server/config";
 import { readFeedbackSender } from "@server/feedback/github-feedback";
@@ -36,6 +37,8 @@ const aiRegistry = new AiRegistry(
     clientFor: (provider, model) =>
       createClientWithModel(aiConfig, provider, model),
     defaultModels: defaultModels(aiConfig),
+    taskDefaultModel: (provider, task) =>
+      taskDefaultModel(aiConfig, provider, task),
   }
 );
 await aiRegistry.load();

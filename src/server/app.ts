@@ -30,6 +30,7 @@ import {
 } from "@server/feedback/github-feedback";
 import { extractPdfText, PdfTextError } from "@shared/pdf/extract-pdf-text";
 import { AiRegistry } from "@server/ai/ai-registry";
+import { AI_USAGE_HEADER } from "@shared/ai/pricing";
 import { AiProviderId } from "@shared/ai/providers";
 import { MAX_IMPORT_PDF_BYTES } from "@custom-types/import-types";
 import {
@@ -359,6 +360,9 @@ export function buildServer({
       request.body,
       { isPreview: request.headers["x-ai-preview"] === "1" }
     );
+    if (result?.usage) {
+      reply.header(AI_USAGE_HEADER, JSON.stringify(result.usage));
+    }
     return reply.status(result?.status ?? HTTP_NOT_FOUND).send(result?.body);
   }
   app.get("/api/ai/status", sendAi);
