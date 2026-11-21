@@ -1,69 +1,170 @@
 const INDENT = "  ";
+const BULLET = "• ";
+/** Keys that name an item: shown as its heading, never as a line of its own */
+const HEADING_KEYS = ["label", "title", "name"];
 
 function isPlain(value: unknown): value is string | number | boolean | null {
   return value === null || typeof value !== "object";
 }
 
-function plain(value: string | number | boolean | null): string {
-  return value === null ? "-" : String(value);
+function isEmpty(value: unknown): boolean {
+  if (value === undefined || value === null) {
+    return true;
+  }
+  if (typeof value === "string") {
+    return value.trim() === "";
+  }
+  if (Array.isArray(value)) {
+    return value.every(isEmpty);
+  }
+  return typeof value === "object"
+    ? Object.values(value as object).every(isEmpty)
+    : false;
 }
 
-/** `key: value` lines for an object, nested values indented below their key */
-function objectLines(object: Record<string, unknown>, depth: number): string[] {
-  const pad = INDENT.repeat(depth);
+/** `startDate` / `start_date` -> "Start date" */
+function humanKey(key: string): string {
+  const words = key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function plain(value: string | number | boolean | null): string {
+  return value === null ? "" : String(value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function indent(lines: string[], depth: number): string[] {
+  return lines.map((line) =>
+    line === "" ? line : INDENT.repeat(depth) + line
+  );
+}
+
+/** The name an item goes by, if it has one */
+function headingOf(item: Record<string, unknown>): string {
+  for (const key of HEADING_KEYS) {
+    const value = item[key];
+    if (typeof value === "string" && value.trim() !== "") {
+      return value.trim();
+    }
+  }
+  return "";
+}
+
+/** `Key: value` lines of an object; technical ids and empty parts are left out */
+function objectLines(
+  object: Record<string, unknown>,
+  skip: string[],
+  heading: string
+): string[] {
   const lines: string[] = [];
-  for (const [key, value] of Object.entries(object)) {
+  const entries = Object.entries(object).flatMap(
+    ([key, value]): [string, unknown][] =>
+      // `fields` is how the app groups an item's own lines: shown as if they were direct
+      key === "fields" && isRecord(value)
+        ? Object.entries(value)
+        : [[key, value]]
+  );
+  for (const [key, value] of entries) {
+    if (key === "id" || skip.includes(key) || isEmpty(value)) {
+      continue;
+    }
     if (isPlain(value)) {
-      const [first, ...rest] = plain(value).split("\n");
-      lines.push(`${pad}${key}: ${first}`);
-      lines.push(...rest.map((line) => `${pad}${INDENT}${line}`));
-    } else if (
-      Array.isArray(value)
-        ? value.length === 0
-        : Object.keys(value as object).length === 0
-    ) {
-      lines.push(`${pad}${key}: (none)`);
+      const text = plain(value);
+      // a line that only repeats the heading adds nothing
+      if (
+        heading !== "" &&
+        text.trim().toLowerCase() === heading.toLowerCase()
+      ) {
+        continue;
+      }
+      const [first, ...rest] = text.split("\n");
+      lines.push(`${humanKey(key)}: ${first}`);
+      lines.push(...rest.map((line) => `${INDENT}${line}`));
+    } else if (Array.isArray(value) && value.every(isPlain)) {
+      lines.push(`${humanKey(key)}:`);
+      lines.push(
+        ...value
+          .filter((entry) => !isEmpty(entry))
+          .map((entry) => `${INDENT}${BULLET}${plain(entry)}`)
+      );
     } else {
-      lines.push(`${pad}${key}:`, ...valueLines(value, depth + 1));
+      lines.push(`${humanKey(key)}:`);
+      lines.push(...indent(valueLines(value), 1));
     }
   }
   return lines;
 }
 
-function isEmpty(value: unknown): boolean {
-  if (value === undefined) {
-    return true;
+/** One item of a list: a bullet with its name, its details indented beneath */
+function itemLines(item: Record<string, unknown>): string[] {
+  const heading = headingOf(item);
+  const details = objectLines(item, [...HEADING_KEYS, "section"], heading);
+  if (heading === "") {
+    return details.length === 0
+      ? []
+      : [`${BULLET}${details[0]}`, ...indent(details.slice(1), 1)];
   }
-  if (Array.isArray(value)) {
-    return value.length === 0;
-  }
-  return typeof value === "object" && value !== null
-    ? Object.keys(value).length === 0
-    : false;
+  return [`${BULLET}${heading}`, ...indent(details, 1)];
 }
 
-function valueLines(value: unknown, depth: number): string[] {
-  const pad = INDENT.repeat(depth);
-  if (Array.isArray(value)) {
-    return value.flatMap((entry: unknown) => {
-      if (isPlain(entry)) {
-        return [`${pad}- ${plain(entry)}`];
+/** A list of items, with the section named when it changes */
+function listLines(list: unknown[]): string[] {
+  const lines: string[] = [];
+  let section = "";
+  for (const entry of list) {
+    if (isEmpty(entry)) {
+      continue;
+    }
+    if (isPlain(entry)) {
+      lines.push(`${BULLET}${plain(entry)}`);
+      continue;
+    }
+    if (Array.isArray(entry)) {
+      lines.push(...listLines(entry));
+      continue;
+    }
+    const record = entry as Record<string, unknown>;
+    const itemSection =
+      typeof record.section === "string" ? record.section.trim() : "";
+    if (itemSection !== "" && itemSection !== section) {
+      if (lines.length > 0) {
+        lines.push("");
       }
-      // An object in a list starts on the marker's line: "- id: i2" then its other fields
-      const lines = valueLines(entry, depth + 1);
-      return [`${pad}- ${(lines[0] ?? "").trimStart()}`, ...lines.slice(1)];
-    });
+      lines.push(itemSection);
+      section = itemSection;
+    }
+    lines.push(...itemLines(record));
   }
-  if (isPlain(value)) {
-    return [`${pad}${plain(value)}`];
+  return lines;
+}
+
+function valueLines(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return listLines(value);
   }
-  return objectLines(value as Record<string, unknown>, depth);
+  if (isRecord(value)) {
+    // a request is mostly `items: [...]`: the list is the text, other keys are notes above it
+    const { items, ...rest } = value;
+    const notes = objectLines(rest, [], "");
+    const list = Array.isArray(items) ? listLines(items) : [];
+    return notes.length > 0 && list.length > 0
+      ? [...notes, "", ...list]
+      : [...notes, ...list];
+  }
+  return isPlain(value) && plain(value) !== "" ? [plain(value)] : [];
 }
 
 /**
- * The text a model receives, laid out for a person: JSON (how the app sends the CV) becomes an
- * indented outline of `label: value` lines and `-` lists; anything else (a pasted advert) is
- * unchanged. For display only: what is sent stays as it was.
+ * The text a model receives, laid out for a person: JSON (how the app sends the CV) becomes
+ * short headings, plain lines and bullets, without technical ids or empty parts; anything else
+ * (a pasted advert) is unchanged. For display only: what is sent stays as it was.
  */
 function toReadableText(text: string): string {
   const trimmed = text.trim();
@@ -71,7 +172,7 @@ function toReadableText(text: string): string {
     return text;
   }
   try {
-    return valueLines(JSON.parse(trimmed), 0).join("\n");
+    return valueLines(JSON.parse(trimmed)).join("\n");
   } catch {
     return text;
   }
@@ -95,15 +196,12 @@ export function toReadableParts(text: string): {
     ) {
       const { requirements, mode, ...rest } = parsed as Record<string, unknown>;
       // Wording requests (shorten, rephrase ...): the task is one line, empty parts are not listed
-      const shown = Object.fromEntries(
-        Object.entries(rest).filter(([, value]) => !isEmpty(value))
-      );
       const task = typeof mode === "string" ? [`Task: ${mode}`] : [];
       return {
-        main: [...task, ...valueLines(shown, 0)].join("\n"),
+        main: [...task, ...valueLines(rest)].join("\n"),
         context: isEmpty(requirements)
           ? ""
-          : valueLines({ requirements }, 0).join("\n"),
+          : valueLines({ requirements }).join("\n"),
       };
     }
   } catch {
