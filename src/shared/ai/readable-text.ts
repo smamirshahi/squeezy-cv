@@ -18,7 +18,7 @@ function isEmpty(value: unknown): boolean {
     return value.every(isEmpty);
   }
   return typeof value === "object"
-    ? Object.values(value as object).every(isEmpty)
+    ? Object.values(value).every(isEmpty)
     : false;
 }
 
