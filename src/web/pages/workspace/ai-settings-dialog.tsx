@@ -26,6 +26,7 @@ import {
 import { AiIcon } from "@components/ai-button";
 import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
 import { openTutorial } from "@pages/workspace/tutorial-event";
+import { AiCostPanel } from "@pages/workspace/ai-cost-panel";
 import { BrowserAiKeysPanel } from "@pages/workspace/browser-ai-keys";
 import { isBrowserMode } from "@store/persistence/browser/storage-mode";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -36,7 +37,7 @@ import {
 } from "@store/persistence/api-client";
 
 /** What is selected on the left: all tasks, one task, or how to set the providers up */
-type EntryId = "all" | "setup" | AiTask;
+type EntryId = "all" | "setup" | "cost" | AiTask;
 
 /** The "All tasks" value when the tasks do not all use the same provider */
 const MIXED = "mixed";
@@ -169,9 +170,10 @@ function AiSettingsDialog({
     (a, b) => b[1] - a[1]
   )[0]?.[0];
 
-  const isChoice = selected !== "setup";
+  const isCost = selected === "cost";
+  const isChoice = selected !== "setup" && !isCost;
   const savedModel =
-    selected !== "all" && selected !== "setup"
+    selected !== "all" && selected !== "setup" && !isCost
       ? (status?.models?.[selected] ?? "")
       : "";
   const [modelDraft, setModelDraft] = useState<string>("");
@@ -181,7 +183,7 @@ function AiSettingsDialog({
   const selectedValue =
     selected === "all"
       ? allValue
-      : selected === "setup"
+      : selected === "setup" || isCost
         ? ""
         : (providerOf(selected) ?? "");
   const selectedInfo = providers.find((p) => p.id === selectedValue);
@@ -190,7 +192,9 @@ function AiSettingsDialog({
       ? "All tasks"
       : selected === "setup"
         ? "Set up the providers"
-        : AI_TASK_LABELS[selected];
+        : isCost
+          ? "Cost and usage"
+          : AI_TASK_LABELS[selected];
 
   const entries: {
     id: EntryId;
@@ -214,7 +218,9 @@ function AiSettingsDialog({
         value:
           status && current
             ? `${providerLabel(status, current)}${
-                status.models?.[task] ? ` · ${status.models[task]}` : ""
+                (status.usedModels ?? status.models)?.[task]
+                  ? ` · ${(status.usedModels ?? status.models)?.[task]}`
+                  : ""
               }`
             : undefined,
         note:
@@ -223,6 +229,7 @@ function AiSettingsDialog({
             : undefined,
       };
     }),
+    { id: "cost", label: "Cost and usage" },
     { id: "setup", label: "Set up the providers" },
   ];
 
@@ -354,28 +361,31 @@ function AiSettingsDialog({
               <b>Sends:</b> {AI_TASK_DESCRIPTIONS[selected].sends}
             </Paper>
           )}
-          <Paper sx={{ p: 2, fontSize: 13, lineHeight: 1.7 }}>
-            <b>Before anything is sent</b>
-            <br />
-            <b>Sent:</b> the job advert, bullet text, titles, dates
-            <br />
-            <b>Masked:</b> your name → [Candidate Name], email → [Email], phone
-            → [Phone Number], address → [Address], links → [Link n], employers →
-            [Company n], schools and universities → [Institution n]. Employer
-            and school names are always hidden this way and put back in the
-            answer, so the AI cannot tell that “Google” is a strong name; a
-            placeholder it changes is shown as a warning.
-            <br />
-            <b>Never sent:</b> PDF files, your saved data files
-            <br />
-            <b>No guarantee:</b> masking is done on a best-effort basis. We do
-            our best to find and replace personal details, but nothing is
-            guaranteed: a detail written in an unusual way, or inside a free
-            text, can slip through. Dates and wording can also still identify a
-            person. Do not send anything you cannot accept leaving this
-            computer; use an offline provider for that. On the Tailor page,
-            “Preview the exact request” shows the real messages.
-          </Paper>
+          {isCost && <AiCostPanel status={status} />}
+          {!isCost && (
+            <Paper sx={{ p: 2, fontSize: 13, lineHeight: 1.7 }}>
+              <b>Before anything is sent</b>
+              <br />
+              <b>Sent:</b> the job advert, bullet text, titles, dates
+              <br />
+              <b>Masked:</b> your name → [Candidate Name], email → [Email],
+              phone → [Phone Number], address → [Address], links → [Link n],
+              employers → [Company n], schools and universities → [Institution
+              n]. Employer and school names are always hidden this way and put
+              back in the answer, so the AI cannot tell that “Google” is a
+              strong name; a placeholder it changes is shown as a warning.
+              <br />
+              <b>Never sent:</b> PDF files, your saved data files
+              <br />
+              <b>No guarantee:</b> masking is done on a best-effort basis. We do
+              our best to find and replace personal details, but nothing is
+              guaranteed: a detail written in an unusual way, or inside a free
+              text, can slip through. Dates and wording can also still identify
+              a person. Do not send anything you cannot accept leaving this
+              computer; use an offline provider for that. On the Tailor page,
+              “Preview the exact request” shows the real messages.
+            </Paper>
+          )}
 
           {selected === "setup" && isBrowserMode() && (
             <BrowserAiKeysPanel onSaved={refreshStatus} />
@@ -541,12 +551,18 @@ function AiSettingsDialog({
                     fullWidth
                     size="small"
                     label="Model for this task"
-                    placeholder={`Provider default (${
+                    placeholder={`Default for this task (${
+                      status?.usedModels?.[selected] ??
                       providers.find((p) => p.id === selectedInfo.id)
-                        ?.defaultModel ?? "its usual model"
+                        ?.defaultModel ??
+                      "its usual model"
                     })`}
                     value={modelDraft}
-                    helperText="Empty uses the provider's model. Applied when you leave the field or press Enter."
+                    helperText={`Empty uses the default for this task${
+                      selectedInfo.id === "claude"
+                        ? " (Haiku for small tasks, Sonnet for the rest)"
+                        : ""
+                    }. Applied when you leave the field or press Enter.`}
                     onChange={(event) => setModelDraft(event.target.value)}
                     onBlur={() => {
                       if (modelDraft.trim() !== savedModel) {
@@ -568,7 +584,7 @@ function AiSettingsDialog({
                       sx={{ mt: 0.5 }}
                       onClick={() => void applyModel(selected, "")}
                     >
-                      Use the provider default
+                      Use the default model
                     </Button>
                   )}
                 </Box>
@@ -596,7 +612,7 @@ function AiSettingsDialog({
               )}
             </Box>
           )}
-          {status && !isChoice && (
+          {status && selected === "setup" && (
             <Box role="group" aria-label="Providers">
               <Typography sx={{ fontWeight: 700, fontSize: 15, mb: 1 }}>
                 Providers
@@ -656,7 +672,8 @@ export function AiSettingsHost(): JSX.Element {
   const [initial, setInitial] = useState<EntryId>("all");
   useEffect(() => {
     function open(event: Event): void {
-      const task = (event as CustomEvent<{ task?: AiTask }>).detail?.task;
+      const task = (event as CustomEvent<{ task?: AiTask | "cost" }>).detail
+        ?.task;
       setInitial(task ?? "all");
       setIsOpen(true);
     }

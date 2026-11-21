@@ -6,7 +6,11 @@ import {
   createGeminiSender,
   createGroqSender,
 } from "@server/ai/hosted-clients";
-import { AI_PROVIDER_IDS } from "@shared/ai/providers";
+import {
+  AI_PROVIDER_IDS,
+  AiTask,
+  CLAUDE_TASK_MODELS,
+} from "@shared/ai/providers";
 
 /** Whether the chosen provider can be used: the online ones need a key, Ollama needs nothing */
 export function isAiAvailable(config: AiConfig): boolean {
@@ -65,6 +69,21 @@ export function defaultModels(config: AiConfig): Record<AiProvider, string> {
   return Object.fromEntries(
     AI_PROVIDER_IDS.map((id) => [id, modelOf(config, id)])
   ) as Record<AiProvider, string>;
+}
+
+/**
+ * The model a task uses when the user has not chosen one for it (#551): Haiku or Sonnet for
+ * Claude, unless a model was set in `.env` / the browser settings (that one is then used for
+ * everything). Undefined for the other providers: they use their usual model.
+ */
+export function taskDefaultModel(
+  config: AiConfig,
+  provider: AiProvider,
+  task: AiTask
+): string | undefined {
+  return provider === "claude" && !config.isModelChosen
+    ? CLAUDE_TASK_MODELS[task]
+    : undefined;
 }
 
 /** A client for `provider` that uses `model` instead of its usual one (undefined when it cannot be used) */

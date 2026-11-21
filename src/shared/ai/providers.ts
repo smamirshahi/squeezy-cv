@@ -6,6 +6,50 @@ export type AiProviderId = (typeof AI_PROVIDER_IDS)[number];
 export const AI_TASKS = ["tailor", "import", "hide", "chat", "place"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
+const CLAUDE_SMALL = "claude-haiku-5-5";
+const CLAUDE_MAIN = "claude-sonnet-5-5";
+
+/**
+ * The Claude model each task uses when the user has not chosen one (#551). Haiku for the small
+ * mechanical tasks (sorting and classifying short labels), Sonnet for everything that writes or
+ * reads the CV closely. A model set in `.env` / the browser settings, or chosen for a task in AI
+ * settings, wins over this.
+ */
+export const CLAUDE_TASK_MODELS: Record<AiTask, string> = {
+  tailor: CLAUDE_MAIN,
+  import: CLAUDE_MAIN,
+  chat: CLAUDE_MAIN,
+  hide: CLAUDE_SMALL,
+  place: CLAUDE_SMALL,
+};
+
+export type AiEffort = "low" | "medium" | "high" | "xhigh" | "max";
+
+/**
+ * How hard Claude thinks before it answers, per prompt (#551). Thinking is billed as output, and
+ * Sonnet's own default (`high`) is more than short CV edits need. `low` for sorting and
+ * classifying short labels, `medium` for everything that writes, scores or edits the CV; nothing
+ * uses `high`. Prompts not listed use `medium`.
+ */
+const PROMPT_EFFORT: Record<string, AiEffort> = {
+  "pick-hide": "low",
+  "place-items": "low",
+  "extract-requirements": "low",
+};
+const DEFAULT_EFFORT: AiEffort = "medium";
+
+export function effortFor(promptName: string): AiEffort {
+  return PROMPT_EFFORT[promptName] ?? DEFAULT_EFFORT;
+}
+
+/** Only these Claude models take an effort level (the older ones answer with an error) */
+export function supportsEffort(model: string): boolean {
+  return (
+    /^claude-(haiku|sonnet|opus|fable|mythos)-5(-|$)/.test(model) ||
+    /^claude-(opus-4-[678]|sonnet-4-6)$/.test(model)
+  );
+}
+
 export const AI_TASK_LABELS: Record<AiTask, string> = {
   tailor: "Tailor to a job ad",
   import: "Sort pasted CV text",

@@ -1,3 +1,5 @@
+import { AiUsage } from "@shared/ai/pricing";
+import { AiEffort } from "@shared/ai/providers";
 import { PersonalData } from "@shared/ai/redact-personal";
 
 /** What a runtypes schema offers: throws if the value does not match */
@@ -50,6 +52,9 @@ export interface GenerateRequest<T> {
 
   /** Called with a plain-language warning, e.g. when the model altered a placeholder */
   onWarning?: (message: string) => void;
+
+  /** Called after every attempt with the tokens it used, so the cost can be added up (#551) */
+  onUsage?: (usage: AiUsage) => void;
 }
 
 export interface AiClient {
@@ -64,10 +69,20 @@ export interface ChatMessage {
 export interface SenderResult {
   text: string;
   stopReason: "end_turn" | "max_tokens" | "refusal" | "other";
+
+  /** What the provider says it counted; missing when it does not say */
+  usage?: AiUsage;
+}
+
+/** What a call may ask for besides the messages; a sender uses what its provider understands */
+interface SendOptions {
+  /** How hard to think (Claude only, #551) */
+  effort?: AiEffort;
 }
 
 /** One call to the model. The only part that touches the network, so tests can replace it. */
 export type MessageSender = (
   system: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  options?: SendOptions
 ) => Promise<SenderResult>;

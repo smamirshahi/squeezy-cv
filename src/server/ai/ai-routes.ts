@@ -54,6 +54,7 @@ import {
   createRecorder,
   maskedClient,
 } from "@server/ai/send-preview";
+import { AiUsageReport } from "@shared/ai/pricing";
 import { personalOf } from "@shared/ai/redact-personal";
 import { AiTask } from "@shared/ai/providers";
 import { JOB_TITLES_SECTION } from "@shared/vault/job-titles";
@@ -74,6 +75,9 @@ const BULLET_LENGTH = 600;
 export interface AiHttpResult {
   status: number;
   body: unknown;
+
+  /** What the model calls of this request used, when it made any (#551); sent as the header `x-ai-usage` */
+  usage?: AiUsageReport;
 }
 
 /** The HTTP status that goes with a failed AI call */
@@ -185,6 +189,7 @@ export function createAiRoutes(deps: AiRouteDeps): {
           providers: registry.providers(),
           choice: registry.choice(),
           models: registry.models(),
+          usedModels: registry.usedModels(),
         })
       );
     },
@@ -486,8 +491,9 @@ export function createAiRoutes(deps: AiRouteDeps): {
       // With `isPreview` the client only records what would be sent (and works without a key). A
       // body `masking` (the user's choices in the "Send to AI" dialog) is added to what is sent.
       let recorder: Recorder | undefined;
+      let usage: AiUsageReport | undefined;
       const aiFor: RouteContext["aiFor"] = (task, recordOptions = {}) => {
-        const { client, provider } = registry.forTask(task);
+        const { client, provider, model } = registry.forTask(task);
         const rawMasking = (body as { masking?: unknown } | undefined)?.masking;
         const userMasking =
           rawMasking === undefined
@@ -496,12 +502,33 @@ export function createAiRoutes(deps: AiRouteDeps): {
         if (options.isPreview) {
           recorder = createRecorder({
             provider,
+            model,
+            task,
             masking: userMasking,
             ...recordOptions,
           });
           return recorder;
         }
-        return client ? maskedClient(client, userMasking) : undefined;
+        if (!client) {
+          return undefined;
+        }
+        // Add up the tokens of every attempt of every call this request makes
+        const metered: AiClient = {
+          generate: (request) =>
+            client.generate({
+              ...request,
+              onUsage: (used) => {
+                usage = {
+                  provider,
+                  model,
+                  inputTokens: (usage?.inputTokens ?? 0) + used.inputTokens,
+                  outputTokens: (usage?.outputTokens ?? 0) + used.outputTokens,
+                };
+                request.onUsage?.(used);
+              },
+            }),
+        };
+        return maskedClient(metered, userMasking);
       };
       try {
         const result = await route({
@@ -517,10 +544,14 @@ export function createAiRoutes(deps: AiRouteDeps): {
         ) {
           return ok(recorder.finish());
         }
-        return result;
+        return usage ? { ...result, usage } : result;
       } catch (error) {
         if (error instanceof PreviewStop) {
           return ok(error.preview);
+        }
+        // Attempts that failed were billed too: report them with the error
+        if (error instanceof AiError && usage) {
+          return { ...aiErrorResult(error), usage };
         }
         throw error;
       }

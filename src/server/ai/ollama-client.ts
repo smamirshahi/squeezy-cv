@@ -8,6 +8,10 @@ interface OllamaChatResponse {
 
   done_reason?: string;
   error?: string;
+
+  /** Tokens of the prompt and of the answer */
+  prompt_eval_count?: number;
+  eval_count?: number;
 }
 
 /**
@@ -68,6 +72,10 @@ export function createOllamaSender(
     return {
       text: payload.message?.content ?? "",
       stopReason: payload.done_reason === "length" ? "max_tokens" : "end_turn",
+      usage: {
+        inputTokens: payload.prompt_eval_count ?? 0,
+        outputTokens: payload.eval_count ?? 0,
+      },
     };
   };
 }
