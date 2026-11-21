@@ -6,6 +6,11 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Drawer,
   IconButton,
   InputAdornment,
@@ -19,11 +24,13 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@components/ui";
 import {
   CheckOutlined as CheckIcon,
   CloseOutlined as CloseIcon,
+  DeleteOutlined as DeleteIcon,
   ExpandMoreOutlined as ExpandMoreIcon,
   OpenInNewOutlined as OpenInNewIcon,
   SearchOutlined as SearchIcon,
@@ -266,6 +273,9 @@ export function ApplicationsPage(): JSX.Element {
     {}
   );
   const today = toIsoDay(new Date());
+  // The application waiting for "Delete?" confirmation, and a counter that reloads the list
+  const [toDelete, setToDelete] = useState<ApplicationSummary | null>(null);
+  const [reloads, setReloads] = useState<number>(0);
 
   useEffect(() => {
     let isCancelled = false;
@@ -304,7 +314,7 @@ export function ApplicationsPage(): JSX.Element {
     return () => {
       isCancelled = true;
     };
-  }, [api]);
+  }, [api, reloads]);
 
   // The address keeps the search and filters, so "back" from an application finds them again
   useEffect(() => {
@@ -313,6 +323,25 @@ export function ApplicationsPage(): JSX.Element {
   }, [view]);
 
   const readable = state.status === "ready" ? state.applications : [];
+
+  async function deleteApplication(): Promise<void> {
+    if (!toDelete) {
+      return;
+    }
+    setActionError("");
+    try {
+      await api.deleteApplication(toDelete.id);
+      if (selectedId === toDelete.id) {
+        setSelectedId("");
+      }
+      setReloads((count) => count + 1);
+    } catch (caught) {
+      setActionError(
+        caught instanceof Error ? caught.message : "Something went wrong."
+      );
+    }
+    setToDelete(null);
+  }
 
   async function reloadCandidates(): Promise<void> {
     const parked = await api.listCandidates();
@@ -577,6 +606,7 @@ export function ApplicationsPage(): JSX.Element {
               onDelete={(candidate) =>
                 void runCandidateAction(() => api.deleteCandidate(candidate.id))
               }
+              onDeleteApplication={setToDelete}
               view={view}
               onViewChange={setView}
               today={today}
@@ -613,6 +643,22 @@ export function ApplicationsPage(): JSX.Element {
           </ResizableAside>
         )}
       </Box>
+      <Dialog open={toDelete !== null} onClose={() => setToDelete(null)}>
+        <DialogTitle>Delete this application?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {toDelete?.company}, {toDelete?.role}, and the CV you sent will be
+            removed from the list. If your data folder is a git repository, the
+            history still has it.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setToDelete(null)}>Cancel</Button>
+          <Button color="error" onClick={() => void deleteApplication()}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
@@ -1060,6 +1106,7 @@ interface TableProps {
   onContinue: (candidate: Candidate) => void;
   onDrop: (candidate: Candidate) => void;
   onDelete: (candidate: Candidate) => void;
+  onDeleteApplication: (application: ApplicationSummary) => void;
   view: ListView;
   onViewChange: (view: ListView) => void;
   today: string;
@@ -1080,6 +1127,7 @@ function ApplicationsTable({
   onContinue,
   onDrop,
   onDelete,
+  onDeleteApplication,
   view,
   onViewChange,
   today,
@@ -1505,13 +1553,28 @@ function ApplicationsTable({
                       </Typography>
                     )}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     {jobsById.has(jobId) ? (
                       <OpenJobButton
                         jobId={jobId}
                         label={job?.name || application?.jobName || company}
                       />
                     ) : null}
+                    {application && (
+                      <Tooltip title="Delete this application">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          aria-label={`Delete application ${company}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDeleteApplication(application);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </TableCell>
                 </TableRow>
               );

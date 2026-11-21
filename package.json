@@ -1,7 +1,7 @@
 {
   "name": "squeezy-cv",
   "private": true,
-  "version": "0.17.4",
+  "version": "0.17.5",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n web,server -c blue,green \"pnpm dev:web\" \"pnpm dev:server\"",
