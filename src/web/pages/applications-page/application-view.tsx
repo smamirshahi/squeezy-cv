@@ -238,6 +238,26 @@ export function ApplicationView({
     }
   }
 
+  /** The first delete moves it to Deleted; it can be restored from there */
+  async function moveToDeleted(): Promise<void> {
+    try {
+      await api.updateApplication(applicationId, { isDeleted: true });
+      window.location.assign("/applications");
+    } catch (caught) {
+      setError(messageOf(caught));
+    }
+  }
+
+  async function restore(): Promise<void> {
+    try {
+      await api.updateApplication(applicationId, { isDeleted: false });
+      window.location.assign("/applications");
+    } catch (caught) {
+      setError(messageOf(caught));
+    }
+  }
+
+  /** Delete again from Deleted: gone for good */
   async function remove(): Promise<void> {
     try {
       await api.deleteApplication(applicationId);
@@ -316,14 +336,30 @@ export function ApplicationView({
           }}
         >
           {hasNoReply && <Chip label="No reply" color="warning" />}
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => setIsDeleting(true)}
-          >
-            Delete
-          </Button>
+          {application.deletedAt ? (
+            <>
+              <Button variant="outlined" onClick={() => void restore()}>
+                Restore
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => setIsDeleting(true)}
+              >
+                Delete forever
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => void moveToDeleted()}
+            >
+              Delete
+            </Button>
+          )}
           <TextField
             select
             size="small"
@@ -552,18 +588,18 @@ export function ApplicationView({
         onClose={() => setIsDeleting(false)}
         fullScreen={isPhone}
       >
-        <DialogTitle>Delete this application?</DialogTitle>
+        <DialogTitle>Delete this application for good?</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {application.company}, {application.role}, and the CV you sent will
-            be removed from the list. If your data folder is a git repository,
-            the history still has it.
+            be removed from the app for good. If your data folder is a git
+            repository, the history still has it.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDeleting(false)}>Cancel</Button>
           <Button color="error" onClick={() => void remove()}>
-            Delete
+            Delete forever
           </Button>
         </DialogActions>
       </Dialog>

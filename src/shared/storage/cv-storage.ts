@@ -33,6 +33,8 @@ export interface JobSummary {
   company?: string;
   role?: string;
   stage?: "draft" | "ready";
+  /** When the job was moved to Deleted (missing = not deleted) */
+  deletedAt?: string;
   createdAt: string;
   isCorrupt: boolean;
 }
