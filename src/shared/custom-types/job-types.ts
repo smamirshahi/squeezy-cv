@@ -22,7 +22,7 @@ import {
 export const JOB_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** The current version of the job format. Bump it together with a migration. */
-export const CURRENT_JOB_VERSION = 1;
+export const CURRENT_JOB_VERSION = 2;
 
 /** The page limit of a job that has none of its own */
 export const DEFAULT_PAGE_LIMIT = 1;
@@ -53,6 +53,9 @@ export const JobSchema = Object({
   company: String.optional(),
 
   role: String.optional(),
+
+  /** When the job was moved to Deleted (ISO time). Missing = not deleted; deleting again removes it for good. */
+  deletedAt: String.optional(),
 
   /** Where the job is before it is sent: still being prepared (default) or ready to apply */
   stage: Union(Literal("draft"), Literal("ready")).optional(),

@@ -218,11 +218,12 @@ export function updateApplication(
       index === 0 ? { ...change, at: next.appliedAt } : change
     );
   }
-  const textPatches: [keyof ApplicationPatch, string, number][] = [
-    ["jobUrl", "Job link", MAX_URL_LENGTH],
-    ["jobDescription", "Job description", MAX_LONG_TEXT_LENGTH],
-    ["notes", "Notes", MAX_LONG_TEXT_LENGTH],
-  ];
+  const textPatches: ["jobUrl" | "jobDescription" | "notes", string, number][] =
+    [
+      ["jobUrl", "Job link", MAX_URL_LENGTH],
+      ["jobDescription", "Job description", MAX_LONG_TEXT_LENGTH],
+      ["notes", "Notes", MAX_LONG_TEXT_LENGTH],
+    ];
   for (const [key, label, maxLength] of textPatches) {
     if (key in patch) {
       const text = optionalText(patch[key], label, maxLength);
@@ -233,6 +234,11 @@ export function updateApplication(
         delete target[key];
       }
     }
+  }
+  if (patch.isDeleted === true) {
+    next.deletedAt = new Date().toISOString();
+  } else if (patch.isDeleted === false) {
+    delete next.deletedAt;
   }
   if (patch.status !== undefined && patch.status !== application.status) {
     const at = requireDay(patch.statusAt ?? today, "Date of the change");
@@ -287,6 +293,7 @@ export function summariseApplication(
     jobName: application.jobName ?? application.submitted?.variant.name ?? "",
     templateName: application.templateName ?? "",
     updatedAt: lastUpdateDay(application),
+    ...(application.deletedAt ? { deletedAt: application.deletedAt } : {}),
     isCorrupt: false,
   };
 }

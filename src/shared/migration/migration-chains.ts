@@ -56,13 +56,33 @@ const TEMPLATE_V1_TO_V2: MigrationStep = {
 };
 
 /**
+ * Job 1 to 2 and application 1 to 2 (#559): an optional `deletedAt` marks an item moved to the
+ * Deleted section. Nothing to rewrite; old files simply have no such field.
+ */
+const JOB_V1_TO_V2: MigrationStep = {
+  kind: "job",
+  fromVersion: 1,
+  toVersion: 2,
+  migrate: (json) => ({ ...json }),
+};
+const APPLICATION_V1_TO_V2: MigrationStep = {
+  kind: "application",
+  fromVersion: 1,
+  toVersion: 2,
+  migrate: (json) => ({ ...json }),
+};
+
+/**
  * The single place where the migration chains of the simple file kinds are registered. Every chain starts
  * empty at version 1. `migration-guard.test.ts` fails when `current` has no step from the version before.
  */
 export const MIGRATION_CHAINS: Record<ChainKind, Chain> = {
-  job: { current: CURRENT_JOB_VERSION, steps: [] },
+  job: { current: CURRENT_JOB_VERSION, steps: [JOB_V1_TO_V2] },
   template: { current: CURRENT_TEMPLATE_VERSION, steps: [TEMPLATE_V1_TO_V2] },
-  application: { current: CURRENT_APPLICATION_VERSION, steps: [] },
+  application: {
+    current: CURRENT_APPLICATION_VERSION,
+    steps: [APPLICATION_V1_TO_V2],
+  },
   candidate: { current: CURRENT_CANDIDATE_VERSION, steps: [] },
 };
 
