@@ -68,6 +68,7 @@ interface Stub {
   status?: number;
   jobs?: unknown[];
   templates?: { id: string; name: string; isCorrupt: boolean }[];
+  candidates?: unknown[];
   /** A job by id, as `GET /api/jobs/:id` answers it */
   job?: unknown;
 }
@@ -98,6 +99,9 @@ function stubServer(stub: Stub): Call[] {
       }
       if (path === "/api/jobs") {
         return json(stub.jobs ?? []);
+      }
+      if (path === "/api/candidates" && method === "GET") {
+        return json(stub.candidates ?? []);
       }
       if (path === "/api/templates") {
         return json(stub.templates ?? []);
@@ -809,5 +813,89 @@ describe("Applications page: the side panel", () => {
     expect(panel.queryByText("Progress")).toBeNull();
     fireEvent.click(panel.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("complementary")).toBeNull();
+  });
+});
+
+describe("Applications page: row actions are icon buttons with tooltips", () => {
+  const candidate = (id: string, status: string): Record<string, unknown> => ({
+    id,
+    version: 1,
+    company: `Cand ${id}`,
+    role: "Dev",
+    status,
+    createdAt: "2026-11-01",
+  });
+
+  it("shows Continue, Drop and Delete forever on an open candidate, with no text on them", async () => {
+    stubServer({ applications: [], candidates: [candidate("x", "open")] });
+    renderPage();
+    await screen.findByText("Cand x");
+    const row = within(rowOf("Cand x"));
+    for (const name of ["Continue", "Drop", "Delete forever"]) {
+      const button = row.getByRole("button", { name: `${name} Cand x` });
+      expect(button.textContent).toBe("");
+      expect(button.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("shows only Restore and Delete forever on a dropped candidate, and restoring sends it back to open", async () => {
+    const calls = stubServer({
+      applications: [],
+      candidates: [candidate("d", "dropped")],
+    });
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: /^Dropped/ }));
+    await screen.findByText("Cand d");
+    const row = within(rowOf("Cand d"));
+    expect(row.queryByRole("button", { name: /^Continue/ })).toBeNull();
+    expect(row.queryByRole("button", { name: /^Drop / })).toBeNull();
+    fireEvent.click(row.getByRole("button", { name: "Restore Cand d" }));
+    await waitFor(() =>
+      expect(
+        calls.some(
+          (c) =>
+            c.method === "PATCH" &&
+            c.url === "/api/candidates/d" &&
+            c.body.includes('"open"')
+        )
+      ).toBe(true)
+    );
+  });
+
+  it("shows Restore and Delete forever on a deleted job, and Move to Deleted on a live one", async () => {
+    stubServer({
+      applications: [],
+      jobs: [
+        jobEntry("j1", "Live job"),
+        jobEntry("j2", "Gone job", { deletedAt: "2026-11-10" }),
+      ],
+    });
+    renderPage();
+    await screen.findByText("Live job");
+    expect(
+      within(rowOf("Live job")).getByRole("button", {
+        name: "Move to Deleted Live job",
+      }).textContent
+    ).toBe("");
+    fireEvent.click(await screen.findByRole("button", { name: /^Deleted/ }));
+    await screen.findByText("Gone job");
+    const row = within(rowOf("Gone job"));
+    for (const name of ["Restore", "Delete forever"]) {
+      const button = row.getByRole("button", { name: `${name} Gone job` });
+      expect(button.textContent).toBe("");
+    }
+  });
+
+  it("names the action in a tooltip on hover", async () => {
+    stubServer({ applications: [], candidates: [candidate("x", "open")] });
+    renderPage();
+    await screen.findByText("Cand x");
+    fireEvent.mouseOver(
+      within(rowOf("Cand x")).getByRole("button", { name: "Drop Cand x" })
+    );
+    expect(await screen.findByRole("tooltip")).toHaveProperty(
+      "textContent",
+      "Drop"
+    );
   });
 });

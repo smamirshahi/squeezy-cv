@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.19.3] - 2026-11-22
+
+### Changed
+
+- Applications (#568): every action in the table's last column is now an icon button with a tooltip (Restore, Delete forever, Continue, Drop, Move to Deleted), the same on every kind of row; before, some were text buttons.
+
 ## [0.19.2] - 2026-11-21
 
 ### Changed
@@ -607,7 +613,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...HEAD
+[0.19.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...v0.19.3
 [0.19.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...v0.19.2
 [0.19.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.18.0...v0.19.0
