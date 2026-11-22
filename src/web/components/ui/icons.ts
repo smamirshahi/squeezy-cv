@@ -14,6 +14,7 @@ export { default as BackupOutlined } from "@mui/icons-material/BackupOutlined";
 export { default as BookmarkBorderOutlined } from "@mui/icons-material/BookmarkBorderOutlined";
 export { default as BugReportOutlined } from "@mui/icons-material/BugReportOutlined";
 export { default as CalendarMonthOutlined } from "@mui/icons-material/CalendarMonthOutlined";
+export { default as BlockOutlined } from "@mui/icons-material/BlockOutlined";
 export { default as CheckCircleOutlined } from "@mui/icons-material/CheckCircleOutlined";
 export { default as CheckOutlined } from "@mui/icons-material/CheckOutlined";
 export { default as ChevronRightOutlined } from "@mui/icons-material/ChevronRightOutlined";
@@ -22,6 +23,7 @@ export { default as ClearAllOutlined } from "@mui/icons-material/ClearAllOutline
 export { default as CloseOutlined } from "@mui/icons-material/CloseOutlined";
 export { default as ContentCopyOutlined } from "@mui/icons-material/ContentCopyOutlined";
 export { default as DarkModeOutlined } from "@mui/icons-material/DarkModeOutlined";
+export { default as DeleteForeverOutlined } from "@mui/icons-material/DeleteForeverOutlined";
 export { default as DeleteOutlined } from "@mui/icons-material/DeleteOutlined";
 export { default as DescriptionOutlined } from "@mui/icons-material/DescriptionOutlined";
 export { default as DesktopWindowsOutlined } from "@mui/icons-material/DesktopWindowsOutlined";
@@ -66,6 +68,7 @@ export { default as SmartphoneOutlined } from "@mui/icons-material/SmartphoneOut
 export { default as StarBorderOutlined } from "@mui/icons-material/StarBorderOutlined";
 export { default as StarOutlined } from "@mui/icons-material/StarOutlined";
 export { default as SyncOutlined } from "@mui/icons-material/SyncOutlined";
+export { default as RestoreFromTrashOutlined } from "@mui/icons-material/RestoreFromTrashOutlined";
 export { default as UndoOutlined } from "@mui/icons-material/UndoOutlined";
 export { default as VisibilityOffOutlined } from "@mui/icons-material/VisibilityOffOutlined";
 export { default as VisibilityOutlined } from "@mui/icons-material/VisibilityOutlined";

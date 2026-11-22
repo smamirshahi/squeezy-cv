@@ -28,12 +28,17 @@ import {
   Typography,
 } from "@components/ui";
 import {
+  ArrowForwardOutlined as ArrowForwardIcon,
+  BlockOutlined as BlockIcon,
   CheckOutlined as CheckIcon,
   CloseOutlined as CloseIcon,
+  DeleteForeverOutlined as DeleteForeverIcon,
   DeleteOutlined as DeleteIcon,
   ExpandMoreOutlined as ExpandMoreIcon,
   OpenInNewOutlined as OpenInNewIcon,
+  RestoreFromTrashOutlined as RestoreFromTrashIcon,
   SearchOutlined as SearchIcon,
+  UndoOutlined as UndoIcon,
 } from "@components/ui/icons";
 import { MouseEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
@@ -1509,35 +1514,35 @@ function ApplicationsTable({
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                       {isDropped ? (
-                        <Button
-                          size="small"
+                        <RowAction
+                          label="Restore"
+                          subject={candidate.company || candidate.role}
+                          icon={<UndoIcon fontSize="small" />}
                           onClick={() => onRestore(candidate)}
-                        >
-                          Restore
-                        </Button>
+                        />
                       ) : (
                         <>
-                          <Button
-                            size="small"
+                          <RowAction
+                            label="Continue"
+                            subject={candidate.company || candidate.role}
+                            icon={<ArrowForwardIcon fontSize="small" />}
                             onClick={() => onContinue(candidate)}
-                          >
-                            Continue
-                          </Button>
-                          <Button
-                            size="small"
+                          />
+                          <RowAction
+                            label="Drop"
+                            subject={candidate.company || candidate.role}
+                            icon={<BlockIcon fontSize="small" />}
                             onClick={() => onDrop(candidate)}
-                          >
-                            Drop
-                          </Button>
+                          />
                         </>
                       )}
-                      <Button
-                        size="small"
+                      <RowAction
+                        label="Delete forever"
+                        subject={candidate.company || candidate.role}
+                        icon={<DeleteForeverIcon fontSize="small" />}
                         color="error"
                         onClick={() => onDelete(candidate)}
-                      >
-                        Delete
-                      </Button>
+                      />
                     </TableCell>
                   </TableRow>
                 );
@@ -1707,39 +1712,27 @@ function ApplicationsTable({
                     {target &&
                       (isTrashed ? (
                         <>
-                          <Button
-                            size="small"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onRestoreItem(target);
-                            }}
-                          >
-                            Restore
-                          </Button>
-                          <Button
-                            size="small"
+                          <RowAction
+                            label="Restore"
+                            subject={target.label}
+                            icon={<RestoreFromTrashIcon fontSize="small" />}
+                            onClick={() => onRestoreItem(target)}
+                          />
+                          <RowAction
+                            label="Delete forever"
+                            subject={target.label}
+                            icon={<DeleteForeverIcon fontSize="small" />}
                             color="error"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onDeleteForever(target);
-                            }}
-                          >
-                            Delete forever
-                          </Button>
+                            onClick={() => onDeleteForever(target)}
+                          />
                         </>
                       ) : (
-                        <Tooltip title="Move to Deleted">
-                          <IconButton
-                            size="small"
-                            aria-label={`Delete ${target.label}`}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onTrash(target);
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <RowAction
+                          label="Move to Deleted"
+                          subject={target.label}
+                          icon={<DeleteIcon fontSize="small" />}
+                          onClick={() => onTrash(target)}
+                        />
                       ))}
                   </TableCell>
                 </TableRow>
@@ -1760,6 +1753,37 @@ function ApplicationsTable({
         </Table>
       </Paper>
     </>
+  );
+}
+
+/** One icon button of the last column: a tooltip names it, the click never selects the row */
+function RowAction({
+  label,
+  subject,
+  icon,
+  color,
+  onClick,
+}: {
+  label: string;
+  subject: string;
+  icon: ReactNode;
+  color?: "error";
+  onClick: () => void;
+}): JSX.Element {
+  return (
+    <Tooltip title={label}>
+      <IconButton
+        size="small"
+        color={color}
+        aria-label={`${label} ${subject}`}
+        onClick={(event: MouseEvent<HTMLElement>) => {
+          event.stopPropagation();
+          onClick();
+        }}
+      >
+        {icon}
+      </IconButton>
+    </Tooltip>
   );
 }
 
