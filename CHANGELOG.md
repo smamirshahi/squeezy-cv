@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.19.4] - 2026-11-23
+
+### Fixed
+
+- AI settings (#571): after you change the provider and close the dialog, the provider shown in Advert analysis, Tailor, chat and the other AI panels updates at once; before, it kept the old one until the page was reloaded.
+
 ## [0.19.3] - 2026-11-22
 
 ### Changed
@@ -613,7 +619,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...HEAD
+[0.19.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...v0.19.4
 [0.19.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...v0.19.3
 [0.19.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...v0.19.2
 [0.19.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.0...v0.19.1

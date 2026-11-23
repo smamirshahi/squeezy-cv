@@ -22,7 +22,10 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import { useAppDispatch, useAppSelector } from "@store/store-helper";
 import { moveItemToSection, vaultSelector } from "@store/vault/vault-slice";
 import { AiButton, AiIcon } from "@components/ai-button";
-import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import {
+  onAiSettingsChanged,
+  openAiSettings,
+} from "@pages/workspace/ai-settings-event";
 
 /** The item's words for the AI: every field value and bullet, nothing else */
 function itemText(section: Section["items"][number]): string {
@@ -54,10 +57,14 @@ export function UnsortedPlacement({
   const targets = moveTargets(vault, section.id);
 
   useEffect(() => {
-    api
-      .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api]);
 
   async function ask(): Promise<void> {

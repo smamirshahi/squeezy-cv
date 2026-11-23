@@ -45,7 +45,10 @@ import { vaultSelector } from "@store/vault/vault-slice";
 import { useStore } from "react-redux";
 import { RootState } from "@store/store-helper";
 import { AiButton, AiIcon } from "@components/ai-button";
-import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import {
+  onAiSettingsChanged,
+  openAiSettings,
+} from "@pages/workspace/ai-settings-event";
 
 const MAX_SENT_TURNS = 6;
 
@@ -101,10 +104,14 @@ function ChatConversation({ jobId }: { jobId: string }): JSX.Element {
   const target = status ? taskProvider(status, "chat") : null;
 
   useEffect(() => {
-    api
-      .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api]);
 
   // the conversation is kept in this browser (not in the data folder), one per job

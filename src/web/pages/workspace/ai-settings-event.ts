@@ -11,3 +11,17 @@ export function openAiSettings(task?: AiTask | "cost"): void {
     })
   );
 }
+
+/** Fired when the AI settings dialog closes, so screens that show the chosen provider read it again */
+const AI_SETTINGS_CHANGED_EVENT = "squeezy-cv-ai-settings-changed";
+
+/** Tells every screen that the AI settings may have changed */
+export function announceAiSettingsChanged(): void {
+  window.dispatchEvent(new Event(AI_SETTINGS_CHANGED_EVENT));
+}
+
+/** Calls `listener` whenever the AI settings may have changed; returns the unsubscribe function */
+export function onAiSettingsChanged(listener: () => void): () => void {
+  window.addEventListener(AI_SETTINGS_CHANGED_EVENT, listener);
+  return () => window.removeEventListener(AI_SETTINGS_CHANGED_EVENT, listener);
+}

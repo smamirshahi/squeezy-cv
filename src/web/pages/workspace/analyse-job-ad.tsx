@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { onAiSettingsChanged } from "@pages/workspace/ai-settings-event";
 import {
   Alert,
   Box,
@@ -57,10 +58,14 @@ export function AnalyseJobAd({ job }: { job: Job }): JSX.Element {
         : "";
 
   useEffect(() => {
-    api
-      .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api]);
 
   async function analyse(): Promise<void> {
