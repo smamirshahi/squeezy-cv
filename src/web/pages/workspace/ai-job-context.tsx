@@ -5,7 +5,10 @@ import {
   SettingsOutlined as SettingsOutlinedIcon,
   WorkOutlineOutlined as WorkOutlineOutlinedIcon,
 } from "@components/ui/icons";
-import { openAiSettings } from "@pages/workspace/ai-settings-event";
+import {
+  onAiSettingsChanged,
+  openAiSettings,
+} from "@pages/workspace/ai-settings-event";
 import { AiTask } from "@shared/ai/providers";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 import {
@@ -41,10 +44,14 @@ function useAiProvider(
     if (!isEnabled) {
       return;
     }
-    api
-      .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api, isEnabled]);
   return status ? taskProvider(status, "tailor") : null;
 }

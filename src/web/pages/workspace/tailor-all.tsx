@@ -1,3 +1,4 @@
+import { onAiSettingsChanged } from "@pages/workspace/ai-settings-event";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Box, Button, LinearProgress, Typography } from "@components/ui";
 import { CheckCircleOutlined as CheckCircleOutlinedIcon } from "@components/ui/icons";
@@ -88,10 +89,14 @@ export function TailorAll({
     if (givenStatus !== undefined) {
       return;
     }
-    api
-      .getAiStatus()
-      .then(setOwnStatus)
-      .catch(() => setOwnStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setOwnStatus)
+        .catch(() => setOwnStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api, givenStatus]);
 
   async function run(): Promise<void> {

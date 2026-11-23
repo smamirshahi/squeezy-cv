@@ -24,7 +24,10 @@ import {
   AiTask,
 } from "@shared/ai/providers";
 import { AiIcon } from "@components/ai-button";
-import { OPEN_AI_SETTINGS_EVENT } from "@pages/workspace/ai-settings-event";
+import {
+  announceAiSettingsChanged,
+  OPEN_AI_SETTINGS_EVENT,
+} from "@pages/workspace/ai-settings-event";
 import { openTutorial } from "@pages/workspace/tutorial-event";
 import { AiCostPanel } from "@pages/workspace/ai-cost-panel";
 import { BrowserAiKeysPanel } from "@pages/workspace/browser-ai-keys";
@@ -684,7 +687,10 @@ export function AiSettingsHost(): JSX.Element {
     <AiSettingsDialog
       isOpen={isOpen}
       initial={initial}
-      onClose={() => setIsOpen(false)}
+      onClose={() => {
+        setIsOpen(false);
+        announceAiSettingsChanged();
+      }}
     />
   );
 }

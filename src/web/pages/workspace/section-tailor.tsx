@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { onAiSettingsChanged } from "@pages/workspace/ai-settings-event";
 import {
   Alert,
   Box,
@@ -67,10 +68,14 @@ export function SectionTailor({
     : "Scores every entry against the job description. Nothing is hidden or moved; undo works.";
 
   useEffect(() => {
-    api
-      .getAiStatus()
-      .then(setStatus)
-      .catch(() => setStatus(null));
+    const load = (): void => {
+      api
+        .getAiStatus()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    };
+    load();
+    return onAiSettingsChanged(load);
   }, [api]);
 
   // What was said about another section is not about this one
