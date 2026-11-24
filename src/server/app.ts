@@ -377,6 +377,8 @@ export function buildServer({
     "ats-wording",
     "hide",
     "place",
+    "job-fields",
+    "job-link",
   ]) {
     app.post(`/api/ai/${name}`, sendAi);
   }

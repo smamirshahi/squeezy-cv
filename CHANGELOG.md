@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-24
+
+### Added
+
+- Job application (#575): a "Start from the advert" box at the top of the form. Paste a job link or the text of the job page and the AI fills company, role, location, work mode, employment type, the advert text and the link. Filled fields carry an AI mark until you edit them, and there are Undo and "Use another job". A link is read by Gemini when a Gemini key is set (only the link is sent); when the page cannot be read (LinkedIn usually refuses) the box keeps the link and asks you to paste the page text. New routes `POST /api/ai/job-fields` and `POST /api/ai/job-link`, in server and browser mode.
+
 ## [0.19.4] - 2026-11-23
 
 ### Fixed
@@ -619,7 +625,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...v0.20.0
 [0.19.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...v0.19.4
 [0.19.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...v0.19.3
 [0.19.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.1...v0.19.2

@@ -30,8 +30,11 @@ export function AiButton({ startIcon, ...props }: ButtonProps): JSX.Element {
  */
 export function AiBadge({
   label = "Written by AI for this job",
+  isProminent = false,
 }: {
   label?: string;
+  /** Larger, solid AI colour: for fields the AI filled that the user must check */
+  isProminent?: boolean;
 }): JSX.Element {
   return (
     <Tooltip title={label}>
@@ -43,19 +46,23 @@ export function AiBadge({
           flex: "none",
           display: "inline-flex",
           alignItems: "center",
-          gap: 0.25,
-          height: 18,
-          px: 0.5,
-          borderRadius: 9,
+          gap: isProminent ? 0.5 : 0.25,
+          height: isProminent ? 24 : 18,
+          px: isProminent ? 1 : 0.5,
+          ml: isProminent ? 1 : 0,
+          borderRadius: 12,
           border: "1px solid var(--aib)",
-          bgcolor: "var(--ais)",
-          color: "var(--ait)",
-          fontSize: 10.5,
+          bgcolor: isProminent ? "var(--ai)" : "var(--ais)",
+          color: isProminent ? "var(--aix)" : "var(--ait)",
+          fontSize: isProminent ? 13 : 10.5,
           fontWeight: 700,
           lineHeight: 1,
         }}
       >
-        <AutoAwesomeOutlinedIcon aria-hidden="true" sx={{ fontSize: 11 }} />
+        <AutoAwesomeOutlinedIcon
+          aria-hidden="true"
+          sx={{ fontSize: isProminent ? 16 : 11 }}
+        />
         AI
       </Box>
     </Tooltip>

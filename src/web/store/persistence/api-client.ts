@@ -1,3 +1,4 @@
+import { JobFields, JobFieldsSchema } from "@custom-types/job-fields-types";
 import { RestoreSummary } from "@shared/backup/full-backup";
 import { gateAiFetch } from "@store/persistence/send-gate";
 import {
@@ -227,6 +228,12 @@ export interface ApiClient {
   /** The text layer of a PDF, read by the local server, or on this device in the browser version (the file is not stored). Nothing is sent to an AI here. */
   extractPdfText: (file: Blob) => Promise<{ text: string; pages: number }>;
 
+  /** Company, role, location and description from the text of a pasted job page. Sends that text to the chosen provider. Nothing is saved. */
+  extractJobFields: (text: string) => Promise<JobFields>;
+
+  /** Company, role, location and description read from a job link: Gemini opens the page. Sends only the link. Nothing is saved. */
+  extractJobFromLink: (url: string) => Promise<JobFields>;
+
   /** Sorts pasted CV text into a vault with the AI. Sends the whole text to the AI provider. Nothing is saved. */
   importCv: (text: string) => Promise<ImportedCv>;
 
@@ -433,6 +440,16 @@ export function createApiClient(
         );
       }
       return { text: payload.text, pages: payload.pages ?? 0 };
+    },
+    async extractJobFields(text) {
+      return JobFieldsSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/job-fields", { text })
+      );
+    },
+    async extractJobFromLink(url) {
+      return JobFieldsSchema.check(
+        await request(fetchImpl, "POST", "/api/ai/job-link", { url })
+      );
     },
     async importCv(text) {
       const result = (await request(fetchImpl, "POST", "/api/ai/import", {

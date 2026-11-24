@@ -34,6 +34,9 @@ export interface AiModelSupport {
   clientFor?: (provider: AiProviderId, model: string) => AiClient | undefined;
   defaultModels?: Partial<Record<AiProviderId, string>>;
 
+  /** A Gemini client that fetches links itself, for reading a pasted job link; undefined without a Gemini key */
+  urlClient?: () => { client: AiClient; model: string } | undefined;
+
   /** The model a task uses when the user chose none for it (Claude: Haiku or Sonnet, #551) */
   taskDefaultModel?: (
     provider: AiProviderId,
@@ -181,6 +184,11 @@ export class AiRegistry {
       return { client: this.modelClients.get(key), provider, model };
     }
     return { client: this.clients[provider], provider, model };
+  }
+
+  /** The Gemini client that reads links (needs a Gemini key), and the model it uses */
+  urlReader(): { client: AiClient; model: string } | undefined {
+    return this.support.urlClient?.();
   }
 
   /** The model the provider's own client (the one in `clients`) talks to */

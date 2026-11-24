@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { AiButton } from "@components/ai-button";
+import { AiBadge, AiButton } from "@components/ai-button";
 
 afterEach(cleanup);
 
@@ -31,5 +31,20 @@ describe("AiButton", () => {
     expect(
       button.querySelector('[data-testid="AutoAwesomeOutlinedIcon"]')
     ).toBeNull();
+  });
+});
+
+describe("AiBadge", () => {
+  afterEach(cleanup);
+
+  it("is named by its label, in both sizes", () => {
+    render(
+      <>
+        <AiBadge label="Small mark" />
+        <AiBadge isProminent label="Large mark" />
+      </>
+    );
+    expect(screen.getByRole("img", { name: "Small mark" })).toBeTruthy();
+    expect(screen.getByRole("img", { name: "Large mark" })).toBeTruthy();
   });
 });

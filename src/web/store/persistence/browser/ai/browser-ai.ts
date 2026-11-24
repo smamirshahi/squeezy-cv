@@ -9,6 +9,7 @@ import {
   createClientWithModel,
   defaultModels,
   taskDefaultModel,
+  urlReaderOf,
 } from "@server/ai/ai-provider";
 import { AiHttpResult, createAiRoutes } from "@server/ai/ai-routes";
 import { AiClient, MessageSender } from "@server/ai/ai-types";
@@ -143,6 +144,7 @@ async function browserRegistry(
         provider === "ollama" && !keys.isOllamaOn
           ? undefined
           : createClientWithModel(config, provider, model),
+      urlClient: () => urlReaderOf(config),
       defaultModels: defaultModels(config),
       taskDefaultModel: (provider, task) =>
         taskDefaultModel(config, provider, task),

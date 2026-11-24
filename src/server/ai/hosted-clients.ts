@@ -114,7 +114,8 @@ const GEMINI_REFUSALS = new Set([
  */
 export function createGeminiSender(
   config: AiConfig,
-  fetchImpl: FetchLike = fetch
+  fetchImpl: FetchLike = fetch,
+  options: { isUrlContext?: boolean } = {}
 ): MessageSender {
   const { apiKey, model, baseUrl }: HostedConfig = config.gemini;
   return async (system: string, messages: ChatMessage[]) => {
@@ -128,10 +129,19 @@ export function createGeminiSender(
           role: message.role === "assistant" ? "model" : "user",
           parts: [{ text: message.content }],
         })),
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS,
-        },
+        // With URL context Gemini fetches the links in the message itself (Google's servers
+        // read the page). It cannot be combined with JSON mode, so the prompt asks for JSON.
+        ...(options.isUrlContext
+          ? {
+              tools: [{ url_context: {} }],
+              generationConfig: { maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS },
+            }
+          : {
+              generationConfig: {
+                responseMimeType: "application/json",
+                maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS,
+              },
+            }),
       },
       { apiKey, timeoutMs: config.timeouts.gemini, name: "Gemini" },
       fetchImpl

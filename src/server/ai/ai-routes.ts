@@ -16,6 +16,11 @@ import {
   ImportRequestSchema,
   MAX_IMPORT_LENGTH,
 } from "@custom-types/import-types";
+import {
+  JobFieldsRequestSchema,
+  JobLinkRequestSchema,
+  MAX_JOB_PAGE_LENGTH,
+} from "@custom-types/job-fields-types";
 import { MaskingSchema } from "@custom-types/masking-types";
 import { MAX_PLACE_ITEMS, PlaceRequestSchema } from "@custom-types/place-types";
 import { RewordRequestSchema } from "@custom-types/reword-types";
@@ -43,6 +48,10 @@ import {
   NothingToWorkFromError,
   generateBullets,
 } from "@server/ai/generate-bullets";
+import {
+  extractJobFields,
+  extractJobFromLink,
+} from "@server/ai/extract-job-fields";
 import { importCv } from "@server/ai/import-cv";
 import { pickHide } from "@server/ai/pick-hide";
 import { placeItems } from "@server/ai/place-items";
@@ -136,7 +145,12 @@ interface RouteContext {
   /** The client for a task: the real one, or a recorder when only a preview is wanted. Undefined when not set up. */
   aiFor: (
     task: AiTask,
-    options?: { callsToRecord?: number; standIn?: unknown }
+    options?: {
+      callsToRecord?: number;
+      standIn?: unknown;
+      /** Gemini with URL context, whichever provider the task uses (reading a job link) */
+      isUrlReader?: boolean;
+    }
   ) => AiClient | undefined;
   isMasking: boolean;
 }
@@ -238,6 +252,45 @@ export function createAiRoutes(deps: AiRouteDeps): {
         return ok(await analyseJobAd(ai, vault, jobAd, masking()));
       }
     ),
+
+    // Fills a job from the text of a pasted job page: company, role, location, description
+    "POST /api/ai/job-fields": withAi(
+      "tailor",
+      "tailoring",
+      async (ai, { body }) => {
+        const text = JobFieldsRequestSchema.check(body).text.trim();
+        if (text.length === 0 || text.length > MAX_JOB_PAGE_LENGTH) {
+          return fail(
+            HTTP_BAD_REQUEST,
+            "invalid",
+            `The pasted text must be 1 to ${MAX_JOB_PAGE_LENGTH} characters.`
+          );
+        }
+        const { vault } = await loadVault();
+        return ok(await extractJobFields(ai, vault, text, masking()));
+      }
+    ),
+
+    // Fills a job from a link: Gemini opens the page itself, only the link is sent
+    "POST /api/ai/job-link": async (context) => {
+      const ai = context.aiFor("tailor", { isUrlReader: true });
+      if (!ai) {
+        return fail(
+          HTTP_UNAVAILABLE,
+          "ai_not_configured",
+          "Reading a link needs a Gemini key. Add one in AI settings, or paste the text of the page instead."
+        );
+      }
+      const url = JobLinkRequestSchema.check(context.body).url.trim();
+      if (!/^https:\/\/[^\s]{4,2000}$/.test(url)) {
+        return fail(
+          HTTP_BAD_REQUEST,
+          "invalid",
+          "Paste a web address that starts with https://"
+        );
+      }
+      return ok(await extractJobFromLink(ai, url));
+    },
 
     // A relevance score and reason for every entry (and skill) of ONE section. A preview
     // records every batch of the section, answered with empty scores.
@@ -493,7 +546,16 @@ export function createAiRoutes(deps: AiRouteDeps): {
       let recorder: Recorder | undefined;
       let usage: AiUsageReport | undefined;
       const aiFor: RouteContext["aiFor"] = (task, recordOptions = {}) => {
-        const { client, provider, model } = registry.forTask(task);
+        const reader = recordOptions.isUrlReader
+          ? registry.urlReader()
+          : undefined;
+        const { client, provider, model } = recordOptions.isUrlReader
+          ? {
+              client: reader?.client,
+              provider: "gemini" as const,
+              model: reader?.model,
+            }
+          : registry.forTask(task);
         const rawMasking = (body as { masking?: unknown } | undefined)?.masking;
         const userMasking =
           rawMasking === undefined

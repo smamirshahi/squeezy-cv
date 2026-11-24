@@ -3,6 +3,9 @@ import { notify } from "@components/notifications/notify";
 import { AppliedElsewhereDialog } from "@pages/workspace/applied-elsewhere-dialog";
 import { AnalyseJobAd } from "@pages/workspace/analyse-job-ad";
 import { ResizableAside } from "@pages/workspace/resizable-aside";
+import { JobImport, JobImportBox } from "@pages/workspace/job-source";
+import { AiBadge } from "@components/ai-button";
+import { JobFields } from "@custom-types/job-fields-types";
 import { SponsorshipCheck } from "@pages/workspace/sponsorship-check";
 import { useSavedForLater } from "@pages/workspace/use-saved-for-later";
 import { ChangeEvent, ReactNode, useMemo, useRef, useState } from "react";
@@ -283,6 +286,11 @@ export function JobDetailsPage(): JSX.Element {
   const [note, setNote] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isReading, setIsReading] = useState<boolean>(false);
+  // What the last "Start from the advert" filled: which fields (marked until edited) and what
+  // they held before, for Undo
+  const [imported, setImported] = useState<
+    (JobImport & { keys: Set<string>; before: Partial<Job> }) | null
+  >(null);
   const [isApplying, setIsApplying] = useState<boolean>(false);
   const parkedEntry = job
     ? parked.open.find((entry) => entry.jobId === job.id)
@@ -317,6 +325,70 @@ export function JobDetailsPage(): JSX.Element {
       createJob({ vault, style, name: typed.trim() || DEFAULT_JOB_NAME, id })
     );
     dispatch(setJobDetails({ id, details }));
+  }
+
+  /** The AI mark next to a label while the field still holds what the advert gave */
+  function mark(key: string): ReactNode {
+    return imported?.keys.has(key) ? (
+      <AiBadge isProminent label="Filled from the advert: check it" />
+    ) : null;
+  }
+
+  /** The user changed a field: it is theirs now, so its AI mark goes */
+  function unmark(key: string): void {
+    if (imported?.keys.has(key)) {
+      const keys = new Set(imported.keys);
+      keys.delete(key);
+      setImported({ ...imported, keys });
+    }
+  }
+
+  function fillFrom(
+    read: JobFields,
+    link: string,
+    from: JobImport["from"]
+  ): void {
+    const details = {
+      company: read.company,
+      role: read.role,
+      location: read.location,
+      workMode: read.workMode as Job["workMode"],
+      employmentType: read.employmentType as Job["employmentType"],
+      jobAd: read.advert,
+      url: link,
+    };
+    const filled = Object.entries(details).filter(
+      ([, text]) => (text ?? "") !== ""
+    );
+    const before: Partial<Job> = {
+      name: job?.name,
+      company: job?.company,
+      role: job?.role,
+      location: job?.location,
+      workMode: job?.workMode,
+      employmentType: job?.employmentType,
+      jobAd: job?.jobAd,
+      url: job?.url,
+    };
+    edit(Object.fromEntries(filled));
+    setImported({
+      count: filled.length,
+      from,
+      keys: new Set(filled.map(([key]) => key)),
+      before,
+    });
+  }
+
+  function undoFill(): void {
+    if (imported) {
+      dispatch(
+        setJobDetails({
+          id: job?.id ?? "",
+          details: imported.before,
+        })
+      );
+      setImported(null);
+    }
   }
 
   /** Parks the job in Saved for later at once and says where it went (no form) */
@@ -614,7 +686,7 @@ export function JobDetailsPage(): JSX.Element {
   );
 
   const optionalSelect = <T extends string>(
-    label: string,
+    label: ReactNode,
     value: T | undefined,
     options: [T, string][],
     change: (next: T | undefined) => void
@@ -708,6 +780,12 @@ export function JobDetailsPage(): JSX.Element {
           {parked.error}
         </Typography>
       )}
+      <JobImportBox
+        imported={imported}
+        onFill={fillFrom}
+        onUndo={undoFill}
+        onUseAnother={() => setImported(null)}
+      />
       {!isDesktop && stackedTop}
       <Step
         number={1}
@@ -725,16 +803,22 @@ export function JobDetailsPage(): JSX.Element {
           <TextField
             id="job-company"
             required
-            label="Company"
+            label={<>Company{mark("company")}</>}
             value={job?.company ?? ""}
-            onChange={(event) => edit({ company: event.target.value })}
+            onChange={(event) => {
+              unmark("company");
+              edit({ company: event.target.value });
+            }}
           />
           <TextField
             id="job-role"
             required
-            label="Role"
+            label={<>Role{mark("role")}</>}
             value={job?.role ?? ""}
-            onChange={(event) => edit({ role: event.target.value })}
+            onChange={(event) => {
+              unmark("role");
+              edit({ role: event.target.value });
+            }}
           />
         </Box>
         <TextField
@@ -771,10 +855,13 @@ export function JobDetailsPage(): JSX.Element {
         }
       >
         <TextField
-          label="Location"
+          label={<>Location{mark("location")}</>}
           placeholder="City, country"
           value={job?.location ?? ""}
-          onChange={(event) => edit({ location: event.target.value })}
+          onChange={(event) => {
+            unmark("location");
+            edit({ location: event.target.value });
+          }}
         />
         <Box
           sx={{
@@ -784,17 +871,20 @@ export function JobDetailsPage(): JSX.Element {
           }}
         >
           {optionalSelect<NonNullable<Job["workMode"]>>(
-            "Work mode",
+            <>Work mode{mark("workMode")}</>,
             job?.workMode,
             [
               ["onsite", "On site"],
               ["hybrid", "Hybrid"],
               ["remote", "Remote"],
             ],
-            (next) => edit({ workMode: next })
+            (next) => {
+              unmark("workMode");
+              edit({ workMode: next });
+            }
           )}
           {optionalSelect<EmploymentType>(
-            "Employment",
+            <>Employment{mark("employmentType")}</>,
             job?.employmentType,
             [
               ["fullTime", "Full time"],
@@ -803,7 +893,10 @@ export function JobDetailsPage(): JSX.Element {
               ["freelance", "Freelance"],
               ["internship", "Internship"],
             ],
-            (next) => edit({ employmentType: next })
+            (next) => {
+              unmark("employmentType");
+              edit({ employmentType: next });
+            }
           )}
         </Box>
       </Step>
@@ -914,9 +1007,12 @@ export function JobDetailsPage(): JSX.Element {
           <TextField
             id="job-url"
             fullWidth
-            label="Link to the advert"
+            label={<>Link to the advert{mark("url")}</>}
             value={job?.url ?? ""}
-            onChange={(event) => edit({ url: event.target.value })}
+            onChange={(event) => {
+              unmark("url");
+              edit({ url: event.target.value });
+            }}
           />
           <OpenInNewTabButton
             url={job?.url ?? ""}
@@ -967,8 +1063,17 @@ export function JobDetailsPage(): JSX.Element {
           aria-label="Advert text"
           placeholder="Paste the advert here, or choose a PDF"
           value={job?.jobAd ?? ""}
-          onChange={(event) => edit({ jobAd: event.target.value })}
+          onChange={(event) => {
+            unmark("jobAd");
+            edit({ jobAd: event.target.value });
+          }}
         />
+        {imported?.keys.has("jobAd") && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <AiBadge isProminent label="Filled from the advert: check it" />
+            <Help>Advert text filled from the advert.</Help>
+          </Box>
+        )}
         <Help>
           Only the advert text is used. Nothing is sent anywhere until you press
           Analyse.
