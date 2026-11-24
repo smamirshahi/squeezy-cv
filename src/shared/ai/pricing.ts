@@ -83,6 +83,8 @@ const OUTPUT_TOKENS: Record<string, { low: number; high: number }> = {
   "generate-bullets": { low: 500, high: 3000 },
   "score-section": { low: 600, high: 4000 },
   "extract-requirements": { low: 500, high: 3000 },
+  "extract-job-fields": { low: 600, high: 5000 },
+  "extract-job-link": { low: 600, high: 5000 },
   "ats-wording": { low: 600, high: 3500 },
   "chat-edit": { low: 600, high: 4000 },
   "pick-hide": { low: 300, high: 2000 },

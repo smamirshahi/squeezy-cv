@@ -116,3 +116,26 @@ export function createAiClients(
   }
   return clients;
 }
+
+/**
+ * A Gemini client that reads web pages itself (URL context): it is given a link and Google
+ * fetches the page. Undefined without a Gemini key. Separate from the task clients because it
+ * is Gemini-only, whichever provider the user chose for the tasks.
+ */
+function createGeminiUrlClient(config: AiConfig): AiClient | undefined {
+  const gemini = configFor(config, "gemini");
+  return gemini.gemini.apiKey
+    ? new ClaudeAiClient(
+        createGeminiSender(gemini, fetch, { isUrlContext: true }),
+        gemini.gemini.apiKey
+      )
+    : undefined;
+}
+
+/** The URL-reading client with the model it uses, for the registry */
+export function urlReaderOf(
+  config: AiConfig
+): { client: AiClient; model: string } | undefined {
+  const client = createGeminiUrlClient(config);
+  return client ? { client, model: config.gemini.model } : undefined;
+}

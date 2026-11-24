@@ -35,6 +35,8 @@ const PROMPT_EFFORT: Record<string, AiEffort> = {
   "pick-hide": "low",
   "place-items": "low",
   "extract-requirements": "low",
+  "extract-job-fields": "low",
+  "extract-job-link": "low",
 };
 const DEFAULT_EFFORT: AiEffort = "medium";
 
