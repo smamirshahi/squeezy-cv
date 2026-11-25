@@ -122,7 +122,7 @@ describe("FirstRun", () => {
     expect(button.className).toMatch(/colorSecondary/);
     fireEvent.click(button);
     expect(screen.getByRole("dialog")).toBeTruthy();
-    expect(screen.getByLabelText("Your CV text")).toBeTruthy();
+    expect(screen.getByLabelText("Or paste CV text")).toBeTruthy();
   });
 
   it("is gone once there is a CV", () => {

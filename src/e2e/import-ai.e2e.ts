@@ -80,10 +80,13 @@ describe("AI import dialog (the AI's answer is stubbed)", () => {
     await settings.waitFor({ state: "detached" });
 
     await page
-      .getByRole("textbox", { name: "Your CV text" })
+      .getByRole("textbox", { name: "Or paste CV text" })
       .fill("Alex Morgan, developer");
     await page.getByRole("button", { name: "Analyze with AI" }).click();
-    await page.getByText("Found: Alex Morgan").waitFor();
+    await page.getByText("Here is what we found").waitFor();
+    // The new name differs from the one in the vault: choose it, then adding is possible
+    await page.getByRole("button", { name: "Go to the first" }).click();
+    await page.getByRole("radio", { name: /Alex Morgan/ }).click();
     await page.getByRole("button", { name: "Add to my vault" }).click();
     await page.getByRole("button", { name: "Add to my vault" }).waitFor({
       state: "detached",

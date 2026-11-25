@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { gateAiFetch, registerSendHost } from "@store/persistence/send-gate";
+import {
+  gateAiFetch,
+  registerSendHost,
+  withSendSubject,
+} from "@store/persistence/send-gate";
 
 let unregister: (() => void) | undefined;
 afterEach(() => {
@@ -72,5 +76,43 @@ describe("the Send to AI step for Suggest natural wording", () => {
     expect(response.status).toBe(409);
     expect((await response.json()).code).toBe("cancelled");
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("naming what a request is about", () => {
+  const approve = { masking: { custom: [], skip: [] } };
+
+  it("passes the name given by withSendSubject to the window", async () => {
+    const host = vi.fn().mockResolvedValue(approve);
+    unregister = registerSendHost(host);
+    await withSendSubject("“Profile.pdf” (2 of 4)", () =>
+      gateAiFetch(server())("/api/ai/import", post({ text: "x" }))
+    );
+    expect(host.mock.calls[0][0].subject).toBe("“Profile.pdf” (2 of 4)");
+  });
+
+  it("has no name for a request made outside withSendSubject", async () => {
+    const host = vi.fn().mockResolvedValue(approve);
+    unregister = registerSendHost(host);
+    await gateAiFetch(server())("/api/ai/import", post({ text: "x" }));
+    expect(host.mock.calls[0][0].subject).toBeUndefined();
+  });
+
+  it("forgets the name afterwards, also when the request failed", async () => {
+    const host = vi.fn().mockResolvedValue(approve);
+    unregister = registerSendHost(host);
+    await expect(
+      withSendSubject("“a.pdf”", () => Promise.reject(new Error("boom")))
+    ).rejects.toThrow("boom");
+    await gateAiFetch(server())("/api/ai/import", post({ text: "x" }));
+    expect(host.mock.calls[0][0].subject).toBeUndefined();
+  });
+
+  it("returns the cancel answer when the user says no, so the caller can keep its other results", async () => {
+    unregister = registerSendHost(() => Promise.resolve(null));
+    const response = await withSendSubject("“a.pdf”", () =>
+      gateAiFetch(server())("/api/ai/import", post({ text: "x" }))
+    );
+    expect(response.status).toBe(409);
   });
 });

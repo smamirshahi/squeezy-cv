@@ -156,7 +156,7 @@ async function request(
 }
 
 /** The result of sorting pasted CV text: a vault to review, and what looked wrong */
-export interface ImportedCv {
+interface ImportedCv {
   vault: Vault;
   warnings: string[];
 }

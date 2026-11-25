@@ -302,6 +302,17 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
     change({ ...masking, custom: [...masking.custom, { text: value, kind }] });
   }
 
+  /** Several suggestions hidden in one step (one refreshed preview, not one per word) */
+  function addAllSuggestions(values: string[]): void {
+    const known = new Set(masking.custom.map((entry) => normalise(entry.text)));
+    const added: Masking["custom"] = values
+      .filter((value) => !known.has(normalise(value)))
+      .map((value) => ({ text: value, kind: "other" }));
+    if (added.length > 0) {
+      change({ ...masking, custom: [...masking.custom, ...added] });
+    }
+  }
+
   /** The typed word or phrase: the same as selecting it in the text, for keyboard and touch */
   function addTyped(): void {
     addMask(typedMask, typedKind);
@@ -382,7 +393,9 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
       <DialogTitle id="send-to-ai-title">
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           <AiIcon />
-          Send to {provider.recipient}?
+          {request.subject
+            ? `Send ${request.subject} to ${provider.recipient}?`
+            : `Send to ${provider.recipient}?`}
         </Box>
         <Typography variant="body2" color="text.secondary">
           {request.scope}. {provider.detail} Check the text below, hide anything
@@ -673,6 +686,16 @@ function SendToAiDialog({ request, resolve }: DialogState): JSX.Element {
                 <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
                   Also looks private
                 </Typography>
+                {preview.suggestions.length > 1 && (
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                      size="small"
+                      onClick={() => addAllSuggestions(preview.suggestions)}
+                    >
+                      Hide all
+                    </Button>
+                  </Box>
+                )}
                 {preview.suggestions.map((value) => (
                   <Box
                     key={value}

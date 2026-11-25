@@ -17,6 +17,7 @@ import { App } from "../../App";
 import { rootReducer } from "@store/store";
 import { AppStore } from "@store/store-helper";
 import { setStyle } from "@store/cv-data/cv-data-slice";
+import { clearRecentImport, setRecentImport } from "@store/vault/recent-import";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import {
   addSection,
@@ -274,5 +275,27 @@ describe("VaultPage: AI import", () => {
     expect(button.querySelector("svg")).not.toBeNull();
     fireEvent.click(button);
     expect(screen.getByRole("dialog")).toBeTruthy();
+  });
+});
+
+describe("VaultPage after an import", () => {
+  afterEach(() => act(() => clearRecentImport()));
+
+  it("marks the sections an import added to or updated, until it is undone", () => {
+    const store = createStore();
+    const [first, second] = store.getState().vault.sections;
+    renderEditor(store);
+    expect(screen.queryByText("3 new")).toBeNull();
+    act(() =>
+      setRecentImport({
+        [first.id]: { added: 3, updated: 0 },
+        [second.id]: { added: 0, updated: 2 },
+      })
+    );
+    expect(screen.getByText("3 new")).toBeTruthy();
+    expect(screen.getByText("2 updated")).toBeTruthy();
+    act(() => clearRecentImport());
+    expect(screen.queryByText("3 new")).toBeNull();
+    expect(screen.queryByText("2 updated")).toBeNull();
   });
 });

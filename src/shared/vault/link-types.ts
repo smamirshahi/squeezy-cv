@@ -33,6 +33,13 @@ export const LINK_TYPES: LinkType[] = [
     urlHint: "https://linkedin.com/in/your-name",
   },
   {
+    id: "xing",
+    label: "XING",
+    aliases: ["xing.com"],
+    domains: ["xing.com"],
+    urlHint: "https://www.xing.com/profile/Your_Name",
+  },
+  {
     id: "github",
     label: "GitHub",
     domains: ["github.com"],

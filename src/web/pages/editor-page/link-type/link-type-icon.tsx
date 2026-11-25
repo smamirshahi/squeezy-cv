@@ -35,6 +35,7 @@ import {
   SiTwitch,
   SiWhatsapp,
   SiX,
+  SiXing,
   SiYoutube,
 } from "@icons-pack/react-simple-icons";
 
@@ -48,6 +49,7 @@ const ICONS: Record<
   gitlab: SiGitlab,
   bitbucket: SiBitbucket,
   x: SiX,
+  xing: SiXing,
   instagram: SiInstagram,
   facebook: SiFacebook,
   youtube: SiYoutube,
