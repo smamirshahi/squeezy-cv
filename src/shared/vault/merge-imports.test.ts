@@ -81,6 +81,79 @@ describe("isSameEntry", () => {
   });
 });
 
+describe("isSameEntry with a second identity field", () => {
+  it("keeps two different roles at the same employer apart when the years overlap", () => {
+    expect(
+      isSameEntry(
+        "experience",
+        job({ jobTitle: "Software Developer" }),
+        job({ jobTitle: "Teaching Assistant", endDate: "2020-06-01" })
+      )
+    ).toBe(false);
+  });
+
+  it("still matches a changed but alike title (the title is then a conflict)", () => {
+    expect(
+      isSameEntry(
+        "experience",
+        job({ jobTitle: "Software Developer" }),
+        job({ jobTitle: "Senior Software Developer" })
+      )
+    ).toBe(true);
+    expect(
+      isSameEntry(
+        "experience",
+        job({ jobTitle: "Software Developer" }),
+        job({ jobTitle: "Web Developer" })
+      )
+    ).toBe(true);
+  });
+
+  it("treats an unrelated title with the identical period as one entry", () => {
+    expect(
+      isSameEntry(
+        "experience",
+        job({ jobTitle: "Software Developer" }),
+        job({ jobTitle: "Programmer" })
+      )
+    ).toBe(true);
+  });
+
+  it("does not compare the title when one side has none", () => {
+    expect(
+      isSameEntry(
+        "experience",
+        job(),
+        job({ jobTitle: "", endDate: "2020-01-01" })
+      )
+    ).toBe(true);
+  });
+
+  it("applies to degrees at the same school too", () => {
+    const degree = (name: string, end: string): Item =>
+      item({
+        institute: "University of Bremen",
+        degree: name,
+        startDate: "2014-01-01",
+        endDate: end,
+      });
+    expect(
+      isSameEntry(
+        "education",
+        degree("Doctoral Degree", "2018-12-01"),
+        degree("Bachelor of Science", "2016-12-01")
+      )
+    ).toBe(false);
+    expect(
+      isSameEntry(
+        "education",
+        degree("Doctoral Degree", "2018-12-01"),
+        degree("PhD Degree", "2018-12-01")
+      )
+    ).toBe(true);
+  });
+});
+
 describe("gatherLines", () => {
   it("drops repeated lines and remembers every file a line is in", () => {
     const lines = gatherLines([
@@ -93,6 +166,45 @@ describe("gatherLines", () => {
       "Led the team",
     ]);
     expect(lines[0].from).toEqual(["a.pdf", "b.pdf"]);
+  });
+});
+
+describe("planImports with several roles at one employer", () => {
+  it("proposes both roles as separate items", () => {
+    const plan = planImports(
+      vault(),
+      [
+        source("a.pdf", [
+          job({ jobTitle: "Software Developer" }),
+          job({ jobTitle: "Teaching Assistant", endDate: "2020-06-01" }),
+        ]),
+        source("b.pdf", [job({ jobTitle: "Software Developer" })]),
+      ],
+      newId
+    );
+    expect(plan.proposals).toHaveLength(2);
+    expect(plan.proposals.map((p) => p.item.fields.jobTitle).sort()).toEqual([
+      "Software Developer",
+      "Teaching Assistant",
+    ]);
+  });
+
+  it("asks about a changed job title instead of adding a second entry", () => {
+    const plan = planImports(
+      vault([
+        {
+          type: "experience",
+          items: [job({ jobTitle: "Software Developer" })],
+        },
+      ]),
+      [source("a.pdf", [job({ jobTitle: "Senior Software Developer" })])],
+      newId
+    );
+    expect(plan.proposals).toHaveLength(1);
+    expect(plan.proposals[0].kind).toBe("update");
+    expect(plan.proposals[0].conflicts.map((c) => c.field)).toEqual([
+      "jobTitle",
+    ]);
   });
 });
 

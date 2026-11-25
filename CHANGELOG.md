@@ -9,6 +9,16 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-25
+
+### Changed
+
+- Importing several PDFs now opens the Send to AI window once for all the files (it shows every file's message) instead of once per file; one approval covers the run, and a cancel sends nothing more and keeps the files already analyzed (#580).
+
+### Fixed
+
+- Import (#580): two different roles at the same employer in overlapping years are no longer merged into one entry. Alike titles ("Software Developer", "Senior Software Developer") still merge, and a changed title is shown as a conflict to settle; the same goes for two different degrees at one school.
+
 ## [0.21.0] - 2026-11-25
 
 ### Added
@@ -642,7 +652,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...HEAD
+[0.21.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...v0.20.0

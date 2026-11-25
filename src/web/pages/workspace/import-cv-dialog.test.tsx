@@ -14,6 +14,7 @@ import sample from "@fixtures/sample-cv.json";
 import { migrateCvFile } from "@shared/vault/migrate-vault";
 import { rootReducer } from "@store/store";
 import { MAX_IMPORT_PDF_BYTES } from "@custom-types/import-types";
+import { registerSendHost } from "@store/persistence/send-gate";
 import {
   OPEN_AI_SETTINGS_EVENT,
   announceAiSettingsChanged,
@@ -434,5 +435,101 @@ describe("ImportCvDialog progress and cancelling", () => {
     await screen.findByText("Here is what we found");
     // a.pdf was removed: only b.pdf counts, and it was not analyzed before
     expect(importCalls()).toBe(3);
+  });
+
+  it("asks once for all the files, and not again after the user approves", async () => {
+    const host = vi
+      .fn()
+      .mockResolvedValue({ masking: { custom: [], skip: [] } });
+    const unregister = registerSendHost(host);
+    try {
+      fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+        const headers = init?.headers as Record<string, string> | undefined;
+        if (url === "/api/import/pdf") {
+          return Promise.resolve(reply({ text: "Alex Morgan, CV", pages: 1 }));
+        }
+        if (url === "/api/ai/import") {
+          return Promise.resolve(
+            reply(
+              headers?.["x-ai-preview"]
+                ? {
+                    provider: "claude",
+                    calls: [
+                      { promptName: "import-cv", system: "s", input: "i" },
+                    ],
+                    terms: [],
+                    suggestions: [],
+                  }
+                : imported("+44 7700 111111")
+            )
+          );
+        }
+        return Promise.resolve(
+          reply({
+            isConfigured: true,
+            provider: "claude",
+            providers: [{ id: "claude", isConfigured: true }],
+          })
+        );
+      });
+      open();
+      choose(A, B);
+      await screen.findByText(/b\.pdf: read/);
+      await press();
+      await screen.findByText("Here is what we found");
+      expect(host).toHaveBeenCalledTimes(1);
+      expect(host.mock.calls[0][0].subject).toBe("2 files");
+      // The window shows both files' messages
+      expect(host.mock.calls[0][0].preview.calls).toHaveLength(2);
+      const real = fetchMock.mock.calls.filter(
+        ([url, init]) =>
+          url === "/api/ai/import" &&
+          !(init?.headers as Record<string, string> | undefined)?.[
+            "x-ai-preview"
+          ]
+      );
+      expect(real).toHaveLength(2);
+    } finally {
+      unregister();
+    }
+  });
+
+  it("stops after the first file when the user cancels the one window", async () => {
+    const unregister = registerSendHost(() => Promise.resolve(null));
+    try {
+      fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+        const headers = init?.headers as Record<string, string> | undefined;
+        if (url === "/api/import/pdf") {
+          return Promise.resolve(reply({ text: "Alex Morgan, CV", pages: 1 }));
+        }
+        if (url === "/api/ai/import" && headers?.["x-ai-preview"]) {
+          return Promise.resolve(
+            reply({
+              provider: "claude",
+              calls: [{ promptName: "import-cv", system: "s", input: "i" }],
+              terms: [],
+              suggestions: [],
+            })
+          );
+        }
+        return Promise.resolve(
+          reply({
+            isConfigured: true,
+            provider: "claude",
+            providers: [{ id: "claude", isConfigured: true }],
+          })
+        );
+      });
+      open();
+      choose(A, B);
+      await screen.findByText(/b\.pdf: read/);
+      await press();
+      await screen.findByText(/Cancelled\. Nothing more was sent/);
+      expect(screen.queryByText("Analyzed")).toBeNull();
+      // Only the two previews were made, nothing was sent
+      expect(importCalls()).toBe(2);
+    } finally {
+      unregister();
+    }
   });
 });
