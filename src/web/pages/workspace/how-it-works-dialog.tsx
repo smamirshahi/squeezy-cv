@@ -448,6 +448,10 @@ const VAULT_STEPS: VaultStep[] = [
         Rule of thumb: <b>if it could be on a CV for some job, add it.</b> If
         you did not achieve or finish it, leave it out.
       </>,
+      <>
+        Skills sit in categories. The <b>move icon</b> on a skill row puts that
+        skill in another category.
+      </>,
     ],
     note: "Dates are optional, so you can add something even when you only half remember it.",
   },
@@ -466,6 +470,35 @@ const VAULT_STEPS: VaultStep[] = [
       </>,
     ],
     note: "Nothing is rewritten until you accept it.",
+  },
+  {
+    title: "Import all your old CVs (beta)",
+    lead: "Too many CV versions? Squeezy CV puts them in one vault.",
+    body: [
+      <>
+        <b>Why this app exists:</b> over the years you end up with a pile of CV
+        versions, and the newest one never has everything. Here every fact is
+        kept <b>once</b> in one vault, and each job gets its own CV from it.
+      </>,
+      <>
+        So start by importing <b>all your old PDFs</b>, even several at once,
+        and a LinkedIn profile saved as PDF. Press{" "}
+        <b>Paste CV text, AI sorts it</b>, add the files or paste text, and the
+        AI sorts them into your vault.{" "}
+        {isBrowserMode()
+          ? "In this browser version the PDFs are read on your device; nothing is uploaded to read them (the PDF reader downloads the first time you use it)."
+          : "The PDFs are read on this computer."}
+      </>,
+      <>
+        Then you review before anything is saved. Items are <b>New</b>,{" "}
+        <b>Updates your vault</b>, <b>Combined from several files</b> or{" "}
+        <b>Needs your decision</b>. When your files disagree (a date, a job
+        title) you pick the right one, and you can add the other title to{" "}
+        <b>Other job titles</b>. You can remove lines from a gathered
+        description. <b>Undo import</b> in the notice takes it all back.
+      </>,
+    ],
+    note: "Beta: this works, but it is still being improved. Check what it found before you add it. It sends the whole text to the AI you chose.",
   },
   {
     title: "It stays on your device",
@@ -508,6 +541,13 @@ const VAULT_STEPS: VaultStep[] = [
             <b>Data</b> button, your browser's install icon, or Share, then “Add
             to Home Screen” on iPhone and iPad): it opens in its own window,
             works offline, and the browser is less likely to clear your data.
+          </>,
+          <>
+            In Chrome or Edge on a computer, <b>Data</b> also offers{" "}
+            <b>Store my data in a folder</b>. Pick a folder that Drive, Dropbox,
+            iCloud or OneDrive syncs and your vault follows you between devices.
+            After you come back, press <b>Reconnect folder</b>. AI keys are
+            never written to the folder.
           </>,
         ]
       : [
@@ -604,7 +644,7 @@ function Chip({
 
 /** The picture of a vault tutorial step: a list of items, or one item being edited */
 function VaultPicture({ step }: { step: number }): JSX.Element {
-  const isList = step !== 1;
+  const isList = step !== 1 && step !== 2;
   return (
     <Box aria-hidden="true" sx={{ ...pictureSx(380), gap: 1.25 }}>
       <Box
@@ -629,7 +669,7 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
           <Typography sx={{ flex: 1, fontSize: 15, fontWeight: 700 }}>
             My vault
           </Typography>
-          {step === 2 && (
+          {step === 3 && (
             <Chip
               sx={{
                 height: 22,
@@ -645,7 +685,7 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
         </Box>
         {isList &&
           VAULT_EXAMPLE_ITEMS.map(([title, sub, isShown], index) => {
-            const isDimmed = step === 3 && !isShown;
+            const isDimmed = step === 5 && !isShown;
             return (
               <Box
                 key={title}
@@ -686,7 +726,7 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
                     Added
                   </Chip>
                 )}
-                {step === 3 && (
+                {step === 5 && (
                   <Chip
                     sx={
                       isShown
@@ -707,7 +747,41 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
               </Box>
             );
           })}
-        {!isList && (
+        {step === 2 && (
+          <Box sx={{ px: 1.75, py: 1.5, display: "grid", gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <AiPill isFilled>✦ Paste CV text, AI sorts it</AiPill>
+              <Chip sx={{ bgcolor: "#FFF3DA", color: "#7A4C00" }}>BETA</Chip>
+            </Box>
+            {["cv-2022.pdf", "cv-for-agency.pdf", "linkedin-profile.pdf"].map(
+              (name) => (
+                <Box
+                  key={name}
+                  sx={{
+                    border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+                    borderRadius: "4px",
+                    px: 1.25,
+                    py: 0.75,
+                    fontSize: 12.5,
+                  }}
+                >
+                  {name}
+                </Box>
+              )
+            )}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+              <Chip sx={GREEN_SOFT}>New</Chip>
+              <Chip sx={{ bgcolor: AI_SOFT, color: AI_TEXT }}>
+                Updates your vault
+              </Chip>
+              <Chip sx={AMBER_SOFT}>Needs your decision</Chip>
+            </Box>
+            <Typography sx={{ fontSize: 11.5, color: WORKSPACE_COLORS.muted }}>
+              Many CV versions in, one vault out. Undo import is in the notice.
+            </Typography>
+          </Box>
+        )}
+        {!isList && step === 1 && (
           <Box sx={{ px: 1.75, pt: 1.5, pb: 1.75 }}>
             <Typography sx={{ fontWeight: 600, fontSize: 13.5 }}>
               Senior Software Developer
@@ -793,7 +867,7 @@ function VaultPicture({ step }: { step: number }): JSX.Element {
           </Box>
         )}
       </Box>
-      {step === 3 && (
+      {step === 5 && (
         <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
           <Chip
             sx={{
@@ -878,6 +952,11 @@ const TEMPLATE_STEPS: TemplateStep[] = [
       <>
         The <b>bin</b> removes a section from the CV and <b>Add section</b>{" "}
         brings back one you removed. New kinds of section are made in the Vault.
+      </>,
+      <>
+        A skills section can use <b>Grouped rows</b>.{" "}
+        <b>Levels in grouped rows</b> is None, Exceptions or All (languages
+        always show theirs), and the Skill Icon setting is off there.
       </>,
     ],
     note: "Your name and contact details always stay at the top.",
@@ -1520,7 +1599,23 @@ interface ApplyStep {
 
 const APPLY_STEPS: ApplyStep[] = [
   {
-    title: "Start with the advert",
+    title: "Start from the advert",
+    lead: "One box at the top fills in the form for you.",
+    body: [
+      <>
+        Paste a <b>link</b> to the job or the <b>text</b> of the advert into{" "}
+        <b>Start from the advert</b>. The AI fills the form (company, title and
+        so on) and <b>marks what it filled</b>, until you edit it.
+      </>,
+      <>
+        Not right? <b>Undo</b> takes the fill back. You can always type the
+        details yourself instead.
+      </>,
+    ],
+    note: "This sends the advert text to your AI, like Analyse does.",
+  },
+  {
+    title: "Analyse the advert",
     lead: "The rest of the form is easy. The advert is what matters.",
     body: [
       <>
@@ -1528,11 +1623,18 @@ const APPLY_STEPS: ApplyStep[] = [
         reads it once and lists what the job <b>must have</b>, what is{" "}
         <b>nice to have</b>, and its <b>keywords</b>.
       </>,
+      <>
+        <b>Advert analysis</b> comes first in the right panel, then the steps.
+        The status is automatic: <b>Save and continue</b> leaves a Draft,{" "}
+        <b>Save for later</b> a Candidate and <b>I applied elsewhere</b> an
+        Applied. You change it later in <b>Applications</b>.
+      </>,
       <>Everything after this is measured against that list.</>,
     ],
     note: (
       <>
-        <b>Privacy:</b> this step sends only the advert text. Then press{" "}
+        <b>Privacy:</b> this step sends only the advert text. The gear next to
+        the button chooses which AI and model run it. Then press{" "}
         <b>Save and continue</b>.
       </>
     ),
@@ -1627,7 +1729,10 @@ const APPLY_STEPS: ApplyStep[] = [
     note: (
       <>
         Stuck? <b>Chat</b> in the left menu changes things in words, such as
-        &ldquo;Fit to 1 page&rdquo;. You approve each change.
+        &ldquo;Fit to 1 page&rdquo;. You approve each change. To switch to
+        another job, <b>Start another job</b> is Save for later plus Clear;
+        Clear keeps the job as a Draft and <b>Bring it back</b> in the
+        notification undoes it.
       </>
     ),
   },
@@ -1797,6 +1902,27 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
   if (step === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <PicCard borderColor={AI_COLOR}>
+          <b>Start from the advert</b>
+          <Caption>A link to the job, or the advert text</Caption>
+          <PictureLines count={2} />
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <AiPill isFilled>✦ Fill the form</AiPill>
+            <AiPill>Undo</AiPill>
+          </Box>
+        </PicCard>
+        <PicCard>
+          <Caption>Company · filled by AI</Caption>
+          <b>Harbourlight Software</b>
+          <Caption>Job title · filled by AI</Caption>
+          <b>React Front-End Developer</b>
+        </PicCard>
+      </Box>
+    );
+  }
+  if (step === 1) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
         <PicCard borderColor={WORKSPACE_COLORS.borderStrong}>
           <Caption>Advert text</Caption>
           <PictureLines count={4} />
@@ -1846,7 +1972,7 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
       </Box>
     );
   }
-  if (step === 1) {
+  if (step === 2) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
@@ -1952,7 +2078,7 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
       </Box>
     );
   }
-  if (step === 2) {
+  if (step === 3) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
         <PicCard>
@@ -2098,7 +2224,7 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
       </Box>
     );
   }
-  if (step === 3) {
+  if (step === 4) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
         <Box
@@ -2158,7 +2284,7 @@ function ApplyPictureContent({ step }: { step: number }): JSX.Element {
       </Box>
     );
   }
-  if (step === 4) {
+  if (step === 5) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box

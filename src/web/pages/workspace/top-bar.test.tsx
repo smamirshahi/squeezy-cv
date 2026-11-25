@@ -36,7 +36,7 @@ describe("tutorials on the first visit of a page", () => {
   it("opens the Apply tutorial the first time the Apply page is visited, and not again", () => {
     show("/jobs");
     expect(
-      screen.getByRole("dialog", { name: "Start with the advert" })
+      screen.getByRole("dialog", { name: "Start from the advert" })
     ).toBeTruthy();
     expect(hasSeenTutorial("apply")).toBe(true);
     cleanup();
@@ -148,7 +148,7 @@ describe("welcome on the very first open", () => {
 
     show("/jobs");
     expect(
-      screen.getByRole("dialog", { name: "Start with the advert" })
+      screen.getByRole("dialog", { name: "Start from the advert" })
     ).toBeTruthy();
   });
 
