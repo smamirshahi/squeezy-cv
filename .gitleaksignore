@@ -1,0 +1,4 @@
+# False positives from the full-history scan (#457): a fake test key and an icon import.
+216ab7bc53f200af656ba50308c22c6edee42fe9:src/web/pages/editor-page/link-type/link-type-icon.tsx:linkedin-client-id:4
+6b243fc732a706b08a822b5f655db616697ab14b:src/server/ai/hosted.test.ts:generic-api-key:70
+c115e331ccb23e610f68608308e04e82055535e5:src/server/ai/hosted.test.ts:generic-api-key:70
