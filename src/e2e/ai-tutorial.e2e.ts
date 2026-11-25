@@ -34,7 +34,7 @@ describe("the AI tutorial (#504)", () => {
       name: "AI is a helper, not the author",
     });
     await dialog.waitFor();
-    await dialog.getByText("Using AI safely · Step 1 of 6").waitFor();
+    await dialog.getByText("Using AI safely · Step 1 of 8").waitFor();
     await dialog.getByRole("button", { name: "Close" }).click();
     await dialog.waitFor({ state: "hidden" });
 

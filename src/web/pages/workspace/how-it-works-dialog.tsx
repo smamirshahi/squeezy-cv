@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useViewport } from "@hooks/use-viewport";
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -2858,6 +2859,31 @@ const AI_STEPS: AiStep[] = [
     noteTone: "plain",
   },
   {
+    name: "Your AI",
+    question: "Set up your AI, key and model",
+    lead: "Choose a provider, test it, and pick a model if you want one.",
+    body: [
+      <>
+        {isBrowserMode()
+          ? "Each provider is a card with a status chip (Not set up, Not tested, Key works, Test failed). Open “Show the steps” on a card to see how to get a key, paste it, then press "
+          : "Pick a provider in AI settings. Its status shows whether it is ready. Then press "}
+        <b>Test key</b>. The test sends one tiny request with <b>no CV data</b>.
+      </>,
+      <>
+        The <b>Model</b> field is always editable. Leave it <b>empty</b> to use
+        the recommended model. After a passing test you get model suggestions,
+        and the test uses the model you really chose.
+      </>,
+      <>
+        One task can have its own model: choose the task in AI settings and fill{" "}
+        <b>Model for this task</b>. Empty means the provider’s model.{" "}
+        <b>Switching the provider forgets it.</b>
+      </>,
+    ],
+    note: "Claude defaults to Haiku for small tasks (hide, place) and Sonnet for everything else, so a request costs less.",
+    noteTone: "plain",
+  },
+  {
     name: "What leaves",
     question: "What leaves your computer",
     lead: "Only when you use an online AI, and only text.",
@@ -2913,13 +2939,20 @@ const AI_STEPS: AiStep[] = [
     lead: "Before an advert is sent, you get to read it first.",
     body: [
       <>
-        Select any words and hide them as <b>Company, Institution, Person</b>,{" "}
-        <b>Location, Date</b> or <b>Other</b>. Do it for a client, a project
-        name, a manager’s name, or anything private.
+        The <b>Send to AI</b> window shows a warning for the provider you chose.
+        Switch between <b>Readable</b> and <b>Exact text</b> to see the message
+        as it will be sent.
+      </>,
+      <>
+        Select any words, or type them in <b>Hide a word or phrase</b>, and hide
+        them as <b>Company, Institution, Person</b>, <b>Location, Date</b> or{" "}
+        <b>Other</b>. Do it for a client, a project name, a manager’s name, or
+        anything private. Rows you untick are <b>sent as written</b>.
       </>,
       <>
         <b>Remember my own masks</b> saves your choices for next time. Tick{" "}
-        <b>This job advert is private or confidential</b> when it is.
+        <b>This job advert is private or confidential</b> when it is. The purple
+        Send button shows how many messages go out.
       </>,
     ],
     note: (
@@ -2929,6 +2962,25 @@ const AI_STEPS: AiStep[] = [
       </>
     ),
     noteTone: "ai",
+  },
+  {
+    name: "Cost",
+    question: "What a request costs",
+    lead: "You see the price before you send and after the answer.",
+    body: [
+      <>
+        The Send to AI window shows the <b>model</b> and an{" "}
+        <b>estimated cost</b> under the text, and the Send button repeats it.
+        Offline AI is free.
+      </>,
+      <>
+        After each request a notice says the <b>real cost</b>.{" "}
+        <b>AI settings</b> has a <b>Cost and usage</b> page with the model per
+        task and your latest requests.
+      </>,
+    ],
+    note: "The estimate is a guess from the text length. The notice afterwards is the real number, and “price unknown” appears when a model has no known price.",
+    noteTone: "plain",
   },
   {
     name: "Relevancy",
@@ -3295,6 +3347,50 @@ function AiPictureContent({ step }: { step: number }): JSX.Element {
   if (step === 2) {
     return (
       <>
+        <PicCard borderColor={AI_COLOR}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <b>Claude</b>
+            <AiTag tone={GREEN_SOFT}>Key works</AiTag>
+          </Box>
+          <Box
+            sx={{
+              border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+              borderRadius: "4px",
+              px: 1.25,
+              py: 0.75,
+              fontSize: 12.5,
+              color: WORKSPACE_COLORS.muted,
+            }}
+          >
+            Model · empty = recommended
+          </Box>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <AiPill isFilled>Test key</AiPill>
+            <Caption>One tiny request, no CV data.</Caption>
+          </Box>
+        </PicCard>
+        <PicCard>
+          <b style={{ fontSize: 13 }}>One task, its own model</b>
+          <AiRow
+            name="Hide"
+            tag="Claude"
+            tagTone={AI_TAG}
+            caption="Model for this task: Haiku"
+          />
+          <AiRow
+            name="Score"
+            tag="Claude"
+            tagTone={AI_TAG}
+            caption="Empty: the provider’s model"
+          />
+        </PicCard>
+        <Caption>Switching the provider forgets a task’s own model.</Caption>
+      </>
+    );
+  }
+  if (step === 3) {
+    return (
+      <>
         <AiGroup
           title="Sent"
           edge="#B58A2E"
@@ -3328,7 +3424,7 @@ function AiPictureContent({ step }: { step: number }): JSX.Element {
       </>
     );
   }
-  if (step === 3) {
+  if (step === 4) {
     return (
       <>
         <PicCard borderColor="#B9B3A9">
@@ -3375,13 +3471,32 @@ function AiPictureContent({ step }: { step: number }): JSX.Element {
       </>
     );
   }
-  if (step === 4) {
+  if (step === 5) {
     return (
       <PicCard borderColor={AI_COLOR}>
         <b style={{ fontSize: 14 }}>Send to your AI?</b>
         <Caption>
           Check the text below, hide anything private, then send.
         </Caption>
+        <Alert severity="warning">
+          This AI is online: the text below leaves this computer.
+        </Alert>
+        <Box sx={{ display: "flex", gap: 0.6 }}>
+          <AiPill isFilled>Readable</AiPill>
+          <AiPill>Exact text</AiPill>
+        </Box>
+        <Box
+          sx={{
+            border: `1px solid ${WORKSPACE_COLORS.borderStrong}`,
+            borderRadius: "4px",
+            px: 1.25,
+            py: 0.75,
+            fontSize: 12.5,
+            color: WORKSPACE_COLORS.muted,
+          }}
+        >
+          Hide a word or phrase
+        </Box>
         <Typography sx={{ fontSize: 12.5 }}>
           Hide “Harbourlight Software” as
         </Typography>
@@ -3462,7 +3577,46 @@ function AiPictureContent({ step }: { step: number }): JSX.Element {
             {label}
           </Box>
         ))}
+        <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
+          Unticked rows are sent as written.
+        </Typography>
+        <Box>
+          <AiPill isFilled>✦ Send to Anthropic · 2 messages</AiPill>
+        </Box>
       </PicCard>
+    );
+  }
+  if (step === 6) {
+    return (
+      <>
+        <PicCard borderColor={AI_COLOR}>
+          <b style={{ fontSize: 14 }}>Send to your AI?</b>
+          <Caption>Model: Claude Sonnet · estimated cost about $0.02</Caption>
+          <Box>
+            <AiPill isFilled>✦ Send to Anthropic (about $0.02)</AiPill>
+          </Box>
+        </PicCard>
+        <Typography
+          sx={{
+            textAlign: "center",
+            color: AI_TEXT,
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          ↓ after the answer
+        </Typography>
+        <PicCard borderColor="#B7DFC6">
+          <AiLabel color="#175F37">NOTICE</AiLabel>
+          <Typography sx={{ fontSize: 13 }}>
+            Score entries: $0.018 (2,140 tokens, Claude Sonnet)
+          </Typography>
+          <Caption>Usage opens AI settings, Cost and usage.</Caption>
+        </PicCard>
+        <Caption>
+          Defaults: Haiku for hide and place, Sonnet for everything else.
+        </Caption>
+      </>
     );
   }
   return (
