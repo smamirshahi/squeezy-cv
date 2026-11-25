@@ -101,18 +101,20 @@ describe("the Vault tutorial", () => {
 });
 
 describe("the AI tutorial (#504)", () => {
-  it("is in the list and goes through its six steps", () => {
+  it("is in the list and goes through its eight steps", () => {
     const onClose = vi.fn();
     render(<HowItWorksDialog isOpen startTutorial="ai" onClose={onClose} />);
     const list = screen.getByRole("navigation", { name: "Tutorials" });
     expect(list.textContent).toContain("AI");
-    expect(screen.getByText("Using AI safely · Step 1 of 6")).toBeTruthy();
+    expect(screen.getByText("Using AI safely · Step 1 of 8")).toBeTruthy();
     const titles = [
       "AI is a helper, not the author",
       "Online or offline AI",
+      "Set up your AI, key and model",
       "What leaves your computer",
       "Masking: names swapped for placeholders",
       "When to hide more yourself",
+      "What a request costs",
       "Relevancy: how well it fits the job",
     ];
     titles.forEach((title, index) => {

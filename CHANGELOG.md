@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.2] - 2026-11-25
+
+### Changed
+
+- The "Using AI safely" tutorial now has eight steps: new steps on setting up your AI (provider cards, Test key, the Model field, a model for one task) and on what a request costs (estimate, real cost notice, Cost and usage, default models), and the Send to AI step covers the provider warning, Readable / Exact text, "Hide a word or phrase", "sent as written" and the message count (#509: #531, #537, #538, #545, #551).
+
 ## [0.21.1] - 2026-11-25
 
 ### Changed
@@ -652,7 +658,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...HEAD
+[0.21.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...v0.21.2
 [0.21.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...v0.20.1
