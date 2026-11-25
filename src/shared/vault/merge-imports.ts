@@ -112,6 +112,36 @@ function overlaps(a: Item, b: Item): boolean {
   return first[0] <= second[1] && second[0] <= first[1];
 }
 
+/** Words that say little about a role or degree */
+const FILLER_WORDS = new Set(["and", "of", "the", "in", "for", "at", "a"]);
+
+/** Two titles are alike when one contains the other or they share a meaningful word ("Software Developer", "Senior Developer") */
+function isSimilar(x: string, y: string): boolean {
+  if (x === y || x.includes(y) || y.includes(x)) {
+    return true;
+  }
+  const words = (text: string): Set<string> =>
+    new Set(
+      text
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((word) => word.length > 1 && !FILLER_WORDS.has(word))
+    );
+  const mine = words(x);
+  return [...words(y)].some((word) => mine.has(word));
+}
+
+/** Same start and end year (both must have a start) */
+function isSamePeriod(a: Item, b: Item): boolean {
+  const first = yearsOf(a);
+  const second = yearsOf(b);
+  return (
+    first !== null &&
+    second !== null &&
+    first[0] === second[0] &&
+    first[1] === second[1]
+  );
+}
+
 /** Same entry: the first identity field matches (one contains the other) and the dates overlap */
 export function isSameEntry(type: SectionType, a: Item, b: Item): boolean {
   if (type === "summary") {
@@ -127,9 +157,18 @@ export function isSameEntry(type: SectionType, a: Item, b: Item): boolean {
   if (!isNameMatch) {
     return false;
   }
-  // a second identity field (job title, degree) that is present on both must be close, or the
-  // dates must overlap: the same employer twice with different roles stays two entries
-  return overlaps(a, b);
+  if (!overlaps(a, b)) {
+    return false;
+  }
+  // The same employer twice at the same time can be two different roles (a job and a side
+  // project, a promotion year): when both have a second identity field (job title, degree)
+  // and the two are not alike, only an identical period makes them one entry whose title changed
+  // (that is then a conflict for the user to settle)
+  const [third, fourth] = [first[1], second[1]];
+  if (third && fourth && !isSimilar(third, fourth)) {
+    return isSamePeriod(a, b);
+  }
+  return true;
 }
 
 /** Gathers the lines of several texts, dropping repeats (compared ignoring case and spacing) and remembering where each came from */

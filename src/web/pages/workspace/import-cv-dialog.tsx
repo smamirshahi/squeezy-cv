@@ -51,7 +51,7 @@ import {
   openAiSettings,
 } from "@pages/workspace/ai-settings-event";
 import { ImportReview } from "@pages/workspace/import-review";
-import { withSendSubject } from "@store/persistence/send-gate";
+import { withOneApproval, withSendSubject } from "@store/persistence/send-gate";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
 
 /** One PDF in the list: its text is read first, then it is analysed together with the others */
@@ -220,47 +220,69 @@ export function ImportCvDialog({ isOpen, onClose }: Props): JSX.Element {
     removedWhileBusy.current = new Set();
     const results = { ...analysed };
     try {
-      const sources: ImportSource[] = [];
-      const notes: string[] = [];
-      let position = 0;
-      for (const document of documents) {
-        if (removedWhileBusy.current.has(document.id)) {
-          continue;
-        }
-        position += 1;
-        const total = documents.filter(
-          (one) => !removedWhileBusy.current.has(one.id)
-        ).length;
-        let answer = results[document.id];
-        if (answer?.text !== document.text) {
-          setCurrent(document.id);
-          setProgress(
-            total === 1
-              ? `The AI is sorting ${document.name} into vault sections. This takes a few seconds.`
-              : `The AI is reading ${document.name} (${position} of ${total}). Each file takes a few seconds.`
+      // One Send to AI window for every file that still has to be sent: it lists them all and
+      // one approval covers the run (the window is not opened again for each file)
+      const toSend = documents.filter(
+        (document) => results[document.id]?.text !== document.text
+      );
+      const collect = async (): Promise<{
+        sources: ImportSource[];
+        notes: string[];
+      }> => {
+        const found: ImportSource[] = [];
+        const remarks: string[] = [];
+        let position = 0;
+        for (const document of documents) {
+          if (removedWhileBusy.current.has(document.id)) {
+            continue;
+          }
+          position += 1;
+          const total = documents.filter(
+            (one) => !removedWhileBusy.current.has(one.id)
+          ).length;
+          let answer = results[document.id];
+          if (answer?.text !== document.text) {
+            setCurrent(document.id);
+            setProgress(
+              total === 1
+                ? `The AI is sorting ${document.name} into vault sections. This takes a few seconds.`
+                : `The AI is reading ${document.name} (${position} of ${total}). Each file takes a few seconds.`
+            );
+            const imported = await api.importCv(document.text);
+            answer = {
+              text: document.text,
+              vault: imported.vault,
+              warnings: imported.warnings,
+            };
+            results[document.id] = answer;
+            setAnalysed((list) => ({ ...list, [document.id]: answer }));
+          }
+          if (removedWhileBusy.current.has(document.id)) {
+            continue;
+          }
+          found.push({ fileName: document.name, vault: answer.vault });
+          remarks.push(
+            ...answer.warnings.map((warning) => `${document.name}: ${warning}`)
           );
-          const imported = await withSendSubject(
-            total === 1
-              ? `“${document.name}”`
-              : `“${document.name}” (${position} of ${total})`,
-            () => api.importCv(document.text)
-          );
-          answer = {
-            text: document.text,
-            vault: imported.vault,
-            warnings: imported.warnings,
-          };
-          results[document.id] = answer;
-          setAnalysed((list) => ({ ...list, [document.id]: answer }));
         }
-        if (removedWhileBusy.current.has(document.id)) {
-          continue;
-        }
-        sources.push({ fileName: document.name, vault: answer.vault });
-        notes.push(
-          ...answer.warnings.map((warning) => `${document.name}: ${warning}`)
-        );
-      }
+        return { sources: found, notes: remarks };
+      };
+      const { sources, notes } =
+        toSend.length === 0
+          ? await collect()
+          : await withSendSubject(
+              toSend.length === 1
+                ? `“${toSend[0].name}”`
+                : `${toSend.length} files`,
+              () =>
+                withOneApproval(
+                  toSend.map((document) => ({
+                    url: "/api/ai/import",
+                    body: { text: document.text },
+                  })),
+                  collect
+                )
+            );
       if (sources.length === 0) {
         throw new Error("Nothing is left to analyze.");
       }

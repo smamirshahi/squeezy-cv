@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   gateAiFetch,
   registerSendHost,
+  withOneApproval,
   withSendSubject,
 } from "@store/persistence/send-gate";
 
@@ -114,5 +115,31 @@ describe("naming what a request is about", () => {
       gateAiFetch(server())("/api/ai/import", post({ text: "x" }))
     );
     expect(response.status).toBe(409);
+  });
+
+  it("asks once for a batch, names it, and reuses the approval for every request", async () => {
+    const fetchMock = server();
+    const host = vi.fn().mockResolvedValue(approve);
+    unregister = registerSendHost(host);
+    const gated = gateAiFetch(fetchMock);
+    const entries = [
+      { url: "/api/ai/import", body: { text: "one" } },
+      { url: "/api/ai/import", body: { text: "two" } },
+    ];
+    await withSendSubject("2 files", () =>
+      withOneApproval(entries, async () => {
+        await gated("/api/ai/import", post({ text: "one" }));
+        await gated("/api/ai/import", post({ text: "two" }));
+      })
+    );
+    expect(host).toHaveBeenCalledTimes(1);
+    expect(host.mock.calls[0][0].subject).toBe("2 files");
+    // The window shows both messages
+    expect(host.mock.calls[0][0].preview.calls).toHaveLength(2);
+    const real = fetchMock.mock.calls.filter(
+      ([, init]) =>
+        !(init?.headers as Record<string, string> | undefined)?.["x-ai-preview"]
+    );
+    expect(real).toHaveLength(2);
   });
 });
