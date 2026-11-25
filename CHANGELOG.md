@@ -20,6 +20,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 - The import dialog showed the old AI provider after you chose another in Change AI; it now updates when the settings dialog closes.
 
+## [0.20.1] - 2026-11-25
+
+### Changed
+
+- Repo (#457): a `.gitleaksignore` lists the three false positives of the full-history secrets scan (a fake test key and an icon import), so the scan comes out clean.
+
 ## [0.20.0] - 2026-11-24
 
 ### Added
@@ -637,7 +643,8 @@ refer to GitHub issues.
 - Gemini and Groq have not been tried against the real services (#134).
 
 [Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...HEAD
-[0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...v0.21.0
+[0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...v0.21.0
+[0.20.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...v0.20.0
 [0.19.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...v0.19.4
 [0.19.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.2...v0.19.3
