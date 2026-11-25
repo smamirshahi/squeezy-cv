@@ -80,15 +80,12 @@ describe("PDF import without a server (real Chromium)", () => {
     const before = requests.length;
 
     await choose(page, makeTestPdf(["Alex Morgan", "Developer at Acme"], 2));
-    const box = page.getByLabel("Your CV text");
-    await expect
-      .poll(async () => box.inputValue(), { timeout: 20_000 })
-      .toContain("Alex Morgan");
-    expect(await box.inputValue()).toContain("Developer at Acme");
+    const box = page.getByLabel("Or paste CV text");
+    // The file is listed as read; its text stays out of the paste box
     await page
-      .getByText(/Read 2 pages|2 pages/)
-      .first()
-      .waitFor();
+      .getByText(/cv\.pdf: read \(\d+ characters\)/)
+      .waitFor({ timeout: 20_000 });
+    expect(await box.inputValue()).toBe("");
 
     // Reading the PDF needed no upload: no request carried a body, and no address of
     // ours was called for the file
@@ -103,7 +100,7 @@ describe("PDF import without a server (real Chromium)", () => {
       []
     );
 
-    // The text can be edited before it is sorted
+    // Text can still be pasted next to the file
     await box.fill("Edited text");
     expect(await box.inputValue()).toBe("Edited text");
   });
@@ -114,18 +111,11 @@ describe("PDF import without a server (real Chromium)", () => {
     await openImport(page);
     // Load the reader once, then lose the network
     await choose(page, makeTestPdf(["First"]));
-    await expect
-      .poll(async () => page.getByLabel("Your CV text").inputValue(), {
-        timeout: 20_000,
-      })
-      .toContain("First");
+    const rows = page.getByText(/cv\.pdf: read \(\d+ characters\)/);
+    await rows.first().waitFor({ timeout: 20_000 });
     await context.setOffline(true);
     await choose(page, makeTestPdf(["Second line"]));
-    await expect
-      .poll(async () => page.getByLabel("Your CV text").inputValue(), {
-        timeout: 20_000,
-      })
-      .toContain("Second line");
+    await expect.poll(async () => rows.count(), { timeout: 20_000 }).toBe(2);
   });
 
   it("refuses a file that is not a PDF, with the same reason as the server", async () => {
@@ -133,7 +123,7 @@ describe("PDF import without a server (real Chromium)", () => {
     await openImport(page);
     await choose(page, Buffer.from("not really a pdf"));
     await page.getByText("This file is not a PDF.").waitFor();
-    expect(await page.getByLabel("Your CV text").inputValue()).toBe("");
+    expect(await page.getByLabel("Or paste CV text").inputValue()).toBe("");
   });
 
   it("says a scanned PDF has no text layer", async () => {
@@ -141,7 +131,7 @@ describe("PDF import without a server (real Chromium)", () => {
     await openImport(page);
     await choose(page, makeTestPdf([]));
     await page.getByText(/no text layer/).waitFor();
-    expect(await page.getByLabel("Your CV text").inputValue()).toBe("");
+    expect(await page.getByLabel("Or paste CV text").inputValue()).toBe("");
   });
 
   it("refuses a PDF with too many pages", async () => {
@@ -155,6 +145,6 @@ describe("PDF import without a server (real Chromium)", () => {
     const page = await (await newContext()).newPage();
     await openImport(page);
     await choose(page, Buffer.alloc(5 * 1024 * 1024 + 1, 37));
-    await page.getByText(/larger than 5 MB/).waitFor();
+    await page.getByText(/larger than 5 MB/i).waitFor();
   });
 });

@@ -28,6 +28,13 @@ describe("link types", () => {
     expect(linkTypeOfLabel("Portfolio").id).toBe("website");
   });
 
+  it("knows XING by label and by its web address", () => {
+    expect(linkTypeOfLabel("xing").id).toBe("xing");
+    expect(
+      guessLinkTypeFromUrl("https://www.xing.com/profile/Jane_Doe").id
+    ).toBe("xing");
+  });
+
   it("treats unknown or empty labels as Other", () => {
     expect(linkTypeOfLabel("My cat blog 2").id).toBe(OTHER_LINK_TYPE_ID);
     expect(linkTypeOfLabel("").id).toBe(OTHER_LINK_TYPE_ID);

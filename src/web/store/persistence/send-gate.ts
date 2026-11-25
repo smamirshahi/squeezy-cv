@@ -22,6 +22,9 @@ export interface SendApprovalRequest {
   /** What is being sent, in words ("Your whole CV and the job advert") */
   scope: string;
 
+  /** Which file or text this is, when several go one after another ("Profile.pdf (2 of 4)") */
+  subject?: string;
+
   /** Whether the text includes a job advert (the user may mark it as private) */
   hasAdvert: boolean;
 
@@ -87,6 +90,7 @@ const MASKS_KEY = "squeezy-cv-always-mask";
 const MAX_REMEMBERED_MASKS = 100;
 
 let host: SendHost | undefined;
+let subject: string | undefined;
 let batch: { entries: BatchEntry[]; approval?: SendApproval } | undefined;
 
 /** The dialog registers itself here; without one (tests, print page) nothing is asked */
@@ -177,6 +181,19 @@ export async function withOneApproval<T>(
   }
 }
 
+/** Names what the requests made inside `run` are about; the window shows it in its title */
+export async function withSendSubject<T>(
+  name: string,
+  run: () => Promise<T>
+): Promise<T> {
+  subject = name;
+  try {
+    return await run();
+  } finally {
+    subject = undefined;
+  }
+}
+
 function cancelled(): Response {
   return new Response(
     JSON.stringify({
@@ -220,6 +237,8 @@ function gateRequests(fetchImpl: FetchLike): FetchLike {
     ) {
       return fetchImpl(input, init);
     }
+    // Read now: the window opens after the previews, when another run may have set another name
+    const requestSubject = subject;
     const body = JSON.parse(init.body) as Record<string, unknown>;
     const withMasking = (masking: Masking): RequestInit => ({
       ...init,
@@ -278,6 +297,7 @@ function gateRequests(fetchImpl: FetchLike): FetchLike {
     }
     const approval = await host({
       ...kind,
+      subject: requestSubject,
       preview,
       initial,
       refresh: async (masking) => {

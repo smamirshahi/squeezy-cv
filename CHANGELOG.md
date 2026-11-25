@@ -9,6 +9,17 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-25
+
+### Added
+
+- Import several PDFs (and pasted text) at once, in "Paste CV text, AI sorts it" (marked BETA, it will keep improving). The files are combined: the same entry in several files becomes one item with the different descriptions gathered (each line keeps its source), items already in the vault are updated and shown as before and after, and anything the files disagree on (dates, titles, employer, profile details) is shown for you to settle before it is saved. Nothing is saved until you press Add to my vault, and one Undo takes it back. Each file shows its own status (Waiting, Analyzing, Analyzed), a file that is still waiting can be removed, and when you cancel the Send to AI step the files already analyzed are kept and not sent again. The Send to AI window names the file it is about, and "Also looks private" has a Hide all button. The Vault marks what an import added or updated (#574).
+- XING is now one of the link types in Main info, with its icon on the CV.
+
+### Fixed
+
+- The import dialog showed the old AI provider after you chose another in Change AI; it now updates when the settings dialog closes.
+
 ## [0.20.1] - 2026-11-25
 
 ### Changed
@@ -631,7 +642,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.4...v0.20.0
 [0.19.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.19.3...v0.19.4

@@ -21,6 +21,7 @@ import { VaultItemEditor } from "@pages/workspace/vault-item-editor";
 import { selectedItemOf } from "@pages/workspace/section-items";
 import { AddSectionButton } from "@pages/editor-page/sections/add-section-dialog";
 import { AiIcon } from "@components/ai-button";
+import { useRecentImport } from "@store/vault/recent-import";
 import { ImportCvDialog } from "@pages/workspace/import-cv-dialog";
 import { useEditorPages } from "@pages/editor-page/editor-pages";
 import { EditorFooter } from "@pages/editor-page/editor-footer";
@@ -65,6 +66,7 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
   const dispatch = useAppDispatch();
   const pages = useEditorPages();
   const sections = useAppSelector(sectionsSelector);
+  const recent = useRecentImport();
   const { handleImport, handleExport } = useImportExportJson();
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
 
@@ -144,6 +146,22 @@ function VaultTree({ selectedPage, viewport }: TreeProps): JSX.Element {
                         primary: { sx: { fontWeight: 600 } },
                       }}
                     />
+                    {recent[section.id]?.added ? (
+                      <Chip
+                        size="small"
+                        color="success"
+                        label={`${recent[section.id].added} new`}
+                        sx={{ mr: 0.5 }}
+                      />
+                    ) : null}
+                    {recent[section.id]?.updated ? (
+                      <Chip
+                        size="small"
+                        color="info"
+                        label={`${recent[section.id].updated} updated`}
+                        sx={{ mr: 0.5 }}
+                      />
+                    ) : null}
                     <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
                       {section.items.length}
                     </Typography>
