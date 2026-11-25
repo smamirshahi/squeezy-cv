@@ -73,9 +73,9 @@ describe("the Vault tutorial", () => {
 
   it("has the 'Back it up' step after 'It stays on your device'", () => {
     openVault();
-    expect(screen.getByText("Your vault · Step 1 of 5")).toBeTruthy();
+    expect(screen.getByText("Your vault · Step 1 of 6")).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", { name: "Step 3: It stays on your device" })
+      screen.getByRole("button", { name: "Step 4: It stays on your device" })
     );
     expect(screen.getByText(/Text only leaves your device/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -87,11 +87,28 @@ describe("the Vault tutorial", () => {
     expect(screen.queryByText(/Safari/)).toBeNull();
   });
 
+  it("explains the import, why the app exists and that it is beta (#574, #577)", () => {
+    openVault();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Step 3: Import all your old CVs (beta)",
+      })
+    );
+    expect(screen.getByText(/Why this app exists/)).toBeTruthy();
+    expect(screen.getByText(/Beta: this works/)).toBeTruthy();
+    expect(screen.getByText(/all your old PDFs/)).toBeTruthy();
+    expect(screen.getAllByText(/Needs your decision/).length).toBeGreaterThan(
+      0
+    );
+    expect(screen.getAllByText(/Undo import/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Other job titles/).length).toBeGreaterThan(0);
+  });
+
   it("ends with 'Start filling my vault' on the last step", () => {
     openVault();
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Step 5: You choose what reaches a CV",
+        name: "Step 6: You choose what reaches a CV",
       })
     );
     expect(
@@ -125,5 +142,19 @@ describe("the AI tutorial (#504)", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Got it" }));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe("the Apply tutorial (#509)", () => {
+  it("starts with the advert box and explains the automatic status", () => {
+    render(<HowItWorksDialog isOpen startTutorial="apply" onClose={vi.fn()} />);
+    expect(
+      screen.getByRole("heading", { name: "Start from the advert" })
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(
+      screen.getByRole("heading", { name: "Analyse the advert" })
+    ).toBeTruthy();
+    expect(screen.getByText(/I applied elsewhere/)).toBeTruthy();
   });
 });

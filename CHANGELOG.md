@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.3] - 2026-11-25
+
+### Changed
+
+- Tutorials brought up to date (#509): the Vault tutorial has a new step "Import all your old CVs (beta)" (why the app exists, several PDFs, the review, conflicts, Undo import), a skills move-icon line and the browser folder option in "Back it up" (#492, #511, #574, #577); the Templates tutorial covers the Grouped rows skills layout (#518, #520); the Job application tutorial has a new "Start from the advert" step and explains the automatic status, Save for later and Start another job (#543, #575). The Vault tutorial's pictures now match their steps.
+
 ## [0.21.2] - 2026-11-25
 
 ### Changed
@@ -658,7 +664,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...HEAD
+[0.21.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...v0.21.3
 [0.21.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...v0.21.2
 [0.21.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.20.1...v0.21.0
