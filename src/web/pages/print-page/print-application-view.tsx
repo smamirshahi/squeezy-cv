@@ -86,10 +86,11 @@ export function PrintApplicationView({
   const marginMm =
     variant.tuning?.marginMm ?? PAPER_MARGIN_MM[variant.style.paperMargin];
   return (
-    <div data-cv-ready="true">
+    <div data-cv-ready="true" className="print-sheet">
       <style>{`@page { size: ${A4_DIMENSION_MM.width}mm ${A4_DIMENSION_MM.height}mm; margin: ${marginMm}mm; }
 html, body { margin: 0; background: #fff; }
-@media print { .print-bar { display: none !important; } }`}</style>
+@media print { .print-bar { display: none !important; } }
+${isFramed ? `@media screen { .print-sheet { padding: ${marginMm}mm; box-sizing: border-box; } }` : ""}`}</style>
       {!isFramed && (
         <div
           className="print-bar"

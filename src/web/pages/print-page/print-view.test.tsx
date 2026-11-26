@@ -67,6 +67,31 @@ describe("PrintView", () => {
     );
   });
 
+  it("shows the page margin on screen only when it is framed (the export preview)", async () => {
+    const variant = createDefaultVariant(file, "main");
+    stubServer({
+      "/api/vault": { status: 200, body: file },
+      "/api/jobs/main/resolved": { status: 200, body: variant },
+    });
+    const alone = show("main");
+    await waitFor(() =>
+      expect(alone.querySelector('[data-cv-ready="true"]')).not.toBeNull()
+    );
+    expect(alone.querySelector("style")?.textContent).not.toContain(
+      "@media screen"
+    );
+    cleanup();
+
+    vi.stubGlobal("top", {});
+    const framed = show("main");
+    await waitFor(() =>
+      expect(framed.querySelector('[data-cv-ready="true"]')).not.toBeNull()
+    );
+    expect(framed.querySelector("style")?.textContent).toMatch(
+      /@media screen \{ \.print-sheet \{ padding: \d+(\.\d+)?mm;/
+    );
+  });
+
   it("uses the variant's saved auto-fit result instead of calculating it", async () => {
     const variant = {
       ...createDefaultVariant(file, "main"),

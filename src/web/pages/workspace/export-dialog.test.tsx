@@ -147,3 +147,54 @@ describe("export dialog: mark as applied after export", () => {
     expect(calls.some((c) => c.url === "/api/applications")).toBe(true);
   });
 });
+
+describe("export dialog: ATS score", () => {
+  it("shows the two scores, the final result and says it is the average", async () => {
+    await openDialog();
+    expect(screen.getByText(/^Your CV: \d+ of 100$/)).toBeTruthy();
+    expect(screen.getByText(/^Final result: \d+ of 100$/)).toBeTruthy();
+    expect(
+      screen.getByText(/average of the two scores|Your CV alone/)
+    ).toBeTruthy();
+  });
+
+  it("keeps the reasons in an accordion that opens and closes", async () => {
+    await openDialog();
+    const header = screen.getByRole("button", { name: /Final result/ });
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText(/A guide, not a guarantee/)).toBe(null);
+    fireEvent.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("true");
+    expect(await screen.findByText(/A guide, not a guarantee/)).toBeTruthy();
+    fireEvent.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+  });
+});
+
+describe("export dialog: preview zoom", () => {
+  it("zooms in and out in steps and Fit goes back", async () => {
+    await openDialog();
+    const fit = screen.getByRole("button", { name: /Fit$/ });
+    const start = fit.textContent;
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+    expect(fit.textContent).not.toBe(start);
+    expect(fit.textContent).toBe("115% · Fit");
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }));
+    expect(fit.textContent).toBe("85% · Fit");
+    fireEvent.click(fit);
+    expect(fit.textContent).toBe(start);
+  });
+
+  it("stops at the zoom limits", async () => {
+    await openDialog();
+    const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+    for (let i = 0; i < 10; i += 1) {
+      fireEvent.click(zoomIn);
+    }
+    expect(zoomIn.hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: /Fit$/ }).textContent).toBe(
+      "200% · Fit"
+    );
+  });
+});

@@ -9,7 +9,15 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-26
+
+### Added
+
+- Export PDF dialog (#588): zoom out / zoom in / Fit buttons for the preview; the preview fits the page width by default (no horizontal scrollbar), shows the page margin and a grey background around the paper, and the dialog is wider and keeps a fixed height.
+
 ### Changed
+
+- Export PDF dialog (#588): the ATS score reads "Your CV x of 100", "Match to this job x of 100" and "Final result" (the average of the two); the reasons are in an accordion that scrolls when open.
 
 - README (#457): says plainly that a Chromium browser on a computer is recommended, that Safari and Firefox mostly work, and that the app is not optimised for phones.
 
@@ -687,7 +695,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.6...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.6...v0.22.0
 [0.21.6]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...v0.21.6
 [0.21.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...v0.21.5
 [0.21.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...v0.21.4

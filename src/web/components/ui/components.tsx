@@ -178,7 +178,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
 
 export type DialogProps = Narrow<
   MuiDialogProps,
-  { maxWidth?: "xs" | "sm" | "md" | "lg" | false }
+  { maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false }
 >;
 
 /** A dialog. Widths: xs, sm, md, lg. */
