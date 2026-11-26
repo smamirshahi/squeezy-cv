@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.4] - 2026-11-26
+
+### Added
+
+- Project files for going public (#457): `LICENSE` (PolyForm Noncommercial 1.0.0: free to use, change and share for any non-commercial purpose; commercial use needs permission), `CONTRIBUTING.md` (issues welcome, pull requests not accepted for now) and `SECURITY.md` (private vulnerability reporting), and a Licence section in the README. The wording "free for non-commercial use" is now a project rule in `CLAUDE.md`.
+
 ## [0.21.3] - 2026-11-25
 
 ### Changed
@@ -664,7 +670,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...HEAD
+[0.21.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...v0.21.4
 [0.21.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...v0.21.3
 [0.21.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...v0.21.2
 [0.21.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.0...v0.21.1
