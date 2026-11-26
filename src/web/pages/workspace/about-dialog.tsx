@@ -40,6 +40,9 @@ const ABOUT = {
   role: "Software developer · Nottingham, UK",
   photoUrl: "/me-avatar.jpg",
   linkedinUrl: "https://www.linkedin.com/in/mohammadamirshahi/",
+  repoUrl: "https://github.com/smamirshahi/squeezy-cv",
+  changelogUrl:
+    "https://github.com/smamirshahi/squeezy-cv/blob/main/CHANGELOG.md",
   whyLead:
     "I made this for myself. Every job needs a slightly different CV, and keeping track of every version I had sent was a mess.",
   whyMore:
@@ -490,6 +493,22 @@ export function AboutDialog({
         <Typography sx={{ fontSize: 12, color: WORKSPACE_COLORS.muted }}>
           Version {APP_VERSION} ({APP_COMMIT})
         </Typography>
+        <Link
+          href={ABOUT.changelogUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ fontSize: 12 }}
+        >
+          Changelog
+        </Link>
+        <Link
+          href={ABOUT.repoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ fontSize: 12 }}
+        >
+          GitHub
+        </Link>
         <Box sx={{ flex: 1 }} />
         <Button size="small" onClick={() => setIsPrivacyOpen(true)}>
           Privacy note

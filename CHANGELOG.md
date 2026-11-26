@@ -9,6 +9,13 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.5] - 2026-11-26
+
+### Added
+
+- About dialog (#457): Changelog and GitHub links next to the version.
+- README (#457): a screenshot of the app (made with the fake sample data) and a note that masking before an online AI is best effort.
+
 ## [0.21.4] - 2026-11-26
 
 ### Added
@@ -670,7 +677,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...HEAD
+[0.21.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...v0.21.5
 [0.21.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...v0.21.4
 [0.21.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...v0.21.3
 [0.21.2]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.1...v0.21.2
