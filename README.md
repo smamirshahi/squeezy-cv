@@ -166,8 +166,10 @@ More in [`docs/hosting.md`](docs/hosting.md) and the "Browser mode" section of t
 
 ### Option A: browser mode, nothing to install
 
+> **Use a Chromium browser on a computer** (Chrome, Edge, Brave). Safari and Firefox mostly work, but they lack the folder option and their print-to-PDF can differ slightly. The app is **not optimised for phones**: it opens there, but expect rough edges, especially in the editor and the PDF export.
+
 1. Open the hosted app: <https://squeezy-cv.pages.dev>. It is free and needs no account; your data stays in your browser (see [docs/hosting.md](docs/hosting.md) for how it is hosted).
-2. Optional: install it. In Chrome or Edge use the install icon in the address bar; on a phone use "Add to Home Screen".
+2. Optional: install it. In Chrome or Edge use the install icon in the address bar; on a phone "Add to Home Screen" works, but see the note above.
 3. Open **Your data** and choose where to keep it. Pick a folder (Chrome/Edge on a computer) or make a **backup file** now and then.
 4. Optional AI: open the AI settings and paste your own key (Gemini and Groq have free tiers).
 
