@@ -8,6 +8,8 @@
 
 A personal CV app. Write your facts **once**, then make a tailored, one-click-PDF CV for every job you apply to.
 
+<img src="docs/screenshot.png" alt="Squeezy CV: the job application screen with the live A4 preview on the left and the inspector on the right" width="860">
+
 <a href="https://ko-fi.com/mohammadamirshahi"><img src="https://img.shields.io/badge/%E2%98%95%20Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge" alt="Buy me a coffee on Ko-fi" height="40"></a>
 
 <sub>Free, and I build it in my own time. If it helped you land an interview, a coffee keeps it going.</sub>
@@ -37,7 +39,7 @@ You check the result on a live **A4 preview**, export a **PDF**, and optionally 
 
 - **Web app:** React 19, TypeScript, Vite, MUI, Redux Toolkit.
 - **Local server (server mode only):** Fastify. Stores your data as JSON files on your computer and makes the PDF with headless Chromium.
-- **Private by default.** Nothing leaves your machine unless you choose an online AI provider, and even then your name, email, phone and employers are replaced with placeholders first.
+- **Private by default.** Nothing leaves your machine unless you choose an online AI provider, and even then your name, email, phone and employers are replaced with placeholders first (best effort: you see the exact text before it is sent, and dates and wording still go along).
 
 ## Why this app and not another CV builder
 
