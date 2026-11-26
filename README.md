@@ -14,7 +14,7 @@ A personal CV app. Write your facts **once**, then make a tailored, one-click-PD
 
 <br>
 
-[What it is](#what-it-is) · [Why this app](#why-this-app-and-not-another-cv-builder) · [Two ways to run it](#two-ways-to-run-it) · [Install](#install-and-run) · [Tutorials](#learn-it-the-tutorials) · [Docs](#more-documentation)
+[What it is](#what-it-is) · [Why this app](#why-this-app-and-not-another-cv-builder) · [Two ways to run it](#two-ways-to-run-it) · [Install](#install-and-run) · [Tutorials](#learn-it-the-tutorials) · [Docs](#more-documentation) · [Licence](#licence)
 
 </div>
 
@@ -457,6 +457,10 @@ Please tell me. It helps everyone who uses Squeezy CV.
    - Browser mode: **Open on GitHub** opens a new issue with your note already filled in (you need a GitHub account). **Copy the text** is there if you prefer to send it another way.
    - Server mode: with `FEEDBACK_GITHUB_TOKEN` set in `.env`, the server creates the GitHub issue for you; without it, use step 2.
 2. **On GitHub:** [open an issue](https://github.com/smamirshahi/squeezy-cv/issues/new) yourself. Say what you did, what you expected and what happened. Mention whether you use browser or server mode and your browser. Never paste your real CV, keys or `.env` into an issue.
+
+## Licence
+
+Squeezy CV is **free for non-commercial use**: you can use it, change it and share it for personal, educational, charity and other non-commercial purposes. Commercial use (selling it, offering it as a paid service, or using it inside a business) needs my permission. The terms are the [PolyForm Noncommercial License 1.0.0](LICENSE). Pull requests are not accepted for now, see [CONTRIBUTING.md](CONTRIBUTING.md); to report a security problem see [SECURITY.md](SECURITY.md).
 
 ## Credits
 
