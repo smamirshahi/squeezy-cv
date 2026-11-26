@@ -54,7 +54,7 @@ who can open the page. Users enter their own AI key in the app later (#449).
 
 - Cloudflare Pages project **`squeezy-cv`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://squeezy-cv.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, expires after one year: renew it) and `CLOUDFLARE_ACCOUNT_ID` are used by `deploy.yml`. They are never in the repo or in chat.
-- Production is open to everyone. Cloudflare Access (Zero Trust → Access controls → Applications → "squeezy-cv - Cloudflare Pages") was removed for production when the repo went public; if it is kept for previews only, the destination is `*.squeezy-cv.pages.dev`.
+- Production and PR previews are both open to everyone. The Cloudflare Access application ("squeezy-cv - Cloudflare Pages") was deleted when the repo went public (#457), so no Access application exists any more. To protect only previews again, see "Keeping it private" above.
 - The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=squeezy-cv --branch=main`). Normal deploys come from `deploy.yml`.
 
 ## Who can log in (only if Access is switched on)
@@ -64,7 +64,7 @@ Edit the policy: Zero Trust → Access controls → Applications → open the ap
 ## What deploys when
 
 - Merge or push to `main` → production, automatically (needs `deploy.yml` on `main` and the two secrets; without the secrets the job logs that it skipped and does not fail).
-- Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.squeezy-cv.pages.dev` (also behind Access). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
+- Pull request with the `preview` label, not a draft and not from a fork → preview at `<branch>.squeezy-cv.pages.dev` (public, like production). Without the label, and for draft pull requests, nothing deploys (to save Actions minutes, #470). A merge that only changes docs (`**.md`, `.claude`, `.githooks`, `data.example`) does not redeploy production.
 - `deploy.yml` does **not** run tests or lint; `ci.yml` does that on pull requests, so merge through pull requests. A format change needs a migration step because testers keep real data in their browsers (see `CLAUDE.md`). Never change the project name or address.
 
 To keep data in a folder that Drive, Dropbox, iCloud or OneDrive syncs (browser and server mode), see [sync-with-a-folder.md](sync-with-a-folder.md).
