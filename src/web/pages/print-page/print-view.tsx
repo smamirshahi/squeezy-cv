@@ -71,12 +71,14 @@ export function PrintView({ jobId }: Props): JSX.Element | null {
     return null;
   }
 
+  const isFramed = window.self !== window.top;
   const marginMm =
     variant.tuning?.marginMm ?? PAPER_MARGIN_MM[variant.style.paperMargin];
   return (
-    <div data-cv-ready="true">
+    <div data-cv-ready="true" className="print-sheet">
       <style>{`@page { size: ${A4_DIMENSION_MM.width}mm ${A4_DIMENSION_MM.height}mm; margin: ${marginMm}mm; }
-html, body { margin: 0; background: #fff; }`}</style>
+html, body { margin: 0; background: #fff; }
+${isFramed ? `@media screen { .print-sheet { padding: ${marginMm}mm; box-sizing: border-box; } }` : ""}`}</style>
       <PreviewPage contentRef={contentRef} isPrintView />
     </div>
   );

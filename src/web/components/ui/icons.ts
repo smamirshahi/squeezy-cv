@@ -75,3 +75,5 @@ export { default as VisibilityOutlined } from "@mui/icons-material/VisibilityOut
 export { default as WarningAmberOutlined } from "@mui/icons-material/WarningAmberOutlined";
 export { default as WorkOutlineOutlined } from "@mui/icons-material/WorkOutlineOutlined";
 export { default as WorkOutlined } from "@mui/icons-material/WorkOutlined";
+export { default as ZoomInOutlined } from "@mui/icons-material/ZoomInOutlined";
+export { default as ZoomOutOutlined } from "@mui/icons-material/ZoomOutOutlined";
