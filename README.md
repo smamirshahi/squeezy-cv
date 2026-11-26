@@ -8,6 +8,8 @@
 
 A personal CV app. Write your facts **once**, then make a tailored, one-click-PDF CV for every job you apply to.
 
+**[Try it in your browser: squeezy-cv.pages.dev](https://squeezy-cv.pages.dev)** (free, no account, your data stays on your device)
+
 <img src="docs/screenshot.png" alt="Squeezy CV: the job application screen with the live A4 preview on the left and the inspector on the right" width="860">
 
 <a href="https://ko-fi.com/mohammadamirshahi"><img src="https://img.shields.io/badge/%E2%98%95%20Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge" alt="Buy me a coffee on Ko-fi" height="40"></a>
@@ -164,7 +166,7 @@ More in [`docs/hosting.md`](docs/hosting.md) and the "Browser mode" section of t
 
 ### Option A: browser mode, nothing to install
 
-1. Open the hosted app: <https://squeezy-cv.pages.dev>. It is private for now: only people on the access list can log in. Ask for access, see [docs/hosting.md](docs/hosting.md) for how the list works.
+1. Open the hosted app: <https://squeezy-cv.pages.dev>. It is free and needs no account; your data stays in your browser (see [docs/hosting.md](docs/hosting.md) for how it is hosted).
 2. Optional: install it. In Chrome or Edge use the install icon in the address bar; on a phone use "Add to Home Screen".
 3. Open **Your data** and choose where to keep it. Pick a folder (Chrome/Edge on a computer) or make a **backup file** now and then.
 4. Optional AI: open the AI settings and paste your own key (Gemini and Groq have free tiers).
@@ -261,7 +263,7 @@ The tutorials are **inside the app**, so you learn on the real screens. There ar
 
 ## More documentation
 
-- [docs/hosting.md](docs/hosting.md): the hosted browser version, who may log in, what deploys when
+- [docs/hosting.md](docs/hosting.md): the hosted browser version and what deploys when
 - [docs/sync-with-a-folder.md](docs/sync-with-a-folder.md): keep your data in Dropbox, Drive, iCloud or OneDrive
 - [docs/design-language.md](docs/design-language.md): the allowed UI looks (for contributors)
 - [CHANGELOG.md](CHANGELOG.md): what changed in each version
@@ -288,7 +290,7 @@ Install these once.
 Then:
 
 ```bash
-git clone <this repo's URL> squeezy-cv
+git clone https://github.com/smamirshahi/squeezy-cv.git squeezy-cv
 cd squeezy-cv
 pnpm install
 pnpm exec playwright install chromium
