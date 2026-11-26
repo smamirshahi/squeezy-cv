@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- README (#457): says plainly that a Chromium browser on a computer is recommended, that Safari and Firefox mostly work, and that the app is not optimised for phones.
+
 ## [0.21.6] - 2026-11-26
 
 ### Changed
