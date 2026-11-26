@@ -12,7 +12,7 @@ I read issues when I can and can't promise a reply or a fix date.
 
 ## Want to change it for yourself?
 
-You are welcome to fork it and make it your own; the [MIT licence](LICENSE) allows that. The README explains how to run it, and `CLAUDE.md` and `docs/` describe how the code is laid out.
+You are welcome to fork it and make it your own; the [licence](LICENSE) (PolyForm Noncommercial 1.0.0) allows that for any non-commercial purpose. The README explains how to run it, and `CLAUDE.md` and `docs/` describe how the code is laid out.
 
 ## If this changes later
 

@@ -9,6 +9,10 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Project files for going public (#457): `LICENSE` (PolyForm Noncommercial 1.0.0: free to use, change and share for any non-commercial purpose; commercial use needs permission), `CONTRIBUTING.md` (issues welcome, pull requests not accepted for now) and `SECURITY.md` (private vulnerability reporting).
+
 ## [0.21.3] - 2026-11-25
 
 ### Changed
