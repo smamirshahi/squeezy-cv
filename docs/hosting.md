@@ -20,7 +20,7 @@ Wrangler:
 - pull request (not a draft, not from a fork) → preview at `<branch>.squeezy-cv.pages.dev`
 
 `public/_redirects` sends every path to `index.html`, so a deep link such as `/jobs` works.
-`public/_headers` and `public/robots.txt` ask search engines not to index the site.
+`public/_headers` and `public/robots.txt` let search engines index the site (it is open to everyone, #457). To close it again, put `Disallow: /` in `robots.txt` and `X-Robots-Tag: noindex, nofollow` in `_headers`.
 
 ## One-time setup (needs your Cloudflare account)
 
@@ -33,10 +33,11 @@ Wrangler:
 3. In GitHub: **Settings → Secrets and variables → Actions** → add secrets
    `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
-## Keeping it private (Cloudflare Access)
+## Keeping it private (optional, Cloudflare Access)
 
-The site is public on the internet by default (an unguessable name is not security). To let only
-people you list in:
+The live site is **open to everyone** since the repository went public (#457); there is no
+Access application on production any more. If you ever want to close it again (or protect only
+the PR previews, `*.squeezy-cv.pages.dev`), this is how. To let only people you list in:
 
 1. Cloudflare dashboard → **Zero Trust** (free plan, up to 50 users) → **Access → Applications →
    Add an application → Self-hosted**.
@@ -53,10 +54,10 @@ who can open the page. Users enter their own AI key in the app later (#449).
 
 - Cloudflare Pages project **`squeezy-cv`** (Direct Upload; it was created in the dashboard via "Continue to Pages", not as a Workers project), address `https://squeezy-cv.pages.dev`.
 - GitHub secrets `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit, expires after one year: renew it) and `CLOUDFLARE_ACCOUNT_ID` are used by `deploy.yml`. They are never in the repo or in chat.
-- Cloudflare Access protects the site: Zero Trust → Access controls → Applications → "squeezy-cv - Cloudflare Pages" (created by the project's "Restrict previews" button). Destinations: `*.squeezy-cv.pages.dev` (previews) and `squeezy-cv.pages.dev` (production). Policy "Allow Members": Allow, rule Emails, login by One-time PIN.
+- Production is open to everyone. Cloudflare Access (Zero Trust → Access controls → Applications → "squeezy-cv - Cloudflare Pages") was removed for production when the repo went public; if it is kept for previews only, the destination is `*.squeezy-cv.pages.dev`.
 - The first production upload was made by hand (`pnpm build:browser`, then `pnpm dlx wrangler login` and `wrangler pages deploy dist --project-name=squeezy-cv --branch=main`). Normal deploys come from `deploy.yml`.
 
-## Who can log in
+## Who can log in (only if Access is switched on)
 
 Edit the policy: Zero Trust → Access controls → Applications → open the application → Policies → "Allow Members" → Edit → Include → Emails. Add or remove addresses and save. Use only **Emails** (or Emails ending in) and no Everyone rule, and no second policy that allows more people. Test with an address that is not listed: it must be refused and get no code. A removed person keeps an open session until it ends; revoke it under Zero Trust → Team & Resources → Users, or shorten the session duration in the application's settings.
 

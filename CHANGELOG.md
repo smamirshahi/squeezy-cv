@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.21.6] - 2026-11-26
+
+### Changed
+
+- The live app is open to everyone (#457): search engines may index it (`robots.txt`, `_headers`), and the README and `docs/hosting.md` no longer say it is private. Nothing changes inside the app or in the saved data.
+
 ## [0.21.5] - 2026-11-26
 
 ### Added
@@ -677,7 +683,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.6...HEAD
+[0.21.6]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...v0.21.6
 [0.21.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...v0.21.5
 [0.21.4]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.3...v0.21.4
 [0.21.3]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.2...v0.21.3
