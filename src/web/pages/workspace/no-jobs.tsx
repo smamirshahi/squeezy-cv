@@ -37,7 +37,7 @@ export function NoJobs(): JSX.Element {
         href={formatRoute(DETAILS)}
         onClick={(event) => onAppLinkClick(event, DETAILS)}
       >
-        Go to Job application
+        Go to Apply
       </Button>
     </Box>
   );

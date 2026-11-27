@@ -35,7 +35,7 @@ import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
  * What the About dialog says. Edit the texts here. `photoUrl`: a picture in the `public/` folder
  * (for example "/me-avatar.jpg"); empty shows the initials instead.
  */
-const ABOUT = {
+export const ABOUT = {
   name: "Mohammad Amirshahi",
   role: "Software developer · Nottingham, UK",
   photoUrl: "/me-avatar.jpg",

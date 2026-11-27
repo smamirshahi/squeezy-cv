@@ -10,6 +10,7 @@ import {
 import {
   BackupOutlined as BackupOutlinedIcon,
   DarkModeOutlined as DarkModeOutlinedIcon,
+  GitHub as GitHubIcon,
   InfoOutlined as InfoOutlinedIcon,
   LightModeOutlined as LightModeOutlinedIcon,
   MemoryOutlined as MemoryIcon,
@@ -18,7 +19,7 @@ import {
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { COMMIT_TOOLTIP } from "@hooks/build-info";
-import { AboutDialog } from "@pages/workspace/about-dialog";
+import { ABOUT, AboutDialog } from "@pages/workspace/about-dialog";
 import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -59,6 +60,20 @@ export function MoreMenu(): JSX.Element {
             <InfoOutlinedIcon fontSize="small" />
           </ListItemIcon>
           About
+        </MenuItem>
+        <MenuItem
+          component="a"
+          href={ABOUT.repoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Squeezy CV on GitHub (opens in a new tab)"
+          sx={{ minHeight: 44 }}
+          onClick={close}
+        >
+          <ListItemIcon>
+            <GitHubIcon fontSize="small" />
+          </ListItemIcon>
+          GitHub
         </MenuItem>
         <MenuItem
           aria-label="Your data: backup and restore"

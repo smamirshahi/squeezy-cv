@@ -120,10 +120,16 @@ const FLOW_STEPS: FlowStep[] = [
     info: "How a CV looks: which sections, their order, the page layout and the style. Many jobs can share one template, so a change of look reaches all of them.",
   },
   {
-    label: "Job application",
+    label: "Apply",
     target: { kind: "jobs", view: "page" },
     kinds: ["jobs", "chat"],
     info: "One target. It picks a template, then chooses which items to show and how they are worded. Exporting and marking as applied freezes a copy of what you sent.",
+  },
+  {
+    label: "Job application",
+    target: { kind: "applications", search: "" },
+    kinds: ["applications", "application"],
+    info: "The CVs you have sent, each a frozen copy with its status (applied, interview, offer and so on).",
   },
 ];
 
@@ -255,12 +261,14 @@ export function TopBar(): JSX.Element {
     tutorial: TutorialId;
     step: number;
   } | null>(null);
-  // The (i) of "Job application" opens its own tutorial, the others the overview
+  // The (i) of "Apply" and "Job application" open their own tutorials, the others the overview
   const openHelp = (step: number): void =>
     setHelp(
       step === 2
         ? { tutorial: "apply", step: 0 }
-        : { tutorial: "overview", step }
+        : step === 3
+          ? { tutorial: "applications", step: 0 }
+          : { tutorial: "overview", step }
     );
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const route = useRoute();

@@ -9,6 +9,17 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-27
+
+### Added
+
+- Top bar (#592): a fourth step, **Job application**, opens the list of CVs you have sent; the third step is now called **Apply**.
+- GitHub icon (#592) in the tool rail (and the phone More menu) that opens the repository in a new tab.
+
+### Changed
+
+- The "Go to Job application" link on the page without jobs now reads "Go to Apply" (#592).
+
 ## [0.22.1] - 2026-11-27
 
 ### Changed
@@ -701,7 +712,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.6...v0.22.0
 [0.21.6]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...v0.21.6
