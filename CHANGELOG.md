@@ -9,6 +9,12 @@ How to release: see "Versioning" in `CLAUDE.md`.
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-11-27
+
+### Changed
+
+- README (#457): the Job row, "Squeeze to fit" and "Nothing is lost when you apply" now say what you do (choose, hide, mark as applied) instead of what the app does; the project structure list matches the code (`jobs` slice, no `tailor` page, new shared folders).
+
 ## [0.22.0] - 2026-11-26
 
 ### Added
@@ -695,7 +701,8 @@ refer to GitHub issues.
 - Chat: streaming replies (#136) and compound requests (#135) are open.
 - Gemini and Groq have not been tried against the real services (#134).
 
-[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/smamirshahi/squeezy-cv/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.6...v0.22.0
 [0.21.6]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.5...v0.21.6
 [0.21.5]: https://github.com/smamirshahi/squeezy-cv/compare/v0.21.4...v0.21.5

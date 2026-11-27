@@ -30,12 +30,12 @@ Most CV tools give you **one document** and you copy it, rename it and edit it f
 
 Squeezy CV keeps all of it **on your own machine**, private, and not on anyone's server, and it splits the problem into four things:
 
-| Part            | What it is                                                                                                                | Think of it as   |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| **Vault**       | Every fact about you: jobs, education, skills, projects, links, all the bullet points. Written once.                      | your memory      |
-| **Template**    | How a CV _looks_: sections, order, layout, fonts, colours.                                                                | your paper       |
-| **Job**         | One target. It picks a template, sets the page limit, decides what to show from the vault per section, and can reword it. | one application  |
-| **Application** | A frozen copy of exactly what you sent (with the PDF), plus status and follow-ups.                                        | your paper trail |
+| Part            | What it is                                                                                                                                | Think of it as   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| **Vault**       | Every fact about you: jobs, education, skills, projects, links, all the bullet points. Written once.                                      | your memory      |
+| **Template**    | How a CV _looks_: sections, order, layout, fonts, colours.                                                                                | your paper       |
+| **Job**         | One target. For each job you choose a template and a page limit, pick what to show from the vault per section, and reword it if you want. | one application  |
+| **Application** | A frozen copy of exactly what you sent (with the PDF), plus status and follow-ups.                                                        | your paper trail |
 
 You check the result on a live **A4 preview**, export a **PDF**, and optionally let **AI** help tailor a job to an advert (always marked with the purple sparkle, always shown to you before anything changes).
 
@@ -54,8 +54,8 @@ You check the result on a live **A4 preview**, export a **PDF**, and optionally 
 - **Hiding is not deleting.** On a job you hide what does not fit (the old internship, the unrelated project). The vault keeps it, so the next job can show it again. You can put in _everything_ you have ever done without worrying about a long CV.
 - **Wording belongs to the job.** Rewrite a bullet for one advert and only that job changes. The vault keeps your plain version.
 - **Look and content are separate.** Redesign a template once and every job that uses it follows. Switch a job from a two-column to a one-column look without touching a single word.
-- **Squeeze to fit.** Set a page limit and the app helps you choose what to hide until it fits, instead of you fighting margins by hand.
-- **Nothing is lost when you apply.** Sending marks the job as an **application**: a frozen copy of what you sent, with the PDF. Edit the vault tomorrow and the history stays true.
+- **Squeeze to fit.** Set a page limit and the preview shows when it is over. You then hide items (or ask the AI to suggest what to hide, and you approve it) until it fits, instead of fighting margins by hand.
+- **Nothing is lost when you apply.** When you mark a job as applied, it becomes an **application**: a frozen copy of what you sent, with the PDF. Edit the vault tomorrow and the history stays true.
 
 </details>
 
@@ -419,8 +419,8 @@ src/
     components/  shared UI pieces
     custom-styles/  theme, fonts, colours
     hooks/       React hooks
-    pages/       workspace, editors, preview, tailor (AI), applications, print view
-    store/       Redux slices: vault, cvData, app, variants (holds the templates and jobs), persistence, history
+    pages/       workspace, editors, preview, applications, candidates, print view
+    store/       Redux slices: vault, cvData, app, jobs (holds the templates and jobs), persistence, history, chat
   server/   the local API (Fastify; entry: main.ts)
     storage/     reading and writing the JSON files
     pdf/         PDF export with Playwright and Chromium
@@ -428,7 +428,7 @@ src/
     backup/      optional git commits of the data folder
   shared/   code used by both sides (no React, Redux or Node APIs)
     custom-types/  the runtypes schemas
-    vault/  variant/  layout/  ai/  application/  export/  chat/   pure logic
+    vault/  variant/  layout/  ai/  application/  ats/  migration/  routing/  export/  chat/   pure logic
   e2e/      real-browser tests (pnpm test:e2e)
 fixtures/       fake data for tests
 data.example/   example data layout
