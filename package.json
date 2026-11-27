@@ -2,7 +2,7 @@
   "name": "squeezy-cv",
   "private": true,
   "license": "PolyForm-Noncommercial-1.0.0",
-  "version": "0.22.1",
+  "version": "0.23.0",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n web,server -c blue,green \"pnpm dev:web\" \"pnpm dev:server\"",

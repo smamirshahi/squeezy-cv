@@ -87,7 +87,7 @@ describe("editing an item in the vault (inline editor)", () => {
     await page
       .getByLabel("Description")
       .fill("Led the migration to TypeScript");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
     await page.getByText("Unsaved changes").waitFor();
 
     // the page shows the vault's new facts
@@ -148,7 +148,7 @@ describe("editing an item in the vault (inline editor)", () => {
     await page
       .getByLabel("Description")
       .fill("Owned the billing platform\nMentored two engineers");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
     await openCvPage(page);
     await page.getByText("Owned the billing platform").first().waitFor();
     await page.getByText("Mentored two engineers").first().waitFor();

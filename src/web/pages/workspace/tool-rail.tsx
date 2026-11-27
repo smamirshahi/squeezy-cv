@@ -5,6 +5,7 @@ import {
   DarkModeOutlined as DarkModeOutlinedIcon,
   DescriptionOutlined as DescriptionOutlinedIcon,
   FolderOpenOutlined as FolderOpenIcon,
+  GitHub as GitHubIcon,
   InfoOutlined as InfoOutlinedIcon,
   LayersOutlined as LayersIcon,
   LightModeOutlined as LightModeOutlinedIcon,
@@ -17,7 +18,7 @@ import { useAppSelector } from "@store/store-helper";
 import { useThemeMode } from "@custom-styles/theme";
 import { APP_VERSION } from "@shared/version";
 import { COMMIT_TOOLTIP } from "@hooks/build-info";
-import { AboutDialog } from "@pages/workspace/about-dialog";
+import { ABOUT, AboutDialog } from "@pages/workspace/about-dialog";
 import { openDataDialog } from "@pages/workspace/data-dialog";
 import { openAiSettings } from "@pages/workspace/ai-settings-event";
 import { WORKSPACE_COLORS } from "@pages/workspace/workspace-tokens";
@@ -95,6 +96,7 @@ export function ToolRail(): JSX.Element {
             ...ITEMS,
             null,
             "about" as const,
+            "github" as const,
             "data" as const,
             "settings" as const,
             "theme" as const,
@@ -122,6 +124,30 @@ export function ToolRail(): JSX.Element {
             >
               <InfoOutlinedIcon fontSize="small" />
               <Typography sx={{ fontSize: 10.5 }}>About</Typography>
+            </ButtonBase>
+          );
+        }
+        if (item === "github") {
+          return (
+            <ButtonBase
+              key="github"
+              component="a"
+              href={ABOUT.repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Squeezy CV on GitHub (opens in a new tab)"
+              sx={{
+                width: 60,
+                py: 0.9,
+                borderRadius: 1,
+                flexDirection: "column",
+                gap: 0.25,
+                color: WORKSPACE_COLORS.muted,
+                "&:hover": { bgcolor: WORKSPACE_COLORS.hover },
+              }}
+            >
+              <GitHubIcon fontSize="small" />
+              <Typography sx={{ fontSize: 10.5 }}>GitHub</Typography>
             </ButtonBase>
           );
         }

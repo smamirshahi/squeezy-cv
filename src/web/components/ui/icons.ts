@@ -35,6 +35,7 @@ export { default as ExpandMoreOutlined } from "@mui/icons-material/ExpandMoreOut
 export { default as FeedbackOutlined } from "@mui/icons-material/FeedbackOutlined";
 export { default as FileDownloadOutlined } from "@mui/icons-material/FileDownloadOutlined";
 export { default as FileUploadOutlined } from "@mui/icons-material/FileUploadOutlined";
+export { default as GitHub } from "@mui/icons-material/GitHub";
 export { default as FolderOpenOutlined } from "@mui/icons-material/FolderOpenOutlined";
 export { default as FolderOutlined } from "@mui/icons-material/FolderOutlined";
 export { default as FormatBoldOutlined } from "@mui/icons-material/FormatBoldOutlined";
